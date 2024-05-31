@@ -1,6 +1,5 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import { DiffOps } from './calendarOps'
-import { prepareDateTimeDiff, prepareZonedEpochDiff } from './diff'
 import {
   DurationFields,
   DurationTimeFields,
@@ -10,9 +9,7 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import { IsoDateFields } from './isoFields'
 import {
-  Marker,
   RelativeToSlots,
   createDiffMarkers,
   createMarkerSystem,
@@ -41,55 +38,9 @@ import {
   nanoToGivenFields,
   unitNanoMap,
 } from './units'
-import { NumberSign, bindArgs, clampEntity } from './utils'
+import { NumberSign, clampEntity } from './utils'
 
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
-
-/*
-TODO: move to markerSystem file?
-*/
-function diffMarkersViaWeeks(
-  timeZoneOps: TimeZoneOps | undefined,
-  calendarOps: DiffOps,
-  startMarker: Marker,
-  endMarker: Marker,
-  largestUnit: Unit,
-  sign: NumberSign,
-  years: number,
-  months: number,
-): DurationFields {
-  const prepareMarkerDiff = (
-    timeZoneOps
-      ? bindArgs(prepareZonedEpochDiff, timeZoneOps)
-      : prepareDateTimeDiff
-  ) as (
-    m0: Marker,
-    m1: Marker,
-    sign: NumberSign,
-  ) => [IsoDateFields, IsoDateFields, number]
-
-  const [startIsoDate, endIsoDate, timeNano] = prepareMarkerDiff(
-    startMarker,
-    endMarker,
-    sign,
-  )
-
-  const midIsoDate = calendarOps.dateAdd(startIsoDate, {
-    ...durationFieldDefaults,
-    years,
-    months,
-  })
-  const midDiff = calendarOps.dateUntil(startIsoDate, midIsoDate, largestUnit)
-  const endDiff = calendarOps.dateUntil(midIsoDate, endIsoDate, Unit.Week)
-  const dateDiff = {
-    ...endDiff,
-    years: midDiff.years,
-    months: midDiff.months,
-  }
-  const timeDiff = nanoToDurationTimeFields(timeNano)
-
-  return { ...dateDiff, ...timeDiff }
-}
 
 // Adding
 // -----------------------------------------------------------------------------
@@ -217,19 +168,12 @@ export function roundDuration<RA, C, T>(
   const diffMarkers = createDiffMarkers(timeZoneOps)
 
   const endMarker = moveMarker(calendarOps, marker, slots)
-  let balancedDuration =
-    smallestUnit === Unit.Week && largestUnit > Unit.Week
-      ? diffMarkersViaWeeks(
-          timeZoneOps,
-          calendarOps,
-          marker,
-          endMarker,
-          largestUnit,
-          slots.sign,
-          slots.years,
-          slots.months,
-        )
-      : diffMarkers(calendarOps, marker, endMarker, largestUnit)
+  let balancedDuration = diffMarkers(
+    calendarOps,
+    marker,
+    endMarker,
+    largestUnit,
+  )
 
   const origSign = slots.sign
   const balancedSign = computeDurationSign(balancedDuration)

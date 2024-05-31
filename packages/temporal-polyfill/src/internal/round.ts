@@ -414,7 +414,9 @@ export function roundRelativeDuration(
   const nudgeFunc = (
     !isUniformUnit(smallestUnit, marker)
       ? nudgeRelativeDuration
-      : isZonedEpochSlots(marker) && smallestUnit < Unit.Day
+      : isZonedEpochSlots(marker) &&
+          smallestUnit < Unit.Day &&
+          largestUnit >= Unit.Day
         ? nudgeZonedTimeDuration
         : nudgeDayTimeDuration
   ) as typeof nudgeRelativeDuration // most general
@@ -571,7 +573,7 @@ function nudgeZonedTimeDuration(
   endEpochNano: BigNano, // NOT NEEDED, just for conformance
   _largestUnit: Unit,
   smallestUnit: TimeUnit, // always <Day
-  roundingInc: number,
+  roundingInc: number, // always >=Day
   roundingMode: RoundingMode,
   calendarOps: MoveOps,
   marker: Marker,
@@ -584,11 +586,11 @@ function nudgeZonedTimeDuration(
 ] {
   const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
 
-  const timeYoNano = bigNanoToNumber(
+  const timeNano = bigNanoToNumber(
     durationFieldsToBigNano(durationFields, Unit.Hour),
   )
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
-  let roundedTimeNano = roundByInc(timeYoNano, nanoInc, roundingMode)
+  let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 
   const [dayEpochNano0, dayEpochNano1] = clampRelativeDuration(
     calendarOps,
@@ -648,8 +650,20 @@ export function nudgeRelativeDuration(
 ] {
   const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
   const smallestUnitFieldName = durationFieldNamesAsc[smallestUnit]
-
   const baseDurationFields = clearDurationFields(smallestUnit, durationFields)
+
+  // convert days to whole weeks
+  if (smallestUnit === Unit.Week) {
+    // HACK to assume 7 days in a week. Works okay for now since applies to all current calendars.
+    // Necessary because NudgeToCalendarUnit requires the PlainDate fields for this conversion.
+    // TODO: refactor marker system. use RelativeTo record instead:
+    // https://github.com/tc39/proposal-temporal/issues/2837
+    durationFields = {
+      ...durationFields,
+      weeks: durationFields.weeks + Math.trunc(durationFields.days / 7),
+    }
+  }
+
   const truncedVal =
     divTrunc(durationFields[smallestUnitFieldName], roundingInc) * roundingInc
 
@@ -658,8 +672,8 @@ export function nudgeRelativeDuration(
   const [epochNano0, epochNano1] = clampRelativeDuration(
     calendarOps,
     baseDurationFields,
-    smallestUnit,
-    roundingInc * sign,
+    smallestUnit, // clampUnit
+    roundingInc * sign, // clampDistance
     marker,
     markerToEpochNano,
     moveMarker,

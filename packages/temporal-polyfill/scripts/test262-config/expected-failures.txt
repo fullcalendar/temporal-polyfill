@@ -16,24 +16,6 @@
 # total 'years' with 1-nanosecond duration
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
 
-# Duration::round is now non-compliant with week math
-built-ins/Temporal/Duration/prototype/round/largestunit-smallestunit-combinations-relativeto.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfCeil.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfEven.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfExpand.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfFloor.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-halfTrunc.js
-built-ins/Temporal/Duration/prototype/round/roundingmode-trunc.js
-#
-# related. just about calendar access
-built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
-built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-options-undefined.js
-
 ####################################################################################################
 # SPEC BUGS
 ####################################################################################################
@@ -198,6 +180,12 @@ built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options
 built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+# CALLING
+# (our version of NudgeToCalendarUnit aka nudgeRelativeDuration assumes 7 days in week an does not consult calendar)
+built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
 
 # CALLING
 built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
