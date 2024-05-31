@@ -10,13 +10,6 @@
 # "Dec 30th 1970 to Apr 30th 1973 is 27 months, 30 days, not 28 months" // typo! Dec 31st
 
 ####################################################################################################
-# OUR BUGS
-####################################################################################################
-
-# total 'years' with 1-nanosecond duration
-built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
-
-####################################################################################################
 # SPEC BUGS
 ####################################################################################################
 
@@ -180,6 +173,14 @@ built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options
 built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
 built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+# CALLING
+# (our version of NudgeToCalendarUnit aka nudgeRelativeDuration is more frugal about calling
+# the TimeZone, thus not conforming to the `substituteMethod` mock, but when we refactor the "marker" system,
+# things will fall back into conformance. NudgeToCalendarUnit should add duration to PlainDateTime, and then
+# ALWAYS call the time zone to convert it to epochNano. Our current algorithm knows the duration is zero
+# and thus short circuits all work, returning the same epochNanoseconds)
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
 
 # CALLING
 # (our version of NudgeToCalendarUnit aka nudgeRelativeDuration assumes 7 days in week an does not consult calendar)
