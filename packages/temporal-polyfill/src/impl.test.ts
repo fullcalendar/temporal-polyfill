@@ -101,4 +101,12 @@ describe('toTemporalInstant', () => {
     const inst = toTemporalInstant.call(legacyDate)
     expect(inst.epochNanoseconds).toBe(1708485414855000000n)
   })
+
+  it('throws when called with invalid date', () => {
+    const invalidDate = new Date(NaN)
+    const t = () => {
+      toTemporalInstant.call(invalidDate)
+    }
+    expect(t).toThrow(RangeError)
+  })
 })

@@ -76,6 +76,9 @@ export function bigIntToBigNano(num: bigint, multiplierNano = 1): BigNano {
 }
 
 export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
+  if (isNaN(num)) {
+    throw new RangeError('NaN cannot be converted to BigInt')
+  }
   const wholeInDay = nanoInUtcDay / multiplierNano
   const [days, remainder] = divModTrunc(num, wholeInDay)
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
