@@ -706,7 +706,7 @@ declare global {
      * each year, how many days are in each month, and how to do arithmetic in
      * that calendar system.
      *
-     * See https://tc39.es/proposal-temporal/docs/calendar.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/calendars.html for more details.
      */
     class Calendar implements CalendarProtocol {
       static from(item: CalendarLike): Temporal.Calendar | CalendarProtocol;
@@ -804,7 +804,7 @@ declare global {
      * which happens during the whole day no matter which time zone it's happening
      * in.
      *
-     * See https://tc39.es/proposal-temporal/docs/date.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/plaindate.html for more details.
      */
     class PlainDate {
       static from(item: Temporal.PlainDate | PlainDateLike | string, options?: AssignmentOptions): Temporal.PlainDate;
@@ -900,7 +900,7 @@ declare global {
      * and `Temporal.PlainMonthDay` all carry less information and should be used when
      * complete information is not required.
      *
-     * See https://tc39.es/proposal-temporal/docs/datetime.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/plaindatetime.html for more details.
      */
     class PlainDateTime {
       static from(
@@ -999,7 +999,7 @@ declare global {
      * without a year. For example, it could be used to represent a yearly
      * recurring event, like "Bastille Day is on the 14th of July."
      *
-     * See https://tc39.es/proposal-temporal/docs/monthday.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/plainmonthday.html for more details.
      */
     class PlainMonthDay {
       static from(
@@ -1053,7 +1053,7 @@ declare global {
      * `Temporal.PlainDateTime` by combining it with a `Temporal.PlainDate` using the
      * `toPlainDateTime()` method.
      *
-     * See https://tc39.es/proposal-temporal/docs/time.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/plaintime.html for more details.
      */
     class PlainTime {
       static from(item: Temporal.PlainTime | PlainTimeLike | string, options?: AssignmentOptions): Temporal.PlainTime;
@@ -1175,7 +1175,7 @@ declare global {
      * example, it could be used to represent a particular instance of a monthly
      * recurring event, like "the June 2019 meeting".
      *
-     * See https://tc39.es/proposal-temporal/docs/yearmonth.html for more details.
+     * See https://tc39.es/proposal-temporal/docs/plainyearmonth.html for more details.
      */
     class PlainYearMonth {
       static from(
