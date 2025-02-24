@@ -28,7 +28,7 @@ import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
-import { slotsWithCalendar } from '../internal/modify'
+import { slotsWithCalendarId } from '../internal/modify'
 import { moveByDays, movePlainDate } from '../internal/move'
 import {
   CalendarDisplayOptions,
@@ -126,7 +126,7 @@ export type Record = {
 }
 
 export type Fields = DateFields
-export type FromFields = PlainDateBag<string>
+export type FromFields = PlainDateBag
 export type WithFields = DateBag
 export type ISOFields = IsoDateFields
 
@@ -142,10 +142,7 @@ export type ToZonedDateTimeOptions = {
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = bindArgs(
-  constructPlainDateSlots<string, string>,
-  refineCalendarId,
-) as (
+export const create = bindArgs(constructPlainDateSlots, refineCalendarId) as (
   isoYear: number,
   isoMonth: number,
   isoDay: number,
@@ -220,53 +217,37 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarId(calendar))
+  return slotsWithCalendarId(record, refineCalendarId(calendar))
 }
 
 // Math
 // -----------------------------------------------------------------------------
 
-export const add = bindArgs(
-  movePlainDate<string>,
-  createNativeMoveOps,
-  false,
-) as (
+export const add = bindArgs(movePlainDate, createNativeMoveOps, false) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const subtract = bindArgs(
-  movePlainDate<string>,
-  createNativeMoveOps,
-  true,
-) as (
+export const subtract = bindArgs(movePlainDate, createNativeMoveOps, true) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(
-  diffPlainDates<string>,
-  createNativeDiffOps,
-  false,
-) as (
+export const until = bindArgs(diffPlainDates, createNativeDiffOps, false) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(
-  diffPlainDates<string>,
-  createNativeDiffOps,
-  true,
-) as (
+export const since = bindArgs(diffPlainDates, createNativeDiffOps, true) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const equals = plainDatesEqual<string> as (
+export const equals = plainDatesEqual as (
   record0: Record,
   record1: Record,
 ) => boolean
@@ -372,7 +353,7 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = formatPlainDateIso<string> as (
+export const toString = formatPlainDateIso as (
   record: Record,
   options?: ToStringOptions,
 ) => string
@@ -528,7 +509,7 @@ export const diffDays = diffPlainDays as (
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
+  computeInterval: (isoFields: DateSlots) => IsoDateTimeInterval,
   record0: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -544,7 +525,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: DateSlots<string>) => IsoDateTimeFields,
+  computeAlignment: (slots: DateSlots) => IsoDateTimeFields,
   dayDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {

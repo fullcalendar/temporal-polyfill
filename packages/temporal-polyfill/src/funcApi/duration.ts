@@ -96,7 +96,7 @@ export const negated = negateDuration as (record: Record) => Record
 export const abs = absDuration as (record: Record) => Record
 
 export const add = bindArgs(
-  addDurations<RelativeToRecord, string, string>,
+  addDurations<RelativeToRecord>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
@@ -104,7 +104,7 @@ export const add = bindArgs(
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const subtract = bindArgs(
-  addDurations<RelativeToRecord, string, string>,
+  addDurations<RelativeToRecord>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
@@ -112,21 +112,21 @@ export const subtract = bindArgs(
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const round = bindArgs(
-  roundDuration<RelativeToRecord, string, string>,
+  roundDuration<RelativeToRecord>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: RoundOptions) => Record
 
 export const total = bindArgs(
-  totalDuration<RelativeToRecord, string, string>,
+  totalDuration<RelativeToRecord>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: UnitName | TotalOptions) => number
 
 export const compare = bindArgs(
-  compareDurations<RelativeToRecord, string, string>,
+  compareDurations<RelativeToRecord>,
   identity,
   createNativeDiffOps,
   queryNativeTimeZone,

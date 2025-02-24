@@ -20,20 +20,20 @@ import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
 // the "origin"
-export type RelativeToSlots<C, T> = DateSlots<C> | ZonedEpochSlots<C, T>
+export type RelativeToSlots = DateSlots | ZonedEpochSlots
 
 // the "origin", returned from bag refining
-export type RelativeToSlotsNoCalendar<T> = IsoDateFields | EpochAndZoneSlots<T>
+export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
 
 // a date marker that's moved away from the "origin"
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
 
 export type MarkerSystem<CO> = [Marker, CO, TimeZoneOps?]
 
-export function createMarkerSystem<C, CO, T>(
-  getCalendarOps: (calendarSlot: C) => CO,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  relativeToSlots: RelativeToSlots<C, T>,
+export function createMarkerSystem<CO>(
+  getCalendarOps: (calendarId: string) => CO,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
+  relativeToSlots: RelativeToSlots,
 ): MarkerSystem<CO> {
   const calendarOps = getCalendarOps(relativeToSlots.calendar)
 

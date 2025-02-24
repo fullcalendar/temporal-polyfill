@@ -27,9 +27,10 @@ import {
   ZonedDateTimeSlots,
   createInstantSlots,
 } from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName, nanoInMilli } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { CalendarArg, CalendarSlot, refineCalendarSlot } from './calendar'
+import { CalendarArg, refineCalendarArg } from './calendarArg'
 import {
   Duration,
   DurationArg,
@@ -39,8 +40,7 @@ import {
 import { prepInstantFormat } from './intlFormatConfig'
 import { epochGetters, neverValueOf } from './mixins'
 import { createSlotClass, getSlots } from './slotClass'
-import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
-import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type Instant = any
@@ -97,8 +97,8 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       return createZonedDateTime(
         instantToZonedDateTime(
           slots,
-          refineTimeZoneSlot(refinedObj.timeZone),
-          refineCalendarSlot(refinedObj.calendar),
+          refineTimeZoneArg(refinedObj.timeZone),
+          refineCalendarArg(refinedObj.calendar),
         ),
       )
     },
@@ -107,7 +107,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
       return createZonedDateTime(
-        instantToZonedDateTime(slots, refineTimeZoneSlot(timeZoneArg)),
+        instantToZonedDateTime(slots, refineTimeZoneArg(timeZoneArg)),
       )
     },
     toLocaleString(
@@ -118,23 +118,16 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       const [format, epochMilli] = prepInstantFormat(locales, options, slots)
       return format.format(epochMilli)
     },
-    toString(
-      slots: InstantSlots,
-      options?: InstantDisplayOptions<TimeZoneSlot>,
-    ): string {
+    toString(slots: InstantSlots, options?: InstantDisplayOptions): string {
       return formatInstantIso(
-        refineTimeZoneSlot,
-        createTimeZoneOffsetOps,
+        refineTimeZoneArg,
+        queryNativeTimeZone,
         slots,
         options,
       )
     },
     toJSON(slots: InstantSlots): string {
-      return formatInstantIso(
-        refineTimeZoneSlot,
-        createTimeZoneOffsetOps,
-        slots,
-      )
+      return formatInstantIso(refineTimeZoneArg, queryNativeTimeZone, slots)
     },
     valueOf: neverValueOf,
   },
@@ -173,8 +166,7 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 
         case ZonedDateTimeBranding:
           return createInstantSlots(
-            (slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>)
-              .epochNanoseconds,
+            (slots as ZonedDateTimeSlots).epochNanoseconds,
           )
       }
     }

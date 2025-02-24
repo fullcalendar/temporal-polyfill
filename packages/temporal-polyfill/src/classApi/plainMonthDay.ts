@@ -19,21 +19,10 @@ import {
 } from '../internal/optionsRefine'
 import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { bindArgs, isObjectLike } from '../internal/utils'
-import {
-  CalendarArg,
-  CalendarSlot,
-  extractCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './calendar'
-import {
-  createDateModOps,
-  createMonthDayModOps,
-  createMonthDayRefineOps,
-} from './calendarOpsQuery'
+import { extractCalendarIdFromBag, refineCalendarArg } from './calendarArg'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
-  createCalendarFromSlots,
   monthDayGetters,
   neverValueOf,
   removeBranding,
@@ -42,30 +31,26 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainMonthDay = any & MonthDayFields
-export type PlainMonthDayArg =
-  | PlainMonthDay
-  | PlainMonthDayBag<CalendarArg>
-  | string
+export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
 
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
-    bindArgs(constructPlainMonthDaySlots, refineCalendarSlot),
+    bindArgs(constructPlainMonthDaySlots, refineCalendarArg),
     {
       ...calendarIdGetters,
       ...monthDayGetters,
     },
     {
       getISOFields: removeBranding,
-      getCalendar: createCalendarFromSlots,
       with(
-        slots: PlainMonthDaySlots<CalendarSlot>,
+        slots: PlainMonthDaySlots,
         mod: MonthDayBag,
         options?: OverflowOptions,
       ): PlainMonthDay {
         return createPlainMonthDay(
           plainMonthDayWithFields(
-            createMonthDayModOps,
+            createNativeStandardOps,
             slots,
             this,
             rejectInvalidBag(mod),
@@ -73,22 +58,16 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
           ),
         )
       },
-      equals(
-        slots: PlainMonthDaySlots<CalendarSlot>,
-        otherArg: PlainMonthDayArg,
-      ): boolean {
+      equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {
         return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
       },
-      toPlainDate(
-        slots: PlainMonthDaySlots<CalendarSlot>,
-        bag: YearFields,
-      ): PlainDate {
+      toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
         return createPlainDate(
-          plainMonthDayToPlainDate(createDateModOps, slots, this, bag),
+          plainMonthDayToPlainDate(createNativeStandardOps, slots, this, bag),
         )
       },
       toLocaleString(
-        slots: PlainMonthDaySlots<CalendarSlot>,
+        slots: PlainMonthDaySlots,
         locales?: LocalesArg,
         options?: Intl.DateTimeFormatOptions,
       ): string {
@@ -100,7 +79,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         return format.format(epochMilli)
       },
       toString: formatPlainMonthDayIso,
-      toJSON(slots: PlainMonthDaySlots<CalendarSlot>): string {
+      toJSON(slots: PlainMonthDaySlots): string {
         return formatPlainMonthDayIso(slots)
       },
       valueOf: neverValueOf,
@@ -118,7 +97,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
 export function toPlainMonthDaySlots(
   arg: PlainMonthDayArg,
   options?: OverflowOptions,
-): PlainMonthDaySlots<CalendarSlot> {
+): PlainMonthDaySlots {
   options = copyOptions(options)
 
   if (isObjectLike(arg)) {
@@ -126,17 +105,15 @@ export function toPlainMonthDaySlots(
 
     if (slots && slots.branding === PlainMonthDayBranding) {
       refineOverflowOptions(options) // parse unused options
-      return slots as PlainMonthDaySlots<CalendarSlot>
+      return slots as PlainMonthDaySlots
     }
 
-    const calendarMaybe = extractCalendarSlotFromBag(
-      arg as PlainMonthDaySlots<CalendarSlot>,
-    )
-    const calendar = calendarMaybe || isoCalendarId
+    const calendarIdMaybe = extractCalendarIdFromBag(arg as PlainMonthDaySlots)
+    const calendarId = calendarIdMaybe || isoCalendarId
 
     return refinePlainMonthDayBag(
-      createMonthDayRefineOps(calendar),
-      !calendarMaybe,
+      createNativeStandardOps(calendarId),
+      !calendarIdMaybe,
       arg as MonthDayBag,
       options,
     )

@@ -14,7 +14,6 @@ import {
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   DurationSlots,
-  IdLike,
   InstantSlots,
   PlainDateSlots,
   PlainDateTimeSlots,
@@ -22,8 +21,6 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
-  getId,
-  isIdLikeEqual,
 } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
@@ -44,9 +41,9 @@ export function compareInstants(
   )
 }
 
-export function compareZonedDateTimes<C, T>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-  zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
+export function compareZonedDateTimes(
+  zonedDateTimeSlots0: ZonedDateTimeSlots,
+  zonedDateTimeSlots1: ZonedDateTimeSlots,
 ): NumberSign {
   return compareBigNanos(
     zonedDateTimeSlots0.epochNanoseconds,
@@ -54,10 +51,10 @@ export function compareZonedDateTimes<C, T>(
   )
 }
 
-export function compareDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => MoveOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function compareDurations<RA>(
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
+  getCalendarOps: (calendarId: string) => MoveOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -142,57 +139,57 @@ export function instantsEqual(
   return !compareInstants(instantSlots0, instantSlots1)
 }
 
-export function zonedDateTimesEqual<C extends IdLike, T extends IdLike>(
-  zonedDateTimeSlots0: ZonedDateTimeSlots<C, T>,
-  zonedDateTimeSlots1: ZonedDateTimeSlots<C, T>,
+export function zonedDateTimesEqual(
+  zonedDateTimeSlots0: ZonedDateTimeSlots,
+  zonedDateTimeSlots1: ZonedDateTimeSlots,
 ): boolean {
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
-    !!isTimeZoneSlotsEqual(
+    !!isTimeZoneIdsEqual(
       zonedDateTimeSlots0.timeZone,
       zonedDateTimeSlots1.timeZone,
     ) &&
-    isIdLikeEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
+    zonedDateTimeSlots0.calendar === zonedDateTimeSlots1.calendar
   )
 }
 
-export function plainDateTimesEqual<C extends IdLike>(
-  plainDateTimeSlots0: PlainDateTimeSlots<C>,
-  plainDateTimeSlots1: PlainDateTimeSlots<C>,
+export function plainDateTimesEqual(
+  plainDateTimeSlots0: PlainDateTimeSlots,
+  plainDateTimeSlots1: PlainDateTimeSlots,
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    isIdLikeEqual(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
+    plainDateTimeSlots0.calendar === plainDateTimeSlots1.calendar
   )
 }
 
-export function plainDatesEqual<C extends IdLike>(
-  plainDateSlots0: PlainDateSlots<C>,
-  plainDateSlots1: PlainDateSlots<C>,
+export function plainDatesEqual(
+  plainDateSlots0: PlainDateSlots,
+  plainDateSlots1: PlainDateSlots,
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
-    isIdLikeEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
+    plainDateSlots0.calendar === plainDateSlots1.calendar
   )
 }
 
-export function plainYearMonthsEqual<C extends IdLike>(
-  plainYearMonthSlots0: PlainYearMonthSlots<C>,
-  plainYearMonthSlots1: PlainYearMonthSlots<C>,
+export function plainYearMonthsEqual(
+  plainYearMonthSlots0: PlainYearMonthSlots,
+  plainYearMonthSlots1: PlainYearMonthSlots,
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    isIdLikeEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
+    plainYearMonthSlots0.calendar === plainYearMonthSlots1.calendar
   )
 }
 
-export function plainMonthDaysEqual<C extends IdLike>(
-  plainMonthDaySlots0: PlainMonthDaySlots<C>,
-  plainMonthDaySlots1: PlainMonthDaySlots<C>,
+export function plainMonthDaysEqual(
+  plainMonthDaySlots0: PlainMonthDaySlots,
+  plainMonthDaySlots1: PlainMonthDaySlots,
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    isIdLikeEqual(plainMonthDaySlots0.calendar, plainMonthDaySlots1.calendar)
+    plainMonthDaySlots0.calendar === plainMonthDaySlots1.calendar
   )
 }
 
@@ -211,25 +208,18 @@ NOTE: our minifier converts true/false to 1/0, which impares this function's
 ability to return true/false literals. So, resign to returning loose truthy values
 and make the caller responsible for casting to a boolean.
 */
-export function isTimeZoneSlotsEqual(
-  a: IdLike,
-  b: IdLike,
+export function isTimeZoneIdsEqual(
+  a: string,
+  b: string,
 ): number | boolean | undefined {
   if (a === b) {
-    return 1
-  }
-
-  const aId = getId(a)
-  const bId = getId(b)
-
-  if (aId === bId) {
     return 1
   }
 
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    return getTimeZoneAtomic(aId) === getTimeZoneAtomic(bId)
+    return getTimeZoneAtomic(a) === getTimeZoneAtomic(b)
   } catch {}
 
   // If reaching here, there was an error, so NOT equal

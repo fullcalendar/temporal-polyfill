@@ -51,7 +51,7 @@ export type Record = {
 
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
-export type ToStringOptions = InstantDisplayOptions<string>
+export type ToStringOptions = InstantDisplayOptions
 export type ToZonedDateTimeOptions = {
   timeZone: string
   calendar: string
@@ -217,7 +217,7 @@ export function rangeToLocaleStringParts(
 }
 
 export const toString = bindArgs(
-  formatInstantIso<string, string>,
+  formatInstantIso,
   refineTimeZoneId,
   queryNativeTimeZone,
 ) as (record: Record, options?: ToStringOptions) => string

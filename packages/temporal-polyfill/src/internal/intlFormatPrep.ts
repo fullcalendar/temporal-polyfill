@@ -2,13 +2,7 @@ import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
-import {
-  EpochAndZoneSlots,
-  EpochSlots,
-  IdLike,
-  getEpochMilli,
-  getId,
-} from './slots'
+import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { nanoInMilli } from './units'
@@ -242,11 +236,11 @@ export function createFormatForPrep(
 }
 
 function getForcedCommonTimeZone(
-  slots0?: { timeZone: IdLike }, // actually needed
-  slots1?: { timeZone: IdLike }, // optional!
+  slots0?: { timeZone: string }, // actually needed
+  slots1?: { timeZone: string }, // optional!
 ): string {
-  const timeZoneId = getId(slots0!.timeZone)
-  if (slots1 && getId(slots1.timeZone) !== timeZoneId) {
+  const timeZoneId = slots0!.timeZone
+  if (slots1 && slots1.timeZone !== timeZoneId) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
   return timeZoneId
@@ -260,7 +254,7 @@ export const instantConfig: ClassFormatConfig<EpochSlots> = [
   getEpochMilli,
 ]
 
-export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots<IdLike>> = [
+export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = [
   transformZonedOptions,
   getEpochMilli,
   false, // strictCalendarChecks
@@ -307,7 +301,7 @@ function toEpochMillis<S>(
   return slotsList.map((slots: S) => {
     if ((slots as any).calendar) {
       checkCalendarsCompatible(
-        getId((slots as any).calendar),
+        (slots as any).calendar, // !!!
         resolvedOptions.calendar,
         strictCalendarCheck,
       )

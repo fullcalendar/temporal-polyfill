@@ -26,14 +26,14 @@ export type TimeZoneOffsetOps = {
   getOffsetNanosecondsFor: OffsetNanosecondsOp
 }
 
-export type FixedIsoFields<C> = IsoDateTimeFields & {
-  calendar: C
+export type FixedIsoFields = IsoDateTimeFields & {
+  calendar: string
   offsetNanoseconds: number
 }
 
-export type ZonedIsoFields<C, T> = IsoDateTimeFields & {
-  calendar: C
-  timeZone: T
+export type ZonedIsoFields = IsoDateTimeFields & {
+  calendar: string
+  timeZone: string
   offset: string
 }
 
@@ -47,22 +47,24 @@ export const zonedEpochSlotsToIso = memoize(
   WeakMap,
 ) as typeof _zonedEpochSlotsToIso
 
-function _zonedEpochSlotsToIso<C, T>(
-  slots: ZonedEpochSlots<C, T>,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
-): FixedIsoFields<C>
-function _zonedEpochSlotsToIso<C, T>(
-  slots: ZonedEpochSlots<C, T>,
+function _zonedEpochSlotsToIso(
+  slots: ZonedEpochSlots,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
+): FixedIsoFields
+function _zonedEpochSlotsToIso(
+  slots: ZonedEpochSlots,
   timeZoneOps: TimeZoneOffsetOps,
-): FixedIsoFields<C>
-function _zonedEpochSlotsToIso<C, T>(
-  slots: ZonedEpochSlots<C, T>, // goes first because key
-  getTimeZoneOps: ((timeZoneSlot: T) => TimeZoneOffsetOps) | TimeZoneOffsetOps,
-): FixedIsoFields<C> {
+): FixedIsoFields
+function _zonedEpochSlotsToIso(
+  slots: ZonedEpochSlots, // goes first because key
+  getTimeZoneOps:
+    | ((timeZoneId: string) => TimeZoneOffsetOps)
+    | TimeZoneOffsetOps,
+): FixedIsoFields {
   const { epochNanoseconds } = slots
   const timeZoneOps = isTimeZoneOffsetOps(getTimeZoneOps)
     ? getTimeZoneOps
-    : getTimeZoneOps(slots.timeZone!)
+    : getTimeZoneOps(slots.timeZone)
 
   const offsetNanoseconds =
     timeZoneOps.getOffsetNanosecondsFor(epochNanoseconds)
@@ -75,10 +77,10 @@ function _zonedEpochSlotsToIso<C, T>(
   }
 }
 
-export function buildZonedIsoFields<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOffsetOps,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
-): ZonedIsoFields<C, T> {
+export function buildZonedIsoFields(
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
+  zonedDateTimeSlots: ZonedDateTimeSlots,
+): ZonedIsoFields {
   const isoFields = zonedEpochSlotsToIso(zonedDateTimeSlots, getTimeZoneOps)
 
   return {

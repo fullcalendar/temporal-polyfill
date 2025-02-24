@@ -62,7 +62,7 @@ export type Record = {
 }
 
 export type Fields = MonthDayFields
-export type FromFields = PlainMonthDayBag<string>
+export type FromFields = PlainMonthDayBag
 export type WithFields = MonthDayBag
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = EraYearOrYear
@@ -74,7 +74,7 @@ export type ToStringOptions = CalendarDisplayOptions
 // -----------------------------------------------------------------------------
 
 export const create = bindArgs(
-  constructPlainMonthDaySlots<string, string>,
+  constructPlainMonthDaySlots,
   refineCalendarId,
 ) as (
   isoMonth: number,
@@ -138,7 +138,7 @@ export function withFields(
 // Math
 // -----------------------------------------------------------------------------
 
-export const equals = plainMonthDaysEqual<string> as (
+export const equals = plainMonthDaysEqual as (
   record0: Record,
   record1: Record,
 ) => boolean
@@ -214,7 +214,7 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = formatPlainMonthDayIso<string> as (
+export const toString = formatPlainMonthDayIso as (
   record: Record,
   options?: ToStringOptions,
 ) => string

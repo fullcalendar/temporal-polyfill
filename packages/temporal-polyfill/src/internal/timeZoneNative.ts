@@ -25,13 +25,15 @@ export interface NativeTimeZone {
   getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
 }
 
-export const queryNativeTimeZone = memoize((slotId: string): NativeTimeZone => {
-  const essence = getTimeZoneEssence(slotId)
+export const queryNativeTimeZone = memoize(
+  (timeZoneId: string): NativeTimeZone => {
+    const essence = getTimeZoneEssence(timeZoneId)
 
-  return typeof essence === 'object'
-    ? new IntlTimeZone(essence)
-    : new FixedTimeZone(essence || 0)
-})
+    return typeof essence === 'object'
+      ? new IntlTimeZone(essence)
+      : new FixedTimeZone(essence || 0)
+  },
+)
 
 // Fixed
 // -----------------------------------------------------------------------------

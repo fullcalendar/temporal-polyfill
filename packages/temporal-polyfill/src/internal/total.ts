@@ -27,10 +27,10 @@ import { DurationSlots } from './slots'
 import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
-export function totalDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function totalDuration<RA>(
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
+  getCalendarOps: (calendarId: string) => DiffOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: DurationSlots,
   options: UnitName | DurationTotalOptions<RA>,
 ): number {

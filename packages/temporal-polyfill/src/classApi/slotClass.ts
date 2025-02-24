@@ -5,7 +5,6 @@ import {
   createNameDescriptors,
   createPropDescriptors,
   createStringTagDescriptors,
-  hasAllPropsByName,
   mapProps,
 } from '../internal/utils'
 
@@ -66,18 +65,6 @@ export function createSlotClass(
 
 // Utils
 // -----------------------------------------------------------------------------
-
-// TODO: return type
-export function createProtocolValidator(propNames: string[]): any {
-  propNames = propNames.concat('id').sort()
-
-  return (obj: any) => {
-    if (!hasAllPropsByName(obj, propNames)) {
-      throw new TypeError(errorMessages.invalidProtocol)
-    }
-    return obj
-  }
-}
 
 export function rejectInvalidBag<B>(bag: B): B {
   if (

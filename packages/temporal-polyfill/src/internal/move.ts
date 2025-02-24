@@ -77,14 +77,14 @@ export function moveInstant(
   )
 }
 
-export function moveZonedDateTime<C, T>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function moveZonedDateTime(
+  getCalendarOps: (calendarId: string) => MoveOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
-  zonedDateTimeSlots: ZonedDateTimeSlots<C, T>,
+  zonedDateTimeSlots: ZonedDateTimeSlots,
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): ZonedDateTimeSlots<C, T> {
+): ZonedDateTimeSlots {
   const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
   const calendarOps = getCalendarOps(zonedDateTimeSlots.calendar)
 
@@ -100,13 +100,13 @@ export function moveZonedDateTime<C, T>(
   }
 }
 
-export function movePlainDateTime<C>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
+export function movePlainDateTime(
+  getCalendarOps: (calendarId: string) => MoveOps,
   doSubtract: boolean,
-  plainDateTimeSlots: PlainDateTimeSlots<C>,
+  plainDateTimeSlots: PlainDateTimeSlots,
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): PlainDateTimeSlots<C> {
+): PlainDateTimeSlots {
   const { calendar } = plainDateTimeSlots
   return createPlainDateTimeSlots(
     moveDateTime(
@@ -119,13 +119,13 @@ export function movePlainDateTime<C>(
   )
 }
 
-export function movePlainDate<C>(
-  getCalendarOps: (calendarSlot: C) => MoveOps,
+export function movePlainDate(
+  getCalendarOps: (calendarId: string) => MoveOps,
   doSubtract: boolean,
-  plainDateSlots: PlainDateSlots<C>,
+  plainDateSlots: PlainDateSlots,
   durationSlots: DurationSlots,
   options?: OverflowOptions,
-): PlainDateSlots<C> {
+): PlainDateSlots {
   const { calendar } = plainDateSlots
   return createPlainDateSlots(
     moveDate(
@@ -138,15 +138,15 @@ export function movePlainDate<C>(
   )
 }
 
-export function movePlainYearMonth<C>(
-  getCalendarOps: (calendar: C) => YearMonthMoveOps,
+export function movePlainYearMonth(
+  getCalendarOps: (calendar: string) => YearMonthMoveOps,
   doSubtract: boolean,
-  plainYearMonthSlots: PlainYearMonthSlots<C>,
+  plainYearMonthSlots: PlainYearMonthSlots,
   durationSlots: DurationSlots,
-  options: OverflowOptions = Object.create(null), // b/c CalendarProtocol likes empty object,
-): PlainYearMonthSlots<C> {
-  const calendarSlot = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarSlot)
+  options?: OverflowOptions,
+): PlainYearMonthSlots {
+  const calendarId = plainYearMonthSlots.calendar
+  const calendarOps = getCalendarOps(calendarId)
   let isoDateFields: IsoDateFields = moveToDayOfMonthUnsafe(
     calendarOps,
     plainYearMonthSlots,
@@ -173,7 +173,7 @@ export function movePlainYearMonth<C>(
 
   return createPlainYearMonthSlots(
     moveToDayOfMonthUnsafe(calendarOps, movedIsoDateFields),
-    calendarSlot,
+    calendarId,
   )
 }
 

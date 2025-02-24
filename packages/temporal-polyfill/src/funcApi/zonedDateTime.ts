@@ -39,8 +39,8 @@ import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import {
-  slotsWithCalendar,
-  slotsWithTimeZone,
+  slotsWithCalendarId,
+  slotsWithTimeZoneId,
   zonedDateTimeWithPlainDate,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
@@ -173,9 +173,9 @@ export type Record = {
 }
 
 export type Fields = ZonedDateTimeFields
-export type FromFields = ZonedDateTimeBag<string, string>
+export type FromFields = ZonedDateTimeBag
 export type WithFields = DateTimeBag
-export type ISOFields = ZonedIsoFields<string, string>
+export type ISOFields = ZonedIsoFields
 
 export type AssignmentOptions = ZonedFieldOptions
 export type ArithmeticOptions = OverflowOptions
@@ -187,7 +187,7 @@ export type ToStringOptions = ZonedDateTimeDisplayOptions
 // -----------------------------------------------------------------------------
 
 export const create = bindArgs(
-  constructZonedDateTimeSlots<string, string, string, string>,
+  constructZonedDateTimeSlots,
   refineCalendarId,
   refineTimeZoneId,
 ) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
@@ -231,7 +231,7 @@ export const getFields = memoize((record: Record): Fields => {
 }, WeakMap)
 
 export const getISOFields = bindArgs(
-  buildZonedIsoFields<string, string>,
+  buildZonedIsoFields,
   queryNativeTimeZone,
 ) as (record: Record) => ISOFields
 
@@ -294,7 +294,7 @@ export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
 ) => boolean
 
 export const hoursInDay = bindArgs(
-  computeZonedHoursInDay<string, string>,
+  computeZonedHoursInDay,
   queryNativeTimeZone,
 ) as (record: Record) => number
 
@@ -317,15 +317,15 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarId(calendar))
+  return slotsWithCalendarId(record, refineCalendarId(calendar))
 }
 
 export function withTimeZone(record: Record, timeZone: string): Record {
-  return slotsWithTimeZone(record, refineTimeZoneId(timeZone))
+  return slotsWithTimeZoneId(record, refineTimeZoneId(timeZone))
 }
 
 export const withPlainDate = bindArgs(
-  zonedDateTimeWithPlainDate<string, string>,
+  zonedDateTimeWithPlainDate,
   queryNativeTimeZone,
 ) as (
   zonedDateTimeRecord: Record,
@@ -333,7 +333,7 @@ export const withPlainDate = bindArgs(
 ) => Record
 
 export const withPlainTime = bindArgs(
-  zonedDateTimeWithPlainTime<string, string>,
+  zonedDateTimeWithPlainTime,
   queryNativeTimeZone,
 ) as (
   zonedDateTimeRecord: Record,
@@ -344,7 +344,7 @@ export const withPlainTime = bindArgs(
 // -----------------------------------------------------------------------------
 
 export const add = bindArgs(
-  moveZonedDateTime<string, string>,
+  moveZonedDateTime,
   createNativeMoveOps,
   queryNativeTimeZone,
   false,
@@ -355,7 +355,7 @@ export const add = bindArgs(
 ) => Record
 
 export const subtract = bindArgs(
-  moveZonedDateTime<string, string>,
+  moveZonedDateTime,
   createNativeMoveOps,
   queryNativeTimeZone,
   true,
@@ -366,7 +366,7 @@ export const subtract = bindArgs(
 ) => Record
 
 export const until = bindArgs(
-  diffZonedDateTimes<string, string>,
+  diffZonedDateTimes,
   createNativeDiffOps,
   queryNativeTimeZone,
   false,
@@ -377,7 +377,7 @@ export const until = bindArgs(
 ) => DurationFns.Record
 
 export const since = bindArgs(
-  diffZonedDateTimes<string, string>,
+  diffZonedDateTimes,
   createNativeDiffOps,
   queryNativeTimeZone,
   true,
@@ -387,22 +387,22 @@ export const since = bindArgs(
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const round = bindArgs(
-  roundZonedDateTime<string, string>,
-  queryNativeTimeZone,
-) as (record: Record, options: DayTimeUnitName | RoundOptions) => Record
+export const round = bindArgs(roundZonedDateTime, queryNativeTimeZone) as (
+  record: Record,
+  options: DayTimeUnitName | RoundOptions,
+) => Record
 
 export const startOfDay = bindArgs(
-  computeZonedStartOfDay<string, string>,
+  computeZonedStartOfDay,
   queryNativeTimeZone,
 ) as (record: Record) => Record
 
-export const equals = zonedDateTimesEqual<string, string> as (
+export const equals = zonedDateTimesEqual as (
   record0: Record,
   record1: Record,
 ) => boolean
 
-export const compare = compareZonedDateTimes<string, string> as (
+export const compare = compareZonedDateTimes as (
   record0: Record,
   record1: Record,
 ) => NumberSign
@@ -415,17 +415,17 @@ export const toInstant = zonedDateTimeToInstant as (
 ) => InstantFns.Record
 
 export const toPlainDateTime = bindArgs(
-  zonedDateTimeToPlainDateTime<string, string>,
+  zonedDateTimeToPlainDateTime,
   queryNativeTimeZone,
 ) as (record: Record) => PlainDateTimeFns.Record
 
 export const toPlainDate = bindArgs(
-  zonedDateTimeToPlainDate<string, string>,
+  zonedDateTimeToPlainDate,
   queryNativeTimeZone,
 ) as (record: Record) => PlainDateFns.Record
 
 export const toPlainTime = bindArgs(
-  zonedDateTimeToPlainTime<string, string>,
+  zonedDateTimeToPlainTime,
   queryNativeTimeZone,
 ) as (record: Record) => PlainTimeFns.Record
 
@@ -502,7 +502,7 @@ export function rangeToLocaleStringParts(
 }
 
 export const toString = bindArgs(
-  formatZonedDateTimeIso<string, string>,
+  formatZonedDateTimeIso,
   queryNativeTimeZone,
 ) as (record: Record, options?: ToStringOptions) => string
 
@@ -510,7 +510,7 @@ export const toString = bindArgs(
 // -----------------------------------------------------------------------------
 
 function adaptDateFunc<R>(
-  dateFunc: (dateSlots: DateSlots<string>) => R,
+  dateFunc: (dateSlots: DateSlots) => R,
 ): (record: Record) => R {
   return (record: Record) => {
     return dateFunc(zonedEpochSlotsToIso(record, queryNativeTimeZone))
@@ -646,7 +646,7 @@ function moveByTimeUnit(
 
 function rountToInterval(
   unit: Unit,
-  computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
+  computeInterval: (isoFields: DateSlots) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -665,7 +665,7 @@ function rountToInterval(
 }
 
 function aligned(
-  computeAlignment: (record: DateTimeSlots<string>) => IsoDateTimeFields,
+  computeAlignment: (record: DateTimeSlots) => IsoDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
@@ -682,10 +682,7 @@ function aligned(
 }
 
 function zonedTransform<A extends any[]>(
-  transformIso: (
-    isoSlots: DateTimeSlots<string>,
-    ...args: A
-  ) => IsoDateTimeFields,
+  transformIso: (isoSlots: DateTimeSlots, ...args: A) => IsoDateTimeFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
     const timeZoneOps = queryNativeTimeZone(record.timeZone)

@@ -4,6 +4,7 @@ import {
   plainDateTimeWithFields,
   refinePlainDateTimeBag,
 } from '../internal/bagRefine'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
@@ -24,7 +25,7 @@ import { parsePlainDateTime } from '../internal/isoParse'
 import {
   plainDateTimeWithPlainDate,
   plainDateTimeWithPlainTime,
-  slotsWithCalendar,
+  slotsWithCalendarId,
 } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
 import {
@@ -48,22 +49,14 @@ import {
   createPlainDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
-  CalendarSlot,
-  getCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './calendar'
-import {
-  createDateModOps,
-  createDateRefineOps,
-  createDiffOps,
-  createMonthDayRefineOps,
-  createMoveOps,
-  createYearMonthRefineOps,
-} from './calendarOpsQuery'
+  getCalendarIdFromBag,
+  refineCalendarArg,
+} from './calendarArg'
 import {
   Duration,
   DurationArg,
@@ -73,7 +66,6 @@ import {
 import { prepPlainDateTimeFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
-  createCalendarFromSlots,
   dateGetters,
   neverValueOf,
   removeBranding,
@@ -94,19 +86,15 @@ import {
 } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
-import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTime = any & DateTimeFields
-export type PlainDateTimeArg =
-  | PlainDateTime
-  | PlainDateTimeBag<CalendarArg>
-  | string
+export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  bindArgs(constructPlainDateTimeSlots, refineCalendarSlot),
+  bindArgs(constructPlainDateTimeSlots, refineCalendarArg),
   {
     ...calendarIdGetters,
     ...dateGetters,
@@ -114,15 +102,14 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   },
   {
     getISOFields: removeBranding,
-    getCalendar: createCalendarFromSlots,
     with(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       mod: DateTimeBag,
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
         plainDateTimeWithFields(
-          createDateModOps,
+          createNativeStandardOps,
           slots,
           this,
           rejectInvalidBag(mod),
@@ -131,15 +118,15 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     withCalendar(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       calendarArg: CalendarArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        slotsWithCalendar(slots, refineCalendarSlot(calendarArg)),
+        slotsWithCalendarId(slots, refineCalendarArg(calendarArg)),
       )
     },
     withPlainDate(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       plainDateArg: PlainDateArg,
     ): PlainDateTime {
       return createPlainDateTime(
@@ -147,7 +134,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     withPlainTime(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       plainTimeArg?: PlainTimeArg,
     ): PlainDateTime {
       return createPlainDateTime(
@@ -158,13 +145,13 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     add(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
         movePlainDateTime(
-          createMoveOps,
+          createNativeStandardOps,
           false,
           slots,
           toDurationSlots(durationArg),
@@ -173,13 +160,13 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     subtract(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
         movePlainDateTime(
-          createMoveOps,
+          createNativeStandardOps,
           true,
           slots,
           toDurationSlots(durationArg),
@@ -188,13 +175,13 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     until(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       otherArg: PlainDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
-          createDiffOps,
+          createNativeStandardOps,
           false,
           slots,
           toPlainDateTimeSlots(otherArg),
@@ -203,13 +190,13 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     since(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       otherArg: PlainDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
-          createDiffOps,
+          createNativeStandardOps,
           true,
           slots,
           toPlainDateTimeSlots(otherArg),
@@ -218,49 +205,46 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     round(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
     ): PlainDateTime {
       return createPlainDateTime(roundPlainDateTime(slots, options))
     },
-    equals(
-      slots: PlainDateTimeSlots<CalendarSlot>,
-      otherArg: PlainDateTimeArg,
-    ): boolean {
+    equals(slots: PlainDateTimeSlots, otherArg: PlainDateTimeArg): boolean {
       return plainDateTimesEqual(slots, toPlainDateTimeSlots(otherArg))
     },
     toZonedDateTime(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       timeZoneArg: TimeZoneArg,
       options?: EpochDisambigOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
         plainDateTimeToZonedDateTime(
-          createTimeZoneOps,
+          queryNativeTimeZone,
           slots,
-          refineTimeZoneSlot(timeZoneArg),
+          refineTimeZoneArg(timeZoneArg),
           options,
         ),
       )
     },
-    toPlainDate(slots: PlainDateTimeSlots<CalendarSlot>): PlainDate {
+    toPlainDate(slots: PlainDateTimeSlots): PlainDate {
       return createPlainDate(createPlainDateSlots(slots))
     },
-    toPlainTime(slots: PlainDateTimeSlots<CalendarSlot>): PlainTime {
+    toPlainTime(slots: PlainDateTimeSlots): PlainTime {
       return createPlainTime(createPlainTimeSlots(slots))
     },
-    toPlainYearMonth(slots: PlainDateTimeSlots<CalendarSlot>): PlainYearMonth {
+    toPlainYearMonth(slots: PlainDateTimeSlots): PlainYearMonth {
       return createPlainYearMonth(
-        plainDateTimeToPlainYearMonth(createYearMonthRefineOps, slots, this),
+        plainDateTimeToPlainYearMonth(createNativeStandardOps, slots, this),
       )
     },
-    toPlainMonthDay(slots: PlainDateTimeSlots<CalendarSlot>): PlainMonthDay {
+    toPlainMonthDay(slots: PlainDateTimeSlots): PlainMonthDay {
       return createPlainMonthDay(
-        plainDateTimeToPlainMonthDay(createMonthDayRefineOps, slots, this),
+        plainDateTimeToPlainMonthDay(createNativeStandardOps, slots, this),
       )
     },
     toLocaleString(
-      slots: PlainDateTimeSlots<CalendarSlot>,
+      slots: PlainDateTimeSlots,
       locales?: LocalesArg,
       options?: Intl.DateTimeFormatOptions,
     ) {
@@ -272,7 +256,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       return format.format(epochMilli)
     },
     toString: formatPlainDateTimeIso,
-    toJSON(slots: PlainDateTimeSlots<CalendarSlot>): string {
+    toJSON(slots: PlainDateTimeSlots): string {
       return formatPlainDateTimeIso(slots)
     },
     valueOf: neverValueOf,
@@ -296,7 +280,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
 export function toPlainDateTimeSlots(
   arg: PlainDateTimeArg,
   options?: OverflowOptions,
-): PlainDateTimeSlots<CalendarSlot> {
+): PlainDateTimeSlots {
   options = copyOptions(options)
 
   if (isObjectLike(arg)) {
@@ -305,28 +289,26 @@ export function toPlainDateTimeSlots(
     switch (slots.branding) {
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return slots as PlainDateTimeSlots<CalendarSlot>
+        return slots as PlainDateTimeSlots
 
       case PlainDateBranding:
         refineOverflowOptions(options) // parse unused options
         return createPlainDateTimeSlots({
-          ...(slots as PlainDateSlots<CalendarSlot>),
+          ...(slots as PlainDateSlots),
           ...isoTimeFieldDefaults,
         })
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return zonedDateTimeToPlainDateTime(
-          createTimeZoneOffsetOps,
-          slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+          queryNativeTimeZone,
+          slots as ZonedDateTimeSlots,
         )
     }
 
     return refinePlainDateTimeBag(
-      createDateRefineOps(
-        getCalendarSlotFromBag(arg as PlainDateBag<CalendarArg>),
-      ),
-      arg as PlainDateBag<CalendarArg>,
+      createNativeStandardOps(getCalendarIdFromBag(arg as PlainDateBag)),
+      arg as PlainDateBag,
       options,
     )
   }

@@ -35,7 +35,7 @@ export function reversedMove<S>(
 // -----------------------------------------------------------------------------
 // These functions validate input
 
-export function moveByYears<S extends DateSlots<string>>(
+export function moveByYears<S extends DateSlots>(
   slots: S,
   years: number,
   options?: OverflowOptions,
@@ -52,7 +52,7 @@ export function moveByYears<S extends DateSlots<string>>(
   return { ...slots, ...isoDateFields }
 }
 
-export function moveByMonths<S extends DateSlots<string>>(
+export function moveByMonths<S extends DateSlots>(
   slots: S,
   months: number,
   options?: OverflowOptions,
@@ -97,7 +97,7 @@ const dayLabel = 'day'
 const dayOfWeekLabel = 'dayOfWeek'
 const weekOfYearLabel = 'weekOfYear'
 
-export function moveToDayOfYear<S extends DateSlots<string>>(
+export function moveToDayOfYear<S extends DateSlots>(
   slots: S,
   dayOfYear: number,
   options?: OverflowOptions,
@@ -117,7 +117,7 @@ export function moveToDayOfYear<S extends DateSlots<string>>(
   return moveByDays(slots, normDayOfYear - currentDayOfYear)
 }
 
-export function moveToDayOfMonth<S extends DateSlots<string>>(
+export function moveToDayOfMonth<S extends DateSlots>(
   slots: S,
   day: number,
   options?: OverflowOptions,
@@ -156,7 +156,7 @@ export function moveToDayOfWeek<S extends IsoDateFields>(
   return moveByDays(slots, normDayOfWeek - computeIsoDayOfWeek(slots))
 }
 
-export function slotsWithWeekOfYear<S extends DateSlots<string>>(
+export function slotsWithWeekOfYear<S extends DateSlots>(
   slots: S,
   weekOfYear: number,
   options?: OverflowOptions,

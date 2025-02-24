@@ -20,6 +20,7 @@ import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import {
   DateSlots,
+  DateTimeSlots,
   DurationSlots,
   InstantSlots,
   PlainDateSlots,
@@ -95,9 +96,7 @@ export function parseInstant(s: string): InstantSlots {
   return createInstantSlots(epochNanoseconds)
 }
 
-export function parseRelativeToSlots(
-  s: string,
-): RelativeToSlots<string, string> {
+export function parseRelativeToSlots(s: string): RelativeToSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {
@@ -120,7 +119,7 @@ export function parseRelativeToSlots(
 export function parseZonedDateTime(
   s: string,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots<string, string> {
+): ZonedDateTimeSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || !organized.timeZone) {
@@ -150,7 +149,7 @@ export function parseOffsetNano(s: string): number {
   return offsetNano
 }
 
-export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
+export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
@@ -160,7 +159,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots<string> {
   return createPlainDateTimeSlots(finalizeDateTime(organized))
 }
 
-export function parsePlainDate(s: string): PlainDateSlots<string> {
+export function parsePlainDate(s: string): PlainDateSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
@@ -175,7 +174,7 @@ export function parsePlainDate(s: string): PlainDateSlots<string> {
 export function parsePlainYearMonth(
   getCalendarOps: (calendarId: string) => DayOps,
   s: string,
-): PlainYearMonthSlots<string> {
+): PlainYearMonthSlots {
   const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
@@ -201,7 +200,7 @@ function requireIsoCalendar(organized: { calendar: string }): void {
 export function parsePlainMonthDay(
   getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
   s: string,
-): PlainMonthDaySlots<string> {
+): PlainMonthDaySlots {
   const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {
@@ -301,7 +300,7 @@ function finalizeZonedDateTime(
   offsetNano: number | undefined,
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
-): ZonedDateTimeSlots<string, string> {
+): ZonedDateTimeSlots {
   const slotId = resolveTimeZoneId(organized.timeZone)
   const timeZoneImpl = queryNativeTimeZone(slotId)
 
@@ -322,15 +321,13 @@ function finalizeZonedDateTime(
   )
 }
 
-function finalizeDateTime(
-  organized: DateTimeLikeOrganized,
-): IsoDateTimeFields & { calendar: string } {
+function finalizeDateTime(organized: DateTimeLikeOrganized): DateTimeSlots {
   return resolveSlotsCalendar(
     checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)),
   )
 }
 
-function finalizeDate(organized: DateOrganized): DateSlots<string> {
+function finalizeDate(organized: DateOrganized): DateSlots {
   return resolveSlotsCalendar(
     checkIsoDateInBounds(checkIsoDateFields(organized)),
   )
@@ -513,7 +510,7 @@ function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
 /*
 Result assumed to be ISO
 */
-function organizeYearMonthParts(parts: string[]): DateSlots<string> {
+function organizeYearMonthParts(parts: string[]): DateSlots {
   return {
     isoYear: organizeIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
@@ -522,7 +519,7 @@ function organizeYearMonthParts(parts: string[]): DateSlots<string> {
   }
 }
 
-function organizeMonthDayParts(parts: string[]): DateSlots<string> {
+function organizeMonthDayParts(parts: string[]): DateSlots {
   return {
     isoYear: isoEpochFirstLeapYear,
     isoMonth: parseInt(parts[1]),

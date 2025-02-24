@@ -20,7 +20,7 @@ import { moveByIsoWeeks } from './moveUtils'
 // -----------------------------------------------------------------------------
 
 export function computeYearFloor(
-  slots: DateSlots<string>,
+  slots: DateSlots,
   calendarOps = createNativeConvertOps(slots.calendar),
 ): IsoDateTimeFields & { year: number } {
   const [year0] = calendarOps.dateParts(slots)
@@ -29,7 +29,7 @@ export function computeYearFloor(
 }
 
 export function computeMonthFloor(
-  slots: DateSlots<string>,
+  slots: DateSlots,
   calendarOps = createNativeConvertOps(slots.calendar),
 ): IsoDateTimeFields & { year: number; month: number } {
   const [year0, month0] = calendarOps.dateParts(slots)
@@ -52,11 +52,11 @@ export const computeMicroFloor = bindArgs(clearIsoFields, Unit.Microsecond)
 // Ceil
 // -----------------------------------------------------------------------------
 
-export function computeYearCeil(slots: DateSlots<string>): IsoDateTimeFields {
+export function computeYearCeil(slots: DateSlots): IsoDateTimeFields {
   return computeYearInterval(slots)[1]
 }
 
-export function computeMonthCeil(slots: DateSlots<string>): IsoDateTimeFields {
+export function computeMonthCeil(slots: DateSlots): IsoDateTimeFields {
   return computeMonthInterval(slots)[1]
 }
 
@@ -67,9 +67,7 @@ export function computeIsoWeekCeil(slots: IsoDateFields): IsoDateTimeFields {
 // Interval
 // -----------------------------------------------------------------------------
 
-export function computeYearInterval(
-  slots: DateSlots<string>,
-): IsoDateTimeInterval {
+export function computeYearInterval(slots: DateSlots): IsoDateTimeInterval {
   const calendarOps = createNativeConvertOps(slots.calendar)
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
@@ -77,9 +75,7 @@ export function computeYearInterval(
   return [isoFields0, isoFields1]
 }
 
-export function computeMonthInterval(
-  slots: DateSlots<string>,
-): IsoDateTimeInterval {
+export function computeMonthInterval(slots: DateSlots): IsoDateTimeInterval {
   const calendarOps = createNativeConvertOps(slots.calendar)
   const isoFields0 = computeMonthFloor(slots, calendarOps)
   const [year1, month1] = calendarOps.monthAdd(
@@ -102,7 +98,7 @@ export function computeIsoWeekInterval(
 /*
 For year/month/week only
 */
-export function roundDateTimeToInterval<C, S extends DateSlots<C>>(
+export function roundDateTimeToInterval<S extends DateSlots>(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
   roundingMode: RoundingMode,

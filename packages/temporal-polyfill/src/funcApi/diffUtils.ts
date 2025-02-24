@@ -8,8 +8,8 @@ import {
 import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { MoveOps } from '../internal/calendarOps'
 import {
-  getCommonCalendarSlot,
-  getCommonTimeZoneSlot,
+  getCommonCalendarId,
+  getCommonTimeZoneId,
   prepareZonedEpochDiff,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
@@ -66,15 +66,15 @@ export const diffPlainTimeUnits = bindArgs(
 
 function diffZonedLargeUnits(
   unit: Unit,
-  record0: ZonedDateTimeSlots<string, string>,
-  record1: ZonedDateTimeSlots<string, string>,
+  record0: ZonedDateTimeSlots,
+  record1: ZonedDateTimeSlots,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const timeZoneSlot = getCommonTimeZoneSlot(record0.timeZone, record1.timeZone)
-  const timeZoneOps = queryNativeTimeZone(timeZoneSlot)
+  const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
+  const timeZoneOps = queryNativeTimeZone(timeZoneId)
 
-  const calendarSlot = getCommonCalendarSlot(record0.calendar, record1.calendar)
-  const calendarOps = createNativeDiffOps(calendarSlot)
+  const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
+  const calendarOps = createNativeDiffOps(calendarId)
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
@@ -90,14 +90,14 @@ function diffZonedLargeUnits(
   )
 }
 
-function diffPlainLargeUnits<S extends DateSlots<string>>(
+function diffPlainLargeUnits<S extends DateSlots>(
   unit: Unit,
   record0: S,
   record1: S,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const calendarSlot = getCommonCalendarSlot(record0.calendar, record1.calendar)
-  const calendarOps = createNativeDiffOps(calendarSlot)
+  const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
+  const calendarOps = createNativeDiffOps(calendarId)
 
   return diffDateUnits(
     isoToEpochNano as MarkerToEpochNano,
@@ -175,14 +175,14 @@ function diffDateUnits(
 function diffZonedDayLikeUnits(
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: ZonedDateTimeSlots<string, string>,
-  record1: ZonedDateTimeSlots<string, string>,
+  record0: ZonedDateTimeSlots,
+  record1: ZonedDateTimeSlots,
   options?: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
-  const timeZoneSlot = getCommonTimeZoneSlot(record0.timeZone, record1.timeZone)
-  const timeZoneOps = queryNativeTimeZone(timeZoneSlot)
+  const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
+  const timeZoneOps = queryNativeTimeZone(timeZoneId)
 
   const sign = compareBigNanos(
     record1.epochNanoseconds,

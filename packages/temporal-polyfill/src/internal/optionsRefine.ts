@@ -113,9 +113,9 @@ export interface TotalUnitOptions {
   unit: UnitName
 }
 
-export type InstantDisplayOptions<TA> = { timeZone?: TA } & TimeDisplayOptions
+export type InstantDisplayOptions = { timeZone?: string } & TimeDisplayOptions
 
-export type InstantDisplayTuple<TA> = [TA | undefined, ...TimeDisplayTuple]
+export type InstantDisplayTuple = [string | undefined, ...TimeDisplayTuple]
 
 export interface OverflowOptions {
   overflow?: TemporalSpec.AssignmentOptions['overflow']
@@ -466,14 +466,14 @@ export function refineZonedDateTimeDisplayOptions(
   ]
 }
 
-export function refineInstantDisplayOptions<TA>(
-  options: InstantDisplayOptions<TA> | undefined,
-): InstantDisplayTuple<TA> {
+export function refineInstantDisplayOptions(
+  options: InstantDisplayOptions | undefined,
+): InstantDisplayTuple {
   options = normalizeOptions(options)
 
   // alphabetical
   const timeDisplayTuple = refineTimeDisplayTuple(options)
-  const timeZoneArg: TA | undefined = options.timeZone
+  const timeZoneArg: string | undefined = options.timeZone
 
   return [timeZoneArg, ...timeDisplayTuple]
 }

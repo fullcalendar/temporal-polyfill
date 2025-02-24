@@ -174,7 +174,7 @@ export const compare = compareIsoTimeFields as (
 // -----------------------------------------------------------------------------
 
 export const toZonedDateTime = bindArgs(
-  plainTimeToZonedDateTime<string, string, string, PlainDateSlots<string>>,
+  plainTimeToZonedDateTime<PlainDateSlots>,
   refineTimeZoneId,
   identity,
   queryNativeTimeZone,
@@ -183,7 +183,7 @@ export const toZonedDateTime = bindArgs(
   options: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
-export const toPlainDateTime = plainTimeToPlainDateTime<string> as (
+export const toPlainDateTime = plainTimeToPlainDateTime as (
   plainTimeRecord: Record,
   plainDateRecord: PlainDateFns.Record,
 ) => PlainDateTimeFns.Record

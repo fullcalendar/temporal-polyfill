@@ -101,17 +101,17 @@ import { noop } from './utils'
 // Common
 // -----------------------------------------------------------------------------
 
-const nativeYearMonthRefineBase: YearMonthRefineOps<string> = {
+const nativeYearMonthRefineBase: YearMonthRefineOps = {
   yearMonthFromFields: nativeYearMonthFromFields,
   fields: nativeFieldsMethod,
 }
 
-const nativeDateRefineBase: DateRefineOps<string> = {
+const nativeDateRefineBase: DateRefineOps = {
   dateFromFields: nativeDateFromFields,
   fields: nativeFieldsMethod,
 }
 
-const nativeMonthDayRefineBase: MonthDayRefineOps<string> = {
+const nativeMonthDayRefineBase: MonthDayRefineOps = {
   monthDayFromFields: nativeMonthDayFromFields,
   fields: nativeFieldsMethod,
 }

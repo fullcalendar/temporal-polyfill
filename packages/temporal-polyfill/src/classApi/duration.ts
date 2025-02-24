@@ -4,6 +4,7 @@ import {
   refineDurationBag,
   refineMaybeZonedDateTimeBag,
 } from '../internal/bagRefine'
+import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
 import { DurationFields } from '../internal/durationFields'
@@ -36,21 +37,16 @@ import {
   ZonedDateTimeSlots,
   createPlainDateSlots,
 } from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { CalendarArg, CalendarSlot, getCalendarSlotFromBag } from './calendar'
-import {
-  createDateRefineOps,
-  createDiffOps,
-  createMoveOps,
-} from './calendarOpsQuery'
+import { getCalendarIdFromBag } from './calendarArg'
 import { durationGetters, neverValueOf } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { createSlotClass, getSlots } from './slotClass'
-import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
-import { createTimeZoneOps } from './timeZoneOpsQuery'
+import { refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTimeArg } from './zonedDateTime'
 
 export type Duration = any & DurationFields
@@ -81,8 +77,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          createDiffOps,
-          createTimeZoneOps,
+          createNativeStandardOps,
+          queryNativeTimeZone,
           false,
           slots,
           toDurationSlots(otherArg),
@@ -98,8 +94,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          createDiffOps,
-          createTimeZoneOps,
+          createNativeStandardOps,
+          queryNativeTimeZone,
           true,
           slots,
           toDurationSlots(otherArg),
@@ -114,8 +110,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         roundDuration(
           refinePublicRelativeTo,
-          createDiffOps,
-          createTimeZoneOps,
+          createNativeStandardOps,
+          queryNativeTimeZone,
           slots,
           options,
         ),
@@ -127,8 +123,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): number {
       return totalDuration(
         refinePublicRelativeTo,
-        createDiffOps,
-        createTimeZoneOps,
+        createNativeStandardOps,
+        queryNativeTimeZone,
         slots,
         options,
       )
@@ -159,8 +155,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): NumberSign {
       return compareDurations(
         refinePublicRelativeTo,
-        createMoveOps,
-        createTimeZoneOps,
+        createNativeStandardOps,
+        queryNativeTimeZone,
         toDurationSlots(durationArg0),
         toDurationSlots(durationArg1),
         options,
@@ -188,7 +184,7 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
 
 function refinePublicRelativeTo(
   relativeTo: ZonedDateTimeArg | PlainDateTimeArg | PlainDateArg | undefined,
-): RelativeToSlots<CalendarSlot, TimeZoneSlot> | undefined {
+): RelativeToSlots | undefined {
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {
       const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>
@@ -196,23 +192,21 @@ function refinePublicRelativeTo(
       switch (slots.branding) {
         case ZonedDateTimeBranding:
         case PlainDateBranding:
-          return slots as
-            | ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>
-            | PlainDateSlots<CalendarSlot>
+          return slots as ZonedDateTimeSlots | PlainDateSlots
 
         case PlainDateTimeBranding:
-          return createPlainDateSlots(slots as PlainDateTimeSlots<CalendarSlot>)
+          return createPlainDateSlots(slots as PlainDateTimeSlots)
       }
 
-      const calendar = getCalendarSlotFromBag(relativeTo as any) // !!!
+      const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
       const res = refineMaybeZonedDateTimeBag(
-        refineTimeZoneSlot,
-        createTimeZoneOps,
-        createDateRefineOps(calendar),
-        relativeTo as unknown as ZonedDateTimeBag<CalendarArg, TimeZoneArg>, // !!!
+        refineTimeZoneArg,
+        queryNativeTimeZone,
+        createNativeStandardOps(calendarId),
+        relativeTo as unknown as ZonedDateTimeBag, // !!!
       )
 
-      return { ...res, calendar }
+      return { ...res, calendar: calendarId }
     }
 
     return parseRelativeToSlots(relativeTo)

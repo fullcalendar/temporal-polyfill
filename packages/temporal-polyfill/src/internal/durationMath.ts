@@ -45,10 +45,10 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 // Adding
 // -----------------------------------------------------------------------------
 
-export function addDurations<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function addDurations<RA>(
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
+  getCalendarOps: (calendarId: string) => DiffOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
   slots: DurationSlots,
   otherSlots: DurationSlots,
@@ -120,10 +120,10 @@ function addDayTimeDurations(
 // Rounding
 // -----------------------------------------------------------------------------
 
-export function roundDuration<RA, C, T>(
-  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots<C, T> | undefined,
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function roundDuration<RA>(
+  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
+  getCalendarOps: (calendarId: string) => DiffOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundingOptions<RA>,
 ): DurationSlots {

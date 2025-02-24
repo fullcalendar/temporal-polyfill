@@ -34,9 +34,9 @@ import {
   ZonedDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { CalendarSlot } from './calendar'
 import {
   Duration,
   DurationArg,
@@ -48,8 +48,7 @@ import { neverValueOf, removeBranding, timeGetters } from './mixins'
 import { PlainDateArg, toPlainDateSlots } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
-import { TimeZoneArg, TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
-import { createTimeZoneOffsetOps, createTimeZoneOps } from './timeZoneOpsQuery'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainTime = any & TimeFields
@@ -113,9 +112,9 @@ export const [PlainTime, createPlainTime] = createSlotClass(
     ): ZonedDateTime {
       return createZonedDateTime(
         plainTimeToZonedDateTime(
-          refineTimeZoneSlot,
+          refineTimeZoneArg,
           toPlainDateSlots,
-          createTimeZoneOps,
+          queryNativeTimeZone,
           slots,
           options,
         ),
@@ -173,13 +172,13 @@ export function toPlainTimeSlots(
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainTimeSlots(slots as PlainDateTimeSlots<CalendarSlot>)
+        return createPlainTimeSlots(slots as PlainDateTimeSlots)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
         return zonedDateTimeToPlainTime(
-          createTimeZoneOffsetOps,
-          slots as ZonedDateTimeSlots<CalendarSlot, TimeZoneSlot>,
+          queryNativeTimeZone,
+          slots as ZonedDateTimeSlots,
         )
     }
 

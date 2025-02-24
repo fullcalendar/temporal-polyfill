@@ -75,7 +75,7 @@ export type Record = {
 }
 
 export type Fields = YearMonthFields
-export type FromFields = PlainYearMonthBag<string>
+export type FromFields = PlainYearMonthBag
 export type WithFields = YearMonthBag
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = { day: number }
@@ -89,7 +89,7 @@ export type ToStringOptions = CalendarDisplayOptions
 // -----------------------------------------------------------------------------
 
 export const create = bindArgs(
-  constructPlainYearMonthSlots<string, string>,
+  constructPlainYearMonthSlots,
   refineCalendarId,
 ) as (
   isoYear: number,
@@ -157,7 +157,7 @@ export function withFields(
 // -----------------------------------------------------------------------------
 
 export const add = bindArgs(
-  movePlainYearMonth<string>,
+  movePlainYearMonth,
   createNativeYearMonthMoveOps,
   false,
 ) as (
@@ -167,7 +167,7 @@ export const add = bindArgs(
 ) => Record
 
 export const subtract = bindArgs(
-  movePlainYearMonth<string>,
+  movePlainYearMonth,
   createNativeYearMonthMoveOps,
   true,
 ) as (
@@ -177,7 +177,7 @@ export const subtract = bindArgs(
 ) => Record
 
 export const until = bindArgs(
-  diffPlainYearMonth<string>,
+  diffPlainYearMonth,
   createNativeYearMonthDiffOps,
   false,
 ) as (
@@ -187,7 +187,7 @@ export const until = bindArgs(
 ) => DurationFns.Record
 
 export const since = bindArgs(
-  diffPlainYearMonth<string>,
+  diffPlainYearMonth,
   createNativeYearMonthDiffOps,
   true,
 ) as (
@@ -196,7 +196,7 @@ export const since = bindArgs(
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const equals = plainYearMonthsEqual<string> as (
+export const equals = plainYearMonthsEqual as (
   record0: Record,
   record1: Record,
 ) => boolean
@@ -277,7 +277,7 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = formatPlainYearMonthIso<string> as (
+export const toString = formatPlainYearMonthIso as (
   record: Record,
   options?: ToStringOptions,
 ) => string

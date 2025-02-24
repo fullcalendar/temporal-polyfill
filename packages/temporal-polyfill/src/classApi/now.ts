@@ -11,17 +11,17 @@ import {
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from '../internal/slots'
+import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   createPropDescriptors,
   createStringTagDescriptors,
 } from '../internal/utils'
-import { CalendarSlot, refineCalendarSlot } from './calendar'
+import { CalendarArg, refineCalendarArg } from './calendarArg'
 import { Instant, createInstant } from './instant'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
-import { TimeZoneSlot, refineTimeZoneSlot } from './timeZone'
-import { createTimeZoneOffsetOps } from './timeZoneOpsQuery'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export const Now = Object.defineProperties(
@@ -38,51 +38,51 @@ export const Now = Object.defineProperties(
       },
 
       zonedDateTime(
-        calendar: CalendarSlot,
-        timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
+        calendarArg: CalendarArg,
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): ZonedDateTime {
         return createZonedDateTime(
           createZonedDateTimeSlots(
             getCurrentEpochNano(),
-            refineTimeZoneSlot(timeZone),
-            refineCalendarSlot(calendar),
+            refineTimeZoneArg(timeZoneArg),
+            refineCalendarArg(calendarArg),
           ),
         )
       },
 
       zonedDateTimeISO(
-        timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): ZonedDateTime {
         return createZonedDateTime(
           createZonedDateTimeSlots(
             getCurrentEpochNano(),
-            refineTimeZoneSlot(timeZone),
+            refineTimeZoneArg(timeZoneArg),
             isoCalendarId,
           ),
         )
       },
 
       plainDateTime(
-        calendar: CalendarSlot,
-        timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
+        calendarArg: CalendarArg,
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainDateTime {
         return createPlainDateTime(
           createPlainDateTimeSlots(
             getCurrentIsoDateTime(
-              createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)),
+              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
-            refineCalendarSlot(calendar),
+            refineCalendarArg(calendarArg),
           ),
         )
       },
 
       plainDateTimeISO(
-        timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainDateTime {
         return createPlainDateTime(
           createPlainDateTimeSlots(
             getCurrentIsoDateTime(
-              createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)),
+              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
             isoCalendarId,
           ),
@@ -90,35 +90,39 @@ export const Now = Object.defineProperties(
       },
 
       plainDate(
-        calendar: CalendarSlot,
-        timeZone: TimeZoneSlot = getCurrentTimeZoneId(),
+        calendarArg: CalendarArg,
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainDate {
         return createPlainDate(
           createPlainDateSlots(
             getCurrentIsoDateTime(
-              createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)),
+              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
-            refineCalendarSlot(calendar),
+            refineCalendarArg(calendarArg),
           ),
         )
       },
 
-      plainDateISO(timeZone: TimeZoneSlot = getCurrentTimeZoneId()): PlainDate {
+      plainDateISO(
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
+      ): PlainDate {
         return createPlainDate(
           createPlainDateSlots(
             getCurrentIsoDateTime(
-              createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)),
+              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
             isoCalendarId,
           ),
         )
       },
 
-      plainTimeISO(timeZone: TimeZoneSlot = getCurrentTimeZoneId()): PlainTime {
+      plainTimeISO(
+        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
+      ): PlainTime {
         return createPlainTime(
           createPlainTimeSlots(
             getCurrentIsoDateTime(
-              createTimeZoneOffsetOps(refineTimeZoneSlot(timeZone)),
+              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
           ),
         )

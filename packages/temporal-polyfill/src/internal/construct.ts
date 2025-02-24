@@ -43,13 +43,13 @@ export function constructInstantSlots(epochNano: bigint): InstantSlots {
   )
 }
 
-export function constructZonedDateTimeSlots<CA, C, TA, T>(
-  refineCalendarArg: (calendarArg: CA) => C,
-  refineTimeZoneArg: (timeZoneArg: TA) => T,
+export function constructZonedDateTimeSlots<CA, TA>(
+  refineCalendarArg: (calendarArg: CA) => string, // to calendarId
+  refineTimeZoneArg: (timeZoneArg: TA) => string,
   epochNano: bigint,
   timeZoneArg: TA,
   calendarArg: CA = isoCalendarId as any,
-): ZonedDateTimeSlots<C, T> {
+): ZonedDateTimeSlots {
   return createZonedDateTimeSlots(
     checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
     refineTimeZoneArg(timeZoneArg),
@@ -57,8 +57,8 @@ export function constructZonedDateTimeSlots<CA, C, TA, T>(
   )
 }
 
-export function constructPlainDateTimeSlots<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
+export function constructPlainDateTimeSlots<CA>(
+  refineCalendarArg: (calendarArg: CA) => string, // to calendarId
   isoYear: number,
   isoMonth: number,
   isoDay: number,
@@ -69,7 +69,7 @@ export function constructPlainDateTimeSlots<CA, C>(
   isoMicrosecond = 0,
   isoNanosecond = 0,
   calendarArg: CA = isoCalendarId as any,
-): PlainDateTimeSlots<C> {
+): PlainDateTimeSlots {
   const isoFields = zipProps(isoDateTimeFieldNamesAsc, [
     isoYear,
     isoMonth,
@@ -89,13 +89,13 @@ export function constructPlainDateTimeSlots<CA, C>(
   )
 }
 
-export function constructPlainDateSlots<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
+export function constructPlainDateSlots<CA>(
+  refineCalendarArg: (calendarArg: CA) => string, // to calendarId
   isoYear: number,
   isoMonth: number,
   isoDay: number,
   calendarArg: CA = isoCalendarId as any,
-): PlainDateSlots<C> {
+): PlainDateSlots {
   return createPlainDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields(
@@ -110,16 +110,16 @@ export function constructPlainDateSlots<CA, C>(
   )
 }
 
-export function constructPlainYearMonthSlots<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
+export function constructPlainYearMonthSlots<CA>(
+  refineCalendarArg: (calendarArg: CA) => string, // to calendarId
   isoYear: number,
   isoMonth: number,
-  calendar: CA = isoCalendarId as any,
+  calendarArg: CA = isoCalendarId as any,
   referenceIsoDay = 1,
-): PlainYearMonthSlots<C> {
+): PlainYearMonthSlots {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
-  const calendarSlot = refineCalendarArg(calendar)
+  const calendarId = refineCalendarArg(calendarArg)
   const isoDayInt = toInteger(referenceIsoDay)
 
   return createPlainYearMonthSlots(
@@ -130,20 +130,20 @@ export function constructPlainYearMonthSlots<CA, C>(
         isoDay: isoDayInt,
       }),
     ),
-    calendarSlot,
+    calendarId,
   )
 }
 
-export function constructPlainMonthDaySlots<CA, C>(
-  refineCalendarArg: (calendarArg: CA) => C,
+export function constructPlainMonthDaySlots<CA>(
+  refineCalendarArg: (calendarArg: CA) => string, // to calendarId
   isoMonth: number,
   isoDay: number,
-  calendar: CA = isoCalendarId as any,
+  calendarArg: CA = isoCalendarId as any,
   referenceIsoYear: number = isoEpochFirstLeapYear,
-): PlainMonthDaySlots<C> {
+): PlainMonthDaySlots {
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
-  const calendarSlot = refineCalendarArg(calendar)
+  const calendarId = refineCalendarArg(calendarArg)
   const isoYearInt = toInteger(referenceIsoYear)
 
   return createPlainMonthDaySlots(
@@ -154,7 +154,7 @@ export function constructPlainMonthDaySlots<CA, C>(
         isoDay: isoDayInt,
       }),
     ),
-    calendarSlot,
+    calendarId,
   )
 }
 

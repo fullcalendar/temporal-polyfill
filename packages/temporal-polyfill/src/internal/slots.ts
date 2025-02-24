@@ -1,5 +1,4 @@
 import { BigNano, bigNanoToBigInt } from './bigNano'
-import { requireString } from './cast'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { computeDurationSign } from './durationMath'
 import {
@@ -32,30 +31,33 @@ export function createInstantSlots(epochNano: BigNano): InstantSlots {
   }
 }
 
-export function createZonedDateTimeSlots<C, T>(
+export function createZonedDateTimeSlots(
   epochNano: BigNano,
-  timeZone: T,
-  calendar: C,
-): ZonedDateTimeSlots<C, T> {
+  timeZoneId: string,
+  calendarId: string,
+): ZonedDateTimeSlots {
   return {
     branding: ZonedDateTimeBranding,
-    calendar,
-    timeZone,
+    calendar: calendarId,
+    timeZone: timeZoneId,
     epochNanoseconds: epochNano,
   }
 }
 
-export function createPlainDateTimeSlots<C>(
-  isoFields: IsoDateTimeFields & { calendar: C },
-): PlainDateTimeSlots<C>
-export function createPlainDateTimeSlots<C>(
+/*
+TODO: simpler way of doing method overloading?
+*/
+export function createPlainDateTimeSlots(
+  isoFields: IsoDateTimeFields & { calendar: string },
+): PlainDateTimeSlots
+export function createPlainDateTimeSlots(
   isoFields: IsoDateTimeFields,
-  calendar: C,
-): PlainDateTimeSlots<C>
-export function createPlainDateTimeSlots<C>(
-  isoFields: IsoDateTimeFields & { calendar?: C },
+  calendar: string,
+): PlainDateTimeSlots
+export function createPlainDateTimeSlots(
+  isoFields: IsoDateTimeFields & { calendar?: string },
   calendar = isoFields.calendar,
-): PlainDateTimeSlots<C> {
+): PlainDateTimeSlots {
   return {
     branding: PlainDateTimeBranding,
     calendar: calendar!,
@@ -63,17 +65,17 @@ export function createPlainDateTimeSlots<C>(
   }
 }
 
-export function createPlainDateSlots<C>(
-  isoFields: IsoDateFields & { calendar: C },
-): PlainDateSlots<C>
-export function createPlainDateSlots<C>(
+export function createPlainDateSlots(
+  isoFields: IsoDateFields & { calendar: string },
+): PlainDateSlots
+export function createPlainDateSlots(
   isoFields: IsoDateFields,
-  calendar: C,
-): PlainDateSlots<C>
-export function createPlainDateSlots<C>(
-  isoFields: IsoDateFields & { calendar?: C },
+  calendar: string,
+): PlainDateSlots
+export function createPlainDateSlots(
+  isoFields: IsoDateFields & { calendar?: string },
   calendar = isoFields.calendar,
-): PlainDateSlots<C> {
+): PlainDateSlots {
   return {
     branding: PlainDateBranding,
     calendar: calendar!,
@@ -81,17 +83,20 @@ export function createPlainDateSlots<C>(
   }
 }
 
-export function createPlainYearMonthSlots<C>(
-  isoFields: IsoDateFields & { calendar: C },
-): PlainYearMonthSlots<C>
-export function createPlainYearMonthSlots<C>(
+/*
+TODO: simpler way of doing method overloading?
+*/
+export function createPlainYearMonthSlots(
+  isoFields: IsoDateFields & { calendar: string },
+): PlainYearMonthSlots
+export function createPlainYearMonthSlots(
   isoFields: IsoDateFields,
-  calendar: C,
-): PlainYearMonthSlots<C>
-export function createPlainYearMonthSlots<C>(
-  isoFields: IsoDateFields & { calendar?: C },
+  calendar: string,
+): PlainYearMonthSlots
+export function createPlainYearMonthSlots(
+  isoFields: IsoDateFields & { calendar?: string },
   calendar = isoFields.calendar,
-): PlainYearMonthSlots<C> {
+): PlainYearMonthSlots {
   return {
     branding: PlainYearMonthBranding,
     calendar: calendar!,
@@ -99,17 +104,20 @@ export function createPlainYearMonthSlots<C>(
   }
 }
 
-export function createPlainMonthDaySlots<C>(
-  isoFields: IsoDateFields & { calendar: C },
-): PlainMonthDaySlots<C>
-export function createPlainMonthDaySlots<C>(
+/*
+TODO: simpler way of doing method overloading?
+*/
+export function createPlainMonthDaySlots(
+  isoFields: IsoDateFields & { calendar: string },
+): PlainMonthDaySlots
+export function createPlainMonthDaySlots(
   isoFields: IsoDateFields,
-  calendar: C,
-): PlainMonthDaySlots<C>
-export function createPlainMonthDaySlots<C>(
-  isoFields: IsoDateFields & { calendar?: C },
+  calendar: string,
+): PlainMonthDaySlots
+export function createPlainMonthDaySlots(
+  isoFields: IsoDateFields & { calendar?: string },
   calendar = isoFields.calendar,
-): PlainMonthDaySlots<C> {
+): PlainMonthDaySlots {
   return {
     branding: PlainMonthDayBranding,
     calendar: calendar!,
@@ -139,40 +147,37 @@ export function createDurationSlots(
 export type BrandingSlots = { branding: string }
 
 export type EpochSlots = { epochNanoseconds: BigNano }
-export type EpochAndZoneSlots<T> = EpochSlots & { timeZone: T }
-export type ZonedEpochSlots<C = unknown, T = unknown> = EpochAndZoneSlots<T> & {
-  calendar: C
+export type EpochAndZoneSlots = EpochSlots & { timeZone: string }
+export type ZonedEpochSlots = EpochAndZoneSlots & {
+  calendar: string
 }
 
-export type DateSlots<C> = IsoDateFields & { calendar: C }
-export type DateTimeSlots<C> = IsoDateTimeFields & { calendar: C }
+// without branding
+export type DateSlots = IsoDateFields & { calendar: string }
+export type DateTimeSlots = IsoDateTimeFields & { calendar: string }
 
-export type PlainDateSlots<C> = IsoDateFields & {
+export type PlainDateSlots = DateSlots & {
   branding: typeof PlainDateBranding
-  calendar: C
 }
 
 export type PlainTimeSlots = IsoTimeFields & {
   branding: typeof PlainTimeBranding
 }
 
-export type PlainDateTimeSlots<C> = IsoDateTimeFields & {
+export type PlainDateTimeSlots = DateTimeSlots & {
   branding: typeof PlainDateTimeBranding
-  calendar: C
 }
 
-export type ZonedDateTimeSlots<C, T> = ZonedEpochSlots<C, T> & {
+export type ZonedDateTimeSlots = ZonedEpochSlots & {
   branding: typeof ZonedDateTimeBranding
 }
 
-export type PlainMonthDaySlots<C> = IsoDateFields & {
+export type PlainMonthDaySlots = DateSlots & {
   branding: typeof PlainMonthDayBranding
-  calendar: C
 }
 
-export type PlainYearMonthSlots<C> = IsoDateFields & {
+export type PlainYearMonthSlots = DateSlots & {
   branding: typeof PlainYearMonthBranding
-  calendar: C
 }
 
 export type DurationSlots = DurationFields & {
@@ -206,17 +211,4 @@ export function getEpochNano(slots: EpochSlots): bigint {
 
 export function extractEpochNano(slots: EpochSlots): BigNano {
   return slots.epochNanoseconds
-}
-
-// ID-like
-// -----------------------------------------------------------------------------
-
-export type IdLike = string | { id: string }
-
-export function getId(idLike: IdLike): string {
-  return typeof idLike === 'string' ? idLike : requireString(idLike.id)
-}
-
-export function isIdLikeEqual(idLike0: IdLike, idLike1: IdLike): boolean {
-  return idLike0 === idLike1 || getId(idLike0) === getId(idLike1)
 }

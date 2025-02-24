@@ -6,7 +6,7 @@ import {
 } from './bigNano'
 import { NativeDiffOps, monthCodeNumberToMonth } from './calendarNative'
 import { DiffOps, YearMonthDiffOps } from './calendarOps'
-import { isTimeZoneSlotsEqual } from './compare'
+import { isTimeZoneIdsEqual } from './compare'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
   nanoToDurationDayTimeFields,
@@ -41,7 +41,6 @@ import {
 } from './round'
 import {
   DurationSlots,
-  IdLike,
   InstantSlots,
   PlainDateSlots,
   PlainDateTimeSlots,
@@ -50,7 +49,6 @@ import {
   ZonedEpochSlots,
   createDurationSlots,
   extractEpochNano,
-  isIdLikeEqual,
 } from './slots'
 import {
   isoTimeFieldsToNano,
@@ -103,15 +101,15 @@ export function diffInstants(
   )
 }
 
-export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
-  getCalendarOps: (calendarSlot: C) => DiffOps,
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
+export function diffZonedDateTimes(
+  getCalendarOps: (calendarId: string) => DiffOps,
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   invert: boolean,
-  slots0: ZonedDateTimeSlots<C, T>,
-  slots1: ZonedDateTimeSlots<C, T>,
+  slots0: ZonedDateTimeSlots,
+  slots1: ZonedDateTimeSlots,
   options?: DiffOptions<UnitName>,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(slots0.calendar, slots1.calendar)
+  const calendarId = getCommonCalendarId(slots0.calendar, slots1.calendar)
   const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, optionsCopy, Unit.Hour)
@@ -133,9 +131,9 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
       roundingMode,
     )
   } else {
-    const timeZoneSlot = getCommonTimeZoneSlot(slots0.timeZone, slots1.timeZone)
-    const timeZoneOps = getTimeZoneOps(timeZoneSlot)
-    const calendarOps = getCalendarOps(calendarSlot)
+    const timeZoneId = getCommonTimeZoneId(slots0.timeZone, slots1.timeZone)
+    const timeZoneOps = getTimeZoneOps(timeZoneId)
+    const calendarOps = getCalendarOps(calendarId)
 
     durationFields = diffZonedEpochsBig(
       calendarOps,
@@ -166,14 +164,14 @@ export function diffZonedDateTimes<C extends IdLike, T extends IdLike>(
   )
 }
 
-export function diffPlainDateTimes<C extends IdLike>(
-  getCalendarOps: (calendarSlot: C) => DiffOps,
+export function diffPlainDateTimes(
+  getCalendarOps: (calendarId: string) => DiffOps,
   invert: boolean,
-  plainDateTimeSlots0: PlainDateTimeSlots<C>,
-  plainDateTimeSlots1: PlainDateTimeSlots<C>,
+  plainDateTimeSlots0: PlainDateTimeSlots,
+  plainDateTimeSlots1: PlainDateTimeSlots,
   options?: DiffOptions<UnitName>,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(
+  const calendarId = getCommonCalendarId(
     plainDateTimeSlots0.calendar,
     plainDateTimeSlots1.calendar,
   )
@@ -198,7 +196,7 @@ export function diffPlainDateTimes<C extends IdLike>(
       roundingMode,
     )
   } else {
-    const calendarOps = getCalendarOps(calendarSlot)
+    const calendarOps = getCalendarOps(calendarId)
 
     durationFields = diffDateTimesBig(
       calendarOps,
@@ -228,14 +226,14 @@ export function diffPlainDateTimes<C extends IdLike>(
   )
 }
 
-export function diffPlainDates<C extends IdLike>(
-  getCalendarOps: (calendarSlot: C) => DiffOps,
+export function diffPlainDates(
+  getCalendarOps: (calendarId: string) => DiffOps,
   invert: boolean,
-  plainDateSlots0: PlainDateSlots<C>,
-  plainDateSlots1: PlainDateSlots<C>,
+  plainDateSlots0: PlainDateSlots,
+  plainDateSlots1: PlainDateSlots,
   options?: DiffOptions<DateUnitName>,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(
+  const calendarId = getCommonCalendarId(
     plainDateSlots0.calendar,
     plainDateSlots1.calendar,
   )
@@ -250,7 +248,7 @@ export function diffPlainDates<C extends IdLike>(
 
   return diffDateLike(
     invert,
-    () => getCalendarOps(calendarSlot),
+    () => getCalendarOps(calendarId),
     plainDateSlots0,
     plainDateSlots1,
     ...optionsTuple,
@@ -258,14 +256,14 @@ export function diffPlainDates<C extends IdLike>(
   )
 }
 
-export function diffPlainYearMonth<C extends IdLike>(
-  getCalendarOps: (calendar: C) => YearMonthDiffOps,
+export function diffPlainYearMonth(
+  getCalendarOps: (calendar: string) => YearMonthDiffOps,
   invert: boolean,
-  plainYearMonthSlots0: PlainYearMonthSlots<C>,
-  plainYearMonthSlots1: PlainYearMonthSlots<C>,
+  plainYearMonthSlots0: PlainYearMonthSlots,
+  plainYearMonthSlots1: PlainYearMonthSlots,
   options?: DiffOptions<YearMonthUnitName>,
 ): DurationSlots {
-  const calendarSlot = getCommonCalendarSlot(
+  const calendarId = getCommonCalendarId(
     plainYearMonthSlots0.calendar,
     plainYearMonthSlots1.calendar,
   )
@@ -277,7 +275,7 @@ export function diffPlainYearMonth<C extends IdLike>(
     Unit.Year,
     Unit.Month,
   )
-  const calendarOps = getCalendarOps(calendarSlot)
+  const calendarOps = getCalendarOps(calendarId)
 
   return diffDateLike(
     invert,
@@ -795,16 +793,16 @@ export function computeIntlMonthsInYearSpan(
 
 // -----------------------------------------------------------------------------
 
-export function getCommonCalendarSlot<C extends IdLike>(a: C, b: C): C {
-  if (!isIdLikeEqual(a, b)) {
+export function getCommonCalendarId(a: string, b: string): string {
+  if (a !== b) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
 
   return a
 }
 
-export function getCommonTimeZoneSlot<C extends IdLike>(a: C, b: C): C {
-  if (!isTimeZoneSlotsEqual(a, b)) {
+export function getCommonTimeZoneId(a: string, b: string): string {
+  if (!isTimeZoneIdsEqual(a, b)) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
 

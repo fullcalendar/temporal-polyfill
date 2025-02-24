@@ -22,19 +22,7 @@ import {
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
-import {
-  CalendarArg,
-  CalendarSlot,
-  getCalendarSlotFromBag,
-  refineCalendarSlot,
-} from './calendar'
-import {
-  createDateModOps,
-  createYearMonthDiffOps,
-  createYearMonthModOps,
-  createYearMonthMoveOps,
-  createYearMonthRefineOps,
-} from './calendarOpsQuery'
+import { getCalendarIdFromBag, refineCalendarArg } from './calendarArg'
 import {
   Duration,
   DurationArg,
@@ -44,7 +32,6 @@ import {
 import { prepPlainYearMonthFormat } from './intlFormatConfig'
 import {
   calendarIdGetters,
-  createCalendarFromSlots,
   neverValueOf,
   removeBranding,
   yearMonthGetters,
@@ -53,30 +40,26 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainYearMonth = any & YearMonthFields
-export type PlainYearMonthArg =
-  | PlainYearMonth
-  | PlainYearMonthBag<CalendarArg>
-  | string
+export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
 
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    bindArgs(constructPlainYearMonthSlots, refineCalendarSlot),
+    bindArgs(constructPlainYearMonthSlots, refineCalendarArg),
     {
       ...calendarIdGetters,
       ...yearMonthGetters,
     },
     {
       getISOFields: removeBranding,
-      getCalendar: createCalendarFromSlots,
       with(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         mod: YearMonthBag,
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
           plainYearMonthWithFields(
-            createYearMonthModOps,
+            createNativeStandardOps,
             slots,
             this,
             rejectInvalidBag(mod),
@@ -85,13 +68,13 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       add(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         durationArg: DurationArg,
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
           movePlainYearMonth(
-            createYearMonthMoveOps,
+            createNativeStandardOps,
             false,
             slots,
             toDurationSlots(durationArg),
@@ -100,13 +83,13 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       subtract(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         durationArg: DurationArg,
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
           movePlainYearMonth(
-            createYearMonthMoveOps,
+            createNativeStandardOps,
             true,
             slots,
             toDurationSlots(durationArg),
@@ -115,13 +98,13 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       until(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         otherArg: PlainYearMonthArg,
         options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
         return createDuration(
           diffPlainYearMonth(
-            createYearMonthDiffOps,
+            createNativeStandardOps,
             false,
             slots,
             toPlainYearMonthSlots(otherArg),
@@ -130,13 +113,13 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       since(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         otherArg: PlainYearMonthArg,
         options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
         return createDuration(
           diffPlainYearMonth(
-            createYearMonthDiffOps,
+            createNativeStandardOps,
             true,
             slots,
             toPlainYearMonthSlots(otherArg),
@@ -144,22 +127,16 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
           ),
         )
       },
-      equals(
-        slots: PlainYearMonthSlots<CalendarSlot>,
-        otherArg: PlainYearMonthArg,
-      ): boolean {
+      equals(slots: PlainYearMonthSlots, otherArg: PlainYearMonthArg): boolean {
         return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
       },
-      toPlainDate(
-        slots: PlainYearMonthSlots<CalendarSlot>,
-        bag: { day: number },
-      ): PlainDate {
+      toPlainDate(slots: PlainYearMonthSlots, bag: { day: number }): PlainDate {
         return createPlainDate(
-          plainYearMonthToPlainDate(createDateModOps, slots, this, bag),
+          plainYearMonthToPlainDate(createNativeStandardOps, slots, this, bag),
         )
       },
       toLocaleString(
-        slots: PlainYearMonthSlots<CalendarSlot>,
+        slots: PlainYearMonthSlots,
         locales?: LocalesArg,
         options?: Intl.DateTimeFormatOptions,
       ): string {
@@ -171,7 +148,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         return format.format(epochMilli)
       },
       toString: formatPlainYearMonthIso,
-      toJSON(slots: PlainYearMonthSlots<CalendarSlot>) {
+      toJSON(slots: PlainYearMonthSlots) {
         return formatPlainYearMonthIso(slots)
       },
       valueOf: neverValueOf,
@@ -203,11 +180,11 @@ export function toPlainYearMonthSlots(
 
     if (slots && slots.branding === PlainYearMonthBranding) {
       refineOverflowOptions(options) // parse unused options
-      return slots as PlainYearMonthSlots<CalendarSlot>
+      return slots as PlainYearMonthSlots
     }
 
     return refinePlainYearMonthBag(
-      createYearMonthRefineOps(getCalendarSlotFromBag(arg as any)), // !!!
+      createNativeStandardOps(getCalendarIdFromBag(arg as any)), // !!!
       arg as any, // !!!
       options,
     )

@@ -103,10 +103,10 @@ export type NativeMonthDayRefineDeps = NativeDateRefineDeps & {
   yearMonthForMonthDay: YearMonthForMonthDayOp
 }
 
-export type NativeYearMonthRefineOps = YearMonthRefineOps<string> &
+export type NativeYearMonthRefineOps = YearMonthRefineOps &
   NativeYearMonthRefineDeps
-export type NativeDateRefineOps = DateRefineOps<string> & NativeDateRefineDeps
-export type NativeMonthDayRefineOps = MonthDayRefineOps<string> &
+export type NativeDateRefineOps = DateRefineOps & NativeDateRefineDeps
+export type NativeMonthDayRefineOps = MonthDayRefineOps &
   NativeMonthDayRefineDeps
 
 // Mod

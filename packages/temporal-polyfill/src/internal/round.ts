@@ -105,11 +105,11 @@ export function roundInstant(
 /*
 ONLY day & time
 */
-export function roundZonedDateTime<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: ZonedDateTimeSlots<C, T>,
+export function roundZonedDateTime(
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
+  slots: ZonedDateTimeSlots,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
-): ZonedDateTimeSlots<C, T> {
+): ZonedDateTimeSlots {
   let { epochNanoseconds, timeZone, calendar } = slots
   const [smallestUnit, roundingInc, roundingMode] =
     refineRoundingOptions(options)
@@ -155,10 +155,10 @@ export function roundZonedDateTime<C, T>(
 /*
 ONLY day & time
 */
-export function roundPlainDateTime<C>(
-  slots: PlainDateTimeSlots<C>,
+export function roundPlainDateTime(
+  slots: PlainDateTimeSlots,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
-): PlainDateTimeSlots<C> {
+): PlainDateTimeSlots {
   const roundedIsoFields = roundDateTime(
     slots,
     ...(refineRoundingOptions(options) as [DayTimeUnit, number, RoundingMode]),
@@ -183,9 +183,9 @@ export function roundPlainTime(
 // Zoned Utils
 // -----------------------------------------------------------------------------
 
-export function computeZonedHoursInDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: ZonedDateTimeSlots<C, T>,
+export function computeZonedHoursInDay(
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
+  slots: ZonedDateTimeSlots,
 ): number {
   const timeZoneOps = getTimeZoneOps(slots.timeZone)
 
@@ -208,10 +208,10 @@ export function computeZonedHoursInDay<C, T>(
   return hoursExact
 }
 
-export function computeZonedStartOfDay<C, T>(
-  getTimeZoneOps: (timeZoneSlot: T) => TimeZoneOps,
-  slots: ZonedDateTimeSlots<C, T>,
-): ZonedDateTimeSlots<C, T> {
+export function computeZonedStartOfDay(
+  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
+  slots: ZonedDateTimeSlots,
+): ZonedDateTimeSlots {
   const { timeZone, calendar } = slots
   const timeZoneOps = getTimeZoneOps(timeZone)
   const epochNano1 = alignZonedEpoch(computeDayFloor, timeZoneOps, slots)
@@ -222,10 +222,10 @@ export function computeZonedStartOfDay<C, T>(
 /*
 For year/month/week/day only
 */
-export function alignZonedEpoch<C, T>(
-  computeAlignment: (slots: DateTimeSlots<C>) => IsoDateTimeFields,
+export function alignZonedEpoch(
+  computeAlignment: (slots: DateTimeSlots) => IsoDateTimeFields,
   timeZoneOps: TimeZoneOps,
-  slots: ZonedDateTimeSlots<C, T>,
+  slots: ZonedDateTimeSlots,
 ): BigNano {
   const isoFields = zonedEpochSlotsToIso(slots, timeZoneOps)
   const isoFields1 = computeAlignment(isoFields)
@@ -236,10 +236,10 @@ export function alignZonedEpoch<C, T>(
 /*
 For year/month/week/day only
 */
-export function roundZonedEpochToInterval<C>(
-  computeInterval: (slots: DateTimeSlots<C>) => IsoDateTimeInterval,
+export function roundZonedEpochToInterval(
+  computeInterval: (slots: DateTimeSlots) => IsoDateTimeInterval,
   timeZoneOps: TimeZoneOps,
-  slots: ZonedEpochSlots<C, unknown>,
+  slots: ZonedEpochSlots,
   roundingMode: RoundingMode,
 ): BigNano {
   const isoSlots = zonedEpochSlotsToIso(slots, timeZoneOps)

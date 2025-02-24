@@ -36,7 +36,7 @@ import { parsePlainDateTime } from '../internal/isoParse'
 import {
   plainDateTimeWithPlainDate,
   plainDateTimeWithPlainTime,
-  slotsWithCalendar,
+  slotsWithCalendarId,
 } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
 import {
@@ -193,7 +193,7 @@ export type Record = {
 }
 
 export type Fields = DateTimeFields
-export type FromFields = PlainDateTimeBag<string>
+export type FromFields = PlainDateTimeBag
 export type WithFields = DateTimeBag
 export type ISOFields = IsoDateTimeFields
 
@@ -208,7 +208,7 @@ export type ToStringOptions = DateTimeDisplayOptions
 // -----------------------------------------------------------------------------
 
 export const create = bindArgs(
-  constructPlainDateTimeSlots<string, string>,
+  constructPlainDateTimeSlots,
   refineCalendarId,
 ) as (
   isoYear: number,
@@ -294,7 +294,7 @@ export function withFields(
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendar(record, refineCalendarId(calendar))
+  return slotsWithCalendarId(record, refineCalendarId(calendar))
 }
 
 export const withPlainDate = plainDateTimeWithPlainDate as (
@@ -310,18 +310,14 @@ export const withPlainTime = plainDateTimeWithPlainTime as (
 // Math
 // -----------------------------------------------------------------------------
 
-export const add = bindArgs(
-  movePlainDateTime<string>,
-  createNativeMoveOps,
-  false,
-) as (
+export const add = bindArgs(movePlainDateTime, createNativeMoveOps, false) as (
   plainDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
 export const subtract = bindArgs(
-  movePlainDateTime<string>,
+  movePlainDateTime,
   createNativeMoveOps,
   true,
 ) as (
@@ -331,7 +327,7 @@ export const subtract = bindArgs(
 ) => Record
 
 export const until = bindArgs(
-  diffPlainDateTimes<string>,
+  diffPlainDateTimes,
   createNativeDiffOps,
   false,
 ) as (
@@ -341,7 +337,7 @@ export const until = bindArgs(
 ) => DurationFns.Record
 
 export const since = bindArgs(
-  diffPlainDateTimes<string>,
+  diffPlainDateTimes,
   createNativeDiffOps,
   true,
 ) as (
@@ -350,12 +346,12 @@ export const since = bindArgs(
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const round = roundPlainDateTime<string> as (
+export const round = roundPlainDateTime as (
   record: Record,
   options: DayTimeUnitName | RoundOptions,
 ) => Record
 
-export const equals = plainDateTimesEqual<string> as (
+export const equals = plainDateTimesEqual as (
   record0: Record,
   record1: Record,
 ) => boolean
@@ -369,7 +365,7 @@ export const compare = compareIsoDateTimeFields as (
 // -----------------------------------------------------------------------------
 
 export const toZonedDateTime = bindArgs(
-  plainDateTimeToZonedDateTime<string, string>,
+  plainDateTimeToZonedDateTime,
   queryNativeTimeZone,
 ) as (
   record: Record,
@@ -457,7 +453,7 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = formatPlainDateTimeIso<string> as (
+export const toString = formatPlainDateTimeIso as (
   record: Record,
   options?: ToStringOptions,
 ) => string
@@ -670,7 +666,7 @@ function moveByTimeUnit(
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: DateSlots<string>) => IsoDateTimeInterval,
+  computeInterval: (isoFields: DateSlots) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -684,7 +680,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: DateTimeSlots<string>) => IsoDateTimeFields,
+  computeAlignment: (slots: DateTimeSlots) => IsoDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {

@@ -13,20 +13,20 @@ import { DateUnitName, Unit } from './units'
 
 // Function Types
 // (Must always be called from a CalendarOps object)
-export type DateFromFieldsOp<C> = (
+export type DateFromFieldsOp = (
   fields: DateBag,
   options?: OverflowOptions,
-) => PlainDateSlots<C>
+) => PlainDateSlots
 
-export type YearMonthFromFieldsOp<C> = (
+export type YearMonthFromFieldsOp = (
   fields: YearMonthBag,
   options?: OverflowOptions,
-) => PlainYearMonthSlots<C>
+) => PlainYearMonthSlots
 
-export type MonthDayFromFieldsOp<C> = (
+export type MonthDayFromFieldsOp = (
   fields: DateBag,
   options?: OverflowOptions,
-) => PlainMonthDaySlots<C>
+) => PlainMonthDaySlots
 
 export type FieldsOp = (fieldNames: string[]) => string[]
 
@@ -54,26 +54,26 @@ export type DayOp = (isoFields: IsoDateFields) => number
 // (assumes received fields are ALREADY refined)
 // TODO: have these functions return the branding too?
 
-export type DateRefineOps<C> = {
-  dateFromFields: DateFromFieldsOp<C>
+export type DateRefineOps = {
+  dateFromFields: DateFromFieldsOp
   fields: FieldsOp
 }
-export type YearMonthRefineOps<C> = {
-  yearMonthFromFields: YearMonthFromFieldsOp<C>
+export type YearMonthRefineOps = {
+  yearMonthFromFields: YearMonthFromFieldsOp
   fields: FieldsOp
 }
-export type MonthDayRefineOps<C> = {
-  monthDayFromFields: MonthDayFromFieldsOp<C>
+export type MonthDayRefineOps = {
+  monthDayFromFields: MonthDayFromFieldsOp
   fields: FieldsOp
 }
 
 // Mod
 // (assumes received fields are ALREADY refined)
-export type YearMonthModOps<C> = YearMonthRefineOps<C> & {
+export type YearMonthModOps = YearMonthRefineOps & {
   mergeFields: MergeFieldsOp
 }
-export type DateModOps<C> = DateRefineOps<C> & { mergeFields: MergeFieldsOp }
-export type MonthDayModOps<C> = MonthDayRefineOps<C> & {
+export type DateModOps = DateRefineOps & { mergeFields: MergeFieldsOp }
+export type MonthDayModOps = MonthDayRefineOps & {
   mergeFields: MergeFieldsOp
 }
 
