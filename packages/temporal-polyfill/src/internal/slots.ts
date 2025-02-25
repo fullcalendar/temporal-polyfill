@@ -193,6 +193,9 @@ export type InstantSlots = {
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------
 
+/*
+Only used by funcApi
+*/
 export function getEpochSec(slots: EpochSlots): number {
   return epochNanoToSec(slots.epochNanoseconds)
 }
@@ -201,6 +204,9 @@ export function getEpochMilli(slots: EpochSlots): number {
   return epochNanoToMilli(slots.epochNanoseconds)
 }
 
+/*
+Only used by funcApi
+*/
 export function getEpochMicro(slots: EpochSlots): bigint {
   return epochNanoToMicro(slots.epochNanoseconds)
 }

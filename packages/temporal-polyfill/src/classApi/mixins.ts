@@ -3,14 +3,8 @@ import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
 import { timeFieldNamesAsc } from '../internal/fields'
 import { isoTimeFieldNamesAsc } from '../internal/isoFields'
-import {
-  DurationSlots,
-  getEpochMicro,
-  getEpochMilli,
-  getEpochNano,
-  getEpochSec,
-} from '../internal/slots'
-import { bindArgs, excludePropsByName, mapPropNames } from '../internal/utils'
+import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
+import { mapPropNames } from '../internal/utils'
 import {
   dateRefiners,
   dayOnlyRefiners,
@@ -80,9 +74,7 @@ export const timeGetters = mapPropNames((_name, i) => {
 // -----------------------------------------------------------------------------
 
 export const epochGetters = {
-  epochSeconds: getEpochSec,
   epochMilliseconds: getEpochMilli,
-  epochMicroseconds: getEpochMicro,
   epochNanoseconds: getEpochNano,
 }
 
@@ -92,9 +84,3 @@ export const epochGetters = {
 export function neverValueOf() {
   throw new TypeError(errorMessages.forbiddenValueOf)
 }
-
-// for getISOFields
-export const removeBranding = bindArgs(
-  excludePropsByName,
-  new Set([/*@__KEY__*/ 'branding']),
-)

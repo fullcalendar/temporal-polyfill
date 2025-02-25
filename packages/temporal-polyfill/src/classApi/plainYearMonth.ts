@@ -30,12 +30,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepPlainYearMonthFormat } from './intlFormatConfig'
-import {
-  calendarIdGetters,
-  neverValueOf,
-  removeBranding,
-  yearMonthGetters,
-} from './mixins'
+import { calendarIdGetters, neverValueOf, yearMonthGetters } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
@@ -51,7 +46,6 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       ...yearMonthGetters,
     },
     {
-      getISOFields: removeBranding,
       with(
         slots: PlainYearMonthSlots,
         mod: YearMonthBag,

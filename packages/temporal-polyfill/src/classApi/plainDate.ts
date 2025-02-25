@@ -51,12 +51,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepPlainDateFormat } from './intlFormatConfig'
-import {
-  calendarIdGetters,
-  dateGetters,
-  neverValueOf,
-  removeBranding,
-} from './mixins'
+import { calendarIdGetters, dateGetters, neverValueOf } from './mixins'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import {
@@ -82,7 +77,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ...dateGetters,
   },
   {
-    getISOFields: removeBranding,
     with(slots: PlainDateSlots, mod: DateBag, options?: OverflowOptions) {
       return createPlainDate(
         plainDateWithFields(

@@ -10,9 +10,7 @@ import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
-  zonedDateTimeToPlainMonthDay,
   zonedDateTimeToPlainTime,
-  zonedDateTimeToPlainYearMonth,
 } from '../internal/convert'
 import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
@@ -22,7 +20,6 @@ import { parseZonedDateTime } from '../internal/isoParse'
 import {
   slotsWithCalendarId,
   slotsWithTimeZoneId,
-  zonedDateTimeWithPlainDate,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
@@ -46,12 +43,7 @@ import {
   createDurationSlots,
 } from '../internal/slots'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import {
-  FixedIsoFields,
-  ZonedIsoFields,
-  buildZonedIsoFields,
-  zonedEpochSlotsToIso,
-} from '../internal/timeZoneOps'
+import { FixedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneOps'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
@@ -74,21 +66,14 @@ import {
   neverValueOf,
   timeGetters,
 } from './mixins'
-import {
-  PlainDate,
-  PlainDateArg,
-  createPlainDate,
-  toPlainDateSlots,
-} from './plainDate'
+import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
-import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import {
   PlainTime,
   PlainTimeArg,
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
@@ -117,9 +102,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     },
   },
   {
-    getISOFields(slots: ZonedDateTimeSlots): ZonedIsoFields {
-      return buildZonedIsoFields(queryNativeTimeZone, slots)
-    },
     with(
       slots: ZonedDateTimeSlots,
       mod: DateTimeBag,
@@ -150,18 +132,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     ): ZonedDateTime {
       return createZonedDateTime(
         slotsWithTimeZoneId(slots, refineTimeZoneArg(timeZoneArg)),
-      )
-    },
-    withPlainDate(
-      slots: ZonedDateTimeSlots,
-      plainDateArg: PlainDateArg,
-    ): ZonedDateTime {
-      return createZonedDateTime(
-        zonedDateTimeWithPlainDate(
-          queryNativeTimeZone,
-          slots,
-          toPlainDateSlots(plainDateArg),
-        ),
       )
     },
     withPlainTime(
@@ -276,16 +246,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     toPlainTime(slots: ZonedDateTimeSlots): PlainTime {
       return createPlainTime(
         zonedDateTimeToPlainTime(queryNativeTimeZone, slots),
-      )
-    },
-    toPlainYearMonth(slots: ZonedDateTimeSlots): PlainYearMonth {
-      return createPlainYearMonth(
-        zonedDateTimeToPlainYearMonth(createNativeStandardOps, slots, this),
-      )
-    },
-    toPlainMonthDay(slots: ZonedDateTimeSlots): PlainMonthDay {
-      return createPlainMonthDay(
-        zonedDateTimeToPlainMonthDay(createNativeStandardOps, slots, this),
       )
     },
     toLocaleString(

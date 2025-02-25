@@ -77,6 +77,9 @@ function _zonedEpochSlotsToIso(
   }
 }
 
+/*
+Only used by funcApi
+*/
 export function buildZonedIsoFields(
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   zonedDateTimeSlots: ZonedDateTimeSlots,

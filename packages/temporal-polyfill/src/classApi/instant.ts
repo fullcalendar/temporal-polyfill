@@ -1,12 +1,9 @@
 import { numberToBigNano } from '../internal/bigNano'
-import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
 import {
-  epochMicroToInstant,
   epochMilliToInstant,
   epochNanoToInstant,
-  epochSecToInstant,
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
@@ -30,7 +27,6 @@ import {
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName, nanoInMilli } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { CalendarArg, refineCalendarArg } from './calendarArg'
 import {
   Duration,
   DurationArg,
@@ -88,20 +84,6 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     equals(slots: InstantSlots, otherArg: InstantArg): boolean {
       return instantsEqual(slots, toInstantSlots(otherArg))
     },
-    toZonedDateTime(
-      slots: InstantSlots,
-      options: { timeZone: TimeZoneArg; calendar: CalendarArg },
-    ): ZonedDateTime {
-      const refinedObj = requireObjectLike(options)
-
-      return createZonedDateTime(
-        instantToZonedDateTime(
-          slots,
-          refineTimeZoneArg(refinedObj.timeZone),
-          refineCalendarArg(refinedObj.calendar),
-        ),
-      )
-    },
     toZonedDateTimeISO(
       slots: InstantSlots,
       timeZoneArg: TimeZoneArg,
@@ -135,14 +117,8 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
     from(arg: InstantArg) {
       return createInstant(toInstantSlots(arg))
     },
-    fromEpochSeconds(epochSec: number): Instant {
-      return createInstant(epochSecToInstant(epochSec))
-    },
     fromEpochMilliseconds(epochMilli: number): Instant {
       return createInstant(epochMilliToInstant(epochMilli))
-    },
-    fromEpochMicroseconds(epochMicro: bigint): Instant {
-      return createInstant(epochMicroToInstant(epochMicro))
     },
     fromEpochNanoseconds(epochNano: bigint): Instant {
       return createInstant(epochNanoToInstant(epochNano))

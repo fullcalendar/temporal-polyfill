@@ -16,7 +16,6 @@ import {
   createPropDescriptors,
   createStringTagDescriptors,
 } from '../internal/utils'
-import { CalendarArg, refineCalendarArg } from './calendarArg'
 import { Instant, createInstant } from './instant'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
@@ -37,19 +36,6 @@ export const Now = Object.defineProperties(
         return createInstant(createInstantSlots(getCurrentEpochNano()))
       },
 
-      zonedDateTime(
-        calendarArg: CalendarArg,
-        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
-      ): ZonedDateTime {
-        return createZonedDateTime(
-          createZonedDateTimeSlots(
-            getCurrentEpochNano(),
-            refineTimeZoneArg(timeZoneArg),
-            refineCalendarArg(calendarArg),
-          ),
-        )
-      },
-
       zonedDateTimeISO(
         timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): ZonedDateTime {
@@ -58,20 +44,6 @@ export const Now = Object.defineProperties(
             getCurrentEpochNano(),
             refineTimeZoneArg(timeZoneArg),
             isoCalendarId,
-          ),
-        )
-      },
-
-      plainDateTime(
-        calendarArg: CalendarArg,
-        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
-      ): PlainDateTime {
-        return createPlainDateTime(
-          createPlainDateTimeSlots(
-            getCurrentIsoDateTime(
-              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
-            ),
-            refineCalendarArg(calendarArg),
           ),
         )
       },
@@ -85,20 +57,6 @@ export const Now = Object.defineProperties(
               queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
             isoCalendarId,
-          ),
-        )
-      },
-
-      plainDate(
-        calendarArg: CalendarArg,
-        timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
-      ): PlainDate {
-        return createPlainDate(
-          createPlainDateSlots(
-            getCurrentIsoDateTime(
-              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
-            ),
-            refineCalendarArg(calendarArg),
           ),
         )
       },

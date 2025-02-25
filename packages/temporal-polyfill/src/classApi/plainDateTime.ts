@@ -11,8 +11,6 @@ import {
 } from '../internal/compare'
 import { constructPlainDateTimeSlots } from '../internal/construct'
 import {
-  plainDateTimeToPlainMonthDay,
-  plainDateTimeToPlainYearMonth,
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
 } from '../internal/convert'
@@ -68,7 +66,6 @@ import {
   calendarIdGetters,
   dateGetters,
   neverValueOf,
-  removeBranding,
   timeGetters,
 } from './mixins'
 import {
@@ -77,14 +74,12 @@ import {
   createPlainDate,
   toPlainDateSlots,
 } from './plainDate'
-import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import {
   PlainTime,
   PlainTimeArg,
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -101,7 +96,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ...timeGetters,
   },
   {
-    getISOFields: removeBranding,
     with(
       slots: PlainDateTimeSlots,
       mod: DateTimeBag,
@@ -232,16 +226,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     },
     toPlainTime(slots: PlainDateTimeSlots): PlainTime {
       return createPlainTime(createPlainTimeSlots(slots))
-    },
-    toPlainYearMonth(slots: PlainDateTimeSlots): PlainYearMonth {
-      return createPlainYearMonth(
-        plainDateTimeToPlainYearMonth(createNativeStandardOps, slots, this),
-      )
-    },
-    toPlainMonthDay(slots: PlainDateTimeSlots): PlainMonthDay {
-      return createPlainMonthDay(
-        plainDateTimeToPlainMonthDay(createNativeStandardOps, slots, this),
-      )
     },
     toLocaleString(
       slots: PlainDateTimeSlots,

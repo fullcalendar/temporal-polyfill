@@ -88,6 +88,9 @@ export function zonedDateTimeToPlainDate(
   )
 }
 
+/*
+Only used by funcApi
+*/
 export function zonedDateTimeToPlainYearMonth(
   getCalendarOps: (calendarId: string) => YearMonthRefineOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
@@ -99,6 +102,9 @@ export function zonedDateTimeToPlainYearMonth(
   return convertToPlainYearMonth(calendarOps, zonedDateTimeFields)
 }
 
+/*
+Only used by funcApi
+*/
 export function zonedDateTimeToPlainMonthDay(
   getCalendarOps: (calendarId: string) => MonthDayRefineOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
@@ -141,6 +147,9 @@ export function plainDateTimeToZonedDateTime(
   )
 }
 
+/*
+Only used by funcApi
+*/
 export function plainDateTimeToPlainYearMonth(
   getCalendarOps: (calendarId: string) => YearMonthRefineOps,
   plainDateTimeSlots: PlainDateTimeSlots,
@@ -154,6 +163,9 @@ export function plainDateTimeToPlainYearMonth(
   })
 }
 
+/*
+Only used by funcApi
+*/
 export function plainDateTimeToPlainMonthDay(
   getCalendarOps: (calendarId: string) => MonthDayRefineOps,
   plainDateTimeSlots: PlainDateTimeSlots,
@@ -265,6 +277,9 @@ export function plainMonthDayToPlainDate(
 // PlainTime -> *
 // -----------------------------------------------------------------------------
 
+/*
+Only used by funcApi
+*/
 export function plainTimeToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots,
@@ -284,6 +299,9 @@ export function plainTimeToZonedDateTime<PA>(
   )
 }
 
+/*
+Only used by funcApi
+*/
 export function plainTimeToPlainDateTime(
   plainTimeSlots0: PlainTimeSlots,
   plainDateSlots1: PlainDateSlots,
@@ -299,6 +317,9 @@ export function plainTimeToPlainDateTime(
 // Epoch-* -> Instant
 // -----------------------------------------------------------------------------
 
+/*
+Only used by funcApi
+*/
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return createInstantSlots(
     checkEpochNanoInBounds(numberToBigNano(epochSec, nanoInSec)),
@@ -311,6 +332,9 @@ export function epochMilliToInstant(epochMilli: number): InstantSlots {
   )
 }
 
+/*
+Only used by funcApi
+*/
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   return createInstantSlots(
     checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochMicro), nanoInMicro)),
