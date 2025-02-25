@@ -149,16 +149,6 @@ export function epochMilliToNano(epochMilli: number): BigNano {
   return numberToBigNano(epochMilli, nanoInMilli)
 }
 
-// Epoch Getters
-// -----------------------------------------------------------------------------
-
-export const epochGetters = {
-  epochSeconds: epochNanoToSec,
-  epochMilliseconds: epochNanoToMilli,
-  epochMicroseconds: epochNanoToMicro,
-  epochNanoseconds: bigNanoToBigInt,
-}
-
 // ISO <-> Epoch Conversion
 // -----------------------------------------------------------------------------
 // ISO Fields -> Epoch
