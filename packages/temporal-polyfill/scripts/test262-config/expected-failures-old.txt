@@ -1,0 +1,295 @@
+####################################################################################################
+# SHORTCOMING IN TESTS
+####################################################################################################
+# TODO: open PRs
+#
+# built-ins/Temporal/Duration/compare/argument-duration-out-of-range.js (line ~65)
+# ::compare not given relativeTo, so will throw RangeError even if behavior not implemented
+#
+# built-ins/Temporal/PlainDate/prototype/since/wrapping-at-end-of-month.js (line ~92)
+# "Dec 30th 1970 to Apr 30th 1973 is 27 months, 30 days, not 28 months" // typo! Dec 31st
+
+####################################################################################################
+# SPEC BUGS
+####################################################################################################
+
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2791
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-rounding-day-pd
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-rounding-day-pd
+#
+# CalendarRecord's dateAdd/(dateUntil?) methods are plucked but never used because
+# are (unit<=day && relativeTo:PlainDateTime) || (unit<day && relativeTo:ZonedDateTime)
+# Just don't pluck it.
+
+# SPEC-BUG
+# PR: https://github.com/tc39/proposal-temporal/pull/2789
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-fewer-calls-offset-prefer-reject
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-fewer-calls-offset-prefer-reject
+#
+# Instant disambiguation with refer/reject of multiple results from
+# getPossibleInstantsFor() can avoid a call to getOffsetNanosecondsFor
+# by deriving each candidate's offset by comparing it to the UTC-zoned y/m/d/etc
+#
+# In addition to contents of Test Branch:
+built-ins/Temporal/ZonedDateTime/prototype/round/getoffsetnanosecondsfor-maximum-forward-offset-shift.js
+
+# SPEC-BUG
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2795
+#
+# PlainDateTime::toLocaleString should not be swayed by timeZone in any way
+#
+staging/Intl402/Temporal/old/datetime-toLocaleString.js
+
+####################################################################################################
+# PRECISION
+####################################################################################################
+
+# PRECISION
+# We do not "perform long division to calculate the fractional part of the quotient
+# remainder / n with more accuracy than 64-bit floating point division" because we don't
+# use bigint, and even if we did, it's overly tedious to do string manipulation to simulate this
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-4.js
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
+
+# PRECISION (TimeZone subclass/protocol only)
+# we don't support hours-in-day greater than 10000000xxx (line 119 in the test),
+# which can happen if 1-day-apart TimeZone::getPossibleInstantsFor calls give results wildly apart.
+# results in slightly-less-precise-than-desirable (already ridiculous) .hoursInDay values
+# this happens because we don't leverage bigint for such normally-simple operations
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values.js
+#
+# similar, but with floating point imprecision
+built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/precision-exact-mathematical-values-2.js
+
+####################################################################################################
+# BAG STUFF
+####################################################################################################
+
+# CALLING
+# Ticket: https://github.com/tc39/proposal-temporal/issues/2788
+# Test Branch: TODO!
+#
+# A ZonedDateTime should only need to call its timeZone's getOffsetNanosecondsFor
+# once during its existence and then cache the resulting ISO values.
+#
+built-ins/Temporal/ZonedDateTime/prototype/withPlainDate/order-of-operations.js
+
+# CALLING
+# Conversion from ZonedDateTime -> PlainYearMonth/PlainMonthDay is supposed to
+# create an intermediate PlainDateTime which is then given to Calendar::monthFromFields.
+# Instead, we pass the ZonedDateTime directly to Calendar::monthFromFields to prevent
+# from needing to make an intermediate object. Also better for code compactness
+# because, if we created an intermediate IsoFields with zonedEpochSlotsToIso,
+# there's no convenient way to compute all calendar-based fields like year/month/day/etc.
+#
+# TODO: report this, citing that if the ZonedDateTime fields are already cached,
+# then fewer operations (https://github.com/tc39/proposal-temporal/issues/2788).
+#
+built-ins/Temporal/ZonedDateTime/prototype/toPlainMonthDay/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/toPlainYearMonth/order-of-operations.js
+
+# CALLING
+# ZonedDateTime is supposed to create an intermediate PlainDateTime which is then
+# given to Calendar::mergeFields. Instead, we pass the ZonedDateTime directly
+# to Calendar::mergeFields to prevent from needing to make an intermediate object.
+# Also better for code compactness because, if we created intermediate IsoFields
+# with zonedEpochSlotsToIso, there's no convenient way to compute all calendar-based
+# fields like year/month/day/etc.
+#
+# TODO: report this, citing that if the ZonedDateTime fields are already cached,
+# then fewer operations (https://github.com/tc39/proposal-temporal/issues/2788).
+#
+built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
+
+# CALLING
+# PlainDateTime::with is supposed to access *time* parts via internal slots.
+# We treat the current PlainDateTime as a bag and access the time parts as normal properties,
+# Better for code compactness, though a bit slower
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+
+####################################################################################################
+# MISC NON-COMPLIANT ACCESS
+####################################################################################################
+
+# CALLING
+# Test Branch: https://github.com/fullcalendar/test262/tree/temporal-more-calls-calendar-bag
+# Test Diff: https://github.com/tc39/test262/compare/main...fullcalendar:test262:temporal-more-calls-calendar-bag
+#
+# We pluck the CalendarRecord once for bag-refining and once for MarkerSystem
+# creation. Works out well with code reuse the ref impl does it in one pass.
+built-ins/Temporal/Duration/compare/order-of-operations.js
+#TODO: move this over
+
+# CALLING
+# In the spec, `AddDuration` adds dur0 y/m/w/d, then dur1 y/m/w/d, then combines and adds time parts.
+# Our version uses two `moveDateTime` calls for better code reuse, which results in:
+#   +dur0.timeparts +dur0.ymwd +dur1.timeparts +dur1.ymwd
+# Same ultimate results but different calls to Calendar::dateAdd w/ different intermediate durations.
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd.js
+
+# CALLING
+# Discussion: https://github.com/tc39/proposal-temporal/issues/2794
+#
+# Our algorithm leverages Calendar::day instead of Calendar::fields/dateFromFields
+# to get the PlainYearMonth to start-of-month for add/subtract/until/since.
+# Better for tree-shaking for the fns api.
+#
+# Despite the risk of ICU creating new historic calendars with skipped days.
+# (see note in intlMath.ts)
+#
+# TODO: make a calendar whitelist to fail on creation of these new calendars.
+# (Leverage what's in calendarConfig.ts)
+#
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/since/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-datefromfields-called-with-options-undefined.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/until/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/add/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/order-of-operations.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-datefromfields-called.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fromfields-called-with-null-prototype-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-yearmonthfromfields-called-with-null-prototype-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/end-of-month-out-of-range.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-fields-iterable.js
+built-ins/Temporal/PlainYearMonth/prototype/add/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/constructor-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/duplicate-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/proto-in-calendar-fields.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments.js
+built-ins/Temporal/PlainYearMonth/prototype/add/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/add/overflow-wrong-type.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/calendar-arguments-extra-options.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow-wrong-type.js
+
+# CALLING
+# (our version of NudgeToCalendarUnit aka nudgeRelativeDuration is more frugal about calling
+# the TimeZone, thus not conforming to the `substituteMethod` mock, but when we refactor the "marker" system,
+# things will fall back into conformance. NudgeToCalendarUnit should add duration to PlainDateTime, and then
+# ALWAYS call the time zone to convert it to epochNano. Our current algorithm knows the duration is zero
+# and thus short circuits all work, returning the same epochNanoseconds)
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-3.js
+
+# CALLING
+# (our version of NudgeToCalendarUnit aka nudgeRelativeDuration assumes 7 days in week an does not consult calendar)
+built-ins/Temporal/Duration/prototype/total/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/since/calendar-dateuntil-called-with-singular-largestunit.js
+built-ins/Temporal/ZonedDateTime/prototype/until/calendar-dateuntil-called-with-singular-largestunit.js
+
+# CALLING
+built-ins/Temporal/PlainDate/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/PlainDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/since/order-of-operations.js
+built-ins/Temporal/ZonedDateTime/prototype/until/order-of-operations.js
+built-ins/Temporal/Duration/prototype/round/order-of-operations.js
+built-ins/Temporal/Duration/prototype/total/order-of-operations.js
+built-ins/Temporal/Duration/compare/order-of-operations.js
+built-ins/Temporal/Duration/prototype/add/order-of-operations.js
+
+####################################################################################################
+# OBJECTS GIVEN TO PROTOCOLS
+####################################################################################################
+
+# CALLING
+# getPossibleInstantsFor wants plainDateTimes that sometimes have calendar. instead, always give iso
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/timezone-getpossibleinstantsfor.js
+
+# CALLING
+# when ZonedDateTime needs to query Calendar, should give PlainDateTime instead of PlainDate
+built-ins/Temporal/ZonedDateTime/prototype/day/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInMonth/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/daysInYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/month/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/monthCode/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/year/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/custom.js
+
+# CALLING
+# problem with our adapter needing specific instance of Temporal object
+built-ins/Temporal/Duration/compare/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/PlainDate/prototype/add/custom.js
+built-ins/Temporal/PlainDate/prototype/day/custom.js
+built-ins/Temporal/PlainDate/prototype/dayOfWeek/custom.js
+built-ins/Temporal/PlainDate/prototype/dayOfYear/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInWeek/custom.js
+built-ins/Temporal/PlainDate/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainDate/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainDate/prototype/month/custom.js
+built-ins/Temporal/PlainDate/prototype/monthCode/custom.js
+built-ins/Temporal/PlainDate/prototype/monthsInYear/custom.js
+built-ins/Temporal/PlainDate/prototype/subtract/custom.js
+built-ins/Temporal/PlainDate/prototype/since/custom.js
+built-ins/Temporal/PlainDate/prototype/until/custom.js
+built-ins/Temporal/PlainDate/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainDate/prototype/with/custom.js
+built-ins/Temporal/PlainDate/prototype/year/custom.js
+built-ins/Temporal/PlainDate/prototype/yearOfWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/day/custom.js
+built-ins/Temporal/PlainDateTime/prototype/dayOfWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/dayOfYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInWeek/custom.js
+built-ins/Temporal/PlainDateTime/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/month/custom.js
+built-ins/Temporal/PlainDateTime/prototype/monthCode/custom.js
+built-ins/Temporal/PlainDateTime/prototype/monthsInYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/plain-custom-timezone.js
+built-ins/Temporal/PlainDateTime/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainDateTime/prototype/year/custom.js
+built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/custom.js
+built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/daysInMonth/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/daysInYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/inLeapYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/month/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/monthCode/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/monthsInYear/custom.js
+built-ins/Temporal/PlainYearMonth/prototype/year/custom.js
+built-ins/Temporal/PlainMonthDay/prototype/day/custom.js
+built-ins/Temporal/PlainMonthDay/prototype/monthCode/custom.js
+built-ins/Temporal/TimeZone/prototype/getPlainDateTimeFor/custom-timezone.js
+built-ins/Temporal/Duration/prototype/add/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/subtract/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/total/calendar-dateadd-called-with-plaindate-instance.js
+built-ins/Temporal/Duration/prototype/round/calendar-dateadd-called-with-plaindate-instance.js
+
+####################################################################################################
+# Intl
+####################################################################################################
+# NOTE: more in expected-failures-node-gte16.txt
+
+# NOT-IMPLEMENTED
+# TimeZone ID canonicalization for Intl.DateTimeFormat
+# Polyfilling this is hard for format/formatToParts. The reference-polyfill doesn't even do it.
+# The reference-polyfill DOES polyfill resolveOptions (used by tests below), but that will result
+# in inconsistent results with format/formatToParts, so best not to polyfill either.
+intl402/DateTimeFormat/timezone-case-insensitive.js
+intl402/DateTimeFormat/timezone-not-canonicalized.js
+
+# These are caught by the default test glob, but are unrelated to Temporal.
+# They rely on Intl.DateTimeFormat supporting offset time zones.
+intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
+intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
