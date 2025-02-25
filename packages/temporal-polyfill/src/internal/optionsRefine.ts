@@ -9,6 +9,7 @@ import { DurationFieldName, durationFieldIndexes } from './durationFields'
 import * as errorMessages from './errorMessages'
 import {
   CalendarDisplay,
+  Direction,
   EpochDisambig,
   OffsetDisambig,
   OffsetDisplay,
@@ -156,6 +157,12 @@ export interface SubsecDigitsOptions {
   fractionalSecondDigits?: SubsecDigits // TODO: accept 'auto' ?
 }
 
+export type DirectionName = TemporalSpec.TransitionDirection
+
+export interface DirectionOptions {
+  direction: DirectionName
+}
+
 // Config
 // -----------------------------------------------------------------------------
 
@@ -167,6 +174,7 @@ const roundingModeName = 'roundingMode'
 const roundingIncName = 'roundingIncrement'
 const subsecDigitsName = 'fractionalSecondDigits'
 const relativeToName = 'relativeTo'
+const directionName = 'direction'
 
 const overflowMap = {
   constrain: Overflow.Constrain,
@@ -219,6 +227,11 @@ const roundingModeMap = {
   expand: RoundingMode.Expand,
   halfExpand: RoundingMode.HalfExpand,
   halfEven: RoundingMode.HalfEven,
+}
+
+const directionMap = {
+  previous: Direction.Previous,
+  next: Direction.Next,
 }
 
 // Compound Options
@@ -476,6 +489,16 @@ export function refineInstantDisplayOptions(
   const timeZoneArg: string | undefined = options.timeZone
 
   return [timeZoneArg, ...timeDisplayTuple]
+}
+
+export function refineDirectionOptions(
+  options: DirectionOptions | DirectionName,
+): Direction {
+  const normalizedOptions = normalizeOptionsOrString<
+    DirectionOptions,
+    typeof directionName
+  >(options, directionName)
+  return refineChoiceOption(directionName, directionMap, normalizedOptions)
 }
 
 // Utils for compound options

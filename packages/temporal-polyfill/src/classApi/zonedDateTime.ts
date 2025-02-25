@@ -25,11 +25,13 @@ import {
 import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
+  DirectionOptions,
   OverflowOptions,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
   copyOptions,
+  refineDirectionOptions,
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
 import {
@@ -270,6 +272,27 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return formatZonedDateTimeIso(queryNativeTimeZone, slots)
     },
     valueOf: neverValueOf,
+
+    // TODO: optimize minification of this method
+    getTimeZoneTransition(
+      slots: ZonedDateTimeSlots,
+      options: DirectionOptions,
+    ): ZonedDateTime | null {
+      const { timeZone: timeZoneId, epochNanoseconds: epochNano } = slots
+
+      const direction = refineDirectionOptions(options)
+      const timeZoneOps = queryNativeTimeZone(timeZoneId)
+      const newEpochNano = timeZoneOps.getTransition(epochNano, direction)
+
+      if (newEpochNano) {
+        return createZonedDateTime({
+          ...slots,
+          epochNanoseconds: newEpochNano,
+        })
+      }
+
+      return null
+    },
   },
   {
     from(arg: any, options?: ZonedFieldOptions) {

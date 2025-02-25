@@ -77,3 +77,8 @@ common SubsecDigits addons:
   -1 means hide seconds
   undefined means 'auto' (display all digits but no trailing zeros)
 */
+
+export const enum Direction {
+  Previous = -1, // compatible with internal getTransition
+  Next = 1, // "
+}
