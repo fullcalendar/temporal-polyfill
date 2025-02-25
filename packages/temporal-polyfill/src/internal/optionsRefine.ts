@@ -498,7 +498,17 @@ export function refineDirectionOptions(
     DirectionOptions,
     typeof directionName
   >(options, directionName)
-  return refineChoiceOption(directionName, directionMap, normalizedOptions)
+  const res = refineChoiceOption(
+    directionName,
+    directionMap,
+    normalizedOptions,
+    0,
+  )
+  if (!res) {
+    // neither position or negative
+    throw new RangeError('BAD!') // TODO: improve
+  }
+  return res
 }
 
 // Utils for compound options

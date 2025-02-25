@@ -39,6 +39,7 @@ built-ins/Temporal/ZonedDateTime/prototype/until/length.js
 built-ins/Temporal/ZonedDateTime/prototype/equals/length.js
 built-ins/Temporal/ZonedDateTime/prototype/add/length.js
 built-ins/Temporal/ZonedDateTime/prototype/round/length.js
+built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/length.js
 built-ins/Temporal/Instant/length.js
 built-ins/Temporal/Instant/prototype/subtract/length.js
 built-ins/Temporal/Instant/prototype/since/length.js
@@ -128,6 +129,7 @@ built-ins/Temporal/ZonedDateTime/prototype/toLocaleString/not-a-constructor.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/not-a-constructor.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainTime/not-a-constructor.js
 built-ins/Temporal/ZonedDateTime/prototype/round/not-a-constructor.js
+built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/not-a-constructor.js
 built-ins/Temporal/Instant/prototype/toJSON/not-a-constructor.js
 built-ins/Temporal/Instant/prototype/subtract/not-a-constructor.js
 built-ins/Temporal/Instant/prototype/since/not-a-constructor.js
@@ -233,6 +235,7 @@ built-ins/Temporal/ZonedDateTime/prototype/toLocaleString/builtin.js
 built-ins/Temporal/ZonedDateTime/prototype/toString/builtin.js
 built-ins/Temporal/ZonedDateTime/prototype/toPlainTime/builtin.js
 built-ins/Temporal/ZonedDateTime/prototype/round/builtin.js
+built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/builtin.js
 built-ins/Temporal/Instant/prototype/toJSON/builtin.js
 built-ins/Temporal/Instant/prototype/subtract/builtin.js
 built-ins/Temporal/Instant/prototype/since/builtin.js
