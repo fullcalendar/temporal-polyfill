@@ -344,7 +344,7 @@ function resolveSlotsCalendar<T extends { calendar: string }>(organized: T): T {
 // RegExp
 // -----------------------------------------------------------------------------
 
-const signRegExpStr = '([+\u2212-])' // outer captures
+const signRegExpStr = '([+-])' // outer captures
 const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
 
 const yearMonthRegExpStr =
