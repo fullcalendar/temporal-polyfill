@@ -599,6 +599,7 @@ function mergePlainDateTimeBag(
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
     fabricateOverflowOptions(overflow),
+    /* doingMerge = */ true,
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -621,7 +622,11 @@ function mergePlainDateBag(
     dateFieldNamesAlpha,
   )
 
-  return calendarOps.dateFromFields(fields as any, options)
+  return calendarOps.dateFromFields(
+    fields as any,
+    options,
+    /* doingMerge = */ true,
+  )
 }
 
 function mergePlainYearMonthBag(
@@ -637,7 +642,11 @@ function mergePlainYearMonthBag(
     yearMonthFieldNames,
   )
 
-  return calendarOps.yearMonthFromFields(fields, options)
+  return calendarOps.yearMonthFromFields(
+    fields,
+    options,
+    /* doingMerge = */ true,
+  )
 }
 
 function mergePlainMonthDayBag(
@@ -787,10 +796,11 @@ export function nativeDateFromFields(
   this: NativeDateRefineDeps,
   fields: DateBag,
   options?: OverflowOptions,
+  doingMerge?: boolean,
 ): PlainDateSlots {
   const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
-  const month = refineMonth(this, fields, year, overflow)
+  const month = refineMonth(this, fields, year, overflow, doingMerge)
   const day = refineDay(this, fields as DayFields, month, year, overflow)
   const isoFields = this.isoFields(year, month, day)
 
@@ -804,10 +814,11 @@ export function nativeYearMonthFromFields(
   this: NativeYearMonthRefineDeps,
   fields: YearMonthBag,
   options?: OverflowOptions,
+  doingMerge?: boolean,
 ): PlainYearMonthSlots {
   const overflow = refineOverflowOptions(options)
   const year = refineYear(this, fields)
-  const month = refineMonth(this, fields, year, overflow)
+  const month = refineMonth(this, fields, year, overflow, doingMerge)
   const isoFields = this.isoFields(year, month, 1)
 
   return createPlainYearMonthSlots(
@@ -986,6 +997,7 @@ function refineMonth(
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
+  doingMerge?: boolean,
 ): number {
   let { month, monthCode } = fields
 
@@ -997,8 +1009,10 @@ function refineMonth(
       overflow,
     )
 
-    if (month !== undefined && month !== monthByCode) {
-      throw new RangeError(errorMessages.mismatchingMonthAndCode)
+    if (!doingMerge) {
+      if (month !== undefined && month !== monthByCode) {
+        throw new RangeError(errorMessages.mismatchingMonthAndCode)
+      }
     }
 
     month = monthByCode

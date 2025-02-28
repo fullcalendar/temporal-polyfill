@@ -16,11 +16,13 @@ import { DateUnitName, Unit } from './units'
 export type DateFromFieldsOp = (
   fields: DateBag,
   options?: OverflowOptions,
+  doingMerge?: boolean,
 ) => PlainDateSlots
 
 export type YearMonthFromFieldsOp = (
   fields: YearMonthBag,
   options?: OverflowOptions,
+  doingMerge?: boolean,
 ) => PlainYearMonthSlots
 
 export type MonthDayFromFieldsOp = (
