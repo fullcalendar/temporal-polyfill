@@ -327,11 +327,11 @@ export function refinePlainTimeBag(
   bag: TimeBag,
   options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
-  // spec says overflow parsed first
-  const overflow = refineOverflowOptions(options)
-
   // disallowEmpty
   const fields = refineFields(bag, timeFieldNamesAlpha, [], true) as TimeBag
+
+  // spec says overflow parsed after fields
+  const overflow = refineOverflowOptions(options)
 
   return createPlainTimeSlots(refineTimeBag(fields, overflow))
 }
@@ -670,9 +670,12 @@ function mergePlainTimeBag(
   modFields: TimeBag,
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
-  const overflow = refineOverflowOptions(options) // spec says overflow parsed first
   const origFields = pluckProps(timeFieldNamesAlpha, initialFields)
   const newFields = refineFields(modFields, timeFieldNamesAlpha)
+
+  // spec says overflow parsed after fields
+  const overflow = refineOverflowOptions(options)
+
   const mergedFields = { ...origFields, ...newFields }
   return refineTimeBag(mergedFields, overflow)
 }

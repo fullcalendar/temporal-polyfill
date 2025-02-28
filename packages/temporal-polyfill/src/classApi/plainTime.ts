@@ -154,8 +154,12 @@ export function toPlainTimeSlots(
     return refinePlainTimeBag(arg as PlainTimeBag, options)
   }
 
-  refineOverflowOptions(options) // parse unused options
-  return parsePlainTime(arg)
+  const timeSlots = parsePlainTime(arg)
+
+  // parse unused options, but AFTER time-string parsing
+  refineOverflowOptions(options)
+
+  return timeSlots
 }
 
 export function optionalToPlainTimeFields(
