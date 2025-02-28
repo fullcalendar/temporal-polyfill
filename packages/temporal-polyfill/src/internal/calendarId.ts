@@ -11,14 +11,13 @@ export function resolveCalendarId(id: string): string {
   id = id.toLowerCase() // normalize
 
   if (id !== isoCalendarId && id !== gregoryCalendarId) {
-    if (
-      computeCalendarIdBase(id) !==
-      computeCalendarIdBase(
-        queryCalendarIntlFormat(id).resolvedOptions().calendar,
-      )
-    ) {
+    const canonId = queryCalendarIntlFormat(id).resolvedOptions().calendar
+
+    if (computeCalendarIdBase(id) !== computeCalendarIdBase(canonId)) {
       throw new RangeError(errorMessages.invalidCalendar(id))
     }
+
+    return canonId
   }
 
   return id
