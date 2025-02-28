@@ -69,6 +69,7 @@ const timeStandardNames: OptionNames = [
   ...timeFallbackNames,
   'dayPeriod',
   'timeStyle',
+  'fractionalSecondDigits',
 ]
 const dateTimeStandardNames: OptionNames = [
   ...dateStandardNames,
