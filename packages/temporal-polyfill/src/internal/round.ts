@@ -584,7 +584,7 @@ function nudgeZonedTimeDuration(
   nudgedEpochNano: BigNano,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const sign = computeDurationSign(durationFields) // TODO: already computed and non-zero?
+  const sign = computeDurationSign(durationFields) || 1 // TODO: already computed and non-zero?
 
   const timeNano = bigNanoToNumber(
     durationFieldsToBigNano(durationFields, Unit.Hour),

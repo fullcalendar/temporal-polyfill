@@ -11,6 +11,7 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { IsoDateTimeFields } from './isoFields'
 import {
   Marker,
   MarkerToEpochNano,
@@ -21,9 +22,11 @@ import {
   createMarkerToEpochNano,
   createMoveMarker,
   isUniformUnit,
+  isZonedEpochSlots,
 } from './markerSystem'
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
+import { checkIsoDateTimeInBounds } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
@@ -41,12 +44,18 @@ export function totalDuration<RA>(
   )
   const maxUnit = Math.max(totalUnit, maxDurationUnit)
 
-  if (isUniformUnit(maxUnit, relativeToSlots)) {
+  // NEW: short-circuit
+  if (!relativeToSlots && isUniformUnit(maxUnit, relativeToSlots)) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 
   if (!relativeToSlots) {
     throw new RangeError(errorMessages.missingRelativeTo)
+  }
+
+  // NEW: short-circuit
+  if (!slots.sign) {
+    return 0
   }
 
   const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
@@ -59,6 +68,14 @@ export function totalDuration<RA>(
   const diffMarkers = createDiffMarkers(timeZoneOps)
 
   const endMarker = moveMarker(calendarOps, marker, slots)
+
+  // sanitize start/end markers
+  // see DifferencePlainDateTimeWithRounding
+  if (!isZonedEpochSlots(relativeToSlots)) {
+    checkIsoDateTimeInBounds(marker as IsoDateTimeFields)
+    checkIsoDateTimeInBounds(endMarker as IsoDateTimeFields)
+  }
+
   const balancedDuration = diffMarkers(
     calendarOps,
     marker,

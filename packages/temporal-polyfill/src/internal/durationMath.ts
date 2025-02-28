@@ -9,6 +9,7 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
+import { IsoDateTimeFields } from './isoFields'
 import {
   RelativeToSlots,
   createDiffMarkers,
@@ -27,6 +28,7 @@ import {
 } from './optionsRefine'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
+import { checkIsoDateTimeInBounds } from './timeMath'
 import { TimeZoneOps } from './timeZoneOps'
 import {
   DayTimeUnit,
@@ -138,9 +140,8 @@ export function roundDuration<RA>(
 
   const maxUnit = Math.max(durationLargestUnit, largestUnit)
 
-  // Don't do nanosecond-only rounding if ZDT because rounding hours/mins/etc
-  // could balance-up to days, which could vary based on time zone
-  if (!isZonedEpochSlots(relativeToSlots) && maxUnit <= Unit.Day) {
+  // NEW: Only do time-rounding short-circuit if no relativeTo specified
+  if (!relativeToSlots && maxUnit <= Unit.Day) {
     return createDurationSlots(
       checkDurationUnits(
         roundDayTimeDuration(
@@ -152,6 +153,11 @@ export function roundDuration<RA>(
         ),
       ),
     )
+  }
+
+  // short circuit, see DifferencePlainDateTimeWithRounding
+  if (!isZonedEpochSlots(relativeToSlots) && !slots.sign) {
+    return slots
   }
 
   if (!relativeToSlots) {
@@ -168,6 +174,14 @@ export function roundDuration<RA>(
   const diffMarkers = createDiffMarkers(timeZoneOps)
 
   const endMarker = moveMarker(calendarOps, marker, slots)
+
+  // sanitize start/end markers
+  // see DifferencePlainDateTimeWithRounding
+  if (!isZonedEpochSlots(relativeToSlots)) {
+    checkIsoDateTimeInBounds(marker as IsoDateTimeFields)
+    checkIsoDateTimeInBounds(endMarker as IsoDateTimeFields)
+  }
+
   let balancedDuration = diffMarkers(
     calendarOps,
     marker,
@@ -181,20 +195,18 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
-  if (balancedSign) {
-    balancedDuration = roundRelativeDuration(
-      balancedDuration,
-      markerToEpochNano(endMarker),
-      largestUnit,
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-      calendarOps,
-      marker,
-      markerToEpochNano,
-      moveMarker,
-    )
-  }
+  balancedDuration = roundRelativeDuration(
+    balancedDuration,
+    markerToEpochNano(endMarker),
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+    calendarOps,
+    marker,
+    markerToEpochNano,
+    moveMarker,
+  )
 
   return createDurationSlots(balancedDuration)
 }

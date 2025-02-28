@@ -334,6 +334,16 @@ export function refineDurationRoundOptions<RA, R>(
   checkLargestSmallestUnit(largestUnit, smallestUnit)
   roundingInc = refineRoundingInc(roundingInc, smallestUnit, true)
 
+  if (
+    roundingInc > 1 &&
+    smallestUnit > Unit.Hour && // a date unit?
+    largestUnit !== smallestUnit
+  ) {
+    throw new RangeError(
+      'For calendar units with roundingIncrement > 1, use largestUnit = smallestUnit',
+    )
+  }
+
   return [
     largestUnit,
     smallestUnit,
