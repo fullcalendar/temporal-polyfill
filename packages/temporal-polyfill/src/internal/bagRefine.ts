@@ -83,8 +83,7 @@ import { OffsetDisambig, Overflow } from './options'
 import {
   OverflowOptions,
   ZonedFieldOptions,
-  copyOptions,
-  overrideOverflowOptions,
+  fabricateOverflowOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsRefine'
@@ -219,7 +218,7 @@ export function refineZonedDateTimeBag(
     refineZonedFieldOptions(options)
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    overrideOverflowOptions(options, overflow),
+    fabricateOverflowOptions(overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
   const timeZoneOps = getTimeZoneOps(timeZoneId)
@@ -251,7 +250,7 @@ export function refinePlainDateTimeBag(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    overrideOverflowOptions(options, overflow),
+    fabricateOverflowOptions(overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -456,7 +455,6 @@ export function zonedDateTimeWithFields(
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  const optionsCopy = copyOptions(options)
   const { calendar, timeZone } = zonedDateTimeSlots
   const calendarOps = getCalendarOps(calendar)
   const timeZoneOps = getTimeZoneOps(timeZone)
@@ -467,7 +465,7 @@ export function zonedDateTimeWithFields(
       timeZoneOps,
       initialFields,
       modFields,
-      optionsCopy,
+      options,
     ),
     timeZone,
     calendar,
@@ -481,12 +479,11 @@ export function plainDateTimeWithFields(
   modFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
-  const optionsCopy = copyOptions(options)
   const calendarId = plainDateTimeSlots.calendar
   const calendarOps = getCalendarOps(calendarId)
 
   return createPlainDateTimeSlots(
-    mergePlainDateTimeBag(calendarOps, initialFields, modFields, optionsCopy),
+    mergePlainDateTimeBag(calendarOps, initialFields, modFields, options),
   )
 }
 
@@ -497,11 +494,10 @@ export function plainDateWithFields(
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  const optionsCopy = copyOptions(options)
   const calendarId = plainDateSlots.calendar
   const calendarOps = getCalendarOps(calendarId)
 
-  return mergePlainDateBag(calendarOps, initialFields, modFields, optionsCopy)
+  return mergePlainDateBag(calendarOps, initialFields, modFields, options)
 }
 
 export function plainYearMonthWithFields(
@@ -511,12 +507,11 @@ export function plainYearMonthWithFields(
   modFields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const optionsCopy = copyOptions(options)
   const calendarId = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarId)
 
   return createPlainYearMonthSlots(
-    mergePlainYearMonthBag(calendarOps, initialFields, modFields, optionsCopy),
+    mergePlainYearMonthBag(calendarOps, initialFields, modFields, options),
   )
 }
 
@@ -527,16 +522,10 @@ export function plainMonthDayWithFields(
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  const optionsCopy = copyOptions(options)
   const calendarId = plainMonthDaySlots.calendar
   const calendarOps = getCalendarOps(calendarId)
 
-  return mergePlainMonthDayBag(
-    calendarOps,
-    initialFields,
-    modFields,
-    optionsCopy,
-  )
+  return mergePlainMonthDayBag(calendarOps, initialFields, modFields, options)
 }
 
 export function plainTimeWithFields(
@@ -579,7 +568,7 @@ function mergeZonedDateTimeBag(
   )
   const isoDateFields = calendarOps.dateFromFields(
     fields as any,
-    overrideOverflowOptions(options, overflow),
+    fabricateOverflowOptions(overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 
@@ -609,7 +598,7 @@ function mergePlainDateTimeBag(
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = calendarOps.dateFromFields(
     fields as any,
-    overrideOverflowOptions(options, overflow),
+    fabricateOverflowOptions(overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
 

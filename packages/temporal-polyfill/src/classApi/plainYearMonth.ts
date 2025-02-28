@@ -17,7 +17,6 @@ import { movePlainYearMonth } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
@@ -168,8 +167,6 @@ export function toPlainYearMonthSlots(
   arg: PlainYearMonthArg,
   options?: OverflowOptions,
 ) {
-  options = copyOptions(options)
-
   if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 

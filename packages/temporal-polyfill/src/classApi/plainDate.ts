@@ -24,7 +24,6 @@ import { movePlainDate } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
-  copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import {
@@ -232,8 +231,6 @@ export function toPlainDateSlots(
   arg: PlainDateArg,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  options = copyOptions(options)
-
   if (isObjectLike(arg)) {
     const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 

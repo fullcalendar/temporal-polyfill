@@ -32,7 +32,7 @@ import {
   moveZonedEpochs,
 } from './move'
 import { RoundingMode } from './options'
-import { DiffOptions, copyOptions, refineDiffOptions } from './optionsRefine'
+import { DiffOptions, refineDiffOptions } from './optionsRefine'
 import {
   computeNanoInc,
   roundBigNano,
@@ -82,10 +82,9 @@ export function diffInstants(
   instantSlots1: InstantSlots,
   options?: DiffOptions<TimeUnitName>,
 ): DurationSlots {
-  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(
     invert,
-    optionsCopy,
+    options,
     Unit.Second,
     Unit.Hour,
   ) as [TimeUnit, TimeUnit, number, RoundingMode]
@@ -110,9 +109,8 @@ export function diffZonedDateTimes(
   options?: DiffOptions<UnitName>,
 ): DurationSlots {
   const calendarId = getCommonCalendarId(slots0.calendar, slots1.calendar)
-  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
-    refineDiffOptions(invert, optionsCopy, Unit.Hour)
+    refineDiffOptions(invert, options, Unit.Hour)
 
   const epochNano0 = slots0.epochNanoseconds
   const epochNano1 = slots1.epochNanoseconds
@@ -142,7 +140,7 @@ export function diffZonedDateTimes(
       slots1,
       sign,
       largestUnit,
-      optionsCopy,
+      options,
     )
 
     durationFields = roundRelativeDuration(
@@ -175,9 +173,8 @@ export function diffPlainDateTimes(
     plainDateTimeSlots0.calendar,
     plainDateTimeSlots1.calendar,
   )
-  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
-    refineDiffOptions(invert, optionsCopy, Unit.Day)
+    refineDiffOptions(invert, options, Unit.Day)
 
   const startEpochNano = isoToEpochNano(plainDateTimeSlots0)!
   const endEpochNano = isoToEpochNano(plainDateTimeSlots1)!
@@ -204,7 +201,7 @@ export function diffPlainDateTimes(
       plainDateTimeSlots1,
       sign,
       largestUnit,
-      optionsCopy,
+      options,
     )
 
     durationFields = roundRelativeDuration(
@@ -237,10 +234,9 @@ export function diffPlainDates(
     plainDateSlots0.calendar,
     plainDateSlots1.calendar,
   )
-  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(
     invert,
-    optionsCopy,
+    options,
     Unit.Day,
     Unit.Year,
     Unit.Day,
@@ -252,7 +248,6 @@ export function diffPlainDates(
     plainDateSlots0,
     plainDateSlots1,
     ...optionsTuple,
-    optionsCopy,
   )
 }
 
@@ -267,10 +262,9 @@ export function diffPlainYearMonth(
     plainYearMonthSlots0.calendar,
     plainYearMonthSlots1.calendar,
   )
-  const optionsCopy = copyOptions(options)
   const optionsTuple = refineDiffOptions(
     invert,
-    optionsCopy,
+    options,
     Unit.Year,
     Unit.Year,
     Unit.Month,
@@ -283,7 +277,6 @@ export function diffPlainYearMonth(
     moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots0),
     moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots1),
     ...optionsTuple,
-    optionsCopy,
   )
 }
 
@@ -296,7 +289,6 @@ function diffDateLike(
   smallestUnit: Unit, // TODO: large field
   roundingInc: number,
   roundingMode: RoundingMode,
-  origOptions: DiffOptions<DateUnitName> | undefined,
 ): DurationSlots {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
@@ -321,7 +313,6 @@ function diffDateLike(
       startIsoFields,
       endIsoFields,
       largestUnit,
-      origOptions,
     )
 
     if (!(smallestUnit === Unit.Day && roundingInc === 1)) {
@@ -351,9 +342,8 @@ export function diffPlainTimes(
   plainTimeSlots1: IsoTimeFields,
   options?: DiffOptions<TimeUnitName>,
 ): DurationSlots {
-  const optionsCopy = copyOptions(options)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
-    refineDiffOptions(invert, optionsCopy, Unit.Hour, Unit.Hour)
+    refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
   const timeDiffNano = roundByInc(
     diffTimes(plainTimeSlots0, plainTimeSlots1),

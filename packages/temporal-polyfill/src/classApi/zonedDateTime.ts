@@ -31,7 +31,6 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-  copyOptions,
   refineDirectionOptions,
   refineZonedFieldOptions,
 } from '../internal/optionsRefine'
@@ -316,8 +315,6 @@ export function toZonedDateTimeSlots(
   arg: ZonedDateTimeArg,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  options = copyOptions(options)
-
   if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 

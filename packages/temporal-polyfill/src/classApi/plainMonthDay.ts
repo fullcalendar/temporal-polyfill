@@ -15,7 +15,6 @@ import { formatPlainMonthDayIso } from '../internal/isoFormat'
 import { parsePlainMonthDay } from '../internal/isoParse'
 import {
   OverflowOptions,
-  copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
@@ -93,8 +92,6 @@ export function toPlainMonthDaySlots(
   arg: PlainMonthDayArg,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  options = copyOptions(options)
-
   if (isObjectLike(arg)) {
     const slots = getSlots(arg)
 

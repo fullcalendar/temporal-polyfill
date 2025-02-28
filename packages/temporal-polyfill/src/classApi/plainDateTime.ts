@@ -32,7 +32,6 @@ import {
   EpochDisambigOptions,
   OverflowOptions,
   RoundingOptions,
-  copyOptions,
   refineOverflowOptions,
 } from '../internal/optionsRefine'
 import { roundPlainDateTime } from '../internal/round'
@@ -266,8 +265,6 @@ export function toPlainDateTimeSlots(
   arg: PlainDateTimeArg,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
-  options = copyOptions(options)
-
   if (isObjectLike(arg)) {
     const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
 

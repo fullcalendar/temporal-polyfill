@@ -32,7 +32,7 @@ import {
   unitNamesAsc,
   unitNanoMap,
 } from './units'
-import { bindArgs, clampEntity, isObjectLike } from './utils'
+import { bindArgs, clampEntity } from './utils'
 
 // Types
 // -----------------------------------------------------------------------------
@@ -706,29 +706,12 @@ function normalizeOptionsOrString<O extends {}, K extends string & keyof O>(
 }
 
 /*
-For validating and copying. If undefined, leave as undefined
-Used for to* and diff* and `with` functions
+TODO: Eventually remove. Not passed to user-defined Calendars anymore
 */
-export function copyOptions<O>(options: O): O {
-  if (options === undefined) {
-    return undefined as any
+export function fabricateOverflowOptions(overflow: Overflow): OverflowOptions {
+  return {
+    overflow: overflowMapNames[overflow],
   }
-  if (isObjectLike(options)) {
-    return Object.assign(Object.create(null), options)
-  }
-  throw new TypeError(errorMessages.invalidObject)
-}
-
-export function overrideOverflowOptions(
-  options: OverflowOptions | undefined,
-  overflow: Overflow,
-): OverflowOptions {
-  return (
-    options &&
-    Object.assign(Object.create(null), options, {
-      overflow: overflowMapNames[overflow],
-    })
-  )
 }
 
 // Utils
