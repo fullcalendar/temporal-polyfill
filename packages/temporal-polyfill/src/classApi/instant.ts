@@ -154,7 +154,9 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 // -----------------------------------------------------------------------------
 
 export function toTemporalInstant(this: Date): Instant {
+  const epochMilli = Date.prototype.valueOf.call(this) // will error if not Date
+
   return createInstant(
-    createInstantSlots(numberToBigNano(this.valueOf(), nanoInMilli)),
+    createInstantSlots(numberToBigNano(epochMilli, nanoInMilli)),
   )
 }
