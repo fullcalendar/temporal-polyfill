@@ -9,6 +9,7 @@ import {
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
+import { checkIsoDateTimeInBounds } from './timeMath'
 import {
   TimeZoneOps,
   getMatchingInstantFor,
@@ -79,10 +80,12 @@ export function plainDateTimeWithPlainTime(
   plainDateTimeSlots: PlainDateTimeSlots,
   plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
 ): PlainDateTimeSlots {
-  return createPlainDateTimeSlots({
-    ...plainDateTimeSlots,
-    ...plainTimeSlots,
-  })
+  return createPlainDateTimeSlots(
+    checkIsoDateTimeInBounds({
+      ...plainDateTimeSlots,
+      ...plainTimeSlots,
+    }),
+  )
 }
 
 /*
