@@ -4,6 +4,7 @@ import {
   plainDateTimeWithFields,
   refinePlainDateTimeBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import {
   compareIsoDateTimeFields,
@@ -89,7 +90,7 @@ export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  bindArgs(constructPlainDateTimeSlots, refineCalendarArg),
+  bindArgs(constructPlainDateTimeSlots, refineCalendarId),
   {
     ...calendarIdGetters,
     ...dateGetters,

@@ -4,6 +4,7 @@ import {
   refinePlainMonthDayBag,
 } from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
+import { refineCalendarId } from '../internal/calendarId'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
@@ -19,7 +20,7 @@ import {
 } from '../internal/optionsRefine'
 import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { bindArgs, isObjectLike } from '../internal/utils'
-import { extractCalendarIdFromBag, refineCalendarArg } from './calendarArg'
+import { extractCalendarIdFromBag } from './calendarArg'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import { calendarIdGetters, monthDayGetters, neverValueOf } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -31,7 +32,7 @@ export type PlainMonthDayArg = PlainMonthDay | PlainMonthDayBag | string
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
-    bindArgs(constructPlainMonthDaySlots, refineCalendarArg),
+    bindArgs(constructPlainMonthDaySlots, refineCalendarId),
     {
       ...calendarIdGetters,
       ...monthDayGetters,

@@ -3,6 +3,7 @@ import {
   plainYearMonthWithFields,
   refinePlainYearMonthBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
@@ -22,7 +23,7 @@ import {
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
-import { getCalendarIdFromBag, refineCalendarArg } from './calendarArg'
+import { getCalendarIdFromBag } from './calendarArg'
 import {
   Duration,
   DurationArg,
@@ -40,7 +41,7 @@ export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    bindArgs(constructPlainYearMonthSlots, refineCalendarArg),
+    bindArgs(constructPlainYearMonthSlots, refineCalendarId),
     {
       ...calendarIdGetters,
       ...yearMonthGetters,

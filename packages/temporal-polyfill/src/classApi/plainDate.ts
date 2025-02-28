@@ -3,6 +3,7 @@ import {
   plainDateWithFields,
   refinePlainDateBag,
 } from '../internal/bagRefine'
+import { refineCalendarId } from '../internal/calendarId'
 import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
@@ -71,7 +72,7 @@ export type PlainDateArg = PlainDate | PlainDateBag | string
 
 export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
-  bindArgs(constructPlainDateSlots, refineCalendarArg),
+  bindArgs(constructPlainDateSlots, refineCalendarId),
   {
     ...calendarIdGetters,
     ...dateGetters,

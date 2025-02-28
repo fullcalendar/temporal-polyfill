@@ -43,6 +43,11 @@ export function constructInstantSlots(epochNano: bigint): InstantSlots {
   )
 }
 
+/*
+TODO: no longer accept refineCalendarArg/refineTimeZoneArg funcs!
+They're always refineCalendarId/refineTimeZoneId!
+*/
+
 export function constructZonedDateTimeSlots<CA, TA>(
   refineCalendarArg: (calendarArg: CA) => string, // to calendarId
   refineTimeZoneArg: (timeZoneArg: TA) => string,
