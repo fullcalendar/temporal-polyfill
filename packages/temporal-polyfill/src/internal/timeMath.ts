@@ -70,6 +70,24 @@ export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
   return isoFields
 }
 
+/*
+Used on isoYear/Month/Date before doing zoned operations
+See CheckISODaysRange in spec
+TEMPORARY
+*/
+export function checkIsoDateInBoundsStrict<T extends IsoDateFields>(
+  isoFields: T,
+): T {
+  const bigNano = isoToEpochNano({
+    ...isoFields,
+    ...isoTimeFieldDefaults,
+  })
+  if (!bigNano || Math.abs(bigNano[0]) > 1e8) {
+    throw new RangeError('BAD!')
+  }
+  return isoFields
+}
+
 export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(
   isoFields: T,
 ): T {

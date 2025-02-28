@@ -4,6 +4,7 @@ import { parseIntlPartsYear } from './intlMath'
 import { IsoDateTimeFields } from './isoFields'
 import {
   checkEpochNanoInBounds,
+  checkIsoDateInBoundsStrict,
   epochNanoToSec,
   epochNanoToSecMod,
   isoArgsToEpochSec,
@@ -46,6 +47,7 @@ export class FixedTimeZone implements NativeTimeZone {
   }
 
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): BigNano[] {
+    checkIsoDateInBoundsStrict(isoDateTimeFields) // TODO: also do for non-ISO!!!
     return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)]
   }
 

@@ -40,6 +40,7 @@ import {
 } from './slots'
 import {
   checkIsoDateInBounds,
+  checkIsoDateInBoundsStrict,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoToEpochNanoWithOffset,
@@ -306,7 +307,7 @@ function finalizeZonedDateTime(
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
-    checkIsoDateTimeFields(organized),
+    checkIsoDateInBoundsStrict(checkIsoDateTimeFields(organized)),
     offsetNano,
     offsetDisambig,
     epochDisambig,
