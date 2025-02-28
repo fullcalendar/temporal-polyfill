@@ -85,6 +85,9 @@ export function plainDateTimeWithPlainTime(
   })
 }
 
+/*
+Only used by funcApi
+*/
 export function plainDateTimeWithPlainDate(
   plainDateTimeSlots: PlainDateTimeSlots,
   plainDateSlots: PlainDateSlots,

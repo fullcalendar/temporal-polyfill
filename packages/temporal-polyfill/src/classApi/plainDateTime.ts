@@ -22,7 +22,6 @@ import { isoTimeFieldDefaults } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { parsePlainDateTime } from '../internal/isoParse'
 import {
-  plainDateTimeWithPlainDate,
   plainDateTimeWithPlainTime,
   slotsWithCalendarId,
 } from '../internal/modify'
@@ -68,12 +67,7 @@ import {
   neverValueOf,
   timeGetters,
 } from './mixins'
-import {
-  PlainDate,
-  PlainDateArg,
-  createPlainDate,
-  toPlainDateSlots,
-} from './plainDate'
+import { PlainDate, createPlainDate } from './plainDate'
 import {
   PlainTime,
   PlainTimeArg,
@@ -117,14 +111,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): PlainDateTime {
       return createPlainDateTime(
         slotsWithCalendarId(slots, refineCalendarArg(calendarArg)),
-      )
-    },
-    withPlainDate(
-      slots: PlainDateTimeSlots,
-      plainDateArg: PlainDateArg,
-    ): PlainDateTime {
-      return createPlainDateTime(
-        plainDateTimeWithPlainDate(slots, toPlainDateSlots(plainDateArg)),
       )
     },
     withPlainTime(
