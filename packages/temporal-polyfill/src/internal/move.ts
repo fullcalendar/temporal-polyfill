@@ -354,6 +354,11 @@ export function nativeDateAdd(
     return isoDateFields
   }
 
+  // HACK. Should probably be done elsewhere
+  if (epochMilli === undefined) {
+    throw new RangeError('BAD!')
+  }
+
   epochMilli! += (weeks * 7 + days) * milliInDay
 
   return checkIsoDateInBounds(epochMilliToIso(epochMilli!))

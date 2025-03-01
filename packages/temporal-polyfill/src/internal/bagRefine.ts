@@ -865,7 +865,8 @@ export function nativeMonthDayFromFields(
     }
 
     // constrain (what refineMonth/refineDay would normally do)
-    if (isIso) {
+    // HACK with gregory comparison
+    if (isIso || this.id === 'gregory') {
       normalMonth = clampEntity(
         'month',
         normalMonth!,
