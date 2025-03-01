@@ -6,6 +6,11 @@
     "quickfix.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/*.code-search": true,
+    "packages/locale-data/data/**": true
+  },
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.tsdk": "packages/temporal-polyfill/node_modules/typescript/lib",
   "biome.lspBin": "packages/temporal-polyfill/node_modules/@biomejs/biome/bin/biome"

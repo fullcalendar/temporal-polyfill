@@ -9,7 +9,10 @@
       "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "autoAttachChildProcesses": true
+      "autoAttachChildProcesses": true,
+      "outFiles": [
+        "${workspaceFolder}/packages/temporal-polyfill/dist/**/*.(m|c|)js"
+      ]
     },
     {
       "name": "Vitest: Debug File",
