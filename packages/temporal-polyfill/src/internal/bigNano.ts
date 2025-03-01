@@ -75,6 +75,9 @@ export function bigIntToBigNano(num: bigint, multiplierNano = 1): BigNano {
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
 }
 
+/*
+Expects a proper integer. For user input, call toStrictInteger
+*/
 export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
   const wholeInDay = nanoInUtcDay / multiplierNano
   const [days, remainder] = divModTrunc(num, wholeInDay)

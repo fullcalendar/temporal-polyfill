@@ -187,6 +187,9 @@ export function epochNanoToMicro(epochNano: BigNano): bigint {
 
 // [micro/milli/sec] -> nano
 
+/*
+Expects a proper integer
+*/
 export function epochMilliToNano(epochMilli: number): BigNano {
   return numberToBigNano(epochMilli, nanoInMilli)
 }

@@ -11,7 +11,7 @@ import {
   MonthDayRefineOps,
   YearMonthRefineOps,
 } from './calendarOps'
-import { requireObjectLike, toBigInt } from './cast'
+import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import { EraYearOrYear, MonthDayFields, YearMonthFields } from './fields'
 import {
   IsoDateTimeFields,
@@ -319,21 +319,30 @@ export function plainTimeToPlainDateTime(
 
 /*
 Only used by funcApi
+Almost public-facing, does input validation
 */
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(numberToBigNano(epochSec, nanoInSec)),
+    checkEpochNanoInBounds(
+      numberToBigNano(toStrictInteger(epochSec), nanoInSec),
+    ),
   )
 }
 
+/*
+Almost public-facing, does input validation
+*/
 export function epochMilliToInstant(epochMilli: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(numberToBigNano(epochMilli, nanoInMilli)),
+    checkEpochNanoInBounds(
+      numberToBigNano(toStrictInteger(epochMilli), nanoInMilli),
+    ),
   )
 }
 
 /*
 Only used by funcApi
+Almost public-facing, does input validation
 */
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   return createInstantSlots(
@@ -341,6 +350,9 @@ export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   )
 }
 
+/*
+Almost public-facing, does input validation
+*/
 export function epochNanoToInstant(epochNano: bigint): InstantSlots {
   return createInstantSlots(
     checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
