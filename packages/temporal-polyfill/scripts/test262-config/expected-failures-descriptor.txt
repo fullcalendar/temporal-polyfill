@@ -178,6 +178,7 @@ built-ins/Temporal/Duration/prototype/toLocaleString/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/toString/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/round/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/negated/not-a-constructor.js
+built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
 
 #
 # find built-ins/Temporal intl402/Temporal -name 'builtin.js'

@@ -1,0 +1,221 @@
+
+#########################
+# Limits :: ZonedDateTime
+#########################
+
+# When parsing ZDT, need to apply offset to ISO fields before checking if
+# ISO-YMD is out-of-bounds
+built-ins/Temporal/ZonedDateTime/from/argument-string-limits.js
+
+# Wrangle temporary `checkIsoDateInBoundsStrict`
+
+
+##########################
+# Limits :: PlainMonthYear
+##########################
+
+# Arithmetics SHOULD error because they need start-of-month to do computations
+# Currently, we are NOT erroring
+# Are we doing an overly-clever short-circuit somewhere?
+built-ins/Temporal/PlainYearMonth/prototype/add/throws-if-year-outside-valid-iso-range.js
+built-ins/Temporal/PlainYearMonth/prototype/subtract/throws-if-year-outside-valid-iso-range.js
+built-ins/Temporal/PlainYearMonth/prototype/since/throws-if-year-outside-valid-iso-range.js
+built-ins/Temporal/PlainYearMonth/prototype/until/throws-if-year-outside-valid-iso-range.js
+
+# Rounding during arithmetics should NOT error
+# Point-to-point rounding should NOT reject out-of-bounds internal dates
+# Currently, we ARE erroring
+# How to avoid? Should we short-circuit somewhere?
+built-ins/Temporal/PlainYearMonth/prototype/since/argument-string-limits.js
+built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-limits.js
+
+# String parsing should NOT error on very high/low years (like -271821-04-01)
+# Currently, we ARE erroring
+# FYI, we don't have this problem for `from()` because year fields are ignored
+built-ins/Temporal/PlainYearMonth/prototype/equals/argument-string-limits.js
+built-ins/Temporal/PlainYearMonth/from/argument-string-limits.js
+built-ins/Temporal/PlainYearMonth/compare/argument-string-limits.js
+
+
+####################
+# Limits :: Duration
+####################
+
+# During rounding, if time parts are pushed out-of-bounds, SHOULD error
+# Currently, we are NOT erroring
+# Must redesign roundDayTimeDurationByInc
+# Collapses all fields into a BigNano right now
+built-ins/Temporal/Duration/prototype/toString/total-of-duration-time-units-out-of-range.js
+
+
+######################
+# Field Parsing :: All
+######################
+
+# `monthCode` parsing
+# Should reject immediately if malformed string
+# Should reject after other fields if number+isLeap combo doesn't ever exist in calendar
+built-ins/Temporal/ZonedDateTime/from/monthcode-invalid.js
+built-ins/Temporal/PlainYearMonth/from/monthcode-invalid.js
+built-ins/Temporal/PlainMonthDay/from/monthcode-invalid.js
+built-ins/Temporal/PlainDateTime/from/monthcode-invalid.js
+built-ins/Temporal/PlainDate/from/monthcode-invalid.js
+
+
+################################
+# Field Parsing :: ZonedDateTime
+################################
+
+# `offset` parsing
+# Should reject immediately if malformed string
+built-ins/Temporal/ZonedDateTime/from/offset-string-invalid.js
+
+
+################################
+# Field Parsing :: PlainMonthDay
+################################
+
+# `eraYear`/`year` must be consistent
+staging/sm/Temporal/PlainMonthDay/from-gregory.js
+
+# Constrain input `day` - all calendars, not just ISO
+# See hack in `nativeMonthDayFromFields`
+intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
+staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
+staging/sm/Temporal/PlainMonthDay/from-chinese.js
+
+# Ignore very high/low ISO years
+built-ins/Temporal/PlainMonthDay/from/fields-string.js
+built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
+
+
+#############################
+# Field Updating (via `with`)
+#############################
+
+# New monthCode/month conflict with old monthCode/month
+# See half-baked `doingMerge` hack, ULTIMATELY REMOVE
+built-ins/Temporal/PlainDate/prototype/with/basic.js
+built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
+built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
+
+# Query time from internal slots, not public calendar fields
+built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
+
+
+##########
+# Calendar
+##########
+
+# Switch `era` to gregory/gregory-inverse and japenese/japanese-inverse
+# Must canonicalize these `era` fields on bag input
+# FYI, canonicalization already happening on internal Intl.DateTimeFormat results
+intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
+staging/Intl402/Temporal/old/japanese-before-era.js
+staging/sm/Temporal/PlainDate/non-positive-era-year.js
+
+# When guessing year, start at 1970 (instead of 1972)
+# Do this for all calendars?
+staging/sm/Temporal/PlainMonthDay/from-coptic.js
+
+# When guessing year, our 1972+100 search won't guess old Chinese years
+# Special-case the guess-start-year for Chinese?
+staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-common.js
+staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
+
+# Hebrew wrong date values for some reason
+staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
+
+# Trouble scraping calendar data at lower limit
+# Because `new Temporal.PlainDate(-271821, 4, 19, '<i18n-calendar>')`
+# translates to epochMilli < -8640000000000000
+# which errors when passed to DTF::format()
+# Solution entails using epochMilli exactly -8640000000000000,
+# with a time zone with negative offset like:
+#
+# new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', calendar: 'buddhist', dateStyle: 'full', timeStyle: 'full' })
+#   .format(Date.UTC(-271821, 4 - 1, 20))
+# > 'Monday, November 19, -271273 BE at 6:09:24 PM GMT-05:50:36'
+#
+staging/sm/Temporal/PlainDate/withCalendar.js
+
+
+##########
+# TimeZone
+##########
+
+# Investigate wrong DST shift
+intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
+intl402/Temporal/ZonedDateTime/prototype/hoursInDay/dst-skipped-cross-midnight.js
+intl402/Temporal/ZonedDateTime/prototype/round/dst-skipped-cross-midnight.js
+intl402/Temporal/ZonedDateTime/prototype/startOfDay/dst-skipped-cross-midnight.js
+intl402/Temporal/ZonedDateTime/prototype/withPlainTime/dst-skipped-cross-midnight.js
+intl402/Temporal/PlainDate/prototype/toZonedDateTime/dst-skipped-cross-midnight.js
+
+
+#########################
+# Locale-Aware Formatting
+#########################
+
+# ZonedDateTime::toLocaleString({ "timeZoneName": "short" }) should contain time parts
+# Be more like Date::toLocaleString instead of DTF::format():
+#
+#   let legacyDate = new Date(1735213600_321)
+#   let options = { timeZone: 'UTC', timeZoneName: 'short' }
+#   console.log(legacyDate.toLocaleString('en', options))                  // 12/26/2024, 11:46:40 AM UTC
+#   console.log(new Intl.DateTimeFormat('en', options).format(legacyDate)) // 12/26/2024, UTC
+#
+# Should massage DTF options more
+intl402/Temporal/ZonedDateTime/prototype/toLocaleString/lone-options-accepted.js
+
+# DTF::format() should throw error
+# when given a Temporal type that has no overlap with formatting options.
+# Search `if (!hasAnyPropsByName(options, standardNames))`
+# If within DateTimeFormat().format(), error
+# If within Temporal::[TYPE]::toLocaleString(), apply fallbacks
+intl402/DateTimeFormat/prototype/format/temporal-objects-not-overlapping-options.js
+intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-not-overlapping-options.js
+intl402/DateTimeFormat/prototype/formatRange/temporal-objects-not-overlapping-options.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-not-overlapping-options.js
+
+
+################
+# NOT ACTIONABLE
+################
+
+# WONTFIX: Seems our Node version doesn't normalize
+# America/Nipigon -> America/Toronto, but the browsers do
+staging/sm/Temporal/ZonedDateTime/zones-and-links.js
+
+# WONTFIX: Precision issue with Duration::total
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
+
+# Intl.DateTimeFormat does not canonicalize time zone yet
+intl402/DateTimeFormat/timezone-not-canonicalized.js
+intl402/DateTimeFormat/timezone-case-insensitive.js
+
+# Intl.DateTimeFormat does accept tz offset time zones yet
+intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
+intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
+
+# Intl.DateTimeFormat doesn't output what we expect,
+# which is checked in test262 before comparing to Temporal formatting
+# An issue with Intl.DateTimeFormat
+staging/Intl402/Temporal/old/non-iso-calendars.js
+
+# No Intl.DurationFormat yet
+intl402/DurationFormat/prototype/formatToParts/temporal-duration-string-arg.js
+intl402/DurationFormat/prototype/formatToParts/temporal-duration-object-arg.js
+intl402/DurationFormat/prototype/formatToParts/taint-temporal-duration-prototype.js
+intl402/DurationFormat/prototype/format/temporal-duration-string-arg.js
+intl402/DurationFormat/prototype/format/temporal-duration-object-arg.js
+intl402/DurationFormat/prototype/format/taint-temporal-duration-prototype.js
+intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
+
+# Ignored in proposal-temporal repo:
+# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L33
+# "Test is incorrect, no reason why this date should not exist; seems to be
+# working around an ICU4X bug"
+staging/sm/Temporal/PlainDate/from-islamic-umalqura.js
