@@ -213,6 +213,7 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
 
 // Checking Fields
 // -----------------------------------------------------------------------------
+// Checks validity of isoMonth/isoDay, but does NOT do bounds checking
 
 export function checkIsoDateTimeFields<P extends IsoDateTimeFields>(
   isoDateTimeFields: P,
