@@ -2,6 +2,7 @@ import { BigNano, divModBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import {
   checkDurationTimeUnit,
+  checkDurationUnits,
   durationFieldsToBigNano,
   negateDurationFields,
 } from './durationMath'
@@ -185,6 +186,9 @@ export function formatDurationIso(
       ...slots,
       ...roundDayTimeDurationByInc(slots, nanoInc, roundingMode),
     }
+
+    // Check out-of-bounds
+    checkDurationUnits(slots)
   }
 
   return formatDurationSlots(

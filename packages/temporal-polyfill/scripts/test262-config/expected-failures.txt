@@ -19,17 +19,6 @@ built-ins/Temporal/ZonedDateTime/from/argument-string-limits.js
 # Wrangle `diffPlainYearMonth` HACK
 
 
-####################
-# Limits :: Duration
-####################
-
-# During rounding, if time parts are pushed out-of-bounds, SHOULD error
-# Currently, we are NOT erroring
-# Must redesign roundDayTimeDurationByInc
-# Collapses all fields into a BigNano right now
-built-ins/Temporal/Duration/prototype/toString/total-of-duration-time-units-out-of-range.js
-
-
 ######################
 # Field Parsing :: All
 ######################
