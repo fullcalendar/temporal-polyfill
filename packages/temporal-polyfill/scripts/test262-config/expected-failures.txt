@@ -27,15 +27,18 @@ built-ins/Temporal/PlainYearMonth/from/monthcode-invalid.js
 built-ins/Temporal/PlainMonthDay/from/monthcode-invalid.js
 built-ins/Temporal/PlainDateTime/from/monthcode-invalid.js
 built-ins/Temporal/PlainDate/from/monthcode-invalid.js
+built-ins/Temporal/PlainDate/prototype/with/basic.js
+built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
+built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
+
+# Wrangle `doingMerge` HACK
 
 
 ################################
 # Field Parsing :: ZonedDateTime
 ################################
 
-# `offset` parsing
-# Should reject immediately if malformed string
-built-ins/Temporal/ZonedDateTime/from/offset-string-invalid.js
+# Wrangle `builtinRefiners`.offset HACK
 
 
 ################################
@@ -59,12 +62,6 @@ built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
 #############################
 # Field Updating (via `with`)
 #############################
-
-# New monthCode/month conflict with old monthCode/month
-# See half-baked `doingMerge` hack, ULTIMATELY REMOVE
-built-ins/Temporal/PlainDate/prototype/with/basic.js
-built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
-built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
 
 # Query time from internal slots, not public calendar fields
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js

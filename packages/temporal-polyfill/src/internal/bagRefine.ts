@@ -154,7 +154,12 @@ const builtinRefiners = {
   ...dateFieldRefiners,
   ...timeFieldRefiners,
   ...durationFieldRefiners,
-  offset: toStringViaPrimitive,
+  offset(offsetString: string) {
+    const s = toStringViaPrimitive(offsetString)
+    // HACK to validate ASAP. will need to parse again later!!!
+    parseOffsetNano(s)
+    return s
+  },
 }
 
 // High-Level Refining
@@ -211,7 +216,7 @@ export function refineZonedDateTimeBag(
     timeAndZoneFieldNames, // forcedValidFieldNames
   ) as ZonedDateTimeBag
 
-  // guaranteed via refineCalendarFields
+  // guaranteed fields.timeZone via refineCalendarFields
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
   const [overflow, offsetDisambig, epochDisambig] =
