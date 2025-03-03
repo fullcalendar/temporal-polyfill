@@ -14,16 +14,9 @@ built-ins/Temporal/ZonedDateTime/from/argument-string-limits.js
 # Limits :: PlainMonthYear
 ##########################
 
-# Arithmetics SHOULD error because they need start-of-month to do computations
-# Currently, we are NOT erroring
-# Are we doing an overly-clever short-circuit somewhere?
-built-ins/Temporal/PlainYearMonth/prototype/add/throws-if-year-outside-valid-iso-range.js
-built-ins/Temporal/PlainYearMonth/prototype/subtract/throws-if-year-outside-valid-iso-range.js
-built-ins/Temporal/PlainYearMonth/prototype/since/throws-if-year-outside-valid-iso-range.js
-built-ins/Temporal/PlainYearMonth/prototype/until/throws-if-year-outside-valid-iso-range.js
-
 # Wrangle `smallestPrecision` HACK
 # Wrangle `parsePlainDate`/`isPlainYearMonth` HACK
+# Wrangle `diffPlainYearMonth` HACK
 
 
 ####################

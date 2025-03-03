@@ -147,9 +147,10 @@ export function movePlainYearMonth(
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendar
   const calendarOps = getCalendarOps(calendarId)
-  let isoDateFields: IsoDateFields = moveToDayOfMonthUnsafe(
-    calendarOps,
-    plainYearMonthSlots,
+
+  // The first-of-month must be representable, this check in-bounds
+  let isoDateFields: IsoDateFields = checkIsoDateInBounds(
+    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots),
   )
 
   if (doSubtract) {

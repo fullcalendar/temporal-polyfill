@@ -51,6 +51,7 @@ import {
   extractEpochNano,
 } from './slots'
 import {
+  checkIsoDateInBounds,
   isoTimeFieldsToNano,
   isoToEpochMilli,
   isoToEpochNano,
@@ -271,11 +272,31 @@ export function diffPlainYearMonth(
   )
   const calendarOps = getCalendarOps(calendarId)
 
+  const firstOfMonth0 = moveToDayOfMonthUnsafe(
+    calendarOps,
+    plainYearMonthSlots0,
+  )
+  const firstOfMonth1 = moveToDayOfMonthUnsafe(
+    calendarOps,
+    plainYearMonthSlots1,
+  )
+
+  // Short-circuit if exactly the same (no in-bounds checking later)
+  // HACK: not using compareIsoDateFields because choked when epochMillis out-of-bounds
+  if (
+    firstOfMonth0.isoYear === firstOfMonth1.isoYear &&
+    firstOfMonth0.isoMonth === firstOfMonth1.isoMonth &&
+    firstOfMonth0.isoDay === firstOfMonth1.isoDay
+  ) {
+    return createDurationSlots(durationFieldDefaults)
+  }
+
   return diffDateLike(
     invert,
     () => calendarOps,
-    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots0),
-    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots1),
+    // The first-of-month must be representable, this check in-bounds
+    checkIsoDateInBounds(firstOfMonth0),
+    checkIsoDateInBounds(firstOfMonth1),
     ...optionsTuple,
     /* smallestPrecision = */ Unit.Month,
   )
