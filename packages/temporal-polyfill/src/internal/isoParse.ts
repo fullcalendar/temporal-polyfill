@@ -6,7 +6,12 @@ import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import {
+  IsoDateFields,
+  IsoDateTimeFields,
+  IsoTimeFields,
+  isoTimeFieldDefaults,
+} from './isoFields'
 import {
   checkIsoDateFields,
   checkIsoDateTimeFields,
@@ -160,11 +165,19 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   return createPlainDateTimeSlots(finalizeDateTime(organized))
 }
 
-export function parsePlainDate(s: string): PlainDateSlots {
-  const organized = parseDateTimeLike(requireString(s))
+export function parsePlainDate(
+  s: string,
+  isPlainYearMonth?: boolean,
+): PlainDateSlots {
+  let organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
     throw new RangeError(errorMessages.failedParse(s))
+  }
+
+  // HACK to not limit the D in the YMD string because it'll get thrown away
+  if (isPlainYearMonth && organized.calendar === isoCalendarId) {
+    organized = { ...organized, isoDay: 1, ...isoTimeFieldDefaults }
   }
 
   return createPlainDateSlots(
@@ -185,7 +198,7 @@ export function parsePlainYearMonth(
     )
   }
 
-  const isoSlots = parsePlainDate(s)
+  const isoSlots = parsePlainDate(s, true)
   const calendarOps = getCalendarOps(isoSlots.calendar)
   const moveIsoSlots = moveToDayOfMonthUnsafe(calendarOps, isoSlots)
 

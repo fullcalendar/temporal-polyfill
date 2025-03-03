@@ -277,6 +277,7 @@ export function diffPlainYearMonth(
     moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots0),
     moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots1),
     ...optionsTuple,
+    /* smallestPrecision = */ Unit.Month,
   )
 }
 
@@ -289,9 +290,15 @@ function diffDateLike(
   smallestUnit: Unit, // TODO: large field
   roundingInc: number,
   roundingMode: RoundingMode,
+  smallestPrecision: Unit = Unit.Day,
 ): DurationSlots {
-  const startEpochNano = isoToEpochNano(startIsoFields)!
-  const endEpochNano = isoToEpochNano(endIsoFields)!
+  const startEpochNano = isoToEpochNano(startIsoFields)
+  const endEpochNano = isoToEpochNano(endIsoFields)
+
+  if (startEpochNano === undefined || endEpochNano === undefined) {
+    throw new RangeError('BAD!')
+  }
+
   const sign = compareBigNanos(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
@@ -315,7 +322,7 @@ function diffDateLike(
       largestUnit,
     )
 
-    if (!(smallestUnit === Unit.Day && roundingInc === 1)) {
+    if (!(smallestUnit === smallestPrecision && roundingInc === 1)) {
       durationFields = roundRelativeDuration(
         durationFields,
         endEpochNano,
