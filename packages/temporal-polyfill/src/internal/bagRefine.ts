@@ -139,7 +139,12 @@ const dateFieldRefiners = {
   eraYear: toInteger,
   year: toInteger,
   month: toPositiveInteger,
-  monthCode: toStringViaPrimitive,
+  monthCode(monthCode: string) {
+    const s = toStringViaPrimitive(monthCode)
+    // HACK to validate ASAP. will need to parse again later!!!
+    parseMonthCode(s)
+    return s
+  },
   day: toPositiveInteger,
 }
 

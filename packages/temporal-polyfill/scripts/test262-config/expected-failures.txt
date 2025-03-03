@@ -19,18 +19,7 @@
 # Field Parsing :: All
 ######################
 
-# `monthCode` parsing
-# Should reject immediately if malformed string
-# Should reject after other fields if number+isLeap combo doesn't ever exist in calendar
-built-ins/Temporal/ZonedDateTime/from/monthcode-invalid.js
-built-ins/Temporal/PlainYearMonth/from/monthcode-invalid.js
-built-ins/Temporal/PlainMonthDay/from/monthcode-invalid.js
-built-ins/Temporal/PlainDateTime/from/monthcode-invalid.js
-built-ins/Temporal/PlainDate/from/monthcode-invalid.js
-built-ins/Temporal/PlainDate/prototype/with/basic.js
-built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
-built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
-
+# Wrangle `builtinRefiners`.offset HACK
 # Wrangle `doingMerge` HACK
 
 
@@ -62,6 +51,11 @@ built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
 #############################
 # Field Updating (via `with`)
 #############################
+
+# Should reject if month/monthCode not consistent in same bag
+built-ins/Temporal/PlainDate/prototype/with/basic.js
+built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
+built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
 
 # Query time from internal slots, not public calendar fields
 built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
