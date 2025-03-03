@@ -177,7 +177,11 @@ export function parsePlainDate(
 
   // HACK to not limit the D in the YMD string because it'll get thrown away
   if (isPlainYearMonth && organized.calendar === isoCalendarId) {
-    organized = { ...organized, isoDay: 1, ...isoTimeFieldDefaults }
+    if (organized.isoYear === -271821 && organized.isoMonth === 4) {
+      organized = { ...organized, isoDay: 20, ...isoTimeFieldDefaults }
+    } else {
+      organized = { ...organized, isoDay: 1, ...isoTimeFieldDefaults }
+    }
   }
 
   return createPlainDateSlots(

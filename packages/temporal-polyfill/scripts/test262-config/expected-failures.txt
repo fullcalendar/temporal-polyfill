@@ -22,15 +22,9 @@ built-ins/Temporal/PlainYearMonth/prototype/subtract/throws-if-year-outside-vali
 built-ins/Temporal/PlainYearMonth/prototype/since/throws-if-year-outside-valid-iso-range.js
 built-ins/Temporal/PlainYearMonth/prototype/until/throws-if-year-outside-valid-iso-range.js
 
-# String parsing should NOT error on very high/low years (like -271821-04-01)
-# Currently, we ARE erroring
-# FYI, we don't have this problem for `from()` because year fields are ignored
-built-ins/Temporal/PlainYearMonth/prototype/equals/argument-string-limits.js
-built-ins/Temporal/PlainYearMonth/from/argument-string-limits.js
-built-ins/Temporal/PlainYearMonth/compare/argument-string-limits.js
+# Wrangle `smallestPrecision` HACK
+# Wrangle `parsePlainDate`/`isPlainYearMonth` HACK
 
-# Wrangle `smallestPrecision`
-# Wrangle HACK in `parsePlainDate`
 
 ####################
 # Limits :: Duration
