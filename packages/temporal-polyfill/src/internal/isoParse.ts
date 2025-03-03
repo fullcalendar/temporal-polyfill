@@ -45,7 +45,6 @@ import {
 } from './slots'
 import {
   checkIsoDateInBounds,
-  checkIsoDateInBoundsStrict,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoToEpochNanoWithOffset,
@@ -319,12 +318,14 @@ function finalizeZonedDateTime(
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots {
-  const slotId = resolveTimeZoneId(organized.timeZone)
-  const timeZoneImpl = queryNativeTimeZone(slotId)
+  const timeZoneId = resolveTimeZoneId(organized.timeZone)
+  const timeZoneImpl = queryNativeTimeZone(timeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
-    checkIsoDateInBoundsStrict(checkIsoDateTimeFields(organized)),
+    // does NOT checkIsoDateInBoundsStrict,
+    // because the epoch-nanoseconds bounding is done within getMatchingInstantFor
+    checkIsoDateTimeFields(organized),
     offsetNano,
     offsetDisambig,
     epochDisambig,
@@ -334,7 +335,7 @@ function finalizeZonedDateTime(
 
   return createZonedDateTimeSlots(
     epochNanoseconds,
-    slotId,
+    timeZoneId,
     resolveCalendarId(organized.calendar),
   )
 }

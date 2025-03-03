@@ -3,10 +3,6 @@
 # Limits :: ZonedDateTime
 #########################
 
-# When parsing ZDT, need to apply offset to ISO fields before checking if
-# ISO-YMD is out-of-bounds
-built-ins/Temporal/ZonedDateTime/from/argument-string-limits.js
-
 # Wrangle temporary `checkIsoDateInBoundsStrict`
 
 
