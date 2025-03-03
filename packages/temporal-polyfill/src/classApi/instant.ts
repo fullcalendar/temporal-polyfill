@@ -1,4 +1,5 @@
 import { numberToBigNano } from '../internal/bigNano'
+import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
 import {
@@ -156,7 +157,11 @@ export function toInstantSlots(arg: InstantArg): InstantSlots {
 export function toTemporalInstant(this: Date): Instant {
   const epochMilli = Date.prototype.valueOf.call(this) // will error if not Date
 
+  // TODO: better error message instead of "non-integer number" or whatever?
+
   return createInstant(
-    createInstantSlots(numberToBigNano(epochMilli, nanoInMilli)),
+    createInstantSlots(
+      numberToBigNano(requireNumberIsInteger(epochMilli), nanoInMilli),
+    ),
   )
 }

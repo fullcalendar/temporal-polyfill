@@ -85,7 +85,10 @@ Already known to be number
 Also, responsible for ensuring not -0
 Other top-level funcs handle this themselves
 */
-function requireNumberIsInteger(num: number, entityName = 'number'): number {
+export function requireNumberIsInteger(
+  num: number,
+  entityName = 'number',
+): number {
   if (!Number.isInteger(num)) {
     throw new RangeError(errorMessages.expectedInteger(entityName, num))
   }
