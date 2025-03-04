@@ -59,16 +59,6 @@
 # Should massage DTF options more
 intl402/Temporal/ZonedDateTime/prototype/toLocaleString/lone-options-accepted.js
 
-# DTF::format() should throw error
-# when given a Temporal type that has no overlap with formatting options.
-# Search `if (!hasAnyPropsByName(options, standardNames))`
-# If within DateTimeFormat().format(), error
-# If within Temporal::[TYPE]::toLocaleString(), apply fallbacks
-intl402/DateTimeFormat/prototype/format/temporal-objects-not-overlapping-options.js
-intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-not-overlapping-options.js
-intl402/DateTimeFormat/prototype/formatRange/temporal-objects-not-overlapping-options.js
-intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-not-overlapping-options.js
-
 
 ################
 # NOT ACTIONABLE

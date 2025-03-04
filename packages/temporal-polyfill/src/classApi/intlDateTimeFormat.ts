@@ -168,5 +168,6 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
     config,
     // a generator that conveniently caches by the first arg: forcedTimeZoneId
     memoize(createFormatForPrep),
+    /* strictOptions = */ true,
   )
 }

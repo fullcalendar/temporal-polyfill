@@ -103,6 +103,7 @@ const monthDayExclusions: OptionNames = [
 
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
+  strictOptions: boolean,
 ) => Intl.DateTimeFormatOptions
 
 function createOptionsTransformer(
@@ -112,10 +113,16 @@ function createOptionsTransformer(
 ): OptionsTransformer {
   const excludedNameSet = new Set(exclusions)
 
-  return (options: Intl.DateTimeFormatOptions) => {
+  return (options: Intl.DateTimeFormatOptions, strictOptions: boolean) => {
+    const hasAnyExclusions = // HACK
+      exclusions && hasAnyPropsByName(options, exclusions)
+
     options = excludePropsByName(excludedNameSet, options)
 
     if (!hasAnyPropsByName(options, standardNames)) {
+      if (strictOptions && hasAnyExclusions) {
+        throw new TypeError('BAD!') // no options overlap!
+      }
       Object.assign(options, fallbacks)
     }
 
@@ -197,11 +204,13 @@ export type FormatQuerier = (
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
+  strictOptions: boolean,
 ) => Intl.DateTimeFormat
 
 export function createFormatPrepper<S>(
   config: ClassFormatConfig<S>,
   queryFormat: FormatQuerier = createFormatForPrep,
+  strictOptions = false,
 ): FormatPrepper<S> {
   const [transformOptions, , , getForcedTimeZoneId] = config
 
@@ -211,6 +220,7 @@ export function createFormatPrepper<S>(
       locales,
       options,
       transformOptions,
+      strictOptions,
     )
 
     const resolvedOptions = subformat.resolvedOptions()
@@ -223,8 +233,9 @@ export function createFormatForPrep(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
+  strictOptions: boolean,
 ): Intl.DateTimeFormat {
-  options = transformOptions(options)
+  options = transformOptions(options, strictOptions)
 
   if (forcedTimeZoneId) {
     if (options.timeZone !== undefined) {

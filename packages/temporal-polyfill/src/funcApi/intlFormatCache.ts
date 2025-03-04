@@ -29,6 +29,7 @@ export function createFormatCache(): FormatQuerier {
           locales,
           options,
           transformOptions,
+          /* strictOptions = */ false,
         )
         map.set(key, format!)
       }
