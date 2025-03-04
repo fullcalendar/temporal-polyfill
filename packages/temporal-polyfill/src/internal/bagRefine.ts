@@ -1,4 +1,8 @@
-import { isoCalendarId, japaneseCalendarId } from './calendarConfig'
+import {
+  gregoryCalendarId,
+  isoCalendarId,
+  japaneseCalendarId,
+} from './calendarConfig'
 import {
   NativeDateRefineDeps,
   NativeMonthDayRefineOps,
@@ -807,7 +811,25 @@ export function nativeMonthDayFromFields(
     }
     // pluck monthCode/day number without limiting overflow
     ;[monthCodeNumber, isLeapMonth] = parseMonthCode(fields.monthCode)
-    day = fields.day! // guaranteed by caller
+
+    // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's monthDayFromFields
+    // to limit the day in calendar with predictable max-days-in-month without the year
+    const isIsoLike =
+      !this.id ||
+      this.id === gregoryCalendarId ||
+      this.id === japaneseCalendarId
+    if (isIsoLike) {
+      yearMaybe = isoEpochFirstLeapYear
+
+      // TODO: more DRY
+      // might limit overflow
+      const month = refineMonth(this, fields, yearMaybe, overflow)
+      // NOTE: internal call of getDefinedProp not necessary
+      day = refineDay(this, fields as DayFields, month, yearMaybe, overflow)
+    } else {
+      // NORMAL CASE
+      day = fields.day! // guaranteed by caller
+    }
   }
 
   // query calendar for final year/month

@@ -33,10 +33,6 @@
 # Field Parsing :: PlainMonthDay
 ################################
 
-# Constrain input `day` - all calendars, not just ISO
-staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
-staging/sm/Temporal/PlainMonthDay/from-chinese.js
-
 # Ignore very high/low ISO years
 built-ins/Temporal/PlainMonthDay/from/fields-string.js
 built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
@@ -53,12 +49,16 @@ intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
 staging/Intl402/Temporal/old/japanese-before-era.js
 staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
+# Infinite loop in createIntlYearDataCache for roc/M02 --- COMMENTED OUT!
+#staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
+
 # When guessing year, start at 1970 (instead of 1972)
 # Do this for all calendars?
 staging/sm/Temporal/PlainMonthDay/from-coptic.js
 
 # When guessing year, our 1972+100 search won't guess old Chinese years
 # Special-case the guess-start-year for Chinese?
+staging/sm/Temporal/PlainMonthDay/from-chinese.js
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-common.js
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
 
