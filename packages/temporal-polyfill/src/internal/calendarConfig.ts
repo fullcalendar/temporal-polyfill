@@ -16,32 +16,29 @@ export const eraOriginsByCalendarId: {
   [calendarId: string]: Record<string, number>
 } = {
   [gregoryCalendarId]: {
-    'bce': -1,
-    'ce': 0,
+    'gregory-inverse': -1,
+    'gregory': 0,
   },
   [japaneseCalendarId]: {
-    'bce': -1,
-    'ce': 0,
+    'japanese-inverse': -1,
+    'japanese': 0,
     'meiji': 1867,
     'taisho': 1911,
     'showa': 1925,
     'heisei': 1988,
     'reiwa': 2018,
   },
-  'ethioaa': {
-    'era0': 0,
-  },
   'ethiopic': {
-    'era0': 0,
-    'era1': 5500,
+    'ethioaa': 0,
+    'ethiopic': 5500,
   },
   'coptic': {
-    'era0': -1,
-    'era1': 0,
+    'coptic-inverse': -1,
+    'coptic': 0,
   },
   'roc': {
-    'broc': -1, // before roc
-    'minguo': 0,
+    'roc-inverse': -1,
+    'roc': 0,
   },
   'buddhist': {
     'be': 0,
@@ -54,6 +51,31 @@ export const eraOriginsByCalendarId: {
   },
   'persian': {
     'ap': 0,
+  },
+}
+
+export const eraRemapsByCalendarId: {
+  [calendarId: string]: Record<string, string>
+} = {
+  [gregoryCalendarId]: {
+    'bce': 'gregory-inverse',
+    'ce': 'gregory',
+  },
+  [japaneseCalendarId]: {
+    'bce': 'japanese-inverse',
+    'ce': 'japanese',
+  },
+  'ethiopic': {
+    'era0': 'ethioaa',
+    'era1': 'ethiopic',
+  },
+  'coptic': {
+    'era0': 'coptic-inverse',
+    'era1': 'coptic',
+  },
+  'roc': {
+    'broc': 'roc-inverse',
+    'minguo': 'roc',
   },
 }
 

@@ -43,17 +43,6 @@
 # Wrangle `maxLengthOfMonthCodeInAnyYear` HACK
 # Wrangle `chineseMonthDaySearchStartYear` HACK
 
-# Switch `era` to:
-# gregory/gregory-inverse
-# japenese/japanese-inverse
-# roc/roc-inverse
-# etc
-# Search for helperEthioaa in calendar.mjs in reference implementation
-# FYI, canonicalization already happening on internal Intl.DateTimeFormat results
-intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
-staging/Intl402/Temporal/old/japanese-before-era.js
-staging/sm/Temporal/PlainDate/non-positive-era-year.js
-
 
 #########################
 # Locale-Aware Formatting

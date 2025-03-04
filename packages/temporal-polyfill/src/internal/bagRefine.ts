@@ -1,4 +1,5 @@
 import {
+  eraRemapsByCalendarId,
   gregoryCalendarId,
   isoCalendarId,
   japaneseCalendarId,
@@ -916,8 +917,9 @@ function refineYear(
   calendarNative: NativeYearMonthRefineDeps,
   fields: DateBag,
 ): number {
-  let { era, eraYear, year } = fields
   const eraOrigins = getCalendarEraOrigins(calendarNative)
+  const eraRemaps = eraRemapsByCalendarId[calendarNative.id || ''] || {}
+  let { era, eraYear, year } = fields
 
   if (era !== undefined || eraYear !== undefined) {
     if (era === undefined || eraYear === undefined) {
@@ -928,7 +930,9 @@ function refineYear(
       throw new RangeError(errorMessages.forbiddenEraParts)
     }
 
-    const eraOrigin = eraOrigins[era]
+    const normalizedEra = eraRemaps[era] || era
+    const eraOrigin = eraOrigins[normalizedEra]
+
     if (eraOrigin === undefined) {
       throw new RangeError(errorMessages.invalidEra(era))
     }

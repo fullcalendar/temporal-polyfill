@@ -1,4 +1,4 @@
-import { eraOriginsByCalendarId } from './calendarConfig'
+import { eraOriginsByCalendarId, eraRemapsByCalendarId } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
   DateParts,
@@ -186,6 +186,7 @@ export function parseIntlYear(
 
   if (intlParts.era) {
     const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
+    const eraRemaps = eraRemapsByCalendarId[calendarIdBase] || {}
 
     if (eraOrigins !== undefined) {
       era =
@@ -207,6 +208,8 @@ export function parseIntlYear(
       } else if (era === 'beforeroc') {
         era = 'broc'
       }
+
+      era = eraRemaps[era] || era
 
       eraYear = year // TODO: will this get optimized to next line?
       year = eraYearToYear(eraYear, eraOrigins[era] || 0)

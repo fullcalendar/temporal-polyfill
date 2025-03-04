@@ -190,16 +190,21 @@ export function computeIsoEraParts(
 
 function computeGregoryEraParts({ isoYear }: IsoDateFields): EraParts {
   if (isoYear < 1) {
-    return ['bce', -isoYear + 1]
+    return ['gregory-inverse', -isoYear + 1]
   }
-  return ['ce', isoYear]
+  return ['gregory', isoYear]
 }
 
 function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
   const epochMilli = isoToEpochMilli(isoFields)!
 
   if (epochMilli < primaryJapaneseEraMilli) {
-    return computeGregoryEraParts(isoFields)
+    // TODO: DRY with computeGregoryEraParts
+    const { isoYear } = isoFields
+    if (isoYear < 1) {
+      return ['japanese-inverse', -isoYear + 1]
+    }
+    return ['japanese', isoYear]
   }
 
   const intlParts = hashIntlFormatParts(
