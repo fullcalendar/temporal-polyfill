@@ -207,13 +207,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainDateWithFields(
-    createNativeDateModOps,
-    record,
-    getFields(record),
-    fields,
-    options,
-  )
+  return plainDateWithFields(createNativeDateModOps, record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {

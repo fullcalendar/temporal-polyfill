@@ -55,7 +55,6 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
           plainYearMonthWithFields(
             createNativeStandardOps,
             slots,
-            this,
             rejectInvalidBag(mod),
             options,
           ),

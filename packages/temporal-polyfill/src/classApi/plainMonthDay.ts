@@ -46,7 +46,6 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
           plainMonthDayWithFields(
             createNativeStandardOps,
             slots,
-            this,
             rejectInvalidBag(mod),
             options,
           ),

@@ -129,7 +129,6 @@ export function withFields(
   return plainMonthDayWithFields(
     createNativeMonthDayModOps,
     record,
-    getFields(record),
     fields,
     options,
   )

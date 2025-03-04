@@ -147,7 +147,6 @@ export function withFields(
   return plainYearMonthWithFields(
     createNativeYearMonthModOps,
     record,
-    getFields(record),
     fields,
     options,
   )

@@ -310,7 +310,6 @@ export function withFields(
     createNativeDateModOps,
     queryNativeTimeZone,
     record,
-    getFields(record),
     fields,
     options,
   )

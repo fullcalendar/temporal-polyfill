@@ -20,7 +20,6 @@
 ######################
 
 # Wrangle `builtinRefiners`.offset HACK
-# Wrangle `doingMerge` HACK
 
 
 ################################
@@ -34,9 +33,6 @@
 # Field Parsing :: PlainMonthDay
 ################################
 
-# `eraYear`/`year` must be consistent
-staging/sm/Temporal/PlainMonthDay/from-gregory.js
-
 # Constrain input `day` - all calendars, not just ISO
 # See hack in `nativeMonthDayFromFields`
 intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
@@ -46,19 +42,6 @@ staging/sm/Temporal/PlainMonthDay/from-chinese.js
 # Ignore very high/low ISO years
 built-ins/Temporal/PlainMonthDay/from/fields-string.js
 built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
-
-
-#############################
-# Field Updating (via `with`)
-#############################
-
-# Should reject if month/monthCode not consistent in same bag
-built-ins/Temporal/PlainDate/prototype/with/basic.js
-built-ins/Temporal/PlainDateTime/prototype/with/month-and-monthcode-must-agree.js
-built-ins/Temporal/PlainYearMonth/prototype/with/basic.js
-
-# Query time from internal slots, not public calendar fields
-built-ins/Temporal/PlainDateTime/prototype/with/order-of-operations.js
 
 
 ##########

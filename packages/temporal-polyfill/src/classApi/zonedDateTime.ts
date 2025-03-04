@@ -115,7 +115,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
           createNativeStandardOps,
           queryNativeTimeZone,
           slots,
-          this,
           rejectInvalidBag(mod),
           options,
         ),

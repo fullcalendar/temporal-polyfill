@@ -99,7 +99,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
         plainDateTimeWithFields(
           createNativeStandardOps,
           slots,
-          this,
           rejectInvalidBag(mod),
           options,
         ),

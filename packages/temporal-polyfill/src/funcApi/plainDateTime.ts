@@ -287,7 +287,6 @@ export function withFields(
   return plainDateTimeWithFields(
     createNativeDateModOps,
     record,
-    getFields(record),
     fields,
     options,
   )
