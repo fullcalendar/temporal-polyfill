@@ -1,3 +1,4 @@
+import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import { resolveCalendarId } from './calendarId'
 import { NativeMonthDayParseOps } from './calendarNative'
@@ -53,7 +54,11 @@ import {
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
 import { FixedTimeZone, queryNativeTimeZone } from './timeZoneNative'
-import { getMatchingInstantFor, validateTimeZoneOffset } from './timeZoneOps'
+import {
+  getMatchingInstantFor,
+  getStartOfDayInstantFor,
+  validateTimeZoneOffset,
+} from './timeZoneOps'
 import {
   TimeUnit,
   Unit,
@@ -330,20 +335,31 @@ function finalizeZonedDateTime(
   const timeZoneId = resolveTimeZoneId(organized.timeZone)
   const timeZoneImpl = queryNativeTimeZone(timeZoneId)
 
-  const epochNanoseconds = getMatchingInstantFor(
-    timeZoneImpl,
-    // does NOT checkIsoDateInBoundsStrict,
-    // because the epoch-nanoseconds bounding is done within getMatchingInstantFor
-    checkIsoDateTimeFields(organized),
-    offsetNano,
-    offsetDisambig,
-    epochDisambig,
-    !(timeZoneImpl as FixedTimeZone).offsetNano, // not fixed? epochFuzzy
-    organized.hasZ,
-  )
+  // does NOT checkIsoDateInBoundsStrict,
+  // because the epoch-nanoseconds bounding is done within getMatchingInstantFor
+  checkIsoDateTimeFields(organized)
+
+  let epochNano: BigNano
+
+  if (organized.hasTime) {
+    epochNano = getMatchingInstantFor(
+      timeZoneImpl,
+      organized,
+      offsetNano,
+      offsetDisambig,
+      epochDisambig,
+      !(timeZoneImpl as FixedTimeZone).offsetNano, // not fixed? epochFuzzy
+      organized.hasZ,
+    )
+  } else {
+    epochNano = getStartOfDayInstantFor(
+      timeZoneImpl as any, // !!!
+      organized,
+    )
+  }
 
   return createZonedDateTimeSlots(
-    epochNanoseconds,
+    epochNano,
     timeZoneId,
     resolveCalendarId(organized.calendar),
   )

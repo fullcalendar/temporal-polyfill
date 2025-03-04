@@ -11,6 +11,7 @@ import {
   isoToEpochNano,
   isoToEpochNanoWithOffset,
 } from './timeMath'
+import { NativeTimeZone } from './timeZoneNative'
 import { nanoInUtcDay } from './units'
 import { memoize, pluckProps } from './utils'
 
@@ -180,6 +181,24 @@ export function getSingleInstantFor(
     // 'later' or 'compatible'
     disambig === EpochDisambig.Earlier ? 0 : possibleEpochNanos.length - 1
   ]
+}
+
+export function getStartOfDayInstantFor(
+  timeZoneOps: NativeTimeZone,
+  // already 00:00:00. TODO: rethink this
+  isoFields: IsoDateTimeFields,
+): BigNano {
+  const possibleEpochNanos = timeZoneOps.getPossibleInstantsFor(isoFields)
+
+  // If not a DST gap, return the single or earlier epochNs
+  if (possibleEpochNanos.length) {
+    return possibleEpochNanos[0]
+  }
+
+  const zonedEpochNano = isoToEpochNano(isoFields)!
+  const zonedEpochNanoDayBefore = moveBigNano(zonedEpochNano, -nanoInUtcDay)
+
+  return timeZoneOps.getTransition(zonedEpochNanoDayBefore, 1)!
 }
 
 function findMatchingEpochNano(

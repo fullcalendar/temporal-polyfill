@@ -61,7 +61,7 @@ import {
 import {
   TimeZoneOps,
   getMatchingInstantFor,
-  getSingleInstantFor,
+  getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneOps'
 import { clampRelativeDuration, computeEpochNanoFrac } from './total'
@@ -192,8 +192,14 @@ export function computeZonedHoursInDay(
   const isoFields = zonedEpochSlotsToIso(slots, timeZoneOps)
   const [isoFields0, isoFields1] = computeDayInterval(isoFields)
 
-  const epochNano0 = getSingleInstantFor(timeZoneOps, isoFields0)
-  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(
+    timeZoneOps as any, // !!!
+    isoFields0,
+  )
+  const epochNano1 = getStartOfDayInstantFor(
+    timeZoneOps as any, // !!!
+    isoFields1,
+  )
 
   const hoursExact = bigNanoToNumber(
     diffBigNanos(epochNano0, epochNano1),
@@ -229,7 +235,10 @@ export function alignZonedEpoch(
 ): BigNano {
   const isoFields = zonedEpochSlotsToIso(slots, timeZoneOps)
   const isoFields1 = computeAlignment(isoFields)
-  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+  const epochNano1 = getStartOfDayInstantFor(
+    timeZoneOps as any, // !!!
+    isoFields1,
+  )
   return epochNano1
 }
 
@@ -246,8 +255,14 @@ export function roundZonedEpochToInterval(
   const [isoFields0, isoFields1] = computeInterval(isoSlots)
 
   const epochNano = slots.epochNanoseconds
-  const epochNano0 = getSingleInstantFor(timeZoneOps, isoFields0)
-  const epochNano1 = getSingleInstantFor(timeZoneOps, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(
+    timeZoneOps as any, // !!!!
+    isoFields0,
+  )
+  const epochNano1 = getStartOfDayInstantFor(
+    timeZoneOps as any, // !!!!
+    isoFields1,
+  )
 
   if (bigNanoOutside(epochNano, epochNano0, epochNano1)) {
     throw new RangeError(errorMessages.invalidProtocolResults)

@@ -42,6 +42,7 @@ import {
   TimeZoneOffsetOps,
   TimeZoneOps,
   getSingleInstantFor,
+  getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneOps'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
@@ -199,14 +200,25 @@ export function plainDateToZonedDateTime<PA>(
   const timeZoneId = refineTimeZoneString(options.timeZone)
   const plainTimeArg = options.plainTime
   const isoTimeFields =
-    plainTimeArg !== undefined
-      ? refinePlainTimeArg(plainTimeArg)
-      : isoTimeFieldDefaults
+    plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
 
   const timeZoneOps = getTimeZoneOps(timeZoneId)
+  let epochNano: BigNano
+
+  if (isoTimeFields) {
+    epochNano = getSingleInstantFor(timeZoneOps, {
+      ...plainDateSlots,
+      ...isoTimeFields,
+    })
+  } else {
+    epochNano = getStartOfDayInstantFor(timeZoneOps as any /* !!! */, {
+      ...plainDateSlots,
+      ...isoTimeFieldDefaults,
+    })
+  }
 
   return createZonedDateTimeSlots(
-    getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...isoTimeFields }),
+    epochNano,
     timeZoneId,
     plainDateSlots.calendar,
   )

@@ -55,19 +55,6 @@ staging/Intl402/Temporal/old/japanese-before-era.js
 staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
 
-##########
-# TimeZone
-##########
-
-# Investigate wrong DST shift
-intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
-intl402/Temporal/ZonedDateTime/prototype/hoursInDay/dst-skipped-cross-midnight.js
-intl402/Temporal/ZonedDateTime/prototype/round/dst-skipped-cross-midnight.js
-intl402/Temporal/ZonedDateTime/prototype/startOfDay/dst-skipped-cross-midnight.js
-intl402/Temporal/ZonedDateTime/prototype/withPlainTime/dst-skipped-cross-midnight.js
-intl402/Temporal/PlainDate/prototype/toZonedDateTime/dst-skipped-cross-midnight.js
-
-
 #########################
 # Locale-Aware Formatting
 #########################
