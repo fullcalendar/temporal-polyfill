@@ -41,6 +41,7 @@
 ##########
 
 # Wrangle `maxLengthOfMonthCodeInAnyYear` HACK
+# Wrangle `chineseMonthDaySearchStartYear` HACK
 
 # Switch `era` to:
 # gregory/gregory-inverse
@@ -55,14 +56,6 @@ staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
 # Infinite loop in createIntlYearDataCache for roc/M02 --- COMMENTED OUT!
 #staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
-
-# When guessing year, our 1972+100 search won't guess old Chinese years
-# Special-case the guess-start-year for Chinese?
-staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-common.js
-staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
-
-# Hebrew wrong date values for some reason
-staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
 
 # Trouble scraping calendar data at lower limit
 # Because `new Temporal.PlainDate(-271821, 4, 19, '<i18n-calendar>')`
@@ -157,3 +150,15 @@ intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-Durat
 # "Test is incorrect, no reason why this date should not exist; seems to be
 # working around an ICU4X bug"
 staging/sm/Temporal/PlainDate/from-islamic-umalqura.js
+
+# Ignored in proposal-temporal repo:
+# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L39
+# "Faulty leap month calculations in Chinese calendar in ICU4C
+# https://unicode-org.atlassian.net/browse/ICU-22230"
+staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
+
+# Ignored in proposal-temporal repo:
+# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L31
+# "Possibly faulty calculations for year 0 in Hebrew calendar in ICU4C
+# https://unicode-org.atlassian.net/browse/ICU-23007"
+staging/sm/Temporal/PlainDate/from-constrain-hebrew.js

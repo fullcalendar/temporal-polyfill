@@ -371,8 +371,13 @@ export function computeIntlYearMonthForMonthDay(
   isLeapMonth: boolean,
   day: number,
 ): YearMonthParts | undefined {
+  const isChinese = this.id && computeCalendarIdBase(this.id) === 'chinese'
+  const startIsoYear = isChinese
+    ? chineseMonthDaySearchStartYear(monthCodeNumber, isLeapMonth, day)
+    : isoEpochFirstLeapYear
+
   let [startYear, startMonth, startDay] = computeIntlDateParts.call(this, {
-    isoYear: isoEpochFirstLeapYear,
+    isoYear: startIsoYear,
     isoMonth: isoMonthsInYear,
     isoDay: 31,
   })
@@ -412,6 +417,46 @@ export function computeIntlYearMonthForMonthDay(
       return [tryYear, tryMonth]
     }
   }
+}
+
+function chineseMonthDaySearchStartYear(
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  day: number,
+): number {
+  // Note that ICU4C actually has _no_ years in which leap months M01L and
+  // M09L through M12L have 30 days. The values marked with (*) here are years
+  // in which the leap month occurs with 29 days. ICU4C disagrees with ICU4X
+  // here and it is not clear which is correct.
+  if (isLeapMonth) {
+    switch (monthCodeNumber) {
+      case 1:
+        return 1651 // *
+      case 2:
+        return day < 30 ? 1947 : 1765
+      case 3:
+        return day < 30 ? 1966 : 1955
+      case 4:
+        return day < 30 ? 1963 : 1944
+      case 5:
+        return day < 30 ? 1971 : 1952
+      case 6:
+        return day < 30 ? 1960 : 1941
+      case 7:
+        return day < 30 ? 1968 : 1938
+      case 8:
+        return day < 30 ? 1957 : 1718
+      case 9:
+        return 1832 // *
+      case 10:
+        return 1870 // *
+      case 11:
+        return 1814 // *
+      case 12:
+        return 1890 // *
+    }
+  }
+  return 1972
 }
 
 // -----------------------------------------------------------------------------
