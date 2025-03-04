@@ -58,7 +58,6 @@ staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
 # When guessing year, our 1972+100 search won't guess old Chinese years
 # Special-case the guess-start-year for Chinese?
-staging/sm/Temporal/PlainMonthDay/from-chinese.js
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-common.js
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
 

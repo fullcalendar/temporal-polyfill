@@ -821,18 +821,38 @@ export function nativeMonthDayFromFields(
       this.id === gregoryCalendarId ||
       this.id === japaneseCalendarId
     if (isIsoLike) {
-      yearMaybe = isoEpochFirstLeapYear
-
-      // TODO: more DRY
-      // might limit overflow
-      const month = refineMonth(this, fields, yearMaybe, overflow)
-      // NOTE: internal call of getDefinedProp not necessary
-      day = refineDay(this, fields as DayFields, month, yearMaybe, overflow)
-    } else if (this.id && computeCalendarIdBase(this.id) === 'coptic') {
-      // HACK. TODO: make proper system for maxLengthOfMonthCodeInAnyYear
+      const month = refineMonth(this, fields, isoEpochFirstLeapYear, overflow)
+      day = refineDay(
+        this,
+        fields as DayFields,
+        month,
+        isoEpochFirstLeapYear,
+        overflow,
+      )
+    } else if (
+      this.id &&
+      computeCalendarIdBase(this.id) === 'coptic' &&
+      overflow === Overflow.Constrain
+    ) {
       const maxLengthOfMonthCodeInAnyYear =
         !isLeapMonth && monthCodeNumber === 13 ? 6 : 30
-      day = fields.day! // guaranteed by caller
+      day = fields.day!
+      day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
+    } else if (
+      this.id &&
+      computeCalendarIdBase(this.id) === 'chinese' &&
+      overflow === Overflow.Constrain
+    ) {
+      const maxLengthOfMonthCodeInAnyYear =
+        isLeapMonth &&
+        (monthCodeNumber === 1 ||
+          monthCodeNumber === 9 ||
+          monthCodeNumber === 10 ||
+          monthCodeNumber === 11 ||
+          monthCodeNumber === 12)
+          ? 29
+          : 30
+      day = fields.day!
       day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
     } else {
       // NORMAL CASE
