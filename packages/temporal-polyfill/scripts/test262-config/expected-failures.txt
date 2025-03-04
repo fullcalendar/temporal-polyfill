@@ -54,9 +54,6 @@ intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
 staging/Intl402/Temporal/old/japanese-before-era.js
 staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
-# Infinite loop in createIntlYearDataCache for roc/M02 --- COMMENTED OUT!
-#staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
-
 # Trouble scraping calendar data at lower limit
 # Because `new Temporal.PlainDate(-271821, 4, 19, '<i18n-calendar>')`
 # translates to epochMilli < -8640000000000000

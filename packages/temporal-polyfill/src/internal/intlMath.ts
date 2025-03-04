@@ -135,6 +135,10 @@ function createIntlYearDataCache(
       // move to last day of previous month
       epochMilli -= milliInDay
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
+    /*
+    TODO: add max-iteration to avoid infinite loop when Intl.DateTimeFormat
+    returns unexpected results
+    */
 
     return {
       monthEpochMillis: millisReversed.reverse(),
@@ -191,6 +195,8 @@ export function parseIntlYear(
         era = 'bce'
       } else if (era === 'ad' || era === 'a') {
         era = 'ce'
+      } else if (era === 'beforeroc') {
+        era = 'broc'
       }
 
       eraYear = year // TODO: will this get optimized to next line?

@@ -40,7 +40,7 @@ export const eraOriginsByCalendarId: {
     'era1': 0,
   },
   'roc': {
-    'beforeroc': -1,
+    'broc': -1, // before roc
     'minguo': 0,
   },
   'buddhist': {
