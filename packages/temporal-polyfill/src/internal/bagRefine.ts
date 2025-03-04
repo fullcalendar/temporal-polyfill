@@ -3,6 +3,7 @@ import {
   isoCalendarId,
   japaneseCalendarId,
 } from './calendarConfig'
+import { computeCalendarIdBase } from './calendarId'
 import {
   NativeDateRefineDeps,
   NativeMonthDayRefineOps,
@@ -119,6 +120,7 @@ import {
   Callable,
   bindArgs,
   clampEntity,
+  clampNumber,
   clampProp,
   mapPropNamesToConstant,
   pluckProps,
@@ -826,6 +828,12 @@ export function nativeMonthDayFromFields(
       const month = refineMonth(this, fields, yearMaybe, overflow)
       // NOTE: internal call of getDefinedProp not necessary
       day = refineDay(this, fields as DayFields, month, yearMaybe, overflow)
+    } else if (this.id && computeCalendarIdBase(this.id) === 'coptic') {
+      // HACK. TODO: make proper system for maxLengthOfMonthCodeInAnyYear
+      const maxLengthOfMonthCodeInAnyYear =
+        !isLeapMonth && monthCodeNumber === 13 ? 6 : 30
+      day = fields.day! // guaranteed by caller
+      day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
     } else {
       // NORMAL CASE
       day = fields.day! // guaranteed by caller

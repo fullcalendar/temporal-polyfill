@@ -40,8 +40,14 @@
 # Calendar
 ##########
 
-# Switch `era` to gregory/gregory-inverse and japenese/japanese-inverse
-# Must canonicalize these `era` fields on bag input
+# Wrangle `maxLengthOfMonthCodeInAnyYear` HACK
+
+# Switch `era` to:
+# gregory/gregory-inverse
+# japenese/japanese-inverse
+# roc/roc-inverse
+# etc
+# Search for helperEthioaa in calendar.mjs in reference implementation
 # FYI, canonicalization already happening on internal Intl.DateTimeFormat results
 intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
 staging/Intl402/Temporal/old/japanese-before-era.js
@@ -49,10 +55,6 @@ staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
 # Infinite loop in createIntlYearDataCache for roc/M02 --- COMMENTED OUT!
 #staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
-
-# When guessing year, start at 1970 (instead of 1972)
-# Do this for all calendars?
-staging/sm/Temporal/PlainMonthDay/from-coptic.js
 
 # When guessing year, our 1972+100 search won't guess old Chinese years
 # Special-case the guess-start-year for Chinese?
