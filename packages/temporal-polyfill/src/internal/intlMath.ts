@@ -27,6 +27,7 @@ import {
   epochMilliToIso,
   isoArgsToEpochMilli,
   isoToEpochMilli,
+  maxMilli,
 } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
@@ -94,6 +95,7 @@ function createIntlYearDataCache(
   function buildYear(year: number) {
     let epochMilli = isoArgsToEpochMilli(year - yearCorrection)!
     let intlFields: IntlDateFields
+    let iterations = 0
     const millisReversed: number[] = []
     const monthStringsReversed: string[] = []
 
@@ -134,11 +136,18 @@ function createIntlYearDataCache(
 
       // move to last day of previous month
       epochMilli -= milliInDay
+
+      if (
+        // Safeguard to avoid infinite loop when Intl.DateTimeFormat gives
+        // unespected results
+        ++iterations > 100 ||
+        // If any part of a calendar's year underflows epochMilli,
+        // give up
+        epochMilli < -maxMilli
+      ) {
+        throw new RangeError('BAD!')
+      }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
-    /*
-    TODO: add max-iteration to avoid infinite loop when Intl.DateTimeFormat
-    returns unexpected results
-    */
 
     return {
       monthEpochMillis: millisReversed.reverse(),

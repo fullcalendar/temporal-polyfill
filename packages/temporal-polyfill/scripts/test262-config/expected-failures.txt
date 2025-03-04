@@ -54,19 +54,6 @@ intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
 staging/Intl402/Temporal/old/japanese-before-era.js
 staging/sm/Temporal/PlainDate/non-positive-era-year.js
 
-# Trouble scraping calendar data at lower limit
-# Because `new Temporal.PlainDate(-271821, 4, 19, '<i18n-calendar>')`
-# translates to epochMilli < -8640000000000000
-# which errors when passed to DTF::format()
-# Solution entails using epochMilli exactly -8640000000000000,
-# with a time zone with negative offset like:
-#
-# new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', calendar: 'buddhist', dateStyle: 'full', timeStyle: 'full' })
-#   .format(Date.UTC(-271821, 4 - 1, 20))
-# > 'Monday, November 19, -271273 BE at 6:09:24 PM GMT-05:50:36'
-#
-staging/sm/Temporal/PlainDate/withCalendar.js
-
 
 ##########
 # TimeZone
@@ -117,6 +104,23 @@ staging/sm/Temporal/ZonedDateTime/zones-and-links.js
 
 # WONTFIX: Precision issue with Duration::total
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
+
+# WONTFIX
+# Our polyfill does not support the lowest year of i18n calendars because:
+#
+# A) To determine a YMD values, we must use Intl.DateTimeFormat scraping to
+#    crawl backwards through years. If YMD is within-bounds, but start-of-year
+#    is not, our algorithm chokes
+#
+# Failing code:
+#   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
+#   // well within epochMilli bounds, but fails
+#
+# B) -271821-04-19 is a valid PlainDate but it's out-of-range when computing UTC
+#    epochMilli for Intl.DateTimeFormat. Possible to use a negative offset time
+#    zone like America/Chicago, but this special-case is cumbersome.
+#
+staging/sm/Temporal/PlainDate/withCalendar.js
 
 # Intl.DateTimeFormat does not canonicalize time zone yet
 intl402/DateTimeFormat/timezone-not-canonicalized.js

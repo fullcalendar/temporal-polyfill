@@ -57,7 +57,7 @@ TODO: move all check* calls as late as possible, right before record-creation, e
 */
 
 const maxDays = 100000000
-const maxMilli = maxDays * milliInDay
+export const maxMilli = maxDays * milliInDay
 const epochNanoMax: BigNano = [maxDays, 0]
 const epochNanoMin: BigNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax

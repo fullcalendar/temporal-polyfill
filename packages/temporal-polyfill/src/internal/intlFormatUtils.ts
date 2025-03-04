@@ -1,3 +1,5 @@
+import { maxMilli } from './timeMath'
+
 export type LocalesArg = string | string[]
 export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]
 export type RawFormattable = Date | number
@@ -8,9 +10,15 @@ export const standardLocaleId = 'en-GB' // 24-hour clock, gregorian by default
 
 export function hashIntlFormatParts(
   intlFormat: Intl.DateTimeFormat,
-  epochMilliseconds: number,
+  epochMilli: number,
 ): Record<string, string> {
-  const parts = intlFormat.formatToParts(epochMilliseconds)
+  // TODO: best level for this?
+  // Probably do it when date is *converted* to epochMilli
+  if (epochMilli < -maxMilli) {
+    throw new RangeError('BAD!')
+  }
+
+  const parts = intlFormat.formatToParts(epochMilli)
   const hash = {} as Record<string, string>
 
   for (const part of parts) {
