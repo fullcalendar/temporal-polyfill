@@ -71,12 +71,7 @@ import {
   isoTimeFieldNamesAsc,
 } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
-import {
-  computeIsoDaysInMonth,
-  constrainIsoTimeFields,
-  isoEpochFirstLeapYear,
-  isoMonthsInYear,
-} from './isoMath'
+import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
 import { RelativeToSlotsNoCalendar } from './markerSystem'
 import { OffsetDisambig, Overflow } from './options'
@@ -121,7 +116,6 @@ import {
   bindArgs,
   clampEntity,
   clampProp,
-  getDefinedProp,
   mapPropNamesToConstant,
   pluckProps,
   remapProps,
@@ -315,13 +309,12 @@ export function refinePlainMonthDayBag(
   calendarAbsent: boolean,
   bag: MonthDayBag,
   options?: OverflowOptions,
-  requireFields: string[] = [], // when called from Calendar
 ): PlainMonthDaySlots {
   const fields = refineCalendarFields(
     calendarOps,
     bag,
     dateFieldNamesAlpha,
-    requireFields,
+    dayFieldNames,
   )
 
   // Callers who omit the calendar are not writing calendar-independent
@@ -779,97 +772,53 @@ export function nativeYearMonthFromFields(
 
 export function nativeMonthDayFromFields(
   this: NativeMonthDayRefineOps,
-  fields: DateBag,
+  fields: DateBag, // guaranteed `day`
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const overflow = refineOverflowOptions(options)
-  const isIso = !this.id
-  const year =
+  let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
       ? refineYear(this, fields)
       : undefined
-  const { monthCode, month } = fields as DateBag
+  let day: number
   let monthCodeNumber: number
   let isLeapMonth: boolean
-  let normalYear: number | undefined
-  let normalMonth: number | undefined
-  let normalDay: number
 
-  if (monthCode !== undefined) {
-    ;[monthCodeNumber, isLeapMonth] = parseMonthCode(monthCode)
-    normalDay = getDefinedProp(fields, 'day')
-
-    // query calendar for year/month
-    const res = this.yearMonthForMonthDay(
-      monthCodeNumber,
-      isLeapMonth,
-      normalDay,
-    )
-    if (!res) {
-      throw new RangeError(errorMessages.failedYearGuess)
-    }
-    ;[normalYear, normalMonth] = res
-
-    // monthCode conflicts with month?
-    if (month !== undefined && month !== normalMonth) {
-      throw new RangeError(errorMessages.mismatchingMonthAndCode)
-    }
-
-    // constrain (what refineMonth/refineDay would normally do)
-    // HACK with gregory comparison
-    if (isIso || this.id === 'gregory') {
-      normalMonth = clampEntity(
-        'month',
-        normalMonth!,
-        1,
-        isoMonthsInYear,
-        Overflow.Reject,
-      ) // reject because never leap months
-      normalDay = clampEntity(
-        'day',
-        normalDay,
-        1,
-        computeIsoDaysInMonth(
-          year !== undefined ? year : normalYear!,
-          normalMonth,
-        ),
-        overflow,
-      )
-    }
-  } else {
-    // refine year/month/day
-    normalYear =
-      year === undefined && isIso
-        ? isoEpochFirstLeapYear
-        : refineYear(this, fields as EraYearOrYear)
-    normalMonth = refineMonth(this, fields, normalYear, overflow)
-    normalDay = refineDay(
-      this,
-      fields as DayFields,
-      normalMonth,
-      normalYear,
-      overflow,
-    )
-
-    // compute monthCode
-    const leapMonth = this.leapMonth(normalYear)
-    isLeapMonth = normalMonth === leapMonth
-    monthCodeNumber = monthToMonthCodeNumber(normalMonth, leapMonth)
-
-    // query calendar for normalized year/month
-    const res = this.yearMonthForMonthDay(
-      monthCodeNumber,
-      isLeapMonth,
-      normalDay,
-    )
-    if (!res) {
-      throw new RangeError(errorMessages.failedYearGuess)
-    }
-    ;[normalYear, normalMonth] = res
+  // TODO: make this DRY the HACK in refinePlainMOnthDayBag?
+  const isIso = !this.id
+  if (yearMaybe === undefined && isIso) {
+    yearMaybe = isoEpochFirstLeapYear
   }
 
+  // year given? parse either monthCode or month (if both specified, must be equivalent)
+  if (yearMaybe !== undefined) {
+    // might limit overflow
+    const month = refineMonth(this, fields, yearMaybe, overflow)
+    // NOTE: internal call of getDefinedProp not necessary
+    day = refineDay(this, fields as DayFields, month, yearMaybe, overflow)
+
+    const leapMonth = this.leapMonth(yearMaybe)
+    monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
+    isLeapMonth = month === leapMonth
+  } else {
+    // no year given? there must be a monthCode
+    if (fields.monthCode === undefined) {
+      throw new TypeError('BAD!')
+    }
+    // pluck monthCode/day number without limiting overflow
+    ;[monthCodeNumber, isLeapMonth] = parseMonthCode(fields.monthCode)
+    day = fields.day! // guaranteed by caller
+  }
+
+  // query calendar for final year/month
+  const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+  if (!res) {
+    throw new RangeError(errorMessages.failedYearGuess)
+  }
+  const [finalYear, finalMonth] = res
+
   return createPlainMonthDaySlots(
-    checkIsoDateInBounds(this.isoFields(normalYear, normalMonth, normalDay)),
+    checkIsoDateInBounds(this.isoFields(finalYear, finalMonth, day)),
     this.id || isoCalendarId,
   )
 }

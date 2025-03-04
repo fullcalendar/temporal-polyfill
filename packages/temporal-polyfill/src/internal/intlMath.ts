@@ -394,6 +394,7 @@ export function computeIntlYearMonthForMonthDay(
   }
 
   // Walk backwards until finding a year with monthCode/day
+  // TODO: reference implementation says only go 20 years back! also special-cases per-calendar!
   for (let yearMove = 0; yearMove < 100; yearMove++) {
     const tryYear = startYear - yearMove
     const tryLeapMonth = computeIntlLeapMonth.call(this, tryYear)

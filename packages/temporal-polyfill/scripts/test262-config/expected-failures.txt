@@ -34,8 +34,6 @@
 ################################
 
 # Constrain input `day` - all calendars, not just ISO
-# See hack in `nativeMonthDayFromFields`
-intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
 staging/sm/Temporal/PlainMonthDay/result-not-after-1972-dec-31.js
 staging/sm/Temporal/PlainMonthDay/from-chinese.js
 
