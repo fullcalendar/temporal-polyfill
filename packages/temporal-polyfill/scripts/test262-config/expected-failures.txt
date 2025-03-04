@@ -33,9 +33,7 @@
 # Field Parsing :: PlainMonthDay
 ################################
 
-# Ignore very high/low ISO years
-built-ins/Temporal/PlainMonthDay/from/fields-string.js
-built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
+# Wrangle `parsePlainDate`/`isPlainMonthDay` HACK
 
 
 ##########

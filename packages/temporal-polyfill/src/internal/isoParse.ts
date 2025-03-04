@@ -167,6 +167,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
 export function parsePlainDate(
   s: string,
   isPlainYearMonth?: boolean,
+  isPlainMonthDay?: boolean,
 ): PlainDateSlots {
   let organized = parseDateTimeLike(requireString(s))
 
@@ -174,12 +175,20 @@ export function parsePlainDate(
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  // HACK to not limit the D in the YMD string because it'll get thrown away
-  if (isPlainYearMonth && organized.calendar === isoCalendarId) {
-    if (organized.isoYear === -271821 && organized.isoMonth === 4) {
-      organized = { ...organized, isoDay: 20, ...isoTimeFieldDefaults }
-    } else {
-      organized = { ...organized, isoDay: 1, ...isoTimeFieldDefaults }
+  // ISO HACKS
+  if (isPlainYearMonth) {
+    // HACK to not limit the D in the YMD string because it'll get thrown away
+    if (organized.calendar === isoCalendarId) {
+      if (organized.isoYear === -271821 && organized.isoMonth === 4) {
+        organized = { ...organized, isoDay: 20, ...isoTimeFieldDefaults }
+      } else {
+        organized = { ...organized, isoDay: 1, ...isoTimeFieldDefaults }
+      }
+    }
+  } else if (isPlainMonthDay) {
+    // HACK
+    if (organized.calendar === isoCalendarId) {
+      organized = { ...organized, isoYear: isoEpochFirstLeapYear }
     }
   }
 
@@ -228,7 +237,7 @@ export function parsePlainMonthDay(
     )
   }
 
-  const dateSlots = parsePlainDate(s)
+  const dateSlots = parsePlainDate(s, false, /* isPlainMonthDay = */ true)
   const { calendar } = dateSlots
   const calendarOps = getCalendarOps(calendar)
 
