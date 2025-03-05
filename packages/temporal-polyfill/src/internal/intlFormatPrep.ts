@@ -75,10 +75,6 @@ const dateTimeStandardNames: OptionNames = [
   ...dateStandardNames,
   ...timeStandardNames,
 ]
-const zonedStandardNames: OptionNames = [
-  ...dateTimeStandardNames,
-  ...timeZoneNameStrs,
-]
 
 // Exclusions
 // (Silently removed)
@@ -123,7 +119,9 @@ function createOptionsTransformer(
       if (strictOptions && hasAnyExclusions) {
         throw new TypeError('BAD!') // no options overlap!
       }
-      Object.assign(options, fallbacks)
+
+      // still allow options to override fallbacks if present
+      options = { ...fallbacks, ...options }
     }
 
     // HACK: this condition is a proxy for whether this is a Plain type
@@ -146,7 +144,7 @@ const transformInstantOptions = createOptionsTransformer(
   dateTimeFallbacks,
 )
 const transformZonedOptions = createOptionsTransformer(
-  zonedStandardNames,
+  dateTimeStandardNames,
   zonedFallbacks,
 )
 const transformDateTimeOptions = createOptionsTransformer(

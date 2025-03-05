@@ -44,22 +44,6 @@
 # Wrangle `chineseMonthDaySearchStartYear` HACK
 
 
-#########################
-# Locale-Aware Formatting
-#########################
-
-# ZonedDateTime::toLocaleString({ "timeZoneName": "short" }) should contain time parts
-# Be more like Date::toLocaleString instead of DTF::format():
-#
-#   let legacyDate = new Date(1735213600_321)
-#   let options = { timeZone: 'UTC', timeZoneName: 'short' }
-#   console.log(legacyDate.toLocaleString('en', options))                  // 12/26/2024, 11:46:40 AM UTC
-#   console.log(new Intl.DateTimeFormat('en', options).format(legacyDate)) // 12/26/2024, UTC
-#
-# Should massage DTF options more
-intl402/Temporal/ZonedDateTime/prototype/toLocaleString/lone-options-accepted.js
-
-
 ################
 # NOT ACTIONABLE
 ################
