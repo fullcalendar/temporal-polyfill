@@ -1,62 +1,24 @@
 
-#########################
-# Limits :: ZonedDateTime
-#########################
+##
+## Spec deviations specific to our polyfill
+##
 
-# Wrangle temporary `checkIsoDateInBoundsStrict`
-
-
-##########################
-# Limits :: PlainMonthYear
-##########################
-
-# Wrangle `smallestPrecision` HACK
-# Wrangle `parsePlainDate`/`isPlainYearMonth` HACK
-# Wrangle `diffPlainYearMonth` HACK
-
-
-######################
-# Field Parsing :: All
-######################
-
-# Wrangle `builtinRefiners`.offset HACK
-
-
-################################
-# Field Parsing :: ZonedDateTime
-################################
-
-# Wrangle `builtinRefiners`.offset HACK
-
-
-################################
-# Field Parsing :: PlainMonthDay
-################################
-
-# Wrangle `parsePlainDate`/`isPlainMonthDay` HACK
-
-
-##########
-# Calendar
-##########
-
-# Wrangle `maxLengthOfMonthCodeInAnyYear` HACK
-# Wrangle `chineseMonthDaySearchStartYear` HACK
-
-
-################
-# NOT ACTIONABLE
-################
-
-# WONTFIX: Seems our Node version doesn't normalize
-# America/Nipigon -> America/Toronto, but the browsers do
-staging/sm/Temporal/ZonedDateTime/zones-and-links.js
-
-# WONTFIX: Precision issue with Duration::total
+# WONTFIX
+# The spec calls for higher floating-point division precision than what JS's
+# 64-bit floats provide. proposal-temporal/polyfill achieves this via string
+# manipulation hacks:
+# https://github.com/tc39/proposal-temporal/blob/999937370cfd0f6d2ce3cc83a01ab82ab3771b46/polyfill/lib/timeduration.mjs#L92
+# Our polyfill avoids the associated performance degradation and filesize
+# increase by doing simple native JS number division, but this sometimes results
+# in less precise results. Example:
+#
+#   OURS: 816.5692187493501
+#   SPEC: 816.56921874935
+#
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # WONTFIX
-# Our polyfill does not support the lowest year of i18n calendars because:
+# Our polyfill does not support the lowest year of some i18n calendars because:
 #
 # A) To determine a YMD values, we must use Intl.DateTimeFormat scraping to
 #    crawl backwards through years. If YMD is within-bounds, but start-of-year
@@ -64,7 +26,7 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 #
 # Failing code:
 #   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
-#   // well within epochMilli bounds, but fails
+#   // 2 days within epochMilli lower bound, but still fails
 #
 # B) -271821-04-19 is a valid PlainDate but it's out-of-range when computing UTC
 #    epochMilli for Intl.DateTimeFormat. Possible to use a negative offset time
@@ -72,15 +34,18 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 #
 staging/sm/Temporal/PlainDate/withCalendar.js
 
+
+##
+## Issues that will likely resolve when upgrading our Node 18
+##
+
+# Seems our Node version doesn't normalize
+# America/Nipigon -> America/Toronto, but the browsers do
+staging/sm/Temporal/ZonedDateTime/zones-and-links.js
+
 # Intl.DateTimeFormat does not canonicalize time zone yet
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
-
-# Intl.DateTimeFormat does accept tz offset time zones yet
-intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
-intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
-intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
-intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
 
 # Intl.DateTimeFormat doesn't output what we expect,
 # which is checked in test262 before comparing to Temporal formatting
@@ -96,20 +61,27 @@ intl402/DurationFormat/prototype/format/temporal-duration-object-arg.js
 intl402/DurationFormat/prototype/format/taint-temporal-duration-prototype.js
 intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
 
-# Ignored in proposal-temporal repo:
-# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L33
-# "Test is incorrect, no reason why this date should not exist; seems to be
-# working around an ICU4X bug"
+
+##
+## Already ignored in proposal-temporal/polyfill
+## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
+##
+
+# These are caught by the default test glob, but are unrelated to Temporal.
+# They rely on Intl.DateTimeFormat supporting offset time zones.
+intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
+intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
+
+# Test is incorrect, no reason why this date should not exist; seems to be
+# working around an ICU4X bug
 staging/sm/Temporal/PlainDate/from-islamic-umalqura.js
 
-# Ignored in proposal-temporal repo:
-# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L39
-# "Faulty leap month calculations in Chinese calendar in ICU4C
-# https://unicode-org.atlassian.net/browse/ICU-22230"
+# Faulty leap month calculations in Chinese calendar in ICU4C
+# https://unicode-org.atlassian.net/browse/ICU-22230
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
 
-# Ignored in proposal-temporal repo:
-# https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt#L31
-# "Possibly faulty calculations for year 0 in Hebrew calendar in ICU4C
-# https://unicode-org.atlassian.net/browse/ICU-23007"
+# Possibly faulty calculations for year 0 in Hebrew calendar in ICU4C
+# https://unicode-org.atlassian.net/browse/ICU-23007
 staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
