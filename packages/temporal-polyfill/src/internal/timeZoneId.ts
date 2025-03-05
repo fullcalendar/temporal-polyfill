@@ -66,10 +66,19 @@ const queryTimeZoneIntlFormat = memoize(
 const icuRegExp =
   /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/
 
+// TODO: move to parsing file?
+const badCharactersRegExp = /[^\w\/:+-]+/
+
 function normalizeNamedTimeZoneId(id: string): string {
+  if (badCharactersRegExp.test(id)) {
+    throw new RangeError('BAD! ' + id)
+  }
+
   if (icuRegExp.test(id)) {
     throw new RangeError(errorMessages.forbiddenIcuTimeZone)
   }
+
+  // TODO:^^^ do above rejecting before expensive Intl.DateTimeFormat is created?
 
   return id
     .toLowerCase()
