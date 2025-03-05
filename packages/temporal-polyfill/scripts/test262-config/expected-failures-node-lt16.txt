@@ -23,8 +23,9 @@ intl402/Temporal/PlainYearMonth/prototype/with/minimum-valid-year-month.js
 intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
 staging/Intl402/Temporal/old/japanese-era.js
 
-# INVESTIGATE!!!
-# Intl.DateTimeFormat {"dayPeriod":"short"} should include time parts
+# Before Node 16, Intl.DateTimeFormat does not support dayPeriod and instead,
+# if no recognized options are provided, defaults to outputting date+time.
+# Out polyfill defaults to outputting date alone, which is fine.
 intl402/Temporal/Instant/prototype/toLocaleString/lone-options-accepted.js
 intl402/Temporal/PlainDateTime/prototype/toLocaleString/lone-options-accepted.js
 intl402/Temporal/PlainTime/prototype/toLocaleString/lone-options-accepted.js
