@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - spec-2025
 
 env:
   TZ: "America/New_York"
@@ -17,15 +17,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST262_NODE_VERSION: [14.21.3, 16.20.0, 18.19.0, 20.10.0]
+        TEST262_NODE_VERSION: [14.21.3, 16.20.0, 18.19.0, 20.10.0, 22.14.0]
         include:
           - TEST262_NODE_VERSION: 14.21.3
-            LINTING: 1
           - TEST262_NODE_VERSION: 16.20.0
-            TEST262_ESM: 1
+            LINTING: 1
           - TEST262_NODE_VERSION: 18.19.0
-            TEST262_ESM: terser
+            TEST262_ESM: 1
           - TEST262_NODE_VERSION: 20.10.0
+            TEST262_ESM: terser
+          - TEST262_NODE_VERSION: 22.14.0
             TEST262_ESM: swc
 
     steps:
@@ -43,7 +44,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           # NOTE: keep synced with .npmrc
-          node-version: 18.19.0
+          node-version: 22.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
