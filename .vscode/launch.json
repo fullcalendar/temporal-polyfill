@@ -30,6 +30,21 @@
       ]
     },
     {
+      "name": "Test262: Debug File (Node 14)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
+      "runtimeVersion": "14",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test262", "--", "--no-timeout", "${file}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "outFiles": [
+        "${workspaceFolder}/packages/temporal-polyfill/dist/**/*.(m|c|)js"
+      ]
+    },
+    {
       "name": "Vitest: Debug File",
       "type": "node",
       "request": "launch",
