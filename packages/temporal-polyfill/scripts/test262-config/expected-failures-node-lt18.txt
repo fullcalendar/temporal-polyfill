@@ -17,7 +17,3 @@ intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js
-
-# INVESTIGATE!!!
-# Node 16, Intl.DateTimeFormat incorrectly canonicalizes islamic-rgsa -> islamic
-staging/Intl402/Temporal/old/islamic-calendars.js

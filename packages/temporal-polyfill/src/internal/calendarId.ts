@@ -10,7 +10,13 @@ export function refineCalendarId(id: string): string {
 export function resolveCalendarId(id: string): string {
   id = id.toLowerCase() // normalize
 
-  if (id !== isoCalendarId && id !== gregoryCalendarId) {
+  if (
+    id !== isoCalendarId &&
+    id !== gregoryCalendarId &&
+    // Node 16 and lower don't recognize islamic-rgsa and instead normalize
+    // it to islamic. Whitelist
+    id !== 'islamic-rgsa'
+  ) {
     const canonId = queryCalendarIntlFormat(id).resolvedOptions().calendar
 
     if (computeCalendarIdBase(id) !== computeCalendarIdBase(canonId)) {
