@@ -78,3 +78,8 @@ staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
 # Possibly faulty calculations for year 0 in Hebrew calendar in ICU4C
 # https://unicode-org.atlassian.net/browse/ICU-23007
 staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
+
+# Caused by https://issues.chromium.org/issues/40893567
+# Remove these lines after that bug is fixed
+staging/Intl402/Temporal/old/date-time-format.js
+staging/Intl402/Temporal/old/datetime-toLocaleString.js

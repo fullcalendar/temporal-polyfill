@@ -1,7 +1,8 @@
+
 # NOT-IMPLEMENTED
 # For options passed to Intl.DateTimeFormat, we do not reject legacy ICU `timeZone`.
 #
-# Older versions of Node naturally fail on these IDs (ironically more compliant)
-# Newer versions of Node accept them (ironically less compliant)
+# Node<16 naturally fail on these IDs (ironically more compliant)
+# Node>=16 accept them (ironically less compliant)
 #
 intl402/DateTimeFormat/timezone-legacy-non-iana.js
