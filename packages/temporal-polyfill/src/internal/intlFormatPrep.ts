@@ -1,4 +1,4 @@
-import { isoCalendarId } from './calendarConfig'
+import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
@@ -222,6 +222,8 @@ export function createFormatPrepper<S>(
     )
 
     const resolvedOptions = subformat.resolvedOptions()
+    fixResolvedOptionsCalendar(resolvedOptions, options, locales)
+
     return [subformat, ...toEpochMillis(config, resolvedOptions, slotsList)]
   }
 }
@@ -332,4 +334,31 @@ function checkCalendarsCompatible(
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
+}
+
+// Runtime Workarounds
+// -----------------------------------------------------------------------------
+
+/*
+Workaround bug where explicitly specifying calendar:iso8601 results in calendar:gregory
+Happens in Node 14 and some version of V8 (Chrome version 80 at least)
+https://github.com/nodejs/node/issues/42440
+https://codepen.io/arshaw/pen/RNwVewm?editors=0010
+*/
+export function fixResolvedOptionsCalendar(
+  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
+  givenOptions: Intl.DateTimeFormatOptions,
+  givenLocales: LocalesArg | undefined,
+): void {
+  if (
+    resolvedOptions.calendar === gregoryCalendarId &&
+    (givenOptions.calendar === isoCalendarId || localeContainsIso(givenLocales))
+  ) {
+    resolvedOptions.calendar = isoCalendarId
+  }
+}
+
+function localeContainsIso(locales: LocalesArg | undefined): boolean {
+  const localeStr = [].concat((locales as any) || []).join(' ')
+  return localeStr.includes(isoCalendarId)
 }

@@ -3,6 +3,7 @@ import {
   FormatPrepper,
   createFormatForPrep,
   createFormatPrepper,
+  fixResolvedOptionsCalendar,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
@@ -119,10 +120,14 @@ function createDateTimeFormatInternals(
   const rawFormat = new RawDateTimeFormat(locales, options)
   const resolveOptions = rawFormat.resolvedOptions()
   const resolvedLocale = resolveOptions.locale
+
+  // I forget, why the copying?
   const copiedOptions = pluckProps(
     Object.keys(options) as OptionNames,
     resolveOptions as Intl.DateTimeFormatOptions,
   )
+  fixResolvedOptionsCalendar(copiedOptions as any, options, locales)
+
   const queryFormatPrepperForBranding = memoize(createFormatPrepperForBranding)
 
   const prepFormat: DateTimeFormatInternalPrepper = (
