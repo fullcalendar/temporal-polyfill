@@ -84,7 +84,11 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
       // .format() is always bound to the instance. It's a getter
       // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
       memberDescriptor.get = function (this: DateTimeFormat) {
-        if (!(this instanceof DateTimeFormatNew)) {
+        /*
+        Protects against querying .format on non-DateTimeFormats AND
+        fake DateTimeFormats via `Object.create(Intl.DateTimeFormat.prototype)`
+        */
+        if (!internalsMap.has(this)) {
           throw new TypeError('BAD!')
         }
         return formatLikeMethod.bind(this)
