@@ -109,8 +109,8 @@ importers:
   packages/temporal-polyfill:
     dependencies:
       temporal-spec:
-        specifier: ^0.2.4
-        version: 0.2.4
+        specifier: workspace:^0.2.4
+        version: link:../temporal-spec
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1

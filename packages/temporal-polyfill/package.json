@@ -92,7 +92,7 @@
     "linkDirectory": true
   },
   "dependencies": {
-    "temporal-spec": "^0.2.4"
+    "temporal-spec": "workspace:^0.2.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
