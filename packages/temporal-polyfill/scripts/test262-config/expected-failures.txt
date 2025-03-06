@@ -9,11 +9,11 @@ intl402/DateTimeFormat/prototype/formatRangeToParts/name.js
 intl402/DateTimeFormat/prototype/formatToParts/name.js
 intl402/DateTimeFormat/prototype/resolvedOptions/name.js
 
-# Misc Intl.DateTimeFormat issues to triage
+# Caused by fixResolvedOptionsCalendar
 intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
-intl402/DateTimeFormat/constructor-no-instanceof.js
+
+# Misc Intl.DateTimeFormat issues to triage
 intl402/DateTimeFormat/default-options-object-prototype.js
-intl402/DateTimeFormat/intl-legacy-constructed-symbol.js
 intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
 intl402/DateTimeFormat/prototype/format/no-instanceof.js
 intl402/DateTimeFormat/prototype/format/timedatestyle-en.js

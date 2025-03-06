@@ -43,25 +43,32 @@ export const DateTimeFormat = createDateTimeFormatClass()
 const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
 
 function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
-  const members = RawDateTimeFormat.prototype
-  const memberDescriptors = Object.getOwnPropertyDescriptors(members)
-  const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
+  // public-facing
+  // Intl.DateTimeFormat can be called without `new`
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
+  const DateTimeFormatFunc = function (
+    this: any,
+    locales?: LocalesArg,
+    options?: Intl.DateTimeFormatOptions,
+  ) {
+    return new (DateTimeFormatNew as Classlike)(locales, options)
+  }
 
-  const DateTimeFormat = function (
+  // internal constructor
+  const DateTimeFormatNew = function (
     this: any,
     locales: LocalesArg | undefined,
     options: Intl.DateTimeFormatOptions = {},
   ) {
-    // Constructor can be called without `new`
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
-    if (!(this instanceof DateTimeFormat)) {
-      return new (DateTimeFormat as Classlike)(locales, options)
-    }
     internalsMap.set(
       this as DateTimeFormat,
       createDateTimeFormatInternals(locales, options),
     )
   }
+
+  const members = RawDateTimeFormat.prototype
+  const memberDescriptors = Object.getOwnPropertyDescriptors(members)
+  const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
 
   for (const memberName in memberDescriptors) {
     const memberDescriptor = memberDescriptors[memberName]
@@ -71,7 +78,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     if (typeof memberDescriptor.value === 'function') {
       memberDescriptor.value =
         memberName === 'constructor'
-          ? DateTimeFormat
+          ? DateTimeFormatFunc // expose public-facing
           : formatLikeMethod || createProxiedMethod(memberName)
     } else if (formatLikeMethod) {
       // .format() is always bound to the instance. It's a getter
@@ -82,9 +89,22 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     }
   }
 
-  classDescriptors.prototype.value = Object.create(members, memberDescriptors)
-  Object.defineProperties(DateTimeFormat, classDescriptors)
-  return DateTimeFormat as Classlike
+  // Prototype madness so that:
+  //   new Intl.DateTimeFormat() instanceof Intl.DateTimeFormat
+  //   Intl.DateTimeFormat() instanceof Intl.DateTimeFormat
+  //
+  // give methods to superclass (DateTimeFormatNew)
+  const superclassProto = (DateTimeFormatNew.prototype = Object.create(
+    members,
+    memberDescriptors,
+  ))
+  // prepare DateTimeFormatFunc to be a subclass of DateTimeFormatNew
+  classDescriptors.prototype.value = superclassProto
+  // attach public-facing class-functions to subclass (DateTimeFormatFunc)
+  Object.defineProperties(DateTimeFormatFunc, classDescriptors)
+
+  // expose only public-facing subclass
+  return DateTimeFormatFunc as Classlike
 }
 
 function createFormatMethod(methodName: string) {
