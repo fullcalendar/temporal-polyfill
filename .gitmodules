@@ -7,9 +7,6 @@
 [submodule "test262"]
 	path = test262
 	url = https://github.com/tc39/test262.git
-[submodule "packages/temporal-test262-runner"]
-	path = packages/temporal-test262-runner
-	url = https://github.com/fullcalendar/temporal-test262-runner.git
 [submodule "packages/export-size"]
 	path = packages/export-size
 	url = https://github.com/fullcalendar/export-size.git

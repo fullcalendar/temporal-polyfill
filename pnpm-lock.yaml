@@ -74,7 +74,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^1.0.0-beta.27
-        version: 1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)
+        version: 1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@5.27.0))
       '@types/cli-progress':
         specifier: ^3.11.4
         version: 3.11.4
@@ -98,7 +98,7 @@ importers:
         version: 4.17.21
       tsup:
         specifier: ^7.2.0
-        version: 7.2.0(typescript@5.2.2)
+        version: 7.2.0(@swc/core@1.4.11)(postcss@8.4.33)(typescript@5.2.2)
       tsx:
         specifier: ^4.7.0
         version: 4.7.0
@@ -110,14 +110,14 @@ importers:
     dependencies:
       temporal-spec:
         specifier: ^0.2.4
-        version: link:../temporal-spec
+        version: 0.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1
         version: 1.5.1
       '@js-temporal/temporal-test262-runner':
-        specifier: workspace:*
-        version: link:../temporal-test262-runner
+        specifier: js-temporal/temporal-test262-runner#main
+        version: https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80
       '@swc/core':
         specifier: 1.4.11
         version: 1.4.11
@@ -161,26 +161,11 @@ importers:
 
   packages/temporal-spec: {}
 
-  packages/temporal-test262-runner:
-    dependencies:
-      ansi-colors:
-        specifier: ^4.1.3
-        version: 4.1.3
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
-      progress:
-        specifier: ^2.0.3
-        version: 2.0.3
-      tiny-glob:
-        specifier: ^0.2.9
-        version: 0.2.9
-
   packages/temporal-utils:
     dependencies:
       temporal-spec:
         specifier: ^0.2.0
-        version: link:../temporal-spec
+        version: 0.2.4
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1
@@ -190,7 +175,7 @@ importers:
         version: link:../temporal-polyfill/dist
       vitest:
         specifier: ^1.2.2
-        version: 1.2.2(@types/node@18.11.9)(terser@5.27.0)
+        version: 1.2.2(@types/node@20.11.30)(terser@5.27.0)
 
 packages:
 
@@ -655,6 +640,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.19':
     resolution: {integrity: sha512-kf37QtfW+Hwx/buWGMPcR60iF9ziHa6r/CZJIHbmcm4+0qrXiVdxegAH0F6yddEVQ7zdkjcGCgCzUu+BcbhQxw==}
+
+  '@js-temporal/temporal-test262-runner@https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80':
+    resolution: {tarball: https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80}
+    version: 0.10.1
 
   '@jsdevtools/ez-spawn@3.0.4':
     resolution: {integrity: sha512-f5DRIOZf7wxogefH03RjMPMdBF7ADTWUMoOs9kaJo06EfwF+aFhMZMDZxHg/Xe12hptN9xoZjGso2fdjapBRIA==}
@@ -2699,6 +2688,9 @@ packages:
     resolution: {integrity: sha512-/Wo7DcT0u5HUV486xg675HtjNd3BXZ6xDbzsCUZPt5iw8bTQ63bP0Raut3mvro9u+CUyq7YQd8Cx55fsZXxqLQ==}
     engines: {node: '>=10'}
 
+  temporal-spec@0.2.4:
+    resolution: {integrity: sha512-lDMFv4nKQrSjlkHKAlHVqKrBG4DyFfa9F74cmBZ3Iy3ed8yvWnlWSIdi4IKfSqwmazAohBNwiN64qGx4y5Q3IQ==}
+
   terser@5.27.0:
     resolution: {integrity: sha512-bi1HRwVRskAjheeYl291n3JC4GgO/Ty4z1nVs5AAsmonJulGxpSektecnNedrwK9C7vpvVtcX3cw00VSLt7U2A==}
     engines: {node: '>=10'}
@@ -2991,17 +2983,17 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@antfu/eslint-config@1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)':
+  '@antfu/eslint-config@1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@5.27.0))':
     dependencies:
       '@antfu/eslint-define-config': 1.23.0-2
       '@stylistic/eslint-plugin': 0.0.11(eslint@8.51.0)(typescript@5.2.2)
-      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0)(typescript@5.2.2)
+      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)
       '@typescript-eslint/parser': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
       eslint-config-flat-gitignore: 0.1.2
       eslint-plugin-antfu: 1.0.13(eslint@8.51.0)
       eslint-plugin-eslint-comments: 3.2.0(eslint@8.51.0)
-      eslint-plugin-i: 2.29.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0)
+      eslint-plugin-i: 2.29.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)
       eslint-plugin-jsdoc: 46.10.1(eslint@8.51.0)
       eslint-plugin-jsonc: 2.13.0(eslint@8.51.0)
       eslint-plugin-markdown: 3.0.1(eslint@8.51.0)
@@ -3009,8 +3001,8 @@ snapshots:
       eslint-plugin-no-only-tests: 3.1.0
       eslint-plugin-sort-keys: 2.3.5
       eslint-plugin-unicorn: 48.0.1(eslint@8.51.0)
-      eslint-plugin-unused-imports: 3.0.0(@typescript-eslint/eslint-plugin@6.19.1)(eslint@8.51.0)
-      eslint-plugin-vitest: 0.3.20(@typescript-eslint/eslint-plugin@6.19.1)(eslint@8.51.0)(typescript@5.2.2)
+      eslint-plugin-unused-imports: 3.0.0(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)
+      eslint-plugin-vitest: 0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@5.27.0))
       eslint-plugin-vue: 9.20.1(eslint@8.51.0)
       eslint-plugin-yml: 1.12.2(eslint@8.51.0)
       globals: 13.24.0
@@ -3350,6 +3342,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
+  '@js-temporal/temporal-test262-runner@https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80':
+    dependencies:
+      ansi-colors: 4.1.3
+      js-yaml: 4.1.0
+      progress: 2.0.3
+      tiny-glob: 0.2.9
+
   '@jsdevtools/ez-spawn@3.0.4':
     dependencies:
       call-me-maybe: 1.0.2
@@ -3380,6 +3379,7 @@ snapshots:
       is-builtin-module: 3.2.1
       is-module: 1.0.0
       resolve: 1.22.1
+    optionalDependencies:
       rollup: 3.29.4
 
   '@rollup/pluginutils@3.1.0(rollup@4.9.6)':
@@ -3394,6 +3394,7 @@ snapshots:
       '@types/estree': 1.0.5
       estree-walker: 2.0.2
       picomatch: 2.3.1
+    optionalDependencies:
       rollup: 3.29.4
 
   '@rollup/pluginutils@5.1.0(rollup@4.9.6)':
@@ -3401,6 +3402,7 @@ snapshots:
       '@types/estree': 1.0.5
       estree-walker: 2.0.2
       picomatch: 2.3.1
+    optionalDependencies:
       rollup: 4.9.6
 
   '@rollup/rollup-android-arm-eabi@4.9.6':
@@ -3587,7 +3589,7 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0)(typescript@5.2.2)':
+  '@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
       '@typescript-eslint/parser': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
@@ -3602,6 +3604,7 @@ snapshots:
       natural-compare: 1.4.0
       semver: 7.5.4
       ts-api-utils: 1.0.3(typescript@5.2.2)
+    optionalDependencies:
       typescript: 5.2.2
     transitivePeerDependencies:
       - supports-color
@@ -3614,6 +3617,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 6.19.1
       debug: 4.3.4
       eslint: 8.51.0
+    optionalDependencies:
       typescript: 5.2.2
     transitivePeerDependencies:
       - supports-color
@@ -3630,6 +3634,7 @@ snapshots:
       debug: 4.3.4
       eslint: 8.51.0
       ts-api-utils: 1.0.3(typescript@5.2.2)
+    optionalDependencies:
       typescript: 5.2.2
     transitivePeerDependencies:
       - supports-color
@@ -3646,6 +3651,7 @@ snapshots:
       minimatch: 9.0.3
       semver: 7.5.4
       ts-api-utils: 1.0.3(typescript@5.2.2)
+    optionalDependencies:
       typescript: 5.2.2
     transitivePeerDependencies:
       - supports-color
@@ -4158,10 +4164,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@6.19.1)(eslint-import-resolver-node@0.3.9)(eslint@8.51.0):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint-import-resolver-node@0.3.9)(eslint@8.51.0):
     dependencies:
-      '@typescript-eslint/parser': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
       debug: 3.2.7
+    optionalDependencies:
+      '@typescript-eslint/parser': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
       eslint-import-resolver-node: 0.3.9
     transitivePeerDependencies:
@@ -4184,13 +4191,13 @@ snapshots:
       eslint: 8.51.0
       ignore: 5.2.4
 
-  eslint-plugin-i@2.29.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0):
+  eslint-plugin-i@2.29.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0):
     dependencies:
       debug: 4.3.4
       doctrine: 3.0.0
       eslint: 8.51.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.19.1)(eslint-import-resolver-node@0.3.9)(eslint@8.51.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint-import-resolver-node@0.3.9)(eslint@8.51.0)
       get-tsconfig: 4.7.2
       is-glob: 4.0.3
       minimatch: 3.1.2
@@ -4274,17 +4281,20 @@ snapshots:
       semver: 7.5.4
       strip-indent: 3.0.0
 
-  eslint-plugin-unused-imports@3.0.0(@typescript-eslint/eslint-plugin@6.19.1)(eslint@8.51.0):
+  eslint-plugin-unused-imports@3.0.0(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
       eslint-rule-composer: 0.3.0
+    optionalDependencies:
+      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)
 
-  eslint-plugin-vitest@0.3.20(@typescript-eslint/eslint-plugin@6.19.1)(eslint@8.51.0)(typescript@5.2.2):
+  eslint-plugin-vitest@0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@5.27.0)):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1)(eslint@8.51.0)(typescript@5.2.2)
       '@typescript-eslint/utils': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
+    optionalDependencies:
+      '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)
+      vitest: 1.2.2(@types/node@20.8.7)(terser@5.27.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -5177,10 +5187,12 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  postcss-load-config@4.0.2:
+  postcss-load-config@4.0.2(postcss@8.4.33):
     dependencies:
       lilconfig: 3.0.0
       yaml: 2.3.4
+    optionalDependencies:
+      postcss: 8.4.33
 
   postcss-selector-parser@6.0.15:
     dependencies:
@@ -5310,9 +5322,10 @@ snapshots:
   rollup-plugin-sourcemaps@0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6):
     dependencies:
       '@rollup/pluginutils': 3.1.0(rollup@4.9.6)
-      '@types/node': 18.11.9
       rollup: 4.9.6
       source-map-resolve: 0.6.0
+    optionalDependencies:
+      '@types/node': 18.11.9
 
   rollup-plugin-swc3@0.11.0(@swc/core@1.4.11)(rollup@4.9.6):
     dependencies:
@@ -5529,6 +5542,8 @@ snapshots:
       mkdirp: 1.0.4
       yallist: 4.0.0
 
+  temporal-spec@0.2.4: {}
+
   terser@5.27.0:
     dependencies:
       '@jridgewell/source-map': 0.3.5
@@ -5579,7 +5594,7 @@ snapshots:
 
   tslib@2.6.1: {}
 
-  tsup@7.2.0(typescript@5.2.2):
+  tsup@7.2.0(@swc/core@1.4.11)(postcss@8.4.33)(typescript@5.2.2):
     dependencies:
       bundle-require: 4.0.2(esbuild@0.18.20)
       cac: 6.7.14
@@ -5589,12 +5604,15 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2
+      postcss-load-config: 4.0.2(postcss@8.4.33)
       resolve-from: 5.0.0
       rollup: 3.29.4
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
+    optionalDependencies:
+      '@swc/core': 1.4.11
+      postcss: 8.4.33
       typescript: 5.2.2
     transitivePeerDependencies:
       - supports-color
@@ -5680,19 +5698,74 @@ snapshots:
       - supports-color
       - terser
 
+  vite-node@1.2.2(@types/node@20.11.30)(terser@5.27.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.4
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      vite: 5.0.12(@types/node@20.11.30)(terser@5.27.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@1.2.2(@types/node@20.8.7)(terser@5.27.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.4
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      vite: 5.0.12(@types/node@20.8.7)(terser@5.27.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+    optional: true
+
   vite@5.0.12(@types/node@18.11.9)(terser@5.27.0):
     dependencies:
-      '@types/node': 18.11.9
       esbuild: 0.19.11
       postcss: 8.4.33
       rollup: 4.9.6
-      terser: 5.27.0
     optionalDependencies:
+      '@types/node': 18.11.9
       fsevents: 2.3.3
+      terser: 5.27.0
+
+  vite@5.0.12(@types/node@20.11.30)(terser@5.27.0):
+    dependencies:
+      esbuild: 0.19.11
+      postcss: 8.4.33
+      rollup: 4.9.6
+    optionalDependencies:
+      '@types/node': 20.11.30
+      fsevents: 2.3.3
+      terser: 5.27.0
+
+  vite@5.0.12(@types/node@20.8.7)(terser@5.27.0):
+    dependencies:
+      esbuild: 0.19.11
+      postcss: 8.4.33
+      rollup: 4.9.6
+    optionalDependencies:
+      '@types/node': 20.8.7
+      fsevents: 2.3.3
+      terser: 5.27.0
+    optional: true
 
   vitest@1.2.2(@types/node@18.11.9)(terser@5.27.0):
     dependencies:
-      '@types/node': 18.11.9
       '@vitest/expect': 1.2.2
       '@vitest/runner': 1.2.2
       '@vitest/snapshot': 1.2.2
@@ -5714,6 +5787,8 @@ snapshots:
       vite: 5.0.12(@types/node@18.11.9)(terser@5.27.0)
       vite-node: 1.2.2(@types/node@18.11.9)(terser@5.27.0)
       why-is-node-running: 2.2.2
+    optionalDependencies:
+      '@types/node': 18.11.9
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -5722,6 +5797,75 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+
+  vitest@1.2.2(@types/node@20.11.30)(terser@5.27.0):
+    dependencies:
+      '@vitest/expect': 1.2.2
+      '@vitest/runner': 1.2.2
+      '@vitest/snapshot': 1.2.2
+      '@vitest/spy': 1.2.2
+      '@vitest/utils': 1.2.2
+      acorn-walk: 8.3.2
+      cac: 6.7.14
+      chai: 4.4.1
+      debug: 4.3.4
+      execa: 8.0.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.5
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.6.0
+      tinypool: 0.8.2
+      vite: 5.0.12(@types/node@20.11.30)(terser@5.27.0)
+      vite-node: 1.2.2(@types/node@20.11.30)(terser@5.27.0)
+      why-is-node-running: 2.2.2
+    optionalDependencies:
+      '@types/node': 20.11.30
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@1.2.2(@types/node@20.8.7)(terser@5.27.0):
+    dependencies:
+      '@vitest/expect': 1.2.2
+      '@vitest/runner': 1.2.2
+      '@vitest/snapshot': 1.2.2
+      '@vitest/spy': 1.2.2
+      '@vitest/utils': 1.2.2
+      acorn-walk: 8.3.2
+      cac: 6.7.14
+      chai: 4.4.1
+      debug: 4.3.4
+      execa: 8.0.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.5
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.6.0
+      tinypool: 0.8.2
+      vite: 5.0.12(@types/node@20.8.7)(terser@5.27.0)
+      vite-node: 1.2.2(@types/node@20.8.7)(terser@5.27.0)
+      why-is-node-running: 2.2.2
+    optionalDependencies:
+      '@types/node': 20.8.7
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+    optional: true
 
   vue-eslint-parser@9.4.2(eslint@8.51.0):
     dependencies:
