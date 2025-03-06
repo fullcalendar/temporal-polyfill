@@ -1,4 +1,30 @@
 
+# Function descriptor names are wrong
+# Fixed by:
+# Object.defineProperties(method, createPropDescriptors({ name: '' }, /* readyonly = */ true))
+intl402/DateTimeFormat/prototype/format/name.js
+intl402/DateTimeFormat/prototype/format/format-function-name.js
+intl402/DateTimeFormat/prototype/formatRange/name.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/name.js
+intl402/DateTimeFormat/prototype/formatToParts/name.js
+intl402/DateTimeFormat/prototype/resolvedOptions/name.js
+
+# Misc Intl.DateTimeFormat issues to triage
+intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
+intl402/DateTimeFormat/constructor-no-instanceof.js
+intl402/DateTimeFormat/default-options-object-prototype.js
+intl402/DateTimeFormat/intl-legacy-constructed-symbol.js
+intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
+intl402/DateTimeFormat/prototype/format/no-instanceof.js
+intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
+intl402/DateTimeFormat/prototype/formatRange/to-datetime-formattable-with-different-arg-kinds.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/to-datetime-formattable-with-different-arg-kinds.js
+intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
+intl402/DateTimeFormat/prototype/this-value-not-datetimeformat.js
+intl402/DateTimeFormat/prototype/toStringTag/toString-removed-tag.js
+intl402/DateTimeFormat/taint-Object-prototype.js
+
+
 ##
 ## Spec deviations specific to our polyfill
 ##
@@ -34,32 +60,13 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 #
 staging/sm/Temporal/PlainDate/withCalendar.js
 
-
-##
-## Issues that will likely resolve when upgrading our Node 18
-##
-
-# Seems our Node version doesn't normalize
-# America/Nipigon -> America/Toronto, but the browsers do
-staging/sm/Temporal/ZonedDateTime/zones-and-links.js
-
-# Intl.DateTimeFormat does not canonicalize time zone yet
-intl402/DateTimeFormat/timezone-not-canonicalized.js
+# WONTFIX
+# TimeZone ID canonicalization for Intl.DateTimeFormat
+# Polyfilling this is hard for format/formatToParts. The reference-polyfill doesn't even do it.
+# The reference-polyfill DOES polyfill resolveOptions (used by tests below), but that will result
+# in inconsistent results with format/formatToParts, so best not to polyfill either.
 intl402/DateTimeFormat/timezone-case-insensitive.js
-
-# Intl.DateTimeFormat doesn't output what we expect,
-# which is checked in test262 before comparing to Temporal formatting
-# An issue with Intl.DateTimeFormat
-staging/Intl402/Temporal/old/non-iso-calendars.js
-
-# No Intl.DurationFormat yet
-intl402/DurationFormat/prototype/formatToParts/temporal-duration-string-arg.js
-intl402/DurationFormat/prototype/formatToParts/temporal-duration-object-arg.js
-intl402/DurationFormat/prototype/formatToParts/taint-temporal-duration-prototype.js
-intl402/DurationFormat/prototype/format/temporal-duration-string-arg.js
-intl402/DurationFormat/prototype/format/temporal-duration-object-arg.js
-intl402/DurationFormat/prototype/format/taint-temporal-duration-prototype.js
-intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
+intl402/DateTimeFormat/timezone-not-canonicalized.js
 
 
 ##
@@ -83,3 +90,21 @@ staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
 # Remove these lines after that bug is fixed
 staging/Intl402/Temporal/old/date-time-format.js
 staging/Intl402/Temporal/old/datetime-toLocaleString.js
+
+# Fails until Intl.DurationFormat available in Node.js release
+intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
+
+# Temporal test262 runner does not support $262.createRealm()
+intl402/DateTimeFormat/proto-from-ctor-realm.js
+
+# Fails until CLDR 46 (released 2024-10-24) makes its way into a Node.js release
+staging/Intl402/Temporal/old/non-iso-calendars.js
+
+
+##
+## Not ignored, but FAILS in proposal-temporal/polyfill
+##
+
+# Seems our Node version doesn't normalize
+# America/Nipigon -> America/Toronto, but the browsers do
+staging/sm/Temporal/ZonedDateTime/zones-and-links.js

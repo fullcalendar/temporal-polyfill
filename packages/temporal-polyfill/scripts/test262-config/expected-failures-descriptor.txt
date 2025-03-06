@@ -1,9 +1,5 @@
 
-# cd test262/test
-
-#
-# find built-ins/Temporal intl402/Temporal -name 'length.js'
-#
+# length
 built-ins/Temporal/PlainMonthDay/length.js
 built-ins/Temporal/PlainMonthDay/from/length.js
 built-ins/Temporal/PlainMonthDay/prototype/with/length.js
@@ -73,10 +69,12 @@ built-ins/Temporal/Duration/prototype/total/length.js
 built-ins/Temporal/Duration/prototype/add/length.js
 built-ins/Temporal/Duration/prototype/round/length.js
 built-ins/Temporal/Duration/compare/length.js
+intl402/DateTimeFormat/prototype/format/format-function-length.js
+intl402/DateTimeFormat/prototype/formatRange/length.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/length.js
+intl402/DateTimeFormat/prototype/formatToParts/length.js
 
-#
-# find built-ins/Temporal intl402/Temporal -name 'not-a-constructor.js'
-#
+# not-a-constructor
 built-ins/Temporal/PlainMonthDay/prototype/toJSON/not-a-constructor.js
 built-ins/Temporal/PlainMonthDay/prototype/with/not-a-constructor.js
 built-ins/Temporal/PlainMonthDay/prototype/toPlainDate/not-a-constructor.js
@@ -181,9 +179,7 @@ built-ins/Temporal/Duration/prototype/round/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/negated/not-a-constructor.js
 built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
 
-#
-# find built-ins/Temporal intl402/Temporal -name 'builtin.js'
-#
+# builtin
 built-ins/Temporal/PlainMonthDay/prototype/toJSON/builtin.js
 built-ins/Temporal/PlainMonthDay/prototype/with/builtin.js
 built-ins/Temporal/PlainMonthDay/prototype/toPlainDate/builtin.js
@@ -286,6 +282,12 @@ built-ins/Temporal/Duration/prototype/toLocaleString/builtin.js
 built-ins/Temporal/Duration/prototype/toString/builtin.js
 built-ins/Temporal/Duration/prototype/round/builtin.js
 built-ins/Temporal/Duration/prototype/negated/builtin.js
+intl402/DateTimeFormat/prototype/builtin.js
+intl402/DateTimeFormat/prototype/format/builtin.js
+intl402/DateTimeFormat/prototype/format/format-function-builtin.js
+intl402/DateTimeFormat/prototype/formatRange/builtin.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/builtin.js
+intl402/DateTimeFormat/prototype/resolvedOptions/builtin.js
 
 # prop-desc
 built-ins/Temporal/PlainDate/prototype/prop-desc.js
