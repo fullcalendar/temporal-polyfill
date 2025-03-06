@@ -20,7 +20,6 @@ intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
 intl402/DateTimeFormat/prototype/formatRange/to-datetime-formattable-with-different-arg-kinds.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/to-datetime-formattable-with-different-arg-kinds.js
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
-intl402/DateTimeFormat/prototype/this-value-not-datetimeformat.js
 intl402/DateTimeFormat/prototype/toStringTag/toString-removed-tag.js
 intl402/DateTimeFormat/taint-Object-prototype.js
 
