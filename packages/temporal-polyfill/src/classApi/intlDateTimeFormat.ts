@@ -117,7 +117,10 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
 function createFormatMethod(methodName: string) {
   return function (this: DateTimeFormat, ...formattables: Formattable[]) {
     const prepFormat = internalsMap.get(this)!
-    const [format, ...rawFormattables] = prepFormat(...formattables)
+    const [format, ...rawFormattables] = prepFormat(
+      methodName.includes('Range'), // HACK for deterining if range method
+      ...formattables,
+    )
     return (format as any)[methodName](...rawFormattables)
   }
 }
@@ -133,6 +136,7 @@ function createProxiedMethod(methodName: string) {
 // -----------------------------------------------------------------------------
 
 type DateTimeFormatInternalPrepper = (
+  isRange: boolean,
   ...formattables: Formattable[]
 ) => [Intl.DateTimeFormat, ...RawFormattable[]]
 
@@ -157,32 +161,59 @@ function createDateTimeFormatInternals(
 
   const queryFormatPrepperForBranding = memoize(createFormatPrepperForBranding)
 
+  /*
+  TODO: this is overarchitected. done to accommodate format() and formatRange()
+  */
   const prepFormat: DateTimeFormatInternalPrepper = (
+    isRange: boolean, // HACK
     ...formattables: Formattable[]
   ) => {
-    let branding: string | undefined
+    if (isRange) {
+      if (formattables.length !== 2) {
+        throw new TypeError('BAD!')
+      }
+      // check for any undefined arguments first
+      for (const formattable of formattables) {
+        if (formattable === undefined) {
+          throw new TypeError('BAD!')
+        }
+      }
+    }
 
-    const slotsList = formattables.map((formattable, i) => {
-      const slots = getSlots(formattable)
-      const slotsBranding = (slots || {}).branding
+    // HACK for .format(undefined), which should be same as .format()
+    if (!isRange && formattables[0] === undefined) {
+      formattables = []
+    }
 
-      if (i && branding && branding !== slotsBranding) {
+    const formattableEssences = formattables.map((formattable) => {
+      return getSlots(formattable) || Number(formattable)
+    })
+
+    let overallBranding: string | undefined
+    let i = 0
+
+    for (const formattableEssence of formattableEssences) {
+      const slotsBranding =
+        typeof formattableEssence === 'object'
+          ? formattableEssence.branding
+          : undefined
+
+      if (i++ && slotsBranding !== overallBranding) {
         throw new TypeError(errorMessages.mismatchingFormatTypes)
       }
 
-      branding = slotsBranding
-      return slots
-    })
+      overallBranding = slotsBranding
+    }
 
-    if (branding) {
-      return queryFormatPrepperForBranding(branding)(
+    if (overallBranding) {
+      return queryFormatPrepperForBranding(overallBranding)(
         resolvedLocale,
         copiedOptions,
-        ...(slotsList as BrandingSlots[]),
+        ...(formattableEssences as BrandingSlots[]),
       )
     }
 
-    return [rawFormat, ...formattables]
+    return [rawFormat, ...(formattableEssences as number[])]
   }
   ;(prepFormat as DateTimeFormatInternals).rawFormat = rawFormat
   return prepFormat as DateTimeFormatInternals

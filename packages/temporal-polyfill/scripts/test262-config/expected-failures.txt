@@ -12,15 +12,17 @@ intl402/DateTimeFormat/prototype/resolvedOptions/name.js
 # Caused by fixResolvedOptionsCalendar
 intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
 
-# Misc Intl.DateTimeFormat issues to triage
+# We can't do `copiedOptions = pluckProps` the way we want
+intl402/DateTimeFormat/taint-Object-prototype.js
+
+# We're affected by Object.prototype pollution
 intl402/DateTimeFormat/default-options-object-prototype.js
+
+# Misc Intl.DateTimeFormat issues to triage
 intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
 intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
-intl402/DateTimeFormat/prototype/formatRange/to-datetime-formattable-with-different-arg-kinds.js
-intl402/DateTimeFormat/prototype/formatRangeToParts/to-datetime-formattable-with-different-arg-kinds.js
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 intl402/DateTimeFormat/prototype/toStringTag/toString-removed-tag.js
-intl402/DateTimeFormat/taint-Object-prototype.js
 
 
 ##
