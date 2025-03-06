@@ -43,8 +43,9 @@ export const DateTimeFormat = createDateTimeFormatClass()
 const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
 
 function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
-  // public-facing
-  // Intl.DateTimeFormat can be called without `new`
+  // The Intl.DateTimeFormat object
+  // More versatile because accommodates
+  // `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()`
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
   const DateTimeFormatFunc = function (
     this: any,
@@ -54,7 +55,8 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     return new (DateTimeFormatNew as Classlike)(locales, options)
   }
 
-  // internal constructor
+  // All calls to `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()` return
+  // an instance of this class.
   const DateTimeFormatNew = function (
     this: any,
     locales: LocalesArg | undefined,
@@ -78,7 +80,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     if (typeof memberDescriptor.value === 'function') {
       memberDescriptor.value =
         memberName === 'constructor'
-          ? DateTimeFormatFunc // expose public-facing
+          ? DateTimeFormatFunc // expose more versatile
           : formatLikeMethod || createProxiedMethod(memberName)
     } else if (formatLikeMethod) {
       // .format() is always bound to the instance. It's a getter
@@ -96,21 +98,13 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     }
   }
 
-  // Prototype madness so that:
-  //   new Intl.DateTimeFormat() instanceof Intl.DateTimeFormat
-  //   Intl.DateTimeFormat() instanceof Intl.DateTimeFormat
-  //
-  // give methods to superclass (DateTimeFormatNew)
-  const superclassProto = (DateTimeFormatNew.prototype = Object.create(
-    members,
-    memberDescriptors,
-  ))
-  // prepare DateTimeFormatFunc to be a subclass of DateTimeFormatNew
-  classDescriptors.prototype.value = superclassProto
-  // attach public-facing class-functions to subclass (DateTimeFormatFunc)
+  // Both share prototype so they're both `instanceof` eachother
+  classDescriptors.prototype.value = // eventually for DateTimeFormatFunc
+    DateTimeFormatNew.prototype = Object.create({}, memberDescriptors)
+
+  // Define static methods on the eventual Intl.DateTimeFormat
   Object.defineProperties(DateTimeFormatFunc, classDescriptors)
 
-  // expose only public-facing subclass
   return DateTimeFormatFunc as Classlike
 }
 

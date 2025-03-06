@@ -22,7 +22,6 @@ intl402/DateTimeFormat/default-options-object-prototype.js
 intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
 intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
-intl402/DateTimeFormat/prototype/toStringTag/toString-removed-tag.js
 
 
 ##
