@@ -222,7 +222,6 @@ export function createFormatPrepper<S>(
     )
 
     const resolvedOptions = subformat.resolvedOptions()
-    fixResolvedOptionsCalendar(resolvedOptions, options, locales)
 
     return [subformat, ...toEpochMillis(config, resolvedOptions, slotsList)]
   }
@@ -261,6 +260,24 @@ function getForcedCommonTimeZone(
 // Config Data
 // -----------------------------------------------------------------------------
 
+/*
+Detect bug where explicitly specifying calendar:iso8601 results in calendar:gregory
+Happens in Node 14 and some version of V8 (Chrome version 80 at least)
+https://github.com/nodejs/node/issues/42440
+https://codepen.io/arshaw/pen/RNwVewm?editors=0010
+
+If buggy, relax strictCalendarChecks for PlainYearMonth/PlainMonthDay
+Much more elegant that intercepting `calendar` in the options, which
+requires reading all props with a whitelist to ensure proper call order.
+Whitelists are fickle; won't adjust if new DateTimeFormat options added.
+
+TODO: share this DateTimeFormat with computeCurrentTimeZoneId
+*/
+const nonBuggyIsoResolve =
+  new RawDateTimeFormat(undefined, {
+    calendar: isoCalendarId,
+  }).resolvedOptions().calendar === isoCalendarId
+
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformInstantOptions,
   getEpochMilli,
@@ -291,13 +308,13 @@ export const timeConfig: ClassFormatConfig<IsoTimeFields> = [
 export const yearMonthConfig: ClassFormatConfig<IsoDateFields> = [
   transformYearMonthOptions,
   isoToEpochMilli as (isoFields: IsoDateFields) => number,
-  true, // strictCalendarChecks
+  nonBuggyIsoResolve, // strictCalendarChecks
 ]
 
 export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
   transformMonthDayOptions,
   isoToEpochMilli as (isoFields: IsoDateFields) => number,
-  true, // strictCalendarChecks
+  nonBuggyIsoResolve, // strictCalendarChecks
 ]
 
 // General Epoch Conversion
@@ -334,31 +351,4 @@ function checkCalendarsCompatible(
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
-}
-
-// Runtime Workarounds
-// -----------------------------------------------------------------------------
-
-/*
-Workaround bug where explicitly specifying calendar:iso8601 results in calendar:gregory
-Happens in Node 14 and some version of V8 (Chrome version 80 at least)
-https://github.com/nodejs/node/issues/42440
-https://codepen.io/arshaw/pen/RNwVewm?editors=0010
-*/
-export function fixResolvedOptionsCalendar(
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-  givenOptions: Intl.DateTimeFormatOptions,
-  givenLocales: LocalesArg | undefined,
-): void {
-  if (
-    resolvedOptions.calendar === gregoryCalendarId &&
-    (givenOptions.calendar === isoCalendarId || localeContainsIso(givenLocales))
-  ) {
-    resolvedOptions.calendar = isoCalendarId
-  }
-}
-
-function localeContainsIso(locales: LocalesArg | undefined): boolean {
-  const localeStr = [].concat((locales as any) || []).join(' ')
-  return localeStr.includes(isoCalendarId)
 }

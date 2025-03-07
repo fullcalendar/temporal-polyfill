@@ -1,8 +1,4 @@
 
-# Caused by fixResolvedOptionsCalendar
-intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
-
-
 ##
 ## Spec deviations specific to our polyfill
 ##
@@ -45,6 +41,32 @@ staging/sm/Temporal/PlainDate/withCalendar.js
 # in inconsistent results with format/formatToParts, so best not to polyfill either.
 intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
+
+# WONTFIX
+# In Node 14 and older version of V8-based browsers, we are looser than the spec
+# when it comes to specifying calendars in the .toLocaleString for
+# PlainYearMonth/PlainMonthDay objects that have calendar:iso8601. Any value
+# other than iso8601 passed to .toLocaleString should be rejected, including
+# if no options are specified at all (which defaults to browser's locale)
+# Choosing this behavior for the spec was rather contentious:
+# https://github.com/js-temporal/proposal-temporal-v2/issues/29
+#
+# Anyway, relaxation for older Node/V8 is an elegant workaround for a different
+# bug. The native DateTimeFormat incorrectly massages calendar:iso8601 to
+# calendar:gregory:
+# https://github.com/nodejs/node/issues/42440
+#
+# See `nonBuggyIsoResolve` in our source code for flaws with other workarounds.
+#
+# We don't stress too much, because developers are likely developing on newer
+# Node/V8, making their code stricter, for ALL users, including those on the
+# older affected browsers/environments.
+#
+# We'd ideally like to enable these test for Node 14, but unfortunately they
+# must be ignored for another reason, Intl.supportedValuesOf("calendar") is not
+# available:
+#intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
+#intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
 
 
 ##

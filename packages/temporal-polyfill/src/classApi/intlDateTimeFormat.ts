@@ -3,7 +3,6 @@ import {
   FormatPrepper,
   createFormatForPrep,
   createFormatPrepper,
-  fixResolvedOptionsCalendar,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
@@ -171,7 +170,6 @@ function createDateTimeFormatInternals(
     Object.keys(options) as OptionNames,
     resolveOptions as Intl.DateTimeFormatOptions,
   )
-  fixResolvedOptionsCalendar(copiedOptions as any, options, locales)
 
   const queryFormatPrepperForBranding = memoize(createFormatPrepperForBranding)
 
