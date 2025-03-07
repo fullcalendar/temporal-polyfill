@@ -95,6 +95,9 @@ yargs(hideBin(process.argv))
       if (currentNodeMajorVersion >= 18) {
         expectedFailureFiles.push('expected-failures-node-gte18.txt')
       }
+      if (currentNodeMajorVersion >= 22) {
+        expectedFailureFiles.push('expected-failures-node-gte22.txt')
+      }
 
       const esmOpt = process.env.TEST262_ESM
       const esmOptIsMin = esmOpt === 'terser' || esmOpt === 'swc'

@@ -18,11 +18,6 @@ intl402/DateTimeFormat/taint-Object-prototype.js
 # We're affected by Object.prototype pollution
 intl402/DateTimeFormat/default-options-object-prototype.js
 
-# Misc Intl.DateTimeFormat issues to triage
-intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
-intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
-intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
-
 
 ##
 ## Spec deviations specific to our polyfill
@@ -95,6 +90,9 @@ intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-Durat
 
 # Temporal test262 runner does not support $262.createRealm()
 intl402/DateTimeFormat/proto-from-ctor-realm.js
+
+# https://github.com/tc39/ecma402/issues/402
+intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 
 # Fails until CLDR 46 (released 2024-10-24) makes its way into a Node.js release
 staging/Intl402/Temporal/old/non-iso-calendars.js
