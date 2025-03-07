@@ -284,7 +284,6 @@ built-ins/Temporal/Duration/prototype/round/builtin.js
 built-ins/Temporal/Duration/prototype/negated/builtin.js
 intl402/DateTimeFormat/prototype/builtin.js
 intl402/DateTimeFormat/prototype/format/builtin.js
-intl402/DateTimeFormat/prototype/format/format-function-builtin.js
 intl402/DateTimeFormat/prototype/formatRange/builtin.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/builtin.js
 intl402/DateTimeFormat/prototype/resolvedOptions/builtin.js

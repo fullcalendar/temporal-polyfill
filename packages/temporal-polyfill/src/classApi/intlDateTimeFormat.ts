@@ -102,6 +102,11 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
         // don't do Function::bind, because gives weird .name
         return (...args: any[]) => formatLikeMethod.apply(this, args)
       }
+
+      Object.defineProperties(
+        memberDescriptor.get,
+        createNameDescriptors(`get ${memberName}`),
+      )
     }
   }
 

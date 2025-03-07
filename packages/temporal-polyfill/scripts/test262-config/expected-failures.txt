@@ -1,7 +1,4 @@
 
-# Function descriptor names are wrong
-intl402/DateTimeFormat/prototype/format/name.js
-
 # Caused by fixResolvedOptionsCalendar
 intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
 
