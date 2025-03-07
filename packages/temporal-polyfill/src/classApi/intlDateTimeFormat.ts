@@ -98,7 +98,9 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
         if (!internalsMap.has(this)) {
           throw new TypeError('BAD!')
         }
-        return formatLikeMethod.bind(this)
+
+        // don't do Function::bind, because gives weird .name
+        return (...args: any[]) => formatLikeMethod.apply(this, args)
       }
     }
   }
