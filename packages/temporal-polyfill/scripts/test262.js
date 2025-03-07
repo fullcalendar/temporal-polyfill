@@ -86,6 +86,9 @@ yargs(hideBin(process.argv))
       if (currentNodeMajorVersion < 18) {
         expectedFailureFiles.push('expected-failures-node-lt18.txt')
       }
+      if (currentNodeMajorVersion < 20) {
+        expectedFailureFiles.push('expected-failures-node-lt20.txt')
+      }
       if (currentNodeMajorVersion < 22) {
         expectedFailureFiles.push('expected-failures-node-lt22.txt')
       }
