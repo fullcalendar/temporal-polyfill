@@ -12,7 +12,12 @@ import {
   RawFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
-import { Classlike, memoize, pluckProps } from '../internal/utils'
+import {
+  Classlike,
+  createNameDescriptors,
+  memoize,
+  pluckProps,
+} from '../internal/utils'
 import { Instant } from './instant'
 import { classFormatConfigs } from './intlFormatConfig'
 import { PlainDate } from './plainDate'
@@ -109,7 +114,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
 }
 
 function createFormatMethod(methodName: string) {
-  return function (this: DateTimeFormat, ...formattables: Formattable[]) {
+  const func = function (this: DateTimeFormat, ...formattables: Formattable[]) {
     const prepFormat = internalsMap.get(this)!
     const [format, ...rawFormattables] = prepFormat(
       methodName.includes('Range'), // HACK for deterining if range method
@@ -117,13 +122,17 @@ function createFormatMethod(methodName: string) {
     )
     return (format as any)[methodName](...rawFormattables)
   }
+
+  return Object.defineProperties(func, createNameDescriptors(methodName))
 }
 
 function createProxiedMethod(methodName: string) {
-  return function (this: DateTimeFormat, ...args: any[]) {
+  const func = function (this: DateTimeFormat, ...args: any[]) {
     const prepFormat = internalsMap.get(this)!
     return (prepFormat.rawFormat as any)[methodName](...args)
   }
+
+  return Object.defineProperties(func, createNameDescriptors(methodName))
 }
 
 // Internals

@@ -1,13 +1,7 @@
 
 # Function descriptor names are wrong
-# Fixed by:
-# Object.defineProperties(method, createPropDescriptors({ name: '' }, /* readyonly = */ true))
 intl402/DateTimeFormat/prototype/format/name.js
 intl402/DateTimeFormat/prototype/format/format-function-name.js
-intl402/DateTimeFormat/prototype/formatRange/name.js
-intl402/DateTimeFormat/prototype/formatRangeToParts/name.js
-intl402/DateTimeFormat/prototype/formatToParts/name.js
-intl402/DateTimeFormat/prototype/resolvedOptions/name.js
 
 # Caused by fixResolvedOptionsCalendar
 intl402/DateTimeFormat/constructor-calendar-numberingSystem-order.js
