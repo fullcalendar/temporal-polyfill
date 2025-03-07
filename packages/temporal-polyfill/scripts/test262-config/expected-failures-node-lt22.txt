@@ -5,3 +5,10 @@ intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
 intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
 intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
 intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
+
+# Native Intl.DateTimeFormat, prior to Node<=20,
+# access all given options twice. Not our fault
+intl402/DateTimeFormat/constructor-options-order-dayPeriod.js
+intl402/DateTimeFormat/constructor-options-order-fractionalSecondDigits.js
+intl402/DateTimeFormat/constructor-options-order-timedate-style.js
+intl402/DateTimeFormat/constructor-options-order.js

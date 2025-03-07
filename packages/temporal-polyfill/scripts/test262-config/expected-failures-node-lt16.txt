@@ -32,6 +32,39 @@ intl402/Temporal/PlainDateTime/prototype/toLocaleString/lone-options-accepted.js
 intl402/Temporal/PlainTime/prototype/toLocaleString/lone-options-accepted.js
 intl402/Temporal/ZonedDateTime/prototype/toLocaleString/lone-options-accepted.js
 
+# The native Intl.DateTimeFormat doesn't support toString "[object Intl.DateTimeFormat]" yet
+intl402/DateTimeFormat/prototype/toStringTag/toString.js
+intl402/DateTimeFormat/prototype/toStringTag/toStringTag.js
+
+# Intl.DateTimeFormat slight difference in formatting, not our fault
+# "August 10, 2019, 1:02 AM" vs "August 10, 2019 at 1:02 AM"
+intl402/DateTimeFormat/prototype/formatRange/date-same-returns-single-date.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/date-same-returns-single-date.js
+
+# Before Node 16, dayPeriod not supported by Intl.DateTimeFormat
+# Unrelated to Temporal
+intl402/DateTimeFormat/constructor-options-dayPeriod-invalid.js
+intl402/DateTimeFormat/constructor-options-dayPeriod-valid.js
+intl402/DateTimeFormat/constructor-options-throwing-getters-dayPeriod.js
+intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js
+intl402/DateTimeFormat/prototype/format/dayPeriod-narrow-en.js
+intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-long-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-narrow-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-short-en.js
+intl402/DateTimeFormat/prototype/resolvedOptions/order-dayPeriod.js
+
+# Before Node 16, fractionalSecondDigits not supported by Intl.DateTimeFormat
+# Unrelated to Temporal
+intl402/DateTimeFormat/constructor-options-fractionalSecondDigits-valid.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/fractionalSecondDigits.js
+intl402/DateTimeFormat/prototype/formatToParts/fractionalSecondDigits.js
+
+# Intl.DateTimeFormat's dateStyle option cannot coexist with some other options
+# Before Node 16, this was not enforced
+intl402/DateTimeFormat/constructor-options-invalid-explicit-components.js
+intl402/DateTimeFormat/constructor-options-style-conflict.js
+
 # TODO: RETHINK
 # Before Node 16, iso8601 calendars gets normalized to gregory
 intl402/DateTimeFormat/canonicalize-calendar.js
