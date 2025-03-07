@@ -213,7 +213,8 @@ export function remapProps<O, N>(
 }
 
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
-  const res = {} as P
+  // TODO: do this elsewhere to guard against prototype pollution!?
+  const res = Object.create(null) as P
 
   for (const propName of propNames) {
     res[propName] = props[propName]

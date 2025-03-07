@@ -162,7 +162,10 @@ function createDateTimeFormatInternals(
   const resolveOptions = rawFormat.resolvedOptions()
   const resolvedLocale = resolveOptions.locale
 
-  // I forget, why the copying?
+  // Copy original options in an unobservable way, using resolveOptions' data
+  // Necessary because options will be reaccessed later when making brand-specific
+  // formatters, and prop access can't be observable
+  // NOTE: pluckProps protects against prototype pollution (only function that does!)
   const copiedOptions = pluckProps(
     Object.keys(options) as OptionNames,
     resolveOptions as Intl.DateTimeFormatOptions,

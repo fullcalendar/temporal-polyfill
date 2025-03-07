@@ -1,7 +1,9 @@
 
+# TODO: RETHINK
 # not allowed to call built-in utilities like Number.isFinite or Math.sign
 built-ins/Temporal/Duration/call-builtin.js
 
+# TODO: RETHINK
 # we use array spreading internally
 built-ins/Temporal/PlainYearMonth/prototype/subtract/builtin-calendar-no-array-iteration.js
 built-ins/Temporal/PlainYearMonth/prototype/since/builtin-calendar-no-array-iteration.js
