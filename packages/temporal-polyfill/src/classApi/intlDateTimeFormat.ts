@@ -65,7 +65,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   const DateTimeFormatNew = function (
     this: any,
     locales: LocalesArg | undefined,
-    options: Intl.DateTimeFormatOptions = {},
+    options: Intl.DateTimeFormatOptions = Object.create(null), // protect against prototype pollution,
   ) {
     internalsMap.set(
       this as DateTimeFormat,
@@ -155,8 +155,8 @@ type DateTimeFormatInternals = DateTimeFormatInternalPrepper & {
 }
 
 function createDateTimeFormatInternals(
-  locales?: LocalesArg,
-  options: Intl.DateTimeFormatOptions = {},
+  locales: LocalesArg | undefined,
+  options: Intl.DateTimeFormatOptions,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
   const resolveOptions = rawFormat.resolvedOptions()
@@ -166,6 +166,7 @@ function createDateTimeFormatInternals(
   // Necessary because options will be reaccessed later when making brand-specific
   // formatters, and prop access can't be observable
   // NOTE: pluckProps protects against prototype pollution (only function that does!)
+  // view Object.create(null)
   const copiedOptions = pluckProps(
     Object.keys(options) as OptionNames,
     resolveOptions as Intl.DateTimeFormatOptions,
