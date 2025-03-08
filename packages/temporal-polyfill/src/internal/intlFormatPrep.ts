@@ -268,7 +268,8 @@ https://codepen.io/arshaw/pen/RNwVewm?editors=0010
 
 If buggy, relax strictCalendarChecks for PlainYearMonth/PlainMonthDay
 Much more elegant that intercepting `calendar` in the options, which
-requires reading all props with a whitelist to ensure proper call order.
+requires reading all props with a whitelist to ensure proper call order,
+not to mention parsing locale strings like 'en-u-ca-iso8601'
 Whitelists are fickle; won't adjust if new DateTimeFormat options added.
 
 TODO: share this DateTimeFormat with computeCurrentTimeZoneId

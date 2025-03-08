@@ -1,6 +1,12 @@
 
+##
+## Issues with environment, already ignored in proposal-temporal/polyfill
+## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
+##
+
+# ENV-ISSUE
+# Node >=18 has bug
 # Caused by https://issues.chromium.org/issues/40893567
-# HOWEVER, bug isn't present in Node <18, so ignore for Node>=18
 # Remove these lines after that bug is fixed
 staging/Intl402/Temporal/old/instant-toLocaleString.js
 staging/Intl402/Temporal/old/time-toLocaleString.js

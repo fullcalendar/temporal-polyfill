@@ -1,7 +1,6 @@
 
-# Node <=18 incorrectly throw errors when identical args
-# passed to formatRange/formatRangeToParts, i.e. defeating the purpose of a range
-# This has nothing to do with our Temporal polyfill implementation,
-# it's a problem with the underlying Intl.DateTimeFormat
+# ENV-ISSUE
+# Node <=18, native Intl.DateTimeFormat's formatRange/formatRangeToParts methods
+# incorrectly throw error when arguments' epoch-milliseconds are the same
 intl402/DateTimeFormat/prototype/formatRange/date-x-greater-than-y-not-throws.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/date-x-greater-than-y-not-throws.js

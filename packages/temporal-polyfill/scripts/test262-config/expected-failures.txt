@@ -1,13 +1,30 @@
+##
+## In addition to the ignored tests below, see other files:
+##
+##   - expected-failures-node-*.txt
+##     Shortcomings with native APIs, unrelated to our polyfill
+##
+##   - expected-failures-descriptor.txt
+##     We construct our Temporal classes programmatically, not with ES6 `class`.
+##     Thus, our property descriptors are not 100% compliant with the spec.
+##
+##   - expected-failures-builtin-calls.txt
+##     Our polyfill calls methods like Array::push directly on objects,
+##     which could be vulnerable to prototype pollution.
+##     We are weighing cost/benefit of always calling static method references.
+##
+
 
 ##
-## Spec deviations specific to our polyfill
+## Spec deviations (3 total)
 ##
 
-# WONTFIX
+# WONTFIX (1)
 # The spec calls for higher floating-point division precision than what JS's
 # 64-bit floats provide. proposal-temporal/polyfill achieves this via string
 # manipulation hacks:
 # https://github.com/tc39/proposal-temporal/blob/999937370cfd0f6d2ce3cc83a01ab82ab3771b46/polyfill/lib/timeduration.mjs#L92
+#
 # Our polyfill avoids the associated performance degradation and filesize
 # increase by doing simple native JS number division, but this sometimes results
 # in less precise results. Example:
@@ -17,89 +34,83 @@
 #
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
-# WONTFIX
+# WONTFIX (2)
 # Our polyfill does not support the lowest year of some i18n calendars because:
 #
 # A) To determine a YMD values, we must use Intl.DateTimeFormat scraping to
 #    crawl backwards through years. If YMD is within-bounds, but start-of-year
-#    is not, our algorithm chokes
+#    is not, our algorithm chokes.
 #
 # Failing code:
 #   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
-#   // 2 days within epochMilli lower bound, but still fails
+#   // 2 days within epoch-milliseconds lower bound, but still fails
 #
 # B) -271821-04-19 is a valid PlainDate but it's out-of-range when computing UTC
-#    epochMilli for Intl.DateTimeFormat. Possible to use a negative offset time
-#    zone like America/Chicago, but this special-case is cumbersome.
+#    epoch-milliseconds for Intl.DateTimeFormat. Possible to use a negative
+#    offset time zone like America/Chicago, but this special-case is cumbersome.
 #
 staging/sm/Temporal/PlainDate/withCalendar.js
 
-# WONTFIX
-# TimeZone ID canonicalization for Intl.DateTimeFormat
-# Polyfilling this is hard for format/formatToParts. The reference-polyfill doesn't even do it.
-# The reference-polyfill DOES polyfill resolveOptions (used by tests below), but that will result
-# in inconsistent results with format/formatToParts, so best not to polyfill either.
-intl402/DateTimeFormat/timezone-case-insensitive.js
+# WONTFIX (3)
+# We do not patch Intl.DateTimeFormat's resolvedOptions method to return
+# the string-normalized version of the original given time zone ID:
+#
+#   new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires" })
+#     .resolvedOptions().timeZone
+#     // Current Node/browser behavior: "America/Buenos_Aires"
+#     // Desired spec behavior:         "America/Argentina/Buenos_Aires"
+#
 intl402/DateTimeFormat/timezone-not-canonicalized.js
-
-# WONTFIX
-# In Node 14 and older version of V8-based browsers, we are looser than the spec
-# when it comes to specifying calendars in the .toLocaleString for
-# PlainYearMonth/PlainMonthDay objects that have calendar:iso8601. Any value
-# other than iso8601 passed to .toLocaleString should be rejected, including
-# if no options are specified at all (which defaults to browser's locale)
-# Choosing this behavior for the spec was rather contentious:
-# https://github.com/js-temporal/proposal-temporal-v2/issues/29
 #
-# Anyway, relaxation for older Node/V8 is an elegant workaround for a different
-# bug. The native DateTimeFormat incorrectly massages calendar:iso8601 to
-# calendar:gregory:
-# https://github.com/nodejs/node/issues/42440
+# Therefor, similar tests for normalizing differently-cased strings fail too:
 #
-# See `nonBuggyIsoResolve` in our source code for flaws with other workarounds.
+#   new Intl.DateTimeFormat("en", { timeZone: "AMERICA/ARGENTINA/BUENOS_AIRES" })
+#     .resolvedOptions().timeZone
+#     // Current Node/browser behavior: "America/Buenos_Aires"
+#     // Desired spec behavior:         "America/Argentina/Buenos_Aires"
 #
-# We don't stress too much, because developers are likely developing on newer
-# Node/V8, making their code stricter, for ALL users, including those on the
-# older affected browsers/environments.
-#
-# We'd ideally like to enable these test for Node 14, but unfortunately they
-# must be ignored for another reason, Intl.supportedValuesOf("calendar") is not
-# available:
-#intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
-#intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
+intl402/DateTimeFormat/timezone-case-insensitive.js
 
 
 ##
-## Already ignored in proposal-temporal/polyfill
+## Issues with environment, already ignored in proposal-temporal/polyfill
 ## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
 ##
 
+# ENV-ISSUE
 # Test is incorrect, no reason why this date should not exist; seems to be
 # working around an ICU4X bug
 staging/sm/Temporal/PlainDate/from-islamic-umalqura.js
 
+# ENV-ISSUE
 # Faulty leap month calculations in Chinese calendar in ICU4C
 # https://unicode-org.atlassian.net/browse/ICU-22230
 staging/sm/Temporal/PlainMonthDay/from-chinese-leap-month-uncommon.js
 
+# ENV-ISSUE
 # Possibly faulty calculations for year 0 in Hebrew calendar in ICU4C
 # https://unicode-org.atlassian.net/browse/ICU-23007
 staging/sm/Temporal/PlainDate/from-constrain-hebrew.js
 
+# ENV-ISSUE
 # Caused by https://issues.chromium.org/issues/40893567
 # Remove these lines after that bug is fixed
 staging/Intl402/Temporal/old/date-time-format.js
 staging/Intl402/Temporal/old/datetime-toLocaleString.js
 
+# ENV-ISSUE
 # Fails until Intl.DurationFormat available in Node.js release
 intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
 
+# ENV-ISSUE
 # Temporal test262 runner does not support $262.createRealm()
 intl402/DateTimeFormat/proto-from-ctor-realm.js
 
+# ENV-ISSUE
 # https://github.com/tc39/ecma402/issues/402
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 
+# ENV-ISSUE
 # Fails until CLDR 46 (released 2024-10-24) makes its way into a Node.js release
 staging/Intl402/Temporal/old/non-iso-calendars.js
 
@@ -108,6 +119,16 @@ staging/Intl402/Temporal/old/non-iso-calendars.js
 ## Not ignored, but FAILS in proposal-temporal/polyfill
 ##
 
-# Seems our Node version doesn't normalize
-# America/Nipigon -> America/Toronto, but the browsers do
+# ENV-ISSUE
+# ZonedDateTime equality compares *resolved* time zone IDs, but our environment
+# resolves time zone links differently than what the tests expect:
+#
+#   let zdtLink = new Temporal.ZonedDateTime(0n, "Antarctica/South_Pole");
+#   let zdtZone = new Temporal.ZonedDateTime(0n, "Antarctica/McMurdo");
+#   zdtLink.timeZone // "Antarctica/South_Pole", resolves to "Pacific/Auckland"
+#   zdtZone.timeZone // "Antarctica/McMurdo", resolves to "Antarctica/McMurdo"
+#   zdtLink.equals(zdtZone)
+#   // EXPECTED: true
+#   // ACTUAL: false
+#
 staging/sm/Temporal/ZonedDateTime/zones-and-links.js

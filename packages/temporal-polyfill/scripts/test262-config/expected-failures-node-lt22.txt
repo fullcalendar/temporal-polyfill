@@ -1,14 +1,22 @@
 
-# TODO: RETHINK
-# Prior to Node 22, Intl.DateTimeFormat does not accept offset-string timeZone
-intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
-intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
-intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
-intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js
-
-# Native Intl.DateTimeFormat, prior to Node<=20,
-# access all given options twice. Not our fault
+# ENV-ISSUE
+# Node <=20, native Intl.DateTimeFormat's constructor accesses options object's
+# properties twice
 intl402/DateTimeFormat/constructor-options-order-dayPeriod.js
 intl402/DateTimeFormat/constructor-options-order-fractionalSecondDigits.js
 intl402/DateTimeFormat/constructor-options-order-timedate-style.js
 intl402/DateTimeFormat/constructor-options-order.js
+
+
+##
+## Issues with environment, already ignored in proposal-temporal/polyfill
+## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
+##
+
+# ENV-ISSUE
+# Node <=20, native Intl.DateTimeFormat's constructor does not accept
+# offset-string timeZone option
+intl402/DateTimeFormat/prototype/format/offset-timezone-gmt-same.js
+intl402/DateTimeFormat/prototype/formatToParts/offset-timezone-correct.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-basic.js
+intl402/DateTimeFormat/prototype/resolvedOptions/offset-timezone-change.js

@@ -1,6 +1,9 @@
 
-# TODO: RETHINK
-# SPEC says reject timeZone identifiers with invalid characters,
-# like ones with unicode negative sign.
-# Node <22 rejects them, but Node 22 does not
+# WONTFIX
+# We do not patch Intl.DateTimeFormat's constructor to reject time zone IDs
+# with invalid characters.
+#
+# Ironically, older Node <22 correctly rejects them, but Node 22 incorrectly
+# accepts them.
+#
 intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
