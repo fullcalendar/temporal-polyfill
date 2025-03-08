@@ -1,4 +1,4 @@
-import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
+import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
