@@ -80,17 +80,17 @@ yargs(hideBin(process.argv))
         'expected-failures-descriptor.txt',
       ]
 
-      if (currentNodeMajorVersion < 16) {
-        expectedFailureFiles.push('expected-failures-node-lt16.txt')
+      if (currentNodeMajorVersion <= 14) {
+        expectedFailureFiles.push('expected-failures-node-lte14.txt')
       }
-      if (currentNodeMajorVersion < 18) {
-        expectedFailureFiles.push('expected-failures-node-lt18.txt')
+      if (currentNodeMajorVersion <= 16) {
+        expectedFailureFiles.push('expected-failures-node-lte16.txt')
       }
-      if (currentNodeMajorVersion < 20) {
-        expectedFailureFiles.push('expected-failures-node-lt20.txt')
+      if (currentNodeMajorVersion <= 18) {
+        expectedFailureFiles.push('expected-failures-node-lte18.txt')
       }
-      if (currentNodeMajorVersion < 22) {
-        expectedFailureFiles.push('expected-failures-node-lt22.txt')
+      if (currentNodeMajorVersion <= 20) {
+        expectedFailureFiles.push('expected-failures-node-lte20.txt')
       }
       if (currentNodeMajorVersion >= 16) {
         expectedFailureFiles.push('expected-failures-node-gte16.txt')
