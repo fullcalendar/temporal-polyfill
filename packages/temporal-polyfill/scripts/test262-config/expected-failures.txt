@@ -16,7 +16,7 @@
 
 
 ##
-## Spec deviations (3 total)
+## Spec deviations (4 total)
 ##
 
 # WONTFIX (1)
@@ -52,6 +52,13 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 staging/sm/Temporal/PlainDate/withCalendar.js
 
 # WONTFIX (3)
+# We do not patch Intl.DateTimeFormat's constructor to more strictly validate
+# timeZone strings
+#
+# A) Rejecting legacy ICU time zones: see expected-failures-node-gte16.txt
+# B) Rejecting invalid minus sign:    see expected-failures-node-gte22.txt
+
+# WONTFIX (4)
 # We do not patch Intl.DateTimeFormat's resolvedOptions method to return
 # the string-normalized version of the original given time zone ID:
 #
