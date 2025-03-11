@@ -1,4 +1,86 @@
 
+v0.3.0
+------
+
+- Updated to March 2025 version of Temporal spec. Including but no limited to:
+  - timeZones can ONLY be strings; no longer accepts custom objects
+  - calendars can ONLY be strings; no longer accepts custom objects
+  - `Temporal.TimeZone` class removed; most functionality exists on `Temporal.ZonedDateTime`
+    - Added `zonedDateTime.getTimeZoneTransition()`
+  - `Temporal.Calendar` class removed; all functionality exists on Plain/Zoned types
+  - `.getISOFields()` methods removed on all Plain/Zoned types
+  - Better conformance for `Intl.DateTimeFormat`
+  - Many removals, with alternatives:
+
+```js
+// Temporal.Now
+
+❌ Temporal.Now.zonedDateTime(calendar)
+✅ Temporal.Now.zonedDateTimeISO().withCalendar(calendar)
+
+❌ Temporal.Now.plainDateTime(calendar)
+✅ Temporal.Now.plainDateTimeISO().withCalendar(calendar)
+
+❌ Temporal.Now.plainDate(calendar)
+✅ Temporal.Now.plainDateISO().withCalendar(calendar)
+
+// Temporal.Instant
+
+❌ Temporal.Instant.fromEpochSeconds(seconds)
+✅ Temporal.Instant.fromEpochMilliseconds(seconds * 1000)
+
+❌ Temporal.Instant.fromEpochMicroseconds(micro)
+✅ Temporal.Instant.fromEpochNanoseconds(micro * 1000)
+
+❌ instant.epochSeconds
+✅ instant.epochMilliseconds / 1000
+
+❌ instant.epochMicroseconds
+✅ instant.epochNanoseconds / 1000n
+
+❌ instant.toZonedDateTime()
+✅ instant.toZonedDateTimeISO().withCalendar(cal)
+
+// Temporal.ZonedDateTime
+
+❌ zonedDateTime.epochSeconds
+✅ zonedDateTime.epochMilliseconds / 1000
+
+❌ zonedDateTime.epochMicroseconds
+✅ zonedDateTime.epochNanoseconds / 1000n
+
+❌ zonedDateTime.withPlainDate(plainDate)
+✅ plainDate.toZonedDateTime({
+     plainTime: zonedDateTime,
+     timeZone: zonedDateTime.timeZone,
+   })
+
+❌ zonedDateTime.toPlainYearMonth()
+✅ zonedDateTime.toPlainDate().toPlainYearMonth()
+
+❌ zonedDateTime.toPlainMonthDay()
+✅ zonedDateTime.toPlainDate().toPlainMonthDay()
+
+// Temporal.PlainDateTime
+
+❌ plainDateTime.toPlainYearMonth()
+✅ plainDateTime.toPlainDate().toPlainYearMonth()
+
+❌ plainDateTime.toPlainMonthDay()
+✅ plainDateTime.toPlainDate().toPlainMonthDay()
+
+❌ plainDateTime.withPlainDate(plainDate)
+✅ plainDate.toPlainDateTime(plainDateTime)
+
+// Temporal.PlainTime
+
+❌ plainTime.toPlainDateTime(plainDate)
+✅ plainDate.toPlainDateTime(plainTime)
+
+❌ plainTime.toZonedDateTime({ plainDate, timeZone })
+✅ plainDate.toZonedDateTime({ plainTime, timeZone })
+```
+
 v0.2.5 (2024-05-30)
 -------------------
 
