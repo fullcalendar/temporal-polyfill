@@ -177,7 +177,10 @@ built-ins/Temporal/Duration/prototype/toLocaleString/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/toString/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/round/not-a-constructor.js
 built-ins/Temporal/Duration/prototype/negated/not-a-constructor.js
-built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
+
+# Test fails when in dev-mode, but succeeds when built with `build`
+# Happens because toTemporalInstant gets inlines, giving it better descriptor
+#built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
 
 # builtin
 built-ins/Temporal/PlainMonthDay/prototype/toJSON/builtin.js
