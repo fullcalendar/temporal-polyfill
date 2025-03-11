@@ -51,7 +51,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   // More versatile because accommodates
   // `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()`
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
-  const DateTimeFormatFunc = function (
+  function DateTimeFormatFunc(
     this: any,
     locales?: LocalesArg,
     options?: Intl.DateTimeFormatOptions,
@@ -61,7 +61,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
 
   // All calls to `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()` return
   // an instance of this class.
-  const DateTimeFormatNew = function (
+  function DateTimeFormatNew(
     this: any,
     locales: LocalesArg | undefined,
     options: Intl.DateTimeFormatOptions = Object.create(null), // protect against prototype pollution,
