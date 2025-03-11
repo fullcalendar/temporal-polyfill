@@ -1,6 +1,6 @@
 {
   "name": "temporal-spec",
-  "version": "0.2.4",
+  "version": "0.3.0-beta",
   "title": "TypeScript types for Temporal",
   "author": {
     "name": "Adam Shaw",
