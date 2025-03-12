@@ -36,7 +36,11 @@ async function writeBundles(
 
   if (bundleEsm || bundleEsmTerser || bundleEsmSwc) {
     const esmBundle = await rollupBuild({
-      input: joinPaths(pkgDir, 'dist', 'global' + extensions.esm),
+      input: joinPaths(
+        pkgDir,
+        'dist',
+        'global' + extensions.esmWhenIifePrefix + extensions.esm,
+      ),
     })
 
     const filename =
