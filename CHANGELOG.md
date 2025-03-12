@@ -2,7 +2,13 @@
 v0.3.0-beta.1 (2025-03-11)
 --------------------------
 
-TODO
+Fixed JS property names being mangled incorrectly in `global.min.js` and
+`global.esm.js`, leading to critical issues:
+
+- v0.3.0-beta crashes with Invalid protocol results (#66)
+- Temporal.Instant parsing broken in v0.3.0-beta? (#67)
+- CI environment incorrectly always testing `global.js` regardless of matrix
+
 
 v0.3.0-beta (2025-03-10)
 ------------------------
