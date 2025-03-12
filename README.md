@@ -84,19 +84,9 @@ Use a `<script>` tags with a CDN link:
     <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>56 KB</a> (+180%)</td>
   </tr>
   <tr>
-    <td>Spec compliance</td>
-    <td>
-      Strict compliance for built-in types.<br />
-      Relaxed compliance for subclassing<br />built-in types.
-    </td>
-    <td>
-      Strict compliance for entire API.
-    </td>
-  </tr>
-  <tr>
     <td>Spec date</td>
     <td>
-      Apr 2024
+      Mar 2025
     </td>
     <td>
       May 2023
@@ -121,19 +111,7 @@ Use a `<script>` tags with a CDN link:
 
 All calendar systems (ex: `chinese`, `persian`) and all time zones are supported.
 
-Compliance with the latest version of the Temporal spec (Apr 2024) is near-perfect with the following intentional deviations:
-
-- *Custom implementations* of Calendars and TimeZones are queried differently. Only affects those subclassing built-in classes, which is extremely rare. See the CALLING entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
-- There are believed to be 3 bugs in the Temporal spec itself. See SPEC-BUG entries in the [test-skip file](https://github.com/fullcalendar/temporal/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
-- `Intl.DateTimeFormat` has not been polyfilled to accept number-offset values for the `timeZone` option.
-- Method descriptors and `Function::length` are not strictly compliant due to ES-related space-saving techniques.
-
-The [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) has:
-
-- 7102 *total* Temporal-related test files
-- 6477 *passed* by `temporal-polyfill`
-- 491 *skipped* due to superficial method descriptor non-compliance
-- 134 *skipped* due to other aforementioned intentional deviations
+Compliance with the latest version of the Temporal spec is near-perfect [with just 4 intentional deviations](https://github.com/fullcalendar/temporal-polyfill/blob/spec-2025/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
 
 
 ## Browser Support
