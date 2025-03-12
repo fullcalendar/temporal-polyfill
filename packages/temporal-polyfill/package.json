@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "temporal-polyfill",
-  "version": "0.3.0-beta",
+  "version": "0.3.0-beta.1",
   "title": "Temporal Polyfill",
   "description": "A lightweight polyfill for Temporal, successor to the JavaScript Date object",
   "author": {

@@ -1,6 +1,11 @@
 
-v0.3.0
-------
+v0.3.0-beta.1 (2025-03-11)
+--------------------------
+
+TODO
+
+v0.3.0-beta (2025-03-10)
+------------------------
 
 - Updated to March 2025 version of Temporal spec. Including but no limited to:
   - timeZones can ONLY be strings; no longer accepts custom objects
