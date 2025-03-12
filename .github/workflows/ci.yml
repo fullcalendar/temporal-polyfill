@@ -63,5 +63,6 @@ jobs:
       - name: Test
         run: >
           TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
+          TEST262_MIN=${{ matrix.TEST262_MIN }}
           TEST262_ESM=${{ matrix.TEST262_ESM }}
-          cd packages/temporal-polyfill && pnpm run test262
+          pnpm run test262
