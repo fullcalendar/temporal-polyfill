@@ -96,7 +96,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
-    "@js-temporal/temporal-test262-runner": "js-temporal/temporal-test262-runner#main",
+    "@js-temporal/temporal-test262-runner": "fullcalendar/temporal-test262-runner#main",
     "@swc/core": "1.4.11",
     "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",

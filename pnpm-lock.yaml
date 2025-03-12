@@ -116,8 +116,8 @@ importers:
         specifier: 1.5.1
         version: 1.5.1
       '@js-temporal/temporal-test262-runner':
-        specifier: js-temporal/temporal-test262-runner#main
-        version: https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80
+        specifier: fullcalendar/temporal-test262-runner#main
+        version: https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/682c829a6b0625049528ece6bbf690d1fe5c3a62
       '@swc/core':
         specifier: 1.4.11
         version: 1.4.11
@@ -641,8 +641,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.19':
     resolution: {integrity: sha512-kf37QtfW+Hwx/buWGMPcR60iF9ziHa6r/CZJIHbmcm4+0qrXiVdxegAH0F6yddEVQ7zdkjcGCgCzUu+BcbhQxw==}
 
-  '@js-temporal/temporal-test262-runner@https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80':
-    resolution: {tarball: https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80}
+  '@js-temporal/temporal-test262-runner@https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/682c829a6b0625049528ece6bbf690d1fe5c3a62':
+    resolution: {tarball: https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/682c829a6b0625049528ece6bbf690d1fe5c3a62}
     version: 0.10.1
 
   '@jsdevtools/ez-spawn@3.0.4':
@@ -3342,7 +3342,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@js-temporal/temporal-test262-runner@https://codeload.github.com/js-temporal/temporal-test262-runner/tar.gz/67e7a00f027ebde31f99987b8293d181b9479f80':
+  '@js-temporal/temporal-test262-runner@https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/682c829a6b0625049528ece6bbf690d1fe5c3a62':
     dependencies:
       ansi-colors: 4.1.3
       js-yaml: 4.1.0
