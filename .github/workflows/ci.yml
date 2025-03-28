@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - spec-2025
+      - main
 
 env:
   TZ: "America/New_York"

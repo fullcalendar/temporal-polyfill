@@ -1,17 +1,6 @@
 
-v0.3.0-beta.1 (2025-03-11)
---------------------------
-
-Fixed JS property names being mangled incorrectly in `global.min.js` and
-`global.esm.js`, leading to critical issues:
-
-- v0.3.0-beta crashes with Invalid protocol results (#66)
-- Temporal.Instant parsing broken in v0.3.0-beta? (#67)
-- CI environment incorrectly always testing `global.js` regardless of matrix
-
-
-v0.3.0-beta (2025-03-10)
-------------------------
+v0.3.0 (2025-03-28)
+-------------------
 
 - Updated to March 2025 version of Temporal spec. Including but not limited to:
   - timeZones can ONLY be strings; no longer accepts custom objects
@@ -91,6 +80,9 @@ v0.3.0-beta (2025-03-10)
 ❌ plainTime.toZonedDateTime({ plainDate, timeZone })
 ✅ plainDate.toZonedDateTime({ plainTime, timeZone })
 ```
+
+[Learn more about these breaking changes &raquo;](https://github.com/js-temporal/temporal-polyfill/blob/main/CHANGELOG.md#050)
+
 
 v0.2.5 (2024-05-30)
 -------------------

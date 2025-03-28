@@ -41,7 +41,7 @@ console.log(Temporal.Now.zonedDateTimeISO().toString())
 Use a `<script>` tags with a CDN link:
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0-beta.1/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
