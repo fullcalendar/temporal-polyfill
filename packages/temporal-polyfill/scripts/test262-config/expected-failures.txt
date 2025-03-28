@@ -38,8 +38,8 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 # Our polyfill does not support the lowest year of some i18n calendars because:
 #
 # A) To determine a YMD values, we must use Intl.DateTimeFormat scraping to
-#    crawl backwards through years. If YMD is within-bounds, but start-of-year
-#    is not, our algorithm chokes.
+#    crawl backwards through a year's months. If YMD is within-bounds, but
+#    start-of-year is not, our algorithm chokes.
 #
 # Failing code:
 #   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
@@ -69,7 +69,7 @@ staging/sm/Temporal/PlainDate/withCalendar.js
 #
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 #
-# Therefor, similar tests for normalizing differently-cased strings fail too:
+# Therefore, similar tests for normalizing differently-cased strings fail too:
 #
 #   new Intl.DateTimeFormat("en", { timeZone: "AMERICA/ARGENTINA/BUENOS_AIRES" })
 #     .resolvedOptions().timeZone
