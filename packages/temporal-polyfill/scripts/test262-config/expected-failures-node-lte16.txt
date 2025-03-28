@@ -1,5 +1,10 @@
 
 # ENV-ISSUE
+# Node <=16 does not explicitly support the islamic-rgsa calendar,
+# and instead falls back to islamic, which is okay
+staging/Intl402/Temporal/old/islamic-calendars.js
+
+# ENV-ISSUE
 # Node <=16, native Intl.DateTimeFormat's timeZoneName does not accept
 # shortOffset/longOffset/shortGeneric/longGeneric
 intl402/DateTimeFormat/constructor-options-timeZoneName-valid.js
