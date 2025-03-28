@@ -357,7 +357,7 @@ export function nativeDateAdd(
 
   // HACK. Should probably be done elsewhere
   if (epochMilli === undefined) {
-    throw new RangeError('BAD!')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
   epochMilli! += (weeks * 7 + days) * milliInDay

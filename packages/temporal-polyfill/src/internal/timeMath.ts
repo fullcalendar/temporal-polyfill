@@ -105,9 +105,12 @@ export function checkIsoDateInBoundsStrict<T extends IsoDateFields>(
     ...isoFields,
     ...isoTimeFieldDefaults,
   })
+
+  // TODO: better way to do this besides hardcoding limit
   if (!bigNano || Math.abs(bigNano[0]) > 1e8) {
-    throw new RangeError('BAD!')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
+
   return isoFields
 }
 

@@ -810,7 +810,8 @@ export function nativeMonthDayFromFields(
   } else {
     // no year given? there must be a monthCode
     if (fields.monthCode === undefined) {
-      throw new TypeError('BAD!')
+      // TODO: should this message be more specific about month *CODE*?
+      throw new TypeError(errorMessages.missingMonth)
     }
     // pluck monthCode/day number without limiting overflow
     ;[monthCodeNumber, isLeapMonth] = parseMonthCode(fields.monthCode)

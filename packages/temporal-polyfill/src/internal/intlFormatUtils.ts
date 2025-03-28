@@ -1,3 +1,4 @@
+import * as errorMessages from './errorMessages'
 import { maxMilli } from './timeMath'
 
 export type LocalesArg = string | string[]
@@ -15,7 +16,7 @@ export function hashIntlFormatParts(
   // TODO: best level for this?
   // Probably do it when date is *converted* to epochMilli
   if (epochMilli < -maxMilli) {
-    throw new RangeError('BAD!')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
   const parts = intlFormat.formatToParts(epochMilli)

@@ -65,17 +65,20 @@ export const missingMonth = 'Missing month/monthCode'
 export const failedYearGuess = 'Cannot guess year'
 export const invalidLeapMonth = 'Invalid leap month'
 
-// Calendar/TimeZone-PROTOCOL (very vague, I know, but rare)
-export const invalidProtocol = 'Invalid protocol'
+// Calendar/TimeZone-PROTOCOL
+// TODO: remove this since we don't accept Calendar/TimeZone subclasses
+// Also, still used to denote invalid internal result. Give different error.
 export const invalidProtocolResults = 'Invalid protocol results'
 
 // Calendar
-export const mismatchingCalendars = 'Mismatching Calendars'
 export const invalidCalendar = (calendarId: string) =>
-  `Invalid Calendar: ${calendarId}`
+  invalidEntity('Calendar', calendarId)
+export const mismatchingCalendars = 'Mismatching Calendars'
 export const unsupportedWeekNumbers = 'Calendar week operations forbidden'
 
 // TimeZone
+export const invalidTimeZone = (calendarId: string) =>
+  invalidEntity('TimeZone', calendarId)
 export const mismatchingTimeZones = 'Mismatching TimeZones'
 export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
@@ -102,6 +105,7 @@ export const invalidSubstring = (substring: string) =>
   `Invalid substring: ${substring}`
 
 // Formatting
+export const invalidFormatOptions = 'Invalid formatting options'
 export const invalidFormatType = (branding: string) =>
   `Cannot format ${branding}`
 export const mismatchingFormatTypes = 'Mismatching types for formatting'

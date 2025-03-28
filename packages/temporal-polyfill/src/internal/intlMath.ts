@@ -12,6 +12,7 @@ import {
   monthToMonthCodeNumber,
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
+import * as errorMessages from './errorMessages'
 import {
   RawDateTimeFormat,
   hashIntlFormatParts,
@@ -145,7 +146,7 @@ function createIntlYearDataCache(
         // give up
         epochMilli < -maxMilli
       ) {
-        throw new RangeError('BAD!')
+        throw new RangeError(errorMessages.invalidProtocolResults)
       }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 

@@ -95,7 +95,7 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
         fake DateTimeFormats via `Object.create(Intl.DateTimeFormat.prototype)`
         */
         if (!internalsMap.has(this)) {
-          throw new TypeError('BAD!')
+          throw new TypeError(errorMessages.invalidCallingContext)
         }
 
         // don't do Function::bind, because gives weird .name
@@ -182,12 +182,14 @@ function createDateTimeFormatInternals(
   ) => {
     if (isRange) {
       if (formattables.length !== 2) {
-        throw new TypeError('BAD!')
+        // TODO: better error messages about both args need defined
+        throw new TypeError(errorMessages.mismatchingFormatTypes)
       }
       // check for any undefined arguments first
       for (const formattable of formattables) {
         if (formattable === undefined) {
-          throw new TypeError('BAD!')
+          // TODO: better error messages about both args need defined
+          throw new TypeError(errorMessages.mismatchingFormatTypes)
         }
       }
     }

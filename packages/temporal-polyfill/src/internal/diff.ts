@@ -316,8 +316,9 @@ function diffDateLike(
   const startEpochNano = isoToEpochNano(startIsoFields)
   const endEpochNano = isoToEpochNano(endIsoFields)
 
+  // TODO: best place to check range?
   if (startEpochNano === undefined || endEpochNano === undefined) {
-    throw new RangeError('BAD!')
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
   const sign = compareBigNanos(endEpochNano, startEpochNano)

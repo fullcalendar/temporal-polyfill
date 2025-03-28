@@ -71,10 +71,11 @@ const badCharactersRegExp = /[^\w\/:+-]+/
 
 function normalizeNamedTimeZoneId(id: string): string {
   if (badCharactersRegExp.test(id)) {
-    throw new RangeError('BAD! ' + id)
+    throw new RangeError(errorMessages.invalidTimeZone(id))
   }
 
   if (icuRegExp.test(id)) {
+    // TODO: give identifier
     throw new RangeError(errorMessages.forbiddenIcuTimeZone)
   }
 

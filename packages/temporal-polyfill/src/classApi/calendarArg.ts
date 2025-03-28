@@ -1,6 +1,7 @@
 import { isoCalendarId } from '../internal/calendarConfig'
 import { resolveCalendarId } from '../internal/calendarId'
 import { requireString } from '../internal/cast'
+import * as errorMessages from '../internal/errorMessages'
 import { parseCalendarId } from '../internal/isoParse'
 import { isObjectLike } from '../internal/utils'
 import { PlainDate } from './plainDate'
@@ -46,7 +47,8 @@ export function refineCalendarArg(arg: CalendarArg): string {
   if (isObjectLike(arg)) {
     const { calendar } = (getSlots(arg) || {}) as { calendar?: string }
     if (!calendar) {
-      throw new TypeError('BAD!') // TODO: improve!
+      // TODO: better message how non-Temporal objects aren't allowed
+      throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
     return calendar // other object already refined it
   }

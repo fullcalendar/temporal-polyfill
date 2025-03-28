@@ -117,7 +117,8 @@ function createOptionsTransformer(
 
     if (!hasAnyPropsByName(options, standardNames)) {
       if (strictOptions && hasAnyExclusions) {
-        throw new TypeError('BAD!') // no options overlap!
+        // TODO: more specific error about no overlapping options
+        throw new TypeError(errorMessages.invalidFormatOptions)
       }
 
       // still allow options to override fallbacks if present

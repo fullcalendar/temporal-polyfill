@@ -515,8 +515,8 @@ export function refineDirectionOptions(
     0,
   )
   if (!res) {
-    // neither position or negative
-    throw new RangeError('BAD!') // TODO: improve
+    // neither positive or negative
+    throw new RangeError(errorMessages.invalidEntity(directionName, res))
   }
   return res
 }
