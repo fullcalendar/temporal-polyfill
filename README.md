@@ -81,7 +81,7 @@ Use a `<script>` tags with a CDN link:
   <tr>
     <td>Minified+gzip size</td>
     <td><a href='https://bundlephobia.com/package/temporal-polyfill'>20 KB<a></td>
-    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>56 KB</a> (+180%)</td>
+    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>52 KB</a> (+160%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
@@ -89,7 +89,7 @@ Use a `<script>` tags with a CDN link:
       Mar 2025
     </td>
     <td>
-      May 2023
+      Mar 2025
     </td>
   </tr>
   <tr>
