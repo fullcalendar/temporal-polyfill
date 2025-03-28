@@ -80,8 +80,8 @@ Use a `<script>` tags with a CDN link:
   </tr>
   <tr>
     <td>Minified+gzip size</td>
-    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>20 KB<a></td>
-    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>52 KB</a> (+160%)</td>
+    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>19.8 KB<a></td>
+    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>51.9 KB</a> (+162%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
@@ -111,7 +111,7 @@ Use a `<script>` tags with a CDN link:
 
 All calendar systems (ex: `chinese`, `persian`) and all time zones are supported.
 
-Compliance with the latest version of the Temporal spec is near-perfect [with just 4 intentional deviations](https://github.com/fullcalendar/temporal-polyfill/blob/spec-2025/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
+Compliance with the latest version of the Temporal spec is near-perfect [with just 4 intentional deviations](https://github.com/fullcalendar/temporal-polyfill/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
 
 
 ## Browser Support
