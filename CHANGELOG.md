@@ -2,7 +2,7 @@
 v0.3.0 (2025-03-28)
 -------------------
 
-- Updated to March 2025 version of Temporal spec. Including but not limited to:
+- Updated to March 2025 version of Temporal spec (#47). Including but not limited to:
   - timeZones can ONLY be strings; no longer accepts custom objects
   - calendars can ONLY be strings; no longer accepts custom objects
   - `Temporal.TimeZone` class removed; most functionality exists on `Temporal.ZonedDateTime`
