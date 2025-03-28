@@ -13,7 +13,7 @@ Fixed JS property names being mangled incorrectly in `global.min.js` and
 v0.3.0-beta (2025-03-10)
 ------------------------
 
-- Updated to March 2025 version of Temporal spec. Including but no limited to:
+- Updated to March 2025 version of Temporal spec. Including but not limited to:
   - timeZones can ONLY be strings; no longer accepts custom objects
   - calendars can ONLY be strings; no longer accepts custom objects
   - `Temporal.TimeZone` class removed; most functionality exists on `Temporal.ZonedDateTime`
@@ -41,7 +41,7 @@ v0.3.0-beta (2025-03-10)
 ✅ Temporal.Instant.fromEpochMilliseconds(seconds * 1000)
 
 ❌ Temporal.Instant.fromEpochMicroseconds(micro)
-✅ Temporal.Instant.fromEpochNanoseconds(micro * 1000)
+✅ Temporal.Instant.fromEpochNanoseconds(micro * 1000n)
 
 ❌ instant.epochSeconds
 ✅ instant.epochMilliseconds / 1000
