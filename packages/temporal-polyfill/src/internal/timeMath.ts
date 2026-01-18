@@ -328,7 +328,7 @@ export function isoToLegacyDate(
 
   // Note: Date.UTC() interprets one and two-digit years as being in the
   // 20th century, so don't use it
-  const legacyDate = new Date() // should throw out-of-range error here?
+  const legacyDate = new Date(0) // should throw out-of-range error here?
   legacyDate.setUTCHours(isoHour, isoMinute, isoSec, isoMilli)
   legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay + daysNudged)
 
