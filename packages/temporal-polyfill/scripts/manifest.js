@@ -41,6 +41,7 @@ async function writePkgJson(pkgDir, isDev) {
       : './' + exportName + extensions.dts
 
     distExportMap[exportPath] = {
+      'module-sync': esmPath,
       require: cjsPath,
       import:
         isDev || exportConfig.iife
