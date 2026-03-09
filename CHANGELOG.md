@@ -6,6 +6,7 @@ v0.3.1 (2026-03-09)
 - fix: Duration toLocaleString uses DateTimeFormatOptions (#80)
 - fix: ZonedDateTime should not be considered Formattable (#78)
 - fix: stop using locale `en-GB` for computations, not present in some environments (#76)
+- fix: result of `Temporal.Now.timeZoneId()` should not be cached (#63)
 - feature: support require(esm) in Node.js to avoid dual package hazard (#62)
 
 

@@ -18,12 +18,6 @@ export function getCurrentEpochNano(): BigNano {
 
 // -----------------------------------------------------------------------------
 
-let currentTimeZoneId: string | undefined
-
 export function getCurrentTimeZoneId(): string {
-  return currentTimeZoneId || (currentTimeZoneId = computeCurrentTimeZoneId())
-}
-
-function computeCurrentTimeZoneId(): string {
   return new RawDateTimeFormat().resolvedOptions().timeZone
 }
