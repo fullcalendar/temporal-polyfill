@@ -1,4 +1,10 @@
 
+v0.3.1 (2026-03-09)
+-------------------
+
+- fix: use `new Date()` for `maxPossibleTransition` malfunctions in some environments (#83)
+
+
 v0.3.0 (2025-03-28)
 -------------------
 

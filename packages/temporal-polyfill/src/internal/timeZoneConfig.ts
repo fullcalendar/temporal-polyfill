@@ -10,6 +10,11 @@ export const maxPossibleTransition = isoArgsToEpochSec(getCurrentYearPlus10())
 
 function getCurrentYearPlus10() {
   const currentDate = /*@__PURE__*/ new Date()
-  const currentYear = /*@__PURE__*/ currentDate.getUTCFullYear()
+  const currentYear =
+    // `new Date()` might be 0 in some environments and situations
+    // https://github.com/fullcalendar/temporal-polyfill/issues/83
+    /*@__PURE__*/ currentDate.getTime() === 0
+      ? 2040
+      : /*@__PURE__*/ currentDate.getUTCFullYear()
   return currentYear + 10
 }
