@@ -1180,7 +1180,6 @@ export namespace Intl {
   type Formattable =
     | Date
     | Temporal.Instant
-    | Temporal.ZonedDateTime
     | Temporal.PlainDate
     | Temporal.PlainTime
     | Temporal.PlainDateTime
