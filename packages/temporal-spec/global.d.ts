@@ -33,7 +33,7 @@ declare global {
        *
        * The default is `'constrain'`.
        */
-      overflow?: 'constrain' | 'reject';
+      overflow?: 'constrain' | 'reject' | undefined;
     };
 
     /**
@@ -52,7 +52,7 @@ declare global {
        *
        * The default is `'constrain'`.
        */
-      overflow?: 'constrain' | 'balance';
+      overflow?: 'constrain' | 'balance' | undefined;
     };
 
     /**
@@ -82,7 +82,7 @@ declare global {
        * The default is `'compatible'`.
        *
        * */
-      disambiguation?: 'compatible' | 'earlier' | 'later' | 'reject';
+      disambiguation?: 'compatible' | 'earlier' | 'later' | 'reject' | undefined;
     };
 
     type OffsetDisambiguationOptions = {
@@ -118,12 +118,10 @@ declare global {
        * be used to choose the correct instant. However, if the offset is used
        * then the `disambiguation` option will be ignored.
        */
-      offset?: 'use' | 'prefer' | 'ignore' | 'reject';
+      offset?: 'use' | 'prefer' | 'ignore' | 'reject' | undefined;
     };
 
-    type ZonedDateTimeAssignmentOptions = Partial<
-      AssignmentOptions & ToInstantOptions & OffsetDisambiguationOptions
-    >;
+    type ZonedDateTimeAssignmentOptions = AssignmentOptions & ToInstantOptions & OffsetDisambiguationOptions;
 
     /**
      * Options for arithmetic operations like `add()` and `subtract()`
@@ -137,7 +135,7 @@ declare global {
        *
        * The default is `'constrain'`.
        */
-      overflow?: 'constrain' | 'reject';
+      overflow?: 'constrain' | 'reject' | undefined;
     };
 
     type DateUnit = 'year' | 'month' | 'week' | 'day';
@@ -170,8 +168,8 @@ declare global {
      * Options for outputting precision in toString() on types with seconds
      */
     type ToStringPrecisionOptions = {
-      fractionalSecondDigits?: 'auto' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-      smallestUnit?: SmallestUnit<'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond'>;
+      fractionalSecondDigits?: 'auto' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
+      smallestUnit?: SmallestUnit<'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond'> | undefined;
 
       /**
        * Controls how rounding is performed:
@@ -187,27 +185,23 @@ declare global {
        *   negative infinity which is usually unexpected. For this reason, `trunc`
        *   is recommended for most use cases.
        */
-      roundingMode?: RoundingMode;
+      roundingMode?: RoundingMode | undefined;
     };
 
     type ShowCalendarOption = {
-      calendarName?: 'auto' | 'always' | 'never' | 'critical';
+      calendarName?: 'auto' | 'always' | 'never' | 'critical' | undefined;
     };
 
-    type CalendarTypeToStringOptions = Partial<ToStringPrecisionOptions & ShowCalendarOption>;
+    type CalendarTypeToStringOptions = ToStringPrecisionOptions & ShowCalendarOption;
 
-    type ZonedDateTimeToStringOptions = Partial<
-      CalendarTypeToStringOptions & {
-        timeZoneName?: 'auto' | 'never' | 'critical';
-        offset?: 'auto' | 'never';
-      }
-    >;
+    type ZonedDateTimeToStringOptions = CalendarTypeToStringOptions & {
+      timeZoneName?: 'auto' | 'never' | 'critical' | undefined;
+      offset?: 'auto' | 'never' | undefined;
+    };
 
-    type InstantToStringOptions = Partial<
-      ToStringPrecisionOptions & {
-        timeZone: TimeZoneLike;
-      }
-    >;
+    type InstantToStringOptions = ToStringPrecisionOptions & {
+      timeZone?: TimeZoneLike | undefined;
+    };
 
     /**
      * Options to control the result of `until()` and `since()` methods in
@@ -220,7 +214,7 @@ declare global {
        * `since()`, because those methods default behavior is not to round.
        * However, the same property is required for `round()`.
        */
-      smallestUnit?: SmallestUnit<T>;
+      smallestUnit?: SmallestUnit<T> | undefined;
 
       /**
        * The largest unit to allow in the resulting `Temporal.Duration` object.
@@ -238,14 +232,14 @@ declare global {
        * The default is always `'auto'`, though the meaning of this depends on the
        * type being used.
        */
-      largestUnit?: LargestUnit<T>;
+      largestUnit?: LargestUnit<T> | undefined;
 
       /**
        * Allows rounding to an integer number of units. For example, to round to
        * increments of a half hour, use `{ smallestUnit: 'minute',
        * roundingIncrement: 30 }`.
        */
-      roundingIncrement?: number;
+      roundingIncrement?: number | undefined;
 
       /**
        * Controls how rounding is performed:
@@ -263,7 +257,7 @@ declare global {
        *   negative infinity which is usually unexpected. For this reason, `trunc`
        *   is recommended for most use cases.
        */
-      roundingMode?: RoundingMode;
+      roundingMode?: RoundingMode | undefined;
     }
 
     /**
@@ -289,7 +283,7 @@ declare global {
            * increments of a half hour, use `{ smallestUnit: 'minute',
            * roundingIncrement: 30 }`.
            */
-          roundingIncrement?: number;
+          roundingIncrement?: number | undefined;
 
           /**
            * Controls how rounding is performed:
@@ -305,7 +299,7 @@ declare global {
            *   negative infinity which is usually unexpected. For this reason, `trunc`
            *   is recommended for most use cases.
            */
-          roundingMode?: RoundingMode;
+          roundingMode?: RoundingMode | undefined;
         };
 
     /**
@@ -347,7 +341,7 @@ declare global {
                * If `smallestUnit` is larger, then `smallestUnit` will be used as
                * `largestUnit`, superseding a caller-supplied or default value.
                */
-              largestUnit?: LargestUnit<DateTimeUnit>;
+              largestUnit?: LargestUnit<DateTimeUnit> | undefined;
             }
           | {
               /**
@@ -356,7 +350,7 @@ declare global {
                * required, but is optional if `largestUnit` is provided and not
                * undefined.
                */
-              smallestUnit?: SmallestUnit<DateTimeUnit>;
+              smallestUnit?: SmallestUnit<DateTimeUnit> | undefined;
 
               /**
                * The largest unit to allow in the resulting `Temporal.Duration`
@@ -385,7 +379,7 @@ declare global {
            * to increments of a half hour, use `{ smallestUnit: 'minute',
            * roundingIncrement: 30 }`.
            */
-          roundingIncrement?: number;
+          roundingIncrement?: number | undefined;
 
           /**
            * Controls how rounding is performed:
@@ -404,7 +398,7 @@ declare global {
            *   unexpected. For this reason, `trunc` is recommended for most "round
            *   down" use cases.
            */
-          roundingMode?: RoundingMode;
+          roundingMode?: RoundingMode | undefined;
 
           /**
            * The starting point to use for rounding and conversions when
@@ -430,7 +424,13 @@ declare global {
            * time zone transitions and all days will be assumed to be 24 hours
            * long.
            */
-          relativeTo?: Temporal.PlainDateTime | Temporal.ZonedDateTime | PlainDateTimeLike | ZonedDateTimeLike | string;
+          relativeTo?:
+            | Temporal.PlainDateTime
+            | Temporal.ZonedDateTime
+            | PlainDateTimeLike
+            | ZonedDateTimeLike
+            | string
+            | undefined;
         });
 
     /**
@@ -466,7 +466,13 @@ declare global {
            * this option is omitted), then the operation will ignore time zone
            * transitions and all days will be assumed to be 24 hours long.
            */
-          relativeTo?: Temporal.ZonedDateTime | Temporal.PlainDateTime | ZonedDateTimeLike | PlainDateTimeLike | string;
+          relativeTo?:
+            | Temporal.ZonedDateTime
+            | Temporal.PlainDateTime
+            | ZonedDateTimeLike
+            | PlainDateTimeLike
+            | string
+            | undefined;
         };
 
     /**
@@ -493,7 +499,13 @@ declare global {
        * this option is omitted), then the operation will ignore time zone
        * transitions and all days will be assumed to be 24 hours long.
        */
-      relativeTo?: Temporal.ZonedDateTime | Temporal.PlainDateTime | ZonedDateTimeLike | PlainDateTimeLike | string;
+      relativeTo?:
+        | Temporal.ZonedDateTime
+        | Temporal.PlainDateTime
+        | ZonedDateTimeLike
+        | PlainDateTimeLike
+        | string
+        | undefined;
     }
 
     /**
@@ -502,16 +514,46 @@ declare global {
     type TransitionDirection = 'next' | 'previous' | { direction: 'next' | 'previous' };
 
     type DurationLike = {
-      years?: number;
-      months?: number;
-      weeks?: number;
-      days?: number;
-      hours?: number;
-      minutes?: number;
-      seconds?: number;
-      milliseconds?: number;
-      microseconds?: number;
-      nanoseconds?: number;
+      years?: number | undefined;
+      months?: number | undefined;
+      weeks?: number | undefined;
+      days?: number | undefined;
+      hours?: number | undefined;
+      minutes?: number | undefined;
+      seconds?: number | undefined;
+      milliseconds?: number | undefined;
+      microseconds?: number | undefined;
+      nanoseconds?: number | undefined;
+    };
+
+    /**
+     * Options for Intl.DurationFormat
+     */
+    export type DurationFormatOptions = {
+      localeMatcher?: 'lookup' | 'best fit' | undefined;
+      numberingSystem?: string | undefined;
+      style?: 'long' | 'short' | 'narrow' | 'digital' | undefined;
+      years?: 'long' | 'short' | 'narrow' | undefined;
+      yearsDisplay?: 'always' | 'auto' | undefined;
+      months?: 'long' | 'short' | 'narrow' | undefined;
+      monthsDisplay?: 'always' | 'auto' | undefined;
+      weeks?: 'long' | 'short' | 'narrow' | undefined;
+      weeksDisplay?: 'always' | 'auto' | undefined;
+      days?: 'long' | 'short' | 'narrow' | undefined;
+      daysDisplay?: 'always' | 'auto' | undefined;
+      hours?: 'long' | 'short' | 'narrow' | 'numeric' | '2-digit' | undefined;
+      hoursDisplay?: 'always' | 'auto' | undefined;
+      minutes?: 'long' | 'short' | 'narrow' | 'numeric' | '2-digit' | undefined;
+      minutesDisplay?: 'always' | 'auto' | undefined;
+      seconds?: 'long' | 'short' | 'narrow' | 'numeric' | '2-digit' | undefined;
+      secondsDisplay?: 'always' | 'auto' | undefined;
+      milliseconds?: 'long' | 'short' | 'narrow' | 'numeric' | undefined;
+      millisecondsDisplay?: 'always' | 'auto' | undefined;
+      microseconds?: 'long' | 'short' | 'narrow' | 'numeric' | undefined;
+      microsecondsDisplay?: 'always' | 'auto' | undefined;
+      nanoseconds?: 'long' | 'short' | 'narrow' | 'numeric' | undefined;
+      nanosecondsDisplay?: 'always' | 'auto' | undefined;
+      fractionalDigits?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
     };
 
     /**
@@ -559,7 +601,7 @@ declare global {
       subtract(other: Temporal.Duration | DurationLike | string): Temporal.Duration;
       round(roundTo: DurationRoundTo): Temporal.Duration;
       total(totalOf: DurationTotalOf): number;
-      toLocaleString(locales?: globalThis.Intl.LocalesArgument, options?: globalThis.Intl.DateTimeFormatOptions): string;
+      toLocaleString(locales?: globalThis.Intl.LocalesArgument, options?: DurationFormatOptions): string;
       toJSON(): string;
       toString(options?: ToStringPrecisionOptions): string;
       valueOf(): never;
@@ -622,11 +664,11 @@ declare global {
     type PlainDateLike = {
       era?: string | undefined;
       eraYear?: number | undefined;
-      year?: number;
-      month?: number;
-      monthCode?: string;
-      day?: number;
-      calendar?: CalendarLike;
+      year?: number | undefined;
+      month?: number | undefined;
+      monthCode?: string | undefined;
+      day?: number | undefined;
+      calendar?: CalendarLike | undefined;
     };
 
     /**
@@ -680,7 +722,7 @@ declare global {
           | string
           | {
               timeZone: TimeZoneLike;
-              plainTime?: Temporal.PlainTime | PlainTimeLike | string;
+              plainTime?: Temporal.PlainTime | PlainTimeLike | string | undefined;
             }
       ): Temporal.ZonedDateTime;
       toPlainYearMonth(): Temporal.PlainYearMonth;
@@ -695,17 +737,17 @@ declare global {
     type PlainDateTimeLike = {
       era?: string | undefined;
       eraYear?: number | undefined;
-      year?: number;
-      month?: number;
-      monthCode?: string;
-      day?: number;
-      hour?: number;
-      minute?: number;
-      second?: number;
-      millisecond?: number;
-      microsecond?: number;
-      nanosecond?: number;
-      calendar?: CalendarLike;
+      year?: number | undefined;
+      month?: number | undefined;
+      monthCode?: string | undefined;
+      day?: number | undefined;
+      hour?: number | undefined;
+      minute?: number | undefined;
+      second?: number | undefined;
+      millisecond?: number | undefined;
+      microsecond?: number | undefined;
+      nanosecond?: number | undefined;
+      calendar?: CalendarLike | undefined;
     };
 
     /**
@@ -798,11 +840,11 @@ declare global {
     type PlainMonthDayLike = {
       era?: string | undefined;
       eraYear?: number | undefined;
-      year?: number;
-      month?: number;
-      monthCode?: string;
-      day?: number;
-      calendar?: CalendarLike;
+      year?: number | undefined;
+      month?: number | undefined;
+      monthCode?: string | undefined;
+      day?: number | undefined;
+      calendar?: CalendarLike | undefined;
     };
 
     /**
@@ -832,12 +874,12 @@ declare global {
     }
 
     type PlainTimeLike = {
-      hour?: number;
-      minute?: number;
-      second?: number;
-      millisecond?: number;
-      microsecond?: number;
-      nanosecond?: number;
+      hour?: number | undefined;
+      minute?: number | undefined;
+      second?: number | undefined;
+      millisecond?: number | undefined;
+      microsecond?: number | undefined;
+      nanosecond?: number | undefined;
     };
 
     /**
@@ -905,10 +947,10 @@ declare global {
     type PlainYearMonthLike = {
       era?: string | undefined;
       eraYear?: number | undefined;
-      year?: number;
-      month?: number;
-      monthCode?: string;
-      calendar?: CalendarLike;
+      year?: number | undefined;
+      month?: number | undefined;
+      monthCode?: string | undefined;
+      calendar?: CalendarLike | undefined;
     };
 
     /**
@@ -964,19 +1006,19 @@ declare global {
     type ZonedDateTimeLike = {
       era?: string | undefined;
       eraYear?: number | undefined;
-      year?: number;
-      month?: number;
-      monthCode?: string;
-      day?: number;
-      hour?: number;
-      minute?: number;
-      second?: number;
-      millisecond?: number;
-      microsecond?: number;
-      nanosecond?: number;
-      offset?: string;
-      timeZone?: TimeZoneLike;
-      calendar?: CalendarLike;
+      year?: number | undefined;
+      month?: number | undefined;
+      monthCode?: string | undefined;
+      day?: number | undefined;
+      hour?: number | undefined;
+      minute?: number | undefined;
+      second?: number | undefined;
+      millisecond?: number | undefined;
+      microsecond?: number | undefined;
+      nanosecond?: number | undefined;
+      offset?: string | undefined;
+      timeZone?: TimeZoneLike | undefined;
+      calendar?: CalendarLike | undefined;
     };
 
     class ZonedDateTime {
@@ -1141,7 +1183,6 @@ declare global {
     type Formattable =
       | Date
       | Temporal.Instant
-      | Temporal.ZonedDateTime
       | Temporal.PlainDate
       | Temporal.PlainTime
       | Temporal.PlainDateTime
