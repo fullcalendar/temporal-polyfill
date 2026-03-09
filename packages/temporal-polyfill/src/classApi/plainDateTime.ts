@@ -241,6 +241,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
   },
+  formatPlainDateTimeIso,
 )
 
 // Utils

@@ -157,6 +157,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
     },
+    formatPlainYearMonthIso,
   )
 
 // Utils

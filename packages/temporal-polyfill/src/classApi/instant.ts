@@ -128,6 +128,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       return compareInstants(toInstantSlots(a), toInstantSlots(b))
     },
   },
+  (slots: InstantSlots) => formatInstantIso(refineTimeZoneArg, queryNativeTimeZone, slots),
 )
 
 // Utils

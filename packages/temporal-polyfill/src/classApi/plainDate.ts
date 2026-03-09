@@ -221,6 +221,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
   },
+  formatPlainDateIso,
 )
 
 // Utils

@@ -82,6 +82,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
       },
     },
+    formatPlainMonthDayIso,
   )
 
 // Utils

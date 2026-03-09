@@ -122,6 +122,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       )
     },
   },
+  formatPlainTimeIso,
 )
 
 // Utils

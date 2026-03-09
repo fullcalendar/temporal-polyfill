@@ -163,6 +163,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       )
     },
   },
+  formatDurationIso,
 )
 
 // Utils
