@@ -16,7 +16,6 @@ import * as errorMessages from './errorMessages'
 import {
   RawDateTimeFormat,
   hashIntlFormatParts,
-  standardLocaleId,
 } from './intlFormatUtils'
 import { IsoDateFields } from './isoFields'
 import {
@@ -229,13 +228,14 @@ export function parseIntlPartsYear(intlParts: Record<string, string>): number {
  */
 export const queryCalendarIntlFormat = memoize(
   (id: string): Intl.DateTimeFormat =>
-    new RawDateTimeFormat(standardLocaleId, {
+    new RawDateTimeFormat('en', {
       calendar: id,
       timeZone: utcTimeZoneId,
       era: 'short', // 'narrow' is too terse for japanese months
       year: 'numeric',
       month: 'short', // easier to identify monthCodes
       day: 'numeric',
+      hour12: false,
     }),
 )
 

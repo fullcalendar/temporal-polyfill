@@ -7,8 +7,6 @@ export type RawFormattable = Date | number
 
 export const RawDateTimeFormat = Intl.DateTimeFormat
 
-export const standardLocaleId = 'en-GB' // 24-hour clock, gregorian by default
-
 export function hashIntlFormatParts(
   intlFormat: Intl.DateTimeFormat,
   epochMilli: number,

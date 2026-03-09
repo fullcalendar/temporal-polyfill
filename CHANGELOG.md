@@ -5,6 +5,7 @@ v0.3.1 (2026-03-09)
 - fix: use `new Date()` for `maxPossibleTransition` malfunctions in some environments (#83)
 - fix: Duration toLocaleString uses DateTimeFormatOptions (#80)
 - fix: ZonedDateTime should not be considered Formattable (#78)
+- fix: stop using locale `en-GB` for computations, not present in some environments (#76)
 
 
 v0.3.0 (2025-03-28)

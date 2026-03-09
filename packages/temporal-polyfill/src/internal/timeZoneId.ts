@@ -1,6 +1,7 @@
+import { isoCalendarId } from './calendarConfig'
 import { requireString } from './cast'
 import * as errorMessages from './errorMessages'
-import { RawDateTimeFormat, standardLocaleId } from './intlFormatUtils'
+import { RawDateTimeFormat } from './intlFormatUtils'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -51,7 +52,8 @@ export function getTimeZoneEssence(
  */
 const queryTimeZoneIntlFormat = memoize(
   (id: string): Intl.DateTimeFormat =>
-    new RawDateTimeFormat(standardLocaleId, {
+    new RawDateTimeFormat('en', {
+      calendar: isoCalendarId,
       timeZone: id,
       era: 'short',
       year: 'numeric',
@@ -60,6 +62,7 @@ const queryTimeZoneIntlFormat = memoize(
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
+      hour12: false,
     }),
 )
 
