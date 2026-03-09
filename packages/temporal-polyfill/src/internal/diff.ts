@@ -74,6 +74,11 @@ import {
 } from './units'
 import { NumberSign, bindArgs, divModTrunc, pluckProps } from './utils'
 
+/*
+TODO: In many places, diffs are just meant to get sign, which can mostly be done canonically!
+TODO: fix https://github.com/tc39/proposal-temporal/issues/3141#issuecomment-3230087875
+*/
+
 // High-level
 // -----------------------------------------------------------------------------
 
