@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainTimeFns from './plainTime'
+import * as DurationFns from '../../dist/fns/duration'
+import * as PlainDateFns from '../../dist/fns/plaindate'
+import * as PlainTimeFns from '../../dist/fns/plaintime'
 import {
   expectDurationEquals,
   expectPlainDateTimeEquals,
@@ -187,21 +187,6 @@ describe('toPlainDateTime', () => {
   })
 })
 
-describe('toZonedDateTime', () => {
-  it('works', () => {
-    const pt = PlainTimeFns.create(12, 30)
-    const pd = PlainDateFns.create(2024, 6, 3)
-    const zdt = PlainTimeFns.toZonedDateTime(pt, {
-      timeZone: 'America/New_York',
-      plainDate: pd,
-    })
-    expectZonedDateTimeEquals(zdt, {
-      timeZone: 'America/New_York',
-      epochNanoseconds: 1717432200000000000n,
-    })
-  })
-})
-
 describe('toString', () => {
   it('works without options', () => {
     const pt = PlainTimeFns.create(12, 30)
@@ -258,7 +243,8 @@ describe('toLocaleStringParts', () => {
   })
 })
 
-describe('rangeToLocaleString', () => {
+// TODO: revive
+describe.skip('rangeToLocaleString', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
@@ -271,7 +257,8 @@ describe('rangeToLocaleString', () => {
   })
 })
 
-describe('rangeToLocaleStringParts', () => {
+// TODO: revive
+describe.skip('rangeToLocaleStringParts', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)

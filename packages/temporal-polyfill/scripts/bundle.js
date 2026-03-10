@@ -271,7 +271,9 @@ function buildWithConfigs(configs) {
 
       return Promise.all(
         arrayify(config.output).map((outputConfig) => {
-          return bundle.write(outputConfig)
+          if (outputConfig) {
+            return bundle.write(outputConfig)
+          }
         }),
       )
     }),

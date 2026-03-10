@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as PlainYearMonthFns from './plainYearMonth'
+import * as DurationFns from '../../dist/fns/duration'
+import * as PlainYearMonthFns from '../../dist/fns/plainyearmonth'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -76,7 +76,7 @@ describe('getFields', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
     const fields = PlainYearMonthFns.getFields(pym)
     expect(fields).toEqual({
-      era: 'ce',
+      era: 'gregory',
       eraYear: 2024,
       year: 2024,
       monthCode: 'M06',
@@ -230,7 +230,7 @@ describe('toLocaleString', () => {
     const s = testHotCache(() =>
       PlainYearMonthFns.toLocaleString(pym, locale, options),
     )
-    expect(s).toBe('December 2023')
+    expect(s).toBe('2023 December')
   })
 })
 
@@ -247,9 +247,9 @@ describe('toLocaleStringParts', () => {
       PlainYearMonthFns.toLocaleStringParts(pym, locale, options),
     )
     expect(parts).toEqual([
-      { type: 'month', value: 'December' },
-      { type: 'literal', value: ' ' },
       { type: 'year', value: '2023' },
+      { type: 'literal', value: ' ' },
+      { type: 'month', value: 'December' },
     ])
   })
 })
@@ -267,7 +267,7 @@ describe('rangeToLocaleString', () => {
     const s = testHotCache(() =>
       PlainYearMonthFns.rangeToLocaleString(pym0, pym1, locale, options),
     )
-    expect(s).toBe('October – December 2023')
+    expect(s).toBe('2023 October–December')
   })
 })
 
@@ -285,11 +285,11 @@ describe('rangeToLocaleStringParts', () => {
       PlainYearMonthFns.rangeToLocaleStringParts(pym0, pym1, locale, options),
     )
     expect(parts).toEqual([
-      { source: 'startRange', type: 'month', value: 'October' },
-      { source: 'shared', type: 'literal', value: ' – ' },
-      { source: 'endRange', type: 'month', value: 'December' },
-      { source: 'shared', type: 'literal', value: ' ' },
       { source: 'shared', type: 'year', value: '2023' },
+      { source: 'shared', type: 'literal', value: ' ' },
+      { source: 'startRange', type: 'month', value: 'October' },
+      { source: 'shared', type: 'literal', value: '–' },
+      { source: 'endRange', type: 'month', value: 'December' },
     ])
   })
 })

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as InstantFns from './instant'
+import * as DurationFns from '../../dist/fns/duration'
+import * as InstantFns from '../../dist/fns/instant'
 import {
   expectDurationEquals,
   expectInstantEquals,
   testHotCache,
 } from './testUtils'
-import * as ZonedDateTimeFns from './zonedDateTime'
+import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
 
 describe('create', () => {
   it('works', () => {

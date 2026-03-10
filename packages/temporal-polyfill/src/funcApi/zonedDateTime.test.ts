@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainTimeFns from './plainTime'
+import * as DurationFns from '../../dist/fns/duration'
+import * as PlainDateFns from '../../dist/fns/plaindate'
+import * as PlainTimeFns from '../../dist/fns/plaintime'
+import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -12,7 +13,6 @@ import {
   expectZonedDateTimeEquals,
   testHotCache,
 } from './testUtils'
-import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
   it('works without specifying a calendar', () => {

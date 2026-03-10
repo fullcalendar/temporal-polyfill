@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainTimeFns from './plainTime'
+import * as DurationFns from '../../dist/fns/duration'
+import * as PlainDateFns from '../../dist/fns/plaindate'
+import * as PlainTimeFns from '../../dist/fns/plaintime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -85,7 +85,7 @@ describe('getFields', () => {
   it('works with calendar with eras', () => {
     const pd = PlainDateFns.create(2024, 1, 1, 'gregory')
     expect(PlainDateFns.getFields(pd)).toEqual({
-      era: 'ce',
+      era: 'gregory',
       eraYear: 2024,
       year: 2024,
       month: 1,

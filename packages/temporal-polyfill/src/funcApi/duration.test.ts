@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainDateTimeFns from './plainDateTime'
+import * as DurationFns from '../../dist/fns/duration'
+import * as PlainDateFns from '../../dist/fns/plaindate'
+import * as PlainDateTimeFns from '../../dist/fns/plaindatetime'
 import { expectDurationEquals } from './testUtils'
-import * as ZonedDateTimeFns from './zonedDateTime'
+import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
 
 describe('create', () => {
   it('called without args', () => {
