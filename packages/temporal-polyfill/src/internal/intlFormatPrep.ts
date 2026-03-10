@@ -277,9 +277,11 @@ TODO: share this DateTimeFormat with computeCurrentTimeZoneId
 */
 // HACK for pureTopLevel
 function computeNonBuggyIsoResolve() {
-  return new RawDateTimeFormat(undefined, {
-    calendar: isoCalendarId,
-  }).resolvedOptions().calendar === isoCalendarId
+  return (
+    new RawDateTimeFormat(undefined, {
+      calendar: isoCalendarId,
+    }).resolvedOptions().calendar === isoCalendarId
+  )
 }
 const nonBuggyIsoResolve = computeNonBuggyIsoResolve()
 

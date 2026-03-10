@@ -13,8 +13,6 @@ function getCurrentYearPlus10() {
   const currentYear =
     // `new Date()` might be 0 in some environments and situations
     // https://github.com/fullcalendar/temporal-polyfill/issues/83
-    currentDate.getTime() === 0
-      ? 2040
-      : currentDate.getUTCFullYear()
+    currentDate.getTime() === 0 ? 2040 : currentDate.getUTCFullYear()
   return currentYear + 10
 }
