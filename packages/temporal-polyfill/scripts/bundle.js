@@ -391,5 +391,8 @@ async function readTemporalReservedWords(pkgDir) {
       'isoMillisecond',
       'isoMicrosecond',
       'isoNanosecond',
+
+      // Intl.DateTimeFormat options
+      'hour12',
     ])
 }
