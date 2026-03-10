@@ -1,7 +1,8 @@
 
-next
-----
+v0.3.2 (2026-03-10)
+-------------------
 
+- feature: function API in dist, though poorly documented and in alpha
 - fix: incorrect placement of `/*@__PURE__*/` (#90)
 
 
