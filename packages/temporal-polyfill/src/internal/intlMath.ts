@@ -13,10 +13,7 @@ import {
 } from './calendarNative'
 import { diffEpochMilliByDay } from './diff'
 import * as errorMessages from './errorMessages'
-import {
-  RawDateTimeFormat,
-  hashIntlFormatParts,
-} from './intlFormatUtils'
+import { RawDateTimeFormat, hashIntlFormatParts } from './intlFormatUtils'
 import { IsoDateFields } from './isoFields'
 import {
   isoEpochFirstLeapYear,

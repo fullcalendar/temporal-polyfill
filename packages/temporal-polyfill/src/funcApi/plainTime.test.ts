@@ -6,7 +6,6 @@ import {
   expectDurationEquals,
   expectPlainDateTimeEquals,
   expectPlainTimeEquals,
-  expectZonedDateTimeEquals,
   testHotCache,
 } from './testUtils'
 

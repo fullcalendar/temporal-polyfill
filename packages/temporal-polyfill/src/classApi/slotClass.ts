@@ -20,7 +20,7 @@ export function createSlotClass(
   getters: any,
   methods: any,
   staticMethods: any,
-  formatFunc: (slots: any) => string
+  formatFunc: (slots: any) => string,
 ): any {
   function Class(this: any, ...args: any[]) {
     if (this instanceof Class) {
@@ -84,7 +84,8 @@ export function rejectInvalidBag<B>(bag: B): B {
 // Attaches debugging to the given instance
 // Intentionally short function name because shortens 'dbg' string
 function dbg(instance: any, slots: any, formatSlots: (slots: any) => string) {
-  if (dbg.name === 'dbg') { // NOT minified
+  // NOT minified ?
+  if (dbg.name === 'dbg') {
     Object.defineProperty(instance, '_str_', {
       value: formatSlots(slots),
       writable: false,

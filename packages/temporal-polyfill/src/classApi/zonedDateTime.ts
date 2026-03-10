@@ -305,7 +305,8 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
   },
-  (slots: ZonedDateTimeSlots) => formatZonedDateTimeIso(queryNativeTimeZone, slots),
+  (slots: ZonedDateTimeSlots) =>
+    formatZonedDateTimeIso(queryNativeTimeZone, slots),
 )
 
 // Utils
