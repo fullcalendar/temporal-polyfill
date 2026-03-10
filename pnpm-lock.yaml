@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   rollup-plugin-sourcemaps@0.6.3:
-    hash: pv36xcczr5gjtywakxwkjo5sue
+    hash: 24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a
     path: patches/rollup-plugin-sourcemaps@0.6.3.patch
 
 importers:
@@ -109,7 +109,7 @@ importers:
   packages/temporal-polyfill:
     dependencies:
       temporal-spec:
-        specifier: workspace:0.3.0
+        specifier: workspace:0.3.1
         version: link:../temporal-spec
     devDependencies:
       '@biomejs/biome':
@@ -141,7 +141,7 @@ importers:
         version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
       rollup-plugin-sourcemaps:
         specifier: ^0.6.3
-        version: 0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6)
+        version: 0.6.3(patch_hash=24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a)(@types/node@18.11.9)(rollup@4.9.6)
       rollup-plugin-swc3:
         specifier: ^0.11.0
         version: 0.11.0(@swc/core@1.4.11)(rollup@4.9.6)
@@ -5319,7 +5319,7 @@ snapshots:
     optionalDependencies:
       '@babel/code-frame': 7.23.5
 
-  rollup-plugin-sourcemaps@0.6.3(patch_hash=pv36xcczr5gjtywakxwkjo5sue)(@types/node@18.11.9)(rollup@4.9.6):
+  rollup-plugin-sourcemaps@0.6.3(patch_hash=24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a)(@types/node@18.11.9)(rollup@4.9.6):
     dependencies:
       '@rollup/pluginutils': 3.1.0(rollup@4.9.6)
       rollup: 4.9.6
