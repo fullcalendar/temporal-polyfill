@@ -275,10 +275,13 @@ Whitelists are fickle; won't adjust if new DateTimeFormat options added.
 
 TODO: share this DateTimeFormat with computeCurrentTimeZoneId
 */
-const nonBuggyIsoResolve =
-  new RawDateTimeFormat(undefined, {
+// HACK for pureTopLevel
+function computeNonBuggyIsoResolve() {
+  return new RawDateTimeFormat(undefined, {
     calendar: isoCalendarId,
   }).resolvedOptions().calendar === isoCalendarId
+}
+const nonBuggyIsoResolve = computeNonBuggyIsoResolve()
 
 export const instantConfig: ClassFormatConfig<EpochSlots> = [
   transformInstantOptions,

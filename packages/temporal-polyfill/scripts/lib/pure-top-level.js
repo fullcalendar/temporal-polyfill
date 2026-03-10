@@ -18,7 +18,7 @@ export function pureTopLevel() {
           // array literal
           if (g6.includes('...')) {
             if (openingRe.test(g6)) {
-              // console.warn('Complicated spread', g6)
+              console.warn('Complicated spread', g6)
             } else {
               return g1 + transformArraySpread(g6)
             }
@@ -27,7 +27,7 @@ export function pureTopLevel() {
           // object literal
           if (g7.includes('...')) {
             if (openingRe.test(g7)) {
-              // console.warn('Complicated spread', g7)
+              console.warn('Complicated spread', g7)
             } else {
               return g1 + transformObjectSpread(g7)
             }

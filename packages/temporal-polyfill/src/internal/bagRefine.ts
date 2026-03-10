@@ -162,16 +162,21 @@ const durationFieldRefiners = mapPropNamesToConstant(
   toStrictInteger,
 )
 
-const builtinRefiners = {
-  ...dateFieldRefiners,
-  ...timeFieldRefiners,
-  ...durationFieldRefiners,
+// HACK for pureTopLevel
+const buildinOffsetRefiners = {
   offset(offsetString: string) {
     const s = toStringViaPrimitive(offsetString)
     // HACK to validate ASAP. will need to parse again later!!!
     parseOffsetNano(s)
     return s
   },
+}
+//
+const builtinRefiners = {
+  ...dateFieldRefiners,
+  ...timeFieldRefiners,
+  ...durationFieldRefiners,
+  ...buildinOffsetRefiners,
 }
 
 // High-Level Refining

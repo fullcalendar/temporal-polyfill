@@ -460,11 +460,16 @@ export const intlDayOfYearOps: NativeDayOfYearOps = {
   epochMilli: computeIntlEpochMilli,
 }
 
+// HACK for pureTopLevel
+const intlWeekPartsOps = {
+  weekParts: () => [] as unknown as WeekParts,
+}
+//
 export const intlWeekOps: NativeWeekOps = {
   ...intlDayOfYearOps,
+  ...intlWeekPartsOps,
   weekOfYear: computeNativeWeekOfYear,
   yearOfWeek: computeNativeYearOfWeek,
-  weekParts: () => [] as unknown as WeekParts,
 }
 
 // String Parsing
