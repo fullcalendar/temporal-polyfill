@@ -3,7 +3,7 @@ import { secInDay } from './units'
 
 export const utcTimeZoneId = 'UTC'
 
-export const periodDur = secInDay * 60
+export const periodDur = secInDay * 6
 
 export const minPossibleTransition = isoArgsToEpochSec(1847)
 export const maxPossibleTransition = isoArgsToEpochSec(getCurrentYearPlus10())
