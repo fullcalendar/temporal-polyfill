@@ -39,7 +39,7 @@ import {
 	diffEpochMilliByDay,
 	intlMonthAdd,
 	isoMonthAdd,
-	nativeYearMonthAdd,
+	monthAdd,
 } from './calendarNativeMath'
 import { isoArgsToEpochMilli, isoToEpochMilli } from './timeMath'
 
@@ -85,12 +85,12 @@ export function queryNativeMonthAdd(
 
 export function queryNativeYearMonthAdd(
 	calendarId: string,
-	isoFields: Parameters<typeof nativeYearMonthAdd>[1],
-	years: Parameters<typeof nativeYearMonthAdd>[2],
-	months: Parameters<typeof nativeYearMonthAdd>[3],
-	overflow: Parameters<typeof nativeYearMonthAdd>[4],
-): ReturnType<typeof nativeYearMonthAdd> {
-	return nativeYearMonthAdd(calendarId, isoFields, years, months, overflow)
+	isoFields: Parameters<typeof monthAdd>[1],
+	years: Parameters<typeof monthAdd>[2],
+	months: Parameters<typeof monthAdd>[3],
+	overflow: Parameters<typeof monthAdd>[4],
+): ReturnType<typeof monthAdd> {
+	return monthAdd(calendarId, isoFields, years, months, overflow)
 }
 
 export function queryNativeEraParts(

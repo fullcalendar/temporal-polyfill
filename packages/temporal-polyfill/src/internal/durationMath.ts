@@ -1,6 +1,6 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import {
-  nativeDateAdd,
+  dateAdd,
   nativeDateUntil,
 } from './calendarNativeMath'
 import {

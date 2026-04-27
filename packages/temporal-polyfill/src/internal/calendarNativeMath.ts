@@ -46,7 +46,7 @@ import {
 import { DateUnitName, Unit, givenFieldsToBigNano, milliInDay } from './units'
 import { clampEntity, divModTrunc, divTrunc, modTrunc } from './utils'
 
-export function nativeDateAdd(
+export function dateAdd(
   calendarId: string,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
@@ -60,7 +60,7 @@ export function nativeDateAdd(
   days += givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
 
   if (years || months) {
-    epochMilli = nativeYearMonthAdd(
+    epochMilli = monthAdd(
       calendarId,
       isoDateFields,
       years,
@@ -83,7 +83,7 @@ export function nativeDateAdd(
   return checkIsoDateInBounds(epochMilliToIso(epochMilli))
 }
 
-export function nativeYearMonthAdd(
+export function monthAdd(
   calendarId: string,
   isoDateFields: IsoDateFields,
   years: number,

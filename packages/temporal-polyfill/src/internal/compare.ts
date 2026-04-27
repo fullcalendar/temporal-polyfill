@@ -1,5 +1,5 @@
 import { compareBigNanos } from './bigNano'
-import { nativeDateAdd } from './calendarNativeMath'
+import { dateAdd } from './calendarNativeMath'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'

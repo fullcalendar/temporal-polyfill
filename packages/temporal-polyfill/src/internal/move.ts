@@ -1,5 +1,5 @@
 import { BigNano, addBigNanos } from './bigNano'
-import { nativeDateAdd } from './calendarNativeMath'
+import { dateAdd } from './calendarNativeMath'
 import { queryNativeDay } from './calendarNativeQuery'
 import {
   DurationFields,
@@ -151,14 +151,14 @@ export function movePlainYearMonth(
 
   // if moving backwards in time, set to last day of month
   if (durationSlots.sign < 0) {
-    isoDateFields = nativeDateAdd(calendarId, isoDateFields, {
+    isoDateFields = dateAdd(calendarId, isoDateFields, {
       ...durationFieldDefaults,
       months: 1,
     })
     isoDateFields = moveByDays(isoDateFields, -1)
   }
 
-  const movedIsoDateFields = nativeDateAdd(
+  const movedIsoDateFields = dateAdd(
     calendarId,
     isoDateFields,
     durationSlots,
@@ -277,7 +277,7 @@ export function moveDate(
   options?: OverflowOptions,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return nativeDateAdd(calendarId, isoDateFields, durationFields, options)
+    return dateAdd(calendarId, isoDateFields, durationFields, options)
   }
 
   refineOverflowOptions(options) // for validation only

@@ -372,7 +372,7 @@ function refineNativeCalendarFields(
   forcedValidFieldNames: string[] = [],
 ): Record<string, unknown> {
   const fieldNames = [
-    ...nativeFieldsMethod(calendarId, validFieldNames),
+    ...getCalendarFieldNames(calendarId, validFieldNames),
     ...forcedValidFieldNames,
   ].sort()
 
@@ -469,13 +469,13 @@ export function zonedDateTimeWithFields(
   const nativeTimeZone = queryNativeTimeZone(timeZone)
 
   const validFieldNames = [
-    ...nativeFieldsMethod(calendar, dateFieldNamesAlpha),
+    ...getCalendarFieldNames(calendar, dateFieldNamesAlpha),
     ...timeAndOffsetFieldNames,
   ].sort()
 
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedCalendarFields = nativeMergeFields(
+  const mergedCalendarFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
     partialFields,
@@ -520,7 +520,7 @@ export function plainDateTimeWithFields(
   const calendarId = plainDateTimeSlots.calendar
 
   const validFieldNames = [
-    ...nativeFieldsMethod(calendarId, dateFieldNamesAlpha),
+    ...getCalendarFieldNames(calendarId, dateFieldNamesAlpha),
     ...timeFieldNamesAsc,
   ].sort()
 
@@ -528,7 +528,7 @@ export function plainDateTimeWithFields(
   const partialFields = refineFields(modFields, validFieldNames)
   const overflow = refineOverflowOptions(options)
 
-  const mergedCalendarFields = nativeMergeFields(
+  const mergedCalendarFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
     partialFields,
@@ -563,11 +563,11 @@ export function plainDateWithFields(
   options?: OverflowOptions,
 ): PlainDateSlots {
   const calendarId = plainDateSlots.calendar
-  const validFieldNames = nativeFieldsMethod(calendarId, dateFieldNamesAlpha).sort()
+  const validFieldNames = getCalendarFieldNames(calendarId, dateFieldNamesAlpha).sort()
 
   const origFields = computeDateEssentials(plainDateSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = nativeMergeFields(
+  const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
     partialFields,
@@ -582,11 +582,11 @@ export function plainYearMonthWithFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendar
-  const validFieldNames = nativeFieldsMethod(calendarId, yearMonthFieldNames).sort()
+  const validFieldNames = getCalendarFieldNames(calendarId, yearMonthFieldNames).sort()
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = nativeMergeFields(
+  const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
     partialFields,
@@ -601,11 +601,11 @@ export function plainMonthDayWithFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const calendarId = plainMonthDaySlots.calendar
-  const validFieldNames = nativeFieldsMethod(calendarId, dateFieldNamesAlpha).sort()
+  const validFieldNames = getCalendarFieldNames(calendarId, dateFieldNamesAlpha).sort()
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = nativeMergeFields(
+  const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
     partialFields,
@@ -722,13 +722,13 @@ function convertToNativeIso(
   extra: any,
   extraFieldNames: string[],
 ): PlainDateSlots {
-  inputFieldNames = nativeFieldsMethod(calendarId, inputFieldNames)
+  inputFieldNames = getCalendarFieldNames(calendarId, inputFieldNames)
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
-  extraFieldNames = nativeFieldsMethod(calendarId, extraFieldNames)
+  extraFieldNames = getCalendarFieldNames(calendarId, extraFieldNames)
   extra = refineFields(extra, extraFieldNames, [])
 
-  let mergedFields = nativeMergeFields(calendarId, input, extra)
+  let mergedFields = mergeCalendarFields(calendarId, input, extra)
   mergedFields = refineFields(
     mergedFields,
     [...inputFieldNames, ...extraFieldNames].sort(),
@@ -896,7 +896,7 @@ export function monthDayFromFields(
   )
 }
 
-export function nativeFieldsMethod(
+export function getCalendarFieldNames(
   calendarId: string,
   fieldNames: string[],
 ): string[] {
@@ -909,7 +909,7 @@ export function nativeFieldsMethod(
   return fieldNames
 }
 
-export function nativeMergeFields(
+export function mergeCalendarFields(
   calendarId: string,
   baseFields: Record<string, unknown>,
   additionalFields: Record<string, unknown>,
