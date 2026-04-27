@@ -258,7 +258,6 @@ export function toZonedDateTime(
   return plainDateToZonedDateTime(
     refineTimeZoneId,
     identity,
-    queryNativeTimeZone,
     record,
     optionsObj,
   )

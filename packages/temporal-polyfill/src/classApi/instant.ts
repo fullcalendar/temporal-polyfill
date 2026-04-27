@@ -102,15 +102,10 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       return format.format(epochMilli)
     },
     toString(slots: InstantSlots, options?: InstantDisplayOptions): string {
-      return formatInstantIso(
-        refineTimeZoneArg,
-        queryNativeTimeZone,
-        slots,
-        options,
-      )
+      return formatInstantIso(refineTimeZoneArg, slots, options)
     },
     toJSON(slots: InstantSlots): string {
-      return formatInstantIso(refineTimeZoneArg, queryNativeTimeZone, slots)
+      return formatInstantIso(refineTimeZoneArg, slots)
     },
     valueOf: neverValueOf,
   },
@@ -128,8 +123,7 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       return compareInstants(toInstantSlots(a), toInstantSlots(b))
     },
   },
-  (slots: InstantSlots) =>
-    formatInstantIso(refineTimeZoneArg, queryNativeTimeZone, slots),
+  (slots: InstantSlots) => formatInstantIso(refineTimeZoneArg, slots),
 )
 
 // Utils

@@ -74,7 +74,7 @@ import {
   buildZonedIsoFields,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
-} from '../internal/timeZoneOps'
+} from '../internal/timeZoneNativeMath'
 import {
   DayTimeUnitName,
   Unit,
@@ -191,7 +191,6 @@ export function fromFields(
   const calendarId = getCalendarIdFromBag(fields)
   return refineNativeZonedDateTimeBag(
     refineTimeZoneId,
-    queryNativeTimeZone,
     calendarId,
     fields,
     options,
@@ -211,7 +210,7 @@ export function isInstance(record: any): record is Record {
 // -----------------------------------------------------------------------------
 
 export const getFields = memoize((record: Record): Fields => {
-  const isoFields = zonedEpochSlotsToIso(record, queryNativeTimeZone)
+  const isoFields = zonedEpochSlotsToIso(record)
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   return {
@@ -221,10 +220,7 @@ export const getFields = memoize((record: Record): Fields => {
   }
 }, WeakMap)
 
-export const getISOFields = bindArgs(
-  buildZonedIsoFields,
-  queryNativeTimeZone,
-) as (record: Record) => ISOFields
+export const getISOFields = buildZonedIsoFields as (record: Record) => ISOFields
 
 export const calendarId = getCalendarId as (record: Record) => string
 
@@ -241,7 +237,7 @@ export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
 export const epochNanoseconds = getEpochNano as (record: Record) => bigint
 
 export function offsetNanoseconds(record: Record): number {
-  return zonedEpochSlotsToIso(record, queryNativeTimeZone).offsetNanoseconds
+  return zonedEpochSlotsToIso(record).offsetNanoseconds
 }
 
 export function offset(record: Record): string {
@@ -286,7 +282,6 @@ export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
 
 export const hoursInDay = bindArgs(
   computeZonedHoursInDay,
-  queryNativeTimeZone,
 ) as (record: Record) => number
 
 // Setters
@@ -297,7 +292,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return nativeZonedDateTimeWithFields(queryNativeTimeZone, record, fields, options)
+  return nativeZonedDateTimeWithFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
@@ -310,7 +305,6 @@ export function withTimeZone(record: Record, timeZone: string): Record {
 
 export const withPlainDate = bindArgs(
   zonedDateTimeWithPlainDate,
-  queryNativeTimeZone,
 ) as (
   zonedDateTimeRecord: Record,
   plainDateRecord: PlainDateFns.Record,
@@ -318,7 +312,6 @@ export const withPlainDate = bindArgs(
 
 export const withPlainTime = bindArgs(
   zonedDateTimeWithPlainTime,
-  queryNativeTimeZone,
 ) as (
   zonedDateTimeRecord: Record,
   plainTimeRecord?: PlainTimeFns.Record,
@@ -329,7 +322,6 @@ export const withPlainTime = bindArgs(
 
 export const add = bindArgs(
   moveZonedDateTime,
-  queryNativeTimeZone,
   false,
 ) as (
   zonedDateTimeRecord: Record,
@@ -339,7 +331,6 @@ export const add = bindArgs(
 
 export const subtract = bindArgs(
   moveZonedDateTime,
-  queryNativeTimeZone,
   true,
 ) as (
   zonedDateTimeRecord: Record,
@@ -349,7 +340,6 @@ export const subtract = bindArgs(
 
 export const until = bindArgs(
   diffZonedDateTimes,
-  queryNativeTimeZone,
   false,
 ) as (
   record0: Record,
@@ -359,7 +349,6 @@ export const until = bindArgs(
 
 export const since = bindArgs(
   diffZonedDateTimes,
-  queryNativeTimeZone,
   true,
 ) as (
   record0: Record,
@@ -367,14 +356,13 @@ export const since = bindArgs(
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const round = bindArgs(roundZonedDateTime, queryNativeTimeZone) as (
+export const round = bindArgs(roundZonedDateTime) as (
   record: Record,
   options: DayTimeUnitName | RoundOptions,
 ) => Record
 
 export const startOfDay = bindArgs(
   computeZonedStartOfDay,
-  queryNativeTimeZone,
 ) as (record: Record) => Record
 
 export const equals = zonedDateTimesEqual as (
@@ -396,17 +384,14 @@ export const toInstant = zonedDateTimeToInstant as (
 
 export const toPlainDateTime = bindArgs(
   zonedDateTimeToPlainDateTime,
-  queryNativeTimeZone,
 ) as (record: Record) => PlainDateTimeFns.Record
 
 export const toPlainDate = bindArgs(
   zonedDateTimeToPlainDate,
-  queryNativeTimeZone,
 ) as (record: Record) => PlainDateFns.Record
 
 export const toPlainTime = bindArgs(
   zonedDateTimeToPlainTime,
-  queryNativeTimeZone,
 ) as (record: Record) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
@@ -475,7 +460,6 @@ export function rangeToLocaleStringParts(
 
 export const toString = bindArgs(
   formatZonedDateTimeIso,
-  queryNativeTimeZone,
 ) as (record: Record, options?: ToStringOptions) => string
 
 // Internal Utils
@@ -485,7 +469,7 @@ function adaptDateFunc<R>(
   dateFunc: (dateSlots: DateSlots) => R,
 ): (record: Record) => R {
   return (record: Record) => {
-    return dateFunc(zonedEpochSlotsToIso(record, queryNativeTimeZone))
+    return dateFunc(zonedEpochSlotsToIso(record))
   }
 }
 
@@ -623,10 +607,10 @@ function rountToInterval(
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
-  const timeZoneOps = queryNativeTimeZone(record.timeZone)
+  const nativeTimeZone = queryNativeTimeZone(record.timeZone)
   const epochNano1 = roundZonedEpochToInterval(
     computeInterval,
-    timeZoneOps,
+    nativeTimeZone,
     record,
     roundingMode,
   )
@@ -641,9 +625,9 @@ function aligned(
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
-    const timeZoneOps = queryNativeTimeZone(record.timeZone)
+    const nativeTimeZone = queryNativeTimeZone(record.timeZone)
     const epochNano1 = moveBigNano(
-      alignZonedEpoch(computeAlignment, timeZoneOps, record),
+      alignZonedEpoch(computeAlignment, nativeTimeZone, record),
       nanoDelta,
     )
     return {
@@ -657,10 +641,10 @@ function zonedTransform<A extends any[]>(
   transformIso: (isoSlots: DateTimeSlots, ...args: A) => IsoDateTimeFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
-    const timeZoneOps = queryNativeTimeZone(record.timeZone)
-    const isoSlots = zonedEpochSlotsToIso(record, timeZoneOps)
+    const nativeTimeZone = queryNativeTimeZone(record.timeZone)
+    const isoSlots = zonedEpochSlotsToIso(record, nativeTimeZone)
     const transformedIsoSlots = transformIso(isoSlots, ...args)
-    const epochNano1 = getSingleInstantFor(timeZoneOps, transformedIsoSlots)
+    const epochNano1 = getSingleInstantFor(nativeTimeZone, transformedIsoSlots)
     return {
       ...record,
       epochNanoseconds: checkEpochNanoInBounds(epochNano1),

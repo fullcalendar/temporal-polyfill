@@ -72,14 +72,14 @@ function diffZonedLargeUnits(
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
-  const timeZoneOps = queryNativeTimeZone(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
-    bindArgs(prepareZonedEpochDiff, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, timeZoneOps, calendarId) as MoveMarker,
+    bindArgs(prepareZonedEpochDiff, nativeTimeZone) as MarkersToIsoFields,
+    bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
       nativeDateUntil(calendarId, f0, f1, unit),
     unit,
@@ -180,14 +180,14 @@ function diffZonedDayLikeUnits(
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
   const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
-  const timeZoneOps = queryNativeTimeZone(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   const sign = compareBigNanos(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
   const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZoneOps,
+    nativeTimeZone,
     record0,
     record1,
     sign,

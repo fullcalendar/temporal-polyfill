@@ -146,10 +146,7 @@ export function toPlainTimeSlots(
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return zonedDateTimeToPlainTime(
-          queryNativeTimeZone,
-          slots as ZonedDateTimeSlots,
-        )
+        return zonedDateTimeToPlainTime(slots as ZonedDateTimeSlots)
     }
 
     return refinePlainTimeBag(arg as PlainTimeBag, options)

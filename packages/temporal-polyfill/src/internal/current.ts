@@ -2,13 +2,13 @@ import { BigNano } from './bigNano'
 import { RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateTimeFields } from './isoFields'
 import { epochMilliToNano, epochNanoToIso } from './timeMath'
-import { TimeZoneOffsetOps } from './timeZoneOps'
+import { NativeTimeZone } from './timeZoneNative'
 
 export function getCurrentIsoDateTime(
-  timeZoneOps: TimeZoneOffsetOps,
+  nativeTimeZone: NativeTimeZone,
 ): IsoDateTimeFields {
   const epochNano = getCurrentEpochNano()
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = nativeTimeZone.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano, offsetNano)
 }
 

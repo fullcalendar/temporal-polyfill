@@ -97,33 +97,28 @@ export const abs = absDuration as (record: Record) => Record
 export const add = bindArgs(
   addDurations<RelativeToRecord>,
   identity,
-  queryNativeTimeZone,
   false,
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const subtract = bindArgs(
   addDurations<RelativeToRecord>,
   identity,
-  queryNativeTimeZone,
   true,
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
 export const round = bindArgs(
   roundDuration<RelativeToRecord>,
   identity,
-  queryNativeTimeZone,
 ) as (record: Record, options?: RoundOptions) => Record
 
 export const total = bindArgs(
   totalDuration<RelativeToRecord>,
   identity,
-  queryNativeTimeZone,
 ) as (record: Record, options?: UnitName | TotalOptions) => number
 
 export const compare = bindArgs(
   compareDurations<RelativeToRecord>,
   identity,
-  queryNativeTimeZone,
 ) as (record0: Record, record1: Record, options?: CompareOptions) => NumberSign
 
 // Formatting

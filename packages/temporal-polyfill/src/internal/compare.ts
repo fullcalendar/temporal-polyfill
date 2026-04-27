@@ -24,7 +24,6 @@ import {
 } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
-import { TimeZoneOps } from './timeZoneOps'
 import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
 
@@ -53,7 +52,6 @@ export function compareZonedDateTimes(
 
 export function compareDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
   options?: RelativeToOptions<RA>,
@@ -81,9 +79,9 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
+  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
+  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
 
   return compareBigNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),

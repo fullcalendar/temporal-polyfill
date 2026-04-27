@@ -177,7 +177,6 @@ export const toZonedDateTime = bindArgs(
   plainTimeToZonedDateTime<PlainDateSlots>,
   refineTimeZoneId,
   identity,
-  queryNativeTimeZone,
 ) as (
   plainTimeRecord: Record,
   options: ToZonedDateTimeOptions,

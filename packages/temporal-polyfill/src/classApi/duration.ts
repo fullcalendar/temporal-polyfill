@@ -76,7 +76,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          queryNativeTimeZone,
           false,
           slots,
           toDurationSlots(otherArg),
@@ -92,7 +91,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          queryNativeTimeZone,
           true,
           slots,
           toDurationSlots(otherArg),
@@ -105,24 +103,14 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
     ): Duration {
       return createDuration(
-        roundDuration(
-          refinePublicRelativeTo,
-          queryNativeTimeZone,
-          slots,
-          options,
-        ),
+        roundDuration(refinePublicRelativeTo, slots, options),
       )
     },
     total(
       slots: DurationSlots,
       options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
     ): number {
-      return totalDuration(
-        refinePublicRelativeTo,
-        queryNativeTimeZone,
-        slots,
-        options,
-      )
+      return totalDuration(refinePublicRelativeTo, slots, options)
     },
     toLocaleString(
       slots: DurationSlots,
@@ -150,7 +138,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): NumberSign {
       return compareDurations(
         refinePublicRelativeTo,
-        queryNativeTimeZone,
         toDurationSlots(durationArg0),
         toDurationSlots(durationArg1),
         options,
@@ -196,7 +183,6 @@ function refinePublicRelativeTo(
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
       const res = refineMaybeNativeZonedDateTimeBag(
         refineTimeZoneArg,
-        queryNativeTimeZone,
         calendarId,
         relativeTo as unknown as ZonedDateTimeBag, // !!!
       )

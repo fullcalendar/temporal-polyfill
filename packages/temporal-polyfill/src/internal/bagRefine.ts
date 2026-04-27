@@ -109,10 +109,9 @@ import {
 } from './timeMath'
 import { queryNativeTimeZone } from './timeZoneNative'
 import {
-  TimeZoneOps,
   getMatchingInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 import {
   Callable,
   bindArgs,
@@ -180,7 +179,6 @@ const builtinRefiners = {
 
 export function refineMaybeNativeZonedDateTimeBag(
   refineTimeZoneString: (timeZoneString: string) => string,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   calendarId: string,
   bag: ZonedDateTimeBag,
 ): RelativeToSlotsNoCalendar {
@@ -197,10 +195,10 @@ export function refineMaybeNativeZonedDateTimeBag(
     const isoTimeFields = refineTimeBag(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
-    const timeZoneOps = getTimeZoneOps(timeZoneId)
+    const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
     const epochNanoseconds = getMatchingInstantFor(
-      timeZoneOps,
+      nativeTimeZone,
       { ...isoDateFields, ...isoTimeFields },
       fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
     )
@@ -214,7 +212,6 @@ export function refineMaybeNativeZonedDateTimeBag(
 
 export function refineNativeZonedDateTimeBag(
   refineTimeZoneString: (timeZoneString: string) => string,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   calendarId: string,
   bag: ZonedDateTimeBag,
   options: ZonedFieldOptions | undefined,
@@ -237,10 +234,10 @@ export function refineNativeZonedDateTimeBag(
     fabricateOverflowOptions(overflow),
   )
   const isoTimeFields = refineTimeBag(fields, overflow)
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
-    timeZoneOps,
+    nativeTimeZone,
     { ...isoDateFields, ...isoTimeFields },
     fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
     offsetDisambig,
@@ -464,13 +461,12 @@ export const isoTimeFieldsToCal = bindArgs(
 // -----------------------------------------------------------------------------
 
 export function nativeZonedDateTimeWithFields(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
   const { calendar, timeZone } = zonedDateTimeSlots
-  const timeZoneOps = getTimeZoneOps(timeZone)
+  const nativeTimeZone = queryNativeTimeZone(timeZone)
 
   const validFieldNames = [
     ...nativeFieldsMethod(calendar, dateFieldNamesAlpha),
@@ -505,7 +501,7 @@ export function nativeZonedDateTimeWithFields(
 
   return createZonedDateTimeSlots(
     getMatchingInstantFor(
-      timeZoneOps,
+      nativeTimeZone,
       { ...isoDateFields, ...isoTimeFields },
       parseOffsetNano(mergedAllFields.offset),
       offsetDisambig,
@@ -1116,7 +1112,7 @@ function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   monthCode: string
   day: number
 } & TimeFields & { offset: string } {
-  const isoFields = zonedEpochSlotsToIso(slots, queryNativeTimeZone)
+  const isoFields = zonedEpochSlotsToIso(slots)
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   const [year, month, day] = queryNativeDateParts(slots.calendar, isoFields)

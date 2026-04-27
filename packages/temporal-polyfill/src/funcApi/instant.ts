@@ -219,5 +219,4 @@ export function rangeToLocaleStringParts(
 export const toString = bindArgs(
   formatInstantIso,
   refineTimeZoneId,
-  queryNativeTimeZone,
 ) as (record: Record, options?: ToStringOptions) => string

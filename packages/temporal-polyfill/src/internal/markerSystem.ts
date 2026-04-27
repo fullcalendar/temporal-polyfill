@@ -14,7 +14,7 @@ import {
   extractEpochNano,
 } from './slots'
 import { isoToEpochNano } from './timeMath'
-import { TimeZoneOps } from './timeZoneOps'
+import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
@@ -27,14 +27,13 @@ export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
 // a date marker that's moved away from the "origin"
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
 
-export type MarkerSystem = [Marker, TimeZoneOps?]
+export type MarkerSystem = [Marker, NativeTimeZone?]
 
 export function createMarkerSystem(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   relativeToSlots: RelativeToSlots,
 ): MarkerSystem {
   if (isZonedEpochSlots(relativeToSlots)) {
-    return [relativeToSlots, getTimeZoneOps(relativeToSlots.timeZone)]
+    return [relativeToSlots, queryNativeTimeZone(relativeToSlots.timeZone)]
   }
 
   return [
@@ -61,27 +60,27 @@ export type DiffMarkers = (
 ) => DurationFields
 
 export function createMarkerToEpochNano(
-  timeZoneOps: TimeZoneOps | undefined,
+  nativeTimeZone: NativeTimeZone | undefined,
 ): MarkerToEpochNano {
-  return (timeZoneOps ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
+  return (nativeTimeZone ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
 }
 
 export function createMoveMarker(
-  timeZoneOps: TimeZoneOps | undefined,
+  nativeTimeZone: NativeTimeZone | undefined,
   calendarId: string,
 ): MoveMarker {
-  if (timeZoneOps) {
-    return bindArgs(moveZonedEpochs, timeZoneOps, calendarId) as Callable
+  if (nativeTimeZone) {
+    return bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as Callable
   }
   return bindArgs(moveDateTime, calendarId) as Callable
 }
 
 export function createDiffMarkers(
-  timeZoneOps: TimeZoneOps | undefined,
+  nativeTimeZone: NativeTimeZone | undefined,
   calendarId: string,
 ): DiffMarkers {
-  if (timeZoneOps) {
-    return bindArgs(diffZonedEpochsExact, timeZoneOps, calendarId) as Callable
+  if (nativeTimeZone) {
+    return bindArgs(diffZonedEpochsExact, nativeTimeZone, calendarId) as Callable
   }
   return bindArgs(diffDateTimesExact, calendarId) as Callable
 }

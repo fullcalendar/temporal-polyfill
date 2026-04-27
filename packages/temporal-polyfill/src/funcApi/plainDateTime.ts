@@ -349,7 +349,6 @@ export const compare = compareIsoDateTimeFields as (
 
 export const toZonedDateTime = bindArgs(
   plainDateTimeToZonedDateTime,
-  queryNativeTimeZone,
 ) as (
   record: Record,
   timeZone: string,

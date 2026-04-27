@@ -11,26 +11,25 @@ import {
   createZonedDateTimeSlots,
 } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
+import { queryNativeTimeZone } from './timeZoneNative'
 import {
-  TimeZoneOps,
   getMatchingInstantFor,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 
 // ZonedDateTime with *
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainTimeSlots: IsoTimeFields | undefined,
 ): ZonedDateTimeSlots {
   const timeZoneId = zonedDateTimeSlots.timeZone
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   const isoFields = {
-    ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
+    ...zonedEpochSlotsToIso(zonedDateTimeSlots, nativeTimeZone),
     ...(plainTimeSlots || isoTimeFieldDefaults),
   }
 
@@ -38,16 +37,13 @@ export function zonedDateTimeWithPlainTime(
 
   if (plainTimeSlots) {
     epochNano = getMatchingInstantFor(
-      timeZoneOps,
+      nativeTimeZone,
       isoFields,
       isoFields.offsetNanoseconds,
       OffsetDisambig.Prefer, // OffsetDisambig
     )
   } else {
-    epochNano = getStartOfDayInstantFor(
-      timeZoneOps as any, // !!!
-      isoFields,
-    )
+    epochNano = getStartOfDayInstantFor(nativeTimeZone, isoFields)
   }
 
   return createZonedDateTimeSlots(
@@ -58,15 +54,14 @@ export function zonedDateTimeWithPlainTime(
 }
 
 export function zonedDateTimeWithPlainDate(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainDateSlots: PlainDateSlots,
 ): ZonedDateTimeSlots {
   const timeZoneId = zonedDateTimeSlots.timeZone
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   const isoFields = {
-    ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneOps),
+    ...zonedEpochSlotsToIso(zonedDateTimeSlots, nativeTimeZone),
     ...plainDateSlots,
   }
   const calendar = getPreferredCalendarId(
@@ -75,7 +70,7 @@ export function zonedDateTimeWithPlainDate(
   )
 
   const epochNano = getMatchingInstantFor(
-    timeZoneOps,
+    nativeTimeZone,
     isoFields,
     isoFields.offsetNanoseconds,
     OffsetDisambig.Prefer, // OffsetDisambig

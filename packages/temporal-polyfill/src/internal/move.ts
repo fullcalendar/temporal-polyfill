@@ -46,11 +46,11 @@ import {
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './timeMath'
+import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import {
-  TimeZoneOps,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 import { Unit, milliInDay } from './units'
 import {
   Callable,
@@ -75,18 +75,17 @@ export function moveInstant(
 }
 
 export function moveZonedDateTime(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
-  const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
+  const nativeTimeZone = queryNativeTimeZone(zonedDateTimeSlots.timeZone)
 
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
-      timeZoneOps,
+      nativeTimeZone,
       zonedDateTimeSlots.calendar,
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
@@ -198,10 +197,10 @@ function moveEpochNano(
 }
 
 /*
-timeZoneOps must be derived from zonedEpochSlots.timeZone
+nativeTimeZone must be derived from zonedEpochSlots.timeZone
 */
 export function moveZonedEpochs(
-  timeZoneOps: TimeZoneOps,
+  nativeTimeZone: NativeTimeZone,
   calendarId: string,
   slots: ZonedEpochSlots,
   durationFields: DurationFields,
@@ -214,7 +213,7 @@ export function moveZonedEpochs(
     epochNano = addBigNanos(epochNano, timeOnlyNano)
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneOps)
+    const isoDateTimeFields = zonedEpochSlotsToIso(slots, nativeTimeZone)
     const movedIsoDateFields = moveDate(
       calendarId,
       isoDateTimeFields,
@@ -229,7 +228,7 @@ export function moveZonedEpochs(
       ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
     }
     epochNano = addBigNanos(
-      getSingleInstantFor(timeZoneOps, movedIsoDateTimeFields),
+      getSingleInstantFor(nativeTimeZone, movedIsoDateTimeFields),
       timeOnlyNano,
     )
   }

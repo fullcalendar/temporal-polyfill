@@ -32,7 +32,6 @@ import {
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
-import { TimeZoneOps } from './timeZoneOps'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -52,7 +51,6 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 
 export function addDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
   slots: DurationSlots,
   otherSlots: DurationSlots,
@@ -86,9 +84,9 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
-  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(timeZoneOps, relativeToSlots.calendar)
+  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(nativeTimeZone, relativeToSlots.calendar)
 
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
@@ -122,7 +120,6 @@ function addDayTimeDurations(
 
 export function roundDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundingOptions<RA>,
 ): DurationSlots {
@@ -161,10 +158,10 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(timeZoneOps, relativeToSlots.calendar)
+  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
+  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(nativeTimeZone, relativeToSlots.calendar)
 
   const endMarker = moveMarker(marker, slots)
 

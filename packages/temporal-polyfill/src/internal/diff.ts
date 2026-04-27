@@ -59,11 +59,11 @@ import {
   isoToEpochMilli,
   isoToEpochNano,
 } from './timeMath'
+import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import {
-  TimeZoneOps,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 import {
   DateUnitName,
   DayTimeUnit,
@@ -109,7 +109,6 @@ export function diffInstants(
 }
 
 export function diffZonedDateTimes(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   invert: boolean,
   slots0: ZonedDateTimeSlots,
   slots1: ZonedDateTimeSlots,
@@ -137,11 +136,11 @@ export function diffZonedDateTimes(
     )
   } else {
     const timeZoneId = getCommonTimeZoneId(slots0.timeZone, slots1.timeZone)
-    const timeZoneOps = getTimeZoneOps(timeZoneId)
+    const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
     durationFields = diffZonedEpochsBig(
       calendarId,
-      timeZoneOps,
+      nativeTimeZone,
       slots0,
       slots1,
       sign,
@@ -158,7 +157,7 @@ export function diffZonedDateTimes(
       roundingMode,
       slots0,
       extractEpochNano as MarkerToEpochNano,
-      bindArgs(moveZonedEpochs, timeZoneOps, calendarId) as MoveMarker,
+      bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as MoveMarker,
     )
   }
 
@@ -391,7 +390,7 @@ export function diffPlainTimes(
 // -----------------------------------------------------------------------------
 
 export function diffZonedEpochsExact(
-  timeZoneOps: TimeZoneOps,
+  nativeTimeZone: NativeTimeZone,
   calendarId: string,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
@@ -413,7 +412,7 @@ export function diffZonedEpochsExact(
 
   return diffZonedEpochsBig(
     calendarId,
-    timeZoneOps,
+    nativeTimeZone,
     slots0,
     slots1,
     sign,
@@ -459,7 +458,7 @@ export function diffDateTimesExact(
 
 function diffZonedEpochsBig(
   calendarId: string,
-  timeZoneOps: TimeZoneOps,
+  nativeTimeZone: NativeTimeZone,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   sign: NumberSign, // guaranteed non-zero
@@ -467,7 +466,7 @@ function diffZonedEpochsBig(
   origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZoneOps,
+    nativeTimeZone,
     slots0,
     slots1,
     sign,
@@ -516,14 +515,14 @@ function diffDateTimesBig(
 // -----------------------------------------------------------------------------
 
 export function prepareZonedEpochDiff(
-  timeZoneOps: TimeZoneOps,
+  nativeTimeZone: NativeTimeZone,
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   sign: NumberSign, // guaranteed non-zero
 ): [IsoDateFields, IsoDateFields, number] {
-  const startIsoFields = zonedEpochSlotsToIso(slots0, timeZoneOps)
+  const startIsoFields = zonedEpochSlotsToIso(slots0, nativeTimeZone)
   const startIsoTimeFields = pluckProps(isoTimeFieldNamesAsc, startIsoFields)
-  const endIsoFields = zonedEpochSlotsToIso(slots1, timeZoneOps)
+  const endIsoFields = zonedEpochSlotsToIso(slots1, nativeTimeZone)
   const endEpochNano = slots1.epochNanoseconds
   let dayCorrection = 0
 
@@ -546,7 +545,7 @@ export function prepareZonedEpochDiff(
       ...moveByDays(endIsoFields, dayCorrection++ * -sign),
       ...startIsoTimeFields,
     }
-    midEpochNano = getSingleInstantFor(timeZoneOps, midIsoFields)
+    midEpochNano = getSingleInstantFor(nativeTimeZone, midIsoFields)
     return compareBigNanos(endEpochNano, midEpochNano) === -sign
   }
 

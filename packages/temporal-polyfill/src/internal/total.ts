@@ -30,12 +30,10 @@ import {
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
-import { TimeZoneOps } from './timeZoneOps'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: DurationSlots,
   options: UnitName | DurationTotalOptions<RA>,
 ): number {
@@ -60,10 +58,10 @@ export function totalDuration<RA>(
     return 0
   }
 
-  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(timeZoneOps, relativeToSlots.calendar)
+  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
+  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(nativeTimeZone, relativeToSlots.calendar)
 
   const endMarker = moveMarker(marker, slots)
 

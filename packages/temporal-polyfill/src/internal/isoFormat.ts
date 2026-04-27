@@ -45,7 +45,7 @@ import {
 } from './slots'
 import { epochNanoToIso } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { TimeZoneOffsetOps } from './timeZoneOps'
+import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import {
   Unit,
   nanoInHour,
@@ -61,7 +61,6 @@ import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
 
 export function formatInstantIso(
   refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   instantSlots: InstantSlots,
   options?: InstantDisplayOptions,
 ): string {
@@ -69,7 +68,7 @@ export function formatInstantIso(
     refineInstantDisplayOptions(options)
 
   const providedTimeZone = timeZoneArg !== undefined
-  const timeZoneOps = getTimeZoneOps(
+  const nativeTimeZone = queryNativeTimeZone(
     providedTimeZone
       ? refineTimeZoneString(timeZoneArg)
       : (utcTimeZoneId as any),
@@ -77,7 +76,7 @@ export function formatInstantIso(
 
   return formatEpochNanoIso(
     providedTimeZone,
-    timeZoneOps,
+    nativeTimeZone,
     instantSlots.epochNanoseconds,
     roundingMode,
     nanoInc,
@@ -86,13 +85,11 @@ export function formatInstantIso(
 }
 
 export function formatZonedDateTimeIso(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   const [a, b, c, d, e, f] = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
-    getTimeZoneOps,
     zonedDateTimeSlots0.calendar,
     zonedDateTimeSlots0.timeZone,
     zonedDateTimeSlots0.epochNanoseconds,
@@ -202,7 +199,7 @@ export function formatDurationIso(
 
 function formatEpochNanoIso(
   providedTimeZone: boolean,
-  timeZoneOps: TimeZoneOffsetOps,
+  nativeTimeZone: NativeTimeZone,
   epochNano: BigNano,
   roundingMode: RoundingMode,
   nanoInc: number,
@@ -215,7 +212,7 @@ function formatEpochNanoIso(
     true, // useDayOrigin
   )
 
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = nativeTimeZone.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return (
@@ -225,7 +222,6 @@ function formatEpochNanoIso(
 }
 
 function formatZonedEpochNanoIso(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   calendarId: string,
   timeZoneId: string,
   epochNano: BigNano,
@@ -237,8 +233,8 @@ function formatZonedEpochNanoIso(
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundBigNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
-  const offsetNano = timeZoneOps.getOffsetNanosecondsFor(epochNano)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
+  const offsetNano = nativeTimeZone.getOffsetNanosecondsFor(epochNano)
   const isoFields = epochNanoToIso(epochNano, offsetNano)
 
   return (

@@ -63,7 +63,7 @@ import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
   validateTimeZoneOffset,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 import {
   TimeUnit,
   Unit,

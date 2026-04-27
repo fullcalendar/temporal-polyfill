@@ -189,7 +189,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): ZonedDateTime {
       return createZonedDateTime(
         plainDateTimeToZonedDateTime(
-          queryNativeTimeZone,
           slots,
           refineTimeZoneArg(timeZoneArg),
           options,
@@ -258,10 +257,7 @@ export function toPlainDateTimeSlots(
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return zonedDateTimeToPlainDateTime(
-          queryNativeTimeZone,
-          slots as ZonedDateTimeSlots,
-        )
+        return zonedDateTimeToPlainDateTime(slots as ZonedDateTimeSlots)
     }
 
     return refineNativePlainDateTimeBag(

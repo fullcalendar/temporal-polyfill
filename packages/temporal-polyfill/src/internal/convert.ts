@@ -33,13 +33,12 @@ import {
   createZonedDateTimeSlots,
 } from './slots'
 import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './timeMath'
+import { queryNativeTimeZone } from './timeZoneNative'
 import {
-  TimeZoneOffsetOps,
-  TimeZoneOps,
   getSingleInstantFor,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneOps'
+} from './timeZoneNativeMath'
 import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 
 // Instant -> *
@@ -67,21 +66,15 @@ export function zonedDateTimeToInstant(
 }
 
 export function zonedDateTimeToPlainDateTime(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateTimeSlots {
-  return createPlainDateTimeSlots(
-    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
-  )
+  return createPlainDateTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 export function zonedDateTimeToPlainDate(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateSlots {
-  return createPlainDateSlots(
-    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
-  )
+  return createPlainDateSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 export function nativeZonedDateTimeToPlainYearMonth(
@@ -105,29 +98,20 @@ export function nativeZonedDateTimeToPlainMonthDay(
 }
 
 export function zonedDateTimeToPlainTime(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOffsetOps,
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainTimeSlots {
-  return createPlainTimeSlots(
-    zonedEpochSlotsToIso(zonedDateTimeSlots0, getTimeZoneOps),
-  )
+  return createPlainTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 // PlainDateTime -> *
 // -----------------------------------------------------------------------------
 
 export function plainDateTimeToZonedDateTime(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   plainDateTimeSlots: PlainDateTimeSlots,
   timeZoneId: string,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots {
-  const epochNano = dateToEpochNano(
-    getTimeZoneOps,
-    timeZoneId,
-    plainDateTimeSlots,
-    options,
-  )
+  const epochNano = dateToEpochNano(timeZoneId, plainDateTimeSlots, options)
   return createZonedDateTimeSlots(
     checkEpochNanoInBounds(epochNano),
     timeZoneId,
@@ -156,14 +140,13 @@ export function nativePlainDateTimeToPlainMonthDay(
 }
 
 function dateToEpochNano(
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   timeZoneId: string,
   isoFields: IsoDateTimeFields,
   options?: EpochDisambigOptions,
 ): BigNano | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
-  return getSingleInstantFor(timeZoneOps, isoFields, epochDisambig)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
+  return getSingleInstantFor(nativeTimeZone, isoFields, epochDisambig)
 }
 
 // PlainDate -> *
@@ -172,7 +155,6 @@ function dateToEpochNano(
 export function plainDateToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainTimeArg: (plainTimeArg: PA) => IsoTimeFields,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   plainDateSlots: PlainDateSlots,
   options: { timeZone: string; plainTime?: PA },
 ): ZonedDateTimeSlots {
@@ -181,16 +163,16 @@ export function plainDateToZonedDateTime<PA>(
   const isoTimeFields =
     plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
 
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
   let epochNano: BigNano
 
   if (isoTimeFields) {
-    epochNano = getSingleInstantFor(timeZoneOps, {
+    epochNano = getSingleInstantFor(nativeTimeZone, {
       ...plainDateSlots,
       ...isoTimeFields,
     })
   } else {
-    epochNano = getStartOfDayInstantFor(timeZoneOps as any /* !!! */, {
+    epochNano = getStartOfDayInstantFor(nativeTimeZone, {
       ...plainDateSlots,
       ...isoTimeFieldDefaults,
     })
@@ -268,17 +250,16 @@ Only used by funcApi
 export function plainTimeToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainDateArg: (plainDateArg: PA) => PlainDateSlots,
-  getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: PlainTimeSlots,
   options: { timeZone: string; plainDate: PA },
 ): ZonedDateTimeSlots {
   const refinedOptions = requireObjectLike(options)
   const plainDateSlots = refinePlainDateArg(refinedOptions.plainDate)
   const timeZoneId = refineTimeZoneString(refinedOptions.timeZone)
-  const timeZoneOps = getTimeZoneOps(timeZoneId)
+  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
 
   return createZonedDateTimeSlots(
-    getSingleInstantFor(timeZoneOps, { ...plainDateSlots, ...slots }),
+    getSingleInstantFor(nativeTimeZone, { ...plainDateSlots, ...slots }),
     timeZoneId,
     plainDateSlots.calendar,
   )
