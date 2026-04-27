@@ -1,16 +1,11 @@
 import {
-  convertPlainMonthDayToDate,
-  convertPlainYearMonthToDate,
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
+  convertNativePlainMonthDayToDate,
+  convertNativePlainYearMonthToDate,
+  convertNativeToPlainMonthDay,
+  convertNativeToPlainYearMonth,
 } from './bagRefine'
 import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
-import {
-  DateModOps,
-  MonthDayRefineOps,
-  YearMonthRefineOps,
-} from './calendarOps'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import { EraYearOrYear, MonthDayFields, YearMonthFields } from './fields'
 import {
@@ -89,32 +84,24 @@ export function zonedDateTimeToPlainDate(
   )
 }
 
-/*
-Only used by funcApi
-*/
-export function zonedDateTimeToPlainYearMonth(
-  getCalendarOps: (calendarId: string) => YearMonthRefineOps,
+export function nativeZonedDateTimeToPlainYearMonth(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
   zonedDateTimeFields: { year: number; monthCode: string },
 ): PlainYearMonthSlots {
-  const calendarId = zonedDateTimeSlots0.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  return convertToPlainYearMonth(calendarOps, zonedDateTimeFields)
+  return convertNativeToPlainYearMonth(
+    zonedDateTimeSlots0.calendar,
+    zonedDateTimeFields,
+  )
 }
 
-/*
-Only used by funcApi
-*/
-export function zonedDateTimeToPlainMonthDay(
-  getCalendarOps: (calendarId: string) => MonthDayRefineOps,
+export function nativeZonedDateTimeToPlainMonthDay(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
   zonedDateTimeFields: { monthCode: string; day: number },
 ): PlainMonthDaySlots {
-  const calendarId = zonedDateTimeSlots0.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  return convertToPlainMonthDay(calendarOps, zonedDateTimeFields)
+  return convertNativeToPlainMonthDay(
+    zonedDateTimeSlots0.calendar,
+    zonedDateTimeFields,
+  )
 }
 
 export function zonedDateTimeToPlainTime(
@@ -148,32 +135,24 @@ export function plainDateTimeToZonedDateTime(
   )
 }
 
-/*
-Only used by funcApi
-*/
-export function plainDateTimeToPlainYearMonth(
-  getCalendarOps: (calendarId: string) => YearMonthRefineOps,
+export function nativePlainDateTimeToPlainYearMonth(
   plainDateTimeSlots: PlainDateTimeSlots,
   plainDateFields: { year: number; monthCode: string },
 ): PlainYearMonthSlots {
-  const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
-
   return createPlainYearMonthSlots({
-    ...plainDateTimeSlots, // isoTimeFields and calendar
-    ...convertToPlainYearMonth(calendarOps, plainDateFields),
+    ...plainDateTimeSlots,
+    ...convertNativeToPlainYearMonth(plainDateTimeSlots.calendar, plainDateFields),
   })
 }
 
-/*
-Only used by funcApi
-*/
-export function plainDateTimeToPlainMonthDay(
-  getCalendarOps: (calendarId: string) => MonthDayRefineOps,
+export function nativePlainDateTimeToPlainMonthDay(
   plainDateTimeSlots: PlainDateTimeSlots,
   plainDateFields: { monthCode: string; day: number },
 ): PlainMonthDaySlots {
-  const calendarOps = getCalendarOps(plainDateTimeSlots.calendar)
-  return convertToPlainMonthDay(calendarOps, plainDateFields)
+  return convertNativeToPlainMonthDay(
+    plainDateTimeSlots.calendar,
+    plainDateFields,
+  )
 }
 
 function dateToEpochNano(
@@ -236,54 +215,48 @@ export function plainDateToPlainDateTime(
   )
 }
 
-export function plainDateToPlainYearMonth(
-  getCalendarOps: (calendarId: string) => YearMonthRefineOps,
+export function nativePlainDateToPlainYearMonth(
   plainDateSlots: { calendar: string },
   plainDateFields: { year: number; monthCode: string },
 ): PlainYearMonthSlots {
-  const calendarId = plainDateSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-  return convertToPlainYearMonth(calendarOps, plainDateFields)
+  return convertNativeToPlainYearMonth(plainDateSlots.calendar, plainDateFields)
 }
 
-export function plainDateToPlainMonthDay(
-  getCalendarOps: (calendarId: string) => MonthDayRefineOps,
+export function nativePlainDateToPlainMonthDay(
   plainDateSlots: { calendar: string },
   plainDateFields: { monthCode: string; day: number },
 ): PlainMonthDaySlots {
-  const calendarId = plainDateSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-  return convertToPlainMonthDay(calendarOps, plainDateFields)
+  return convertNativeToPlainMonthDay(plainDateSlots.calendar, plainDateFields)
 }
 
 // PlainYearMonth -> *
 // -----------------------------------------------------------------------------
 
-export function plainYearMonthToPlainDate(
-  getCalendarOps: (calendar: string) => DateModOps,
+export function nativePlainYearMonthToPlainDate(
   plainYearMonthSlots: PlainYearMonthSlots,
   plainYearMonthFields: YearMonthFields,
   bag: { day: number },
 ): PlainDateSlots {
-  const calendarId = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  return convertPlainYearMonthToDate(calendarOps, plainYearMonthFields, bag)
+  return convertNativePlainYearMonthToDate(
+    plainYearMonthSlots.calendar,
+    plainYearMonthFields,
+    bag,
+  )
 }
 
 // PlainMonthDay -> *
 // -----------------------------------------------------------------------------
 
-export function plainMonthDayToPlainDate(
-  getCalendarOps: (calendar: string) => DateModOps,
+export function nativePlainMonthDayToPlainDate(
   plainMonthDaySlots: PlainMonthDaySlots,
   plainMonthDayFields: MonthDayFields,
   bag: EraYearOrYear,
 ): PlainDateSlots {
-  const calendarId = plainMonthDaySlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  return convertPlainMonthDayToDate(calendarOps, plainMonthDayFields, bag)
+  return convertNativePlainMonthDayToDate(
+    plainMonthDaySlots.calendar,
+    plainMonthDayFields,
+    bag,
+  )
 }
 
 // PlainTime -> *

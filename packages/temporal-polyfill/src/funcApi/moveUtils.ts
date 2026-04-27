@@ -1,20 +1,16 @@
 import {
-  createNativeDayOfYearOps,
-  createNativeDayOps,
-  createNativeDaysInMonthOps,
-  createNativeDaysInYearOps,
-  createNativeMoveOps,
-  createNativeWeekOps,
+  queryNativeDay,
+  queryNativeDayOfYear,
+  queryNativeDaysInMonth,
+  queryNativeDaysInYear,
+  queryNativeWeekParts,
+  queryNativeYearMonthAdd,
 } from '../internal/calendarNativeQuery'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import { IsoDateFields, isoDateFieldNamesAlpha } from '../internal/isoFields'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
-import {
-  moveByDays,
-  moveToDayOfMonthUnsafe,
-  nativeYearMonthAdd,
-} from '../internal/move'
+import { moveByDays, moveToDayOfMonthUnsafe } from '../internal/move'
 import {
   OverflowOptions,
   refineOverflowOptions,
@@ -44,9 +40,14 @@ export function moveByYears<S extends DateSlots>(
   if (!years) {
     return slots
   }
-  const calendarOps = createNativeMoveOps(slots.calendar)
   const isoFields = epochMilliToIso(
-    nativeYearMonthAdd(calendarOps, slots, toStrictInteger(years), 0, overflow),
+    queryNativeYearMonthAdd(
+      slots.calendar,
+      slots,
+      toStrictInteger(years),
+      0,
+      overflow,
+    ),
   )
   const isoDateFields = pluckProps(isoDateFieldNamesAlpha, isoFields)
   return { ...slots, ...isoDateFields }
@@ -61,10 +62,9 @@ export function moveByMonths<S extends DateSlots>(
   if (!months) {
     return slots
   }
-  const calendarOps = createNativeMoveOps(slots.calendar)
   const isoFields = epochMilliToIso(
-    nativeYearMonthAdd(
-      calendarOps,
+    queryNativeYearMonthAdd(
+      slots.calendar,
       slots,
       0,
       toStrictInteger(months),
@@ -104,7 +104,7 @@ export function moveToDayOfYear<S extends DateSlots>(
 ): S {
   const overflow = refineOverflowOptions(options)
   const { calendar } = slots
-  const daysInYear = createNativeDaysInYearOps(calendar).daysInYear(slots)
+  const daysInYear = queryNativeDaysInYear(calendar, slots)
   const normDayOfYear = clampEntity(
     dayOfMonthLabel,
     toInteger(dayOfYear, dayOfMonthLabel),
@@ -113,7 +113,7 @@ export function moveToDayOfYear<S extends DateSlots>(
     overflow,
   )
 
-  const currentDayOfYear = createNativeDayOfYearOps(calendar).dayOfYear(slots)
+  const currentDayOfYear = queryNativeDayOfYear(calendar, slots)
   return moveByDays(slots, normDayOfYear - currentDayOfYear)
 }
 
@@ -124,7 +124,7 @@ export function moveToDayOfMonth<S extends DateSlots>(
 ): S {
   const overflow = refineOverflowOptions(options)
   const { calendar } = slots
-  const daysInMonth = createNativeDaysInMonthOps(calendar).daysInMonth(slots)
+  const daysInMonth = queryNativeDaysInMonth(calendar, slots)
   const normDayOfMonth = clampEntity(
     dayLabel,
     toInteger(day, dayLabel),
@@ -134,7 +134,7 @@ export function moveToDayOfMonth<S extends DateSlots>(
   )
 
   return moveToDayOfMonthUnsafe(
-    createNativeDayOps(calendar),
+    (isoFields) => queryNativeDay(calendar, isoFields),
     slots,
     normDayOfMonth,
   )
@@ -162,8 +162,10 @@ export function slotsWithWeekOfYear<S extends DateSlots>(
   options?: OverflowOptions,
 ): S {
   const overflow = refineOverflowOptions(options)
-  const calendarOps = createNativeWeekOps(slots.calendar)
-  const [currentWeekOfYear, , weeksInYear] = calendarOps.weekParts(slots)
+  const [currentWeekOfYear, , weeksInYear] = queryNativeWeekParts(
+    slots.calendar,
+    slots,
+  )
 
   if (currentWeekOfYear === undefined) {
     throw new RangeError(errorMessages.unsupportedWeekNumbers)

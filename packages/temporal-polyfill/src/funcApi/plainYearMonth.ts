@@ -1,20 +1,12 @@
 import {
   PlainYearMonthBag,
-  plainYearMonthWithFields,
-  refinePlainYearMonthBag,
+  nativePlainYearMonthWithFields,
+  refineNativePlainYearMonthBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
-import {
-  createNativeDateModOps,
-  createNativeDayOps,
-  createNativeYearMonthDiffOps,
-  createNativeYearMonthModOps,
-  createNativeYearMonthMoveOps,
-  createNativeYearMonthRefineOps,
-} from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
-import { plainYearMonthToPlainDate } from '../internal/convert'
+import { nativePlainYearMonthToPlainDate } from '../internal/convert'
 import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
 import {
@@ -102,14 +94,14 @@ export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
-  return refinePlainYearMonthBag(
-    createNativeYearMonthRefineOps(getCalendarIdFromBag(fields)),
+  return refineNativePlainYearMonthBag(
+    getCalendarIdFromBag(fields),
     fields,
     options,
   )
 }
 
-export const fromString = bindArgs(parsePlainYearMonth, createNativeDayOps) as (
+export const fromString = parsePlainYearMonth as (
   s: string,
 ) => Record
 
@@ -144,12 +136,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainYearMonthWithFields(
-    createNativeYearMonthModOps,
-    record,
-    fields,
-    options,
-  )
+  return nativePlainYearMonthWithFields(record, fields, options)
 }
 
 // Math
@@ -157,7 +144,6 @@ export function withFields(
 
 export const add = bindArgs(
   movePlainYearMonth,
-  createNativeYearMonthMoveOps,
   false,
 ) as (
   plainYearMonthFields: Record,
@@ -167,7 +153,6 @@ export const add = bindArgs(
 
 export const subtract = bindArgs(
   movePlainYearMonth,
-  createNativeYearMonthMoveOps,
   true,
 ) as (
   plainYearMonthFields: Record,
@@ -177,7 +162,6 @@ export const subtract = bindArgs(
 
 export const until = bindArgs(
   diffPlainYearMonth,
-  createNativeYearMonthDiffOps,
   false,
 ) as (
   record0: Record,
@@ -187,7 +171,6 @@ export const until = bindArgs(
 
 export const since = bindArgs(
   diffPlainYearMonth,
-  createNativeYearMonthDiffOps,
   true,
 ) as (
   record0: Record,
@@ -212,12 +195,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return plainYearMonthToPlainDate(
-    createNativeDateModOps,
-    record,
-    getFields(record),
-    fields,
-  )
+  return nativePlainYearMonthToPlainDate(record, getFields(record), fields)
 }
 
 // Formatting

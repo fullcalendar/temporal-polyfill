@@ -1,8 +1,13 @@
 import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
+import {
+  queryNativeDateParts,
+  queryNativeDay,
+  queryNativeIsoFieldsFromParts,
+  queryNativeMonthCodeParts,
+  queryNativeYearMonthForMonthDay,
+} from './calendarNativeQuery'
 import { resolveCalendarId } from './calendarId'
-import { NativeMonthDayParseOps } from './calendarNative'
-import { DayOps } from './calendarOps'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
@@ -203,7 +208,6 @@ export function parsePlainDate(
 }
 
 export function parsePlainYearMonth(
-  getCalendarOps: (calendarId: string) => DayOps,
   s: string,
 ): PlainYearMonthSlots {
   const organized = parseYearMonthOnly(requireString(s))
@@ -216,8 +220,10 @@ export function parsePlainYearMonth(
   }
 
   const isoSlots = parsePlainDate(s, true)
-  const calendarOps = getCalendarOps(isoSlots.calendar)
-  const moveIsoSlots = moveToDayOfMonthUnsafe(calendarOps, isoSlots)
+  const moveIsoSlots = moveToDayOfMonthUnsafe(
+    (isoFields) => queryNativeDay(isoSlots.calendar, isoFields),
+    isoSlots,
+  )
 
   return createPlainYearMonthSlots(moveIsoSlots)
 }
@@ -229,7 +235,6 @@ function requireIsoCalendar(organized: { calendar: string }): void {
 }
 
 export function parsePlainMonthDay(
-  getCalendarOps: (calendarId: string) => NativeMonthDayParseOps,
   s: string,
 ): PlainMonthDaySlots {
   const organized = parseMonthDayOnly(requireString(s))
@@ -244,21 +249,22 @@ export function parsePlainMonthDay(
 
   const dateSlots = parsePlainDate(s, false, /* isPlainMonthDay = */ true)
   const { calendar } = dateSlots
-  const calendarOps = getCalendarOps(calendar)
 
   // normalize year&month to be as close as possible to epoch
-  const [origYear, origMonth, day] = calendarOps.dateParts(dateSlots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(
+  const [origYear, origMonth, day] = queryNativeDateParts(calendar, dateSlots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    calendar,
     origYear,
     origMonth,
   )
-  const [year, month] = calendarOps.yearMonthForMonthDay(
+  const [year, month] = queryNativeYearMonthForMonthDay(
+    calendar,
     monthCodeNumber,
     isLeapMonth,
     day,
   )! // !HACK
   const isoFields = checkIsoDateInBounds(
-    calendarOps.isoFields(year, month, day),
+    queryNativeIsoFieldsFromParts(calendar, year, month, day),
   )
 
   return createPlainMonthDaySlots(isoFields, calendar)

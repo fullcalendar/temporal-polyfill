@@ -1,5 +1,8 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
-import { DiffOps } from './calendarOps'
+import {
+  nativeDateAdd,
+  nativeDateUntil,
+} from './calendarNativeMath'
 import {
   DurationFields,
   DurationTimeFields,
@@ -49,7 +52,6 @@ const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 
 export function addDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getCalendarOps: (calendarId: string) => DiffOps,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
   slots: DurationSlots,
@@ -84,17 +86,13 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
-    getCalendarOps,
-    getTimeZoneOps,
-    relativeToSlots,
-  )
-  const moveMarker = createMoveMarker(timeZoneOps)
-  const diffMarkers = createDiffMarkers(timeZoneOps)
+  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
+  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(timeZoneOps, relativeToSlots.calendar)
 
-  const midMarker = moveMarker(calendarOps, marker, slots)
-  const endMarker = moveMarker(calendarOps, midMarker, otherSlots)
-  const balancedDuration = diffMarkers(calendarOps, marker, endMarker, maxUnit)
+  const midMarker = moveMarker(marker, slots)
+  const endMarker = moveMarker(midMarker, otherSlots)
+  const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
 
   return createDurationSlots(balancedDuration)
 }
@@ -124,7 +122,6 @@ function addDayTimeDurations(
 
 export function roundDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getCalendarOps: (calendarId: string) => DiffOps,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   slots: DurationSlots,
   options: DurationRoundingOptions<RA>,
@@ -164,16 +161,12 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
-    getCalendarOps,
-    getTimeZoneOps,
-    relativeToSlots,
-  )
+  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(timeZoneOps)
-  const diffMarkers = createDiffMarkers(timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(timeZoneOps, relativeToSlots.calendar)
 
-  const endMarker = moveMarker(calendarOps, marker, slots)
+  const endMarker = moveMarker(marker, slots)
 
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
@@ -182,12 +175,7 @@ export function roundDuration<RA>(
     checkIsoDateTimeInBounds(endMarker as IsoDateTimeFields)
   }
 
-  let balancedDuration = diffMarkers(
-    calendarOps,
-    marker,
-    endMarker,
-    largestUnit,
-  )
+  let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
 
   const origSign = slots.sign
   const balancedSign = computeDurationSign(balancedDuration)
@@ -202,7 +190,6 @@ export function roundDuration<RA>(
     smallestUnit,
     roundingInc,
     roundingMode,
-    calendarOps,
     marker,
     markerToEpochNano,
     moveMarker,

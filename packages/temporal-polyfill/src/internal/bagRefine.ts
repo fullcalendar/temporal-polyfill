@@ -6,9 +6,6 @@ import {
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
-  NativeDateRefineDeps,
-  NativeMonthDayRefineOps,
-  NativeYearMonthRefineDeps,
   eraYearToYear,
   formatMonthCode,
   getCalendarEraOrigins,
@@ -17,16 +14,15 @@ import {
   monthToMonthCodeNumber,
   parseMonthCode,
 } from './calendarNative'
-import { createNativePartOps } from './calendarNativeQuery'
 import {
-  DateModOps,
-  DateRefineOps,
-  FieldsOp,
-  MonthDayModOps,
-  MonthDayRefineOps,
-  YearMonthModOps,
-  YearMonthRefineOps,
-} from './calendarOps'
+  queryNativeDateParts,
+  queryNativeMonthCodeParts,
+  queryNativeDaysInMonthPart,
+  queryNativeIsoFieldsFromParts,
+  queryNativeLeapMonth,
+  queryNativeMonthsInYearPart,
+  queryNativeYearMonthForMonthDay,
+} from './calendarNativeQuery'
 import {
   requireObjectLike,
   toInteger,
@@ -182,25 +178,24 @@ const builtinRefiners = {
 // High-Level Refining
 // -----------------------------------------------------------------------------
 
-export function refineMaybeZonedDateTimeBag(
-  refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
+export function refineMaybeNativeZonedDateTimeBag(
+  refineTimeZoneString: (timeZoneString: string) => string,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
-  calendarOps: DateRefineOps,
+  calendarId: string,
   bag: ZonedDateTimeBag,
 ): RelativeToSlotsNoCalendar {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
-    dateFieldNamesAlpha, // validFieldNames
-    [], // requireFields
-    timeAndZoneFieldNames, // forcedValidFieldNames
+    dateFieldNamesAlpha,
+    [],
+    timeAndZoneFieldNames,
   ) as ZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
-    const isoDateFields = calendarOps.dateFromFields(fields as any)
+    const isoDateFields = nativeDateFromFields(calendarId, fields as any)
     const isoTimeFields = refineTimeBag(fields)
 
-    // must happen after datetime fields
     const timeZoneId = refineTimeZoneString(fields.timeZone)
     const timeZoneOps = getTimeZoneOps(timeZoneId)
 
@@ -213,32 +208,31 @@ export function refineMaybeZonedDateTimeBag(
     return { epochNanoseconds, timeZone: timeZoneId }
   }
 
-  const isoDateInternals = calendarOps.dateFromFields(fields as any)
+  const isoDateInternals = nativeDateFromFields(calendarId, fields as any)
   return { ...isoDateInternals, ...isoTimeFieldDefaults }
 }
 
-export function refineZonedDateTimeBag(
-  refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
+export function refineNativeZonedDateTimeBag(
+  refineTimeZoneString: (timeZoneString: string) => string,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
-  calendarOps: DateRefineOps,
   calendarId: string,
   bag: ZonedDateTimeBag,
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
-    dateFieldNamesAlpha, // validFieldNames
-    timeZoneFieldNames, // requireFields
-    timeAndZoneFieldNames, // forcedValidFieldNames
+    dateFieldNamesAlpha,
+    timeZoneFieldNames,
+    timeAndZoneFieldNames,
   ) as ZonedDateTimeBag
 
-  // guaranteed fields.timeZone via refineCalendarFields
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
   const [overflow, offsetDisambig, epochDisambig] =
     refineZonedFieldOptions(options)
-  const isoDateFields = calendarOps.dateFromFields(
+  const isoDateFields = nativeDateFromFields(
+    calendarId,
     fields as any,
     fabricateOverflowOptions(overflow),
   )
@@ -256,21 +250,22 @@ export function refineZonedDateTimeBag(
   return createZonedDateTimeSlots(epochNanoseconds, timeZoneId, calendarId)
 }
 
-export function refinePlainDateTimeBag(
-  calendarOps: DateRefineOps,
+export function refineNativePlainDateTimeBag(
+  calendarId: string,
   bag: DateTimeBag,
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
     dateFieldNamesAlpha,
-    [], // requiredFields
-    timeFieldNamesAsc, // forcedValidFieldNames
+    [],
+    timeFieldNamesAsc,
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
-  const isoDateInternals = calendarOps.dateFromFields(
+  const isoDateInternals = nativeDateFromFields(
+    calendarId,
     fields as any,
     fabricateOverflowOptions(overflow),
   )
@@ -284,54 +279,51 @@ export function refinePlainDateTimeBag(
   return createPlainDateTimeSlots(isoFields)
 }
 
-export function refinePlainDateBag(
-  calendarOps: DateRefineOps,
+export function refineNativePlainDateBag(
+  calendarId: string,
   bag: DateBag,
   options: OverflowOptions | undefined,
   requireFields: string[] = [],
 ): PlainDateSlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
     dateFieldNamesAlpha,
     requireFields,
   )
 
-  return calendarOps.dateFromFields(fields as any, options)
+  return nativeDateFromFields(calendarId, fields as any, options)
 }
 
-export function refinePlainYearMonthBag(
-  calendarOps: YearMonthRefineOps,
+export function refineNativePlainYearMonthBag(
+  calendarId: string,
   bag: YearMonthBag,
   options: OverflowOptions | undefined,
   requireFields?: string[],
 ): PlainYearMonthSlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
     yearMonthFieldNames,
     requireFields,
   )
 
-  return calendarOps.yearMonthFromFields(fields, options)
+  return nativeYearMonthFromFields(calendarId, fields as any, options)
 }
 
-export function refinePlainMonthDayBag(
-  calendarOps: MonthDayRefineOps,
+export function refineNativePlainMonthDayBag(
+  calendarId: string,
   calendarAbsent: boolean,
   bag: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     bag,
     dateFieldNamesAlpha,
     dayFieldNames,
-  )
+  ) as DateBag
 
-  // Callers who omit the calendar are not writing calendar-independent
-  // code. In that case, `monthCode`/`year` can be omitted; `month` and
-  // `day` are sufficient. Add a `year` to satisfy calendar validation.
   if (
     calendarAbsent &&
     fields.month !== undefined &&
@@ -341,7 +333,7 @@ export function refinePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return calendarOps.monthDayFromFields(fields, options)
+  return nativeMonthDayFromFields(calendarId, fields, options)
 }
 
 export function refinePlainTimeBag(
@@ -375,15 +367,15 @@ export function refineDurationBag(bag: DurationBag): DurationSlots {
 // Low-level Refining
 // -----------------------------------------------------------------------------
 
-function refineCalendarFields(
-  calendarOps: { fields: FieldsOp },
+function refineNativeCalendarFields(
+  calendarId: string,
   bag: Record<string, unknown>,
-  validFieldNames: string[], // does NOT need to be alphabetized
-  requiredFieldNames: string[] = [], // a subset of validFieldNames
+  validFieldNames: string[],
+  requiredFieldNames: string[] = [],
   forcedValidFieldNames: string[] = [],
 ): Record<string, unknown> {
   const fieldNames = [
-    ...calendarOps.fields(validFieldNames),
+    ...nativeFieldsMethod(calendarId, validFieldNames),
     ...forcedValidFieldNames,
   ].sort()
 
@@ -471,26 +463,25 @@ export const isoTimeFieldsToCal = bindArgs(
 // High-Level Mod
 // -----------------------------------------------------------------------------
 
-export function zonedDateTimeWithFields(
-  getCalendarOps: (calendarId: string) => DateModOps,
+export function nativeZonedDateTimeWithFields(
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
   const { calendar, timeZone } = zonedDateTimeSlots
-  const calendarOps = getCalendarOps(calendar)
   const timeZoneOps = getTimeZoneOps(timeZone)
 
   const validFieldNames = [
-    ...calendarOps.fields(dateFieldNamesAlpha),
+    ...nativeFieldsMethod(calendar, dateFieldNamesAlpha),
     ...timeAndOffsetFieldNames,
   ].sort()
 
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedCalendarFields = calendarOps.mergeFields(
-    origFields,
+  const mergedCalendarFields = nativeMergeFields(
+    calendar,
+    origFields as unknown as Record<string, unknown>,
     partialFields,
   )
   const mergedAllFields = {
@@ -502,7 +493,8 @@ export function zonedDateTimeWithFields(
     options,
     OffsetDisambig.Prefer,
   )
-  const isoDateFields = calendarOps.dateFromFields(
+  const isoDateFields = nativeDateFromFields(
+    calendar,
     mergedCalendarFields as any,
     fabricateOverflowOptions(overflow),
   )
@@ -524,17 +516,15 @@ export function zonedDateTimeWithFields(
   )
 }
 
-export function plainDateTimeWithFields(
-  getCalendarOps: (calendarId: string) => DateModOps,
+export function nativePlainDateTimeWithFields(
   plainDateTimeSlots: PlainDateTimeSlots,
   modFields: DateTimeBag,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
   const calendarId = plainDateTimeSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
 
   const validFieldNames = [
-    ...calendarOps.fields(dateFieldNamesAlpha),
+    ...nativeFieldsMethod(calendarId, dateFieldNamesAlpha),
     ...timeFieldNamesAsc,
   ].sort()
 
@@ -542,8 +532,9 @@ export function plainDateTimeWithFields(
   const partialFields = refineFields(modFields, validFieldNames)
   const overflow = refineOverflowOptions(options)
 
-  const mergedCalendarFields = calendarOps.mergeFields(
-    origFields,
+  const mergedCalendarFields = nativeMergeFields(
+    calendarId,
+    origFields as unknown as Record<string, unknown>,
     partialFields,
   )
   const mergedAllFields = {
@@ -551,7 +542,8 @@ export function plainDateTimeWithFields(
     ...partialFields,
   }
 
-  const isoDateFields = calendarOps.dateFromFields(
+  const isoDateFields = nativeDateFromFields(
+    calendarId,
     mergedCalendarFields as any,
     fabricateOverflowOptions(overflow),
   )
@@ -569,58 +561,61 @@ export function plainDateTimeWithFields(
   )
 }
 
-export function plainDateWithFields(
-  getCalendarOps: (calendarId: string) => DateModOps,
+export function nativePlainDateWithFields(
   plainDateSlots: PlainDateSlots,
   modFields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots {
   const calendarId = plainDateSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  const validFieldNames = calendarOps.fields(dateFieldNamesAlpha).sort()
+  const validFieldNames = nativeFieldsMethod(calendarId, dateFieldNamesAlpha).sort()
 
   const origFields = computeDateEssentials(plainDateSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = calendarOps.mergeFields(origFields, partialFields)
+  const mergedFields = nativeMergeFields(
+    calendarId,
+    origFields as unknown as Record<string, unknown>,
+    partialFields,
+  )
 
-  return calendarOps.dateFromFields(mergedFields as any, options)
+  return nativeDateFromFields(calendarId, mergedFields as any, options)
 }
 
-export function plainYearMonthWithFields(
-  getCalendarOps: (calendar: string) => YearMonthModOps,
+export function nativePlainYearMonthWithFields(
   plainYearMonthSlots: PlainYearMonthSlots,
   modFields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  const validFieldNames = calendarOps.fields(yearMonthFieldNames).sort()
+  const validFieldNames = nativeFieldsMethod(calendarId, yearMonthFieldNames).sort()
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = calendarOps.mergeFields(origFields, partialFields)
+  const mergedFields = nativeMergeFields(
+    calendarId,
+    origFields as unknown as Record<string, unknown>,
+    partialFields,
+  )
 
-  return calendarOps.yearMonthFromFields(mergedFields, options)
+  return nativeYearMonthFromFields(calendarId, mergedFields as any, options)
 }
 
-export function plainMonthDayWithFields(
-  getCalendarOps: (calendarId: string) => MonthDayModOps,
+export function nativePlainMonthDayWithFields(
   plainMonthDaySlots: PlainMonthDaySlots,
   modFields: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const calendarId = plainMonthDaySlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
-
-  const validFieldNames = calendarOps.fields(dateFieldNamesAlpha).sort()
+  const validFieldNames = nativeFieldsMethod(calendarId, dateFieldNamesAlpha).sort()
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)
   const partialFields = refineFields(modFields, validFieldNames)
-  const mergedFields = calendarOps.mergeFields(origFields, partialFields)
+  const mergedFields = nativeMergeFields(
+    calendarId,
+    origFields as unknown as Record<string, unknown>,
+    partialFields,
+  )
 
-  return calendarOps.monthDayFromFields(mergedFields, options)
+  return nativeMonthDayFromFields(calendarId, mergedFields as any, options)
 }
 
 export function plainTimeWithFields(
@@ -667,137 +662,144 @@ function mergeDurationBag(
 // Conversion that involves bags
 // -----------------------------------------------------------------------------
 
-export function convertToPlainMonthDay(
-  calendarOps: MonthDayRefineOps,
+export function convertNativeToPlainMonthDay(
+  calendarId: string,
   input: { monthCode: string; day: number },
 ): PlainMonthDaySlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     input,
     monthCodeDayFieldNames,
   )
-  return calendarOps.monthDayFromFields(fields)
+  return nativeMonthDayFromFields(calendarId, fields as DateBag)
 }
 
-export function convertToPlainYearMonth(
-  calendarOps: YearMonthRefineOps,
+export function convertNativeToPlainYearMonth(
+  calendarId: string,
   input: { year: number; monthCode: string },
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const fields = refineCalendarFields(
-    calendarOps,
+  const fields = refineNativeCalendarFields(
+    calendarId,
     input,
     yearMonthCodeFieldNames,
   )
-  return calendarOps.yearMonthFromFields(fields, options)
+  return nativeYearMonthFromFields(
+    calendarId,
+    fields as YearMonthBag,
+    options,
+  )
 }
 
-export function convertPlainMonthDayToDate(
-  calendarOps: DateModOps,
+export function convertNativePlainMonthDayToDate(
+  calendarId: string,
   input: { monthCode: string; day: number },
   bag: EraYearOrYear,
 ): PlainDateSlots {
-  return convertToIso(
-    calendarOps,
+  return convertToNativeIso(
+    calendarId,
     input,
-    monthCodeDayFieldNames, // inputFieldNames
-    requireObjectLike(bag), // extra
-    yearFieldNames, // extraFieldNames
+    monthCodeDayFieldNames,
+    requireObjectLike(bag),
+    yearFieldNames,
   )
 }
 
-/*
-Responsible for ensuring bag is an object. Best place?
-*/
-export function convertPlainYearMonthToDate(
-  calendarOps: DateModOps,
+export function convertNativePlainYearMonthToDate(
+  calendarId: string,
   input: YearMonthFields,
   bag: DayFields,
 ): PlainDateSlots {
-  return convertToIso(
-    calendarOps,
+  return convertToNativeIso(
+    calendarId,
     input,
-    yearMonthCodeFieldNames, // inputFieldNames
-    requireObjectLike(bag), // extra
-    dayFieldNames, // extraFieldNames
+    yearMonthCodeFieldNames,
+    requireObjectLike(bag),
+    dayFieldNames,
   )
 }
 
-function convertToIso(
-  calendarOps: DateModOps,
+function convertToNativeIso(
+  calendarId: string,
   input: any,
-  inputFieldNames: string[], // must be alphabetized!!!
+  inputFieldNames: string[],
   extra: any,
-  extraFieldNames: string[], // must be alphabetized!!!
+  extraFieldNames: string[],
 ): PlainDateSlots {
-  inputFieldNames = calendarOps.fields(inputFieldNames)
+  inputFieldNames = nativeFieldsMethod(calendarId, inputFieldNames)
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
-  extraFieldNames = calendarOps.fields(extraFieldNames)
+  extraFieldNames = nativeFieldsMethod(calendarId, extraFieldNames)
   extra = refineFields(extra, extraFieldNames, [])
 
-  let mergedFields = calendarOps.mergeFields(input, extra)
+  let mergedFields = nativeMergeFields(calendarId, input, extra)
   mergedFields = refineFields(
     mergedFields,
     [...inputFieldNames, ...extraFieldNames].sort(),
     [],
   )
 
-  return calendarOps.dateFromFields(mergedFields as any)
+  return nativeDateFromFields(calendarId, mergedFields as any)
 }
 
 // Native *-from-fields
 // -----------------------------------------------------------------------------
 
 export function nativeDateFromFields(
-  this: NativeDateRefineDeps,
+  calendarId: string,
   fields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots {
   const overflow = refineOverflowOptions(options)
-  const year = refineYear(this, fields)
-  const month = refineMonth(this, fields, year, overflow)
-  const day = refineDay(this, fields as DayFields, month, year, overflow)
-  const isoFields = this.isoFields(year, month, day)
+  const year = refineYear(calendarId, fields)
+  const month = refineMonth(calendarId, fields, year, overflow)
+  const day = refineDay(
+    calendarId,
+    fields as DayFields,
+    month,
+    year,
+    overflow,
+  )
+  const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, day)
 
   return createPlainDateSlots(
     checkIsoDateInBounds(isoFields),
-    this.id || isoCalendarId,
+    calendarId,
   )
 }
 
 export function nativeYearMonthFromFields(
-  this: NativeYearMonthRefineDeps,
+  calendarId: string,
   fields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const overflow = refineOverflowOptions(options)
-  const year = refineYear(this, fields)
-  const month = refineMonth(this, fields, year, overflow)
-  const isoFields = this.isoFields(year, month, 1)
+  const year = refineYear(calendarId, fields)
+  const month = refineMonth(calendarId, fields, year, overflow)
+  const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, 1)
 
   return createPlainYearMonthSlots(
     checkIsoYearMonthInBounds(isoFields),
-    this.id || isoCalendarId,
+    calendarId,
   )
 }
 
 export function nativeMonthDayFromFields(
-  this: NativeMonthDayRefineOps,
+  calendarId: string,
   fields: DateBag, // guaranteed `day`
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const overflow = refineOverflowOptions(options)
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
-      ? refineYear(this, fields)
+      ? refineYear(calendarId, fields)
       : undefined
   let day: number
   let monthCodeNumber: number
   let isLeapMonth: boolean
 
   // TODO: make this DRY the HACK in refinePlainMOnthDayBag?
-  const isIso = !this.id
+  const isIso = calendarId === isoCalendarId
   if (yearMaybe === undefined && isIso) {
     yearMaybe = isoEpochFirstLeapYear
   }
@@ -805,13 +807,21 @@ export function nativeMonthDayFromFields(
   // year given? parse either monthCode or month (if both specified, must be equivalent)
   if (yearMaybe !== undefined) {
     // might limit overflow
-    const month = refineMonth(this, fields, yearMaybe, overflow)
+    const month = refineMonth(calendarId, fields, yearMaybe, overflow)
     // NOTE: internal call of getDefinedProp not necessary
-    day = refineDay(this, fields as DayFields, month, yearMaybe, overflow)
+    day = refineDay(
+      calendarId,
+      fields as DayFields,
+      month,
+      yearMaybe,
+      overflow,
+    )
 
-    const leapMonth = this.leapMonth(yearMaybe)
-    monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
-    isLeapMonth = month === leapMonth
+    ;[monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+      calendarId,
+      yearMaybe,
+      month,
+    )
   } else {
     // no year given? there must be a monthCode
     if (fields.monthCode === undefined) {
@@ -824,21 +834,25 @@ export function nativeMonthDayFromFields(
     // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's monthDayFromFields
     // to limit the day in calendar with predictable max-days-in-month without the year
     const isIsoLike =
-      !this.id ||
-      this.id === gregoryCalendarId ||
-      this.id === japaneseCalendarId
+      calendarId === isoCalendarId ||
+      calendarId === gregoryCalendarId ||
+      calendarId === japaneseCalendarId
     if (isIsoLike) {
-      const month = refineMonth(this, fields, isoEpochFirstLeapYear, overflow)
+      const month = refineMonth(
+        calendarId,
+        fields,
+        isoEpochFirstLeapYear,
+        overflow,
+      )
       day = refineDay(
-        this,
+        calendarId,
         fields as DayFields,
         month,
         isoEpochFirstLeapYear,
         overflow,
       )
     } else if (
-      this.id &&
-      computeCalendarIdBase(this.id) === 'coptic' &&
+      computeCalendarIdBase(calendarId) === 'coptic' &&
       overflow === Overflow.Constrain
     ) {
       const maxLengthOfMonthCodeInAnyYear =
@@ -846,8 +860,7 @@ export function nativeMonthDayFromFields(
       day = fields.day!
       day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
     } else if (
-      this.id &&
-      computeCalendarIdBase(this.id) === 'chinese' &&
+      computeCalendarIdBase(calendarId) === 'chinese' &&
       overflow === Overflow.Constrain
     ) {
       const maxLengthOfMonthCodeInAnyYear =
@@ -868,30 +881,40 @@ export function nativeMonthDayFromFields(
   }
 
   // query calendar for final year/month
-  const res = this.yearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+  const res = queryNativeYearMonthForMonthDay(
+    calendarId,
+    monthCodeNumber,
+    isLeapMonth,
+    day,
+  )
   if (!res) {
     throw new RangeError(errorMessages.failedYearGuess)
   }
   const [finalYear, finalMonth] = res
 
   return createPlainMonthDaySlots(
-    checkIsoDateInBounds(this.isoFields(finalYear, finalMonth, day)),
-    this.id || isoCalendarId,
+    checkIsoDateInBounds(
+      queryNativeIsoFieldsFromParts(calendarId, finalYear, finalMonth, day),
+    ),
+    calendarId,
   )
 }
 
 export function nativeFieldsMethod(
-  this: NativeYearMonthRefineDeps,
+  calendarId: string,
   fieldNames: string[],
 ): string[] {
-  if (getCalendarEraOrigins(this) && fieldNames.includes('year')) {
+  if (
+    getCalendarEraOrigins({ id: calendarId }) &&
+    fieldNames.includes('year')
+  ) {
     return [...fieldNames, ...eraYearFieldNames]
   }
   return fieldNames
 }
 
 export function nativeMergeFields(
-  this: NativeYearMonthRefineDeps,
+  calendarId: string,
   baseFields: Record<string, unknown>,
   additionalFields: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -899,11 +922,11 @@ export function nativeMergeFields(
 
   spliceFields(merged, additionalFields, monthFieldNames)
 
-  if (getCalendarEraOrigins(this)) {
+  if (getCalendarEraOrigins({ id: calendarId })) {
     spliceFields(merged, additionalFields, allYearFieldNames)
 
     // eras begin mid-year?
-    if (this.id === japaneseCalendarId) {
+    if (calendarId === japaneseCalendarId) {
       spliceFields(
         merged,
         additionalFields,
@@ -920,11 +943,11 @@ export function nativeMergeFields(
 // -----------------------------------------------------------------------------
 
 function refineYear(
-  calendarNative: NativeYearMonthRefineDeps,
+  calendarId: string,
   fields: DateBag,
 ): number {
-  const eraOrigins = getCalendarEraOrigins(calendarNative)
-  const eraRemaps = eraRemapsByCalendarId[calendarNative.id || ''] || {}
+  const eraOrigins = getCalendarEraOrigins({ id: calendarId })
+  const eraRemaps = eraRemapsByCalendarId[calendarId || ''] || {}
   let { era, eraYear, year } = fields
 
   if (era !== undefined || eraYear !== undefined) {
@@ -957,7 +980,7 @@ function refineYear(
 }
 
 function refineMonth(
-  calendarNative: NativeYearMonthRefineDeps,
+  calendarId: string,
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
@@ -966,7 +989,7 @@ function refineMonth(
 
   if (monthCode !== undefined) {
     const monthByCode = refineMonthCode(
-      calendarNative,
+      calendarId,
       monthCode,
       year,
       overflow,
@@ -986,23 +1009,23 @@ function refineMonth(
     'month',
     month,
     1,
-    calendarNative.monthsInYearPart(year),
+    queryNativeMonthsInYearPart(calendarId, year),
     overflow,
   )
 }
 
 function refineMonthCode(
-  calendarNative: NativeYearMonthRefineDeps,
+  calendarId: string,
   monthCode: string,
   year: number,
   overflow: Overflow,
 ) {
-  const leapMonth = calendarNative.leapMonth(year)
+  const leapMonth = queryNativeLeapMonth(calendarId, year)
   const [monthCodeNumber, wantsLeapMonth] = parseMonthCode(monthCode)
   let month = monthCodeNumberToMonth(monthCodeNumber, wantsLeapMonth, leapMonth)
 
   if (wantsLeapMonth) {
-    const leapMonthMeta = getCalendarLeapMonthMeta(calendarNative)
+    const leapMonthMeta = getCalendarLeapMonthMeta({ id: calendarId })
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {
@@ -1038,7 +1061,7 @@ function refineMonthCode(
 }
 
 function refineDay(
-  calendarNative: NativeDateRefineDeps,
+  calendarId: string,
   fields: DayFields,
   month: number,
   year: number,
@@ -1048,7 +1071,7 @@ function refineDay(
     fields,
     'day',
     1,
-    calendarNative.daysInMonthParts(year, month),
+    queryNativeDaysInMonthPart(calendarId, year, month),
     overflow,
   )
 }
@@ -1096,9 +1119,12 @@ function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   const isoFields = zonedEpochSlotsToIso(slots, queryNativeTimeZone)
   const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(isoFields)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month, day] = queryNativeDateParts(slots.calendar, isoFields)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
 
   return {
@@ -1128,9 +1154,12 @@ function computeDateEssentials(slots: DateSlots): {
   monthCode: string
   day: number
 } {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { year, monthCode, day }
 }
@@ -1139,9 +1168,12 @@ function computeYearMonthEssentials(slots: DateSlots): {
   year: number
   monthCode: string
 } {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month] = calendarOps.dateParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month] = queryNativeDateParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { year, monthCode }
 }
@@ -1150,9 +1182,12 @@ function computeMonthDayEssentials(slots: DateSlots): {
   monthCode: string
   day: number
 } {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { monthCode, day }
 }

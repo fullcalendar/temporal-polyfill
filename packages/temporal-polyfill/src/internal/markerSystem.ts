@@ -1,5 +1,4 @@
 import { BigNano } from './bigNano'
-import { DiffOps, MoveOps } from './calendarOps'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
 import {
@@ -28,28 +27,20 @@ export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
 // a date marker that's moved away from the "origin"
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
 
-export type MarkerSystem<CO> = [Marker, CO, TimeZoneOps?]
+export type MarkerSystem = [Marker, TimeZoneOps?]
 
-export function createMarkerSystem<CO>(
-  getCalendarOps: (calendarId: string) => CO,
+export function createMarkerSystem(
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   relativeToSlots: RelativeToSlots,
-): MarkerSystem<CO> {
-  const calendarOps = getCalendarOps(relativeToSlots.calendar)
-
+): MarkerSystem {
   if (isZonedEpochSlots(relativeToSlots)) {
-    return [
-      relativeToSlots,
-      calendarOps,
-      getTimeZoneOps(relativeToSlots.timeZone),
-    ]
+    return [relativeToSlots, getTimeZoneOps(relativeToSlots.timeZone)]
   }
 
   return [
     // convert IsoDateFields->IsoDateTimeFields
     // because expected in createMoveMarker/createDiffMarkers
     { ...relativeToSlots, ...isoTimeFieldDefaults },
-    calendarOps,
   ]
 }
 
@@ -59,13 +50,11 @@ export function createMarkerSystem<CO>(
 export type MarkerToEpochNano = (marker: Marker) => BigNano
 
 export type MoveMarker = (
-  calendarOps: MoveOps,
   marker: Marker,
   durationFields: DurationFields,
 ) => Marker
 
 export type DiffMarkers = (
-  calendarOps: DiffOps,
   marker0: Marker,
   marker1: Marker,
   largestUnit: Unit,
@@ -79,20 +68,22 @@ export function createMarkerToEpochNano(
 
 export function createMoveMarker(
   timeZoneOps: TimeZoneOps | undefined,
+  calendarId: string,
 ): MoveMarker {
   if (timeZoneOps) {
-    return bindArgs(moveZonedEpochs, timeZoneOps) as Callable
+    return bindArgs(moveZonedEpochs, timeZoneOps, calendarId) as Callable
   }
-  return moveDateTime as Callable
+  return bindArgs(moveDateTime, calendarId) as Callable
 }
 
 export function createDiffMarkers(
   timeZoneOps: TimeZoneOps | undefined,
+  calendarId: string,
 ): DiffMarkers {
   if (timeZoneOps) {
-    return bindArgs(diffZonedEpochsExact, timeZoneOps) as Callable
+    return bindArgs(diffZonedEpochsExact, timeZoneOps, calendarId) as Callable
   }
-  return diffDateTimesExact as Callable
+  return bindArgs(diffDateTimesExact, calendarId) as Callable
 }
 
 // Utils

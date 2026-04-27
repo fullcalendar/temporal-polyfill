@@ -1,5 +1,5 @@
 import { compareBigNanos } from './bigNano'
-import { MoveOps } from './calendarOps'
+import { nativeDateAdd } from './calendarNativeMath'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -53,7 +53,6 @@ export function compareZonedDateTimes(
 
 export function compareDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  getCalendarOps: (calendarId: string) => MoveOps,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   durationSlots0: DurationSlots,
   durationSlots1: DurationSlots,
@@ -82,17 +81,13 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, calendarOps, timeZoneOps] = createMarkerSystem(
-    getCalendarOps,
-    getTimeZoneOps,
-    relativeToSlots,
-  )
+  const [marker, timeZoneOps] = createMarkerSystem(getTimeZoneOps, relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneOps)
-  const moveMarker = createMoveMarker(timeZoneOps)
+  const moveMarker = createMoveMarker(timeZoneOps, relativeToSlots.calendar)
 
   return compareBigNanos(
-    markerToEpochNano(moveMarker(calendarOps, marker, durationSlots0)),
-    markerToEpochNano(moveMarker(calendarOps, marker, durationSlots1)),
+    markerToEpochNano(moveMarker(marker, durationSlots0)),
+    markerToEpochNano(moveMarker(marker, durationSlots1)),
   )
 }
 

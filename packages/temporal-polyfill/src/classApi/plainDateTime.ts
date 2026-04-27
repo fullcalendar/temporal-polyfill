@@ -1,11 +1,10 @@
 import {
   PlainDateBag,
   PlainDateTimeBag,
-  plainDateTimeWithFields,
-  refinePlainDateTimeBag,
+  nativePlainDateTimeWithFields,
+  refineNativePlainDateTimeBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
@@ -96,12 +95,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
-        plainDateTimeWithFields(
-          createNativeStandardOps,
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
+        nativePlainDateTimeWithFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
@@ -130,7 +124,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): PlainDateTime {
       return createPlainDateTime(
         movePlainDateTime(
-          createNativeStandardOps,
           false,
           slots,
           toDurationSlots(durationArg),
@@ -145,7 +138,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): PlainDateTime {
       return createPlainDateTime(
         movePlainDateTime(
-          createNativeStandardOps,
           true,
           slots,
           toDurationSlots(durationArg),
@@ -160,7 +152,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
-          createNativeStandardOps,
           false,
           slots,
           toPlainDateTimeSlots(otherArg),
@@ -175,7 +166,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     ): Duration {
       return createDuration(
         diffPlainDateTimes(
-          createNativeStandardOps,
           true,
           slots,
           toPlainDateTimeSlots(otherArg),
@@ -274,8 +264,8 @@ export function toPlainDateTimeSlots(
         )
     }
 
-    return refinePlainDateTimeBag(
-      createNativeStandardOps(getCalendarIdFromBag(arg as PlainDateBag)),
+    return refineNativePlainDateTimeBag(
+      getCalendarIdFromBag(arg as PlainDateBag),
       arg as PlainDateBag,
       options,
     )

@@ -1,8 +1,8 @@
 import {
   ZonedDateTimeBag,
   isoTimeFieldsToCal,
-  refineZonedDateTimeBag,
-  zonedDateTimeWithFields,
+  nativeZonedDateTimeWithFields,
+  refineNativeZonedDateTimeBag,
 } from '../internal/bagRefine'
 import {
   BigNano,
@@ -11,24 +11,16 @@ import {
   numberToBigNano,
 } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
-import {
-  createNativeDateModOps,
-  createNativeDateRefineOps,
-  createNativeDiffOps,
-  createNativeMonthDayRefineOps,
-  createNativeMoveOps,
-  createNativeYearMonthRefineOps,
-} from '../internal/calendarNativeQuery'
 import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
+  nativeZonedDateTimeToPlainMonthDay,
+  nativeZonedDateTimeToPlainYearMonth,
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
-  zonedDateTimeToPlainMonthDay,
   zonedDateTimeToPlainTime,
-  zonedDateTimeToPlainYearMonth,
 } from '../internal/convert'
 import { diffZonedDateTimes } from '../internal/diff'
 import { DateTimeBag } from '../internal/fields'
@@ -197,10 +189,9 @@ export function fromFields(
   options?: AssignmentOptions,
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
-  return refineZonedDateTimeBag(
+  return refineNativeZonedDateTimeBag(
     refineTimeZoneId,
     queryNativeTimeZone,
-    createNativeDateRefineOps(calendarId),
     calendarId,
     fields,
     options,
@@ -306,13 +297,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return zonedDateTimeWithFields(
-    createNativeDateModOps,
-    queryNativeTimeZone,
-    record,
-    fields,
-    options,
-  )
+  return nativeZonedDateTimeWithFields(queryNativeTimeZone, record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
@@ -344,7 +329,6 @@ export const withPlainTime = bindArgs(
 
 export const add = bindArgs(
   moveZonedDateTime,
-  createNativeMoveOps,
   queryNativeTimeZone,
   false,
 ) as (
@@ -355,7 +339,6 @@ export const add = bindArgs(
 
 export const subtract = bindArgs(
   moveZonedDateTime,
-  createNativeMoveOps,
   queryNativeTimeZone,
   true,
 ) as (
@@ -366,7 +349,6 @@ export const subtract = bindArgs(
 
 export const until = bindArgs(
   diffZonedDateTimes,
-  createNativeDiffOps,
   queryNativeTimeZone,
   false,
 ) as (
@@ -377,7 +359,6 @@ export const until = bindArgs(
 
 export const since = bindArgs(
   diffZonedDateTimes,
-  createNativeDiffOps,
   queryNativeTimeZone,
   true,
 ) as (
@@ -429,19 +410,11 @@ export const toPlainTime = bindArgs(
 ) as (record: Record) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return zonedDateTimeToPlainYearMonth(
-    createNativeYearMonthRefineOps,
-    record,
-    getFields(record),
-  )
+  return nativeZonedDateTimeToPlainYearMonth(record, getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return zonedDateTimeToPlainMonthDay(
-    createNativeMonthDayRefineOps,
-    record,
-    getFields(record),
-  )
+  return nativeZonedDateTimeToPlainMonthDay(record, getFields(record))
 }
 
 // Formatting

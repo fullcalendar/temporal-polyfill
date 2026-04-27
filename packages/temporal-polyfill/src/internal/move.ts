@@ -1,10 +1,6 @@
 import { BigNano, addBigNanos } from './bigNano'
-import {
-  NativeMoveOps,
-  YearMonthParts,
-  monthCodeNumberToMonth,
-} from './calendarNative'
-import { DayOps, MoveOps, YearMonthMoveOps } from './calendarOps'
+import { nativeDateAdd } from './calendarNativeMath'
+import { queryNativeDay } from './calendarNativeQuery'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -18,16 +14,12 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { IntlCalendar, computeIntlMonthsInYear } from './intlMath'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { isoMonthsInYear } from './isoMath'
-import { Overflow } from './options'
-import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
   EpochSlots,
@@ -44,6 +36,7 @@ import {
   createPlainTimeSlots,
   createPlainYearMonthSlots,
 } from './slots'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
@@ -59,7 +52,11 @@ import {
   zonedEpochSlotsToIso,
 } from './timeZoneOps'
 import { Unit, milliInDay } from './units'
-import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
+import {
+  Callable,
+  bindArgs,
+  pluckProps,
+} from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -78,7 +75,6 @@ export function moveInstant(
 }
 
 export function moveZonedDateTime(
-  getCalendarOps: (calendarId: string) => MoveOps,
   getTimeZoneOps: (timeZoneId: string) => TimeZoneOps,
   doSubtract: boolean,
   zonedDateTimeSlots: ZonedDateTimeSlots,
@@ -86,13 +82,12 @@ export function moveZonedDateTime(
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
   const timeZoneOps = getTimeZoneOps(zonedDateTimeSlots.timeZone)
-  const calendarOps = getCalendarOps(zonedDateTimeSlots.calendar)
 
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
       timeZoneOps,
-      calendarOps,
+      zonedDateTimeSlots.calendar,
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -101,7 +96,6 @@ export function moveZonedDateTime(
 }
 
 export function movePlainDateTime(
-  getCalendarOps: (calendarId: string) => MoveOps,
   doSubtract: boolean,
   plainDateTimeSlots: PlainDateTimeSlots,
   durationSlots: DurationSlots,
@@ -110,7 +104,7 @@ export function movePlainDateTime(
   const { calendar } = plainDateTimeSlots
   return createPlainDateTimeSlots(
     moveDateTime(
-      getCalendarOps(calendar),
+      calendar,
       plainDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -120,7 +114,6 @@ export function movePlainDateTime(
 }
 
 export function movePlainDate(
-  getCalendarOps: (calendarId: string) => MoveOps,
   doSubtract: boolean,
   plainDateSlots: PlainDateSlots,
   durationSlots: DurationSlots,
@@ -129,7 +122,7 @@ export function movePlainDate(
   const { calendar } = plainDateSlots
   return createPlainDateSlots(
     moveDate(
-      getCalendarOps(calendar),
+      calendar,
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -139,18 +132,18 @@ export function movePlainDate(
 }
 
 export function movePlainYearMonth(
-  getCalendarOps: (calendar: string) => YearMonthMoveOps,
   doSubtract: boolean,
   plainYearMonthSlots: PlainYearMonthSlots,
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendar
-  const calendarOps = getCalendarOps(calendarId)
+  const getDay = (isoFields: IsoDateFields) =>
+    queryNativeDay(calendarId, isoFields)
 
   // The first-of-month must be representable, this check in-bounds
   let isoDateFields: IsoDateFields = checkIsoDateInBounds(
-    moveToDayOfMonthUnsafe(calendarOps, plainYearMonthSlots),
+    moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots),
   )
 
   if (doSubtract) {
@@ -159,21 +152,22 @@ export function movePlainYearMonth(
 
   // if moving backwards in time, set to last day of month
   if (durationSlots.sign < 0) {
-    isoDateFields = calendarOps.dateAdd(isoDateFields, {
+    isoDateFields = nativeDateAdd(calendarId, isoDateFields, {
       ...durationFieldDefaults,
       months: 1,
     })
     isoDateFields = moveByDays(isoDateFields, -1)
   }
 
-  const movedIsoDateFields = calendarOps.dateAdd(
+  const movedIsoDateFields = nativeDateAdd(
+    calendarId,
     isoDateFields,
     durationSlots,
     options,
   )
 
   return createPlainYearMonthSlots(
-    moveToDayOfMonthUnsafe(calendarOps, movedIsoDateFields),
+    moveToDayOfMonthUnsafe(getDay, movedIsoDateFields),
     calendarId,
   )
 }
@@ -208,7 +202,7 @@ timeZoneOps must be derived from zonedEpochSlots.timeZone
 */
 export function moveZonedEpochs(
   timeZoneOps: TimeZoneOps,
-  calendarOps: MoveOps,
+  calendarId: string,
   slots: ZonedEpochSlots,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -222,7 +216,7 @@ export function moveZonedEpochs(
   } else {
     const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneOps)
     const movedIsoDateFields = moveDate(
-      calendarOps,
+      calendarId,
       isoDateTimeFields,
       {
         ...durationFields, // date parts
@@ -246,7 +240,7 @@ export function moveZonedEpochs(
 }
 
 export function moveDateTime(
-  calendarOps: MoveOps,
+  calendarId: string,
   isoDateTimeFields: IsoDateTimeFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -258,7 +252,7 @@ export function moveDateTime(
   )
 
   const movedIsoDateFields = moveDate(
-    calendarOps,
+    calendarId,
     isoDateTimeFields, // only date parts will be used
     {
       ...durationFields, // date parts
@@ -278,13 +272,13 @@ export function moveDateTime(
 Skips calendar if moving days only
 */
 export function moveDate(
-  calendarOps: MoveOps,
+  calendarId: string,
   isoDateFields: IsoDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): IsoDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return calendarOps.dateAdd(isoDateFields, durationFields, options)
+    return nativeDateAdd(calendarId, isoDateFields, durationFields, options)
   }
 
   refineOverflowOptions(options) // for validation only
@@ -303,11 +297,11 @@ export function moveDate(
 Callers should ensure in-bounds
 */
 export function moveToDayOfMonthUnsafe<F extends IsoDateFields>(
-  calendarOps: DayOps,
+  getDay: (isoFields: IsoDateFields) => number,
   isoFields: F,
   dayOfMonth = 1,
 ): F {
-  return moveByDays(isoFields, dayOfMonth - calendarOps.day(isoFields))
+  return moveByDays(isoFields, dayOfMonth - getDay(isoFields))
 }
 
 function moveTime(
@@ -323,143 +317,6 @@ function moveTime(
   )
 
   return [newIsoFields, durDays + overflowDays]
-}
-
-// Native
-// -----------------------------------------------------------------------------
-
-export function nativeDateAdd(
-  this: NativeMoveOps,
-  isoDateFields: IsoDateFields,
-  durationFields: DurationFields,
-  options?: OverflowOptions,
-): IsoDateFields {
-  const overflow = refineOverflowOptions(options)
-  let { years, months, weeks, days } = durationFields
-  let epochMilli: number | undefined
-
-  // convert time fields to days
-  days += durationFieldsToBigNano(durationFields, Unit.Hour)[0]
-
-  if (years || months) {
-    epochMilli = nativeYearMonthAdd(
-      this,
-      isoDateFields,
-      years,
-      months,
-      overflow,
-    )
-  } else if (weeks || days) {
-    epochMilli = isoToEpochMilli(isoDateFields)
-  } else {
-    return isoDateFields
-  }
-
-  // HACK. Should probably be done elsewhere
-  if (epochMilli === undefined) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
-  }
-
-  epochMilli! += (weeks * 7 + days) * milliInDay
-
-  return checkIsoDateInBounds(epochMilliToIso(epochMilli!))
-}
-
-/*
-Callers should skip calling if years and months are both zero
-*/
-export function nativeYearMonthAdd(
-  moveOps: NativeMoveOps,
-  isoDateFields: IsoDateFields,
-  years: number,
-  months: number,
-  overflow: Overflow,
-): number {
-  let [year, month, day] = moveOps.dateParts(isoDateFields)
-
-  if (years) {
-    const [monthCodeNumber, isLeapMonth] = moveOps.monthCodeParts(year, month)
-    year += years
-    month = monthCodeNumberToMonth(
-      monthCodeNumber,
-      isLeapMonth,
-      moveOps.leapMonth(year),
-    )
-    month = clampEntity(
-      'month',
-      month,
-      1,
-      moveOps.monthsInYearPart(year),
-      overflow,
-    )
-  }
-
-  if (months) {
-    ;[year, month] = moveOps.monthAdd(year, month, months)
-  }
-
-  day = clampEntity(
-    'day',
-    day,
-    1,
-    moveOps.daysInMonthParts(year, month),
-    overflow,
-  )
-
-  return moveOps.epochMilli(year, month, day) // could return undefined!!!!
-}
-
-// ISO / Intl Utils
-// -----------------------------------------------------------------------------
-
-export function isoMonthAdd(
-  year: number,
-  month: number,
-  monthDelta: number,
-): YearMonthParts {
-  year += divTrunc(monthDelta, isoMonthsInYear)
-  month += modTrunc(monthDelta, isoMonthsInYear)
-
-  if (month < 1) {
-    year--
-    month += isoMonthsInYear
-  } else if (month > isoMonthsInYear) {
-    year++
-    month -= isoMonthsInYear
-  }
-
-  return [year, month]
-}
-
-export function intlMonthAdd(
-  this: IntlCalendar,
-  year: number,
-  month: number,
-  monthDelta: number,
-): YearMonthParts {
-  if (monthDelta) {
-    month += monthDelta
-
-    if (!Number.isSafeInteger(month)) {
-      throw new RangeError(errorMessages.outOfBoundsDate)
-    }
-
-    if (monthDelta < 0) {
-      while (month < 1) {
-        month += computeIntlMonthsInYear.call(this, --year)
-      }
-    } else {
-      let monthsInYear: number
-      while (
-        month > (monthsInYear = computeIntlMonthsInYear.call(this, year))
-      ) {
-        month -= monthsInYear
-        year++
-      }
-    }
-  }
-
-  return [year, month]
 }
 
 export function moveByDays<F extends IsoDateFields>(

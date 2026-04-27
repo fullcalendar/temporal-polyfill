@@ -4,7 +4,6 @@ import {
   EraParts,
   MonthCodeParts,
   NativeCalendar,
-  NativeDayOfYearOps,
   WeekParts,
   YearMonthParts,
 } from './calendarNative'
@@ -114,14 +113,15 @@ export function computeIsoDayOfWeek(isoDateFields: IsoDateFields): number {
 }
 
 export function computeIsoWeekParts(
-  this: NativeCalendar & NativeDayOfYearOps,
+  calendarId: string | undefined,
+  queryDayOfYear: (isoFields: IsoDateFields) => number,
   isoDateFields: IsoDateFields,
 ): WeekParts {
   const startOfWeek = 1
-  const minDaysInWeek = this.id ? 1 : 4 // iso=4, gregory/japanese=1
+  const minDaysInWeek = calendarId ? 1 : 4 // iso=4, gregory/japanese=1
 
   const isoDayOfWeek = computeIsoDayOfWeek(isoDateFields)
-  const isoDayOfYear = this.dayOfYear(isoDateFields)
+  const isoDayOfYear = queryDayOfYear(isoDateFields)
 
   // 0-based
   // analyze current date, relative to calendar-decided start-of-week
@@ -174,14 +174,14 @@ const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
 const queryJapaneseEraParts = memoize(computeJapaneseEraParts, WeakMap)
 
 export function computeIsoEraParts(
-  this: NativeCalendar,
+  calendarId: string | undefined,
   isoFields: IsoDateFields,
 ): EraParts {
-  if (this.id === gregoryCalendarId) {
+  if (calendarId === gregoryCalendarId) {
     return computeGregoryEraParts(isoFields)
   }
 
-  if (this.id === japaneseCalendarId) {
+  if (calendarId === japaneseCalendarId) {
     return queryJapaneseEraParts(isoFields)
   }
 

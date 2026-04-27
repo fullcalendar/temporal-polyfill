@@ -1,621 +1,270 @@
 import {
-  nativeDateFromFields,
-  nativeFieldsMethod,
-  nativeMergeFields,
-  nativeMonthDayFromFields,
-  nativeYearMonthFromFields,
-} from './bagRefine'
-import {
-  gregoryCalendarId,
-  isoCalendarId,
-  japaneseCalendarId,
+	gregoryCalendarId,
+	isoCalendarId,
+	japaneseCalendarId,
 } from './calendarConfig'
 import {
-  EpochMilliOp,
-  LeapMonthOp,
-  NativeCalendar,
-  NativeConvertOps,
-  NativeDateModOps,
-  NativeDateRefineOps,
-  NativeDayOfYearOps,
-  NativeDaysInMonthOps,
-  NativeDaysInYearOps,
-  NativeDiffOps,
-  NativeInLeapYearOps,
-  NativeMonthDayModOps,
-  NativeMonthDayParseOps,
-  NativeMonthDayRefineOps,
-  NativeMonthsInYearOps,
-  NativeMoveOps,
-  NativeMoveOpsOnly,
-  NativePartOps,
-  NativeStandardOps,
-  NativeWeekOps,
-  NativeYearMonthDiffOps,
-  NativeYearMonthModOps,
-  NativeYearMonthMoveOps,
-  NativeYearMonthRefineOps,
-  WeekParts,
-  computeNativeDayOfYear,
-  computeNativeDaysInMonth,
-  computeNativeDaysInYear,
-  computeNativeEra,
-  computeNativeEraYear,
-  computeNativeInLeapYear,
-  computeNativeMonthCode,
-  computeNativeMonthsInYear,
-  computeNativeWeekOfYear,
-  computeNativeYearOfWeek,
+	WeekParts,
+	formatMonthCode,
 } from './calendarNative'
 import {
-  DateRefineOps,
-  DayOps,
-  DiffOps,
-  MonthDayRefineOps,
-  MoveOps,
-  YearMonthRefineOps,
-} from './calendarOps'
-import {
-  computeIntlMonthsInYearSpan,
-  computeIsoMonthsInYearSpan,
-  nativeDateUntil,
-} from './diff'
-import {
-  computeIntlDateParts,
-  computeIntlDay,
-  computeIntlDaysInMonth,
-  computeIntlDaysInYear,
-  computeIntlEpochMilli,
-  computeIntlEraParts,
-  computeIntlInLeapYear,
-  computeIntlLeapMonth,
-  computeIntlMonth,
-  computeIntlMonthCodeParts,
-  computeIntlMonthsInYear,
-  computeIntlYear,
-  computeIntlYearMonthForMonthDay,
-  computeIsoFieldsFromIntlParts,
-  queryIntlCalendar,
+	computeIntlDateParts,
+	computeIntlDay,
+	computeIntlDaysInMonth,
+	computeIntlDaysInYear,
+	computeIntlEpochMilli,
+	computeIntlEraParts,
+	computeIntlInLeapYear,
+	computeIntlLeapMonth,
+	computeIntlMonthCodeParts,
+	computeIntlMonthsInYear,
+	computeIntlYearMonthForMonthDay,
+	computeIsoFieldsFromIntlParts,
+	queryIntlCalendar,
 } from './intlMath'
 import {
-  computeIsoDateParts,
-  computeIsoDay,
-  computeIsoDayOfWeek,
-  computeIsoDaysInMonth,
-  computeIsoDaysInWeek,
-  computeIsoDaysInYear,
-  computeIsoEraParts,
-  computeIsoFieldsFromParts,
-  computeIsoInLeapYear,
-  computeIsoMonth,
-  computeIsoMonthCodeParts,
-  computeIsoMonthsInYear,
-  computeIsoWeekParts,
-  computeIsoYear,
-  computeIsoYearMonthForMonthDay,
+	computeIsoDateParts,
+	computeIsoDay,
+	computeIsoDaysInMonth,
+	computeIsoDaysInYear,
+	computeIsoEraParts,
+	computeIsoFieldsFromParts,
+	computeIsoInLeapYear,
+	computeIsoMonthCodeParts,
+	computeIsoMonthsInYear,
+	computeIsoWeekParts,
+	computeIsoYearMonthForMonthDay,
 } from './isoMath'
-import { intlMonthAdd, isoMonthAdd, nativeDateAdd } from './move'
-import { isoArgsToEpochMilli } from './timeMath'
-import { noop } from './utils'
+import {
+	diffEpochMilliByDay,
+	intlMonthAdd,
+	isoMonthAdd,
+	nativeYearMonthAdd,
+} from './calendarNativeMath'
+import { isoArgsToEpochMilli, isoToEpochMilli } from './timeMath'
 
-// Common
-// -----------------------------------------------------------------------------
-
-const nativeYearMonthRefineBase: YearMonthRefineOps = {
-  yearMonthFromFields: nativeYearMonthFromFields,
-  fields: nativeFieldsMethod,
+export function queryNativeDateParts(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): ReturnType<typeof computeIsoDateParts> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoDateParts(isoFields)
+		: computeIntlDateParts(queryIntlCalendar(calendarId), isoFields)
 }
 
-const nativeDateRefineBase: DateRefineOps = {
-  dateFromFields: nativeDateFromFields,
-  fields: nativeFieldsMethod,
+export function queryNativeDay(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDay>[0],
+): ReturnType<typeof computeIsoDay> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoDay(isoFields)
+		: computeIntlDay(queryIntlCalendar(calendarId), isoFields)
 }
 
-const nativeMonthDayRefineBase: MonthDayRefineOps = {
-  monthDayFromFields: nativeMonthDayFromFields,
-  fields: nativeFieldsMethod,
+export function queryNativeEpochMilli(
+	calendarId: string,
+	year: number,
+	month?: number,
+	day?: number,
+): number {
+	return isIsoBasedCalendarId(calendarId)
+		? isoArgsToEpochMilli(year, month, day)!
+		: computeIntlEpochMilli(queryIntlCalendar(calendarId), year, month, day)
 }
 
-const nativeMoveBase: MoveOps = {
-  dateAdd: nativeDateAdd,
+export function queryNativeMonthAdd(
+	calendarId: string,
+	year: number,
+	month: number,
+	monthDelta: number,
+): ReturnType<typeof isoMonthAdd> {
+	return isIsoBasedCalendarId(calendarId)
+		? isoMonthAdd(year, month, monthDelta)
+		: intlMonthAdd(queryIntlCalendar(calendarId), year, month, monthDelta)
 }
 
-const nativeDiffBase: DiffOps = {
-  dateAdd: nativeDateAdd,
-  dateUntil: nativeDateUntil,
+export function queryNativeYearMonthAdd(
+	calendarId: string,
+	isoFields: Parameters<typeof nativeYearMonthAdd>[1],
+	years: Parameters<typeof nativeYearMonthAdd>[2],
+	months: Parameters<typeof nativeYearMonthAdd>[3],
+	overflow: Parameters<typeof nativeYearMonthAdd>[4],
+): ReturnType<typeof nativeYearMonthAdd> {
+	return nativeYearMonthAdd(calendarId, isoFields, years, months, overflow)
 }
 
-const nativeStandardBase = {
-  dateAdd: nativeDateAdd,
-  dateUntil: nativeDateUntil,
-  dateFromFields: nativeDateFromFields,
-  yearMonthFromFields: nativeYearMonthFromFields,
-  monthDayFromFields: nativeMonthDayFromFields,
-  fields: nativeFieldsMethod,
-  mergeFields: nativeMergeFields,
-
-  inLeapYear: computeNativeInLeapYear,
-  monthsInYear: computeNativeMonthsInYear,
-  daysInMonth: computeNativeDaysInMonth,
-  daysInYear: computeNativeDaysInYear,
-  dayOfYear: computeNativeDayOfYear,
-  era: computeNativeEra,
-  eraYear: computeNativeEraYear,
-  monthCode: computeNativeMonthCode,
-
-  dayOfWeek: computeIsoDayOfWeek,
-  daysInWeek: computeIsoDaysInWeek,
+export function queryNativeEraParts(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoEraParts>[1],
+): ReturnType<typeof computeIsoEraParts> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoEraParts(queryIsoCalendarId(calendarId), isoFields)
+		: computeIntlEraParts(queryIntlCalendar(calendarId), isoFields)
 }
 
-// ISO
-// -----------------------------------------------------------------------------
-
-// Refine
-// ------
-
-const isoYearMonthRefineDeps = {
-  leapMonth: noop as LeapMonthOp,
-  monthsInYearPart: computeIsoMonthsInYear,
-  isoFields: computeIsoFieldsFromParts,
+export function queryNativeMonthCodeParts(
+	calendarId: string,
+	year: Parameters<typeof computeIsoMonthCodeParts>[0],
+	month: Parameters<typeof computeIsoMonthCodeParts>[1],
+): ReturnType<typeof computeIsoMonthCodeParts> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoMonthCodeParts(year, month)
+		: computeIntlMonthCodeParts(queryIntlCalendar(calendarId), year, month)
 }
 
-const isoDateRefineDeps = {
-  ...isoYearMonthRefineDeps,
-  daysInMonthParts: computeIsoDaysInMonth,
+export function queryNativeMonthCode(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): string {
+	const [year, month] = queryNativeDateParts(calendarId, isoFields)
+	const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+		calendarId,
+		year,
+		month,
+	)
+	return formatMonthCode(monthCodeNumber, isLeapMonth)
 }
 
-const isoMonthDayRefineDeps = {
-  ...isoDateRefineDeps,
-  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
+export function queryNativeYearMonthForMonthDay(
+	calendarId: string,
+	monthCodeNumber: Parameters<typeof computeIsoYearMonthForMonthDay>[0],
+	isLeapMonth: Parameters<typeof computeIsoYearMonthForMonthDay>[1],
+	day: Parameters<typeof computeIsoYearMonthForMonthDay>[2],
+): ReturnType<typeof computeIsoYearMonthForMonthDay> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+		: computeIntlYearMonthForMonthDay(
+				queryIntlCalendar(calendarId),
+				monthCodeNumber,
+				isLeapMonth,
+				day,
+			)
 }
 
-export const isoYearMonthRefineOps: NativeYearMonthRefineOps = {
-  ...nativeYearMonthRefineBase,
-  ...isoYearMonthRefineDeps,
+export function queryNativeIsoFieldsFromParts(
+	calendarId: string,
+	year: Parameters<typeof computeIsoFieldsFromParts>[0],
+	month: Parameters<typeof computeIsoFieldsFromParts>[1],
+	day: Parameters<typeof computeIsoFieldsFromParts>[2],
+): ReturnType<typeof computeIsoFieldsFromParts> {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoFieldsFromParts(year, month, day)
+		: computeIsoFieldsFromIntlParts(queryIntlCalendar(calendarId), year, month, day)
 }
 
-export const isoDateRefineOps: NativeDateRefineOps = {
-  ...nativeDateRefineBase,
-  ...isoMonthDayRefineDeps,
+export function queryNativeInLeapYear(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): boolean {
+	const [year] = queryNativeDateParts(calendarId, isoFields)
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoInLeapYear(year)
+		: computeIntlInLeapYear(queryIntlCalendar(calendarId), year)
 }
 
-export const isoMonthDayRefineOps: NativeMonthDayRefineOps = {
-  ...nativeMonthDayRefineBase,
-  ...isoMonthDayRefineDeps,
+export function queryNativeMonthsInYear(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): number {
+	const [year] = queryNativeDateParts(calendarId, isoFields)
+	return queryNativeMonthsInYearPart(calendarId, year)
 }
 
-// Mod
-// ---
-
-export const isoYearMonthModOps: NativeYearMonthModOps = {
-  ...isoYearMonthRefineOps,
-  mergeFields: nativeMergeFields,
+export function queryNativeMonthsInYearPart(
+	calendarId: string,
+	year: number,
+): number {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoMonthsInYear(year)
+		: computeIntlMonthsInYear(queryIntlCalendar(calendarId), year)
 }
 
-export const isoDateModOps: NativeDateModOps = {
-  ...isoDateRefineOps,
-  mergeFields: nativeMergeFields,
+export function queryNativeDaysInMonth(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): number {
+	const [year, month] = queryNativeDateParts(calendarId, isoFields)
+	return queryNativeDaysInMonthPart(calendarId, year, month)
 }
 
-export const isoMonthDayModOps: NativeMonthDayModOps = {
-  ...isoMonthDayRefineOps,
-  mergeFields: nativeMergeFields,
+export function queryNativeDaysInMonthPart(
+	calendarId: string,
+	year: number,
+	month: number,
+): number {
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoDaysInMonth(year, month)
+		: computeIntlDaysInMonth(queryIntlCalendar(calendarId), year, month)
 }
 
-// Math
-// ----
-
-const isoConvertOps: NativeConvertOps = {
-  dateParts: computeIsoDateParts,
-  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
-  monthAdd: isoMonthAdd,
+export function queryNativeDaysInYear(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): number {
+	const [year] = queryNativeDateParts(calendarId, isoFields)
+	return isIsoBasedCalendarId(calendarId)
+		? computeIsoDaysInYear(year)
+		: computeIntlDaysInYear(queryIntlCalendar(calendarId), year)
 }
 
-const isoMoveOpsOnly: NativeMoveOpsOnly = {
-  ...isoConvertOps,
-  monthCodeParts: computeIsoMonthCodeParts,
-  monthsInYearPart: computeIsoMonthsInYear,
-  daysInMonthParts: computeIsoDaysInMonth,
-  leapMonth: noop as LeapMonthOp,
+export function queryNativeLeapMonth(
+	calendarId: string,
+	year: number,
+): number | undefined {
+	return isIsoBasedCalendarId(calendarId)
+		? undefined
+		: computeIntlLeapMonth(queryIntlCalendar(calendarId), year)
 }
 
-export const isoMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...isoMoveOpsOnly,
+export function queryNativeDayOfYear(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoDateParts>[0],
+): number {
+	const [year] = queryNativeDateParts(calendarId, isoFields)
+	const milli0 = isIsoBasedCalendarId(calendarId)
+		? isoArgsToEpochMilli(year)
+		: computeIntlEpochMilli(queryIntlCalendar(calendarId), year)
+	const milli1 = isoToEpochMilli(isoFields)!
+	return diffEpochMilliByDay(milli0!, milli1) + 1
 }
 
-export const isoDiffOps: NativeDiffOps = {
-  ...nativeDiffBase,
-  ...isoMoveOpsOnly,
-  monthsInYearSpan: computeIsoMonthsInYearSpan,
+export function queryNativeWeekParts(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoWeekParts>[2],
+): WeekParts {
+	if (!isIsoBasedCalendarId(calendarId)) {
+		return [] as unknown as WeekParts
+	}
+
+	return computeIsoWeekParts(
+		queryIsoCalendarId(calendarId),
+		(innerIsoFields) => queryNativeDayOfYear(calendarId, innerIsoFields),
+		isoFields,
+	)
 }
 
-export const isoDayOps: DayOps = {
-  day: computeIsoDay,
+export function queryNativeWeekOfYear(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoWeekParts>[2],
+): number | undefined {
+	return queryNativeWeekParts(calendarId, isoFields)[0]
 }
 
-export const isoYearMonthMoveOps: NativeYearMonthMoveOps = {
-  ...isoMoveOps,
-  ...isoDayOps,
+export function queryNativeYearOfWeek(
+	calendarId: string,
+	isoFields: Parameters<typeof computeIsoWeekParts>[2],
+): number | undefined {
+	return queryNativeWeekParts(calendarId, isoFields)[1]
 }
 
-export const isoYearMonthDiffOps: NativeYearMonthDiffOps = {
-  ...isoDiffOps,
-  ...isoDayOps,
+function isIsoBasedCalendarId(calendarId: string): boolean {
+	return (
+		calendarId === isoCalendarId ||
+		calendarId === gregoryCalendarId ||
+		calendarId === japaneseCalendarId
+	)
 }
 
-// Parts & Stats
-// -------------
-
-export const isoPartOps: NativePartOps = {
-  dateParts: computeIsoDateParts,
-  eraParts: computeIsoEraParts,
-  monthCodeParts: computeIsoMonthCodeParts,
-}
-
-export const isoInLeapYearOps: NativeInLeapYearOps = {
-  inLeapYear: computeNativeInLeapYear,
-  dateParts: computeIsoDateParts,
-  inLeapYearPart: computeIsoInLeapYear,
-}
-
-export const isoMonthsInYearOps: NativeMonthsInYearOps = {
-  monthsInYear: computeNativeMonthsInYear,
-  dateParts: computeIsoDateParts,
-  monthsInYearPart: computeIsoMonthsInYear,
-}
-
-export const isoDaysInMonthOps: NativeDaysInMonthOps = {
-  daysInMonth: computeNativeDaysInMonth,
-  dateParts: computeIsoDateParts,
-  daysInMonthParts: computeIsoDaysInMonth,
-}
-
-export const isoDaysInYearOps: NativeDaysInYearOps = {
-  daysInYear: computeNativeDaysInYear,
-  dateParts: computeIsoDateParts,
-  daysInYearPart: computeIsoDaysInYear,
-}
-
-export const isoDayOfYearOps: NativeDayOfYearOps = {
-  dayOfYear: computeNativeDayOfYear,
-  dateParts: computeIsoDateParts,
-  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
-}
-
-export const isoWeekOps: NativeWeekOps = {
-  ...isoDayOfYearOps,
-  weekOfYear: computeNativeWeekOfYear,
-  yearOfWeek: computeNativeYearOfWeek,
-  weekParts: computeIsoWeekParts,
-}
-
-// String Parsing
-// --------------
-
-export const isoMonthDayParseOps: NativeMonthDayParseOps = {
-  dateParts: computeIsoDateParts,
-  monthCodeParts: computeIsoMonthCodeParts,
-  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
-  isoFields: computeIsoFieldsFromParts,
-}
-
-// Standard
-// --------
-
-export const isoStandardOps: NativeStandardOps = {
-  ...nativeStandardBase,
-  ...isoWeekOps,
-  dateParts: computeIsoDateParts,
-  eraParts: computeIsoEraParts,
-  monthCodeParts: computeIsoMonthCodeParts,
-  yearMonthForMonthDay: computeIsoYearMonthForMonthDay,
-  inLeapYearPart: computeIsoInLeapYear,
-  leapMonth: noop as LeapMonthOp,
-  monthsInYearPart: computeIsoMonthsInYear,
-  monthsInYearSpan: computeIsoMonthsInYearSpan,
-  daysInMonthParts: computeIsoDaysInMonth,
-  daysInYearPart: computeIsoDaysInYear,
-  isoFields: computeIsoFieldsFromParts,
-  epochMilli: isoArgsToEpochMilli as EpochMilliOp,
-  monthAdd: isoMonthAdd,
-  year: computeIsoYear,
-  month: computeIsoMonth,
-  day: computeIsoDay,
-}
-
-// Intl
-// -----------------------------------------------------------------------------
-
-// Refine
-// ------
-
-const intlYearMonthRefineDeps = {
-  leapMonth: computeIntlLeapMonth,
-  monthsInYearPart: computeIntlMonthsInYear,
-  isoFields: computeIsoFieldsFromIntlParts,
-}
-
-const intlDateRefineDeps = {
-  ...intlYearMonthRefineDeps,
-  daysInMonthParts: computeIntlDaysInMonth,
-}
-
-const intlMonthDayRefineDeps = {
-  ...intlDateRefineDeps,
-  yearMonthForMonthDay: computeIntlYearMonthForMonthDay,
-}
-
-export const intlYearMonthRefineOps: Omit<NativeYearMonthRefineOps, 'id'> = {
-  ...nativeYearMonthRefineBase,
-  ...intlYearMonthRefineDeps,
-}
-
-export const intlDateRefineOps: Omit<NativeDateRefineOps, 'id'> = {
-  ...nativeDateRefineBase,
-  ...intlDateRefineDeps,
-}
-
-export const intlMonthDayRefineOps: Omit<NativeMonthDayRefineOps, 'id'> = {
-  ...nativeMonthDayRefineBase,
-  ...intlMonthDayRefineDeps,
-}
-
-// Mod
-// ---
-
-export const intlYearMonthModOps: Omit<NativeYearMonthModOps, 'id'> = {
-  ...intlYearMonthRefineOps,
-  mergeFields: nativeMergeFields,
-}
-
-export const intlDateModOps: Omit<NativeDateModOps, 'id'> = {
-  ...intlDateRefineOps,
-  mergeFields: nativeMergeFields,
-}
-
-export const intlMonthDayModOps: Omit<NativeMonthDayModOps, 'id'> = {
-  ...intlMonthDayRefineOps,
-  mergeFields: nativeMergeFields,
-}
-
-// Math
-// ----
-
-const intlConvertOps: NativeConvertOps = {
-  dateParts: computeIntlDateParts,
-  epochMilli: computeIntlEpochMilli,
-  monthAdd: intlMonthAdd,
-}
-
-const intlMoveOpsOnly: NativeMoveOpsOnly = {
-  ...intlConvertOps,
-  monthCodeParts: computeIntlMonthCodeParts,
-  monthsInYearPart: computeIntlMonthsInYear,
-  daysInMonthParts: computeIntlDaysInMonth,
-  leapMonth: computeIntlLeapMonth,
-}
-
-export const intlMoveOps: NativeMoveOps = {
-  ...nativeMoveBase,
-  ...intlMoveOpsOnly,
-}
-
-export const intlDiffOps: NativeDiffOps = {
-  ...nativeDiffBase,
-  ...intlMoveOpsOnly,
-  monthsInYearSpan: computeIntlMonthsInYearSpan,
-}
-
-export const intlDayOps: DayOps = {
-  day: computeIntlDay,
-}
-
-export const intlYearMonthMoveOps: NativeYearMonthMoveOps = {
-  ...intlMoveOps,
-  ...intlDayOps,
-}
-
-export const intlYearMonthDiffOps: NativeYearMonthDiffOps = {
-  ...intlDiffOps,
-  ...intlDayOps,
-}
-
-// Parts & Stats
-// -------------
-
-export const intlPartOps: NativePartOps = {
-  dateParts: computeIntlDateParts,
-  eraParts: computeIntlEraParts,
-  monthCodeParts: computeIntlMonthCodeParts,
-}
-
-export const intlInLeapYearOps: NativeInLeapYearOps = {
-  inLeapYear: computeNativeInLeapYear,
-  dateParts: computeIntlDateParts,
-  inLeapYearPart: computeIntlInLeapYear,
-}
-
-export const intlMonthsInYearOps: NativeMonthsInYearOps = {
-  monthsInYear: computeNativeMonthsInYear,
-  dateParts: computeIntlDateParts,
-  monthsInYearPart: computeIntlMonthsInYear,
-}
-
-export const intlDaysInMonthOps: NativeDaysInMonthOps = {
-  daysInMonth: computeNativeDaysInMonth,
-  dateParts: computeIntlDateParts,
-  daysInMonthParts: computeIntlDaysInMonth,
-}
-
-export const intlDaysInYearOps: NativeDaysInYearOps = {
-  daysInYear: computeNativeDaysInYear,
-  dateParts: computeIntlDateParts,
-  daysInYearPart: computeIntlDaysInYear,
-}
-
-export const intlDayOfYearOps: NativeDayOfYearOps = {
-  dayOfYear: computeNativeDayOfYear,
-  dateParts: computeIntlDateParts,
-  epochMilli: computeIntlEpochMilli,
-}
-
-// HACK for pureTopLevel
-const intlWeekPartsOps = {
-  weekParts: () => [] as unknown as WeekParts,
-}
-//
-export const intlWeekOps: NativeWeekOps = {
-  ...intlDayOfYearOps,
-  ...intlWeekPartsOps,
-  weekOfYear: computeNativeWeekOfYear,
-  yearOfWeek: computeNativeYearOfWeek,
-}
-
-// String Parsing
-// --------------
-
-export const intlMonthDayParseOps: NativeMonthDayParseOps = {
-  dateParts: computeIntlDateParts,
-  monthCodeParts: computeIntlMonthCodeParts,
-  yearMonthForMonthDay: computeIntlYearMonthForMonthDay,
-  isoFields: computeIsoFieldsFromIntlParts,
-}
-
-// Standard
-// --------
-
-export const intlStandardOps: Omit<NativeStandardOps, 'id'> = {
-  ...nativeStandardBase,
-  ...intlWeekOps,
-  dateParts: computeIntlDateParts,
-  eraParts: computeIntlEraParts,
-  monthCodeParts: computeIntlMonthCodeParts,
-  yearMonthForMonthDay: computeIntlYearMonthForMonthDay,
-  inLeapYearPart: computeIntlInLeapYear,
-  leapMonth: computeIntlLeapMonth,
-  monthsInYearPart: computeIntlMonthsInYear,
-  monthsInYearSpan: computeIntlMonthsInYearSpan,
-  daysInMonthParts: computeIntlDaysInMonth,
-  daysInYearPart: computeIntlDaysInYear,
-  isoFields: computeIsoFieldsFromIntlParts,
-  epochMilli: computeIntlEpochMilli,
-  monthAdd: intlMonthAdd,
-  year: computeIntlYear,
-  month: computeIntlMonth,
-  day: computeIntlDay,
-}
-
-// -----------------------------------------------------------------------------
-
-/*
-All functions expect realized/normalized calendarId
-*/
-
-// Refine
-export const createNativeYearMonthRefineOps = createNativeOpsCreator(
-  isoYearMonthRefineOps,
-  intlYearMonthRefineOps,
-)
-export const createNativeDateRefineOps = createNativeOpsCreator(
-  isoDateRefineOps,
-  intlDateRefineOps,
-)
-export const createNativeMonthDayRefineOps = createNativeOpsCreator(
-  isoMonthDayRefineOps,
-  intlMonthDayRefineOps,
-)
-
-// Mod
-export const createNativeYearMonthModOps = createNativeOpsCreator(
-  isoYearMonthModOps,
-  intlYearMonthModOps,
-)
-export const createNativeDateModOps = createNativeOpsCreator(
-  isoDateModOps,
-  intlDateModOps,
-)
-export const createNativeMonthDayModOps = createNativeOpsCreator(
-  isoMonthDayModOps,
-  intlMonthDayModOps,
-)
-
-// Math
-export const createNativeConvertOps = createNativeOpsCreator(
-  isoConvertOps,
-  intlConvertOps,
-)
-export const createNativeMoveOps = createNativeOpsCreator(
-  isoMoveOps,
-  intlMoveOps,
-)
-export const createNativeDiffOps = createNativeOpsCreator(
-  isoDiffOps,
-  intlDiffOps,
-)
-export const createNativeDayOps = createNativeOpsCreator(isoDayOps, intlDayOps)
-export const createNativeYearMonthMoveOps = createNativeOpsCreator(
-  isoYearMonthMoveOps,
-  intlYearMonthMoveOps,
-)
-export const createNativeYearMonthDiffOps = createNativeOpsCreator(
-  isoYearMonthDiffOps,
-  intlYearMonthDiffOps,
-)
-
-// Parts & Stats
-export const createNativePartOps = createNativeOpsCreator(
-  isoPartOps,
-  intlPartOps,
-)
-export const createNativeInLeapYearOps = createNativeOpsCreator(
-  isoInLeapYearOps,
-  intlInLeapYearOps,
-)
-export const createNativeMonthsInYearOps = createNativeOpsCreator(
-  isoMonthsInYearOps,
-  intlMonthsInYearOps,
-)
-export const createNativeDaysInMonthOps = createNativeOpsCreator(
-  isoDaysInMonthOps,
-  intlDaysInMonthOps,
-)
-export const createNativeDaysInYearOps = createNativeOpsCreator(
-  isoDaysInYearOps,
-  intlDaysInYearOps,
-)
-export const createNativeDayOfYearOps = createNativeOpsCreator(
-  isoDayOfYearOps,
-  intlDayOfYearOps,
-)
-export const createNativeWeekOps = createNativeOpsCreator(
-  isoWeekOps,
-  intlWeekOps,
-)
-
-// String Parsing
-export const createNativeMonthDayParseOps = createNativeOpsCreator(
-  isoMonthDayParseOps,
-  intlMonthDayParseOps,
-)
-
-// Standard
-export const createNativeStandardOps = createNativeOpsCreator(
-  isoStandardOps,
-  intlStandardOps,
-)
-
-function createNativeOpsCreator<O extends {}>(
-  isoOps: O,
-  intlOps: O,
-): (calendarId: string) => O & NativeCalendar {
-  return (calendarId) => {
-    if (calendarId === isoCalendarId) {
-      return isoOps
-    }
-    if (calendarId === gregoryCalendarId || calendarId === japaneseCalendarId) {
-      return Object.assign(Object.create(isoOps), { id: calendarId })
-    }
-    return Object.assign(Object.create(intlOps), queryIntlCalendar(calendarId))
-  }
+function queryIsoCalendarId(calendarId: string): string | undefined {
+	return calendarId === isoCalendarId ? undefined : calendarId
 }

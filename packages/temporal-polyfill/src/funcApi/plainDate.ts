@@ -1,23 +1,15 @@
 import {
   PlainDateBag,
-  plainDateWithFields,
-  refinePlainDateBag,
+  nativePlainDateWithFields,
+  refineNativePlainDateBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
-import {
-  createNativeDateModOps,
-  createNativeDateRefineOps,
-  createNativeDiffOps,
-  createNativeMonthDayRefineOps,
-  createNativeMoveOps,
-  createNativeYearMonthRefineOps,
-} from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
 import {
+  nativePlainDateToPlainMonthDay,
+  nativePlainDateToPlainYearMonth,
   plainDateToPlainDateTime,
-  plainDateToPlainMonthDay,
-  plainDateToPlainYearMonth,
   plainDateToZonedDateTime,
 } from '../internal/convert'
 import { diffPlainDates } from '../internal/diff'
@@ -153,11 +145,7 @@ export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
-  return refinePlainDateBag(
-    createNativeDateRefineOps(getCalendarIdFromBag(fields)),
-    fields,
-    options,
-  )
+  return refineNativePlainDateBag(getCalendarIdFromBag(fields), fields, options)
 }
 
 export const fromString = parsePlainDate as (s: string) => Record
@@ -207,7 +195,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainDateWithFields(createNativeDateModOps, record, fields, options)
+  return nativePlainDateWithFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
@@ -217,25 +205,31 @@ export function withCalendar(record: Record, calendar: string): Record {
 // Math
 // -----------------------------------------------------------------------------
 
-export const add = bindArgs(movePlainDate, createNativeMoveOps, false) as (
+export const add = bindArgs(movePlainDate, false) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const subtract = bindArgs(movePlainDate, createNativeMoveOps, true) as (
+export const subtract = bindArgs(movePlainDate, true) as (
   plainDateRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(diffPlainDates, createNativeDiffOps, false) as (
+export const until = bindArgs(
+  diffPlainDates,
+  false,
+) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(diffPlainDates, createNativeDiffOps, true) as (
+export const since = bindArgs(
+  diffPlainDates,
+  true,
+) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
@@ -276,19 +270,11 @@ export const toPlainDateTime = plainDateToPlainDateTime as (
 ) => PlainDateTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return plainDateToPlainYearMonth(
-    createNativeYearMonthRefineOps,
-    record,
-    getFields(record),
-  )
+  return nativePlainDateToPlainYearMonth(record, getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return plainDateToPlainMonthDay(
-    createNativeMonthDayRefineOps,
-    record,
-    getFields(record),
-  )
+  return nativePlainDateToPlainMonthDay(record, getFields(record))
 }
 
 // Formatting

@@ -240,80 +240,80 @@ export const queryCalendarIntlFormat = memoize(
 // -----------------------------------------------------------------------------
 
 export function computeIntlYear(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): number {
-  return this.queryFields(isoFields).year
+  return intlCalendar.queryFields(isoFields).year
 }
 
 export function computeIntlMonth(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): number {
-  const { year, monthString } = this.queryFields(isoFields)
-  const { monthStringToIndex } = this.queryYearData(year)
+  const { year, monthString } = intlCalendar.queryFields(isoFields)
+  const { monthStringToIndex } = intlCalendar.queryYearData(year)
   return monthStringToIndex[monthString] + 1
 }
 
 export function computeIntlDay(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): number {
-  return this.queryFields(isoFields).day
+  return intlCalendar.queryFields(isoFields).day
 }
 
 export function computeIntlDateParts(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): DateParts {
-  const { year, monthString, day } = this.queryFields(isoFields)
-  const { monthStringToIndex } = this.queryYearData(year)
+  const { year, monthString, day } = intlCalendar.queryFields(isoFields)
+  const { monthStringToIndex } = intlCalendar.queryYearData(year)
   return [year, monthStringToIndex[monthString] + 1, day]
 }
 
 export function computeIsoFieldsFromIntlParts(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
   month?: number,
   day?: number,
 ): IsoDateFields {
-  return epochMilliToIso(computeIntlEpochMilli.call(this, year, month, day))
+  return epochMilliToIso(computeIntlEpochMilli(intlCalendar, year, month, day))
 }
 
 export function computeIntlEpochMilli(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
   month = 1,
   day = 1,
 ): number {
   return (
-    this.queryYearData(year).monthEpochMillis[month - 1] +
+    intlCalendar.queryYearData(year).monthEpochMillis[month - 1] +
     (day - 1) * milliInDay
   )
 }
 
 export function computeIntlMonthCodeParts(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
   month: number,
 ): MonthCodeParts {
-  const leapMonth = computeIntlLeapMonth.call(this, year)
+  const leapMonth = computeIntlLeapMonth(intlCalendar, year)
   const monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
   const isLeapMonth = leapMonth === month
   return [monthCodeNumber, isLeapMonth]
 }
 
 export function computeIntlLeapMonth(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
 ): number | undefined {
-  const currentMonthStrings = queryMonthStrings(this, year)
-  const prevMonthStrings = queryMonthStrings(this, year - 1)
+  const currentMonthStrings = queryMonthStrings(intlCalendar, year)
+  const prevMonthStrings = queryMonthStrings(intlCalendar, year - 1)
   const currentLength = currentMonthStrings.length
 
   if (currentLength > prevMonthStrings.length) {
     // hardcoded leap month. usually means complex month-code schemes
-    const leapMonthMeta = getCalendarLeapMonthMeta(this) as number // hack for <0
+    const leapMonthMeta = getCalendarLeapMonthMeta(intlCalendar) as number // hack for <0
     if (leapMonthMeta < 0) {
       return -leapMonthMeta
     }
@@ -327,37 +327,37 @@ export function computeIntlLeapMonth(
 }
 
 export function computeIntlInLeapYear(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
 ): boolean {
-  const days = computeIntlDaysInYear.call(this, year)
+  const days = computeIntlDaysInYear(intlCalendar, year)
   return (
-    days > computeIntlDaysInYear.call(this, year - 1) &&
-    days > computeIntlDaysInYear.call(this, year + 1)
+    days > computeIntlDaysInYear(intlCalendar, year - 1) &&
+    days > computeIntlDaysInYear(intlCalendar, year + 1)
   )
 }
 
 export function computeIntlDaysInYear(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
 ): number {
-  const milli = computeIntlEpochMilli.call(this, year)
-  const milliNext = computeIntlEpochMilli.call(this, year + 1)
+  const milli = computeIntlEpochMilli(intlCalendar, year)
+  const milliNext = computeIntlEpochMilli(intlCalendar, year + 1)
   return diffEpochMilliByDay(milli, milliNext)
 }
 
 export function computeIntlDaysInMonth(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
   month: number,
 ): number {
-  const { monthEpochMillis } = this.queryYearData(year)
+  const { monthEpochMillis } = intlCalendar.queryYearData(year)
   let nextMonth = month + 1
   let nextMonthEpochMilli = monthEpochMillis
 
   if (nextMonth > monthEpochMillis.length) {
     nextMonth = 1
-    nextMonthEpochMilli = this.queryYearData(year + 1).monthEpochMillis
+    nextMonthEpochMilli = intlCalendar.queryYearData(year + 1).monthEpochMillis
   }
 
   return diffEpochMilliByDay(
@@ -367,37 +367,38 @@ export function computeIntlDaysInMonth(
 }
 
 export function computeIntlMonthsInYear(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   year: number,
 ): number {
-  return this.queryYearData(year).monthEpochMillis.length
+  return intlCalendar.queryYearData(year).monthEpochMillis.length
 }
 
 export function computeIntlEraParts(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): EraParts {
-  const intlFields = this.queryFields(isoFields)
+  const intlFields = intlCalendar.queryFields(isoFields)
   return [intlFields.era, intlFields.eraYear]
 }
 
 export function computeIntlYearMonthForMonthDay(
-  this: IntlCalendar,
+  intlCalendar: IntlCalendar,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   day: number,
 ): YearMonthParts | undefined {
-  const isChinese = this.id && computeCalendarIdBase(this.id) === 'chinese'
+  const isChinese =
+    intlCalendar.id && computeCalendarIdBase(intlCalendar.id) === 'chinese'
   const startIsoYear = isChinese
     ? chineseMonthDaySearchStartYear(monthCodeNumber, isLeapMonth, day)
     : isoEpochFirstLeapYear
 
-  let [startYear, startMonth, startDay] = computeIntlDateParts.call(this, {
+  let [startYear, startMonth, startDay] = computeIntlDateParts(intlCalendar, {
     isoYear: startIsoYear,
     isoMonth: isoMonthsInYear,
     isoDay: 31,
   })
-  const startYearLeapMonth = computeIntlLeapMonth.call(this, startYear)
+  const startYearLeapMonth = computeIntlLeapMonth(intlCalendar, startYear)
   const startMonthCodeNumber = monthToMonthCodeNumber(
     startMonth,
     startYearLeapMonth,
@@ -418,7 +419,7 @@ export function computeIntlYearMonthForMonthDay(
   // TODO: reference implementation says only go 20 years back! also special-cases per-calendar!
   for (let yearMove = 0; yearMove < 100; yearMove++) {
     const tryYear = startYear - yearMove
-    const tryLeapMonth = computeIntlLeapMonth.call(this, tryYear)
+    const tryLeapMonth = computeIntlLeapMonth(intlCalendar, tryYear)
     const tryMonth = monthCodeNumberToMonth(
       monthCodeNumber,
       isLeapMonth,
@@ -428,7 +429,7 @@ export function computeIntlYearMonthForMonthDay(
 
     if (
       isLeapMonth === tryMonthIsLeap &&
-      day <= computeIntlDaysInMonth.call(this, tryYear, tryMonth)
+      day <= computeIntlDaysInMonth(intlCalendar, tryYear, tryMonth)
     ) {
       return [tryYear, tryMonth]
     }

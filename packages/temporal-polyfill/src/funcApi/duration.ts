@@ -1,5 +1,4 @@
 import { durationWithFields, refineDurationBag } from '../internal/bagRefine'
-import { createNativeDiffOps } from '../internal/calendarNativeQuery'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
 import { DurationFields } from '../internal/durationFields'
@@ -98,7 +97,6 @@ export const abs = absDuration as (record: Record) => Record
 export const add = bindArgs(
   addDurations<RelativeToRecord>,
   identity,
-  createNativeDiffOps,
   queryNativeTimeZone,
   false,
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
@@ -106,7 +104,6 @@ export const add = bindArgs(
 export const subtract = bindArgs(
   addDurations<RelativeToRecord>,
   identity,
-  createNativeDiffOps,
   queryNativeTimeZone,
   true,
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
@@ -114,21 +111,18 @@ export const subtract = bindArgs(
 export const round = bindArgs(
   roundDuration<RelativeToRecord>,
   identity,
-  createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: RoundOptions) => Record
 
 export const total = bindArgs(
   totalDuration<RelativeToRecord>,
   identity,
-  createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record: Record, options?: UnitName | TotalOptions) => number
 
 export const compare = bindArgs(
   compareDurations<RelativeToRecord>,
   identity,
-  createNativeDiffOps,
   queryNativeTimeZone,
 ) as (record0: Record, record1: Record, options?: CompareOptions) => NumberSign
 

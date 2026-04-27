@@ -5,8 +5,9 @@ import {
   diffBigNanos,
   moveBigNano,
 } from '../internal/bigNano'
-import { createNativeDiffOps } from '../internal/calendarNativeQuery'
-import { MoveOps } from '../internal/calendarOps'
+import {
+  nativeDateUntil,
+} from '../internal/calendarNativeMath'
 import {
   getCommonCalendarId,
   getCommonTimeZoneId,
@@ -74,16 +75,15 @@ function diffZonedLargeUnits(
   const timeZoneOps = queryNativeTimeZone(timeZoneId)
 
   const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
-  const calendarOps = createNativeDiffOps(calendarId)
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
     bindArgs(prepareZonedEpochDiff, timeZoneOps) as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, timeZoneOps) as MoveMarker,
+    bindArgs(moveZonedEpochs, timeZoneOps, calendarId) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
-      calendarOps.dateUntil(f0, f1, unit),
+      nativeDateUntil(calendarId, f0, f1, unit),
     unit,
-    calendarOps,
+    calendarId,
     record0,
     record1,
     options,
@@ -97,16 +97,15 @@ function diffPlainLargeUnits<S extends DateSlots>(
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
-  const calendarOps = createNativeDiffOps(calendarId)
 
   return diffDateUnits(
     isoToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    moveDateTime as MoveMarker,
+    bindArgs(moveDateTime, calendarId) as MoveMarker,
     (f0: IsoDateFields, f1: IsoDateFields) =>
-      calendarOps.dateUntil(f0, f1, unit),
+      nativeDateUntil(calendarId, f0, f1, unit),
     unit,
-    calendarOps,
+    calendarId,
     record0,
     record1,
     options,
@@ -135,7 +134,7 @@ function diffDateUnits(
   moveMarker: MoveMarker,
   diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
   unit: Unit, // guaranteed Y/M/W
-  calendarOps: MoveOps,
+  _calendarId: string,
   marker0: Marker,
   marker1: Marker,
   options: RoundingModeName | RoundingMathOptions | undefined,
@@ -156,7 +155,6 @@ function diffDateUnits(
     durationFields,
     endEpochNano,
     unit,
-    calendarOps,
     marker0,
     markerToEpochNano,
     moveMarker,

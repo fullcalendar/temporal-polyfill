@@ -1,8 +1,21 @@
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
+import {
+  queryNativeDateParts,
+  queryNativeDay,
+  queryNativeDayOfYear,
+  queryNativeDaysInMonth,
+  queryNativeDaysInYear,
+  queryNativeEraParts,
+  queryNativeInLeapYear,
+  queryNativeMonthCode,
+  queryNativeMonthsInYear,
+  queryNativeWeekOfYear,
+  queryNativeYearOfWeek,
+} from '../internal/calendarNativeQuery'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
 import { timeFieldNamesAsc } from '../internal/fields'
 import { isoTimeFieldNamesAsc } from '../internal/isoFields'
+import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
 import {
@@ -14,7 +27,24 @@ import {
 
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
-// Assumes general calendar (native/adapter)
+
+const calendarGetterQueries = {
+  era: (slots: any) => queryNativeEraParts(slots.calendar, slots)[0],
+  eraYear: (slots: any) => queryNativeEraParts(slots.calendar, slots)[1],
+  year: (slots: any) => queryNativeDateParts(slots.calendar, slots)[0],
+  month: (slots: any) => queryNativeDateParts(slots.calendar, slots)[1],
+  day: (slots: any) => queryNativeDay(slots.calendar, slots),
+  monthCode: (slots: any) => queryNativeMonthCode(slots.calendar, slots),
+  inLeapYear: (slots: any) => queryNativeInLeapYear(slots.calendar, slots),
+  monthsInYear: (slots: any) => queryNativeMonthsInYear(slots.calendar, slots),
+  daysInMonth: (slots: any) => queryNativeDaysInMonth(slots.calendar, slots),
+  daysInYear: (slots: any) => queryNativeDaysInYear(slots.calendar, slots),
+  dayOfWeek: computeIsoDayOfWeek,
+  daysInWeek: computeIsoDaysInWeek,
+  dayOfYear: (slots: any) => queryNativeDayOfYear(slots.calendar, slots),
+  weekOfYear: (slots: any) => queryNativeWeekOfYear(slots.calendar, slots),
+  yearOfWeek: (slots: any) => queryNativeYearOfWeek(slots.calendar, slots),
+}
 
 function createCalendarGetters<M>(methodNameMap: M): {
   [K in keyof M]: () => any
@@ -22,12 +52,9 @@ function createCalendarGetters<M>(methodNameMap: M): {
   const methods = {} as any
 
   for (const methodName in methodNameMap) {
+    const getter = calendarGetterQueries[methodName as keyof typeof calendarGetterQueries]
     methods[methodName] = function (this: any, slots: any) {
-      const { calendar } = slots
-
-      // NOTE: this is inefficient to recreate each time!!!
-      const ops = createNativeStandardOps(calendar) as any
-      return ops[methodName](slots)
+      return getter(slots)
     }
   }
 

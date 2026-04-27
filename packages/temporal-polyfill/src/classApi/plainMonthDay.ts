@@ -1,14 +1,13 @@
 import {
   PlainMonthDayBag,
-  plainMonthDayWithFields,
-  refinePlainMonthDayBag,
+  nativePlainMonthDayWithFields,
+  refineNativePlainMonthDayBag,
 } from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
-import { plainMonthDayToPlainDate } from '../internal/convert'
+import { nativePlainMonthDayToPlainDate } from '../internal/convert'
 import { MonthDayBag, MonthDayFields, YearFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainMonthDayIso } from '../internal/isoFormat'
@@ -43,21 +42,14 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         options?: OverflowOptions,
       ): PlainMonthDay {
         return createPlainMonthDay(
-          plainMonthDayWithFields(
-            createNativeStandardOps,
-            slots,
-            rejectInvalidBag(mod),
-            options,
-          ),
+          nativePlainMonthDayWithFields(slots, rejectInvalidBag(mod), options),
         )
       },
       equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {
         return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
       },
       toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
-        return createPlainDate(
-          plainMonthDayToPlainDate(createNativeStandardOps, slots, this, bag),
-        )
+        return createPlainDate(nativePlainMonthDayToPlainDate(slots, this, bag))
       },
       toLocaleString(
         slots: PlainMonthDaySlots,
@@ -103,15 +95,15 @@ export function toPlainMonthDaySlots(
     const calendarIdMaybe = extractCalendarIdFromBag(arg as PlainMonthDaySlots)
     const calendarId = calendarIdMaybe || isoCalendarId
 
-    return refinePlainMonthDayBag(
-      createNativeStandardOps(calendarId),
+    return refineNativePlainMonthDayBag(
+      calendarId,
       !calendarIdMaybe,
       arg as MonthDayBag,
       options,
     )
   }
 
-  const res = parsePlainMonthDay(createNativeStandardOps, arg)
+  const res = parsePlainMonthDay(arg)
   refineOverflowOptions(options) // parse unused options
   return res
 }

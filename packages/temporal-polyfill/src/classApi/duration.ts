@@ -2,9 +2,8 @@ import {
   ZonedDateTimeBag,
   durationWithFields,
   refineDurationBag,
-  refineMaybeZonedDateTimeBag,
+  refineMaybeNativeZonedDateTimeBag,
 } from '../internal/bagRefine'
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
 import { DurationFields } from '../internal/durationFields'
@@ -77,7 +76,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          createNativeStandardOps,
           queryNativeTimeZone,
           false,
           slots,
@@ -94,7 +92,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         addDurations(
           refinePublicRelativeTo,
-          createNativeStandardOps,
           queryNativeTimeZone,
           true,
           slots,
@@ -110,7 +107,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return createDuration(
         roundDuration(
           refinePublicRelativeTo,
-          createNativeStandardOps,
           queryNativeTimeZone,
           slots,
           options,
@@ -123,7 +119,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): number {
       return totalDuration(
         refinePublicRelativeTo,
-        createNativeStandardOps,
         queryNativeTimeZone,
         slots,
         options,
@@ -155,7 +150,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     ): NumberSign {
       return compareDurations(
         refinePublicRelativeTo,
-        createNativeStandardOps,
         queryNativeTimeZone,
         toDurationSlots(durationArg0),
         toDurationSlots(durationArg1),
@@ -200,10 +194,10 @@ function refinePublicRelativeTo(
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
-      const res = refineMaybeZonedDateTimeBag(
+      const res = refineMaybeNativeZonedDateTimeBag(
         refineTimeZoneArg,
         queryNativeTimeZone,
-        createNativeStandardOps(calendarId),
+        calendarId,
         relativeTo as unknown as ZonedDateTimeBag, // !!!
       )
 

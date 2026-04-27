@@ -1,16 +1,15 @@
 import {
   PlainDateBag,
-  plainDateWithFields,
-  refinePlainDateBag,
+  nativePlainDateWithFields,
+  refineNativePlainDateBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
 import {
+  nativePlainDateToPlainMonthDay,
+  nativePlainDateToPlainYearMonth,
   plainDateToPlainDateTime,
-  plainDateToPlainMonthDay,
-  plainDateToPlainYearMonth,
   plainDateToZonedDateTime,
   zonedDateTimeToPlainDate,
 } from '../internal/convert'
@@ -78,14 +77,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   },
   {
     with(slots: PlainDateSlots, mod: DateBag, options?: OverflowOptions) {
-      return createPlainDate(
-        plainDateWithFields(
-          createNativeStandardOps,
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
-      )
+      return createPlainDate(nativePlainDateWithFields(slots, rejectInvalidBag(mod), options))
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
       return createPlainDate(
@@ -99,7 +91,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ): PlainDate {
       return createPlainDate(
         movePlainDate(
-          createNativeStandardOps,
           false,
           slots,
           toDurationSlots(durationArg),
@@ -114,7 +105,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ): PlainDate {
       return createPlainDate(
         movePlainDate(
-          createNativeStandardOps,
           true,
           slots,
           toDurationSlots(durationArg),
@@ -129,7 +119,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ): Duration {
       return createDuration(
         diffPlainDates(
-          createNativeStandardOps,
           false,
           slots,
           toPlainDateSlots(otherArg),
@@ -144,7 +133,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ): Duration {
       return createDuration(
         diffPlainDates(
-          createNativeStandardOps,
           true,
           slots,
           toPlainDateSlots(otherArg),
@@ -187,14 +175,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(
-        plainDateToPlainYearMonth(createNativeStandardOps, slots, this),
-      )
+      return createPlainYearMonth(nativePlainDateToPlainYearMonth(slots, this))
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(
-        plainDateToPlainMonthDay(createNativeStandardOps, slots, this),
-      )
+      return createPlainMonthDay(nativePlainDateToPlainMonthDay(slots, this))
     },
     toLocaleString(
       slots: PlainDateSlots,
@@ -251,8 +235,8 @@ export function toPlainDateSlots(
         )
     }
 
-    return refinePlainDateBag(
-      createNativeStandardOps(getCalendarIdFromBag(arg as PlainDateBag)),
+    return refineNativePlainDateBag(
+      getCalendarIdFromBag(arg as PlainDateBag),
       arg as PlainDateBag,
       options,
     )

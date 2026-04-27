@@ -1,10 +1,9 @@
 import {
   ZonedDateTimeBag,
-  refineZonedDateTimeBag,
-  zonedDateTimeWithFields,
+  nativeZonedDateTimeWithFields,
+  refineNativeZonedDateTimeBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
-import { createNativeStandardOps } from '../internal/calendarNativeQuery'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
@@ -111,8 +110,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithFields(
-          createNativeStandardOps,
+        nativeZonedDateTimeWithFields(
           queryNativeTimeZone,
           slots,
           rejectInvalidBag(mod),
@@ -155,7 +153,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     ): ZonedDateTime {
       return createZonedDateTime(
         moveZonedDateTime(
-          createNativeStandardOps,
           queryNativeTimeZone,
           false,
           slots,
@@ -171,7 +168,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     ): ZonedDateTime {
       return createZonedDateTime(
         moveZonedDateTime(
-          createNativeStandardOps,
           queryNativeTimeZone,
           true,
           slots,
@@ -188,7 +184,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(
-            createNativeStandardOps,
             queryNativeTimeZone,
             false,
             slots,
@@ -206,7 +201,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(
-            createNativeStandardOps,
             queryNativeTimeZone,
             true,
             slots,
@@ -326,10 +320,9 @@ export function toZonedDateTimeSlots(
 
     const calendarId = getCalendarIdFromBag(arg as any)
 
-    return refineZonedDateTimeBag(
+    return refineNativeZonedDateTimeBag(
       refineTimeZoneArg,
       queryNativeTimeZone,
-      createNativeStandardOps(calendarId),
       calendarId,
       arg as any, // !!!
       options,

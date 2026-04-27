@@ -2,13 +2,16 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
 import { formatMonthCode } from '../internal/calendarNative'
 import {
-  createNativeDayOfYearOps,
-  createNativeDaysInMonthOps,
-  createNativeDaysInYearOps,
-  createNativeInLeapYearOps,
-  createNativeMonthsInYearOps,
-  createNativePartOps,
-  createNativeWeekOps,
+  queryNativeDayOfYear,
+  queryNativeDaysInMonth,
+  queryNativeDaysInYear,
+  queryNativeDateParts,
+  queryNativeInLeapYear,
+  queryNativeMonthsInYear,
+  queryNativeEraParts,
+  queryNativeMonthCodeParts,
+  queryNativeWeekOfYear,
+  queryNativeYearOfWeek,
 } from '../internal/calendarNativeQuery'
 import { DateFields, MonthDayFields, YearMonthFields } from '../internal/fields'
 import { DateSlots } from '../internal/slots'
@@ -37,27 +40,36 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
 // -----------------------------------------------------------------------------
 
 export function computeDateFields(slots: DateSlots): DateFields {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(slots)
-  const [era, eraYear] = calendarOps.eraParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const [era, eraYear] = queryNativeEraParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { era, eraYear, year, monthCode, month, day }
 }
 
 export function computeYearMonthFields(slots: DateSlots): YearMonthFields {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month] = calendarOps.dateParts(slots)
-  const [era, eraYear] = calendarOps.eraParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month] = queryNativeDateParts(slots.calendar, slots)
+  const [era, eraYear] = queryNativeEraParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { era, eraYear, year, monthCode, month }
 }
 
 export function computeMonthDayFields(slots: DateSlots): MonthDayFields {
-  const calendarOps = createNativePartOps(slots.calendar)
-  const [year, month, day] = calendarOps.dateParts(slots)
-  const [monthCodeNumber, isLeapMonth] = calendarOps.monthCodeParts(year, month)
+  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+    slots.calendar,
+    year,
+    month,
+  )
   const monthCode = formatMonthCode(monthCodeNumber, isLeapMonth)
   return { monthCode, month, day }
 }
@@ -66,36 +78,29 @@ export function computeMonthDayFields(slots: DateSlots): MonthDayFields {
 // -----------------------------------------------------------------------------
 
 export function computeInLeapYear(slots: DateSlots): boolean {
-  const calendarOps = createNativeInLeapYearOps(slots.calendar)
-  return calendarOps.inLeapYear(slots)
+  return queryNativeInLeapYear(slots.calendar, slots)
 }
 
 export function computeMonthsInYear(slots: DateSlots): number {
-  const calendarOps = createNativeMonthsInYearOps(slots.calendar)
-  return calendarOps.monthsInYear(slots)
+  return queryNativeMonthsInYear(slots.calendar, slots)
 }
 
 export function computeDaysInMonth(slots: DateSlots): number {
-  const calendarOps = createNativeDaysInMonthOps(slots.calendar)
-  return calendarOps.daysInMonth(slots)
+  return queryNativeDaysInMonth(slots.calendar, slots)
 }
 
 export function computeDaysInYear(slots: DateSlots): number {
-  const calendarOps = createNativeDaysInYearOps(slots.calendar)
-  return calendarOps.daysInYear(slots)
+  return queryNativeDaysInYear(slots.calendar, slots)
 }
 
 export function computeDayOfYear(slots: DateSlots): number {
-  const calendarOps = createNativeDayOfYearOps(slots.calendar)
-  return calendarOps.dayOfYear(slots)
+  return queryNativeDayOfYear(slots.calendar, slots)
 }
 
 export function computeWeekOfYear(slots: DateSlots): number | undefined {
-  const calendarOps = createNativeWeekOps(slots.calendar)
-  return calendarOps.weekOfYear(slots)
+  return queryNativeWeekOfYear(slots.calendar, slots)
 }
 
 export function computeYearOfWeek(slots: DateSlots): number | undefined {
-  const calendarOps = createNativeWeekOps(slots.calendar)
-  return calendarOps.yearOfWeek(slots)
+  return queryNativeYearOfWeek(slots.calendar, slots)
 }

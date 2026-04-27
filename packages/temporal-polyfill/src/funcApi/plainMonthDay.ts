@@ -1,19 +1,13 @@
 import {
   PlainMonthDayBag,
-  plainMonthDayWithFields,
-  refinePlainMonthDayBag,
+  nativePlainMonthDayWithFields,
+  refineNativePlainMonthDayBag,
 } from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
-import {
-  createNativeDateModOps,
-  createNativeMonthDayModOps,
-  createNativeMonthDayParseOps,
-  createNativeMonthDayRefineOps,
-} from '../internal/calendarNativeQuery'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
-import { plainMonthDayToPlainDate } from '../internal/convert'
+import { nativePlainMonthDayToPlainDate } from '../internal/convert'
 import { EraYearOrYear, MonthDayBag, MonthDayFields } from '../internal/fields'
 import { createFormatPrepper, monthDayConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -90,18 +84,15 @@ export function fromFields(
   const calendarMaybe = extractCalendarIdFromBag(fields)
   const calendar = calendarMaybe || isoCalendarId
 
-  return refinePlainMonthDayBag(
-    createNativeMonthDayRefineOps(calendar),
+  return refineNativePlainMonthDayBag(
+    calendar,
     !calendarMaybe,
     fields,
     options,
   )
 }
 
-export const fromString = bindArgs(
-  parsePlainMonthDay,
-  createNativeMonthDayParseOps,
-) as (s: string) => Record
+export const fromString = parsePlainMonthDay as (s: string) => Record
 
 export function isInstance(record: any): record is Record {
   return Boolean(record) && record.branding === PlainMonthDayBranding
@@ -126,12 +117,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainMonthDayWithFields(
-    createNativeMonthDayModOps,
-    record,
-    fields,
-    options,
-  )
+  return nativePlainMonthDayWithFields(record, fields, options)
 }
 
 // Math
@@ -149,12 +135,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return plainMonthDayToPlainDate(
-    createNativeDateModOps,
-    record,
-    getFields(record),
-    fields,
-  )
+  return nativePlainMonthDayToPlainDate(record, getFields(record), fields)
 }
 
 // Formatting

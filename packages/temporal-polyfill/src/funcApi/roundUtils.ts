@@ -1,4 +1,8 @@
-import { createNativeConvertOps } from '../internal/calendarNativeQuery'
+import {
+  queryNativeDateParts,
+  queryNativeEpochMilli,
+  queryNativeMonthAdd,
+} from '../internal/calendarNativeQuery'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -21,19 +25,19 @@ import { moveByIsoWeeks } from './moveUtils'
 
 export function computeYearFloor(
   slots: DateSlots,
-  calendarOps = createNativeConvertOps(slots.calendar),
 ): IsoDateTimeFields & { year: number } {
-  const [year0] = calendarOps.dateParts(slots)
-  const isoFields0 = epochMilliToIso(calendarOps.epochMilli(year0))
+  const [year0] = queryNativeDateParts(slots.calendar, slots)
+  const isoFields0 = epochMilliToIso(queryNativeEpochMilli(slots.calendar, year0))
   return { ...isoFields0, year: year0 }
 }
 
 export function computeMonthFloor(
   slots: DateSlots,
-  calendarOps = createNativeConvertOps(slots.calendar),
 ): IsoDateTimeFields & { year: number; month: number } {
-  const [year0, month0] = calendarOps.dateParts(slots)
-  const isoFields0 = epochMilliToIso(calendarOps.epochMilli(year0, month0))
+  const [year0, month0] = queryNativeDateParts(slots.calendar, slots)
+  const isoFields0 = epochMilliToIso(
+    queryNativeEpochMilli(slots.calendar, year0, month0),
+  )
   return { ...isoFields0, year: year0, month: month0 }
 }
 
@@ -68,22 +72,23 @@ export function computeIsoWeekCeil(slots: IsoDateFields): IsoDateTimeFields {
 // -----------------------------------------------------------------------------
 
 export function computeYearInterval(slots: DateSlots): IsoDateTimeInterval {
-  const calendarOps = createNativeConvertOps(slots.calendar)
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
-  const isoFields1 = epochMilliToIso(calendarOps.epochMilli(year1))
+  const isoFields1 = epochMilliToIso(queryNativeEpochMilli(slots.calendar, year1))
   return [isoFields0, isoFields1]
 }
 
 export function computeMonthInterval(slots: DateSlots): IsoDateTimeInterval {
-  const calendarOps = createNativeConvertOps(slots.calendar)
-  const isoFields0 = computeMonthFloor(slots, calendarOps)
-  const [year1, month1] = calendarOps.monthAdd(
+  const isoFields0 = computeMonthFloor(slots)
+  const [year1, month1] = queryNativeMonthAdd(
+    slots.calendar,
     isoFields0.year,
     isoFields0.month,
     1,
   )
-  const isoFields1 = epochMilliToIso(calendarOps.epochMilli(year1, month1))
+  const isoFields1 = epochMilliToIso(
+    queryNativeEpochMilli(slots.calendar, year1, month1),
+  )
   return [isoFields0, isoFields1]
 }
 
