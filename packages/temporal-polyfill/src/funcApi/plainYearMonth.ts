@@ -1,12 +1,12 @@
 import {
   PlainYearMonthBag,
+  convertNativePlainYearMonthToDate,
   nativePlainYearMonthWithFields,
   refineNativePlainYearMonthBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
-import { nativePlainYearMonthToPlainDate } from '../internal/convert'
 import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
 import {
@@ -195,7 +195,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return nativePlainYearMonthToPlainDate(record, getFields(record), fields)
+  return convertNativePlainYearMonthToDate(getCalendarId(record), getFields(record), fields)
 }
 
 // Formatting

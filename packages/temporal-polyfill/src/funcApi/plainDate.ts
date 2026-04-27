@@ -1,5 +1,7 @@
 import {
   PlainDateBag,
+  convertNativeToPlainMonthDay,
+  convertNativeToPlainYearMonth,
   nativePlainDateWithFields,
   refineNativePlainDateBag,
 } from '../internal/bagRefine'
@@ -7,8 +9,6 @@ import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
 import {
-  nativePlainDateToPlainMonthDay,
-  nativePlainDateToPlainYearMonth,
   plainDateToPlainDateTime,
   plainDateToZonedDateTime,
 } from '../internal/convert'
@@ -269,11 +269,11 @@ export const toPlainDateTime = plainDateToPlainDateTime as (
 ) => PlainDateTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return nativePlainDateToPlainYearMonth(record, getFields(record))
+  return convertNativeToPlainYearMonth(getCalendarId(record), getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return nativePlainDateToPlainMonthDay(record, getFields(record))
+  return convertNativeToPlainMonthDay(getCalendarId(record), getFields(record))
 }
 
 // Formatting

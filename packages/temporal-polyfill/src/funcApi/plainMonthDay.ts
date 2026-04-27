@@ -1,5 +1,6 @@
 import {
   PlainMonthDayBag,
+  convertNativePlainMonthDayToDate,
   nativePlainMonthDayWithFields,
   refineNativePlainMonthDayBag,
 } from '../internal/bagRefine'
@@ -7,7 +8,6 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
-import { nativePlainMonthDayToPlainDate } from '../internal/convert'
 import { EraYearOrYear, MonthDayBag, MonthDayFields } from '../internal/fields'
 import { createFormatPrepper, monthDayConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -135,7 +135,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return nativePlainMonthDayToPlainDate(record, getFields(record), fields)
+  return convertNativePlainMonthDayToDate(getCalendarId(record), getFields(record), fields)
 }
 
 // Formatting

@@ -1,12 +1,12 @@
 import {
   PlainYearMonthBag,
+  convertNativePlainYearMonthToDate,
   nativePlainYearMonthWithFields,
   refineNativePlainYearMonthBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
-import { nativePlainYearMonthToPlainDate } from '../internal/convert'
 import { diffPlainYearMonth } from '../internal/diff'
 import { YearMonthBag, YearMonthFields } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -115,7 +115,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
       },
       toPlainDate(slots: PlainYearMonthSlots, bag: { day: number }): PlainDate {
-        return createPlainDate(nativePlainYearMonthToPlainDate(slots, this, bag))
+        return createPlainDate(convertNativePlainYearMonthToDate(slots.calendar, this, bag))
       },
       toLocaleString(
         slots: PlainYearMonthSlots,

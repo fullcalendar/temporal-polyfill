@@ -1,5 +1,7 @@
 import {
   PlainDateTimeBag,
+  convertNativeToPlainMonthDay,
+  convertNativeToPlainYearMonth,
   isoTimeFieldsToCal,
   nativePlainDateTimeWithFields,
   refineNativePlainDateTimeBag,
@@ -12,11 +14,7 @@ import {
   plainDateTimesEqual,
 } from '../internal/compare'
 import { constructPlainDateTimeSlots } from '../internal/construct'
-import {
-  nativePlainDateTimeToPlainMonthDay,
-  nativePlainDateTimeToPlainYearMonth,
-  plainDateTimeToZonedDateTime,
-} from '../internal/convert'
+import { plainDateTimeToZonedDateTime } from '../internal/convert'
 import { diffPlainDateTimes } from '../internal/diff'
 import { DateTimeBag, DateTimeFields } from '../internal/fields'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
@@ -53,6 +51,7 @@ import {
   createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
+  createPlainYearMonthSlots,
 } from '../internal/slots'
 import {
   checkIsoDateTimeInBounds,
@@ -364,11 +363,11 @@ export const toPlainTime = createPlainTimeSlots as (
 ) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return nativePlainDateTimeToPlainYearMonth(record, getFields(record))
+  return createPlainYearMonthSlots({ ...record, ...convertNativeToPlainYearMonth(getCalendarId(record), getFields(record)) })
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return nativePlainDateTimeToPlainMonthDay(record, getFields(record))
+  return convertNativeToPlainMonthDay(getCalendarId(record), getFields(record))
 }
 
 // Formatting

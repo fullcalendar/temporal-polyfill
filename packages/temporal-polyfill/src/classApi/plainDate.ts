@@ -1,5 +1,7 @@
 import {
   PlainDateBag,
+  convertNativeToPlainMonthDay,
+  convertNativeToPlainYearMonth,
   nativePlainDateWithFields,
   refineNativePlainDateBag,
 } from '../internal/bagRefine'
@@ -7,8 +9,6 @@ import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
 import {
-  nativePlainDateToPlainMonthDay,
-  nativePlainDateToPlainYearMonth,
   plainDateToPlainDateTime,
   plainDateToZonedDateTime,
   zonedDateTimeToPlainDate,
@@ -174,10 +174,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(nativePlainDateToPlainYearMonth(slots, this))
+      return createPlainYearMonth(convertNativeToPlainYearMonth(slots.calendar, this))
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(nativePlainDateToPlainMonthDay(slots, this))
+      return createPlainMonthDay(convertNativeToPlainMonthDay(slots.calendar, this))
     },
     toLocaleString(
       slots: PlainDateSlots,

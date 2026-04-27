@@ -1,5 +1,7 @@
 import {
   ZonedDateTimeBag,
+  convertNativeToPlainMonthDay,
+  convertNativeToPlainYearMonth,
   isoTimeFieldsToCal,
   nativeZonedDateTimeWithFields,
   refineNativeZonedDateTimeBag,
@@ -15,8 +17,6 @@ import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
-  nativeZonedDateTimeToPlainMonthDay,
-  nativeZonedDateTimeToPlainYearMonth,
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
@@ -395,11 +395,11 @@ export const toPlainTime = bindArgs(
 ) as (record: Record) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return nativeZonedDateTimeToPlainYearMonth(record, getFields(record))
+  return convertNativeToPlainYearMonth(getCalendarId(record), getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return nativeZonedDateTimeToPlainMonthDay(record, getFields(record))
+  return convertNativeToPlainMonthDay(getCalendarId(record), getFields(record))
 }
 
 // Formatting
