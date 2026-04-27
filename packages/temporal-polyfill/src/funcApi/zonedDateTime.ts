@@ -3,7 +3,7 @@ import {
   convertNativeToPlainMonthDay,
   convertNativeToPlainYearMonth,
   isoTimeFieldsToCal,
-  nativeZonedDateTimeWithFields,
+  zonedDateTimeWithFields,
   refineNativeZonedDateTimeBag,
 } from '../internal/bagRefine'
 import {
@@ -292,7 +292,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return nativeZonedDateTimeWithFields(record, fields, options)
+  return zonedDateTimeWithFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {

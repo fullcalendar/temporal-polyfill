@@ -2,7 +2,7 @@ import {
   PlainDateBag,
   convertNativeToPlainMonthDay,
   convertNativeToPlainYearMonth,
-  nativePlainDateWithFields,
+  plainDateWithFields,
   refineNativePlainDateBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
@@ -77,7 +77,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   },
   {
     with(slots: PlainDateSlots, mod: DateBag, options?: OverflowOptions) {
-      return createPlainDate(nativePlainDateWithFields(slots, rejectInvalidBag(mod), options))
+      return createPlainDate(plainDateWithFields(slots, rejectInvalidBag(mod), options))
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
       return createPlainDate(

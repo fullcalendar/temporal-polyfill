@@ -191,7 +191,7 @@ export function refineMaybeNativeZonedDateTimeBag(
   ) as ZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
-    const isoDateFields = nativeDateFromFields(calendarId, fields as any)
+    const isoDateFields = dateFromFields(calendarId, fields as any)
     const isoTimeFields = refineTimeBag(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
@@ -206,7 +206,7 @@ export function refineMaybeNativeZonedDateTimeBag(
     return { epochNanoseconds, timeZone: timeZoneId }
   }
 
-  const isoDateInternals = nativeDateFromFields(calendarId, fields as any)
+  const isoDateInternals = dateFromFields(calendarId, fields as any)
   return { ...isoDateInternals, ...isoTimeFieldDefaults }
 }
 
@@ -228,7 +228,7 @@ export function refineNativeZonedDateTimeBag(
 
   const [overflow, offsetDisambig, epochDisambig] =
     refineZonedFieldOptions(options)
-  const isoDateFields = nativeDateFromFields(
+  const isoDateFields = dateFromFields(
     calendarId,
     fields as any,
     fabricateOverflowOptions(overflow),
@@ -261,7 +261,7 @@ export function refineNativePlainDateTimeBag(
   ) as DateTimeBag
 
   const overflow = refineOverflowOptions(options)
-  const isoDateInternals = nativeDateFromFields(
+  const isoDateInternals = dateFromFields(
     calendarId,
     fields as any,
     fabricateOverflowOptions(overflow),
@@ -289,7 +289,7 @@ export function refineNativePlainDateBag(
     requireFields,
   )
 
-  return nativeDateFromFields(calendarId, fields as any, options)
+  return dateFromFields(calendarId, fields as any, options)
 }
 
 export function refineNativePlainYearMonthBag(
@@ -305,7 +305,7 @@ export function refineNativePlainYearMonthBag(
     requireFields,
   )
 
-  return nativeYearMonthFromFields(calendarId, fields as any, options)
+  return yearMonthFromFields(calendarId, fields as any, options)
 }
 
 export function refineNativePlainMonthDayBag(
@@ -330,7 +330,7 @@ export function refineNativePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return nativeMonthDayFromFields(calendarId, fields, options)
+  return monthDayFromFields(calendarId, fields, options)
 }
 
 export function refinePlainTimeBag(
@@ -460,7 +460,7 @@ export const isoTimeFieldsToCal = bindArgs(
 // High-Level Mod
 // -----------------------------------------------------------------------------
 
-export function nativeZonedDateTimeWithFields(
+export function zonedDateTimeWithFields(
   zonedDateTimeSlots: ZonedDateTimeSlots,
   modFields: DateTimeBag,
   options?: ZonedFieldOptions,
@@ -489,7 +489,7 @@ export function nativeZonedDateTimeWithFields(
     options,
     OffsetDisambig.Prefer,
   )
-  const isoDateFields = nativeDateFromFields(
+  const isoDateFields = dateFromFields(
     calendar,
     mergedCalendarFields as any,
     fabricateOverflowOptions(overflow),
@@ -512,7 +512,7 @@ export function nativeZonedDateTimeWithFields(
   )
 }
 
-export function nativePlainDateTimeWithFields(
+export function plainDateTimeWithFields(
   plainDateTimeSlots: PlainDateTimeSlots,
   modFields: DateTimeBag,
   options?: OverflowOptions,
@@ -538,7 +538,7 @@ export function nativePlainDateTimeWithFields(
     ...partialFields,
   }
 
-  const isoDateFields = nativeDateFromFields(
+  const isoDateFields = dateFromFields(
     calendarId,
     mergedCalendarFields as any,
     fabricateOverflowOptions(overflow),
@@ -557,7 +557,7 @@ export function nativePlainDateTimeWithFields(
   )
 }
 
-export function nativePlainDateWithFields(
+export function plainDateWithFields(
   plainDateSlots: PlainDateSlots,
   modFields: DateBag,
   options?: OverflowOptions,
@@ -573,10 +573,10 @@ export function nativePlainDateWithFields(
     partialFields,
   )
 
-  return nativeDateFromFields(calendarId, mergedFields as any, options)
+  return dateFromFields(calendarId, mergedFields as any, options)
 }
 
-export function nativePlainYearMonthWithFields(
+export function plainYearMonthWithFields(
   plainYearMonthSlots: PlainYearMonthSlots,
   modFields: YearMonthBag,
   options?: OverflowOptions,
@@ -592,10 +592,10 @@ export function nativePlainYearMonthWithFields(
     partialFields,
   )
 
-  return nativeYearMonthFromFields(calendarId, mergedFields as any, options)
+  return yearMonthFromFields(calendarId, mergedFields as any, options)
 }
 
-export function nativePlainMonthDayWithFields(
+export function plainMonthDayWithFields(
   plainMonthDaySlots: PlainMonthDaySlots,
   modFields: MonthDayBag,
   options?: OverflowOptions,
@@ -611,7 +611,7 @@ export function nativePlainMonthDayWithFields(
     partialFields,
   )
 
-  return nativeMonthDayFromFields(calendarId, mergedFields as any, options)
+  return monthDayFromFields(calendarId, mergedFields as any, options)
 }
 
 export function plainTimeWithFields(
@@ -667,7 +667,7 @@ export function convertNativeToPlainMonthDay(
     input,
     monthCodeDayFieldNames,
   )
-  return nativeMonthDayFromFields(calendarId, fields as DateBag)
+  return monthDayFromFields(calendarId, fields as DateBag)
 }
 
 export function convertNativeToPlainYearMonth(
@@ -680,7 +680,7 @@ export function convertNativeToPlainYearMonth(
     input,
     yearMonthCodeFieldNames,
   )
-  return nativeYearMonthFromFields(
+  return yearMonthFromFields(
     calendarId,
     fields as YearMonthBag,
     options,
@@ -735,13 +735,13 @@ function convertToNativeIso(
     [],
   )
 
-  return nativeDateFromFields(calendarId, mergedFields as any)
+  return dateFromFields(calendarId, mergedFields as any)
 }
 
 // Native *-from-fields
 // -----------------------------------------------------------------------------
 
-export function nativeDateFromFields(
+export function dateFromFields(
   calendarId: string,
   fields: DateBag,
   options?: OverflowOptions,
@@ -764,7 +764,7 @@ export function nativeDateFromFields(
   )
 }
 
-export function nativeYearMonthFromFields(
+export function yearMonthFromFields(
   calendarId: string,
   fields: YearMonthBag,
   options?: OverflowOptions,
@@ -780,7 +780,7 @@ export function nativeYearMonthFromFields(
   )
 }
 
-export function nativeMonthDayFromFields(
+export function monthDayFromFields(
   calendarId: string,
   fields: DateBag, // guaranteed `day`
   options?: OverflowOptions,

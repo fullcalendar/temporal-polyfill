@@ -1,7 +1,7 @@
 import {
   PlainMonthDayBag,
   convertNativePlainMonthDayToDate,
-  nativePlainMonthDayWithFields,
+  plainMonthDayWithFields,
   refineNativePlainMonthDayBag,
 } from '../internal/bagRefine'
 import { isoCalendarId } from '../internal/calendarConfig'
@@ -42,7 +42,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         options?: OverflowOptions,
       ): PlainMonthDay {
         return createPlainMonthDay(
-          nativePlainMonthDayWithFields(slots, rejectInvalidBag(mod), options),
+          plainMonthDayWithFields(slots, rejectInvalidBag(mod), options),
         )
       },
       equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {

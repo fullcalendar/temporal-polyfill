@@ -1,7 +1,7 @@
 import {
   PlainYearMonthBag,
   convertNativePlainYearMonthToDate,
-  nativePlainYearMonthWithFields,
+  plainYearMonthWithFields,
   refineNativePlainYearMonthBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
@@ -136,7 +136,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return nativePlainYearMonthWithFields(record, fields, options)
+  return plainYearMonthWithFields(record, fields, options)
 }
 
 // Math

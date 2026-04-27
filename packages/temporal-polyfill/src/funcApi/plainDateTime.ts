@@ -3,7 +3,7 @@ import {
   convertNativeToPlainMonthDay,
   convertNativeToPlainYearMonth,
   isoTimeFieldsToCal,
-  nativePlainDateTimeWithFields,
+  plainDateTimeWithFields,
   refineNativePlainDateTimeBag,
 } from '../internal/bagRefine'
 import { addBigNanos, numberToBigNano } from '../internal/bigNano'
@@ -275,7 +275,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return nativePlainDateTimeWithFields(record, fields, options)
+  return plainDateTimeWithFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {

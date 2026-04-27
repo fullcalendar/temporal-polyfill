@@ -1,7 +1,7 @@
 import {
   PlainYearMonthBag,
   convertNativePlainYearMonthToDate,
-  nativePlainYearMonthWithFields,
+  plainYearMonthWithFields,
   refineNativePlainYearMonthBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
@@ -52,7 +52,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
-          nativePlainYearMonthWithFields(slots, rejectInvalidBag(mod), options),
+          plainYearMonthWithFields(slots, rejectInvalidBag(mod), options),
         )
       },
       add(

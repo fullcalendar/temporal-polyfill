@@ -1,6 +1,6 @@
 import {
   ZonedDateTimeBag,
-  nativeZonedDateTimeWithFields,
+  zonedDateTimeWithFields,
   refineNativeZonedDateTimeBag,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
@@ -110,7 +110,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
-        nativeZonedDateTimeWithFields(slots, rejectInvalidBag(mod), options),
+        zonedDateTimeWithFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
