@@ -2,14 +2,14 @@ import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
 import { formatMonthCode } from '../internal/calendarNative'
 import {
+  queryNativeDateParts,
   queryNativeDayOfYear,
   queryNativeDaysInMonth,
   queryNativeDaysInYear,
-  queryNativeDateParts,
-  queryNativeInLeapYear,
-  queryNativeMonthsInYear,
   queryNativeEraParts,
+  queryNativeInLeapYear,
   queryNativeMonthCodeParts,
+  queryNativeMonthsInYear,
   queryNativeWeekOfYear,
   queryNativeYearOfWeek,
 } from '../internal/calendarNativeQuery'

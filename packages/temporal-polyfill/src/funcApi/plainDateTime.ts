@@ -58,7 +58,6 @@ import {
   epochNanoToIso,
   isoToEpochNano,
 } from '../internal/timeMath'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import {
   DayTimeUnitName,
   Unit,
@@ -301,28 +300,19 @@ export const add = bindArgs(movePlainDateTime, false) as (
   options?: ArithmeticOptions,
 ) => Record
 
-export const subtract = bindArgs(
-  movePlainDateTime,
-  true,
-) as (
+export const subtract = bindArgs(movePlainDateTime, true) as (
   plainDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(
-  diffPlainDateTimes,
-  false,
-) as (
+export const until = bindArgs(diffPlainDateTimes, false) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(
-  diffPlainDateTimes,
-  true,
-) as (
+export const since = bindArgs(diffPlainDateTimes, true) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
@@ -346,9 +336,7 @@ export const compare = compareIsoDateTimeFields as (
 // Conversion
 // -----------------------------------------------------------------------------
 
-export const toZonedDateTime = bindArgs(
-  plainDateTimeToZonedDateTime,
-) as (
+export const toZonedDateTime = bindArgs(plainDateTimeToZonedDateTime) as (
   record: Record,
   timeZone: string,
   options?: ToZonedDateTimeOptions,
@@ -363,7 +351,10 @@ export const toPlainTime = createPlainTimeSlots as (
 ) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return createPlainYearMonthSlots({ ...record, ...convertNativeToPlainYearMonth(getCalendarId(record), getFields(record)) })
+  return createPlainYearMonthSlots({
+    ...record,
+    ...convertNativeToPlainYearMonth(getCalendarId(record), getFields(record)),
+  })
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {

@@ -27,7 +27,6 @@ import {
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'

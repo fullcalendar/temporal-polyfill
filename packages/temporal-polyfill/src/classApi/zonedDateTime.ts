@@ -1,7 +1,7 @@
 import {
   ZonedDateTimeBag,
-  zonedDateTimeWithFields,
   refineNativeZonedDateTimeBag,
+  zonedDateTimeWithFields,
 } from '../internal/bagRefine'
 import { refineCalendarId } from '../internal/calendarId'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
@@ -45,7 +45,10 @@ import {
 } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import { FixedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneNativeMath'
+import {
+  FixedIsoFields,
+  zonedEpochSlotsToIso,
+} from '../internal/timeZoneNativeMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
@@ -134,7 +137,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       plainTimeArg?: PlainTimeArg,
     ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithPlainTime(slots, optionalToPlainTimeFields(plainTimeArg)),
+        zonedDateTimeWithPlainTime(
+          slots,
+          optionalToPlainTimeFields(plainTimeArg),
+        ),
       )
     },
     add(

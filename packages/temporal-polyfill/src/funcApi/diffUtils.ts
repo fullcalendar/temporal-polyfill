@@ -5,9 +5,7 @@ import {
   diffBigNanos,
   moveBigNano,
 } from '../internal/bigNano'
-import {
-  nativeDateUntil,
-} from '../internal/calendarNativeMath'
+import { nativeDateUntil } from '../internal/calendarNativeMath'
 import {
   getCommonCalendarId,
   getCommonTimeZoneId,

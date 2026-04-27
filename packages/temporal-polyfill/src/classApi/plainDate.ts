@@ -35,7 +35,6 @@ import {
   ZonedDateTimeSlots,
   createPlainDateSlots,
 } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
@@ -77,7 +76,9 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   },
   {
     with(slots: PlainDateSlots, mod: DateBag, options?: OverflowOptions) {
-      return createPlainDate(plainDateWithFields(slots, rejectInvalidBag(mod), options))
+      return createPlainDate(
+        plainDateWithFields(slots, rejectInvalidBag(mod), options),
+      )
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
       return createPlainDate(
@@ -90,12 +91,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDate {
       return createPlainDate(
-        movePlainDate(
-          false,
-          slots,
-          toDurationSlots(durationArg),
-          options,
-        ),
+        movePlainDate(false, slots, toDurationSlots(durationArg), options),
       )
     },
     subtract(
@@ -104,12 +100,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDate {
       return createPlainDate(
-        movePlainDate(
-          true,
-          slots,
-          toDurationSlots(durationArg),
-          options,
-        ),
+        movePlainDate(true, slots, toDurationSlots(durationArg), options),
       )
     },
     until(
@@ -118,12 +109,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: DiffOptions<DateUnitName>,
     ): Duration {
       return createDuration(
-        diffPlainDates(
-          false,
-          slots,
-          toPlainDateSlots(otherArg),
-          options,
-        ),
+        diffPlainDates(false, slots, toPlainDateSlots(otherArg), options),
       )
     },
     since(
@@ -132,12 +118,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: DiffOptions<DateUnitName>,
     ): Duration {
       return createDuration(
-        diffPlainDates(
-          true,
-          slots,
-          toPlainDateSlots(otherArg),
-          options,
-        ),
+        diffPlainDates(true, slots, toPlainDateSlots(otherArg), options),
       )
     },
     equals(slots: PlainDateSlots, otherArg: PlainDateArg): boolean {
@@ -174,10 +155,14 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(convertNativeToPlainYearMonth(slots.calendar, this))
+      return createPlainYearMonth(
+        convertNativeToPlainYearMonth(slots.calendar, this),
+      )
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(convertNativeToPlainMonthDay(slots.calendar, this))
+      return createPlainMonthDay(
+        convertNativeToPlainMonthDay(slots.calendar, this),
+      )
     },
     toLocaleString(
       slots: PlainDateSlots,

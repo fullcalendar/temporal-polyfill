@@ -11,15 +11,14 @@ import {
   getCalendarEraOrigins,
   getCalendarLeapMonthMeta,
   monthCodeNumberToMonth,
-  monthToMonthCodeNumber,
   parseMonthCode,
 } from './calendarNative'
 import {
   queryNativeDateParts,
-  queryNativeMonthCodeParts,
   queryNativeDaysInMonthPart,
   queryNativeIsoFieldsFromParts,
   queryNativeLeapMonth,
+  queryNativeMonthCodeParts,
   queryNativeMonthsInYearPart,
   queryNativeYearMonthForMonthDay,
 } from './calendarNativeQuery'
@@ -563,7 +562,10 @@ export function plainDateWithFields(
   options?: OverflowOptions,
 ): PlainDateSlots {
   const calendarId = plainDateSlots.calendar
-  const validFieldNames = getCalendarFieldNames(calendarId, dateFieldNamesAlpha).sort()
+  const validFieldNames = getCalendarFieldNames(
+    calendarId,
+    dateFieldNamesAlpha,
+  ).sort()
 
   const origFields = computeDateEssentials(plainDateSlots)
   const partialFields = refineFields(modFields, validFieldNames)
@@ -582,7 +584,10 @@ export function plainYearMonthWithFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendar
-  const validFieldNames = getCalendarFieldNames(calendarId, yearMonthFieldNames).sort()
+  const validFieldNames = getCalendarFieldNames(
+    calendarId,
+    yearMonthFieldNames,
+  ).sort()
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
   const partialFields = refineFields(modFields, validFieldNames)
@@ -601,7 +606,10 @@ export function plainMonthDayWithFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const calendarId = plainMonthDaySlots.calendar
-  const validFieldNames = getCalendarFieldNames(calendarId, dateFieldNamesAlpha).sort()
+  const validFieldNames = getCalendarFieldNames(
+    calendarId,
+    dateFieldNamesAlpha,
+  ).sort()
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)
   const partialFields = refineFields(modFields, validFieldNames)
@@ -680,11 +688,7 @@ export function convertNativeToPlainYearMonth(
     input,
     yearMonthCodeFieldNames,
   )
-  return yearMonthFromFields(
-    calendarId,
-    fields as YearMonthBag,
-    options,
-  )
+  return yearMonthFromFields(calendarId, fields as YearMonthBag, options)
 }
 
 export function convertNativePlainMonthDayToDate(
@@ -749,19 +753,10 @@ export function dateFromFields(
   const overflow = refineOverflowOptions(options)
   const year = refineYear(calendarId, fields)
   const month = refineMonth(calendarId, fields, year, overflow)
-  const day = refineDay(
-    calendarId,
-    fields as DayFields,
-    month,
-    year,
-    overflow,
-  )
+  const day = refineDay(calendarId, fields as DayFields, month, year, overflow)
   const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, day)
 
-  return createPlainDateSlots(
-    checkIsoDateInBounds(isoFields),
-    calendarId,
-  )
+  return createPlainDateSlots(checkIsoDateInBounds(isoFields), calendarId)
 }
 
 export function yearMonthFromFields(
@@ -805,14 +800,7 @@ export function monthDayFromFields(
     // might limit overflow
     const month = refineMonth(calendarId, fields, yearMaybe, overflow)
     // NOTE: internal call of getDefinedProp not necessary
-    day = refineDay(
-      calendarId,
-      fields as DayFields,
-      month,
-      yearMaybe,
-      overflow,
-    )
-
+    day = refineDay(calendarId, fields as DayFields, month, yearMaybe, overflow)
     ;[monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
       calendarId,
       yearMaybe,
@@ -938,10 +926,7 @@ export function mergeCalendarFields(
 // Low-level Native Utils
 // -----------------------------------------------------------------------------
 
-function refineYear(
-  calendarId: string,
-  fields: DateBag,
-): number {
+function refineYear(calendarId: string, fields: DateBag): number {
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
   const eraRemaps = eraRemapsByCalendarId[calendarId || ''] || {}
   let { era, eraYear, year } = fields
@@ -984,12 +969,7 @@ function refineMonth(
   let { month, monthCode } = fields
 
   if (monthCode !== undefined) {
-    const monthByCode = refineMonthCode(
-      calendarId,
-      monthCode,
-      year,
-      overflow,
-    )
+    const monthByCode = refineMonthCode(calendarId, monthCode, year, overflow)
 
     if (month !== undefined && month !== monthByCode) {
       throw new RangeError(errorMessages.mismatchingMonthAndCode)

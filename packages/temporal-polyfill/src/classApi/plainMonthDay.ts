@@ -49,7 +49,9 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
       },
       toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
-        return createPlainDate(convertNativePlainMonthDayToDate(slots.calendar, this, bag))
+        return createPlainDate(
+          convertNativePlainMonthDayToDate(slots.calendar, this, bag),
+        )
       },
       toLocaleString(
         slots: PlainMonthDaySlots,

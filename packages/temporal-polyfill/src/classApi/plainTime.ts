@@ -30,7 +30,6 @@ import {
   ZonedDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {

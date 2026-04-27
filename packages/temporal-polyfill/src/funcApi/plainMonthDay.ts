@@ -84,12 +84,7 @@ export function fromFields(
   const calendarMaybe = extractCalendarIdFromBag(fields)
   const calendar = calendarMaybe || isoCalendarId
 
-  return refineNativePlainMonthDayBag(
-    calendar,
-    !calendarMaybe,
-    fields,
-    options,
-  )
+  return refineNativePlainMonthDayBag(calendar, !calendarMaybe, fields, options)
 }
 
 export const fromString = parsePlainMonthDay as (s: string) => Record
@@ -135,7 +130,11 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertNativePlainMonthDayToDate(getCalendarId(record), getFields(record), fields)
+  return convertNativePlainMonthDayToDate(
+    getCalendarId(record),
+    getFields(record),
+    fields,
+  )
 }
 
 // Formatting

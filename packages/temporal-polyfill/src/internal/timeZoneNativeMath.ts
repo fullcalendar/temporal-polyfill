@@ -61,7 +61,9 @@ Only used by funcApi
 */
 export function buildZonedIsoFields(
   zonedDateTimeSlots: ZonedDateTimeSlots,
-  nativeTimeZone: NativeTimeZone = queryNativeTimeZone(zonedDateTimeSlots.timeZone),
+  nativeTimeZone: NativeTimeZone = queryNativeTimeZone(
+    zonedDateTimeSlots.timeZone,
+  ),
 ): ZonedIsoFields {
   const isoFields = zonedEpochSlotsToIso(zonedDateTimeSlots, nativeTimeZone)
 
@@ -125,7 +127,9 @@ export function getSingleInstantFor(
   nativeTimeZone: NativeTimeZone,
   isoFields: IsoDateTimeFields,
   disambig: EpochDisambig = EpochDisambig.Compat,
-  possibleEpochNanos: BigNano[] = nativeTimeZone.getPossibleInstantsFor(isoFields),
+  possibleEpochNanos: BigNano[] = nativeTimeZone.getPossibleInstantsFor(
+    isoFields,
+  ),
 ): BigNano {
   if (possibleEpochNanos.length === 1) {
     return possibleEpochNanos[0]

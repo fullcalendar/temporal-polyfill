@@ -30,7 +30,6 @@ import {
   getEpochSec,
 } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
 import * as DurationFns from './duration'
@@ -216,7 +215,7 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = bindArgs(
-  formatInstantIso,
-  refineTimeZoneId,
-) as (record: Record, options?: ToStringOptions) => string
+export const toString = bindArgs(formatInstantIso, refineTimeZoneId) as (
+  record: Record,
+  options?: ToStringOptions,
+) => string

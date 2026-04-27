@@ -62,7 +62,9 @@ export type DiffMarkers = (
 export function createMarkerToEpochNano(
   nativeTimeZone: NativeTimeZone | undefined,
 ): MarkerToEpochNano {
-  return (nativeTimeZone ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
+  return (
+    nativeTimeZone ? extractEpochNano : isoToEpochNano
+  ) as MarkerToEpochNano
 }
 
 export function createMoveMarker(
@@ -80,7 +82,11 @@ export function createDiffMarkers(
   calendarId: string,
 ): DiffMarkers {
   if (nativeTimeZone) {
-    return bindArgs(diffZonedEpochsExact, nativeTimeZone, calendarId) as Callable
+    return bindArgs(
+      diffZonedEpochsExact,
+      nativeTimeZone,
+      calendarId,
+    ) as Callable
   }
   return bindArgs(diffDateTimesExact, calendarId) as Callable
 }

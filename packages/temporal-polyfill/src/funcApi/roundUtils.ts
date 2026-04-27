@@ -27,7 +27,9 @@ export function computeYearFloor(
   slots: DateSlots,
 ): IsoDateTimeFields & { year: number } {
   const [year0] = queryNativeDateParts(slots.calendar, slots)
-  const isoFields0 = epochMilliToIso(queryNativeEpochMilli(slots.calendar, year0))
+  const isoFields0 = epochMilliToIso(
+    queryNativeEpochMilli(slots.calendar, year0),
+  )
   return { ...isoFields0, year: year0 }
 }
 
@@ -74,7 +76,9 @@ export function computeIsoWeekCeil(slots: IsoDateFields): IsoDateTimeFields {
 export function computeYearInterval(slots: DateSlots): IsoDateTimeInterval {
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
-  const isoFields1 = epochMilliToIso(queryNativeEpochMilli(slots.calendar, year1))
+  const isoFields1 = epochMilliToIso(
+    queryNativeEpochMilli(slots.calendar, year1),
+  )
   return [isoFields0, isoFields1]
 }
 

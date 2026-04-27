@@ -13,13 +13,13 @@ import {
   negateDuration,
   negateDurationFields,
 } from './durationMath'
-import * as errorMessages from './errorMessages'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
   EpochSlots,
@@ -36,7 +36,6 @@ import {
   createPlainTimeSlots,
   createPlainYearMonthSlots,
 } from './slots'
-import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
@@ -47,16 +46,9 @@ import {
   nanoToIsoTimeAndDay,
 } from './timeMath'
 import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
-import {
-  getSingleInstantFor,
-  zonedEpochSlotsToIso,
-} from './timeZoneNativeMath'
+import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneNativeMath'
 import { Unit, milliInDay } from './units'
-import {
-  Callable,
-  bindArgs,
-  pluckProps,
-} from './utils'
+import { pluckProps } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------

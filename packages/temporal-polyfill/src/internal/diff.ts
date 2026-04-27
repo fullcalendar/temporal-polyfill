@@ -4,14 +4,9 @@ import {
   compareBigNanos,
   diffBigNanos,
 } from './bigNano'
-import {
-  diffEpochMilliByDay,
-  nativeDateUntil,
-} from './calendarNativeMath'
+import { diffEpochMilliByDay, nativeDateUntil } from './calendarNativeMath'
 export { diffEpochMilliByDay } from './calendarNativeMath'
-import {
-  queryNativeDay,
-} from './calendarNativeQuery'
+import { queryNativeDay } from './calendarNativeQuery'
 import { isTimeZoneIdsEqual } from './compare'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
@@ -60,10 +55,7 @@ import {
   isoToEpochNano,
 } from './timeMath'
 import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
-import {
-  getSingleInstantFor,
-  zonedEpochSlotsToIso,
-} from './timeZoneNativeMath'
+import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneNativeMath'
 import {
   DateUnitName,
   DayTimeUnit,
@@ -145,7 +137,6 @@ export function diffZonedDateTimes(
       slots1,
       sign,
       largestUnit,
-      options,
     )
 
     durationFields = roundRelativeDuration(
@@ -202,7 +193,6 @@ export function diffPlainDateTimes(
       plainDateTimeSlots1,
       sign,
       largestUnit,
-      options,
     )
 
     durationFields = roundRelativeDuration(
@@ -270,14 +260,8 @@ export function diffPlainYearMonth(
   const getDay = (isoFields: IsoDateFields) =>
     queryNativeDay(calendarId, isoFields)
 
-  const firstOfMonth0 = moveToDayOfMonthUnsafe(
-    getDay,
-    plainYearMonthSlots0,
-  )
-  const firstOfMonth1 = moveToDayOfMonthUnsafe(
-    getDay,
-    plainYearMonthSlots1,
-  )
+  const firstOfMonth0 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots0)
+  const firstOfMonth1 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots1)
 
   // Short-circuit if exactly the same (no in-bounds checking later)
   // HACK: not using compareIsoDateFields because choked when epochMillis out-of-bounds
@@ -395,7 +379,6 @@ export function diffZonedEpochsExact(
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   largestUnit: Unit,
-  origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const sign = compareBigNanos(slots1.epochNanoseconds, slots0.epochNanoseconds)
 
@@ -417,7 +400,6 @@ export function diffZonedEpochsExact(
     slots1,
     sign,
     largestUnit,
-    origOptions as DiffOptions<DateUnitName>,
   )
 }
 
@@ -426,7 +408,6 @@ export function diffDateTimesExact(
   startIsoFields: IsoDateTimeFields,
   endIsoFields: IsoDateTimeFields,
   largestUnit: Unit,
-  origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const startEpochNano = isoToEpochNano(startIsoFields)!
   const endEpochNano = isoToEpochNano(endIsoFields)!
@@ -449,7 +430,6 @@ export function diffDateTimesExact(
     endIsoFields,
     sign,
     largestUnit,
-    origOptions,
   )
 }
 
@@ -463,7 +443,6 @@ function diffZonedEpochsBig(
   slots1: ZonedEpochSlots,
   sign: NumberSign, // guaranteed non-zero
   largestUnit: Unit, // year/month/week/day
-  origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
     nativeTimeZone,
@@ -475,12 +454,7 @@ function diffZonedEpochsBig(
   const dateDiff =
     largestUnit === Unit.Day // TODO: use this optimization elsewhere too
       ? diffByDay(isoFields0, isoFields1)
-      : nativeDateUntil(
-          calendarId,
-          isoFields0,
-          isoFields1,
-          largestUnit,
-        )
+      : nativeDateUntil(calendarId, isoFields0, isoFields1, largestUnit)
 
   const timeDiff = nanoToDurationTimeFields(remainderNano)
   const dateTimeDiff = { ...dateDiff, ...timeDiff }
@@ -493,7 +467,6 @@ function diffDateTimesBig(
   endIsoFields: IsoDateTimeFields,
   sign: NumberSign, // guaranteed non-zero
   largestUnit: Unit, // year/month/week
-  origOptions?: DiffOptions<UnitName>,
 ): DurationFields {
   const [startIsoDate, endIsoDate, timeNano] = prepareDateTimeDiff(
     startIsoFields,

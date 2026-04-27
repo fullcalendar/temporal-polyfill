@@ -45,7 +45,6 @@ import {
   createPlainDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
@@ -123,12 +122,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(
-          false,
-          slots,
-          toDurationSlots(durationArg),
-          options,
-        ),
+        movePlainDateTime(false, slots, toDurationSlots(durationArg), options),
       )
     },
     subtract(
@@ -137,12 +131,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
-        movePlainDateTime(
-          true,
-          slots,
-          toDurationSlots(durationArg),
-          options,
-        ),
+        movePlainDateTime(true, slots, toDurationSlots(durationArg), options),
       )
     },
     until(

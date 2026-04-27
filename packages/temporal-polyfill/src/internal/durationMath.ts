@@ -1,9 +1,5 @@
 import { BigNano, addBigNanos, bigNanoToNumber } from './bigNano'
 import {
-  dateAdd,
-  nativeDateUntil,
-} from './calendarNativeMath'
-import {
   DurationFields,
   DurationTimeFields,
   durationCalendarFieldNamesAsc,
@@ -86,7 +82,10 @@ export function addDurations<RA>(
 
   const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(nativeTimeZone, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(
+    nativeTimeZone,
+    relativeToSlots.calendar,
+  )
 
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
@@ -161,7 +160,10 @@ export function roundDuration<RA>(
   const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(nativeTimeZone, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(
+    nativeTimeZone,
+    relativeToSlots.calendar,
+  )
 
   const endMarker = moveMarker(marker, slots)
 

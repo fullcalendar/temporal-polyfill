@@ -38,7 +38,6 @@ import {
 } from '../internal/slots'
 import { checkIsoDateInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { DateUnitName, Unit } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import {
@@ -217,19 +216,13 @@ export const subtract = bindArgs(movePlainDate, true) as (
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(
-  diffPlainDates,
-  false,
-) as (
+export const until = bindArgs(diffPlainDates, false) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(
-  diffPlainDates,
-  true,
-) as (
+export const since = bindArgs(diffPlainDates, true) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,

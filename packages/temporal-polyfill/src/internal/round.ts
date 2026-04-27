@@ -181,9 +181,7 @@ export function roundPlainTime(
 // Zoned Utils
 // -----------------------------------------------------------------------------
 
-export function computeZonedHoursInDay(
-  slots: ZonedDateTimeSlots,
-): number {
+export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
   const nativeTimeZone = queryNativeTimeZone(slots.timeZone)
 
   const isoFields = zonedEpochSlotsToIso(slots, nativeTimeZone)

@@ -52,7 +52,8 @@ function createCalendarGetters<M>(methodNameMap: M): {
   const methods = {} as any
 
   for (const methodName in methodNameMap) {
-    const getter = calendarGetterQueries[methodName as keyof typeof calendarGetterQueries]
+    const getter =
+      calendarGetterQueries[methodName as keyof typeof calendarGetterQueries]
     methods[methodName] = function (this: any, slots: any) {
       return getter(slots)
     }

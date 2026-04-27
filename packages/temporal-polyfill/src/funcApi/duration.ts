@@ -20,7 +20,6 @@ import {
   TimeDisplayOptions,
 } from '../internal/optionsRefine'
 import { DurationBranding } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity } from '../internal/utils'
@@ -106,15 +105,15 @@ export const subtract = bindArgs(
   true,
 ) as (record0: Record, record1: Record, options?: ArithmeticOptions) => Record
 
-export const round = bindArgs(
-  roundDuration<RelativeToRecord>,
-  identity,
-) as (record: Record, options?: RoundOptions) => Record
+export const round = bindArgs(roundDuration<RelativeToRecord>, identity) as (
+  record: Record,
+  options?: RoundOptions,
+) => Record
 
-export const total = bindArgs(
-  totalDuration<RelativeToRecord>,
-  identity,
-) as (record: Record, options?: UnitName | TotalOptions) => number
+export const total = bindArgs(totalDuration<RelativeToRecord>, identity) as (
+  record: Record,
+  options?: UnitName | TotalOptions,
+) => number
 
 export const compare = bindArgs(
   compareDurations<RelativeToRecord>,

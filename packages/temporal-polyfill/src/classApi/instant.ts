@@ -25,7 +25,6 @@ import {
   ZonedDateTimeSlots,
   createInstantSlots,
 } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
 import { TimeUnitName, nanoInMilli } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {

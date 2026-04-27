@@ -3,8 +3,8 @@ import {
   convertNativeToPlainMonthDay,
   convertNativeToPlainYearMonth,
   isoTimeFieldsToCal,
-  zonedDateTimeWithFields,
   refineNativeZonedDateTimeBag,
+  zonedDateTimeWithFields,
 } from '../internal/bagRefine'
 import {
   BigNano,
@@ -280,9 +280,9 @@ export const inLeapYear = adaptDateFunc(computeInLeapYear) as (
   record: Record,
 ) => boolean
 
-export const hoursInDay = bindArgs(
-  computeZonedHoursInDay,
-) as (record: Record) => number
+export const hoursInDay = bindArgs(computeZonedHoursInDay) as (
+  record: Record,
+) => number
 
 // Setters
 // -----------------------------------------------------------------------------
@@ -303,16 +303,12 @@ export function withTimeZone(record: Record, timeZone: string): Record {
   return slotsWithTimeZoneId(record, refineTimeZoneId(timeZone))
 }
 
-export const withPlainDate = bindArgs(
-  zonedDateTimeWithPlainDate,
-) as (
+export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
   zonedDateTimeRecord: Record,
   plainDateRecord: PlainDateFns.Record,
 ) => Record
 
-export const withPlainTime = bindArgs(
-  zonedDateTimeWithPlainTime,
-) as (
+export const withPlainTime = bindArgs(zonedDateTimeWithPlainTime) as (
   zonedDateTimeRecord: Record,
   plainTimeRecord?: PlainTimeFns.Record,
 ) => Record
@@ -320,37 +316,25 @@ export const withPlainTime = bindArgs(
 // Math
 // -----------------------------------------------------------------------------
 
-export const add = bindArgs(
-  moveZonedDateTime,
-  false,
-) as (
+export const add = bindArgs(moveZonedDateTime, false) as (
   zonedDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const subtract = bindArgs(
-  moveZonedDateTime,
-  true,
-) as (
+export const subtract = bindArgs(moveZonedDateTime, true) as (
   zonedDateTimeRecord: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(
-  diffZonedDateTimes,
-  false,
-) as (
+export const until = bindArgs(diffZonedDateTimes, false) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(
-  diffZonedDateTimes,
-  true,
-) as (
+export const since = bindArgs(diffZonedDateTimes, true) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
@@ -361,9 +345,9 @@ export const round = bindArgs(roundZonedDateTime) as (
   options: DayTimeUnitName | RoundOptions,
 ) => Record
 
-export const startOfDay = bindArgs(
-  computeZonedStartOfDay,
-) as (record: Record) => Record
+export const startOfDay = bindArgs(computeZonedStartOfDay) as (
+  record: Record,
+) => Record
 
 export const equals = zonedDateTimesEqual as (
   record0: Record,
@@ -382,17 +366,17 @@ export const toInstant = zonedDateTimeToInstant as (
   record: Record,
 ) => InstantFns.Record
 
-export const toPlainDateTime = bindArgs(
-  zonedDateTimeToPlainDateTime,
-) as (record: Record) => PlainDateTimeFns.Record
+export const toPlainDateTime = bindArgs(zonedDateTimeToPlainDateTime) as (
+  record: Record,
+) => PlainDateTimeFns.Record
 
-export const toPlainDate = bindArgs(
-  zonedDateTimeToPlainDate,
-) as (record: Record) => PlainDateFns.Record
+export const toPlainDate = bindArgs(zonedDateTimeToPlainDate) as (
+  record: Record,
+) => PlainDateFns.Record
 
-export const toPlainTime = bindArgs(
-  zonedDateTimeToPlainTime,
-) as (record: Record) => PlainTimeFns.Record
+export const toPlainTime = bindArgs(zonedDateTimeToPlainTime) as (
+  record: Record,
+) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
   return convertNativeToPlainYearMonth(getCalendarId(record), getFields(record))
@@ -458,9 +442,10 @@ export function rangeToLocaleStringParts(
   return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
-export const toString = bindArgs(
-  formatZonedDateTimeIso,
-) as (record: Record, options?: ToStringOptions) => string
+export const toString = bindArgs(formatZonedDateTimeIso) as (
+  record: Record,
+  options?: ToStringOptions,
+) => string
 
 // Internal Utils
 // -----------------------------------------------------------------------------

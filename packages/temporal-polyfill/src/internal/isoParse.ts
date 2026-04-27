@@ -1,5 +1,6 @@
 import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
+import { resolveCalendarId } from './calendarId'
 import {
   queryNativeDateParts,
   queryNativeDay,
@@ -7,7 +8,6 @@ import {
   queryNativeMonthCodeParts,
   queryNativeYearMonthForMonthDay,
 } from './calendarNativeQuery'
-import { resolveCalendarId } from './calendarId'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
@@ -207,9 +207,7 @@ export function parsePlainDate(
   )
 }
 
-export function parsePlainYearMonth(
-  s: string,
-): PlainYearMonthSlots {
+export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
   const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
@@ -234,9 +232,7 @@ function requireIsoCalendar(organized: { calendar: string }): void {
   }
 }
 
-export function parsePlainMonthDay(
-  s: string,
-): PlainMonthDaySlots {
+export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
   const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {

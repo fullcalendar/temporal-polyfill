@@ -3,7 +3,6 @@ import {
   DateParts,
   EraParts,
   MonthCodeParts,
-  NativeCalendar,
   WeekParts,
   YearMonthParts,
 } from './calendarNative'

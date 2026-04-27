@@ -3,10 +3,7 @@ import {
   isoCalendarId,
   japaneseCalendarId,
 } from './calendarConfig'
-import {
-  YearMonthParts,
-  monthCodeNumberToMonth,
-} from './calendarNative'
+import { YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -32,18 +29,14 @@ import {
   isoMonthsInYear,
 } from './isoMath'
 import { Overflow } from './options'
-import {
-  DiffOptions,
-  OverflowOptions,
-  refineOverflowOptions,
-} from './optionsRefine'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   checkIsoDateInBounds,
   epochMilliToIso,
   isoArgsToEpochMilli,
   isoToEpochMilli,
 } from './timeMath'
-import { DateUnitName, Unit, givenFieldsToBigNano, milliInDay } from './units'
+import { Unit, givenFieldsToBigNano, milliInDay } from './units'
 import { clampEntity, divModTrunc, divTrunc, modTrunc } from './utils'
 
 export function dateAdd(
@@ -57,7 +50,11 @@ export function dateAdd(
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
-  days += givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc)[0]
+  days += givenFieldsToBigNano(
+    durationFields,
+    Unit.Hour,
+    durationFieldNamesAsc,
+  )[0]
 
   if (years || months) {
     epochMilli = monthAdd(
@@ -109,7 +106,9 @@ export function monthAdd(
       'month',
       month,
       1,
-      intlCalendar ? computeIntlMonthsInYear(intlCalendar, year) : computeIsoMonthsInYear(year),
+      intlCalendar
+        ? computeIntlMonthsInYear(intlCalendar, year)
+        : computeIsoMonthsInYear(year),
       overflow,
     )
   }
@@ -173,7 +172,9 @@ export function intlMonthAdd(
       }
     } else {
       let monthsInYear: number
-      while (month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))) {
+      while (
+        month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))
+      ) {
         month -= monthsInYear
         year++
       }
@@ -287,7 +288,6 @@ function diffYearMonthDay(
 
     if (Math.sign(dayDiff) === -sign) {
       const origDaysInMonth1 = daysInMonth1
-
       ;[year1, month1] = intlCalendar
         ? intlMonthAdd(intlCalendar, year1, month1, -sign)
         : isoMonthAdd(year1, month1, -sign)
@@ -343,9 +343,7 @@ function diffYearMonthDay(
   return [yearDiff, monthDiff, dayDiff]
 }
 
-function queryIntlCalendarMaybe(
-  calendarId: string,
-): IntlCalendar | undefined {
+function queryIntlCalendarMaybe(calendarId: string): IntlCalendar | undefined {
   return isIsoBasedCalendarId(calendarId)
     ? undefined
     : queryIntlCalendar(calendarId)

@@ -101,9 +101,7 @@ export function fromFields(
   )
 }
 
-export const fromString = parsePlainYearMonth as (
-  s: string,
-) => Record
+export const fromString = parsePlainYearMonth as (s: string) => Record
 
 export function isInstance(record: any): record is Record {
   return Boolean(record) && record.branding === PlainYearMonthBranding
@@ -142,37 +140,25 @@ export function withFields(
 // Math
 // -----------------------------------------------------------------------------
 
-export const add = bindArgs(
-  movePlainYearMonth,
-  false,
-) as (
+export const add = bindArgs(movePlainYearMonth, false) as (
   plainYearMonthFields: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const subtract = bindArgs(
-  movePlainYearMonth,
-  true,
-) as (
+export const subtract = bindArgs(movePlainYearMonth, true) as (
   plainYearMonthFields: Record,
   durationRecord: DurationFns.Record,
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(
-  diffPlainYearMonth,
-  false,
-) as (
+export const until = bindArgs(diffPlainYearMonth, false) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
 ) => DurationFns.Record
 
-export const since = bindArgs(
-  diffPlainYearMonth,
-  true,
-) as (
+export const since = bindArgs(diffPlainYearMonth, true) as (
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
@@ -195,7 +181,11 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertNativePlainYearMonthToDate(getCalendarId(record), getFields(record), fields)
+  return convertNativePlainYearMonthToDate(
+    getCalendarId(record),
+    getFields(record),
+    fields,
+  )
 }
 
 // Formatting
