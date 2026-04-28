@@ -58,9 +58,9 @@ See these files for failure groups:
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.tsv` (all failures)
 
 
-## Test262 Observability Notes
+## Test262 Notes
 
-- Test262 runs against built output in `dist/global.js`. After source edits, run `pnpm run build` before expecting `pnpm run test262` to reflect the changes.
+- IMPORTANT: Always run `pnpm run build` before running `pnpm run test262`. The test262 runner tests against the built output in `dist/global.js`, not the source files.
 - For observability failures, avoid converting internal tuple/array paths back to spread, destructuring, or `for...of` when the code intentionally uses index access. Those constructs can observe `Array.prototype[Symbol.iterator]`.
 - When fabricating internal option bags, prefer null-prototype objects to avoid observing `Object.prototype` pollution.
 - For option-ordering tests, read and coerce all relevant options first, then do algorithmic validation.

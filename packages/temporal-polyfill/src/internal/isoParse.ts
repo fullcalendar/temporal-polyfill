@@ -50,6 +50,7 @@ import {
   createZonedDateTimeSlots,
 } from './slots'
 import {
+  checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
@@ -346,8 +347,6 @@ function finalizeZonedDateTime(
   const timeZoneId = resolveTimeZoneId(organized.timeZone)
   const timeZoneImpl = queryNativeTimeZone(timeZoneId)
 
-  // does NOT checkIsoDateInBoundsStrict,
-  // because the epoch-nanoseconds bounding is done within getMatchingInstantFor
   checkIsoDateTimeFields(organized)
 
   let epochNano: BigNano
@@ -370,6 +369,9 @@ function finalizeZonedDateTime(
       organized,
     )
   }
+
+  // Validate the computed epochNanoseconds is within the representable range
+  checkEpochNanoInBounds(epochNano)
 
   return createZonedDateTimeSlots(
     epochNano,

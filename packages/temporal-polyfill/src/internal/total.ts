@@ -104,8 +104,18 @@ export function totalRelativeDuration(
     markerToEpochNano,
     moveMarker,
   )
-  const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
-  return durationFields[durationFieldNamesAsc[totalUnit]] + frac * sign
+  // Compute (integerPart * denom + numerator * sign) / denom in one division
+  // to avoid float64 precision loss from separate num/denom + integerPart
+  //
+  // TODO: somehow DRY with computeEpochNanoFrac?
+  //
+  const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
+  if (!denom) {
+    throw new RangeError(errorMessages.invalidProtocolResults)
+  }
+  const numerator = bigNanoToNumber(diffBigNanos(epochNano0, endEpochNano))
+  const integerPart = durationFields[durationFieldNamesAsc[totalUnit]]
+  return (integerPart * denom + numerator * sign) / denom
 }
 
 function totalDayTimeDuration(

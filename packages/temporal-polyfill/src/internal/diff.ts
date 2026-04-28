@@ -414,6 +414,27 @@ export function diffZonedEpochsExact(
     )
   }
 
+  // During a fall-back transition, same-date wall-clock times can move in
+  // the opposite direction from epoch time. Treat that as a pure time diff
+  // to avoid mixed-sign calendar/time duration fields.
+  //
+  // TODO: make DRY with diffZonedDateTimes
+  //
+  const isoFields0 = zonedEpochSlotsToIso(slots0, nativeTimeZone)
+  const isoFields1 = zonedEpochSlotsToIso(slots1, nativeTimeZone)
+  if (
+    isoFields0.isoYear === isoFields1.isoYear &&
+    isoFields0.isoMonth === isoFields1.isoMonth &&
+    isoFields0.isoDay === isoFields1.isoDay &&
+    Math.sign(diffTimes(isoFields0, isoFields1)) === -sign
+  ) {
+    return diffEpochNanosExact(
+      slots0.epochNanoseconds,
+      slots1.epochNanoseconds,
+      Unit.Hour,
+    )
+  }
+
   return diffZonedEpochsBig(
     calendarId,
     nativeTimeZone,

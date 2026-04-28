@@ -149,7 +149,8 @@ export function roundDuration<RA>(
   }
 
   // short circuit, see DifferencePlainDateTimeWithRounding
-  if (!isZonedEpochSlots(relativeToSlots) && !slots.sign) {
+  // A blank duration should always return itself regardless of relativeTo type
+  if (!slots.sign) {
     return slots
   }
 
@@ -309,7 +310,8 @@ export function nanoToDurationDayTimeFields(
   dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
     days * (nanoInUtcDay / unitNanoMap[largestUnit])
 
-  if (!Number.isFinite(dayTimeFields[durationFieldNamesAsc[largestUnit]]!)) {
+  // Check that the largest unit value is a safe integer (float64-representable)
+  if (!Number.isSafeInteger(dayTimeFields[durationFieldNamesAsc[largestUnit]]!)) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
