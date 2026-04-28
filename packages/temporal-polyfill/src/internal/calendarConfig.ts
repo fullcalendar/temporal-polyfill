@@ -190,6 +190,35 @@ export const daysInYearOverridesByCalendarIdBase: Record<
     2029: 355,
     2030: 354,
   },
+  'hebrew': {
+    3705: 384,
+    3952: 384,
+    4050: 384,
+    4297: 384,
+    4544: 384,
+    4642: 384,
+    4889: 384,
+    4967: 384,
+    5136: 384,
+    5214: 384,
+    5461: 384,
+    5559: 384,
+  },
+}
+
+export const hebrewInvalidCompleteLeapYears: Record<number, true> = {
+  3705: true,
+  3952: true,
+  4050: true,
+  4297: true,
+  4544: true,
+  4642: true,
+  4889: true,
+  4967: true,
+  5136: true,
+  5214: true,
+  5461: true,
+  5559: true,
 }
 
 // only used by calendar

@@ -3,6 +3,7 @@ import {
   defaultEraByCalendarIdBase,
   eraOriginsByCalendarId,
   eraRemapsByCalendarId,
+  hebrewInvalidCompleteLeapYears,
   normalizeEraName,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
@@ -203,6 +204,22 @@ function correctIntlYearData(
     // ICU4C places the Tevet boundary one day early in Hebrew epoch year 0.
     // Shift only that boundary so Kislev has the expected 30th day.
     monthEpochMillis[3] += milliInDay
+
+    return { ...yearData, monthEpochMillis }
+  }
+
+  if (calendarIdBase === 'hebrew' && hebrewInvalidCompleteLeapYears[year]) {
+    const monthEpochMillis = yearData.monthEpochMillis.slice()
+
+    // ICU4C reports these leap years as complete years whose kevi'ah symbol is
+    // the impossible 3C1: Rosh Hashanah on Tuesday, 385 days, and Pesach on
+    // Sunday. Non-deferred Hebrew calendar rules need the regular leap shape
+    // 3R7 instead. Shorten Cheshvan by one day by moving Kislev (M03) and all
+    // later month starts one day earlier; computeIntlDaysInYear pairs this
+    // with a 384-day override so accessors see the same regular leap shape.
+    for (let i = 2; i < monthEpochMillis.length; i++) {
+      monthEpochMillis[i] -= milliInDay
+    }
 
     return { ...yearData, monthEpochMillis }
   }
