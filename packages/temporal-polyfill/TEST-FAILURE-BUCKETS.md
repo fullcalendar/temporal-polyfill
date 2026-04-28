@@ -117,7 +117,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket I: Calendar field math
 
-- Status: PARTIAL
+- Status: DONE
 - Count: `276`
 - Shared root cause:
   non-ISO month/day/year field derivation, leap-month logic, leap-year logic, monthCode/reference-day generation, intercalary month handling, calendar-specific field error ordering, and related derived accessors.
@@ -130,6 +130,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket J: Non-ISO calendar arithmetic and generic operation semantics
 
+- Status: DONE
 - Count: `339`
 - Shared root cause:
   remaining non-ISO arithmetic and field-resolution behavior not already isolated above: generic `add`, `subtract`, `with`, `since`, `until`, extreme-date handling, mutually-exclusive field checks, and calendar-specific operation semantics.

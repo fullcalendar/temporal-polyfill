@@ -518,19 +518,19 @@ function diffYearMonthDay(
     dayDiff = day1 - day0Trunc + dayCorrect
 
     if (yearDiff) {
-      const [monthCodeNumber0, isLeapYear0] = intlCalendar
+      const [monthCodeNumber0, isLeapMonth0] = intlCalendar
         ? computeIntlMonthCodeParts(intlCalendar, year0, month0)
         : computeIsoMonthCodeParts(year0, month0)
-      const [monthCodeNumber1, isLeapYear1] = intlCalendar
+      const [monthCodeNumber1, isLeapMonth1] = intlCalendar
         ? computeIntlMonthCodeParts(intlCalendar, year1, month1)
         : computeIsoMonthCodeParts(year1, month1)
       monthDiff = computeYearBalanceMonthDiff(
         intlCalendar,
         sign,
         monthCodeNumber0,
-        isLeapYear0,
+        isLeapMonth0,
         monthCodeNumber1,
-        isLeapYear1,
+        isLeapMonth1,
       )
 
       if (Math.sign(monthDiff) === -sign) {
@@ -546,7 +546,7 @@ function diffYearMonthDay(
         const month0Trunc = computeYearAddMonth(
           intlCalendar,
           monthCodeNumber0,
-          isLeapYear0,
+          isLeapMonth0,
           intlCalendar ? computeIntlLeapMonth(intlCalendar, year1) : undefined,
           Overflow.Constrain,
         )
@@ -557,6 +557,28 @@ function diffYearMonthDay(
             (intlCalendar
               ? computeIntlMonthsInYear(intlCalendar, year1)
               : computeIsoMonthsInYear(year1)))
+      } else if (intlCalendar) {
+        const month0Projected = computeYearAddMonth(
+          intlCalendar,
+          monthCodeNumber0,
+          isLeapMonth0,
+          computeIntlLeapMonth(intlCalendar, year1),
+          Overflow.Constrain,
+        )
+
+        // Once the year portion is balanced, the month remainder is the
+        // concrete number of calendar month slots between the source
+        // month-code tuple as it would exist in the balanced year and the
+        // target month. This matters for variable-leap calendars: M07 in a
+        // year with an inserted M05L is ordinal month 8, so M01 - M07 is
+        // seven month slots, not six month-code numbers.
+        monthDiff = computeIntlMonthSpan(
+          intlCalendar,
+          year1,
+          month0Projected,
+          year1,
+          month1,
+        )
       }
     }
   }
