@@ -24,6 +24,7 @@ import {
 } from './calendarNativeQuery'
 import {
   requireObjectLike,
+  requireString,
   toInteger,
   toPositiveInteger,
   toStrictInteger,
@@ -140,11 +141,11 @@ const dateFieldRefiners = {
   eraYear: toInteger,
   year: toInteger,
   month: toPositiveInteger,
+  // monthCode refiner only validates type (string). Range validation (parseMonthCode)
+  // is deferred to dateFromFields/yearMonthFromFields/monthDayFromFields so that
+  // missing-field TypeError precedes invalid-monthCode RangeError.
   monthCode(monthCode: string) {
-    const s = toStringViaPrimitive(monthCode)
-    // HACK to validate ASAP. will need to parse again later!!!
-    parseMonthCode(s)
-    return s
+    return requireString(monthCode)
   },
   day: toPositiveInteger,
 }
@@ -751,6 +752,24 @@ export function dateFromFields(
   options?: OverflowOptions,
 ): PlainDateSlots {
   const overflow = refineOverflowOptions(options)
+
+  // Pre-check required fields so that missing-field TypeError is thrown BEFORE
+  // any RangeError from monthCode parsing or bounds checking.
+  // This ensures correct error ordering per spec (e.g. calendarresolvefields-error-ordering tests).
+  const eraOrigins = getCalendarEraOrigins({ id: calendarId })
+  if (
+    fields.year === undefined &&
+    (fields.era === undefined || fields.eraYear === undefined)
+  ) {
+    throw new TypeError(errorMessages.missingYear(eraOrigins))
+  }
+  if (fields.monthCode === undefined && fields.month === undefined) {
+    throw new TypeError(errorMessages.missingMonth)
+  }
+  if (fields.day === undefined) {
+    throw new TypeError(errorMessages.missingField('day'))
+  }
+
   const year = refineYear(calendarId, fields)
   const month = refineMonth(calendarId, fields, year, overflow)
   const day = refineDay(calendarId, fields as DayFields, month, year, overflow)
@@ -765,6 +784,20 @@ export function yearMonthFromFields(
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const overflow = refineOverflowOptions(options)
+
+  // Pre-check required fields so that missing-field TypeError is thrown BEFORE
+  // any RangeError from monthCode parsing or bounds checking.
+  const eraOrigins = getCalendarEraOrigins({ id: calendarId })
+  if (
+    fields.year === undefined &&
+    (fields.era === undefined || fields.eraYear === undefined)
+  ) {
+    throw new TypeError(errorMessages.missingYear(eraOrigins))
+  }
+  if (fields.monthCode === undefined && fields.month === undefined) {
+    throw new TypeError(errorMessages.missingMonth)
+  }
+
   const year = refineYear(calendarId, fields)
   const month = refineMonth(calendarId, fields, year, overflow)
   const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, 1)
@@ -781,6 +814,13 @@ export function monthDayFromFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const overflow = refineOverflowOptions(options)
+
+  // Pre-check required fields so that missing-field TypeError is thrown BEFORE
+  // any RangeError from monthCode parsing or bounds checking.
+  if (fields.day === undefined) {
+    throw new TypeError(errorMessages.missingField('day'))
+  }
+
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
       ? refineYear(calendarId, fields)

@@ -46,8 +46,10 @@ export class FixedTimeZone implements NativeTimeZone {
     return this.offsetNano
   }
 
+  // Strict ISO date bounds checking is intentionally NOT done here.
+  // It is conditionally performed in getMatchingInstantFor based on offsetDisambig.
+  // This allows offset: "use"/"ignore" to accept epoch-boundary dates.
   getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): BigNano[] {
-    checkIsoDateInBoundsStrict(isoDateTimeFields) // TODO: also do for non-ISO!!!
     return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)]
   }
 

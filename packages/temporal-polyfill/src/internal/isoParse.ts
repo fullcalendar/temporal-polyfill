@@ -307,10 +307,19 @@ export function parseDuration(s: string): DurationSlots {
   return createDurationSlots(checkDurationUnits(parsed))
 }
 
+// If `s` is a full date/datetime string, extract its calendar annotation.
+// If `s` is a time-only string (e.g. "12:34:56"), fall back to iso8601
+// because a time string is not a valid calendar identifier.
 export function parseCalendarId(s: string): string {
   const res =
     parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
-  return res ? res.calendar : s
+  if (res) {
+    return res.calendar
+  }
+  if (parseTimeOnly(s)) {
+    return isoCalendarId
+  }
+  return s
 }
 
 export function parseTimeZoneId(s: string): string {
@@ -478,14 +487,50 @@ const durationRegExp = createRegExp(
 // Maybe-parsing
 // -----------------------------------------------------------------------------
 
+// Separator consistency: if one separator is present in a component, all must match.
+// e.g. "2020-0101" is invalid because date uses both '-' and no separator.
+function validateDateSeparators(s: string): boolean {
+  const m = s.match(/^[+-]?(?:\d{6}|\d{4})(-?)(\d{2})(-?)(\d{2})/)
+  if (!m) return true
+  return m[1] === m[3]
+}
+
+// Strict patterns to reject mixed separators in time/offset components.
+// e.g. "00:0000" or "+00:0000" are invalid because they mix ':' and no separator.
+const strictTimeOnlyRegExp = /^T?\d{2}(?::\d{2}(?::\d{2})?|\d{2}(?:\d{2}(?:\d{2})?)?)?(?:[.,]\d{1,9})?$/i
+const strictOffsetRegExp = /^[+-]\d{2}(?::\d{2}(?::\d{2})?|\d{2}(?:\d{2}(?:\d{2})?)?)?$/i
+
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)
-  return parts ? organizeDateTimeLikeParts(parts) : undefined
+  if (!parts) return undefined
+  if (!validateDateSeparators(parts[0])) return undefined
+
+  // Validate time portion separator consistency (e.g. reject "00:0000")
+  if (parts[6]) {
+    const tIndex = parts[0].search(/[T ]/i)
+    let timePortion = tIndex >= 0 ? parts[0].slice(tIndex + 1) : ''
+    if (parts[10] !== undefined) {
+      const offsetIndex = timePortion.indexOf(parts[10])
+      if (offsetIndex >= 0) {
+        timePortion = timePortion.slice(0, offsetIndex)
+      }
+    }
+    if (!strictTimeOnlyRegExp.test(timePortion)) return undefined
+  }
+
+  // Validate offset portion separator consistency (e.g. reject "+00:0000")
+  if (parts[10] && (parts[10] || '').toUpperCase() !== 'Z') {
+    if (!strictOffsetRegExp.test(parts[10])) return undefined
+  }
+
+  return organizeDateTimeLikeParts(parts)
 }
 
 function parseYearMonthOnly(s: string): DateOrganized | undefined {
   const parts = yearMonthRegExp.exec(s)
-  return parts ? organizeYearMonthParts(parts) : undefined
+  if (!parts) return undefined
+  if (!validateDateSeparators(parts[0])) return undefined
+  return organizeYearMonthParts(parts)
 }
 
 function parseMonthDayOnly(s: string): DateOrganized | undefined {
@@ -495,9 +540,24 @@ function parseMonthDayOnly(s: string): DateOrganized | undefined {
 
 function parseTimeOnly(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
-  return parts
-    ? (organizeAnnotationParts(parts[10]), organizeTimeParts(parts)) // validate annotations
-    : undefined
+  if (!parts) return undefined
+
+  let timeEnd = parts[0].length
+  if (parts[5] !== undefined) {
+    timeEnd = parts[0].indexOf(parts[5])
+  } else if (parts[10]) {
+    timeEnd = parts[0].indexOf('[')
+  }
+  const timePortion = parts[0].slice(0, timeEnd)
+  if (!strictTimeOnlyRegExp.test(timePortion)) return undefined
+
+  // Validate offset if present
+  const offsetMatch = parts[0].match(/[+-].*?(?=\[|$)/)
+  if (offsetMatch) {
+    parseOffsetNano(offsetMatch[0])
+  }
+
+  return (organizeAnnotationParts(parts[10]), organizeTimeParts(parts)) // validate annotations
 }
 
 function parseDurationFields(s: string): DurationFields | undefined {
@@ -510,7 +570,9 @@ export function parseOffsetNanoMaybe(
   onlyHourMinute?: boolean,
 ): number | undefined {
   const parts = offsetRegExp.exec(s)
-  return parts ? organizeOffsetParts(parts, onlyHourMinute) : undefined
+  if (!parts) return undefined
+  if (!strictOffsetRegExp.test(parts[0])) return undefined
+  return organizeOffsetParts(parts, onlyHourMinute)
 }
 
 // Parts Organization
@@ -710,7 +772,8 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
       }
       timeZoneId = val
     } else if (name === 'u-ca') {
-      calendarIds.push(val)
+      // Lowercase calendar ID for case-insensitive matching (e.g. ISO8601 -> iso8601)
+      calendarIds.push(val.toLowerCase())
       calendarIsCritical ||= isCritical
     } else if (isCritical || /[A-Z]/.test(name)) {
       // Critical annotation not used, or uppercase disallowed

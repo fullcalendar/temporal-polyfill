@@ -125,7 +125,12 @@ export function toStringViaPrimitive(arg: string, entityName?: string): string {
   return requireString(arg, entityName)
 }
 
+// Spec: booleans must be converted to BigInt before number check.
+// true -> 1n, false -> 0n. If not bigint/string/boolean, throw TypeError.
 export function toBigInt(bi: bigint): bigint {
+  if (typeof bi === 'boolean') {
+    return BigInt(bi ? 1 : 0)
+  }
   if (typeof bi === 'string') {
     return BigInt(bi)
   }

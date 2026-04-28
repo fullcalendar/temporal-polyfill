@@ -37,6 +37,21 @@ To run individual test files:
 pnpm run test262 ../../test262/test/built-ins/Temporal/Instant/basic.js
 ```
 
+The test262 runner accepts multiple file paths in one invocation. For example:
+
+```
+pnpm run test262 \
+  ../../test262/test/built-ins/Temporal/PlainYearMonth/prototype/add/options-read-before-algorithmic-validation.js \
+  ../../test262/test/built-ins/Temporal/PlainYearMonth/prototype/subtract/options-read-before-algorithmic-validation.js \
+  --no-max
+```
+
+To run a whole bucket from the TSV file, generate the file list with `awk`:
+
+```
+pnpm run test262 $(awk -F '\t' '$1 == "A" { print "../../test262/" $2 }' TEST-FAILURE-BUCKETS.tsv) --no-max
+```
+
 See these files for failure groups:
 
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.md` (starting point)

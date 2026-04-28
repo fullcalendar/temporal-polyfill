@@ -29,6 +29,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket B: Built-in parsing / validation / coercion
 
+- Status: DONE
 - Count: `27`
 - Shared root cause:
   built-in Temporal parsing and validation mismatches, including invalid ISO strings, invalid offsets, monthCode typing, calendar-field error ordering, constructor coercion, and date-limit checks.

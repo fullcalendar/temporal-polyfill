@@ -1,4 +1,5 @@
 node_modules
+.claude/worktrees
 
 /packages/*/dist/*
 /!packages/*/dist/.npmignore

@@ -7,6 +7,7 @@ import { EpochDisambig, OffsetDisambig } from './options'
 import { roundToMinute } from './round'
 import { ZonedDateTimeSlots, ZonedEpochSlots } from './slots'
 import {
+  checkIsoDateInBoundsStrict,
   epochNanoToIso,
   isoToEpochNano,
   isoToEpochNanoWithOffset,
@@ -89,6 +90,16 @@ export function getMatchingInstantFor(
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
       return isoToEpochNanoWithOffset(isoFields, offsetNano)
     }
+  }
+
+  // Only enforce strict ISO date bounds for Prefer/Reject offset disambiguation.
+  // Use/Ignore should skip this check, matching spec behavior for fixed-offset
+  // time zones at epoch boundaries (e.g. ZonedDateTime.from("-000001-01-01T00:00+00:00[UTC]")).
+  if (
+    offsetDisambig === OffsetDisambig.Prefer ||
+    offsetDisambig === OffsetDisambig.Reject
+  ) {
+    checkIsoDateInBoundsStrict(isoFields)
   }
 
   const possibleEpochNanos = nativeTimeZone.getPossibleInstantsFor(isoFields)
