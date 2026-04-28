@@ -177,6 +177,21 @@ export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
   'dangi': 30,
 }
 
+// Current ICU4C data disagrees with Temporal/test262 for a few Chinese year
+// lengths near 2030. Keep these accessor-level overrides narrow instead of
+// shifting month boundaries, which would affect date construction semantics.
+export const daysInYearOverridesByCalendarIdBase: Record<
+  string,
+  Record<number, number>
+> = {
+  'chinese': {
+    2026: 354,
+    2027: 354,
+    2029: 355,
+    2030: 354,
+  },
+}
+
 // only used by calendar
 // ---------------------
 

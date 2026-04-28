@@ -1,4 +1,5 @@
 import {
+  daysInYearOverridesByCalendarIdBase,
   defaultEraByCalendarIdBase,
   eraOriginsByCalendarId,
   eraRemapsByCalendarId,
@@ -475,6 +476,16 @@ export function computeIntlDaysInYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): number {
+  const calendarBase = intlCalendar.id
+    ? computeCalendarIdBase(intlCalendar.id)
+    : undefined
+  const override = calendarBase
+    ? daysInYearOverridesByCalendarIdBase[calendarBase]?.[year]
+    : undefined
+  if (override !== undefined) {
+    return override
+  }
+
   const milli = computeIntlEpochMilli(intlCalendar, year)
   const milliNext = computeIntlEpochMilli(intlCalendar, year + 1)
   return diffEpochMilliByDay(milli, milliNext)
