@@ -16,7 +16,7 @@
 
 
 ##
-## Spec deviations (3 total)
+## Spec deviations (4 total)
 ##
 
 # WONTFIX (1)
@@ -35,13 +35,42 @@
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # WONTFIX (2)
+# Our polyfill does not fully support the lowest/highest year of some i18n
+# calendars because:
+#
+# A) To convert between ISO dates and non-ISO YMD values, we must use
+#    Intl.DateTimeFormat scraping to crawl through a year's months. The
+#    `withCalendar` tests fail while reading non-ISO fields from an ISO edge
+#    date; the `from` tests fail while resolving non-ISO fields back to an ISO
+#    date. In both directions, if the requested date is within-bounds but the
+#    calendar year boundary used for probing is not, our algorithm chokes.
+#
+# Failing code:
+#   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
+#   // 2 days within epoch-milliseconds lower bound, but still fails
+#
+# B) -271821-04-19 is a valid PlainDate but it's out-of-range when computing UTC
+#    epoch-milliseconds for Intl.DateTimeFormat. Possible to use a negative
+#    offset time zone like America/Chicago, but this special-case is cumbersome.
+#    Similar TimeClip issues happen at the upper edge when probing beyond
+#    +8640000000000000 ms.
+#
+intl402/Temporal/PlainDate/from/extreme-dates.js
+intl402/Temporal/PlainDate/prototype/withCalendar/extreme-dates.js
+intl402/Temporal/PlainDateTime/from/extreme-dates.js
+intl402/Temporal/PlainDateTime/prototype/withCalendar/extreme-dates.js
+intl402/Temporal/PlainYearMonth/from/extreme-dates.js
+intl402/Temporal/ZonedDateTime/from/extreme-dates.js
+intl402/Temporal/ZonedDateTime/prototype/withCalendar/extreme-dates.js
+
+# WONTFIX (3)
 # We do not patch Intl.DateTimeFormat's constructor to more strictly validate
 # timeZone strings
 #
 # A) Rejecting legacy ICU time zones: see expected-failures-node-gte16.txt
 # B) Rejecting invalid minus sign:    see expected-failures-node-gte22.txt
 
-# WONTFIX (3)
+# WONTFIX (4)
 # We do not patch Intl.DateTimeFormat's resolvedOptions method to return
 # the string-normalized version of the original given time zone ID:
 #
