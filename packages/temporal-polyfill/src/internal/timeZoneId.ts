@@ -25,7 +25,7 @@ export function getTimeZoneAtomic(id: string): string | number {
   return typeof essence === 'number'
     ? essence
     : essence
-      ? essence.resolvedOptions().timeZone
+      ? queryTimeZoneAtomic(essence)
       : utcTimeZoneId
 }
 
@@ -50,21 +50,29 @@ export function getTimeZoneEssence(
 /**
  * @param id Expects uppercase
  */
-const queryTimeZoneIntlFormat = memoize(
-  (id: string): Intl.DateTimeFormat =>
-    new RawDateTimeFormat('en', {
-      calendar: isoCalendarId,
-      timeZone: id,
-      era: 'short',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false,
-    }),
-)
+const queryTimeZoneIntlFormat = memoize((id: string): Intl.DateTimeFormat => {
+  const options = {
+    calendar: isoCalendarId,
+    timeZone: id,
+    era: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: false,
+  } as Intl.DateTimeFormatOptions
+  const format = new RawDateTimeFormat('en', options)
+  timeZoneAtomicMap.set(format, format.resolvedOptions().timeZone)
+  return format
+})
+
+const timeZoneAtomicMap = new WeakMap<Intl.DateTimeFormat, string>()
+
+function queryTimeZoneAtomic(format: Intl.DateTimeFormat): string {
+  return timeZoneAtomicMap.get(format) || format.resolvedOptions().timeZone
+}
 
 const icuRegExp =
   /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/

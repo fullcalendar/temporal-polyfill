@@ -234,7 +234,7 @@ export function queryNativeWeekParts(
   calendarId: string,
   isoFields: Parameters<typeof computeIsoWeekParts>[2],
 ): WeekParts {
-  if (!isIsoBasedCalendarId(calendarId)) {
+  if (calendarId !== isoCalendarId) {
     return [] as unknown as WeekParts
   }
 

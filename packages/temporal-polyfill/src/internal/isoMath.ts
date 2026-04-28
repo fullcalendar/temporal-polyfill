@@ -189,9 +189,9 @@ export function computeIsoEraParts(
 
 function computeGregoryEraParts({ isoYear }: IsoDateFields): EraParts {
   if (isoYear < 1) {
-    return ['gregory-inverse', -isoYear + 1]
+    return ['bce', -isoYear + 1]
   }
-  return ['gregory', isoYear]
+  return ['ce', isoYear]
 }
 
 function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {

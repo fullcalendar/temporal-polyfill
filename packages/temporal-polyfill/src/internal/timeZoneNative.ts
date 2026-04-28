@@ -4,7 +4,6 @@ import { parseIntlPartsYear } from './intlMath'
 import { IsoDateTimeFields } from './isoFields'
 import {
   checkEpochNanoInBounds,
-  checkIsoDateInBoundsStrict,
   epochNanoToSec,
   epochNanoToSecMod,
   isoArgsToEpochSec,
