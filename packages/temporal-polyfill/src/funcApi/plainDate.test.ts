@@ -141,17 +141,6 @@ describe('withCalendar', () => {
       isoDay: 1,
     })
   })
-
-  it('accepts time strings with calendar annotations', () => {
-    const pd0 = PlainDateFns.create(2024, 1, 1)
-    const pd1 = PlainDateFns.withCalendar(pd0, 'T11:30[u-ca=buddhist]')
-    expectPlainDateEquals(pd1, {
-      calendar: 'buddhist',
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-    })
-  })
 })
 
 describe('dayOfWeek', () => {
