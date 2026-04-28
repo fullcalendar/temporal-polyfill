@@ -169,7 +169,9 @@ export function computeIsoWeekParts(
 // Era (complicated stuff)
 // -----------------------------------------------------------------------------
 
-const primaryJapaneseEraMilli = isoArgsToEpochMilli(1868, 9, 8)!
+// Temporal's Japanese era round-tripping follows the Gregorian-aligned era
+// model used by test262, where dates before 1873 remain in CE/BCE.
+const primaryJapaneseEraMilli = isoArgsToEpochMilli(1873, 1, 1)!
 const queryJapaneseEraParts = memoize(computeJapaneseEraParts, WeakMap)
 
 export function computeIsoEraParts(
@@ -198,12 +200,9 @@ function computeJapaneseEraParts(isoFields: IsoDateFields): EraParts {
   const epochMilli = isoToEpochMilli(isoFields)!
 
   if (epochMilli < primaryJapaneseEraMilli) {
-    // TODO: DRY with computeGregoryEraParts
-    const { isoYear } = isoFields
-    if (isoYear < 1) {
-      return ['japanese-inverse', -isoYear + 1]
-    }
-    return ['japanese', isoYear]
+    // Pre-Meiji dates round-trip through generic CE/BCE in Temporal instead of
+    // exposing ICU's large set of historical Japanese era names.
+    return computeGregoryEraParts(isoFields)
   }
 
   const intlParts = hashIntlFormatParts(

@@ -1,4 +1,8 @@
-import { eraOriginsByCalendarId, eraRemapsByCalendarId } from './calendarConfig'
+import {
+  eraOriginsByCalendarId,
+  eraRemapsByCalendarId,
+  normalizeEraName,
+} from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
   DateParts,
@@ -177,6 +181,7 @@ export function parseIntlYear(
   eraYear: number | undefined
   year: number
 } {
+  const rawYear = parseInt(intlParts.year)
   let year = parseIntlPartsYear(intlParts)
   let era: string | undefined
   let eraYear: number | undefined
@@ -186,30 +191,62 @@ export function parseIntlYear(
     const eraRemaps = eraRemapsByCalendarId[calendarIdBase] || {}
 
     if (eraOrigins !== undefined) {
-      era =
-        calendarIdBase === 'islamic'
-          ? 'ah' // https://github.com/fullcalendar/temporal-polyfill/issues/39
-          : intlParts.era
-              .normalize('NFD') // 'Shōwa' -> 'Showa'
-              .toLowerCase() // 'Before R.O.C.' -> 'before r.o.c.'
-              .replace(/[^a-z0-9]/g, '') // 'before r.o.c.' -> 'beforeroc'
+      const rawEra = normalizeEraName(intlParts.era)
+      const normalizedEra = eraRemaps[rawEra] || rawEra
 
-      // Firefox 96 introduced a bug where the `'short'` format of the era
-      // option mistakenly returns the one-letter (narrow) format instead. The
-      // code below handles either the correct or Firefox-buggy format. See
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1752253
-      if (era === 'bc' || era === 'b') {
-        era = 'bce'
-      } else if (era === 'ad' || era === 'a') {
-        era = 'ce'
-      } else if (era === 'beforeroc') {
-        era = 'broc'
+      // Some calendars expose raw ICU era labels that Temporal should surface as
+      // stable public era codes, and a few of them need year interpretation that
+      // doesn't fit the simple origin table below.
+      if (calendarIdBase === 'coptic') {
+        if (rawEra === 'era0') {
+          year = 1 - rawYear
+        } else {
+          year = rawYear
+        }
+        era = 'am'
+        eraYear = year
+      } else if (calendarIdBase === 'ethioaa') {
+        year = rawYear
+        era = 'aa'
+        eraYear = rawYear
+      } else if (calendarIdBase === 'ethiopic') {
+        era = normalizedEra
+        if (normalizedEra === 'aa') {
+          year = rawYear - 5500
+          eraYear = rawYear
+        } else {
+          year = rawYear
+          eraYear = rawYear
+        }
+      } else if (calendarIdBase === 'islamic') {
+        year = rawYear
+        if (year <= 0) {
+          era = 'bh'
+          eraYear = 1 - year
+        } else {
+          era = 'ah'
+          eraYear = year
+        }
+      } else if (
+        calendarIdBase === 'buddhist' ||
+        calendarIdBase === 'hebrew' ||
+        calendarIdBase === 'indian' ||
+        calendarIdBase === 'persian'
+      ) {
+        year = rawYear
+        era = normalizedEra
+        eraYear = rawYear
+      } else {
+        const eraOrigin = eraOrigins[normalizedEra]
+
+        if (eraOrigin === undefined) {
+          throw new RangeError(errorMessages.invalidProtocolResults)
+        }
+
+        era = normalizedEra
+        eraYear = rawYear
+        year = eraYearToYear(eraYear, eraOrigin)
       }
-
-      const normalizedEra = eraRemaps[era] || era
-
-      eraYear = year // TODO: will this get optimized to next line?
-      year = eraYearToYear(eraYear, eraOrigins[normalizedEra] || 0)
     }
   }
 

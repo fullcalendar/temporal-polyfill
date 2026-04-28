@@ -4,6 +4,28 @@ export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
 export const japaneseCalendarId = 'japanese'
 
+// Normalize era names from either user input or Intl output into a stable,
+// punctuation-insensitive token before applying calendar-specific remaps.
+export function normalizeEraName(era: string): string {
+  const normalized = era
+    .normalize('NFD') // 'Shōwa' -> 'Showa'
+    .toLowerCase() // 'Before R.O.C.' -> 'before r.o.c.'
+    .replace(/[^a-z0-9]/g, '') // 'before r.o.c.' -> 'beforeroc'
+
+  // Firefox historically returned one-letter era names for some calendars.
+  if (normalized === 'bc' || normalized === 'b') {
+    return 'bce'
+  }
+  if (normalized === 'ad' || normalized === 'a') {
+    return 'ce'
+  }
+  if (normalized === 'beforeroc') {
+    return 'broc'
+  }
+
+  return normalized
+}
+
 /*
 for converting from [era,eraYear] -> year
 if origin is >=0,
@@ -16,38 +38,43 @@ export const eraOriginsByCalendarId: {
   [calendarId: string]: Record<string, number>
 } = {
   [gregoryCalendarId]: {
-    'gregory-inverse': -1,
-    'gregory': 0,
+    'bce': -1,
+    'ce': 0,
   },
   [japaneseCalendarId]: {
-    'japanese-inverse': -1,
-    'japanese': 0,
+    'bce': -1,
+    'ce': 0,
     'meiji': 1867,
     'taisho': 1911,
     'showa': 1925,
     'heisei': 1988,
     'reiwa': 2018,
   },
+  'ethioaa': {
+    'aa': 0,
+  },
   'ethiopic': {
-    'ethioaa': 0,
-    'ethiopic': 5500,
+    'am': 0,
   },
   'coptic': {
-    'coptic-inverse': -1,
-    'coptic': 0,
+    'am': 0,
   },
   'roc': {
-    'roc-inverse': -1,
+    'broc': -1,
     'roc': 0,
   },
   'buddhist': {
     'be': 0,
   },
+  'hebrew': {
+    'am': 0,
+  },
   'islamic': {
+    'bh': -1,
     'ah': 0,
   },
   'indian': {
-    'saka': 0,
+    'shaka': 0,
   },
   'persian': {
     'ap': 0,
@@ -57,25 +84,23 @@ export const eraOriginsByCalendarId: {
 export const eraRemapsByCalendarId: {
   [calendarId: string]: Record<string, string>
 } = {
-  [gregoryCalendarId]: {
-    'bce': 'gregory-inverse',
-    'ce': 'gregory',
-  },
-  [japaneseCalendarId]: {
-    'bce': 'japanese-inverse',
-    'ce': 'japanese',
+  'ethioaa': {
+    'era0': 'aa',
+    'era1': 'aa',
   },
   'ethiopic': {
-    'era0': 'ethioaa',
-    'era1': 'ethiopic',
+    'era0': 'aa',
+    'era1': 'am',
   },
   'coptic': {
-    'era0': 'coptic-inverse',
-    'era1': 'coptic',
+    'era0': 'am',
+    'era1': 'am',
   },
   'roc': {
-    'broc': 'roc-inverse',
     'minguo': 'roc',
+  },
+  'indian': {
+    'saka': 'shaka',
   },
 }
 

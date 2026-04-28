@@ -250,7 +250,8 @@ export function computeIntlMonthsInYearSpan(
   let months = 0
 
   for (let year = yearStart; year !== yearEnd; year += yearSign) {
-    months += computeIntlMonthsInYear(intlCalendar, year + yearCorrection)
+    months +=
+      computeIntlMonthsInYear(intlCalendar, year + yearCorrection) * yearSign
   }
 
   return months

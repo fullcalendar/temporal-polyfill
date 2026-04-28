@@ -3,6 +3,7 @@ import {
   gregoryCalendarId,
   isoCalendarId,
   japaneseCalendarId,
+  normalizeEraName,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
@@ -993,7 +994,7 @@ export function mergeCalendarFields(
 
 function refineYear(calendarId: string, fields: DateBag): number {
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
-  const eraRemaps = eraRemapsByCalendarId[calendarId || ''] || {}
+  const eraRemaps = eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
   let { era, eraYear, year } = fields
 
   if (era !== undefined || eraYear !== undefined) {
@@ -1005,19 +1006,30 @@ function refineYear(calendarId: string, fields: DateBag): number {
       throw new RangeError(errorMessages.forbiddenEraParts)
     }
 
-    const normalizedEra = eraRemaps[era] || era
+    const normalizedEra = eraRemaps[normalizeEraName(era)] || normalizeEraName(era)
     const eraOrigin = eraOrigins[normalizedEra]
 
-    if (eraOrigin === undefined) {
-      throw new RangeError(errorMessages.invalidEra(era))
-    }
+    // Ethiopic's AA era counts from an offset epoch instead of using the
+    // forward/reverse year scheme used by Gregorian/ROC/Japanese eras.
+    if (computeCalendarIdBase(calendarId) === 'ethiopic' && normalizedEra === 'aa') {
+      const yearByEra = eraYear - 5500
+      if (year !== undefined && year !== yearByEra) {
+        throw new RangeError(errorMessages.mismatchingYearAndEra)
+      }
 
-    const yearByEra = eraYearToYear(eraYear, eraOrigin)
-    if (year !== undefined && year !== yearByEra) {
-      throw new RangeError(errorMessages.mismatchingYearAndEra)
-    }
+      year = yearByEra
+    } else {
+      if (eraOrigin === undefined) {
+        throw new RangeError(errorMessages.invalidEra(era))
+      }
 
-    year = yearByEra
+      const yearByEra = eraYearToYear(eraYear, eraOrigin)
+      if (year !== undefined && year !== yearByEra) {
+        throw new RangeError(errorMessages.mismatchingYearAndEra)
+      }
+
+      year = yearByEra
+    }
   } else if (year === undefined) {
     throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
