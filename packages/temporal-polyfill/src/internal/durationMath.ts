@@ -41,6 +41,44 @@ import {
 import { NumberSign, clampEntity } from './utils'
 
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
+const maxDurationSeconds = 2 ** 53
+
+const maxTimeFieldByUnit: bigint[] = [
+  computeMaxTimeField(Unit.Nanosecond),
+  computeMaxTimeField(Unit.Microsecond),
+  computeMaxTimeField(Unit.Millisecond),
+  BigInt(Number.MAX_SAFE_INTEGER),
+]
+
+function computeMaxTimeField(unit: TimeUnit): bigint {
+  const unitsPerSecond = nanoInSec / unitNanoMap[unit]
+  let lower = BigInt(0)
+  let upper = BigInt(2) ** BigInt(53)
+  upper = upper * BigInt(unitsPerSecond) - BigInt(1)
+
+  while (lower < upper) {
+    const middle = (lower + upper + BigInt(1)) >> BigInt(1)
+
+    if (Number(middle) / unitsPerSecond < maxDurationSeconds) {
+      lower = middle
+    } else {
+      upper = middle - BigInt(1)
+    }
+  }
+
+  return lower
+}
+
+function truncBigNanoToBigInt(bigNano: BigNano, divisorNano: number): bigint {
+  return (
+    BigInt(bigNano[0]) * BigInt(nanoInUtcDay / divisorNano) +
+    BigInt(Math.trunc(bigNano[1] / divisorNano))
+  )
+}
+
+function absBigInt(num: bigint): bigint {
+  return num < BigInt(0) ? -num : num
+}
 
 // Adding
 // -----------------------------------------------------------------------------
@@ -310,8 +348,21 @@ export function nanoToDurationDayTimeFields(
   dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
     days * (nanoInUtcDay / unitNanoMap[largestUnit])
 
-  // Check that the largest unit value is a safe integer (float64-representable)
-  if (!Number.isSafeInteger(dayTimeFields[durationFieldNamesAsc[largestUnit]]!)) {
+  const largestUnitVal = dayTimeFields[durationFieldNamesAsc[largestUnit]]!
+
+  // Duration fields are stored as float64 values. For second-and-smaller
+  // largest units, validate the exact pre-rounded integer against the largest
+  // field value whose Number conversion still stays below the 2^53-seconds
+  // limit. This preserves large float64-representable microsecond diffs while
+  // still rejecting out-of-range round() results.
+  if (!Number.isFinite(largestUnitVal)) {
+    throw new RangeError(errorMessages.outOfBoundsDate)
+  }
+  if (
+    largestUnit <= Unit.Second &&
+    absBigInt(truncBigNanoToBigInt(bigNano, unitNanoMap[largestUnit])) >
+      maxTimeFieldByUnit[largestUnit as TimeUnit]
+  ) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
