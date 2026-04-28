@@ -2,6 +2,7 @@ import {
   eraRemapsByCalendarId,
   gregoryCalendarId,
   isoCalendarId,
+  isoYearOffsetsByCalendarId,
   japaneseCalendarId,
   normalizeEraName,
 } from './calendarConfig'
@@ -886,7 +887,8 @@ export function monthDayFromFields(
     const isIsoLike =
       calendarId === isoCalendarId ||
       calendarId === gregoryCalendarId ||
-      calendarId === japaneseCalendarId
+      calendarId === japaneseCalendarId ||
+      isoYearOffsetsByCalendarId[calendarId] !== undefined
     if (isIsoLike) {
       const month = refineMonth(
         calendarId,

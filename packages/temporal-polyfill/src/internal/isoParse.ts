@@ -532,9 +532,20 @@ function extractDateTimeTimePortion(
   let timePortion = tIndex >= 0 ? s.slice(tIndex + 1) : ''
 
   if (offset !== undefined) {
+    // When an explicit offset is present, separator validation should only see
+    // the wall-clock time portion before that offset.
     const offsetIndex = timePortion.indexOf(offset)
     if (offsetIndex >= 0) {
       timePortion = timePortion.slice(0, offsetIndex)
+    }
+  } else {
+    // Calendar annotations like `[u-ca=hebrew]` are allowed immediately after
+    // the time. Strip them before validating `HH:mm[:ss[.fff]]` separators, or
+    // strings like `2000-01-01T12:34[u-ca=gregory]` get rejected as malformed
+    // time text even though the main datetime regexp already accepted them.
+    const annotationIndex = timePortion.indexOf('[')
+    if (annotationIndex >= 0) {
+      timePortion = timePortion.slice(0, annotationIndex)
     }
   }
 

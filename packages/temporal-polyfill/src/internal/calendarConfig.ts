@@ -104,6 +104,15 @@ export const eraRemapsByCalendarId: {
   },
 }
 
+// A few calendars are structurally Gregorian/ISO for month/day math and their
+// arithmetic year can be derived from a fixed ISO-year offset. Keep those local
+// and data-driven instead of routing them through Intl, whose historical data
+// can be non-proleptic.
+export const isoYearOffsetsByCalendarId: Record<string, number> = {
+  'buddhist': 543,
+  'roc': -1911,
+}
+
 export const leapMonthMetas: Record<string, number> = {
   'chinese': 13, // (positive) max possible leap month
   'dangi': 13, // "

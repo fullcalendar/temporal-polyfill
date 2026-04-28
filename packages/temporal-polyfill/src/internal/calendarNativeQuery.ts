@@ -1,6 +1,7 @@
 import {
   gregoryCalendarId,
   isoCalendarId,
+  isoYearOffsetsByCalendarId,
   japaneseCalendarId,
 } from './calendarConfig'
 import { WeekParts, formatMonthCode } from './calendarNative'
@@ -44,6 +45,15 @@ export function queryNativeDateParts(
   calendarId: string,
   isoFields: Parameters<typeof computeIsoDateParts>[0],
 ): ReturnType<typeof computeIsoDateParts> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return [
+      isoFields.isoYear + isoYearOffset,
+      isoFields.isoMonth,
+      isoFields.isoDay,
+    ]
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoDateParts(isoFields)
     : computeIntlDateParts(queryIntlCalendar(calendarId), isoFields)
@@ -53,6 +63,10 @@ export function queryNativeDay(
   calendarId: string,
   isoFields: Parameters<typeof computeIsoDay>[0],
 ): ReturnType<typeof computeIsoDay> {
+  if (queryIsoYearOffset(calendarId) !== undefined) {
+    return computeIsoDay(isoFields)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoDay(isoFields)
     : computeIntlDay(queryIntlCalendar(calendarId), isoFields)
@@ -64,6 +78,11 @@ export function queryNativeEpochMilli(
   month?: number,
   day?: number,
 ): number {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return isoArgsToEpochMilli(year - isoYearOffset, month, day)!
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? isoArgsToEpochMilli(year, month, day)!
     : computeIntlEpochMilli(queryIntlCalendar(calendarId), year, month, day)
@@ -75,6 +94,12 @@ export function queryNativeMonthAdd(
   month: number,
   monthDelta: number,
 ): ReturnType<typeof isoMonthAdd> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    const res = isoMonthAdd(year - isoYearOffset, month, monthDelta)
+    return [res[0] + isoYearOffset, res[1]]
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? isoMonthAdd(year, month, monthDelta)
     : intlMonthAdd(queryIntlCalendar(calendarId), year, month, monthDelta)
@@ -94,6 +119,19 @@ export function queryNativeEraParts(
   calendarId: string,
   isoFields: Parameters<typeof computeIsoEraParts>[1],
 ): ReturnType<typeof computeIsoEraParts> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    const year = isoFields.isoYear + isoYearOffset
+
+    if (calendarId === 'buddhist') {
+      return ['be', year]
+    }
+
+    if (calendarId === 'roc') {
+      return year < 1 ? ['broc', 1 - year] : ['roc', year]
+    }
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoEraParts(queryIsoCalendarId(calendarId), isoFields)
     : computeIntlEraParts(queryIntlCalendar(calendarId), isoFields)
@@ -104,6 +142,11 @@ export function queryNativeMonthCodeParts(
   year: Parameters<typeof computeIsoMonthCodeParts>[0],
   month: Parameters<typeof computeIsoMonthCodeParts>[1],
 ): ReturnType<typeof computeIsoMonthCodeParts> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoMonthCodeParts(year - isoYearOffset, month)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoMonthCodeParts(year, month)
     : computeIntlMonthCodeParts(queryIntlCalendar(calendarId), year, month)
@@ -128,6 +171,12 @@ export function queryNativeYearMonthForMonthDay(
   isLeapMonth: Parameters<typeof computeIsoYearMonthForMonthDay>[1],
   day: Parameters<typeof computeIsoYearMonthForMonthDay>[2],
 ): ReturnType<typeof computeIsoYearMonthForMonthDay> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    const res = computeIsoYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    return res && [res[0] + isoYearOffset, res[1]]
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
     : computeIntlYearMonthForMonthDay(
@@ -144,6 +193,11 @@ export function queryNativeIsoFieldsFromParts(
   month: Parameters<typeof computeIsoFieldsFromParts>[1],
   day: Parameters<typeof computeIsoFieldsFromParts>[2],
 ): ReturnType<typeof computeIsoFieldsFromParts> {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoFieldsFromParts(year - isoYearOffset, month, day)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoFieldsFromParts(year, month, day)
     : computeIsoFieldsFromIntlParts(
@@ -159,6 +213,11 @@ export function queryNativeInLeapYear(
   isoFields: Parameters<typeof computeIsoDateParts>[0],
 ): boolean {
   const [year] = queryNativeDateParts(calendarId, isoFields)
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoInLeapYear(year - isoYearOffset)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoInLeapYear(year)
     : computeIntlInLeapYear(queryIntlCalendar(calendarId), year)
@@ -176,6 +235,11 @@ export function queryNativeMonthsInYearPart(
   calendarId: string,
   year: number,
 ): number {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoMonthsInYear(year - isoYearOffset)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoMonthsInYear(year)
     : computeIntlMonthsInYear(queryIntlCalendar(calendarId), year)
@@ -194,6 +258,11 @@ export function queryNativeDaysInMonthPart(
   year: number,
   month: number,
 ): number {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoDaysInMonth(year - isoYearOffset, month)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoDaysInMonth(year, month)
     : computeIntlDaysInMonth(queryIntlCalendar(calendarId), year, month)
@@ -204,6 +273,11 @@ export function queryNativeDaysInYear(
   isoFields: Parameters<typeof computeIsoDateParts>[0],
 ): number {
   const [year] = queryNativeDateParts(calendarId, isoFields)
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    return computeIsoDaysInYear(year - isoYearOffset)
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? computeIsoDaysInYear(year)
     : computeIntlDaysInYear(queryIntlCalendar(calendarId), year)
@@ -213,6 +287,10 @@ export function queryNativeLeapMonth(
   calendarId: string,
   year: number,
 ): number | undefined {
+  if (queryIsoYearOffset(calendarId) !== undefined) {
+    return undefined
+  }
+
   return isIsoBasedCalendarId(calendarId)
     ? undefined
     : computeIntlLeapMonth(queryIntlCalendar(calendarId), year)
@@ -223,7 +301,10 @@ export function queryNativeDayOfYear(
   isoFields: Parameters<typeof computeIsoDateParts>[0],
 ): number {
   const [year] = queryNativeDateParts(calendarId, isoFields)
-  const milli0 = isIsoBasedCalendarId(calendarId)
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  const milli0 = isoYearOffset !== undefined
+    ? isoArgsToEpochMilli(year - isoYearOffset)
+    : isIsoBasedCalendarId(calendarId)
     ? isoArgsToEpochMilli(year)
     : computeIntlEpochMilli(queryIntlCalendar(calendarId), year)
   const milli1 = isoToEpochMilli(isoFields)!
@@ -269,4 +350,8 @@ function isIsoBasedCalendarId(calendarId: string): boolean {
 
 function queryIsoCalendarId(calendarId: string): string | undefined {
   return calendarId === isoCalendarId ? undefined : calendarId
+}
+
+function queryIsoYearOffset(calendarId: string): number | undefined {
+  return isoYearOffsetsByCalendarId[calendarId]
 }
