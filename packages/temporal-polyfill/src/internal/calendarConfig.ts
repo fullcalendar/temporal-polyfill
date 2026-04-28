@@ -29,12 +29,14 @@ export const eraOriginsByCalendarId: {
     'reiwa': 2018,
   },
   'ethiopic': {
-    'ethioaa': 0,
-    'ethiopic': 5500,
+    'aa': 0,
+    'am': 5500,
+  },
+  'ethioaa': {
+    'aa': 0,
   },
   'coptic': {
-    'coptic-inverse': -1,
-    'coptic': 0,
+    'am': 0,
   },
   'roc': {
     'roc-inverse': -1,
@@ -43,11 +45,14 @@ export const eraOriginsByCalendarId: {
   'buddhist': {
     'be': 0,
   },
+  'hebrew': {
+    'am': 0,
+  },
   'islamic': {
     'ah': 0,
   },
   'indian': {
-    'saka': 0,
+    'shaka': 0,
   },
   'persian': {
     'ap': 0,
@@ -66,17 +71,40 @@ export const eraRemapsByCalendarId: {
     'ce': 'japanese',
   },
   'ethiopic': {
-    'era0': 'ethioaa',
-    'era1': 'ethiopic',
+    'era0': 'aa',
+    'era1': 'am',
+    'ethioaa': 'aa',
+    'ethiopic': 'am',
+  },
+  'ethioaa': {
+    'era0': 'aa',
+    'ethioaa': 'aa',
   },
   'coptic': {
-    'era0': 'coptic-inverse',
-    'era1': 'coptic',
+    'era1': 'am',
+    'coptic': 'am',
   },
   'roc': {
     'broc': 'roc-inverse',
     'minguo': 'roc',
   },
+  'indian': {
+    // Some Intl implementations surface the older `saka` label while
+    // Temporal test262 expects the canonical `shaka` code.
+    'saka': 'shaka',
+  },
+}
+
+// Some Intl implementations omit `era` for single-era calendars. Keep the
+// canonical Temporal-era fallback next to the rest of the calendar metadata.
+export const defaultEraByCalendarIdBase: Record<string, string> = {
+  'buddhist': 'be',
+  'coptic': 'am',
+  'ethioaa': 'aa',
+  'hebrew': 'am',
+  'indian': 'shaka',
+  'islamic': 'ah',
+  'persian': 'ap',
 }
 
 export const leapMonthMetas: Record<string, number> = {

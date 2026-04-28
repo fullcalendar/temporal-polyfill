@@ -1,4 +1,8 @@
-import { eraOriginsByCalendarId, eraRemapsByCalendarId } from './calendarConfig'
+import {
+  defaultEraByCalendarIdBase,
+  eraOriginsByCalendarId,
+  eraRemapsByCalendarId,
+} from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
   DateParts,
@@ -28,7 +32,7 @@ import {
 } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
-import { compareNumbers, mapPropNamesToIndex, memoize } from './utils'
+import { compareNumbers, memoize } from './utils'
 
 interface IntlDateFields {
   era: string | undefined
@@ -40,7 +44,10 @@ interface IntlDateFields {
 
 interface IntlYearData {
   monthEpochMillis: number[]
-  monthStringToIndex: Record<string, number>
+  // Keep the ordered month labels exactly as Intl produced them. Some
+  // calendars repeat the same label for common/leap months, so collapsing to a
+  // string->index map loses the leap-month position entirely.
+  monthStrings: string[]
 }
 
 export interface IntlCalendar extends NativeCalendar {
@@ -137,7 +144,10 @@ function createIntlYearDataCache(
       if (
         // Safeguard to avoid infinite loop when Intl.DateTimeFormat gives
         // unespected results
-        ++iterations > 100 ||
+        // Some calendars drift farther from the naive ISO-year guess than ISO
+        // or Gregorian do. Keep the guard, but give Intl-backed calendars more
+        // room before treating the result as invalid.
+        ++iterations > 500 ||
         // If any part of a calendar's year underflows epochMilli,
         // give up
         epochMilli < -maxMilli
@@ -148,7 +158,7 @@ function createIntlYearDataCache(
 
     return {
       monthEpochMillis: millisReversed.reverse(),
-      monthStringToIndex: mapPropNamesToIndex(monthStringsReversed.reverse()),
+      monthStrings: monthStringsReversed.reverse(),
     }
   }
 
@@ -180,12 +190,11 @@ export function parseIntlYear(
   let year = parseIntlPartsYear(intlParts)
   let era: string | undefined
   let eraYear: number | undefined
+  const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
+  const eraRemaps = eraRemapsByCalendarId[calendarIdBase] || {}
 
-  if (intlParts.era) {
-    const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
-    const eraRemaps = eraRemapsByCalendarId[calendarIdBase] || {}
-
-    if (eraOrigins !== undefined) {
+  if (eraOrigins !== undefined) {
+    if (intlParts.era) {
       era =
         calendarIdBase === 'islamic'
           ? 'ah' // https://github.com/fullcalendar/temporal-polyfill/issues/39
@@ -205,11 +214,21 @@ export function parseIntlYear(
       } else if (era === 'beforeroc') {
         era = 'broc'
       }
+    } else {
+      // Some Intl implementations omit `era` for single-era calendars. Tests
+      // still expect Temporal objects to expose the canonical era code.
+      era = defaultEraByCalendarIdBase[calendarIdBase]
+    }
 
+    if (era !== undefined) {
       const normalizedEra = eraRemaps[era] || era
+      const eraOrigin = eraOrigins[normalizedEra]
 
-      eraYear = year // TODO: will this get optimized to next line?
-      year = eraYearToYear(eraYear, eraOrigins[normalizedEra] || 0)
+      if (eraOrigin !== undefined) {
+        era = normalizedEra
+        eraYear = year
+        year = eraYearToYear(eraYear, eraOrigin)
+      }
     }
   }
 
@@ -250,9 +269,8 @@ export function computeIntlMonth(
   intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): number {
-  const { year, monthString } = intlCalendar.queryFields(isoFields)
-  const { monthStringToIndex } = intlCalendar.queryYearData(year)
-  return monthStringToIndex[monthString] + 1
+  const { year } = intlCalendar.queryFields(isoFields)
+  return computeIntlMonthIndex(intlCalendar, year, isoToEpochMilli(isoFields)!)
 }
 
 export function computeIntlDay(
@@ -266,9 +284,9 @@ export function computeIntlDateParts(
   intlCalendar: IntlCalendar,
   isoFields: IsoDateFields,
 ): DateParts {
-  const { year, monthString, day } = intlCalendar.queryFields(isoFields)
-  const { monthStringToIndex } = intlCalendar.queryYearData(year)
-  return [year, monthStringToIndex[monthString] + 1, day]
+  const { year, day } = intlCalendar.queryFields(isoFields)
+  const epochMilli = isoToEpochMilli(isoFields)!
+  return [year, computeIntlMonthIndex(intlCalendar, year, epochMilli), day]
 }
 
 export function computeIsoFieldsFromIntlParts(
@@ -307,21 +325,46 @@ export function computeIntlLeapMonth(
   intlCalendar: IntlCalendar,
   year: number,
 ): number | undefined {
+  const leapMonthMeta = getCalendarLeapMonthMeta(intlCalendar)
+  if (leapMonthMeta === undefined) {
+    return undefined
+  }
+
   const currentMonthStrings = queryMonthStrings(intlCalendar, year)
-  const prevMonthStrings = queryMonthStrings(intlCalendar, year - 1)
-  const currentLength = currentMonthStrings.length
+  if (currentMonthStrings.length <= 12) {
+    return undefined
+  }
 
-  if (currentLength > prevMonthStrings.length) {
-    // hardcoded leap month. usually means complex month-code schemes
-    const leapMonthMeta = getCalendarLeapMonthMeta(intlCalendar) as number // hack for <0
-    if (leapMonthMeta < 0) {
-      return -leapMonthMeta
+  // Hebrew-style calendars have a fixed leap month position whenever a leap
+  // month exists in that year, so no string probing is needed.
+  if (leapMonthMeta < 0) {
+    return -leapMonthMeta
+  }
+
+  // Chinese/Dangi expose the leap month as a repeated adjacent month label.
+  // Preserve the second occurrence as the actual leap-month slot.
+  for (let i = 1; i < currentMonthStrings.length; i++) {
+    if (currentMonthStrings[i] === currentMonthStrings[i - 1]) {
+      return i + 1
     }
+  }
 
-    for (let i = 0; i < currentLength; i++) {
-      if (currentMonthStrings[i] !== prevMonthStrings[i]) {
-        return i + 1 // convert to 1-based
-      }
+  // Some ICU builds label leap months explicitly (`Mo2bis`) instead of
+  // reusing the common-month label. Treat those marked labels as the leap
+  // month slot directly.
+  for (let i = 0; i < currentMonthStrings.length; i++) {
+    if (/bis$/i.test(currentMonthStrings[i])) {
+      return i + 1
+    }
+  }
+
+  // Older/newer ICU data sometimes encodes leap months with distinct labels
+  // like `Mo2bis` instead of repeating the common month label. Fall back to
+  // the previous-year diff heuristic in that case.
+  const prevMonthStrings = queryMonthStrings(intlCalendar, year - 1)
+  for (let i = 0; i < currentMonthStrings.length; i++) {
+    if (currentMonthStrings[i] !== prevMonthStrings[i]) {
+      return i + 1
     }
   }
 }
@@ -330,11 +373,10 @@ export function computeIntlInLeapYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): boolean {
-  const days = computeIntlDaysInYear(intlCalendar, year)
-  return (
-    days > computeIntlDaysInYear(intlCalendar, year - 1) &&
-    days > computeIntlDaysInYear(intlCalendar, year + 1)
-  )
+  return getCalendarLeapMonthMeta(intlCalendar) !== undefined
+    ? computeIntlMonthsInYear(intlCalendar, year) > 12
+    : computeIntlDaysInYear(intlCalendar, year) >
+        computeIntlDaysInYear(intlCalendar, year - 1)
 }
 
 export function computeIntlDaysInYear(
@@ -479,5 +521,21 @@ function chineseMonthDaySearchStartYear(
 // -----------------------------------------------------------------------------
 
 function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
-  return Object.keys(intlCalendar.queryYearData(year).monthStringToIndex)
+  return intlCalendar.queryYearData(year).monthStrings
+}
+
+function computeIntlMonthIndex(
+  intlCalendar: IntlCalendar,
+  year: number,
+  epochMilli: number,
+): number {
+  const { monthEpochMillis } = intlCalendar.queryYearData(year)
+
+  for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
+    if (epochMilli >= monthEpochMillis[i]) {
+      return i + 1
+    }
+  }
+
+  throw new RangeError(errorMessages.invalidProtocolResults)
 }
