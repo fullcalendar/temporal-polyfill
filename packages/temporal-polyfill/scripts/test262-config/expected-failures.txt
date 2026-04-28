@@ -61,6 +61,36 @@ intl402/DateTimeFormat/timezone-not-canonicalized.js
 #
 intl402/DateTimeFormat/timezone-case-insensitive.js
 
+# WONTFIX for now
+# Temporal plain objects can represent dates at the edge of Temporal's ISO
+# range, including instants that are outside JavaScript Date's TimeClip range.
+# ECMA-402's Temporal bridge formats those plain values from Temporal format
+# records / epoch nanoseconds and must not apply Date TimeClip.
+#
+# This polyfill's Intl.DateTimeFormat wrapper currently does a narrower bridge:
+# it converts Temporal.PlainDate, Temporal.PlainDateTime, and
+# Temporal.PlainYearMonth to epoch milliseconds and then delegates to native
+# Intl.DateTimeFormat format-like methods with those numbers. Native Intl treats
+# number inputs like Date-time values, so out-of-TimeClip values throw
+# RangeError: Invalid time value before the formatter can produce string output
+# or parts.
+#
+# Fixing these correctly requires a larger Temporal-aware formatting path for
+# format, formatToParts, formatRange, and formatRangeToParts. A small patch that
+# clamps, offsets, or string-rewrites native Intl output would be wrong because
+# the tests cover calendar-sensitive fields, weekdays, ranges, and numbering
+# systems. Keep these expected failures grouped until the bridge no longer
+# relies on Date-bounded epoch milliseconds for Temporal plain objects.
+intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip-non-latin-numerals.js
+intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip-weekday.js
+intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip.js
+intl402/DateTimeFormat/prototype/formatRange/temporal-objects-no-time-clip-weekday.js
+intl402/DateTimeFormat/prototype/formatRange/temporal-objects-no-time-clip.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-clip-weekday.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-clip.js
+intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip-weekday.js
+intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
+
 
 ##
 ## Issues with environment, already ignored in proposal-temporal/polyfill

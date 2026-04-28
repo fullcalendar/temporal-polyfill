@@ -6,7 +6,7 @@ import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { nanoInMilli } from './units'
-import { excludePropsByName, hasAnyPropsByName } from './utils'
+import { excludePropsByName } from './utils'
 
 /*
 RULES:
@@ -19,6 +19,7 @@ However, for ZonedDateTimeFormat::toLocaleString, timeZone is forced by obj and 
 
 const numericStr = 'numeric'
 const timeZoneNameStrs: OptionNames = ['timeZoneName']
+const eraStrs: OptionNames = ['era']
 
 // Fallbacks
 // (Used if no Standard Options provided, after Exclusions)
@@ -58,6 +59,7 @@ const timeFallbackNames = Object.keys(timeFallbacks) as OptionNames
 // (See notes for Fallbacks and Exclusions)
 
 const dateStyleNames = ['dateStyle'] as OptionNames
+const timeStyleNames = ['timeStyle'] as OptionNames
 const yearMonthStandardNames = [...yearMonthFallbackNames, ...dateStyleNames]
 const monthDayStandardNames = [...monthDayFallbackNames, ...dateStyleNames]
 const dateStandardNames: OptionNames = [
@@ -68,7 +70,7 @@ const dateStandardNames: OptionNames = [
 const timeStandardNames: OptionNames = [
   ...timeFallbackNames,
   'dayPeriod',
-  'timeStyle',
+  ...timeStyleNames,
   'fractionalSecondDigits',
 ]
 const dateTimeStandardNames: OptionNames = [
@@ -80,19 +82,29 @@ const dateTimeStandardNames: OptionNames = [
 // (Silently removed)
 
 const dateExclusions: OptionNames = [...timeZoneNameStrs, ...timeStandardNames]
-const timeExclusions: OptionNames = [...timeZoneNameStrs, ...dateStandardNames]
+const timeExclusions: OptionNames = [
+  ...timeZoneNameStrs,
+  ...dateStandardNames,
+  ...eraStrs,
+]
 const yearMonthExclusions: OptionNames = [
   ...timeZoneNameStrs,
+  ...eraStrs,
   'day',
   'weekday',
   ...timeStandardNames,
 ]
 const monthDayExclusions: OptionNames = [
   ...timeZoneNameStrs,
+  ...eraStrs,
   'year',
   'weekday',
   ...timeStandardNames,
 ]
+const silentExclusionNames = new Set<OptionNames[number]>([
+  ...timeZoneNameStrs,
+  ...eraStrs,
+])
 
 // Transformer Funcs
 // -----------------
@@ -106,17 +118,43 @@ function createOptionsTransformer(
   standardNames: OptionNames,
   fallbacks: Intl.DateTimeFormatOptions,
   exclusions?: OptionNames,
+  styleConflictNames?: OptionNames,
 ): OptionsTransformer {
   const excludedNameSet = new Set(exclusions)
+  const styleConflictNameSet = new Set(styleConflictNames)
 
   return (options: Intl.DateTimeFormatOptions, strictOptions: boolean) => {
-    const hasAnyExclusions = // HACK
-      exclusions && hasAnyPropsByName(options, exclusions)
+    const hasDateStyle = options.dateStyle !== undefined
+    const hasTimeStyle = options.timeStyle !== undefined
+    const hasAnyStyle = hasDateStyle || hasTimeStyle
+
+    if (hasAnyStyle && styleConflictNames) {
+      const propNames = Object.keys(options) as OptionNames
+
+      // Style formats are complete patterns. ECMA-402 rejects any defined
+      // granular field that would also participate in the style pattern.
+      for (let i = 0; i < propNames.length; i++) {
+        const propName = propNames[i]
+        if (
+          styleConflictNameSet.has(propName) &&
+          options[propName] !== undefined
+        ) {
+          throw new TypeError(errorMessages.invalidFormatOptions)
+        }
+      }
+    }
+
+    const hasHardExclusions = // HACK
+      exclusions && hasAnyHardExclusion(options, exclusions)
+
+    if (!strictOptions && hasHardExclusions) {
+      throw new TypeError(errorMessages.invalidFormatOptions)
+    }
 
     options = excludePropsByName(excludedNameSet, options)
 
-    if (!hasAnyPropsByName(options, standardNames)) {
-      if (strictOptions && hasAnyExclusions) {
+    if (!hasAnyDefinedPropsByName(options, standardNames)) {
+      if (strictOptions && hasHardExclusions) {
         // TODO: more specific error about no overlapping options
         throw new TypeError(errorMessages.invalidFormatOptions)
       }
@@ -157,22 +195,126 @@ const transformDateOptions = createOptionsTransformer(
   dateStandardNames,
   dateFallbacks,
   dateExclusions,
+  [...dateFallbackNames, 'weekday', ...eraStrs],
 )
 const transformTimeOptions = createOptionsTransformer(
   timeStandardNames,
   timeFallbacks,
   timeExclusions,
+  ['hour', 'minute', 'second', 'dayPeriod', 'fractionalSecondDigits'],
 )
-const transformYearMonthOptions = createOptionsTransformer(
+const transformYearMonthBaseOptions = createOptionsTransformer(
   yearMonthStandardNames,
   yearMonthFallbacks,
   yearMonthExclusions,
+  yearMonthFallbackNames,
 )
-const transformMonthDayOptions = createOptionsTransformer(
+const transformMonthDayBaseOptions = createOptionsTransformer(
   monthDayStandardNames,
   monthDayFallbacks,
   monthDayExclusions,
+  monthDayFallbackNames,
 )
+
+const yearMonthStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
+  full: { year: numericStr, month: 'long' },
+  long: { year: numericStr, month: 'long' },
+  medium: { year: numericStr, month: 'short' },
+  short: { year: '2-digit', month: numericStr },
+}
+
+const monthDayStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
+  full: { month: 'long', day: numericStr },
+  long: { month: 'long', day: numericStr },
+  medium: { month: 'short', day: numericStr },
+  short: { month: numericStr, day: numericStr },
+}
+
+const transformYearMonthOptions = createPartialDateStyleTransformer(
+  transformYearMonthBaseOptions,
+  yearMonthStyleFields,
+  [...yearMonthFallbackNames, ...eraStrs],
+)
+const transformMonthDayOptions = createPartialDateStyleTransformer(
+  transformMonthDayBaseOptions,
+  monthDayStyleFields,
+  [...monthDayFallbackNames, ...eraStrs],
+)
+
+function createPartialDateStyleTransformer(
+  baseTransformer: OptionsTransformer,
+  styleFields: Record<string, Intl.DateTimeFormatOptions>,
+  styleConflictNames: OptionNames,
+): OptionsTransformer {
+  return (options: Intl.DateTimeFormatOptions, strictOptions: boolean) => {
+    if (options.timeStyle !== undefined && !strictOptions) {
+      throw new TypeError(errorMessages.invalidFormatOptions)
+    }
+
+    const dateStyle = options.dateStyle
+    if (dateStyle !== undefined) {
+      throwIfStyleFieldConflicts(options, styleConflictNames)
+
+      if (strictOptions) {
+        // Intl.DateTimeFormat formatting of partial plain dates ignores a
+        // paired timeStyle once dateStyle has selected the date pattern.
+        options = { ...options, timeStyle: undefined }
+      }
+
+      options = {
+        ...options,
+        dateStyle: undefined,
+        ...styleFields[dateStyle],
+      }
+    }
+
+    return baseTransformer(options, strictOptions)
+  }
+}
+
+function hasAnyDefinedPropsByName<P extends {}>(
+  props: P,
+  names: (keyof P)[],
+): boolean {
+  // Undefined style options are explicitly treated as absent by ECMA-402.
+  // Keep this separate from hasAnyPropsByName, whose "in" semantics are useful
+  // in option-ordering code elsewhere.
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i]
+    if (props[name] !== undefined) {
+      return true
+    }
+  }
+  return false
+}
+
+function hasAnyHardExclusion<P extends {}>(
+  props: P,
+  names: (keyof P)[],
+): boolean {
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i]
+    if (
+      !silentExclusionNames.has(name as OptionNames[number]) &&
+      props[name] !== undefined
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+function throwIfStyleFieldConflicts(
+  options: Intl.DateTimeFormatOptions,
+  conflictNames: OptionNames,
+): void {
+  for (let i = 0; i < conflictNames.length; i++) {
+    const conflictName = conflictNames[i]
+    if (options[conflictName] !== undefined) {
+      throw new TypeError(errorMessages.invalidFormatOptions)
+    }
+  }
+}
 
 // Config Utils
 // -----------------------------------------------------------------------------
