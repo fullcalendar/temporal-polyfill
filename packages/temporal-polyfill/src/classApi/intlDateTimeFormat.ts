@@ -172,10 +172,12 @@ function createResolvedOptionsMethod() {
     const prepFormat = internalsMap.get(this)!
     const resolvedOptions = prepFormat.rawFormat.resolvedOptions()
     const calendar = normalizeResolvedCalendarId(resolvedOptions)
+    const timeZone = prepFormat.timeZone || resolvedOptions.timeZone
 
-    return calendar === resolvedOptions.calendar
+    return calendar === resolvedOptions.calendar &&
+      timeZone === resolvedOptions.timeZone
       ? resolvedOptions
-      : { ...resolvedOptions, calendar }
+      : { ...resolvedOptions, calendar, timeZone }
   }
 
   return Object.defineProperties(func, createNameDescriptors('resolvedOptions'))

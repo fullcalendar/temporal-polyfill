@@ -57,6 +57,11 @@ See these files for failure groups:
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.md` (starting point)
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.tsv` (all failures)
 
+When adding intentional expected failures, use
+`packages/temporal-polyfill/scripts/test262-config/expected-failures.txt`.
+Do not add general failures to the node-version-specific expected-failures
+files unless the failure really is specific to that Node version range.
+
 When fixing test262 failures, default to addressing the work as a sequence of
 individual sub-fixes/root causes, and review or explain them one-by-one instead
 of treating the whole bucket as one opaque change.
@@ -69,6 +74,10 @@ of treating the whole bucket as one opaque change.
 - When fabricating internal option bags, prefer null-prototype objects to avoid observing `Object.prototype` pollution.
 - For option-ordering tests, read and coerce all relevant options first, then do algorithmic validation.
 - `PlainYearMonth.add/subtract` has special lower-unit validation: `overflow` must be read before rejecting units below month.
+- The polyfill does not intend to fix all host Intl non-compliance. The goal is
+  good-enough Intl behavior, especially preserving the shapes of inputs and
+  outputs for Temporal integration. Avoid papering over string-level Intl
+  differences unless the fix is easy, local, and not a broad compatibility shim.
 
 
 ## Code Comments

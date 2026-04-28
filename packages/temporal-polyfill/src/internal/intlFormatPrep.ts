@@ -89,7 +89,6 @@ const timeExclusions: OptionNames = [
 ]
 const yearMonthExclusions: OptionNames = [
   ...timeZoneNameStrs,
-  ...eraStrs,
   'day',
   'weekday',
   ...timeStandardNames,

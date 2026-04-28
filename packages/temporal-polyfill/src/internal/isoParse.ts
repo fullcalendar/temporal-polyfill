@@ -556,6 +556,23 @@ function extractTimeOnlyPortion(s: string, offset: string | undefined): string {
   return s.slice(0, timeEnd)
 }
 
+function extractTimeOnlyOffset(
+  s: string,
+  offsetSign: string | undefined,
+): string | undefined {
+  if (offsetSign === undefined) {
+    return undefined
+  }
+
+  const offsetStart = s.indexOf(offsetSign)
+  const annotationStart = s.indexOf('[', offsetStart)
+
+  return s.slice(
+    offsetStart,
+    annotationStart < 0 ? undefined : annotationStart,
+  )
+}
+
 function validateOffsetSeparators(s: string): boolean {
   return validateTimeSeparators(s.slice(1))
 }
@@ -602,12 +619,15 @@ function parseTimeOnlyParts(s: string): string[] | undefined {
   const parts = timeRegExp.exec(s)
   if (!parts) return undefined
 
-  const timePortion = extractTimeOnlyPortion(parts[0], parts[5])
+  const offset = extractTimeOnlyOffset(parts[0], parts[5])
+  const timePortion = extractTimeOnlyPortion(parts[0], offset)
   if (!validateTimeSeparators(timePortion)) return undefined
 
-  // Validate offset if present
-  if (parts[5]) {
-    parseOffsetNano(parts[5])
+  // Validate the whole offset. `parts[5]` is only the sign capture from
+  // offsetRegExpStr, so compact forms like "152330-08" need the substring from
+  // the sign through the start of any annotation.
+  if (offset) {
+    parseOffsetNano(offset)
   }
 
   return parts
