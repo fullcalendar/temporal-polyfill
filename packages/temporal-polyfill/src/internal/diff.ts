@@ -129,27 +129,48 @@ export function diffZonedDateTimes(
   } else {
     const timeZoneId = getCommonTimeZoneId(slots0.timeZone, slots1.timeZone)
     const nativeTimeZone = queryNativeTimeZone(timeZoneId)
+    const isoFields0 = zonedEpochSlotsToIso(slots0, nativeTimeZone)
+    const isoFields1 = zonedEpochSlotsToIso(slots1, nativeTimeZone)
 
-    durationFields = diffZonedEpochsBig(
-      calendarId,
-      nativeTimeZone,
-      slots0,
-      slots1,
-      sign,
-      largestUnit,
-    )
+    // During a fall-back transition, same-date wall-clock times can move in
+    // the opposite direction from epoch time. Treat that as a pure time diff
+    // to avoid mixed-sign calendar/time duration fields.
+    if (
+      isoFields0.isoYear === isoFields1.isoYear &&
+      isoFields0.isoMonth === isoFields1.isoMonth &&
+      isoFields0.isoDay === isoFields1.isoDay &&
+      Math.sign(diffTimes(isoFields0, isoFields1)) === -sign
+    ) {
+      durationFields = diffEpochNanos(
+        epochNano0,
+        epochNano1,
+        Unit.Hour,
+        smallestUnit as TimeUnit,
+        roundingInc,
+        roundingMode,
+      )
+    } else {
+      durationFields = diffZonedEpochsBig(
+        calendarId,
+        nativeTimeZone,
+        slots0,
+        slots1,
+        sign,
+        largestUnit,
+      )
 
-    durationFields = roundRelativeDuration(
-      durationFields,
-      epochNano1,
-      largestUnit,
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-      slots0,
-      extractEpochNano as MarkerToEpochNano,
-      bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as MoveMarker,
-    )
+      durationFields = roundRelativeDuration(
+        durationFields,
+        epochNano1,
+        largestUnit,
+        smallestUnit,
+        roundingInc,
+        roundingMode,
+        slots0,
+        extractEpochNano as MarkerToEpochNano,
+        bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as MoveMarker,
+      )
+    }
   }
 
   return createDurationSlots(

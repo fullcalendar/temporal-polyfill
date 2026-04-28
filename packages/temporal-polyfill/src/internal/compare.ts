@@ -211,8 +211,22 @@ export function isTimeZoneIdsEqual(
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    return getTimeZoneAtomic(a) === getTimeZoneAtomic(b)
+    return (
+      getTimeZoneAtomic(a) === getTimeZoneAtomic(b) ||
+      isSouthPoleTimeZoneLink(a, b)
+    )
   } catch {}
 
   // If reaching here, there was an error, so NOT equal
+}
+
+function isSouthPoleTimeZoneLink(a: string, b: string): boolean {
+  // Host Intl on Node 22 can preserve Antarctica/South_Pole instead of exposing
+  // its canonical target, Antarctica/McMurdo, through resolvedOptions(). That
+  // makes the generic atomic-ID comparison miss this IANA link. Keep the
+  // workaround explicit instead of adding broad offset-sampling heuristics.
+  return (
+    (a === 'Antarctica/South_Pole' && b === 'Antarctica/McMurdo') ||
+    (a === 'Antarctica/McMurdo' && b === 'Antarctica/South_Pole')
+  )
 }

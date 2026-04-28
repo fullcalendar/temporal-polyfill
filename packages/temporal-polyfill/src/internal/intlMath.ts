@@ -206,10 +206,10 @@ export function parseIntlYear(
         era = 'broc'
       }
 
-      era = eraRemaps[era] || era
+      const normalizedEra = eraRemaps[era] || era
 
       eraYear = year // TODO: will this get optimized to next line?
-      year = eraYearToYear(eraYear, eraOrigins[era] || 0)
+      year = eraYearToYear(eraYear, eraOrigins[normalizedEra] || 0)
     }
   }
 

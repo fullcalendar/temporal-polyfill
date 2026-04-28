@@ -11,6 +11,7 @@ import {
   RawFormattable,
 } from '../internal/intlFormatUtils'
 import { BrandingSlots } from '../internal/slots'
+import { refineTimeZoneId } from '../internal/timeZoneId'
 import {
   Classlike,
   createNameDescriptors,
@@ -135,7 +136,17 @@ function createFormatMethod(methodName: string) {
 function createProxiedMethod(methodName: string) {
   const func = function (this: DateTimeFormat, ...args: any[]) {
     const prepFormat = internalsMap.get(this)!
-    return (prepFormat.rawFormat as any)[methodName](...args)
+    const res = (prepFormat.rawFormat as any)[methodName](...args)
+
+    if (methodName === 'resolvedOptions' && prepFormat.timeZone) {
+      // ECMA-402 now preserves the matched input time-zone identifier here.
+      // Native Intl in older engines may still canonicalize links like
+      // Australia/Canberra -> Australia/Sydney, so keep the validated public
+      // identifier separately and repair only the user-visible options object.
+      res.timeZone = prepFormat.timeZone
+    }
+
+    return res
   }
 
   return Object.defineProperties(func, createNameDescriptors(methodName))
@@ -151,6 +162,11 @@ type DateTimeFormatInternalPrepper = (
 
 type DateTimeFormatInternals = DateTimeFormatInternalPrepper & {
   rawFormat: Intl.DateTimeFormat
+
+  // Only set for public Intl.DateTimeFormat wrapper instances that received a
+  // timeZone option. Internal time-zone probes use RawDateTimeFormat directly,
+  // because they need the host's canonical target for offset calculations.
+  timeZone?: string
 }
 
 function createDateTimeFormatInternals(
@@ -158,6 +174,10 @@ function createDateTimeFormatInternals(
   options: Intl.DateTimeFormatOptions,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
+  const timeZone =
+    options.timeZone !== undefined
+      ? refineTimeZoneId(options.timeZone)
+      : undefined
   const resolveOptions = rawFormat.resolvedOptions()
   const resolvedLocale = resolveOptions.locale
 
@@ -230,6 +250,7 @@ function createDateTimeFormatInternals(
     return [rawFormat, ...(formattableEssences as number[])]
   }
   ;(prepFormat as DateTimeFormatInternals).rawFormat = rawFormat
+  ;(prepFormat as DateTimeFormatInternals).timeZone = timeZone
   return prepFormat as DateTimeFormatInternals
 }
 

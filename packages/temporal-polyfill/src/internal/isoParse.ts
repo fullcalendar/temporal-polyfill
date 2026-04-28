@@ -359,7 +359,9 @@ function finalizeZonedDateTime(
       offsetNano,
       offsetDisambig,
       epochDisambig,
-      !(timeZoneImpl as FixedTimeZone).offsetNano, // not fixed? epochFuzzy
+      !(timeZoneImpl as FixedTimeZone).offsetNano && // not fixed?
+        organized.offset !== undefined &&
+        !offsetHasSeconds(organized.offset),
       organized.hasZ,
     )
   } else {
@@ -374,6 +376,10 @@ function finalizeZonedDateTime(
     timeZoneId,
     resolveCalendarId(organized.calendar),
   )
+}
+
+function offsetHasSeconds(offset: string): boolean {
+  return offset.replace(/\D/g, '').length > 4
 }
 
 function finalizeDateTime(organized: DateTimeLikeOrganized): DateTimeSlots {
@@ -514,7 +520,10 @@ function validateTimeSeparators(s: string): boolean {
   )
 }
 
-function extractDateTimeTimePortion(s: string, offset: string | undefined): string {
+function extractDateTimeTimePortion(
+  s: string,
+  offset: string | undefined,
+): string {
   const tIndex = s.search(/[T ]/i)
   let timePortion = tIndex >= 0 ? s.slice(tIndex + 1) : ''
 
@@ -591,7 +600,7 @@ function parseTimeOnly(s: string): IsoTimeFields | undefined {
     parseOffsetNano(offsetMatch[0])
   }
 
-  return (organizeAnnotationParts(parts[10]), organizeTimeParts(parts)) // validate annotations
+  return organizeAnnotationParts(parts[10]), organizeTimeParts(parts) // validate annotations
 }
 
 function parseDurationFields(s: string): DurationFields | undefined {
