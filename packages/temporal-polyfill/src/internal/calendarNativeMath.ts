@@ -330,7 +330,7 @@ function diffMonthDay(
   day0: number,
   year1: number,
   month1: number,
-  _day1: number,
+  day1: number,
 ): [monthDiff: number, dayDiff: number] {
   const sign = Math.sign(
     compareYearMonth(year1, month1, year0, month0) ||
@@ -361,7 +361,18 @@ function diffMonthDay(
     : computeIsoDateParts(anchorIsoFields)
   if (
     anchorCompare === sign ||
-    (anchorCompare === 0 && anchorDateParts[2] !== day0)
+    (anchorCompare === 0 &&
+      anchorDateParts[2] !== day0 &&
+      !isConstrainedFinalIntercalaryMonthDiff(
+        intlCalendar,
+        sign,
+        year0,
+        month0,
+        day0,
+        year1,
+        month1,
+        day1,
+      ))
   ) {
     months -= sign
     anchorIsoFields = epochMilliToIso(
@@ -370,6 +381,43 @@ function diffMonthDay(
   }
 
   return [months, diffDays(anchorIsoFields, endIsoFields)]
+}
+
+function isConstrainedFinalIntercalaryMonthDiff(
+  intlCalendar: IntlCalendar | undefined,
+  sign: number,
+  year0: number,
+  month0: number,
+  day0: number,
+  year1: number,
+  month1: number,
+  day1: number,
+): boolean {
+  if (!intlCalendar) {
+    return false
+  }
+
+  const monthsInYear0 = computeIntlMonthsInYear(intlCalendar, year0)
+  const monthsInYear1 = computeIntlMonthsInYear(intlCalendar, year1)
+
+  // Coptic/Ethiopic-style calendars have a real final intercalary month every
+  // year: M13 exists in both common and leap years, but its length is 5 or 6
+  // days. NonISODateUntil determines the year/month span before constraining
+  // the day, so Coptic 1739-M13-06.since(1738-M13-05, { largestUnit: "months" })
+  // should be 13 months, not 12 months + 6 days: adding -13 months from
+  // 1739-M13-06 constrains exactly to 1738-M13-05. Ordinary Jan 31 -> Feb 28
+  // wrapping still backs off because it changes monthCode instead of staying
+  // on the same final intercalary month.
+  return (
+    sign < 0 &&
+    monthsInYear0 > isoMonthsInYear &&
+    monthsInYear1 > isoMonthsInYear &&
+    month0 === monthsInYear0 &&
+    month1 === monthsInYear1 &&
+    day0 === computeIntlDaysInMonth(intlCalendar, year0, month0) &&
+    day1 === computeIntlDaysInMonth(intlCalendar, year1, month1) &&
+    day0 > day1
+  )
 }
 
 function computeIsoMonthSpan(

@@ -19,6 +19,7 @@ import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
+  isoDateFieldNamesAsc,
   isoTimeFieldNamesAsc,
 } from './isoFields'
 import { MarkerToEpochNano, MoveMarker } from './markerSystem'
@@ -492,11 +493,13 @@ function diffZonedEpochsBig(
     slots1,
     sign,
   )
+  const isoDateFields0 = toIsoDateFields(isoFields0)
+  const isoDateFields1 = toIsoDateFields(isoFields1)
 
   const dateDiff =
     largestUnit === Unit.Day // TODO: use this optimization elsewhere too
-      ? diffByDay(isoFields0, isoFields1)
-      : nativeDateUntil(calendarId, isoFields0, isoFields1, largestUnit)
+      ? diffByDay(isoDateFields0, isoDateFields1)
+      : nativeDateUntil(calendarId, isoDateFields0, isoDateFields1, largestUnit)
 
   const timeDiff = nanoToDurationTimeFields(remainderNano)
   const dateTimeDiff = { ...dateDiff, ...timeDiff }
@@ -586,16 +589,21 @@ export function prepareDateTimeDiff(
   endIsoDateTime: IsoDateTimeFields,
   sign: NumberSign, // guaranteed non-zero
 ): [IsoDateFields, IsoDateFields, number] {
-  let endIsoDate: IsoDateFields = endIsoDateTime
+  let endIsoDate: IsoDateFields = toIsoDateFields(endIsoDateTime)
 
   // If date/time diffs conflict, move intermediate date one day forward
   let timeDiffNano = diffTimes(startIsoDateTime, endIsoDateTime)
   if (Math.sign(timeDiffNano) === -sign) {
-    endIsoDate = moveByDays(endIsoDateTime, -sign)
+    endIsoDate = toIsoDateFields(moveByDays(endIsoDateTime, -sign))
     timeDiffNano += nanoInUtcDay * sign
   }
 
-  return [startIsoDateTime, endIsoDate, timeDiffNano]
+  return [toIsoDateFields(startIsoDateTime), endIsoDate, timeDiffNano]
+}
+
+// TODO: eventually get rid of this somehow!
+function toIsoDateFields(isoFields: IsoDateFields): IsoDateFields {
+  return pluckProps(isoDateFieldNamesAsc, isoFields)
 }
 
 // Diffing Via Epoch Nanoseconds
