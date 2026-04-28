@@ -55,6 +55,7 @@ export const eraOriginsByCalendarId: {
   },
   'ethiopic': {
     'am': 0,
+    'aa': 0,
   },
   'coptic': {
     'am': 0,
@@ -84,22 +85,28 @@ export const eraOriginsByCalendarId: {
 export const eraRemapsByCalendarId: {
   [calendarId: string]: Record<string, string>
 } = {
-  'ethioaa': {
-    'era0': 'aa',
-    'era1': 'aa',
-  },
   'ethiopic': {
     'era0': 'aa',
     'era1': 'am',
+    'ethioaa': 'aa',
+    'ethiopic': 'am',
+  },
+  'ethioaa': {
+    'era0': 'aa',
+    'era1': 'aa',
+    'ethioaa': 'aa',
   },
   'coptic': {
     'era0': 'am',
     'era1': 'am',
+    'coptic': 'am',
   },
   'roc': {
     'minguo': 'roc',
   },
   'indian': {
+    // Some Intl implementations surface the older `saka` label while
+    // Temporal test262 expects the canonical `shaka` code.
     'saka': 'shaka',
   },
 }
@@ -111,6 +118,18 @@ export const eraRemapsByCalendarId: {
 export const isoYearOffsetsByCalendarId: Record<string, number> = {
   'buddhist': 543,
   'roc': -1911,
+}
+
+// Some Intl implementations omit `era` for single-era calendars. Keep the
+// canonical Temporal-era fallback next to the rest of the calendar metadata.
+export const defaultEraByCalendarIdBase: Record<string, string> = {
+  'buddhist': 'be',
+  'coptic': 'am',
+  'ethioaa': 'aa',
+  'hebrew': 'am',
+  'indian': 'shaka',
+  'islamic': 'ah',
+  'persian': 'ap',
 }
 
 export const leapMonthMetas: Record<string, number> = {
