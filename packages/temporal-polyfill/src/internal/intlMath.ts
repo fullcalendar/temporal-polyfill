@@ -466,10 +466,15 @@ export function computeIntlInLeapYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): boolean {
-  return getCalendarLeapMonthMeta(intlCalendar) !== undefined
-    ? computeIntlMonthsInYear(intlCalendar, year) > 12
-    : computeIntlDaysInYear(intlCalendar, year) >
-        computeIntlDaysInYear(intlCalendar, year - 1)
+  if (getCalendarLeapMonthMeta(intlCalendar) !== undefined) {
+    return computeIntlMonthsInYear(intlCalendar, year) > 12
+  }
+
+  const daysInYear = computeIntlDaysInYear(intlCalendar, year)
+  return (
+    daysInYear > computeIntlDaysInYear(intlCalendar, year - 1) ||
+    daysInYear > computeIntlDaysInYear(intlCalendar, year + 1)
+  )
 }
 
 export function computeIntlDaysInYear(
