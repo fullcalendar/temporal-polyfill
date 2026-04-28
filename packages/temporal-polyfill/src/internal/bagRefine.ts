@@ -5,6 +5,8 @@ import {
   isoYearOffsetsByCalendarId,
   japaneseCalendarId,
   normalizeEraName,
+  plainMonthDayCommonMonthMaxDayByCalendarIdBase,
+  plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
 import {
@@ -864,6 +866,11 @@ export function monthDayFromFields(
 
   // year given? parse either monthCode or month (if both specified, must be equivalent)
   if (yearMaybe !== undefined) {
+    // PlainMonthDay stores a canonical reference year, but an explicitly
+    // supplied year still participates in validation. Bail out before
+    // canonicalizing if that year cannot produce an in-bounds ISO date.
+    checkIsoDateInBounds(queryNativeIsoFieldsFromParts(calendarId, yearMaybe, 1, 1))
+
     // might limit overflow
     const month = refineMonth(calendarId, fields, yearMaybe, overflow)
     // NOTE: internal call of getDefinedProp not necessary
@@ -890,17 +897,22 @@ export function monthDayFromFields(
       calendarId === japaneseCalendarId ||
       isoYearOffsetsByCalendarId[calendarId] !== undefined
     if (isIsoLike) {
+      // Offset ISO-like calendars (Buddhist/ROC) share Gregorian month lengths,
+      // but their calendar year is not the ISO year. Use the native calendar
+      // year that corresponds to ISO 1972 so February 29 remains available.
+      const referenceYear =
+        isoEpochFirstLeapYear + (isoYearOffsetsByCalendarId[calendarId] || 0)
       const month = refineMonth(
         calendarId,
         fields,
-        isoEpochFirstLeapYear,
+        referenceYear,
         overflow,
       )
       day = refineDay(
         calendarId,
         fields as DayFields,
         month,
-        isoEpochFirstLeapYear,
+        referenceYear,
         overflow,
       )
     } else if (
@@ -932,13 +944,48 @@ export function monthDayFromFields(
     }
   }
 
+  if (
+    isLeapMonth &&
+    queryPlainMonthDayLeapMonthMaxDay(calendarId, monthCodeNumber) <
+      fields.day
+  ) {
+    if (overflow === Overflow.Reject) {
+      throw new RangeError(errorMessages.invalidLeapMonth)
+    }
+
+    // Temporal's PlainMonthDay reference table only admits some leap
+    // month-days. When a requested leap month-day is outside that table,
+    // constrain it through the corresponding common month instead.
+    isLeapMonth = false
+    day = clampNumber(
+      fields.day,
+      1,
+      queryPlainMonthDayCommonMonthMaxDay(calendarId),
+    )
+  }
+
   // query calendar for final year/month
-  const res = queryNativeYearMonthForMonthDay(
+  let res = queryNativeYearMonthForMonthDay(
     calendarId,
     monthCodeNumber,
-    isLeapMonth,
+    Boolean(isLeapMonth),
     day,
   )
+
+  // Without an explicit year, variable-length calendar months need the same
+  // overflow behavior as year-specific fields: reject asks for an exact match,
+  // while constrain walks back to the latest day that exists in some suitable
+  // reference year/month.
+  while (!res && overflow === Overflow.Constrain && day > 1) {
+    day--
+    res = queryNativeYearMonthForMonthDay(
+      calendarId,
+      monthCodeNumber,
+      Boolean(isLeapMonth),
+      day,
+    )
+  }
+
   if (!res) {
     throw new RangeError(errorMessages.failedYearGuess)
   }
@@ -949,6 +996,25 @@ export function monthDayFromFields(
       queryNativeIsoFieldsFromParts(calendarId, finalYear, finalMonth, day),
     ),
     calendarId,
+  )
+}
+
+function queryPlainMonthDayLeapMonthMaxDay(
+  calendarId: string,
+  monthCodeNumber: number,
+): number {
+  return (
+    plainMonthDayLeapMonthMaxDaysByCalendarIdBase[
+      computeCalendarIdBase(calendarId)
+    ]?.[monthCodeNumber] ?? Infinity
+  )
+}
+
+function queryPlainMonthDayCommonMonthMaxDay(calendarId: string): number {
+  return (
+    plainMonthDayCommonMonthMaxDayByCalendarIdBase[
+      computeCalendarIdBase(calendarId)
+    ] ?? Infinity
   )
 }
 

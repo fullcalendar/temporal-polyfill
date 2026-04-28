@@ -138,6 +138,45 @@ export const leapMonthMetas: Record<string, number> = {
   'hebrew': -6, // (negative) constant leap month
 }
 
+// PlainMonthDay stores a canonical reference date, not the user-supplied year.
+// For Chinese/Dangi leap months, Temporal uses a modern reference table rather
+// than blindly accepting every historical Intl result. A value of 0 means that
+// monthCode has no accepted PlainMonthDay leap-month reference row; 29 means
+// that days 1-29 are accepted as leap month-days, but day 30 constrains to the
+// corresponding common month. Month codes omitted from this table are accepted
+// according to normal calendar lookup.
+const chineseDangiPlainMonthDayLeapMonthMaxDays: Record<number, number> = {
+  1: 0,
+  2: 29,
+  8: 29,
+  9: 29,
+  10: 29,
+  11: 29,
+  12: 0,
+}
+
+export const plainMonthDayLeapMonthMaxDaysByCalendarIdBase: Record<
+  string,
+  Record<number, number>
+> = {
+  'chinese': chineseDangiPlainMonthDayLeapMonthMaxDays,
+  'dangi': chineseDangiPlainMonthDayLeapMonthMaxDays,
+}
+
+// When a Chinese/Dangi PlainMonthDay leap month-day falls outside the accepted
+// leap reference table, Temporal constrains through the corresponding common
+// month. Common lunisolar months top out at 30 days.
+//
+// TODO: maybe hardcode 30 for user
+//
+export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
+  string,
+  number
+> = {
+  'chinese': 30,
+  'dangi': 30,
+}
+
 // only used by calendar
 // ---------------------
 
