@@ -3,7 +3,11 @@ import {
   isoCalendarId,
   japaneseCalendarId,
 } from './calendarConfig'
-import { YearMonthParts, monthCodeNumberToMonth } from './calendarNative'
+import {
+  YearMonthParts,
+  getCalendarLeapMonthMeta,
+  monthCodeNumberToMonth,
+} from './calendarNative'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -97,10 +101,12 @@ export function monthAdd(
       ? computeIntlMonthCodeParts(intlCalendar, year, month)
       : computeIsoMonthCodeParts(year, month)
     year += years
-    month = monthCodeNumberToMonth(
+    month = computeYearAddMonth(
+      intlCalendar,
       monthCodeNumber,
       isLeapMonth,
       intlCalendar ? computeIntlLeapMonth(intlCalendar, year) : undefined,
+      overflow,
     )
     month = clampEntity(
       'month',
@@ -132,6 +138,41 @@ export function monthAdd(
   return intlCalendar
     ? computeIntlEpochMilli(intlCalendar, year, month, day)
     : isoArgsToEpochMilli(year, month, day)!
+}
+
+function computeYearAddMonth(
+  intlCalendar: IntlCalendar | undefined,
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  targetLeapMonth: number | undefined,
+  overflow: Overflow,
+): number {
+  if (isLeapMonth) {
+    const leapMonthMeta = intlCalendar
+      ? getCalendarLeapMonthMeta(intlCalendar)
+      : undefined
+
+    // Year arithmetic preserves the source monthCode. If the exact leap-month
+    // code exists in the target year, use that ordinal month directly.
+    if (
+      targetLeapMonth !== undefined &&
+      (leapMonthMeta! < 0 || targetLeapMonth === monthCodeNumber + 1)
+    ) {
+      return targetLeapMonth
+    }
+
+    // If the target year cannot represent the source leap month, reject mode
+    // must fail instead of silently sliding to a neighboring ordinal month.
+    if (overflow === Overflow.Reject) {
+      throw new RangeError(errorMessages.invalidLeapMonth)
+    }
+
+    // Chinese/Dangi-style calendars constrain MxxL to the matching common Mxx.
+    // Hebrew has a fixed Adar I leap slot; constraining it lands in common Adar.
+    return leapMonthMeta! < 0 ? -leapMonthMeta! : monthCodeNumber
+  }
+
+  return monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)
 }
 
 export function isoMonthAdd(

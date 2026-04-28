@@ -104,6 +104,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket H: Era model / era round-tripping
 
+- Status: DONE
 - Count: `188`
 - Shared root cause:
   era validation, era aliases, era boundary handling, year-era remapping, round-tripping via string/property bag, and derived era/year accessors.
@@ -116,6 +117,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket I: Calendar field math
 
+- Status: PARTIAL
 - Count: `276`
 - Shared root cause:
   non-ISO month/day/year field derivation, leap-month logic, leap-year logic, monthCode/reference-day generation, intercalary month handling, calendar-specific field error ordering, and related derived accessors.
