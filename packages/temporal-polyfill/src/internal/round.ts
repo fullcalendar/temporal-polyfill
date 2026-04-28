@@ -488,9 +488,6 @@ export function roundBigNanoByInc(
   // For halfEven ties (0.5), parity must account for days' contribution
   // to total increments, not just the timeNano portion
   //
-  // Likely related to?:
-  // https://github.com/tc39/proposal-temporal/pull/3172/changes
-  //
   if (roundingMode === RoundingMode.HalfEven) {
     const timeExact = timeNano / nanoInc
     if (Math.abs(timeExact % 1) === 0.5) {
@@ -611,14 +608,17 @@ function nudgeZonedTimeDuration(
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
 
-  const [dayEpochNano0, dayEpochNano1] = clampRelativeDuration(
+  const dayWindow = clampRelativeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day, // clampUnit
     sign, // clampDistance
     marker,
     markerToEpochNano,
     moveMarker,
+    endEpochNano,
   )
+  const dayEpochNano0 = dayWindow.epochNano0
+  const dayEpochNano1 = dayWindow.epochNano1
 
   const daySpanNano = bigNanoToNumber(
     diffBigNanos(dayEpochNano0, dayEpochNano1),
@@ -686,30 +686,34 @@ export function nudgeRelativeDuration(
 
   baseDurationFields[smallestUnitFieldName] = truncedVal
 
-  const [epochNano0, epochNano1] = clampRelativeDuration(
+  const nudgeWindow = clampRelativeDuration(
     baseDurationFields,
     smallestUnit, // clampUnit
     roundingInc * sign, // clampDistance
     marker,
     markerToEpochNano,
     moveMarker,
+    endEpochNano,
   )
+  const epochNano0 = nudgeWindow.epochNano0
+  const epochNano1 = nudgeWindow.epochNano1
 
   // usually between 0-1, however can be higher when weeks aren't bounded by months
   const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
 
-  const exactVal = truncedVal + frac * sign * roundingInc
+  const windowStartVal =
+    nudgeWindow.startDurationFields[smallestUnitFieldName]
+  const windowEndVal = nudgeWindow.endDurationFields[smallestUnitFieldName]
+  const exactVal = windowStartVal + frac * sign * roundingInc
   const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)
-  // Determine if the rounded value expanded past the truncated value
-  // (using truncedVal rather than exactVal ensures frac=1.0 triggers bubbling)
-  const expanded = Math.sign(roundedVal - truncedVal) === sign
+  const roundedToEnd = roundedVal === windowEndVal
 
   baseDurationFields[smallestUnitFieldName] = roundedVal
 
   return [
     baseDurationFields,
-    expanded ? epochNano1 : epochNano0,
-    expanded, // guaranteed to be a big unit because of big smallestUnit
+    roundedToEnd ? epochNano1 : epochNano0,
+    nudgeWindow.shifted || roundedToEnd, // guaranteed big unit because of big smallestUnit
   ]
 }
 

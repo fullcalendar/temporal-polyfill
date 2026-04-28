@@ -1,5 +1,11 @@
-import { BigNano, bigNanoToNumber, diffBigNanos } from './bigNano'
 import {
+  BigNano,
+  bigNanoToNumber,
+  compareBigNanos,
+  diffBigNanos,
+} from './bigNano'
+import {
+  DurationFieldName,
   DurationFields,
   clearDurationFields,
   durationFieldNamesAsc,
@@ -96,14 +102,17 @@ export function totalRelativeDuration(
   moveMarker: MoveMarker,
 ): number {
   const sign = computeDurationSign(durationFields)
-  const [epochNano0, epochNano1] = clampRelativeDuration(
+  const nudgeWindow = clampRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
     marker,
     markerToEpochNano,
     moveMarker,
+    endEpochNano,
   )
+  const epochNano0 = nudgeWindow.epochNano0
+  const epochNano1 = nudgeWindow.epochNano1
   // Compute (integerPart * denom + numerator * sign) / denom in one division
   // to avoid float64 precision loss from separate num/denom + integerPart
   //
@@ -114,7 +123,9 @@ export function totalRelativeDuration(
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
   const numerator = bigNanoToNumber(diffBigNanos(epochNano0, endEpochNano))
-  const integerPart = durationFields[durationFieldNamesAsc[totalUnit]]
+  const integerPart = nudgeWindow.startDurationFields[
+    durationFieldNamesAsc[totalUnit]
+  ]
   return (integerPart * denom + numerator * sign) / denom
 }
 
@@ -139,18 +150,103 @@ export function clampRelativeDuration(
   marker: Marker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
+  epochNanoProgress?: BigNano,
 ) {
   const unitName = durationFieldNamesAsc[clampUnit]
-  const durationPlusDistance = {
-    ...durationFields,
-    [unitName]: durationFields[unitName] + clampDistance,
+  let startDurationFields = durationFields
+  let shifted = false
+  let window = computeRelativeDurationWindow(
+    startDurationFields,
+    unitName,
+    clampDistance,
+    marker,
+    markerToEpochNano,
+    moveMarker,
+  )
+
+  // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
+  // that constrain, like Jan 31 -> Feb 29, the balanced duration can describe a
+  // point just beyond the first truncated window. The spec retries one window
+  // later in that case; Duration.total() uses the same operation with trunc.
+  if (
+    epochNanoProgress &&
+    !epochNanoIsWithinWindow(
+      epochNanoProgress,
+      window.epochNano0,
+      window.epochNano1,
+      Math.sign(clampDistance),
+    )
+  ) {
+    startDurationFields = {
+      ...durationFields,
+      [unitName]: durationFields[unitName] + clampDistance,
+    }
+    shifted = true
+    window = computeRelativeDurationWindow(
+      startDurationFields,
+      unitName,
+      clampDistance,
+      marker,
+      markerToEpochNano,
+      moveMarker,
+    )
+
+    if (
+      !epochNanoIsWithinWindow(
+        epochNanoProgress,
+        window.epochNano0,
+        window.epochNano1,
+        Math.sign(clampDistance),
+      )
+    ) {
+      throw new RangeError(errorMessages.invalidProtocolResults)
+    }
   }
 
-  const marker0 = moveMarker(marker, durationFields)
-  const marker1 = moveMarker(marker, durationPlusDistance)
+  return {
+    ...window,
+    startDurationFields,
+    shifted,
+  }
+}
+
+function computeRelativeDurationWindow(
+  startDurationFields: DurationFields,
+  unitName: DurationFieldName,
+  clampDistance: number,
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
+) {
+  const endDurationFields = {
+    ...startDurationFields,
+    [unitName]: startDurationFields[unitName] + clampDistance,
+  }
+
+  const marker0 = moveMarker(marker, startDurationFields)
+  const marker1 = moveMarker(marker, endDurationFields)
   const epochNano0 = markerToEpochNano(marker0)
   const epochNano1 = markerToEpochNano(marker1)
-  return [epochNano0, epochNano1]
+  return { epochNano0, epochNano1, endDurationFields }
+}
+
+function epochNanoIsWithinWindow(
+  epochNanoProgress: BigNano,
+  epochNano0: BigNano,
+  epochNano1: BigNano,
+  sign: number,
+): boolean {
+  if (sign > 0) {
+    return (
+      compareBigNanos(epochNano0, epochNanoProgress) <= 0 &&
+      compareBigNanos(epochNanoProgress, epochNano1) <= 0
+    )
+  }
+
+  return (
+    compareBigNanos(epochNano1, epochNanoProgress) <= 0 &&
+    compareBigNanos(epochNanoProgress, epochNano0) <= 0
+  )
 }
 
 export function computeEpochNanoFrac(
