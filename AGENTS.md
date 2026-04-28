@@ -65,3 +65,9 @@ See these files for failure groups:
 - When fabricating internal option bags, prefer null-prototype objects to avoid observing `Object.prototype` pollution.
 - For option-ordering tests, read and coerce all relevant options first, then do algorithmic validation.
 - `PlainYearMonth.add/subtract` has special lower-unit validation: `overflow` must be read before rejecting units below month.
+
+
+## When to Pause on Test Failures
+
+If it is discovered that a solution to a set of failures is a medium to large algorithmic change,
+please pause and notify the user.
