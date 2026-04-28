@@ -91,6 +91,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket G: Intl formatting bridge
 
+- Status: DONE
 - Count: `55`
 - Shared root cause:
   Temporal-to-`Intl.DateTimeFormat` integration, including `toLocaleString`, `format*`, `formatToParts*`, `resolvedOptions`, style conflicts, and time-zone-name formatting on Temporal objects.

@@ -7,20 +7,3 @@
 # accepts them.
 #
 intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
-
-# WONTFIX
-# built-ins/Temporal/Duration/prototype/total/relativeto-date-limits.js
-#
-# The test expects a RangeError when using "+275760-09-12T00:00:01+00:00[UTC]"
-# as a relativeTo argument for Duration.total(). However, by the Temporal spec,
-# the maximum representable Instant is 275760-09-13T00:00:00Z, and this
-# implementation already treats that exact ZonedDateTime as valid.
-#
-# 275760-09-12T00:00:01Z is well before that limit and is also a valid
-# ZonedDateTime. The test appears to use an earlier cutoff than the repo's
-# existing ZonedDateTime limit checks, which accept +275760-09-13T00:00Z[UTC]
-# and only reject instants beyond it.
-#
-# Our implementation correctly accepts this value without throwing.
-#
-built-ins/Temporal/Duration/prototype/total/relativeto-date-limits.js
