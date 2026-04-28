@@ -136,6 +136,48 @@ describe('add', () => {
       isoMonth: 3,
     })
   })
+
+  it('ignores overflow for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2023, 3)
+
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.add(pym, DurationFns.create(0, -1), {
+        overflow: 'reject',
+      }),
+      {
+        isoYear: 2023,
+        isoMonth: 2,
+      },
+    )
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.add(pym, DurationFns.create(0, -1), {
+        overflow: 'constrain',
+      }),
+      {
+        isoYear: 2023,
+        isoMonth: 2,
+      },
+    )
+  })
+
+  it('supports moving backward from the last representable month', () => {
+    const last = PlainYearMonthFns.create(275760, 9)
+
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.add(last, DurationFns.create(-1)),
+      {
+        isoYear: 275759,
+        isoMonth: 9,
+      },
+    )
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.add(last, DurationFns.create(0, -1)),
+      {
+        isoYear: 275760,
+        isoMonth: 8,
+      },
+    )
+  })
 })
 
 describe('subtract', () => {
@@ -146,6 +188,48 @@ describe('subtract', () => {
       isoYear: 2023,
       isoMonth: 1,
     })
+  })
+
+  it('ignores overflow for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2023, 3)
+
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtract(pym, DurationFns.create(0, 1), {
+        overflow: 'reject',
+      }),
+      {
+        isoYear: 2023,
+        isoMonth: 2,
+      },
+    )
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtract(pym, DurationFns.create(0, 1), {
+        overflow: 'constrain',
+      }),
+      {
+        isoYear: 2023,
+        isoMonth: 2,
+      },
+    )
+  })
+
+  it('supports moving backward from the last representable month', () => {
+    const last = PlainYearMonthFns.create(275760, 9)
+
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtract(last, DurationFns.create(1)),
+      {
+        isoYear: 275759,
+        isoMonth: 9,
+      },
+    )
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtract(last, DurationFns.create(0, 1)),
+      {
+        isoYear: 275760,
+        isoMonth: 8,
+      },
+    )
   })
 })
 

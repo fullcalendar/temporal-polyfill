@@ -1,11 +1,7 @@
 import { BigNano, addBigNanos } from './bigNano'
 import { dateAdd } from './calendarNativeMath'
 import { queryNativeDay } from './calendarNativeQuery'
-import {
-  DurationFields,
-  durationFieldDefaults,
-  durationTimeFieldDefaults,
-} from './durationFields'
+import { DurationFields, durationTimeFieldDefaults } from './durationFields'
 import {
   durationFieldsToBigNano,
   durationHasDateParts,
@@ -147,26 +143,12 @@ export function movePlainYearMonth(
     queryNativeDay(calendarId, isoFields)
 
   // The first-of-month must be representable, this check in-bounds
-  let isoDateFields: IsoDateFields = checkIsoDateInBounds(
+  const isoDateFields: IsoDateFields = checkIsoDateInBounds(
     moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots),
   )
 
   if (doSubtract) {
     durationSlots = negateDuration(durationSlots)
-  }
-
-  // if moving backwards in time, set to last day of month
-  if (durationSlots.sign < 0) {
-    isoDateFields = dateAdd(
-      calendarId,
-      isoDateFields,
-      {
-        ...durationFieldDefaults,
-        months: 1,
-      },
-      refinedOptions,
-    )
-    isoDateFields = moveByDays(isoDateFields, -1)
   }
 
   const movedIsoDateFields = dateAdd(
