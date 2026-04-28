@@ -369,6 +369,16 @@ export function computeIntlLeapMonth(
     return undefined
   }
 
+  // ICU's Chinese calendar data in Node 22 labels 1987 as having a leap M07
+  // (`Mo7bis`), while Temporal/test262 follows ICU4X data where the inserted
+  // slot is M06L. Keep this override deliberately narrow so the normal Intl
+  // probing below remains the source of truth for other Chinese/Dangi years.
+  if (intlCalendar.id && computeCalendarIdBase(intlCalendar.id) === 'chinese') {
+    if (year === 1987) {
+      return 7
+    }
+  }
+
   const currentMonthStrings = queryMonthStrings(intlCalendar, year)
   if (currentMonthStrings.length <= 12) {
     return undefined
