@@ -1092,11 +1092,16 @@ function refineMonthCode(
       if (month > leapMonthMeta) {
         throw new RangeError(errorMessages.invalidLeapMonth)
       }
-      if (leapMonth === undefined) {
+
+      // For variable-leap calendars (Chinese/Dangi), `leapMonth` is the
+      // concrete calendar-month ordinal occupied by the requested leap
+      // monthCode. A leap year can still have a *different* leap month, so the
+      // leap monthCode is only available when the ordinals match exactly.
+      if (leapMonth !== month) {
         if (overflow === Overflow.Reject) {
           throw new RangeError(errorMessages.invalidLeapMonth)
         }
-        month-- // M05L -> M05
+        month = monthCodeNumberToMonth(monthCodeNumber, false, leapMonth)
       }
     } else {
       // leap year is constant
