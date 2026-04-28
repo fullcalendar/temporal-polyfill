@@ -70,27 +70,6 @@ intl402/Temporal/ZonedDateTime/prototype/withCalendar/extreme-dates.js
 # A) Rejecting legacy ICU time zones: see expected-failures-node-gte16.txt
 # B) Rejecting invalid minus sign:    see expected-failures-node-gte22.txt
 
-# WONTFIX (4)
-# We do not patch Intl.DateTimeFormat's resolvedOptions method to return
-# the string-normalized version of the original given time zone ID:
-#
-#   new Intl.DateTimeFormat("en", { timeZone: "America/Argentina/Buenos_Aires" })
-#     .resolvedOptions().timeZone
-#     // Current Node/browser behavior: "America/Buenos_Aires"
-#     // Desired spec behavior:         "America/Argentina/Buenos_Aires"
-#
-intl402/DateTimeFormat/timezone-not-canonicalized.js
-#
-# Therefore, similar tests for normalizing differently-cased strings fail too:
-#
-#   new Intl.DateTimeFormat("en", { timeZone: "AMERICA/ARGENTINA/BUENOS_AIRES" })
-#     .resolvedOptions().timeZone
-#     // Current Node/browser behavior: "America/Buenos_Aires"
-#     // Desired spec behavior:         "America/Argentina/Buenos_Aires"
-#
-intl402/DateTimeFormat/timezone-case-insensitive.js
-
-
 ##
 ## Issues with environment, already ignored in proposal-temporal/polyfill
 ## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt

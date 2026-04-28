@@ -1,8 +1,11 @@
 # Test Failure Buckets
 
-Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
+Derived from the original [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run, plus
+the remaining full-suite `test262 --no-max` failures discovered after buckets
+`A` through `J` were reduced.
 
-- Count basis: `956` unique failing test files.
+- Count basis: `986` bucketed test files: `956` from the original failure
+  manifest, plus `30` current full-suite leftovers in buckets `K` through `R`.
 - Deduping note: `TEST-FAILURES.txt` contains duplicate path mentions when the stack trace repeats the same test path. This file groups unique failing test files only.
 - Goal: give future parallel agents buckets that are as root-cause-oriented, and as non-overlapping, as possible.
 - Authoritative full membership list:
@@ -141,6 +144,106 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
   - `test/intl402/Temporal/PlainYearMonth/prototype/with/basic-gregory.js`
   - `test/intl402/Temporal/ZonedDateTime/prototype/with/mutually-exclusive-fields-islamic-civil.js`
 
+## Bucket K: Duration bounds and precision leftovers
+
+- Count: `2`
+- Shared root cause:
+  remaining `Duration.round()` / `Duration.total()` edge behavior around next-day
+  representable bounds and exact floating-point totals.
+- Failing tests:
+  - `test/built-ins/Temporal/Duration/prototype/round/next-day-out-of-range.js`
+  - `test/built-ins/Temporal/Duration/prototype/total/relativeto-total-of-each-unit.js`
+
+## Bucket L: MonthCode validation ordering
+
+- Count: `5`
+- Shared root cause:
+  built-in property-bag `monthCode` syntax validation happens after year type
+  validation, but these tests expect invalid month-code syntax to throw
+  `RangeError` first.
+- Failing tests:
+  - `test/built-ins/Temporal/PlainDate/from/monthcode-invalid.js`
+  - `test/built-ins/Temporal/PlainDateTime/from/monthcode-invalid.js`
+  - `test/built-ins/Temporal/PlainMonthDay/from/monthcode-invalid.js`
+  - `test/built-ins/Temporal/PlainYearMonth/from/monthcode-invalid.js`
+  - `test/built-ins/Temporal/ZonedDateTime/from/monthcode-invalid.js`
+
+## Bucket M: PlainMonthDay ISO reference year overflow
+
+- Count: `2`
+- Shared root cause:
+  `PlainMonthDay` uses `isoYear` only as an overflow/reference-year aid, but the
+  current path still applies full Temporal date range validation to that
+  reference year.
+- Failing tests:
+  - `test/built-ins/Temporal/PlainMonthDay/from/iso-year-used-only-for-overflow.js`
+  - `test/built-ins/Temporal/PlainMonthDay/prototype/with/iso-year-used-only-for-overflow.js`
+
+## Bucket N: PlainYearMonth string parsing and limits
+
+- Count: `14`
+- Shared root cause:
+  `PlainYearMonth` string inputs are being parsed through the PlainDate string
+  path, rejecting valid year-month strings and edge-limit cases before
+  `PlainYearMonth`-specific validation can run.
+- Failing tests:
+  - `test/built-ins/Temporal/PlainYearMonth/compare/argument-string-limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/compare/argument-string.js`
+  - `test/built-ins/Temporal/PlainYearMonth/from/argument-string-limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/from/argument-string.js`
+  - `test/built-ins/Temporal/PlainYearMonth/from/limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/add/limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/equals/argument-string-limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/equals/argument-string.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/since/argument-string-limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/since/argument-string.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/subtract/limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/toPlainDate/limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-limits.js`
+  - `test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string.js`
+
+## Bucket O: PlainDateTime toString option ordering
+
+- Count: `2`
+- Shared root cause:
+  `PlainDateTime.prototype.toString()` reads `calendarName` after rounding and
+  fractional-second options, but the built-in tests expect all relevant options
+  to be read in spec order before algorithmic validation.
+- Failing tests:
+  - `test/built-ins/Temporal/PlainDateTime/prototype/toString/options-read-before-algorithmic-validation.js`
+  - `test/built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js`
+
+## Bucket P: DateTimeFormat option observability and prototype tainting
+
+- Count: `3`
+- Shared root cause:
+  the `Intl.DateTimeFormat` wrapper observes `timeZone` too many times and is
+  still vulnerable to `Object.prototype` pollution for date-time component
+  defaults.
+- Failing tests:
+  - `test/intl402/DateTimeFormat/constructor-options-order-timedate-style.js`
+  - `test/intl402/DateTimeFormat/constructor-options-order.js`
+  - `test/intl402/DateTimeFormat/taint-Object-prototype-date-time-components.js`
+
+## Bucket Q: Time zone transition boundary timeout
+
+- Count: `1`
+- Shared root cause:
+  `ZonedDateTime.prototype.getTimeZoneTransition()` can time out while searching
+  transition boundaries at the representable instant edges.
+- Failing test:
+  - `test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transition-at-instant-boundaries.js`
+
+## Bucket R: Lunisolar DateTimeFormat monthCode bridge
+
+- Count: `1`
+- Shared root cause:
+  the `DateTimeFormat.formatToParts()` comparison bridge still reports the host
+  Chinese lunisolar month code for one ICU-sensitive date instead of the
+  Temporal-correct leap month code.
+- Failing test:
+  - `test/intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js`
+
 ## Suggested sequencing for parallel agents
 
 If the main goal is minimizing overlap, run the buckets in waves instead of starting all of them at once.
@@ -171,6 +274,17 @@ These two both live in the intl-calendar area, but they still split reasonably w
 
 - Bucket `J`: generic non-ISO calendar arithmetic / operation semantics
 
+### Wave 4: current full-suite leftovers
+
+- Bucket `K`: duration bounds and precision leftovers
+- Bucket `L`: monthCode validation ordering
+- Bucket `M`: PlainMonthDay ISO reference year overflow
+- Bucket `N`: PlainYearMonth string parsing and limits
+- Bucket `O`: PlainDateTime toString option ordering
+- Bucket `P`: DateTimeFormat option observability and prototype tainting
+- Bucket `Q`: time zone transition boundary timeout
+- Bucket `R`: lunisolar DateTimeFormat monthCode bridge
+
 `J` is the broad catch-all bucket. It is the most likely to overlap with `H` and `I`, and some `J` failures may disappear once `H` and `I` land. Because of that, `J` should usually wait until `H` and `I` have stabilized.
 
 In short:
@@ -179,6 +293,9 @@ In short:
 2. Start `H` and `I` together.
 3. Let `H` and `I` settle.
 4. Then start `J`.
+5. Tackle `K` through `R` independently; `L`, `M`, `N`, and `O` are the
+   most isolated built-in buckets, while `P`, `Q`, and `R` are Intl/time-zone
+   integration buckets.
 
 ## Bucket Lookup
 
@@ -194,3 +311,11 @@ Use the TSV manifest for the exact file list:
 - Bucket `H`: `awk -F '\t' '$1 == "H" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
 - Bucket `I`: `awk -F '\t' '$1 == "I" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
 - Bucket `J`: `awk -F '\t' '$1 == "J" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `K`: `awk -F '\t' '$1 == "K" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `L`: `awk -F '\t' '$1 == "L" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `M`: `awk -F '\t' '$1 == "M" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `N`: `awk -F '\t' '$1 == "N" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `O`: `awk -F '\t' '$1 == "O" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `P`: `awk -F '\t' '$1 == "P" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `Q`: `awk -F '\t' '$1 == "Q" { print $2 }' TEST-FAILURE-BUCKETS.tsv`
+- Bucket `R`: `awk -F '\t' '$1 == "R" { print $2 }' TEST-FAILURE-BUCKETS.tsv`

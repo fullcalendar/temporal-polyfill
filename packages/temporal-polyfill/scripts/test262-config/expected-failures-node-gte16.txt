@@ -1,9 +1,0 @@
-
-# WONTFIX
-# We do not patch Intl.DateTimeFormat's constructor to reject legacy ICU time
-# zones IDs.
-#
-# Ironically, older Node <16 correctly rejects them, but Node >=16 incorrectly
-# accepts them.
-#
-intl402/DateTimeFormat/timezone-legacy-non-iana.js

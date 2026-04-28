@@ -1,9 +1,0 @@
-
-# WONTFIX
-# We do not patch Intl.DateTimeFormat's constructor to reject time zone IDs
-# with invalid characters.
-#
-# Ironically, older Node <22 correctly rejects them, but Node 22 incorrectly
-# accepts them.
-#
-intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
