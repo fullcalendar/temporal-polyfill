@@ -495,10 +495,57 @@ function validateDateSeparators(s: string): boolean {
   return m[1] === m[3]
 }
 
-// Strict patterns to reject mixed separators in time/offset components.
-// e.g. "00:0000" or "+00:0000" are invalid because they mix ':' and no separator.
-const strictTimeOnlyRegExp = /^T?\d{2}(?::\d{2}(?::\d{2})?|\d{2}(?:\d{2}(?:\d{2})?)?)?(?:[.,]\d{1,9})?$/i
-const strictOffsetRegExp = /^[+-]\d{2}(?::\d{2}(?::\d{2})?|\d{2}(?:\d{2}(?:\d{2})?)?)?$/i
+function validateTimeSeparators(s: string): boolean {
+  if (s[0] === 'T' || s[0] === 't') {
+    s = s.slice(1)
+  }
+
+  const fractionIndex = s.search(/[.,]/)
+  const main = fractionIndex < 0 ? s : s.slice(0, fractionIndex)
+  const parts = main.split(':')
+
+  if (parts.length === 1) {
+    return /^(?:\d{2}|\d{4}|\d{6})$/i.test(main)
+  }
+
+  return (
+    (parts.length === 2 || parts.length === 3) &&
+    parts.every((part) => part.length === 2 && /^\d{2}$/i.test(part))
+  )
+}
+
+function extractDateTimeTimePortion(s: string, offset: string | undefined): string {
+  const tIndex = s.search(/[T ]/i)
+  let timePortion = tIndex >= 0 ? s.slice(tIndex + 1) : ''
+
+  if (offset !== undefined) {
+    const offsetIndex = timePortion.indexOf(offset)
+    if (offsetIndex >= 0) {
+      timePortion = timePortion.slice(0, offsetIndex)
+    }
+  }
+
+  return timePortion
+}
+
+function extractTimeOnlyPortion(s: string, offset: string | undefined): string {
+  let timeEnd = s.length
+
+  if (offset !== undefined) {
+    timeEnd = s.indexOf(offset)
+  } else {
+    const annotationIndex = s.indexOf('[')
+    if (annotationIndex >= 0) {
+      timeEnd = annotationIndex
+    }
+  }
+
+  return s.slice(0, timeEnd)
+}
+
+function validateOffsetSeparators(s: string): boolean {
+  return validateTimeSeparators(s.slice(1))
+}
 
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)
@@ -507,20 +554,13 @@ function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
 
   // Validate time portion separator consistency (e.g. reject "00:0000")
   if (parts[6]) {
-    const tIndex = parts[0].search(/[T ]/i)
-    let timePortion = tIndex >= 0 ? parts[0].slice(tIndex + 1) : ''
-    if (parts[10] !== undefined) {
-      const offsetIndex = timePortion.indexOf(parts[10])
-      if (offsetIndex >= 0) {
-        timePortion = timePortion.slice(0, offsetIndex)
-      }
-    }
-    if (!strictTimeOnlyRegExp.test(timePortion)) return undefined
+    const timePortion = extractDateTimeTimePortion(parts[0], parts[10])
+    if (!validateTimeSeparators(timePortion)) return undefined
   }
 
   // Validate offset portion separator consistency (e.g. reject "+00:0000")
   if (parts[10] && (parts[10] || '').toUpperCase() !== 'Z') {
-    if (!strictOffsetRegExp.test(parts[10])) return undefined
+    if (!validateOffsetSeparators(parts[10])) return undefined
   }
 
   return organizeDateTimeLikeParts(parts)
@@ -542,14 +582,8 @@ function parseTimeOnly(s: string): IsoTimeFields | undefined {
   const parts = timeRegExp.exec(s)
   if (!parts) return undefined
 
-  let timeEnd = parts[0].length
-  if (parts[5] !== undefined) {
-    timeEnd = parts[0].indexOf(parts[5])
-  } else if (parts[10]) {
-    timeEnd = parts[0].indexOf('[')
-  }
-  const timePortion = parts[0].slice(0, timeEnd)
-  if (!strictTimeOnlyRegExp.test(timePortion)) return undefined
+  const timePortion = extractTimeOnlyPortion(parts[0], parts[5])
+  if (!validateTimeSeparators(timePortion)) return undefined
 
   // Validate offset if present
   const offsetMatch = parts[0].match(/[+-].*?(?=\[|$)/)
@@ -571,7 +605,7 @@ export function parseOffsetNanoMaybe(
 ): number | undefined {
   const parts = offsetRegExp.exec(s)
   if (!parts) return undefined
-  if (!strictOffsetRegExp.test(parts[0])) return undefined
+  if (!validateOffsetSeparators(parts[0])) return undefined
   return organizeOffsetParts(parts, onlyHourMinute)
 }
 

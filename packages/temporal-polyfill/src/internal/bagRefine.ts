@@ -144,8 +144,8 @@ const dateFieldRefiners = {
   // monthCode refiner only validates type (string). Range validation (parseMonthCode)
   // is deferred to dateFromFields/yearMonthFromFields/monthDayFromFields so that
   // missing-field TypeError precedes invalid-monthCode RangeError.
-  monthCode(monthCode: string) {
-    return requireString(monthCode)
+  monthCode(monthCode: string, entityName = 'monthCode') {
+    return refineMonthCodeString(monthCode, entityName)
   },
   day: toPositiveInteger,
 }
@@ -172,6 +172,22 @@ const builtinRefiners = {
   ...timeFieldRefiners,
   ...durationFieldRefiners,
   ...buildinOffsetRefiners,
+}
+
+function refineMonthCodeString(monthCode: unknown, entityName: string): string {
+  if (typeof monthCode === 'string') {
+    return monthCode
+  }
+
+  if (monthCode && typeof monthCode === 'object') {
+    const monthCodeToString = monthCode.toString
+
+    if (typeof monthCodeToString === 'function') {
+      return requireString(monthCodeToString.call(monthCode), entityName)
+    }
+  }
+
+  return requireString(monthCode as string, entityName)
 }
 
 // High-Level Refining
