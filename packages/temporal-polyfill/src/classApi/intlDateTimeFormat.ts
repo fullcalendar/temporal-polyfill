@@ -46,6 +46,17 @@ export type DateTimeFormat = Intl.DateTimeFormat
 export const DateTimeFormat = createDateTimeFormatClass()
 
 const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
+const islamicCalendarFallbackIds = [
+  'islamic-civil',
+  'islamic-tbla',
+  'islamic-umalqura',
+] as const
+const islamicFallbackProbeEpochMillis = [
+  Date.UTC(2024, 0, 1),
+  Date.UTC(2024, 5, 15),
+  Date.UTC(2025, 2, 30),
+]
+const resolvedCalendarFallbackCache = new Map<string, string>()
 
 function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   // The Intl.DateTimeFormat object
@@ -81,12 +92,16 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
     const memberDescriptor = memberDescriptors[memberName]
     const formatLikeMethod =
       memberName.startsWith('format') && createFormatMethod(memberName)
+    const proxiedMethod =
+      memberName === 'resolvedOptions'
+        ? createResolvedOptionsMethod()
+        : createProxiedMethod(memberName)
 
     if (typeof memberDescriptor.value === 'function') {
       memberDescriptor.value =
         memberName === 'constructor'
           ? DateTimeFormatFunc // expose more versatile
-          : formatLikeMethod || createProxiedMethod(memberName)
+          : formatLikeMethod || proxiedMethod
     } else if (formatLikeMethod) {
       // .format() is always bound to the instance. It's a getter
       // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
@@ -150,6 +165,20 @@ function createProxiedMethod(methodName: string) {
   }
 
   return Object.defineProperties(func, createNameDescriptors(methodName))
+}
+
+function createResolvedOptionsMethod() {
+  const func = function (this: DateTimeFormat) {
+    const prepFormat = internalsMap.get(this)!
+    const resolvedOptions = prepFormat.rawFormat.resolvedOptions()
+    const calendar = normalizeResolvedCalendarId(resolvedOptions)
+
+    return calendar === resolvedOptions.calendar
+      ? resolvedOptions
+      : { ...resolvedOptions, calendar }
+  }
+
+  return Object.defineProperties(func, createNameDescriptors('resolvedOptions'))
 }
 
 // Internals
@@ -268,4 +297,68 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
     memoize(createFormatForPrep),
     /* strictOptions = */ true,
   )
+}
+
+function normalizeResolvedCalendarId(
+  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
+): string {
+  const { calendar } = resolvedOptions
+
+  if (calendar !== 'islamic' && calendar !== 'islamic-rgsa') {
+    return calendar
+  }
+
+  const cacheKey = `${resolvedOptions.locale}\u0000${calendar}`
+  let fallbackCalendar = resolvedCalendarFallbackCache.get(cacheKey)
+
+  if (!fallbackCalendar) {
+    fallbackCalendar = detectIslamicCalendarFallback(
+      resolvedOptions.locale,
+      calendar,
+    )
+    resolvedCalendarFallbackCache.set(cacheKey, fallbackCalendar)
+  }
+
+  return fallbackCalendar
+}
+
+function detectIslamicCalendarFallback(locale: string, calendar: string): string {
+  const expectedOutputs = computeCalendarProbeOutputs(locale, calendar)
+
+  for (let i = 0; i < islamicCalendarFallbackIds.length; i++) {
+    const candidateCalendar = islamicCalendarFallbackIds[i]
+    const candidateOutputs = computeCalendarProbeOutputs(locale, candidateCalendar)
+    let matches = true
+
+    for (let j = 0; j < expectedOutputs.length; j++) {
+      if (candidateOutputs[j] !== expectedOutputs[j]) {
+        matches = false
+        break
+      }
+    }
+
+    if (matches) {
+      return candidateCalendar
+    }
+  }
+
+  return islamicCalendarFallbackIds[0]
+}
+
+function computeCalendarProbeOutputs(locale: string, calendar: string): string[] {
+  const format = new RawDateTimeFormat(locale, {
+    calendar,
+    timeZone: 'UTC',
+    era: 'short',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  const outputs: string[] = []
+
+  for (let i = 0; i < islamicFallbackProbeEpochMillis.length; i++) {
+    outputs[i] = format.format(islamicFallbackProbeEpochMillis[i])
+  }
+
+  return outputs
 }

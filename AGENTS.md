@@ -57,6 +57,10 @@ See these files for failure groups:
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.md` (starting point)
 - `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.tsv` (all failures)
 
+When fixing test262 failures, default to addressing the work as a sequence of
+individual sub-fixes/root causes, and review or explain them one-by-one instead
+of treating the whole bucket as one opaque change.
+
 
 ## Test262 Notes
 

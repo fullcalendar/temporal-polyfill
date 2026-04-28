@@ -268,8 +268,10 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
+  s = requireString(s)
+
   let organized: IsoTimeFields | DateTimeLikeOrganized | undefined =
-    parseTimeOnly(requireString(s))
+    parseTimeOnly(s)
 
   if (!organized) {
     organized = parseDateTimeLike(s)
@@ -308,17 +310,17 @@ export function parseDuration(s: string): DurationSlots {
   return createDurationSlots(checkDurationUnits(parsed))
 }
 
-// If `s` is a full date/datetime string, extract its calendar annotation.
-// If `s` is a time-only string (e.g. "12:34:56"), fall back to iso8601
-// because a time string is not a valid calendar identifier.
+// If `s` is a Temporal string, extract its calendar annotation.
+// Time-only strings can carry a calendar annotation for withCalendar().
 export function parseCalendarId(s: string): string {
   const res =
     parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
   if (res) {
     return res.calendar
   }
-  if (parseTimeOnly(s)) {
-    return isoCalendarId
+  const timeParts = parseTimeOnlyParts(s)
+  if (timeParts) {
+    return organizeAnnotationParts(timeParts[10]).calendar
   }
   return s
 }
@@ -590,6 +592,13 @@ function parseMonthDayOnly(s: string): DateOrganized | undefined {
 }
 
 function parseTimeOnly(s: string): IsoTimeFields | undefined {
+  const parts = parseTimeOnlyParts(s)
+  if (!parts) return undefined
+  organizeAnnotationParts(parts[10]) // validate annotations
+  return organizeTimeParts(parts)
+}
+
+function parseTimeOnlyParts(s: string): string[] | undefined {
   const parts = timeRegExp.exec(s)
   if (!parts) return undefined
 
@@ -597,12 +606,11 @@ function parseTimeOnly(s: string): IsoTimeFields | undefined {
   if (!validateTimeSeparators(timePortion)) return undefined
 
   // Validate offset if present
-  const offsetMatch = parts[0].match(/[+-].*?(?=\[|$)/)
-  if (offsetMatch) {
-    parseOffsetNano(offsetMatch[0])
+  if (parts[5]) {
+    parseOffsetNano(parts[5])
   }
 
-  return organizeAnnotationParts(parts[10]), organizeTimeParts(parts) // validate annotations
+  return parts
 }
 
 function parseDurationFields(s: string): DurationFields | undefined {

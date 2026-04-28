@@ -67,6 +67,17 @@ describe('fromFields', () => {
       isoDay: 1,
     })
   })
+
+  it('rejects fallback-only islamic calendar IDs', () => {
+    expect(() =>
+      PlainDateFns.fromFields({
+        calendar: 'islamic',
+        year: 1445,
+        month: 1,
+        day: 1,
+      }),
+    ).toThrow(RangeError)
+  })
 })
 
 describe('getFields', () => {

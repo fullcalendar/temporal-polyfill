@@ -68,6 +68,17 @@ describe('fromFields', () => {
       isoDay: 18,
     })
   })
+
+  it('requires a year before reconciling non-iso month fields', () => {
+    expect(() =>
+      PlainMonthDayFns.fromFields({
+        calendar: 'islamic-civil',
+        monthCode: 'M04',
+        month: 5,
+        day: 1,
+      }),
+    ).toThrow(TypeError)
+  })
 })
 
 describe('getFields', () => {
