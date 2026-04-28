@@ -42,6 +42,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket C: Duration round / total algorithms
 
+- Status: DONE
 - Count: `9`
 - Shared root cause:
   `Temporal.Duration.compare`, `.round()`, and `.total()` disagree with spec on relative duration math, rounding windows, blank durations, sign handling around DST fallback, or precision/bounds.
@@ -54,6 +55,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket D: Built-in PlainYearMonth arithmetic
 
+- Status: DONE
 - Count: `6`
 - Shared root cause:
   `PlainYearMonth` built-in add/subtract semantics for lower units, overflow, and representable bounds.
@@ -63,6 +65,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket E: Time zone / offset specific behavior
 
+- Status: DONE
 - Count: `15`
 - Shared root cause:
   sub-minute offsets, time zone normalization, reverse wall-clock comparisons, transition edge cases, or other zone-specific semantics.
@@ -75,6 +78,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket F: Calendar ID canonicalization / fallback
 
+- Status: DONE
 - Count: `20`
 - Shared root cause:
   calendar identifier acceptance, canonicalization, case handling, and fallback behavior.
