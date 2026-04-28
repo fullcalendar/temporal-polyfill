@@ -830,11 +830,20 @@ export function monthDayFromFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const overflow = refineOverflowOptions(options)
+  const eraOrigins = getCalendarEraOrigins({ id: calendarId })
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   if (fields.day === undefined) {
     throw new TypeError(errorMessages.missingField('day'))
+  }
+  if (
+    calendarId !== isoCalendarId &&
+    fields.month !== undefined &&
+    fields.year === undefined &&
+    (fields.era === undefined || fields.eraYear === undefined)
+  ) {
+    throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
 
   let yearMaybe =
