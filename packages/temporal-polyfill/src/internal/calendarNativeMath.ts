@@ -286,7 +286,9 @@ function diffYearMonthDay(
       : computeIsoDaysInMonth(year1, month1)
     let dayCorrect = 0
 
-    if (Math.sign(dayDiff) === -sign) {
+    // Check if day correction is needed using the effective (truncated) day0
+    // day0 may exceed the days in the target month, so we compare day1 against min(day0, daysInMonth1)
+    if (Math.sign(day1 - Math.min(day0, daysInMonth1)) === -sign) {
       const origDaysInMonth1 = daysInMonth1
       ;[year1, month1] = intlCalendar
         ? intlMonthAdd(intlCalendar, year1, month1, -sign)

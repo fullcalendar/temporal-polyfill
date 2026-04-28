@@ -483,15 +483,40 @@ export function roundBigNanoByInc(
     days -= 1
   }
 
-  const dayAndNano = divModFloor(
-    roundByInc(timeNano, nanoInc, roundingMode),
-    nanoInUtcDay,
-  )
+  let roundedTimeNano: number
+
+  // For halfEven ties (0.5), parity must account for days' contribution
+  // to total increments, not just the timeNano portion
+  //
+  // Likely related to?:
+  // https://github.com/tc39/proposal-temporal/pull/3172/changes
+  //
+  if (roundingMode === RoundingMode.HalfEven) {
+    const timeExact = timeNano / nanoInc
+    if (Math.abs(timeExact % 1) === 0.5) {
+      const incrementsInDay = nanoInUtcDay / nanoInc
+      const timeFloor = Math.floor(timeExact)
+      // Total floor increments = days * increments_per_day + timeFloor
+      // We only need parity, so compute it modularly
+      const daysParity = (Math.abs(days) % 2) * (incrementsInDay % 2)
+      const timeFloorParity = Math.abs(timeFloor) % 2
+      const totalFloorIsOdd = (daysParity + timeFloorParity) % 2 === 1
+      // halfEven: round to even total → if floor is odd, round away from zero
+      const roundedTotal = totalFloorIsOdd ? timeFloor + 1 : timeFloor
+      roundedTimeNano = roundedTotal * nanoInc
+    } else {
+      roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
+    }
+  } else {
+    roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
+  }
+
+  const dayAndNano = divModFloor(roundedTimeNano, nanoInUtcDay)
   // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
   const dayDelta = dayAndNano[0]
-  const roundedTimeNano = dayAndNano[1]
+  const finalTimeNano = dayAndNano[1]
 
-  return createBigNano(days + dayDelta, roundedTimeNano)
+  return createBigNano(days + dayDelta, finalTimeNano)
 }
 
 /*
@@ -675,7 +700,9 @@ export function nudgeRelativeDuration(
 
   const exactVal = truncedVal + frac * sign * roundingInc
   const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)
-  const expanded = Math.sign(roundedVal - exactVal) === sign
+  // Determine if the rounded value expanded past the truncated value
+  // (using truncedVal rather than exactVal ensures frac=1.0 triggers bubbling)
+  const expanded = Math.sign(roundedVal - truncedVal) === sign
 
   baseDurationFields[smallestUnitFieldName] = roundedVal
 
