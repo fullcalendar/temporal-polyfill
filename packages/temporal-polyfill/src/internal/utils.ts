@@ -80,7 +80,12 @@ export function memoize<K, V, A extends any[]>(
     if (map.has(key)) {
       return map.get(key) as V
     }
-    const val = generator(key, ...otherArgs)
+    const args = [key] as unknown[]
+    // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
+    for (let i = 0; i < otherArgs.length; i++) {
+      args[i + 1] = otherArgs[i]
+    }
+    const val = generator.apply(undefined, args as [K, ...A])
     map.set(key, val)
     return val
   }
@@ -145,8 +150,9 @@ export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
   const res = {} as any
   let i = propNamesRev.length
 
-  for (const arg of args) {
-    res[propNamesRev[--i]] = arg
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let argI = 0; argI < args.length; argI++) {
+    res[propNamesRev[--i]] = args[argI]
   }
 
   return res
@@ -180,6 +186,7 @@ export function mapPropNames<P, R, E = undefined>(
 ): { [K in keyof P]: R } {
   const props = {} as { [K in keyof P]: R }
 
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
   for (let i = 0; i < propNames.length; i++) {
     const propName = propNames[i]
     props[propName] = generator(propName, i, extraArg)
@@ -205,6 +212,7 @@ export function remapProps<O, N>(
 ): N {
   const newProps = {} as N
 
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
   for (let i = 0; i < oldNames.length; i++) {
     newProps[newNames[i]] = oldProps[oldNames[i]] as any
   }
@@ -213,10 +221,12 @@ export function remapProps<O, N>(
 }
 
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
-  // TODO: do this elsewhere to guard against prototype pollution!?
+  // Avoid inherited fields from Object.prototype pollution.
   const res = Object.create(null) as P
 
-  for (const propName of propNames) {
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < propNames.length; i++) {
+    const propName = propNames[i]
     res[propName] = props[propName]
   }
 
@@ -242,7 +252,9 @@ export function excludeUndefinedProps<P extends {}>(props: P): Partial<P> {
   props = { ...props }
   const propNames = Object.keys(props) as (keyof P)[]
 
-  for (const propName of propNames) {
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < propNames.length; i++) {
+    const propName = propNames[i]
     if (props[propName] === undefined) {
       delete props[propName]
     }
@@ -255,7 +267,9 @@ export function hasAnyPropsByName<P extends {}>(
   props: P,
   names: (keyof P)[],
 ): boolean {
-  for (const name of names) {
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i]
     if (name in props) {
       return true
     }
@@ -267,7 +281,9 @@ export function hasAllPropsByName<P extends {}>(
   props: P,
   names: (keyof P)[],
 ): boolean {
-  for (const name of names) {
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i]
     if (!(name in props)) {
       return false
     }
@@ -280,7 +296,9 @@ export function allPropsEqual(
   props0: any,
   props1: any,
 ): boolean {
-  for (const propName of propNames) {
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < propNames.length; i++) {
+    const propName = propNames[i]
     if (props0[propName] !== props1[propName]) {
       return false
     }
@@ -310,7 +328,12 @@ export function bindArgs<BA extends any[], DA extends any[], R>(
   ...boundArgs: BA
 ): (...dynamicArgs: DA) => R {
   return (...dynamicArgs: DA) => {
-    return f(...boundArgs, ...dynamicArgs)
+    const args = boundArgs.slice() as unknown[]
+    // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
+    for (let i = 0; i < dynamicArgs.length; i++) {
+      args[boundArgs.length + i] = dynamicArgs[i]
+    }
+    return f.apply(undefined, args as [...BA, ...DA])
   }
 }
 

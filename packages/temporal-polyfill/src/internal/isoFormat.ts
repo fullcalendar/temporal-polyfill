@@ -64,8 +64,12 @@ export function formatInstantIso(
   instantSlots: InstantSlots,
   options?: InstantDisplayOptions,
 ): string {
-  const [timeZoneArg, roundingMode, nanoInc, subsecDigits] =
-    refineInstantDisplayOptions(options)
+  const displayOptions = refineInstantDisplayOptions(options)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const timeZoneArg = displayOptions[0]
+  const roundingMode = displayOptions[1]
+  const nanoInc = displayOptions[2]
+  const subsecDigits = displayOptions[3]
 
   const providedTimeZone = timeZoneArg !== undefined
   const nativeTimeZone = queryNativeTimeZone(
@@ -88,18 +92,19 @@ export function formatZonedDateTimeIso(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
-  const [a, b, c, d, e, f] = refineZonedDateTimeDisplayOptions(options)
+  const displayOptions = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
     zonedDateTimeSlots0.calendar,
     zonedDateTimeSlots0.timeZone,
     zonedDateTimeSlots0.epochNanoseconds,
     // workaround for https://github.com/swc-project/swc/issues/8806
-    a,
-    b,
-    c,
-    d,
-    e,
-    f,
+    // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+    displayOptions[0],
+    displayOptions[1],
+    displayOptions[2],
+    displayOptions[3],
+    displayOptions[4],
+    displayOptions[5],
   )
 }
 
@@ -107,15 +112,16 @@ export function formatPlainDateTimeIso(
   plainDateTimeSlots0: PlainDateTimeSlots,
   options?: DateTimeDisplayOptions,
 ): string {
-  const [a, b, c, d] = refineDateTimeDisplayOptions(options)
+  const displayOptions = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
     plainDateTimeSlots0.calendar,
     plainDateTimeSlots0,
     // workaround for https://github.com/swc-project/swc/issues/8806
-    a,
-    b,
-    c,
-    d,
+    // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+    displayOptions[0],
+    displayOptions[1],
+    displayOptions[2],
+    displayOptions[3],
   )
 }
 
@@ -158,13 +164,14 @@ export function formatPlainTimeIso(
   slots: PlainTimeSlots,
   options?: TimeDisplayOptions,
 ): string {
-  const [a, b, c] = refineTimeDisplayOptions(options)
+  const displayOptions = refineTimeDisplayOptions(options)
   return formatTimeIso(
     slots,
     // workaround for https://github.com/swc-project/swc/issues/8806
-    a,
-    b,
-    c,
+    // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+    displayOptions[0],
+    displayOptions[1],
+    displayOptions[2],
   )
 }
 
@@ -172,10 +179,11 @@ export function formatDurationIso(
   slots: DurationSlots,
   options?: TimeDisplayOptions,
 ): string {
-  const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(
-    options,
-    Unit.Second,
-  )
+  const displayOptions = refineTimeDisplayOptions(options, Unit.Second)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const roundingMode = displayOptions[0]
+  const nanoInc = displayOptions[1]
+  const subsecDigits = displayOptions[2]
 
   // for performance AND for not losing precision when no rounding
   if (nanoInc > 1) {
@@ -318,11 +326,14 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const [wholeSec, subsecNano] = divModBigNano(
+  const secondParts = divModBigNano(
     durationFieldsToBigNano(abs, Unit.Second),
     nanoInSec,
     divModTrunc,
   )
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const wholeSec = secondParts[0]
+  const subsecNano = secondParts[1]
   checkDurationTimeUnit(wholeSec)
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)
@@ -443,9 +454,16 @@ export function formatOffsetNano(
     return ''
   }
 
-  const [hour, nanoRemainder0] = divModFloor(Math.abs(offsetNano), nanoInHour)
-  const [minute, nanoRemainder1] = divModFloor(nanoRemainder0, nanoInMinute)
-  const [second, nanoRemainder2] = divModFloor(nanoRemainder1, nanoInSec)
+  const hourParts = divModFloor(Math.abs(offsetNano), nanoInHour)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const hour = hourParts[0]
+  const nanoRemainder0 = hourParts[1]
+  const minuteParts = divModFloor(nanoRemainder0, nanoInMinute)
+  const minute = minuteParts[0]
+  const nanoRemainder1 = minuteParts[1]
+  const secondParts = divModFloor(nanoRemainder1, nanoInSec)
+  const second = secondParts[0]
+  const nanoRemainder2 = secondParts[1]
 
   return (
     getSignStr(offsetNano) +
@@ -543,5 +561,8 @@ function formatDurationNumber(n: number, force?: any): string {
   }
   // avoid outputting scientific notation
   // https://stackoverflow.com/a/50978675/96342
-  return n.toLocaleString('fullwide', { useGrouping: false })
+  // Avoid inherited options from Object.prototype pollution.
+  const options = Object.create(null)
+  options.useGrouping = false
+  return n.toLocaleString('fullwide', options)
 }

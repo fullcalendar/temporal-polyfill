@@ -242,7 +242,7 @@ export function refineOverflowOptions(
 ): Overflow {
   return options === undefined
     ? Overflow.Constrain
-    : refineOverflow(requireObjectLike(options))
+    : coerceOverflow(requireObjectLike(options))
 }
 
 export function refineZonedFieldOptions(
@@ -252,9 +252,9 @@ export function refineZonedFieldOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const epochDisambig = refineEpochDisambig(options) // "disambig"
-  const offsetDisambig = refineOffsetDisambig(options, defaultOffsetDisambig) // "offset"
-  const overflow = refineOverflow(options) // "overflow"
+  const epochDisambig = coerceEpochDisambig(options) // "disambig"
+  const offsetDisambig = coerceOffsetDisambig(options, defaultOffsetDisambig) // "offset"
+  const overflow = coerceOverflow(options) // "overflow"
 
   return [overflow, offsetDisambig, epochDisambig]
 }
@@ -262,7 +262,7 @@ export function refineZonedFieldOptions(
 export function refineEpochDisambigOptions(
   options: EpochDisambigOptions | undefined,
 ): EpochDisambig {
-  return refineEpochDisambig(normalizeOptions(options))
+  return coerceEpochDisambig(normalizeOptions(options))
 }
 
 export function refineDateDiffOptions(
@@ -270,7 +270,12 @@ export function refineDateDiffOptions(
 ): Unit {
   // TODO: only year/month/week/day?
   options = normalizeOptions(options)
-  return refineLargestUnit(options, Unit.Year, Unit.Day, true)!
+  return validateUnitRange(
+    largestUnitStr,
+    coerceLargestUnit(options, Unit.Day, true)!,
+    Unit.Day,
+    Unit.Year,
+  )!
 }
 
 export function refineDiffOptions<UN extends UnitName>(
@@ -283,10 +288,18 @@ export function refineDiffOptions<UN extends UnitName>(
 ): DiffTuple {
   options = normalizeOptions(options)
 
-  let largestUnit = refineLargestUnit(options, maxUnit, minUnit)
-  let roundingInc = parseRoundingIncInteger(options)
-  let roundingMode = refineRoundingMode(options, defaultRoundingMode)
-  const smallestUnit = refineSmallestUnit(options, maxUnit, minUnit, true)!
+  let largestUnit = coerceLargestUnit(options, minUnit)
+  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingMode = coerceRoundingMode(options, defaultRoundingMode)
+  let smallestUnit = coerceSmallestUnit(options, minUnit, true)!
+
+  largestUnit = validateUnitRange(largestUnitStr, largestUnit, minUnit, maxUnit)
+  smallestUnit = validateUnitRange(
+    smallestUnitStr,
+    smallestUnit,
+    minUnit,
+    maxUnit,
+  )
 
   if (largestUnit == null) {
     largestUnit = Math.max(defaultLargestUnit, smallestUnit)
@@ -294,7 +307,7 @@ export function refineDiffOptions<UN extends UnitName>(
     checkLargestSmallestUnit(largestUnit, smallestUnit)
   }
 
-  roundingInc = refineRoundingInc(roundingInc, smallestUnit, true)
+  roundingInc = validateRoundingInc(roundingInc, smallestUnit, true)
 
   if (roundingModeInvert) {
     roundingMode = invertRoundingMode(roundingMode)
@@ -314,11 +327,11 @@ export function refineDurationRoundOptions<RA, R>(
   >(options, smallestUnitStr)
 
   // alphabetcal
-  let largestUnit = refineLargestUnit(options)
+  let largestUnit = coerceLargestUnit(options)
   const relativeToInternals = refineRelativeTo(options[relativeToName])
-  let roundingInc = parseRoundingIncInteger(options)
-  const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
-  let smallestUnit = refineSmallestUnit(options)
+  let roundingInc = coerceRoundingIncInteger(options)
+  const roundingMode = coerceRoundingMode(options, RoundingMode.HalfExpand)
+  let smallestUnit = coerceSmallestUnit(options)
 
   if (largestUnit === undefined && smallestUnit === undefined) {
     throw new RangeError(errorMessages.missingSmallestLargestUnit)
@@ -332,7 +345,7 @@ export function refineDurationRoundOptions<RA, R>(
   }
 
   checkLargestSmallestUnit(largestUnit, smallestUnit)
-  roundingInc = refineRoundingInc(roundingInc, smallestUnit, true)
+  roundingInc = validateRoundingInc(roundingInc, smallestUnit, true)
 
   if (
     roundingInc > 1 &&
@@ -364,12 +377,18 @@ export function refineRoundingOptions<UN extends DayTimeUnitName>(
   >(options, smallestUnitStr)
 
   // alphabetical
-  let roundingInc = parseRoundingIncInteger(options)
-  const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
-  let smallestUnit = refineSmallestUnit(options, maxUnit)
+  let roundingInc = coerceRoundingIncInteger(options)
+  const roundingMode = coerceRoundingMode(options, RoundingMode.HalfExpand)
+  let smallestUnit = coerceSmallestUnit(options)
 
   smallestUnit = requirePropDefined(smallestUnitStr, smallestUnit)
-  roundingInc = refineRoundingInc(
+  smallestUnit = validateUnitRange(
+    smallestUnitStr,
+    smallestUnit,
+    Unit.Nanosecond,
+    maxUnit,
+  )!
+  roundingInc = validateRoundingInc(
     roundingInc,
     smallestUnit,
     undefined,
@@ -390,10 +409,10 @@ function refineRoundingMathOptions(
   >(options, roundingModeName)
 
   // alphabetical
-  let roundingInc = parseRoundingIncInteger(options)
-  const roundingMode = refineRoundingMode(options, RoundingMode.HalfExpand)
+  let roundingInc = coerceRoundingIncInteger(options)
+  const roundingMode = coerceRoundingMode(options, RoundingMode.HalfExpand)
 
-  roundingInc = refineRoundingInc(
+  roundingInc = validateRoundingInc(
     roundingInc,
     smallestUnit,
     allowManyLargeUnits,
@@ -438,7 +457,7 @@ export function refineTotalOptions<RA, R>(
 
   // alphabetical
   const relativeToInternals = refineRelativeTo(options[relativeToName])
-  let totalUnit = refineTotalUnit(options)
+  let totalUnit = coerceTotalUnit(options)
   totalUnit = requirePropDefined(totalUnitStr, totalUnit)
 
   return [
@@ -451,13 +470,20 @@ export function refineDateTimeDisplayOptions(
   options: DateTimeDisplayOptions | undefined,
 ): DateTimeDisplayTuple {
   options = normalizeOptions(options)
-  return [refineCalendarDisplay(options), ...refineTimeDisplayTuple(options)]
+  const timeDisplayTuple = refineTimeDisplayTuple(options)
+  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+  return [
+    coerceCalendarDisplay(options),
+    timeDisplayTuple[0],
+    timeDisplayTuple[1],
+    timeDisplayTuple[2],
+  ]
 }
 
 export function refineDateDisplayOptions(
   options: CalendarDisplayOptions | undefined,
 ): CalendarDisplay {
-  return refineCalendarDisplay(normalizeOptions(options))
+  return coerceCalendarDisplay(normalizeOptions(options))
 }
 
 export function refineTimeDisplayOptions(
@@ -473,19 +499,31 @@ export function refineZonedDateTimeDisplayOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const calendarDisplay = refineCalendarDisplay(options)
-  const subsecDigits = refineSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
-  const offsetDisplay = refineOffsetDisplay(options)
-  const roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
-  const smallestUnit = refineSmallestUnit(options, Unit.Minute)
-  const timeZoneDisplay = refineTimeZoneDisplay(options)
+  const calendarDisplay = coerceCalendarDisplay(options)
+  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const offsetDisplay = coerceOffsetDisplay(options)
+  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const smallestUnit = coerceSmallestUnit(options)
+  const timeZoneDisplay = coerceTimeZoneDisplay(options)
 
+  const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
+    validateUnitRange(
+      smallestUnitStr,
+      smallestUnit,
+      Unit.Nanosecond,
+      Unit.Minute,
+    ),
+    subsecDigits,
+  )
+
+  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
   return [
     calendarDisplay,
     timeZoneDisplay,
     offsetDisplay,
     roundingMode,
-    ...refineSmallestUnitAndSubsecDigits(smallestUnit, subsecDigits),
+    unitDisplayTuple[0],
+    unitDisplayTuple[1],
   ]
 }
 
@@ -495,10 +533,23 @@ export function refineInstantDisplayOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const timeDisplayTuple = refineTimeDisplayTuple(options)
+  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const smallestUnit = coerceSmallestUnit(options)
   const timeZoneArg: string | undefined = options.timeZone
 
-  return [timeZoneArg, ...timeDisplayTuple]
+  const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
+    validateUnitRange(
+      smallestUnitStr,
+      smallestUnit,
+      Unit.Nanosecond,
+      Unit.Minute,
+    ),
+    subsecDigits,
+  )
+
+  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+  return [timeZoneArg, roundingMode, unitDisplayTuple[0], unitDisplayTuple[1]]
 }
 
 export function refineDirectionOptions(
@@ -508,7 +559,7 @@ export function refineDirectionOptions(
     DirectionOptions,
     typeof directionName
   >(options, directionName)
-  const res = refineChoiceOption(
+  const res = coerceChoiceOption(
     directionName,
     directionMap,
     normalizedOptions,
@@ -529,17 +580,25 @@ function refineTimeDisplayTuple(
   maxSmallestUnit: TimeUnit = Unit.Minute,
 ): TimeDisplayTuple {
   // alphabetical
-  const subsecDigits = refineSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
-  const roundingMode = refineRoundingMode(options, RoundingMode.Trunc)
-  const smallestUnit = refineSmallestUnit(options, maxSmallestUnit)
+  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const smallestUnit = coerceSmallestUnit(options)
 
-  return [
-    roundingMode,
-    ...refineSmallestUnitAndSubsecDigits(smallestUnit, subsecDigits),
-  ]
+  const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
+    validateUnitRange(
+      smallestUnitStr,
+      smallestUnit,
+      Unit.Nanosecond,
+      maxSmallestUnit,
+    ),
+    subsecDigits,
+  )
+
+  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
+  return [roundingMode, unitDisplayTuple[0], unitDisplayTuple[1]]
 }
 
-function refineSmallestUnitAndSubsecDigits(
+function resolveSmallestUnitAndSubsecDigits(
   smallestUnit: Unit | undefined | null,
   subsecDigits: SubsecDigits | undefined,
 ): [nanoInc: number, subsecDigits: SubsecDigits | -1 | undefined] {
@@ -558,64 +617,64 @@ function refineSmallestUnitAndSubsecDigits(
   ]
 }
 
-// Individual Refining (simple)
+// Individual Coercion (simple)
 // -----------------------------------------------------------------------------
 
 // generic. callers should type-narrow the results
-const refineSmallestUnit = bindArgs(
-  refineUnitOption<SmallestUnitOptions<UnitName>>,
+const coerceSmallestUnit = bindArgs(
+  coerceUnitOption<SmallestUnitOptions<UnitName>>,
   smallestUnitStr,
 )
 // generic. callers should type-narrow the results
-const refineLargestUnit = bindArgs(
-  refineUnitOption<LargestUnitOptions<UnitName>>,
+const coerceLargestUnit = bindArgs(
+  coerceUnitOption<LargestUnitOptions<UnitName>>,
   largestUnitStr,
 )
-const refineTotalUnit = bindArgs(
-  refineUnitOption<TotalUnitOptions>,
+const coerceTotalUnit = bindArgs(
+  coerceUnitOption<TotalUnitOptions>,
   totalUnitStr,
 )
-const refineOverflow = bindArgs(
-  refineChoiceOption<OverflowOptions>,
+const coerceOverflow = bindArgs(
+  coerceChoiceOption<OverflowOptions>,
   'overflow',
   overflowMap,
 )
-const refineEpochDisambig = bindArgs(
-  refineChoiceOption<EpochDisambigOptions>,
+const coerceEpochDisambig = bindArgs(
+  coerceChoiceOption<EpochDisambigOptions>,
   'disambiguation',
   epochDisambigMap,
 )
-const refineOffsetDisambig = bindArgs(
-  refineChoiceOption<OffsetDisambigOptions>,
+const coerceOffsetDisambig = bindArgs(
+  coerceChoiceOption<OffsetDisambigOptions>,
   'offset',
   offsetDisambigMap,
 )
-const refineCalendarDisplay = bindArgs(
-  refineChoiceOption<CalendarDisplayOptions>,
+const coerceCalendarDisplay = bindArgs(
+  coerceChoiceOption<CalendarDisplayOptions>,
   'calendarName',
   calendarDisplayMap,
 )
-const refineTimeZoneDisplay = bindArgs(
-  refineChoiceOption<TimeZoneDisplayOptions>,
+const coerceTimeZoneDisplay = bindArgs(
+  coerceChoiceOption<TimeZoneDisplayOptions>,
   'timeZoneName',
   timeZoneDisplayMap,
 )
-const refineOffsetDisplay = bindArgs(
-  refineChoiceOption<OffsetDisplayOptions>,
+const coerceOffsetDisplay = bindArgs(
+  coerceChoiceOption<OffsetDisplayOptions>,
   'offset',
   offsetDisplayMap,
 )
 // Caller should always supply default
-const refineRoundingMode = bindArgs(
-  refineChoiceOption<RoundingModeOptions>,
+const coerceRoundingMode = bindArgs(
+  coerceChoiceOption<RoundingModeOptions>,
   roundingModeName,
   roundingModeMap,
 )
 
-// Individual Refining (custom logic)
+// Individual Coercion / Validation (custom logic)
 // -----------------------------------------------------------------------------
 
-function parseRoundingIncInteger(options: RoundingIncOptions): number {
+function coerceRoundingIncInteger(options: RoundingIncOptions): number {
   const roundingInc = options[roundingIncName]
   if (roundingInc === undefined) {
     return 1
@@ -627,8 +686,8 @@ function parseRoundingIncInteger(options: RoundingIncOptions): number {
 TODO: change defaults and the way this is called because almost always
 allowManyLargeUnits: true
 */
-function refineRoundingInc(
-  roundingInc: number, // results from parseRoundingIncInteger
+function validateRoundingInc(
+  roundingInc: number, // results from coerceRoundingIncInteger
   smallestUnit: Unit,
   allowManyLargeUnits?: boolean,
   solarMode?: boolean,
@@ -665,7 +724,7 @@ function refineRoundingInc(
   return roundingInc
 }
 
-function refineSubsecDigits(
+function coerceSubsecDigits(
   options: SubsecDigitsOptions,
 ): SubsecDigits | undefined {
   let subsecDigits = options[subsecDigitsName]
@@ -700,7 +759,8 @@ For ensuring options is an object
 */
 export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
-    return {} as O
+    // Avoid inherited option properties from Object.prototype pollution.
+    return Object.create(null)
   }
   return requireObjectLike(options)
 }
@@ -710,9 +770,19 @@ function normalizeOptionsOrString<O extends {}, K extends string & keyof O>(
   optionName: K,
 ): O {
   if (typeof options === 'string') {
-    return { [optionName]: options } as O
+    return createOptionsObject(optionName, options as O[K])
   }
   return requireObjectLike(options as O)
+}
+
+function createOptionsObject<O extends {}, K extends string & keyof O>(
+  optionName: K,
+  optionVal: O[K],
+): O {
+  // Avoid inherited option properties from Object.prototype pollution.
+  const res = Object.create(null)
+  res[optionName] = optionVal
+  return res
 }
 
 /*
@@ -738,11 +808,10 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
 `null` means 'auto'
 TODO: create better type where if ensureDefined, then return-type is non null/defined
 */
-function refineUnitOption<O>(
+function coerceUnitOption<O>(
   optionName: keyof O & string,
   options: O,
-  maxUnit: Unit = Unit.Year,
-  minUnit: Unit = Unit.Nanosecond, // used less frequently than maxUnit
+  minUnit: Unit = Unit.Nanosecond,
   ensureDefined?: boolean, // will return minUnit if undefined or auto
 ): Unit | null | undefined {
   let unitStr = options[optionName] as string | undefined
@@ -766,11 +835,29 @@ function refineUnitOption<O>(
     )
   }
 
-  clampEntity(optionName, unit, minUnit, maxUnit, Overflow.Reject, unitNamesAsc)
   return unit
 }
 
-function refineChoiceOption<O>(
+function validateUnitRange<U extends Unit | null | undefined>(
+  optionName: string,
+  unit: U,
+  minUnit: Unit,
+  maxUnit: Unit,
+): U {
+  if (unit != null) {
+    clampEntity(
+      optionName,
+      unit,
+      minUnit,
+      maxUnit,
+      Overflow.Reject,
+      unitNamesAsc,
+    )
+  }
+  return unit
+}
+
+function coerceChoiceOption<O>(
   optionName: keyof O & string,
   enumNameMap: Record<string, number>,
   options: O,

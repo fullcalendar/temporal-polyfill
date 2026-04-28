@@ -12,7 +12,10 @@ export type BigNano = [days: number, timeNano: number]
 does balancing
 */
 export function createBigNano(days: number, timeNano: number): BigNano {
-  let [extraDays, newTimeNano] = divModTrunc(timeNano, nanoInUtcDay)
+  const dayAndNano = divModTrunc(timeNano, nanoInUtcDay)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const extraDays = dayAndNano[0]
+  let newTimeNano = dayAndNano[1]
   let newDays = days + extraDays
   const newDaysSign = Math.sign(newDays)
 
@@ -80,7 +83,10 @@ Expects a proper integer. For user input, call toStrictInteger
 */
 export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
   const wholeInDay = nanoInUtcDay / multiplierNano
-  const [days, remainder] = divModTrunc(num, wholeInDay)
+  const dayAndRemainder = divModTrunc(num, wholeInDay)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const days = dayAndRemainder[0]
+  const remainder = dayAndRemainder[1]
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
 }
 
@@ -89,7 +95,8 @@ export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
 // (divisorNano always a denominator of day-nanoseconds, always positive)
 
 export function bigNanoToBigInt(bigNano: BigNano, divisorNano = 1): bigint {
-  const [days, timeNano] = bigNano
+  const days = bigNano[0]
+  const timeNano = bigNano[1]
   const whole = Math.floor(timeNano / divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
   return BigInt(days) * BigInt(wholeInDay) + BigInt(whole)
@@ -100,8 +107,12 @@ export function bigNanoToNumber(
   divisorNano = 1,
   exact?: boolean,
 ): number {
-  const [days, timeNano] = bigNano
-  const [whole, remainderNano] = divModTrunc(timeNano, divisorNano)
+  const days = bigNano[0]
+  const timeNano = bigNano[1]
+  const wholeAndRemainder = divModTrunc(timeNano, divisorNano)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const whole = wholeAndRemainder[0]
+  const remainderNano = wholeAndRemainder[1]
   const wholeInDay = nanoInUtcDay / divisorNano
   // adding fraction to whole first results in better precision
   return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
@@ -116,8 +127,12 @@ export function divModBigNano(
   divisorNano: number,
   divModFunc = divModFloor,
 ): [whole: number, remainderNano: number] {
-  const [days, timeNano] = bigNano
-  const [whole, remainderNano] = divModFunc(timeNano, divisorNano)
+  const days = bigNano[0]
+  const timeNano = bigNano[1]
+  const wholeAndRemainder = divModFunc(timeNano, divisorNano)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const whole = wholeAndRemainder[0]
+  const remainderNano = wholeAndRemainder[1]
   const wholeInDay = nanoInUtcDay / divisorNano
   return [days * wholeInDay + whole, remainderNano]
 }

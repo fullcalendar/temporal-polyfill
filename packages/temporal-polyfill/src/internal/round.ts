@@ -275,11 +275,10 @@ export function roundDateTimeToNano(
   nanoInc: number,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  const [roundedIsoFields, dayDelta] = roundTimeToNano(
-    isoFields,
-    nanoInc,
-    roundingMode,
-  )
+  const timeAndDay = roundTimeToNano(isoFields, nanoInc, roundingMode)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const roundedIsoFields = timeAndDay[0]
+  const dayDelta = timeAndDay[1]
 
   return checkIsoDateTimeInBounds({
     ...moveByDays(isoFields, dayDelta),
@@ -473,7 +472,9 @@ export function roundBigNanoByInc(
   roundingMode: RoundingMode,
   useDayOrigin?: boolean,
 ): BigNano {
-  let [days, timeNano] = bigNano
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  let days = bigNano[0]
+  let timeNano = bigNano[1]
 
   // consider the start-of-day the origin?
   // convert to start-of-day and time-of-day
@@ -482,10 +483,13 @@ export function roundBigNanoByInc(
     days -= 1
   }
 
-  const [dayDelta, roundedTimeNano] = divModFloor(
+  const dayAndNano = divModFloor(
     roundByInc(timeNano, nanoInc, roundingMode),
     nanoInUtcDay,
   )
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const dayDelta = dayAndNano[0]
+  const roundedTimeNano = dayAndNano[1]
 
   return createBigNano(days + dayDelta, roundedTimeNano)
 }

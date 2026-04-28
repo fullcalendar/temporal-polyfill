@@ -14,6 +14,7 @@ Derived from the current [`TEST-FAILURES.txt`](./TEST-FAILURES.txt) run.
 
 ## Bucket A: Observable side effects / option materialization
 
+- Status: DONE
 - Count: `21`
 - Shared root cause:
   option bags or shorthand arguments are being observed in the wrong way or in the wrong order.

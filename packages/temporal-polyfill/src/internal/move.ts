@@ -10,16 +10,22 @@ import {
   durationFieldsToBigNano,
   durationHasDateParts,
   durationTimeFieldsToBigNanoStrict,
+  getMaxDurationUnit,
   negateDuration,
   negateDurationFields,
 } from './durationMath'
+import * as errorMessages from './errorMessages'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
+import {
+  OverflowOptions,
+  fabricateOverflowOptions,
+  refineOverflowOptions,
+} from './optionsRefine'
 import {
   DurationSlots,
   EpochSlots,
@@ -128,6 +134,14 @@ export function movePlainYearMonth(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
+  const refinedOptions = fabricateOverflowOptions(
+    refineOverflowOptions(options),
+  )
+
+  if (durationSlots.sign && getMaxDurationUnit(durationSlots) < Unit.Month) {
+    throw new RangeError(errorMessages.invalidSmallUnits)
+  }
+
   const calendarId = plainYearMonthSlots.calendar
   const getDay = (isoFields: IsoDateFields) =>
     queryNativeDay(calendarId, isoFields)
@@ -143,10 +157,15 @@ export function movePlainYearMonth(
 
   // if moving backwards in time, set to last day of month
   if (durationSlots.sign < 0) {
-    isoDateFields = dateAdd(calendarId, isoDateFields, {
-      ...durationFieldDefaults,
-      months: 1,
-    })
+    isoDateFields = dateAdd(
+      calendarId,
+      isoDateFields,
+      {
+        ...durationFieldDefaults,
+        months: 1,
+      },
+      refinedOptions,
+    )
     isoDateFields = moveByDays(isoDateFields, -1)
   }
 
@@ -154,7 +173,7 @@ export function movePlainYearMonth(
     calendarId,
     isoDateFields,
     durationSlots,
-    options,
+    refinedOptions,
   )
 
   return createPlainYearMonthSlots(

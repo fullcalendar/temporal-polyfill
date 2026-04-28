@@ -117,14 +117,20 @@ export function givenFieldsToBigNano<K extends string>(
 
     // absorb whole-days from current unit, to prevent overflow
     const unitInDay = nanoInUtcDay / unitNano
-    const [unitDays, leftoverUnits] = divModTrunc(fieldVal, unitInDay)
+    const unitParts = divModTrunc(fieldVal, unitInDay)
+    // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+    const unitDays = unitParts[0]
+    const leftoverUnits = unitParts[1]
 
     timeNano += leftoverUnits * unitNano
     days += unitDays
   }
 
   // absorb whole-days from timeNano
-  const [timeDays, leftoverNano] = divModTrunc(timeNano, nanoInUtcDay)
+  const timeParts = divModTrunc(timeNano, nanoInUtcDay)
+  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
+  const timeDays = timeParts[0]
+  const leftoverNano = timeParts[1]
   return [days + timeDays, leftoverNano]
 }
 
