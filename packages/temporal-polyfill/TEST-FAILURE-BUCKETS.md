@@ -218,6 +218,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket P: DateTimeFormat option observability and prototype tainting
 
+- Status: DONE
 - Count: `3`
 - Shared root cause:
   the `Intl.DateTimeFormat` wrapper observes `timeZone` too many times and is

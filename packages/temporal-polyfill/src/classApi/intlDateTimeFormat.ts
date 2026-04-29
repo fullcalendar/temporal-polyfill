@@ -205,11 +205,8 @@ function createDateTimeFormatInternals(
   options: Intl.DateTimeFormatOptions,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
-  const timeZone =
-    options.timeZone !== undefined
-      ? refineTimeZoneId(options.timeZone)
-      : undefined
   const resolveOptions = rawFormat.resolvedOptions()
+  const timeZone = readOwnDataTimeZoneOption(options)
   const resolvedLocale = resolveOptions.locale
 
   // Copy original options in an unobservable way, using resolveOptions' data
@@ -281,8 +278,30 @@ function createDateTimeFormatInternals(
     return [rawFormat, ...(formattableEssences as number[])]
   }
   ;(prepFormat as DateTimeFormatInternals).rawFormat = rawFormat
-  ;(prepFormat as DateTimeFormatInternals).timeZone = timeZone
+  // Object.prototype can be tainted by Intl tests. Define the optional cache
+  // slot directly so a polluted `timeZone` setter cannot observe construction.
+  Object.defineProperty(prepFormat, 'timeZone', {
+    value: timeZone,
+    configurable: true,
+    writable: true,
+  })
   return prepFormat as DateTimeFormatInternals
+}
+
+function readOwnDataTimeZoneOption(
+  options: Intl.DateTimeFormatOptions,
+): string | undefined {
+  const descriptor = Object.getOwnPropertyDescriptor(options, 'timeZone')
+
+  if (!descriptor || !('value' in descriptor) || descriptor.value === undefined) {
+    return undefined
+  }
+
+  // Native Intl has already performed the observable GetOption sequence. Reuse
+  // only an own data-property value here; accessor options must not be invoked a
+  // second time just so older engines can preserve the caller's exact zone ID in
+  // resolvedOptions().
+  return refineTimeZoneId(descriptor.value)
 }
 
 function createFormatPrepperForBranding<S extends BrandingSlots>(
