@@ -207,6 +207,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket O: PlainDateTime toString option ordering
 
+- Status: DONE
 - Count: `2`
 - Shared root cause:
   `PlainDateTime.prototype.toString()` reads `calendarName` after rounding and

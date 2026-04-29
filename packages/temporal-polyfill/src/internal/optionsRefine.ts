@@ -470,10 +470,17 @@ export function refineDateTimeDisplayOptions(
   options: DateTimeDisplayOptions | undefined,
 ): DateTimeDisplayTuple {
   options = normalizeOptions(options)
+
+  // Temporal.PlainDateTime.prototype.toString reads calendarName before the
+  // time precision options. Keep this coercion outside refineTimeDisplayTuple
+  // so validation inside the time tuple cannot throw before calendarName has
+  // been observed.
+  const calendarDisplay = coerceCalendarDisplay(options)
   const timeDisplayTuple = refineTimeDisplayTuple(options)
+
   // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
   return [
-    coerceCalendarDisplay(options),
+    calendarDisplay,
     timeDisplayTuple[0],
     timeDisplayTuple[1],
     timeDisplayTuple[2],
