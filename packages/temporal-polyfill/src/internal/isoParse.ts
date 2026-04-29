@@ -607,7 +607,12 @@ function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
 function parseYearMonthOnly(s: string): DateOrganized | undefined {
   const parts = yearMonthRegExp.exec(s)
   if (!parts) return undefined
-  if (!validateDateSeparators(parts[0])) return undefined
+
+  // YearMonth-only strings have just one optional date separator, so the
+  // full-date consistency check below does not apply. In particular, signed
+  // six-digit years like "-271821-04" can be misread by that check as a
+  // four-digit compact date prefix ("-2718-21-04") and rejected before the
+  // YearMonth-specific range validation can run.
   return organizeYearMonthParts(parts)
 }
 
