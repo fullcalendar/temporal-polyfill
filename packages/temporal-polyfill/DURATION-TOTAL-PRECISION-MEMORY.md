@@ -31,7 +31,8 @@ However, it is still not the final ideal implementation because
 ### More Authoritative Precision Test
 
 - `../../test262/test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js`
-- Bucket: `C` in `TEST-FAILURE-BUCKETS.tsv`
+- Status: this is the more authoritative precision regression test to keep
+  passing.
 - Important assertion:
 
 ```js
@@ -62,7 +63,9 @@ one final floating-point division.
 ### Temporarily Expected Failure
 
 - `../../test262/test/built-ins/Temporal/Duration/prototype/total/relativeto-total-of-each-unit.js`
-- Bucket: `K` in `TEST-FAILURE-BUCKETS.tsv`
+- Status: this is intentionally listed in
+  `scripts/test262-config/expected-failures.txt` until the exact-rational fix
+  is implemented.
 - Failing assertion after preferring the combined-division form:
 
 ```text
@@ -128,4 +131,3 @@ for:
 
 - `../../test262/test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js`
 - `scripts/test262-config/expected-failures.txt`
-

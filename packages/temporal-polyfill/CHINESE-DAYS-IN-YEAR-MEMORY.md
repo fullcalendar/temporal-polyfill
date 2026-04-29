@@ -1,13 +1,14 @@
 # Chinese `daysInYear` Stopgap
 
-Context: Bucket I still contains non-ISO calendar field-math failures. During
-the Chinese `daysInYear` pass, Node 22 ICU4C disagreed with test262 for a small
+Context: while reducing non-ISO calendar field-math failures, the Chinese
+`daysInYear` pass found that Node 22 ICU4C disagreed with test262 for a small
 set of Chinese calendar year lengths.
 
 ## Current Stopgap
 
 `src/internal/calendarConfig.ts` currently defines
-`daysInYearOverridesByCalendarIdBase`.
+`daysInYearOverridesByCalendarIdBase`. That table is the stopgap documented by
+this note.
 
 As of this note, it contains Chinese overrides for:
 
@@ -16,10 +17,11 @@ As of this note, it contains Chinese overrides for:
 - `2029: 355`
 - `2030: 354`
 
-`src/internal/intlMath.ts` applies this table in `computeIntlDaysInYear()` before
-falling back to the normal Intl-scraped year-boundary calculation.
+`src/internal/intlMath.ts` applies `daysInYearOverridesByCalendarIdBase` in
+`computeIntlDaysInYear()` before falling back to the normal Intl-scraped
+year-boundary calculation.
 
-This is intentionally an accessor-level fix. It makes the bucket-I
+This is intentionally an accessor-level fix. It makes the Chinese
 `daysInYear/basic-chinese.js` tests pass for `PlainDate`, `PlainDateTime`,
 `PlainYearMonth`, and `ZonedDateTime`, but it does not make the underlying
 Chinese calendar model coherent for those years.
@@ -45,7 +47,12 @@ arithmetic crossing the boundary, and `since`/`until` behavior.
 The focused tests:
 
 ```sh
-pnpm run test262 $(awk -F '\t' '$1 == "I" && $2 ~ /prototype\/daysInYear\/basic-chinese\.js$/ { print "../../test262/" $2 }' TEST-FAILURE-BUCKETS.tsv) --no-max
+pnpm run test262 \
+  ../../test262/test/intl402/Temporal/PlainDate/prototype/daysInYear/basic-chinese.js \
+  ../../test262/test/intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-chinese.js \
+  ../../test262/test/intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-chinese.js \
+  ../../test262/test/intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-chinese.js \
+  --no-max
 ```
 
 passed after adding the override table.

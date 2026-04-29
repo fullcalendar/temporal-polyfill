@@ -180,6 +180,7 @@ export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
 // Current ICU4C data disagrees with Temporal/test262 for a few Chinese year
 // lengths near 2030. Keep these accessor-level overrides narrow instead of
 // shifting month boundaries, which would affect date construction semantics.
+// See CHINESE-DAYS-IN-YEAR-MEMORY.md before removing or broadening this table.
 export const daysInYearOverridesByCalendarIdBase: Record<
   string,
   Record<number, number>

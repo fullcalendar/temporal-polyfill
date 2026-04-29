@@ -226,11 +226,10 @@ intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transitions-close
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 
 # WONTFIX for now
-# Remaining Hebrew-calendar bridge/math failures while bucket H is being
-# reduced.
+# Remaining Hebrew-calendar bridge/math failures.
 #
-# At this point, the broad era-model problems in bucket H have been narrowed
-# down to a single Hebrew-only cluster:
+# At this point, the broad era-model problems have been narrowed down to a
+# single Hebrew-only cluster:
 #
 # - round-tripping a few RFC 9557 strings lands on a day that is off by one
 #   for specific Hebrew dates that the tests mark as ICU4C/ICU4X discrepancies
