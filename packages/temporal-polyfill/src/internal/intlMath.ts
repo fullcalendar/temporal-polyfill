@@ -16,7 +16,7 @@ import {
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from './calendarNative'
-import { diffEpochMilliByDay } from './diff'
+import { diffEpochMilliByDay } from './calendarNativeMath'
 import * as errorMessages from './errorMessages'
 import { RawDateTimeFormat, hashIntlFormatParts } from './intlFormatUtils'
 import { IsoDateFields } from './isoFields'

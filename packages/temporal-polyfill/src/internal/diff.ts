@@ -5,7 +5,6 @@ import {
   diffBigNanos,
 } from './bigNano'
 import { diffEpochMilliByDay, nativeDateUntil } from './calendarNativeMath'
-export { diffEpochMilliByDay } from './calendarNativeMath'
 import { queryNativeDay } from './calendarNativeQuery'
 import { isTimeZoneIdsEqual } from './compare'
 import { DurationFields, durationFieldDefaults } from './durationFields'
