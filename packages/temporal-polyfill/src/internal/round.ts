@@ -30,7 +30,7 @@ import {
   MoveMarker,
   isUniformUnit,
   isZonedEpochSlots,
-} from './markerSystem'
+} from './relativeMath'
 import { moveByDays } from './move'
 import {
   EpochDisambig,

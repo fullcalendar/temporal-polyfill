@@ -18,20 +18,22 @@ import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
-// the "origin"
+// the relative-to "origin"
 export type RelativeToSlots = DateSlots | ZonedEpochSlots
 
-// the "origin", returned from bag refining
+// the relative-to "origin", returned from bag refining
 export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
 
-// a date marker that's moved away from the "origin"
+// A date/time marker that can be moved away from the relative-to origin and
+// then compared back against it. Zoned markers keep epoch nanoseconds because
+// their day lengths are time-zone dependent.
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
 
-export type MarkerSystem = [Marker, NativeTimeZone?]
+export type RelativeOrigin = [marker: Marker, nativeTimeZone?: NativeTimeZone]
 
-export function createMarkerSystem(
+export function createRelativeOrigin(
   relativeToSlots: RelativeToSlots,
-): MarkerSystem {
+): RelativeOrigin {
   if (isZonedEpochSlots(relativeToSlots)) {
     return [relativeToSlots, queryNativeTimeZone(relativeToSlots.timeZone)]
   }

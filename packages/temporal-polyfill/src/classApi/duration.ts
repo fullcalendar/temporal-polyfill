@@ -18,7 +18,7 @@ import { DurationBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
-import { RelativeToSlots } from '../internal/markerSystem'
+import { RelativeToSlots } from '../internal/relativeMath'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,

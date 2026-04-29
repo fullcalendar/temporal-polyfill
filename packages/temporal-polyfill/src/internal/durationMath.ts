@@ -12,12 +12,12 @@ import { IsoDateTimeFields } from './isoFields'
 import {
   RelativeToSlots,
   createDiffMarkers,
-  createMarkerSystem,
   createMarkerToEpochNano,
   createMoveMarker,
+  createRelativeOrigin,
   isUniformUnit,
   isZonedEpochSlots,
-} from './markerSystem'
+} from './relativeMath'
 import { Overflow } from './options'
 import {
   DurationRoundingOptions,
@@ -117,7 +117,7 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
   const diffMarkers = createDiffMarkers(
     nativeTimeZone,
@@ -202,7 +202,7 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
   const diffMarkers = createDiffMarkers(

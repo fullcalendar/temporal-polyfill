@@ -23,12 +23,12 @@ import {
   MoveMarker,
   RelativeToSlots,
   createDiffMarkers,
-  createMarkerSystem,
   createMarkerToEpochNano,
   createMoveMarker,
+  createRelativeOrigin,
   isUniformUnit,
   isZonedEpochSlots,
-} from './markerSystem'
+} from './relativeMath'
 import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
@@ -63,7 +63,7 @@ export function totalDuration<RA>(
     return 0
   }
 
-  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
   const diffMarkers = createDiffMarkers(

@@ -5,11 +5,11 @@ import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import {
   RelativeToSlots,
-  createMarkerSystem,
   createMarkerToEpochNano,
   createMoveMarker,
+  createRelativeOrigin,
   isUniformUnit,
-} from './markerSystem'
+} from './relativeMath'
 import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   DurationSlots,
@@ -78,7 +78,7 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, nativeTimeZone] = createMarkerSystem(relativeToSlots)
+  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
   const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
 

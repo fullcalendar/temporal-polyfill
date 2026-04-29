@@ -13,7 +13,7 @@ import {
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { IsoDateFields } from '../internal/isoFields'
-import { Marker, MarkerToEpochNano, MoveMarker } from '../internal/markerSystem'
+import { Marker, MarkerToEpochNano, MoveMarker } from '../internal/relativeMath'
 import { moveDateTime, moveZonedEpochs } from '../internal/move'
 import {
   RoundingMathOptions,

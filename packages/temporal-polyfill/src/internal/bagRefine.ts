@@ -79,7 +79,7 @@ import {
 import { formatOffsetNano } from './isoFormat'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
 import { parseOffsetNano } from './isoParse'
-import { RelativeToSlotsNoCalendar } from './markerSystem'
+import { RelativeToSlotsNoCalendar } from './relativeMath'
 import { OffsetDisambig, Overflow } from './options'
 import {
   OverflowOptions,
