@@ -230,6 +230,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket Q: Time zone transition boundary timeout
 
+- Status: DONE
 - Count: `1`
 - Shared root cause:
   `ZonedDateTime.prototype.getTimeZoneTransition()` can time out while searching

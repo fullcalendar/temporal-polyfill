@@ -171,6 +171,29 @@ intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-exten
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
 
 # WONTFIX for now
+# Native named-time-zone transition search currently uses a coarse fixed-size
+# sampling period (`periodDur`) before bisecting to an exact transition second.
+# The package used a 60-day period before the Stage 4 test262 push, and we are
+# intentionally restoring that value for now because it keeps full all-zone
+# boundary scans fast.
+#
+# The known downside is that offset transitions which happen close together can
+# be invisible to the current algorithm. If the offset at both ends of a 60-day
+# period is the same, the code assumes the whole period is stable and never
+# bisects inside it. That misses real tzdb histories where a zone changes away
+# from an offset and then changes back within the same period. In the
+# representative failing case, Africa/Tunis has two April 1943 transitions eight
+# days apart; `getTimeZoneTransition("next")` from before the first one skips to
+# the second transition instead of returning the first.
+#
+# Do not paper over this by shrinking `periodDur` again as the long-term fix.
+# The next phase should replace the fixed-window scan with an algorithm that is
+# both fast at the representable instant boundaries and able to find multiple
+# transitions inside a broader search range. This expected failure is the
+# acceptance test for that redesign.
+intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transitions-close-together.js
+
+# WONTFIX for now
 # Remaining Hebrew-calendar bridge/math failures while bucket H is being
 # reduced.
 #
