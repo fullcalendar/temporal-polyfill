@@ -12,40 +12,63 @@ export function refineTimeZoneId(id: string): string {
 }
 
 export function resolveTimeZoneId(id: string): string {
-  const essence = getTimeZoneEssence(id)
-  return typeof essence === 'number'
-    ? formatOffsetNano(essence)
-    : essence
-      ? normalizeNamedTimeZoneId(id)
-      : utcTimeZoneId
+  return resolveTimeZoneRecord(id).id
 }
 
 export function getTimeZoneAtomic(id: string): string | number {
-  const essence = getTimeZoneEssence(id)
-  return typeof essence === 'number'
-    ? essence
-    : essence
-      ? queryTimeZoneAtomic(essence)
-      : utcTimeZoneId
+  return resolveTimeZoneRecord(id).compareKey
 }
 
-/**
- * @returns Undefined means `utcTimeZoneId`
- */
-export function getTimeZoneEssence(
-  id: string,
-): number | Intl.DateTimeFormat | undefined {
-  id = id.toUpperCase()
+export type ResolvedTimeZone =
+  | {
+      kind: 'utc'
+      id: string
+      compareKey: string
+    }
+  | {
+      kind: 'fixed'
+      id: string
+      offsetNano: number
+      compareKey: number
+    }
+  | {
+      kind: 'named'
+      id: string
+      format: Intl.DateTimeFormat
+      compareKey: string
+    }
 
-  const offsetNano = parseOffsetNanoMaybe(id, true) // onlyHourMinute=true
+export const resolveTimeZoneRecord = memoize((id: string): ResolvedTimeZone => {
+  const upperId = id.toUpperCase()
+
+  const offsetNano = parseOffsetNanoMaybe(upperId, true) // onlyHourMinute=true
   if (offsetNano !== undefined) {
-    return offsetNano
+    return {
+      kind: 'fixed',
+      id: formatOffsetNano(offsetNano),
+      offsetNano,
+      compareKey: offsetNano,
+    }
   }
 
-  if (id !== utcTimeZoneId) {
-    return queryTimeZoneIntlFormat(id)
+  // Keep UTC distinct from +00:00. They both perform fixed-zero math, but
+  // Temporal equality compares UTC by name and offset zones by offset number.
+  if (upperId === utcTimeZoneId) {
+    return {
+      kind: 'utc',
+      id: utcTimeZoneId,
+      compareKey: utcTimeZoneId,
+    }
   }
-}
+
+  const format = queryTimeZoneIntlFormat(upperId)
+  return {
+    kind: 'named',
+    id: normalizeNamedTimeZoneId(id),
+    format,
+    compareKey: format.resolvedOptions().timeZone,
+  }
+})
 
 /**
  * @param id Expects uppercase
@@ -63,16 +86,8 @@ const queryTimeZoneIntlFormat = memoize((id: string): Intl.DateTimeFormat => {
     second: 'numeric',
     hour12: false,
   } as Intl.DateTimeFormatOptions
-  const format = new RawDateTimeFormat('en', options)
-  timeZoneAtomicMap.set(format, format.resolvedOptions().timeZone)
-  return format
+  return new RawDateTimeFormat('en', options)
 })
-
-const timeZoneAtomicMap = new WeakMap<Intl.DateTimeFormat, string>()
-
-function queryTimeZoneAtomic(format: Intl.DateTimeFormat): string {
-  return timeZoneAtomicMap.get(format) || format.resolvedOptions().timeZone
-}
 
 const icuRegExp =
   /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/

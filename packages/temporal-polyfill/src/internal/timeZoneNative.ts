@@ -15,7 +15,7 @@ import {
   minPossibleTransition,
   periodDur,
 } from './timeZoneConfig'
-import { getTimeZoneEssence } from './timeZoneId'
+import { resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
 
@@ -27,11 +27,11 @@ export interface NativeTimeZone {
 
 export const queryNativeTimeZone = memoize(
   (timeZoneId: string): NativeTimeZone => {
-    const essence = getTimeZoneEssence(timeZoneId)
+    const record = resolveTimeZoneRecord(timeZoneId)
 
-    return typeof essence === 'object'
-      ? new IntlTimeZone(essence)
-      : new FixedTimeZone(essence || 0)
+    return record.kind === 'named'
+      ? new IntlTimeZone(record.format)
+      : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
   },
 )
 
