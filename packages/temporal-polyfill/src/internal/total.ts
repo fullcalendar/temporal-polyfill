@@ -113,11 +113,6 @@ export function totalRelativeDuration(
   )
   const epochNano0 = nudgeWindow.epochNano0
   const epochNano1 = nudgeWindow.epochNano1
-  // Compute (integerPart * denom + numerator * sign) / denom in one division
-  // to avoid float64 precision loss from separate num/denom + integerPart
-  //
-  // TODO: somehow DRY with computeEpochNanoFrac?
-  //
   const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
@@ -126,7 +121,11 @@ export function totalRelativeDuration(
   const integerPart = nudgeWindow.startDurationFields[
     durationFieldNamesAsc[totalUnit]
   ]
-  return (integerPart * denom + numerator * sign) / denom
+
+  // Match the spec's floating-point shape: first compute the fractional unit
+  // from the epoch-nanosecond window, then add it to the whole-unit count.
+  // Collapsing this into one division can shift the final answer by one ulp.
+  return integerPart + (numerator / denom) * sign
 }
 
 function totalDayTimeDuration(

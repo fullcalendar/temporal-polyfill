@@ -186,9 +186,16 @@ export function roundDuration<RA>(
     )
   }
 
-  // short circuit, see DifferencePlainDateTimeWithRounding
-  // A blank duration should always return itself regardless of relativeTo type
-  if (!slots.sign) {
+  // A blank duration usually returns itself. The exception is zoned sub-day
+  // rounding with a day-or-larger largest unit: even a zero duration rounds
+  // through the day-length path, which observes the next-day boundary.
+  const needsZonedDayLength =
+    relativeToSlots &&
+    isZonedEpochSlots(relativeToSlots) &&
+    largestUnit >= Unit.Day &&
+    smallestUnit < Unit.Day
+
+  if (!slots.sign && !needsZonedDayLength) {
     return slots
   }
 
