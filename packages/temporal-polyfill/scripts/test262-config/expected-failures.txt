@@ -194,6 +194,38 @@ intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unico
 intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transitions-close-together.js
 
 # WONTFIX for now
+# Chinese/lunisolar DateTimeFormat output follows the host ICU data.
+#
+# The core Temporal calendar fields already carry a small amount of
+# calendar-math correction where that is necessary for Temporal object
+# behavior. Formatting is different: this package delegates formatted strings
+# and formatToParts output to the host Intl.DateTimeFormat implementation. When
+# Node's ICU4C data disagrees with the ICU4X data used by current test262 for a
+# Chinese-calendar leap-month boundary, the formatted month part can imply the
+# host's monthCode instead of the Temporal object's monthCode.
+#
+# One representative case is Chinese 1987:
+#
+#   Temporal.PlainDate.from("1987-08-23").withCalendar("chinese").monthCode
+#   // "M06L" in this polyfill / test262 expectation
+#
+#   new Intl.DateTimeFormat("en", {
+#     calendar: "chinese",
+#     timeZone: "UTC",
+#     year: "numeric",
+#     month: "numeric",
+#     day: "numeric",
+#   }).formatToParts(Date.UTC(1987, 7, 23))
+#   // host ICU4C reports month "7", which test262's bridge infers as "M07"
+#
+# Papering over this would mean rewriting localized DateTimeFormat parts for
+# specific host ICU data quirks. That is brittle string-level Intl shimming, not
+# Temporal polyfill behavior. Keep this documented as an expected failure so
+# end users understand that Chinese/lunisolar formatting fidelity is bounded by
+# their runtime's Intl/ICU data.
+intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
+
+# WONTFIX for now
 # Remaining Hebrew-calendar bridge/math failures while bucket H is being
 # reduced.
 #

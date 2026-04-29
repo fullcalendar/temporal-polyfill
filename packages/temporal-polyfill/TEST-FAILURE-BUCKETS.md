@@ -243,6 +243,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket R: Lunisolar DateTimeFormat monthCode bridge
 
+- Status: DONE
 - Count: `1`
 - Shared root cause:
   the `DateTimeFormat.formatToParts()` comparison bridge still reports the host
