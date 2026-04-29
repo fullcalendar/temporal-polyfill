@@ -1,11 +1,12 @@
 import { isoCalendarId } from './calendarConfig'
 import { requireString } from './cast'
-import * as errorMessages from './errorMessages'
 import { RawDateTimeFormat } from './intlFormatUtils'
-import { formatOffsetNano } from './isoFormat'
-import { parseOffsetNanoMaybe } from './isoParse'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { capitalize, memoize } from './utils'
+import {
+  normalizeNamedTimeZoneId,
+  parseTimeZoneOffsetId,
+} from './timeZoneParse'
+import { memoize } from './utils'
 
 export function refineTimeZoneId(id: string): string {
   return resolveTimeZoneId(requireString(id))
@@ -41,13 +42,11 @@ export type ResolvedTimeZone =
 export const resolveTimeZoneRecord = memoize((id: string): ResolvedTimeZone => {
   const upperId = id.toUpperCase()
 
-  const offsetNano = parseOffsetNanoMaybe(upperId, true) // onlyHourMinute=true
-  if (offsetNano !== undefined) {
+  const offsetRecord = parseTimeZoneOffsetId(upperId)
+  if (offsetRecord) {
     return {
       kind: 'fixed',
-      id: formatOffsetNano(offsetNano),
-      offsetNano,
-      compareKey: offsetNano,
+      ...offsetRecord,
     }
   }
 
@@ -88,55 +87,3 @@ const queryTimeZoneIntlFormat = memoize((id: string): Intl.DateTimeFormat => {
   } as Intl.DateTimeFormatOptions
   return new RawDateTimeFormat('en', options)
 })
-
-const icuRegExp =
-  /^(AC|AE|AG|AR|AS|BE|BS|CA|CN|CS|CT|EA|EC|IE|IS|JS|MI|NE|NS|PL|PN|PR|PS|SS|VS)T$/
-
-// TODO: move to parsing file?
-const badCharactersRegExp = /[^\w\/:+-]+/
-
-function normalizeNamedTimeZoneId(id: string): string {
-  if (badCharactersRegExp.test(id)) {
-    throw new RangeError(errorMessages.invalidTimeZone(id))
-  }
-
-  if (icuRegExp.test(id)) {
-    // TODO: give identifier
-    throw new RangeError(errorMessages.forbiddenIcuTimeZone)
-  }
-
-  // TODO:^^^ do above rejecting before expensive Intl.DateTimeFormat is created?
-
-  return id
-    .toLowerCase()
-    .split('/')
-    .map((part, partI) => {
-      // abbreviation-like (big parts, like 'ACT' in 'Australia/ACT')
-      // OR numeric-offset-like
-      // OR Pacific/YAP
-      if ((part.length <= 3 || /\d/.test(part)) && !/etc|yap/.test(part)) {
-        return part.toUpperCase()
-      }
-
-      return part.replace(/baja|dumont|[a-z]+/g, (a, i) => {
-        // abbreviation-like (small parts)
-        // - starts with 1-or-2-letters?
-        // - Knox_IN, NZ-CHAT
-        if ((a.length <= 2 && !partI) || a === 'in' || a === 'chat') {
-          return a.toUpperCase()
-        }
-
-        // word-like
-        if (a.length > 2 || !i) {
-          return capitalize(a).replace(
-            /island|noronha|murdo|rivadavia|urville/,
-            capitalize,
-          )
-        }
-
-        // lowercase (au/of/es)
-        return a
-      })
-    })
-    .join('/')
-}
