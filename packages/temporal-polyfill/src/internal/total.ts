@@ -55,8 +55,11 @@ export function totalDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  // NEW: short-circuit
-  if (!slots.sign) {
+  // Zero durations can still need relative calendar math. In particular, a
+  // zoned `day` total must compute the adjacent day-length window, and that
+  // window can cross the representable Instant boundary even when the duration
+  // itself is zero.
+  if (!slots.sign && isUniformUnit(totalUnit, relativeToSlots)) {
     return 0
   }
 
@@ -101,7 +104,10 @@ export function totalRelativeDuration(
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
 ): number {
-  const sign = computeDurationSign(durationFields)
+  // The spec treats zero relative durations as positive when probing the
+  // surrounding unit window. That matters at the upper Instant boundary:
+  // origin + 1 day may be out of range even if the origin itself is valid.
+  const sign = computeDurationSign(durationFields) || 1
   const nudgeWindow = clampRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
