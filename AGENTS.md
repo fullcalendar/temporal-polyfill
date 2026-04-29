@@ -7,17 +7,15 @@ If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
 Don't bother running `pnpm run size` ever
 
 
-## Repo Installation
+## IMPORTANT: Repo Setup (ESPECIALLY right after creating a worktree)
 
-This info will eventually be in the repo root's README.md, but it's only here for now...
-
-Install all submodules after cloning a repo:
+FIRST, install all submodules after cloning a repo:
 
 ```
 git submodule update --init --recursive
 ```
 
-Run `pnpm install` from the repo root
+SECOND, run `pnpm install` from the repo root
 
 
 ## Test Failures
@@ -45,17 +43,6 @@ pnpm run test262 \
   ../../test262/test/built-ins/Temporal/PlainYearMonth/prototype/subtract/options-read-before-algorithmic-validation.js \
   --no-max
 ```
-
-To run a whole bucket from the TSV file, generate the file list with `awk`:
-
-```
-pnpm run test262 $(awk -F '\t' '$1 == "A" { print "../../test262/" $2 }' TEST-FAILURE-BUCKETS.tsv) --no-max
-```
-
-See these files for failure groups:
-
-- `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.md` (starting point)
-- `packages/temporal-polyfill/TEST-FAILURE-BUCKETS.tsv` (all failures)
 
 When adding intentional expected failures, use
 `packages/temporal-polyfill/scripts/test262-config/expected-failures.txt`.
