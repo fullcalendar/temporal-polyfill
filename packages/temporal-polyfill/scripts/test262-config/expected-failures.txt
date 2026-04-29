@@ -107,7 +107,7 @@ intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 ## TEMPORARY failures while fixing Stage 4 compliance
 ##
 
-# WONTFIX for now
+# WONTFIX for real - extension of WONTFIX (2)
 # Temporal plain objects can represent dates at the edge of Temporal's ISO
 # range, including instants that are outside JavaScript Date's TimeClip range.
 # ECMA-402's Temporal bridge formats those plain values from Temporal format

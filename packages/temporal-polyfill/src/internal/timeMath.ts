@@ -62,6 +62,10 @@ const epochNanoMax: BigNano = [maxDays, 0]
 const epochNanoMin: BigNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
+const isoNoonFieldDefaults: IsoTimeFields = {
+  ...isoTimeFieldDefaults,
+  isoHour: 12,
+}
 
 export function checkIsoYearMonthInBounds<T extends IsoDateFields>(
   isoFields: T,
@@ -85,10 +89,12 @@ export function checkIsoYearMonthInBounds<T extends IsoDateFields>(
 }
 
 export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
+  // PlainDate bounds are date-level bounds, not midnight-instant bounds.
+  // Noon is inside the valid PlainDateTime range for both edge dates:
+  // -271821-04-19 and +275760-09-13.
   checkIsoDateTimeInBounds({
     ...isoFields,
-    ...isoTimeFieldDefaults,
-    isoHour: 12, // Noon avoids trouble at edges of DateTime range (excludes midnight) ?
+    ...isoNoonFieldDefaults,
   })
   return isoFields
 }
