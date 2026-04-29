@@ -28,14 +28,13 @@ import {
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
+import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
   TimeUnit,
   Unit,
-  givenFieldsToBigNano,
   nanoInSec,
   nanoInUtcDay,
-  nanoToGivenFields,
   unitNanoMap,
 } from './units'
 import { NumberSign, clampEntity } from './utils'

@@ -40,7 +40,8 @@ import {
   isoArgsToEpochMilli,
   isoToEpochMilli,
 } from './timeMath'
-import { Unit, givenFieldsToBigNano, milliInDay } from './units'
+import { givenFieldsToBigNano } from './unitMath'
+import { Unit, milliInDay } from './units'
 import {
   clampEntity,
   compareNumbers,

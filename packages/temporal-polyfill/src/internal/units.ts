@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import {
   DurationDateFieldName,
   DurationDayTimeFieldName,
@@ -6,7 +5,6 @@ import {
   DurationTimeFieldName,
   DurationYearMonthFieldName,
 } from './durationFields'
-import { divModTrunc, divTrunc, modTrunc } from './utils'
 
 export const enum Unit {
   Nanosecond = 0,
@@ -96,57 +94,3 @@ export const unitNanoMap = [
   nanoInHour,
   nanoInUtcDay,
 ]
-
-// Utils
-// -----------------------------------------------------------------------------
-
-/*
-When largestUnit=hour, returned `Day` value is "days worth of hours"
-*/
-export function givenFieldsToBigNano<K extends string>(
-  fields: Record<K, number>,
-  largestUnit: DayTimeUnit,
-  fieldNames: K[],
-): BigNano {
-  let timeNano = 0
-  let days = 0
-
-  for (let unit = Unit.Nanosecond; unit <= largestUnit; unit++) {
-    const fieldVal = fields[fieldNames[unit]]
-    const unitNano = unitNanoMap[unit]
-
-    // absorb whole-days from current unit, to prevent overflow
-    const unitInDay = nanoInUtcDay / unitNano
-    const unitParts = divModTrunc(fieldVal, unitInDay)
-    // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-    const unitDays = unitParts[0]
-    const leftoverUnits = unitParts[1]
-
-    timeNano += leftoverUnits * unitNano
-    days += unitDays
-  }
-
-  // absorb whole-days from timeNano
-  const timeParts = divModTrunc(timeNano, nanoInUtcDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const timeDays = timeParts[0]
-  const leftoverNano = timeParts[1]
-  return [days + timeDays, leftoverNano]
-}
-
-export function nanoToGivenFields<F>(
-  nano: number,
-  largestUnit: DayTimeUnit, // stops populating at this unit
-  fieldNames: (keyof F)[],
-): { [Key in keyof F]?: number } {
-  const fields = {} as { [Key in keyof F]: number }
-
-  for (let unit = largestUnit; unit >= Unit.Nanosecond; unit--) {
-    const divisor = unitNanoMap[unit]
-
-    fields[fieldNames[unit]] = divTrunc(nano, divisor)
-    nano = modTrunc(nano, divisor)
-  }
-
-  return fields
-}

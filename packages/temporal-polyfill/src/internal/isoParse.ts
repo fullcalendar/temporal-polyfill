@@ -71,9 +71,9 @@ import {
   nanoInHour,
   nanoInMinute,
   nanoInSec,
-  nanoToGivenFields,
   unitNanoMap,
 } from './units'
+import { nanoToGivenFields } from './unitMath'
 import { divModFloor, zipProps } from './utils'
 
 // High-level

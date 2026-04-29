@@ -18,15 +18,14 @@ import {
 import { Overflow } from './options'
 import {
   Unit,
-  givenFieldsToBigNano,
   milliInDay,
   milliInSec,
   nanoInMicro,
   nanoInMilli,
   nanoInSec,
   nanoInUtcDay,
-  nanoToGivenFields,
 } from './units'
+import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import { clampProp, divModFloor, divModTrunc, zipProps } from './utils'
 
 /*
