@@ -185,30 +185,24 @@ intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unico
 # their runtime's Intl/ICU data.
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 
-# WONTFIX for now
-# Remaining Hebrew-calendar bridge/math failures.
-#
-# At this point, the broad era-model problems have been narrowed down to a
-# single Hebrew-only cluster:
-#
-# - round-tripping a few RFC 9557 strings lands on a day that is off by one
-#   for specific Hebrew dates that the tests mark as ICU4C/ICU4X discrepancies
-# The important thing about this group is that it no longer looks like an era
-# aliasing bug, parser bug, or a small validation-order issue. The remaining
-# behavior sits in the Hebrew calendar math / bridge layer itself: exact date
-# round-tripping for certain host-sensitive cases.
-#
-# A correct fix likely needs one of the following:
-#
-# - a more complete local Hebrew calendar field-math implementation, or
-# - a carefully bounded Hebrew-specific bridge adjustment with strong evidence
-#   that it is correct across the affected year shapes
-#
-# We do not want to paper over this by sprinkling ad hoc day bumps or special
-# cases onto individual failing tests. That would be exactly the kind of broad,
-# brittle Intl-shim behavior we are trying to avoid in this package. Until there
-# is a small and clearly-correct Hebrew fix, keep this remaining cluster grouped
-# here so the rest of the bucket can continue landing.
+# TEMPORARY
+# See CALENDAR-YEAR-DATA-PLAN.md. These failures are the host-Intl calendar
+# data disagreements that were previously hidden by narrow year-data massaging
+# and daysInYear accessor overrides. Keep them serialized here until the planned
+# canonical year-data table can replace known-bad scraped years coherently.
+# That plan is also intended to fix the Hebrew roundtrip failures below by
+# using corrected year data for both calendar-field directions instead of
+# trusting raw Intl fields on one side of the bridge.
+intl402/Temporal/PlainDate/from/calc-epoch-year-hebrew.js
+intl402/Temporal/PlainDate/from/hebrew-keviah.js
 intl402/Temporal/PlainDate/from/roundtrip-from-string.js
+intl402/Temporal/PlainDate/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainDate/prototype/daysInYear/basic-hebrew.js
 intl402/Temporal/PlainDateTime/from/roundtrip-from-string.js
+intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-hebrew.js
+intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-hebrew.js
 intl402/Temporal/ZonedDateTime/from/roundtrip-from-string.js
+intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-hebrew.js

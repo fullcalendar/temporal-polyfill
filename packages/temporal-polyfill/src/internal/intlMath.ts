@@ -1,9 +1,7 @@
 import {
-  daysInYearOverridesByCalendarIdBase,
   defaultEraByCalendarIdBase,
   eraOriginsByCalendarId,
   eraRemapsByCalendarId,
-  hebrewInvalidCompleteLeapYears,
   normalizeEraName,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
@@ -166,10 +164,10 @@ function createIntlYearDataCache(
       }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
-    return correctIntlYearData(calendarIdBase, year, {
+    return {
       monthEpochMillis: millisReversed.reverse(),
       monthStrings: monthStringsReversed.reverse(),
-    })
+    }
   }
 
   return memoize(buildYear)
@@ -190,50 +188,6 @@ function correctIntlDateFields(
   }
 
   return intlFields
-}
-
-function correctIntlYearData(
-  calendarIdBase: string,
-  year: number,
-  yearData: IntlYearData,
-): IntlYearData {
-  if (calendarIdBase === 'hebrew' && year === 0) {
-    const monthEpochMillis = yearData.monthEpochMillis.slice()
-
-    // This is a host-data workaround, not a Hebrew calendar implementation. If
-    // future ICU data already exposes the expected Kislev/Tevet boundary, this
-    // unconditional shift would make the corrected data wrong and should be
-    // guarded by the scraped month shape or removed.
-    // ICU4C places the Tevet boundary one day early in Hebrew epoch year 0.
-    // Shift only that boundary so Kislev has the expected 30th day.
-    monthEpochMillis[3] += milliInDay
-
-    return { ...yearData, monthEpochMillis }
-  }
-
-  if (calendarIdBase === 'hebrew' && hebrewInvalidCompleteLeapYears[year]) {
-    const monthEpochMillis = yearData.monthEpochMillis.slice()
-
-    // This is a host-data workaround, not a Hebrew calendar implementation. If
-    // future ICU data already exposes the expected regular leap shape for one of
-    // these years, this unconditional shift would make the corrected data wrong
-    // and should be guarded by the scraped year shape or removed.
-    // ICU4C reports these leap years as complete years whose kevi'ah symbol is
-    // the impossible 3C1: Rosh Hashanah on Tuesday, 385 days, and Pesach on
-    // Sunday. Non-deferred Hebrew calendar rules need the regular leap shape
-    // 3R7 instead. Shorten Cheshvan (M02) by moving the start of Kislev (M03)
-    // and every later month one day earlier. monthEpochMillis is zero-based, so
-    // index 2 is the M03 boundary; leaving indexes 0 and 1 alone preserves the
-    // starts of Tishri (M01) and Cheshvan (M02). computeIntlDaysInYear pairs
-    // this with a 384-day override so accessors see the same regular leap shape.
-    for (let i = 2; i < monthEpochMillis.length; i++) {
-      monthEpochMillis[i] -= milliInDay
-    }
-
-    return { ...yearData, monthEpochMillis }
-  }
-
-  return yearData
 }
 
 // DateTimeFormat Utils
@@ -507,16 +461,6 @@ export function computeIntlDaysInYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): number {
-  const calendarBase = intlCalendar.id
-    ? computeCalendarIdBase(intlCalendar.id)
-    : undefined
-  const override = calendarBase
-    ? daysInYearOverridesByCalendarIdBase[calendarBase]?.[year]
-    : undefined
-  if (override !== undefined) {
-    return override
-  }
-
   const milli = computeIntlEpochMilli(intlCalendar, year)
   const milliNext = computeIntlEpochMilli(intlCalendar, year + 1)
   return diffEpochMilliByDay(milli, milliNext)
