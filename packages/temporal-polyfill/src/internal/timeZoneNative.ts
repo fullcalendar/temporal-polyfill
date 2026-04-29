@@ -11,9 +11,9 @@ import {
   isoToEpochSec,
 } from './timeMath'
 import {
+  getTimeZonePeriodDays,
   maxPossibleTransition,
   minPossibleTransition,
-  periodDur,
 } from './timeZoneConfig'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
@@ -30,7 +30,7 @@ export const queryNativeTimeZone = memoize(
     const record = resolveTimeZoneRecord(timeZoneId)
 
     return record.kind === 'named'
-      ? new IntlTimeZone(record.format)
+      ? new IntlTimeZone(record.id, record.format)
       : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
   },
 )
@@ -69,8 +69,11 @@ interface IntlTimeZoneStore {
 export class IntlTimeZone implements NativeTimeZone {
   tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
-  constructor(format: Intl.DateTimeFormat) {
-    this.tzStore = createIntlTimeZoneStore(createComputeOffsetSec(format))
+  constructor(timeZoneId: string, format: Intl.DateTimeFormat) {
+    this.tzStore = createIntlTimeZoneStore(
+      createComputeOffsetSec(format),
+      getTimeZonePeriodDays(timeZoneId),
+    )
   }
 
   getOffsetNanosecondsFor(epochNano: BigNano): number {
@@ -105,10 +108,12 @@ export class IntlTimeZone implements NativeTimeZone {
 
 function createIntlTimeZoneStore(
   computeOffsetSec: (epochSec: number) => number,
+  periodDays: number,
 ): IntlTimeZoneStore {
   // always given startEpochSec/endEpochSec
   const getSample = memoize(computeOffsetSec)
   const getSplit = memoize(createSplitTuple)
+  const periodSec = periodDays * secInDay
   let minTransition = minPossibleTransition
   let maxTransition = maxPossibleTransition
 
@@ -140,7 +145,10 @@ function createIntlTimeZoneStore(
 
   function getOffsetSec(epochSec: number): number {
     const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
-    const [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
+    const [startEpochSec, endEpochSec] = computePeriod(
+      clampedEpochSec,
+      periodSec,
+    )
     const startOffsetSec = getSample(startEpochSec)
     const endOffsetSec = getSample(endEpochSec)
 
@@ -160,9 +168,9 @@ function createIntlTimeZoneStore(
     direction: -1 | 1,
   ): number | undefined {
     const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
-    let [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec)
+    let [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec, periodSec)
 
-    const inc = periodDur * direction
+    const inc = periodSec * direction
     const inBounds =
       direction < 0
         ? () =>
@@ -250,9 +258,9 @@ function createSplitTuple(
   return [startEpochSec, endEpochSec]
 }
 
-function computePeriod(epochSec: number): [number, number] {
-  const startEpochSec = Math.floor(epochSec / periodDur) * periodDur
-  const endEpochSec = startEpochSec + periodDur
+function computePeriod(epochSec: number, periodSec: number): [number, number] {
+  const startEpochSec = Math.floor(epochSec / periodSec) * periodSec
+  const endEpochSec = startEpochSec + periodSec
   return [startEpochSec, endEpochSec]
 }
 
