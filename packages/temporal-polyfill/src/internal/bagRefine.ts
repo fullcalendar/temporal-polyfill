@@ -867,9 +867,16 @@ export function monthDayFromFields(
   // year given? parse either monthCode or month (if both specified, must be equivalent)
   if (yearMaybe !== undefined) {
     // PlainMonthDay stores a canonical reference year, but an explicitly
-    // supplied year still participates in validation. Bail out before
-    // canonicalizing if that year cannot produce an in-bounds ISO date.
-    checkIsoDateInBounds(queryNativeIsoFieldsFromParts(calendarId, yearMaybe, 1, 1))
+    // supplied ISO year is only a probe for overflow math. In particular, an
+    // out-of-range ISO year can still tell us whether M02-29 should constrain
+    // to M02-28 or remain a leap-day PlainMonthDay. Non-ISO calendars still go
+    // through this guard because their calendar queries may need a real
+    // in-range ISO date to anchor the supplied calendar year.
+    if (!isIso) {
+      checkIsoDateInBounds(
+        queryNativeIsoFieldsFromParts(calendarId, yearMaybe, 1, 1),
+      )
+    }
 
     // might limit overflow
     const month = refineMonth(calendarId, fields, yearMaybe, overflow)
