@@ -146,6 +146,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket K: Duration bounds and precision leftovers
 
+- Status: DONE
 - Count: `2`
 - Shared root cause:
   remaining `Duration.round()` / `Duration.total()` edge behavior around next-day
@@ -156,6 +157,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket L: MonthCode validation ordering
 
+- Status: DONE
 - Count: `5`
 - Shared root cause:
   built-in property-bag `monthCode` syntax validation happens after year type
@@ -170,6 +172,7 @@ the remaining full-suite `test262 --no-max` failures discovered after buckets
 
 ## Bucket M: PlainMonthDay ISO reference year overflow
 
+- Status: DONE
 - Count: `2`
 - Shared root cause:
   `PlainMonthDay` uses `isoYear` only as an overflow/reference-year aid, but the

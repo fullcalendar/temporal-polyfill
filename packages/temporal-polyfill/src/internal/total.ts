@@ -122,10 +122,10 @@ export function totalRelativeDuration(
     durationFieldNamesAsc[totalUnit]
   ]
 
-  // Match the spec's floating-point shape: first compute the fractional unit
-  // from the epoch-nanosecond window, then add it to the whole-unit count.
-  // Collapsing this into one division can shift the final answer by one ulp.
-  return integerPart + (numerator / denom) * sign
+  // Keep the whole-unit and fractional-window math grouped into a single
+  // division. See DURATION-TOTAL-PRECISION-MEMORY.md for the one-ulp tradeoff
+  // this currently makes between two Duration.total() test262 cases.
+  return (integerPart * denom + numerator * sign) / denom
 }
 
 function totalDayTimeDuration(
