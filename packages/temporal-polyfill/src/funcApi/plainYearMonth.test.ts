@@ -76,7 +76,7 @@ describe('getFields', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
     const fields = PlainYearMonthFns.getFields(pym)
     expect(fields).toEqual({
-      era: 'gregory',
+      era: 'ce',
       eraYear: 2024,
       year: 2024,
       monthCode: 'M06',

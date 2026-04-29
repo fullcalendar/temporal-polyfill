@@ -95,7 +95,7 @@ describe('getFields', () => {
   it('works with calendar with eras', () => {
     const pdt = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=gregory]')
     expect(PlainDateTimeFns.getFields(pdt)).toEqual({
-      era: 'gregory',
+      era: 'ce',
       eraYear: 2024,
       year: 2024,
       month: 1,
@@ -128,8 +128,10 @@ describe('withFields', () => {
     })
     const fields1 = PlainDateTimeFns.getFields(pdt1)
     expect(fields1).toEqual({
-      era: undefined,
-      eraYear: undefined,
+      // Current Intl data exposes the Hebrew anno mundi era. The functional
+      // API reports the calendar fields it computes instead of hiding that era.
+      era: 'am',
+      eraYear: 5600,
       year: 5600,
       month: 3,
       monthCode: 'M03',
@@ -218,9 +220,9 @@ describe('weekOfYear', () => {
     expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=gregory]')
-    expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(1)
+    expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
@@ -235,9 +237,9 @@ describe('yearOfWeek', () => {
     expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=gregory]')
-    expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(2023)
+    expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {

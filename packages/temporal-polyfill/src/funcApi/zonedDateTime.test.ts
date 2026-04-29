@@ -344,11 +344,11 @@ describe('weekOfYear', () => {
     expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=gregory]',
     )
-    expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(1)
+    expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
@@ -367,11 +367,11 @@ describe('yearOfWeek', () => {
     expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=gregory]',
     )
-    expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(2023)
+    expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {

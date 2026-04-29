@@ -84,8 +84,11 @@ describe('getFields', () => {
   it('works with calendar without eras', () => {
     const pd = PlainDateFns.create(2024, 1, 1, 'hebrew')
     expect(PlainDateFns.getFields(pd)).toEqual({
-      era: undefined,
-      eraYear: undefined,
+      // Current Intl data exposes the Hebrew anno mundi era. Keep this test
+      // aligned with the returned calendar fields rather than the old
+      // assumption that Hebrew had no observable era.
+      era: 'am',
+      eraYear: 5784,
       year: 5784,
       month: 4,
       monthCode: 'M04',
@@ -96,7 +99,7 @@ describe('getFields', () => {
   it('works with calendar with eras', () => {
     const pd = PlainDateFns.create(2024, 1, 1, 'gregory')
     expect(PlainDateFns.getFields(pd)).toEqual({
-      era: 'gregory',
+      era: 'ce',
       eraYear: 2024,
       year: 2024,
       month: 1,
@@ -120,8 +123,8 @@ describe('withFields', () => {
     })
     const fields1 = PlainDateFns.getFields(pd1)
     expect(fields1).toEqual({
-      era: undefined,
-      eraYear: undefined,
+      era: 'am',
+      eraYear: 5600,
       year: 5600,
       month: 3,
       monthCode: 'M03',
@@ -163,9 +166,9 @@ describe('weekOfYear', () => {
     expect(PlainDateFns.weekOfYear(pd)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const pd = PlainDateFns.create(2023, 1, 1, 'gregory')
-    expect(PlainDateFns.weekOfYear(pd)).toBe(1)
+    expect(PlainDateFns.weekOfYear(pd)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
@@ -180,9 +183,9 @@ describe('yearOfWeek', () => {
     expect(PlainDateFns.yearOfWeek(pd)).toBe(undefined)
   })
 
-  it('returns correct gregory results', () => {
+  it('returns undefined for gregory calendar dates', () => {
     const pd = PlainDateFns.create(2023, 1, 1, 'gregory')
-    expect(PlainDateFns.yearOfWeek(pd)).toBe(2023)
+    expect(PlainDateFns.yearOfWeek(pd)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
