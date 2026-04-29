@@ -142,8 +142,14 @@ export type PlainMonthDayBag = MonthDayBag & { calendar?: string }
 
 const dateFieldRefiners = {
   era: toStringViaPrimitive,
-  eraYear: toInteger,
-  year: toInteger,
+  // `year` and `eraYear` are coerced inside refineYear().  That lets the
+  // *-from-fields routines perform their required-field checks and the
+  // monthCode syntax check before observing numeric coercion failures.
+  //
+  // TODO: better separation/refactoring of coercion/validation
+  //
+  eraYear: passThroughDateField,
+  year: passThroughDateField,
   month: toPositiveInteger,
   // monthCode refiner only validates type (string). Range validation (parseMonthCode)
   // is deferred to dateFromFields/yearMonthFromFields/monthDayFromFields so that
@@ -192,6 +198,19 @@ function refineMonthCodeString(monthCode: unknown, entityName: string): string {
   }
 
   return requireString(monthCode as string, entityName)
+}
+
+function passThroughDateField<T>(fieldVal: T): T {
+  return fieldVal
+}
+
+function validateMonthCodeSyntax(fields: Partial<MonthFields>): void {
+  if (fields.monthCode !== undefined) {
+    // Syntax is part of resolving the supplied fields, not calendar suitability.
+    // `M99L` is syntactically valid and is rejected later against the chosen
+    // calendar/year, but `L99M` should fail before year numeric coercion.
+    parseMonthCode(fields.monthCode)
+  }
 }
 
 // High-Level Refining
@@ -790,6 +809,8 @@ export function dateFromFields(
     throw new TypeError(errorMessages.missingField('day'))
   }
 
+  validateMonthCodeSyntax(fields)
+
   const year = refineYear(calendarId, fields)
   const month = refineMonth(calendarId, fields, year, overflow)
   const day = refineDay(calendarId, fields as DayFields, month, year, overflow)
@@ -817,6 +838,8 @@ export function yearMonthFromFields(
   if (fields.monthCode === undefined && fields.month === undefined) {
     throw new TypeError(errorMessages.missingMonth)
   }
+
+  validateMonthCodeSyntax(fields)
 
   const year = refineYear(calendarId, fields)
   const month = refineMonth(calendarId, fields, year, overflow)
@@ -849,6 +872,8 @@ export function monthDayFromFields(
   ) {
     throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
+
+  validateMonthCodeSyntax(fields)
 
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
@@ -1064,6 +1089,14 @@ function refineYear(calendarId: string, fields: DateBag): number {
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
   const eraRemaps = eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
   let { era, eraYear, year } = fields
+
+  // TODO: repeat coercion? happens prior too?
+  if (year !== undefined) {
+    year = toInteger(year as number, 'year')
+  }
+  if (eraYear !== undefined) {
+    eraYear = toInteger(eraYear as number, 'eraYear')
+  }
 
   if (era !== undefined || eraYear !== undefined) {
     if (era === undefined || eraYear === undefined) {
