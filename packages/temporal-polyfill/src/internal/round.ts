@@ -701,8 +701,7 @@ export function nudgeRelativeDuration(
   // usually between 0-1, however can be higher when weeks aren't bounded by months
   const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
 
-  const windowStartVal =
-    nudgeWindow.startDurationFields[smallestUnitFieldName]
+  const windowStartVal = nudgeWindow.startDurationFields[smallestUnitFieldName]
   const windowEndVal = nudgeWindow.endDurationFields[smallestUnitFieldName]
   const exactVal = windowStartVal + frac * sign * roundingInc
   const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)

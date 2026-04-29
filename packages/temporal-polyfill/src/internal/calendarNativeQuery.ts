@@ -173,7 +173,11 @@ export function queryNativeYearMonthForMonthDay(
 ): ReturnType<typeof computeIsoYearMonthForMonthDay> {
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
-    const res = computeIsoYearMonthForMonthDay(monthCodeNumber, isLeapMonth, day)
+    const res = computeIsoYearMonthForMonthDay(
+      monthCodeNumber,
+      isLeapMonth,
+      day,
+    )
     return res && [res[0] + isoYearOffset, res[1]]
   }
 
@@ -302,11 +306,12 @@ export function queryNativeDayOfYear(
 ): number {
   const [year] = queryNativeDateParts(calendarId, isoFields)
   const isoYearOffset = queryIsoYearOffset(calendarId)
-  const milli0 = isoYearOffset !== undefined
-    ? isoArgsToEpochMilli(year - isoYearOffset)
-    : isIsoBasedCalendarId(calendarId)
-    ? isoArgsToEpochMilli(year)
-    : computeIntlEpochMilli(queryIntlCalendar(calendarId), year)
+  const milli0 =
+    isoYearOffset !== undefined
+      ? isoArgsToEpochMilli(year - isoYearOffset)
+      : isIsoBasedCalendarId(calendarId)
+        ? isoArgsToEpochMilli(year)
+        : computeIntlEpochMilli(queryIntlCalendar(calendarId), year)
   const milli1 = isoToEpochMilli(isoFields)!
   return diffEpochMilliByDay(milli0!, milli1) + 1
 }

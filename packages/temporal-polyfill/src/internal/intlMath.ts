@@ -58,11 +58,7 @@ export interface IntlCalendar extends NativeCalendar {
   queryYearData: (year: number) => IntlYearData
 }
 
-const hebrewEpochYearKislevDay30EpochMilli = isoArgsToEpochMilli(
-  -3761,
-  11,
-  17,
-)!
+const hebrewEpochYearKislevDay30EpochMilli = isoArgsToEpochMilli(-3761, 11, 17)!
 
 // -----------------------------------------------------------------------------
 
@@ -84,7 +80,10 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   return {
     id: calendarId,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
-    queryYearData: createIntlYearDataCache(calendarIdBase, epochMilliToIntlFields),
+    queryYearData: createIntlYearDataCache(
+      calendarIdBase,
+      epochMilliToIntlFields,
+    ),
   }
 }
 

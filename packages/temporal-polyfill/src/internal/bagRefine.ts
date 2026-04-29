@@ -934,12 +934,7 @@ export function monthDayFromFields(
       // year that corresponds to ISO 1972 so February 29 remains available.
       const referenceYear =
         isoEpochFirstLeapYear + (isoYearOffsetsByCalendarId[calendarId] || 0)
-      const month = refineMonth(
-        calendarId,
-        fields,
-        referenceYear,
-        overflow,
-      )
+      const month = refineMonth(calendarId, fields, referenceYear, overflow)
       day = refineDay(
         calendarId,
         fields as DayFields,
@@ -978,8 +973,7 @@ export function monthDayFromFields(
 
   if (
     isLeapMonth &&
-    queryPlainMonthDayLeapMonthMaxDay(calendarId, monthCodeNumber) <
-      fields.day
+    queryPlainMonthDayLeapMonthMaxDay(calendarId, monthCodeNumber) < fields.day
   ) {
     if (overflow === Overflow.Reject) {
       throw new RangeError(errorMessages.invalidLeapMonth)
@@ -1094,7 +1088,8 @@ export function mergeCalendarFields(
 
 function refineYear(calendarId: string, fields: DateBag): number {
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
-  const eraRemaps = eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
+  const eraRemaps =
+    eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
   let { era, eraYear, year } = fields
 
   // TODO: repeat coercion? happens prior too?
@@ -1114,12 +1109,16 @@ function refineYear(calendarId: string, fields: DateBag): number {
       throw new RangeError(errorMessages.forbiddenEraParts)
     }
 
-    const normalizedEra = eraRemaps[normalizeEraName(era)] || normalizeEraName(era)
+    const normalizedEra =
+      eraRemaps[normalizeEraName(era)] || normalizeEraName(era)
     const eraOrigin = eraOrigins[normalizedEra]
 
     // Ethiopic's AA era counts from an offset epoch instead of using the
     // forward/reverse year scheme used by Gregorian/ROC/Japanese eras.
-    if (computeCalendarIdBase(calendarId) === 'ethiopic' && normalizedEra === 'aa') {
+    if (
+      computeCalendarIdBase(calendarId) === 'ethiopic' &&
+      normalizedEra === 'aa'
+    ) {
       const yearByEra = eraYear - 5500
       if (year !== undefined && year !== yearByEra) {
         throw new RangeError(errorMessages.mismatchingYearAndEra)

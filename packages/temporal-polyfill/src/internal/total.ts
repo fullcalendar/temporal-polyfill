@@ -118,9 +118,8 @@ export function totalRelativeDuration(
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
   const numerator = bigNanoToNumber(diffBigNanos(epochNano0, endEpochNano))
-  const integerPart = nudgeWindow.startDurationFields[
-    durationFieldNamesAsc[totalUnit]
-  ]
+  const integerPart =
+    nudgeWindow.startDurationFields[durationFieldNamesAsc[totalUnit]]
 
   // Keep the whole-unit and fractional-window math grouped into a single
   // division. See DURATION-TOTAL-PRECISION-MEMORY.md for the one-ulp tradeoff

@@ -98,9 +98,8 @@ describe('Intl.DateTimeFormat', () => {
       ).toBe(true)
       expect(
         fallbackCalendars.includes(
-          new Intl.DateTimeFormat(
-            'en-u-ca-islamic-rgsa',
-          ).resolvedOptions().calendar,
+          new Intl.DateTimeFormat('en-u-ca-islamic-rgsa').resolvedOptions()
+            .calendar,
         ),
       ).toBe(true)
     })

@@ -324,12 +324,18 @@ function normalizeResolvedCalendarId(
   return fallbackCalendar
 }
 
-function detectIslamicCalendarFallback(locale: string, calendar: string): string {
+function detectIslamicCalendarFallback(
+  locale: string,
+  calendar: string,
+): string {
   const expectedOutputs = computeCalendarProbeOutputs(locale, calendar)
 
   for (let i = 0; i < islamicCalendarFallbackIds.length; i++) {
     const candidateCalendar = islamicCalendarFallbackIds[i]
-    const candidateOutputs = computeCalendarProbeOutputs(locale, candidateCalendar)
+    const candidateOutputs = computeCalendarProbeOutputs(
+      locale,
+      candidateCalendar,
+    )
     let matches = true
 
     for (let j = 0; j < expectedOutputs.length; j++) {
@@ -347,7 +353,10 @@ function detectIslamicCalendarFallback(locale: string, calendar: string): string
   return islamicCalendarFallbackIds[0]
 }
 
-function computeCalendarProbeOutputs(locale: string, calendar: string): string[] {
+function computeCalendarProbeOutputs(
+  locale: string,
+  calendar: string,
+): string[] {
   const format = new RawDateTimeFormat(locale, {
     calendar,
     timeZone: 'UTC',

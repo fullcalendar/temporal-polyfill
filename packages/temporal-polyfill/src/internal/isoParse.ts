@@ -578,10 +578,7 @@ function extractTimeOnlyOffset(
   const offsetStart = s.indexOf(offsetSign)
   const annotationStart = s.indexOf('[', offsetStart)
 
-  return s.slice(
-    offsetStart,
-    annotationStart < 0 ? undefined : annotationStart,
-  )
+  return s.slice(offsetStart, annotationStart < 0 ? undefined : annotationStart)
 }
 
 function validateOffsetSeparators(s: string): boolean {

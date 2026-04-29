@@ -279,7 +279,7 @@ export function nativeDateUntil(
     return { ...durationFieldDefaults, months, days }
   }
 
-  let [years, months, days] = diffYearMonthDay(
+  const [years, months, days] = diffYearMonthDay(
     intlCalendar,
     ...yearMonthDayStart,
     ...yearMonthDayEnd,
