@@ -137,7 +137,7 @@ intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-cli
 intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip-weekday.js
 intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 
-# WONTFIX for now
+# WONTFIX for real - TODO: combine with groups above
 # Intl host-compliance gaps we intentionally do not paper over
 #
 # The polyfill wraps Intl.DateTimeFormat enough to preserve Temporal object
@@ -153,7 +153,7 @@ intl402/DateTimeFormat/prototype/formatToParts/era.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
 
-# WONTFIX for now
+# WONTFIX for real - TODO: combine with groups above
 # Chinese/lunisolar DateTimeFormat output follows the host ICU data.
 #
 # The core Temporal calendar fields already carry a small amount of
@@ -193,11 +193,10 @@ intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 #
 # - round-tripping a few RFC 9557 strings lands on a day that is off by one
 #   for specific Hebrew dates that the tests mark as ICU4C/ICU4X discrepancies
-# - Hebrew `daysInYear` is still wrong for at least one representative year
 # The important thing about this group is that it no longer looks like an era
 # aliasing bug, parser bug, or a small validation-order issue. The remaining
-# behavior sits in the Hebrew calendar math / bridge layer itself: year length
-# and exact date round-tripping for certain host-sensitive cases.
+# behavior sits in the Hebrew calendar math / bridge layer itself: exact date
+# round-tripping for certain host-sensitive cases.
 #
 # A correct fix likely needs one of the following:
 #
@@ -211,9 +210,5 @@ intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 # is a small and clearly-correct Hebrew fix, keep this remaining cluster grouped
 # here so the rest of the bucket can continue landing.
 intl402/Temporal/PlainDate/from/roundtrip-from-string.js
-intl402/Temporal/PlainDate/prototype/daysInYear/basic-hebrew.js
 intl402/Temporal/PlainDateTime/from/roundtrip-from-string.js
-intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-hebrew.js
-intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-hebrew.js
 intl402/Temporal/ZonedDateTime/from/roundtrip-from-string.js
-intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-hebrew.js

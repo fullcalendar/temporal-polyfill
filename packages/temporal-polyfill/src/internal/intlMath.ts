@@ -200,6 +200,10 @@ function correctIntlYearData(
   if (calendarIdBase === 'hebrew' && year === 0) {
     const monthEpochMillis = yearData.monthEpochMillis.slice()
 
+    // This is a host-data workaround, not a Hebrew calendar implementation. If
+    // future ICU data already exposes the expected Kislev/Tevet boundary, this
+    // unconditional shift would make the corrected data wrong and should be
+    // guarded by the scraped month shape or removed.
     // ICU4C places the Tevet boundary one day early in Hebrew epoch year 0.
     // Shift only that boundary so Kislev has the expected 30th day.
     monthEpochMillis[3] += milliInDay
@@ -210,12 +214,18 @@ function correctIntlYearData(
   if (calendarIdBase === 'hebrew' && hebrewInvalidCompleteLeapYears[year]) {
     const monthEpochMillis = yearData.monthEpochMillis.slice()
 
+    // This is a host-data workaround, not a Hebrew calendar implementation. If
+    // future ICU data already exposes the expected regular leap shape for one of
+    // these years, this unconditional shift would make the corrected data wrong
+    // and should be guarded by the scraped year shape or removed.
     // ICU4C reports these leap years as complete years whose kevi'ah symbol is
     // the impossible 3C1: Rosh Hashanah on Tuesday, 385 days, and Pesach on
     // Sunday. Non-deferred Hebrew calendar rules need the regular leap shape
-    // 3R7 instead. Shorten Cheshvan by one day by moving Kislev (M03) and all
-    // later month starts one day earlier; computeIntlDaysInYear pairs this
-    // with a 384-day override so accessors see the same regular leap shape.
+    // 3R7 instead. Shorten Cheshvan (M02) by moving the start of Kislev (M03)
+    // and every later month one day earlier. monthEpochMillis is zero-based, so
+    // index 2 is the M03 boundary; leaving indexes 0 and 1 alone preserves the
+    // starts of Tishri (M01) and Cheshvan (M02). computeIntlDaysInYear pairs
+    // this with a 384-day override so accessors see the same regular leap shape.
     for (let i = 2; i < monthEpochMillis.length; i++) {
       monthEpochMillis[i] -= milliInDay
     }

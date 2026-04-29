@@ -177,20 +177,27 @@ export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
   'dangi': 30,
 }
 
-// Current ICU4C data disagrees with Temporal/test262 for a few Chinese year
-// lengths near 2030. Keep these accessor-level overrides narrow instead of
-// shifting month boundaries, which would affect date construction semantics.
-// See CHINESE-DAYS-IN-YEAR-MEMORY.md before removing or broadening this table.
 export const daysInYearOverridesByCalendarIdBase: Record<
   string,
   Record<number, number>
 > = {
+  // Current ICU4C data disagrees with Temporal/test262 for a few Chinese year
+  // lengths near 2030: ICU reports 2026/2027/2029/2030 as 355/353/354/355
+  // days, while test262 expects 354/354/355/354. Keep these accessor-level
+  // overrides narrow instead of shifting scraped month boundaries, which would
+  // also affect date construction, arithmetic, and ISO <-> Chinese field math.
   'chinese': {
     2026: 354,
     2027: 354,
     2029: 355,
     2030: 354,
   },
+  // Hebrew entries are accessor-level year-length corrections for known ICU4C
+  // data disagreements. Older entries are paired with correctIntlYearData(),
+  // which rewrites the scraped month-boundary table for impossible 385-day leap
+  // shapes. The 5806/5807 entries only keep daysInYear aligned with the
+  // rule-based data used by test262; they do not correct ISO <-> Hebrew field
+  // conversion around ISO 2046.
   'hebrew': {
     3705: 384,
     3952: 384,
@@ -204,9 +211,12 @@ export const daysInYearOverridesByCalendarIdBase: Record<
     5214: 384,
     5461: 384,
     5559: 384,
+    5806: 384,
+    5807: 355,
   },
 }
 
+// See correctIntlYearData()
 export const hebrewInvalidCompleteLeapYears: Record<number, true> = {
   3705: true,
   3952: true,
