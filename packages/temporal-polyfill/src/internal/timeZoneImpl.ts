@@ -1,7 +1,7 @@
 import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
+import { CalendarDateTimeFields } from './fieldTypes'
 import { parseIntlPartsYear } from './intlCalendar'
 import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
-import { IsoDateTimeFields } from './isoFields'
 import {
   checkEpochNanoInBounds,
   epochNanoToSec,
@@ -21,7 +21,7 @@ import { clampNumber, compareNumbers, memoize } from './utils'
 
 export interface TimeZoneImpl {
   getOffsetNanosecondsFor(epochNano: BigNano): number
-  getPossibleInstantsFor(isoFields: IsoDateTimeFields): BigNano[]
+  getPossibleInstantsFor(isoFields: CalendarDateTimeFields): BigNano[]
   getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
 }
 
@@ -46,7 +46,7 @@ export class FixedTimeZone implements TimeZoneImpl {
   // Strict ISO date bounds checking is intentionally NOT done here.
   // It is conditionally performed in getMatchingInstantFor based on offsetDisambig.
   // This allows offset: "use"/"ignore" to accept epoch-boundary dates.
-  getPossibleInstantsFor(isoDateTimeFields: IsoDateTimeFields): BigNano[] {
+  getPossibleInstantsFor(isoDateTimeFields: CalendarDateTimeFields): BigNano[] {
     return [isoToEpochNanoWithOffset(isoDateTimeFields, this.offsetNano)]
   }
 
@@ -78,7 +78,7 @@ export class IntlTimeZone implements TimeZoneImpl {
     return this.tzStore.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
-  getPossibleInstantsFor(isoFields: IsoDateTimeFields): BigNano[] {
+  getPossibleInstantsFor(isoFields: CalendarDateTimeFields): BigNano[] {
     const [zonedEpochSec, subsecNano] = isoToEpochSec(isoFields)
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {

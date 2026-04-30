@@ -163,30 +163,6 @@ describe('offset', () => {
   })
 })
 
-describe('getISOFields', () => {
-  it('works', () => {
-    const zdt = ZonedDateTimeFns.create(
-      1709055000000000000n,
-      'America/New_York',
-    )
-    const isoFields = ZonedDateTimeFns.getISOFields(zdt)
-    expect(isoFields).toEqual({
-      calendar: 'iso8601',
-      isoDay: 27,
-      isoHour: 12,
-      isoMicrosecond: 0,
-      isoMillisecond: 0,
-      isoMinute: 30,
-      isoMonth: 2,
-      isoNanosecond: 0,
-      isoSecond: 0,
-      isoYear: 2024,
-      offset: '-05:00',
-      timeZone: 'America/New_York',
-    })
-  })
-})
-
 describe('getFields', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.create(
@@ -610,11 +586,11 @@ describe('toPlainDateTime', () => {
     )
     const pdt = ZonedDateTimeFns.toPlainDateTime(zdt)
     expectPlainDateTimeEquals(pdt, {
-      isoYear: 2024,
-      isoMonth: 2,
-      isoDay: 27,
-      isoHour: 12,
-      isoMinute: 30,
+      year: 2024,
+      month: 2,
+      day: 27,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -626,9 +602,9 @@ describe('toPlainDate', () => {
     )
     const pd = ZonedDateTimeFns.toPlainDate(zdt)
     expectPlainDateEquals(pd, {
-      isoYear: 2024,
-      isoMonth: 2,
-      isoDay: 27,
+      year: 2024,
+      month: 2,
+      day: 27,
     })
   })
 })
@@ -640,8 +616,8 @@ describe('toPlainTime', () => {
     )
     const pt = ZonedDateTimeFns.toPlainTime(zdt)
     expectPlainTimeEquals(pt, {
-      isoHour: 12,
-      isoMinute: 30,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -653,8 +629,8 @@ describe('toPlainYearMonth', () => {
     )
     const pym = ZonedDateTimeFns.toPlainYearMonth(zdt)
     expectPlainYearMonthEquals(pym, {
-      isoYear: 2024,
-      isoMonth: 2,
+      year: 2024,
+      month: 2,
     })
   })
 })
@@ -666,8 +642,8 @@ describe('toPlainMonthDay', () => {
     )
     const pmd = ZonedDateTimeFns.toPlainMonthDay(zdt)
     expectPlainMonthDayEquals(pmd, {
-      isoMonth: 2,
-      isoDay: 27,
+      month: 2,
+      day: 27,
     })
   })
 })

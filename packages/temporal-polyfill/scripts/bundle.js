@@ -380,18 +380,6 @@ async function readTemporalReservedWords(pkgDir) {
       'useGrouping',
       'relatedYear',
 
-      // previously in getISOFields(), but that was removed
-      // TODO: THIS IS NOT A VERY GOOD SYSTEM
-      'isoYear',
-      'isoMonth',
-      'isoDay',
-      'isoHour',
-      'isoMinute',
-      'isoSecond',
-      'isoMillisecond',
-      'isoMicrosecond',
-      'isoNanosecond',
-
       // Intl.DateTimeFormat options
       'hour12',
     ])

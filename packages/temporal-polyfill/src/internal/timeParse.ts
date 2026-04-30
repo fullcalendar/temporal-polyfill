@@ -1,4 +1,4 @@
-import { IsoTimeFields } from './isoFields'
+import { TimeFields } from './fieldTypes'
 import { nanoToIsoTimeAndDay } from './timeMath'
 import { fractionRegExpStr, parseInt0, parseSubsecNano } from './utils'
 
@@ -10,13 +10,13 @@ export const timeRegExpStr =
   ')?' +
   ')?'
 
-export function organizeTimeParts(parts: string[]): IsoTimeFields {
-  const isoSecond = parseInt0(parts[3])
+export function organizeTimeParts(parts: string[]): TimeFields {
+  const second = parseInt0(parts[3])
 
   return {
     ...nanoToIsoTimeAndDay(parseSubsecNano(parts[4] || ''))[0],
-    isoHour: parseInt0(parts[1]),
-    isoMinute: parseInt0(parts[2]),
-    isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage leap-second
+    hour: parseInt0(parts[1]),
+    minute: parseInt0(parts[2]),
+    second: second === 60 ? 59 : second, // massage leap-second
   }
 }

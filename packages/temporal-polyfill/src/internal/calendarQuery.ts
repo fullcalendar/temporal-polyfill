@@ -50,9 +50,9 @@ export function queryCalendarDateFields(
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
     return {
-      year: isoFields.isoYear + isoYearOffset,
-      month: isoFields.isoMonth,
-      day: isoFields.isoDay,
+      year: isoFields.year + isoYearOffset,
+      month: isoFields.month,
+      day: isoFields.day,
     }
   }
 
@@ -66,11 +66,11 @@ export function queryCalendarDay(
   isoFields: Parameters<typeof computeIsoDateFields>[0],
 ): number {
   if (queryIsoYearOffset(calendarId) !== undefined) {
-    return isoFields.isoDay
+    return isoFields.day
   }
 
   return isIsoBasedCalendarId(calendarId)
-    ? isoFields.isoDay
+    ? isoFields.day
     : computeIntlDay(queryIntlCalendar(calendarId), isoFields)
 }
 
@@ -96,7 +96,7 @@ export function queryCalendarEraFields(
 ): ReturnType<typeof computeIsoEraFields> {
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
-    const year = isoFields.isoYear + isoYearOffset
+    const year = isoFields.year + isoYearOffset
 
     if (calendarId === 'buddhist') {
       return { era: 'be', eraYear: year }

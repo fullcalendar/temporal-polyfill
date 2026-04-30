@@ -1,6 +1,7 @@
 import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
+import { timeFieldDefaults } from './fieldNames'
 import {
   dayFieldNames,
   monthCodeDayFieldNames,
@@ -12,6 +13,7 @@ import {
   yearMonthCodeFieldNamesWithEra,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
+import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import {
   DateFields,
   DayFields,
@@ -19,11 +21,6 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
-import {
-  IsoDateTimeFields,
-  IsoTimeFields,
-  isoTimeFieldDefaults,
-} from './isoFields'
 import { mergeCalendarFields } from './merge'
 import { refineEpochDisambigOptions } from './optionsFieldRefine'
 import { EpochDisambigOptions, OverflowOptions } from './optionsModel'
@@ -116,7 +113,7 @@ export function plainDateTimeToZonedDateTime(
 
 function dateToEpochNano(
   timeZoneId: string,
-  isoFields: IsoDateTimeFields,
+  isoFields: CalendarDateTimeFields,
   options?: EpochDisambigOptions,
 ): BigNano | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
@@ -129,7 +126,7 @@ function dateToEpochNano(
 
 export function plainDateToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
-  refinePlainTimeArg: (plainTimeArg: PA) => IsoTimeFields,
+  refinePlainTimeArg: (plainTimeArg: PA) => TimeFields,
   plainDateSlots: PlainDateSlots,
   options: { timeZone: string; plainTime?: PA },
 ): ZonedDateTimeSlots {
@@ -149,7 +146,7 @@ export function plainDateToZonedDateTime<PA>(
   } else {
     epochNano = getStartOfDayInstantFor(timeZoneImpl, {
       ...plainDateSlots,
-      ...isoTimeFieldDefaults,
+      ...timeFieldDefaults,
     })
   }
 
@@ -162,7 +159,7 @@ export function plainDateToZonedDateTime<PA>(
 
 export function plainDateToPlainDateTime(
   plainDateSlots: PlainDateSlots,
-  plainTimeFields: IsoTimeFields = isoTimeFieldDefaults,
+  plainTimeFields: TimeFields = timeFieldDefaults,
 ): PlainDateTimeSlots {
   return createPlainDateTimeSlots(
     checkIsoDateTimeInBounds({

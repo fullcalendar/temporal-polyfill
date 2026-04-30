@@ -2,7 +2,11 @@ import { compareBigNanos } from './bigNano'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
 import { RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import {
@@ -93,8 +97,8 @@ export function compareDurations<RA>(
 // -----------------------------------------------------------------------------
 
 export function compareIsoDateTimeFields(
-  isoFields0: IsoDateTimeFields,
-  isoFields1: IsoDateTimeFields,
+  isoFields0: CalendarDateTimeFields,
+  isoFields1: CalendarDateTimeFields,
 ): NumberSign {
   return (
     compareIsoDateFields(isoFields0, isoFields1) ||
@@ -103,8 +107,8 @@ export function compareIsoDateTimeFields(
 }
 
 export function compareIsoDateFields(
-  isoFields0: IsoDateFields,
-  isoFields1: IsoDateFields,
+  isoFields0: CalendarDateFields,
+  isoFields1: CalendarDateFields,
 ): NumberSign {
   return compareNumbers(
     isoToEpochMilli(isoFields0)!,
@@ -113,8 +117,8 @@ export function compareIsoDateFields(
 }
 
 export function compareIsoTimeFields(
-  isoFields0: IsoTimeFields,
-  isoFields1: IsoTimeFields,
+  isoFields0: TimeFields,
+  isoFields1: TimeFields,
 ): NumberSign {
   return compareNumbers(
     isoTimeFieldsToNano(isoFields0),

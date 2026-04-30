@@ -14,11 +14,11 @@ import {
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes } from '../internal/diff'
 import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { CalendarDateTimeFields } from '../internal/fieldTypes'
 import { DateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
@@ -69,7 +69,7 @@ import {
   nanoInSec,
   nanoInUtcDay,
 } from '../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -136,57 +136,28 @@ export type Record = {
    */
   readonly calendar: string
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoYear: number
+  readonly year: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMonth: number
+  readonly month: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoDay: number
+  readonly day: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoHour: number
+  readonly hour: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMinute: number
+  readonly minute: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoSecond: number
+  readonly second: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMillisecond: number
+  readonly millisecond: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMicrosecond: number
+  readonly microsecond: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoNanosecond: number
+  readonly nanosecond: number
 }
 
 export type Fields = DateTimeFields
 export type FromFields = DateTimeLikeObject
 export type WithFields = Partial<DateTimeFields>
-export type ISOFields = IsoDateTimeFields
-
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<UnitName>
@@ -236,8 +207,6 @@ export const getFields = memoize((record: Record): Fields => {
     ...isoTimeFieldsToCal(record),
   }
 }, WeakMap)
-
-export const getISOFields = identity as (record: Record) => ISOFields
 
 export const calendarId = getCalendarId as (record: Record) => string
 
@@ -641,7 +610,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: AbstractDateTimeSlots) => IsoDateTimeFields,
+  computeAlignment: (slots: AbstractDateTimeSlots) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {

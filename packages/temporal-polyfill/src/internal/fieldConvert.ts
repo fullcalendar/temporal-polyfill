@@ -1,31 +1,29 @@
 import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
-import { IsoTimeFields, isoTimeFieldNamesAsc } from './isoFields'
 import { constrainIsoTimeFields } from './isoMath'
 import { Overflow } from './optionsModel'
 import { bindArgs, remapProps } from './utils'
 
-// Public Temporal time fields and internal ISO time fields carry the same
-// numeric values, but their property names differ. Keep this conversion outside
-// fieldRefine so callers do not imply any user-observable coercion happens here.
+// Time fields do not carry a calendar. Keep this helper as the internal
+// boundary between user-facing bags and ISO-date algorithms, even though it is
+// currently an identity remap.
 export const timeFieldsToIso = bindArgs(
-  remapProps<TimeFields, IsoTimeFields>,
+  remapProps<TimeFields, TimeFields>,
   timeFieldNamesAsc,
-  isoTimeFieldNamesAsc,
+  timeFieldNamesAsc,
 )
 
-// Inverse of timeFieldsToIso(), used when internal ISO time slots need to be
-// exposed through the calendar-shaped field records used by from-fields paths.
+// Inverse of timeFieldsToIso(), also currently an identity remap.
 export const isoTimeFieldsToCal = bindArgs(
-  remapProps<IsoTimeFields, TimeFields>,
-  isoTimeFieldNamesAsc,
+  remapProps<TimeFields, TimeFields>,
+  timeFieldNamesAsc,
   timeFieldNamesAsc,
 )
 
 export function resolveTimeFields(
   fields: Partial<TimeFields>,
   overflow?: Overflow,
-): IsoTimeFields {
+): TimeFields {
   // Start from Temporal's default time bag so partial inputs behave like full
   // records before overflow handling clamps or rejects out-of-range values.
   return constrainIsoTimeFields(

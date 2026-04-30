@@ -41,7 +41,10 @@ import {
   createDurationSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
-import { FixedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneMath'
+import {
+  FixedCalendarDateTimeFields,
+  zonedEpochSlotsToIso,
+} from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
 import {
@@ -304,6 +307,6 @@ function adaptDateMethods(methods: any) {
   }, methods)
 }
 
-function slotsToIso(slots: ZonedDateTimeSlots): FixedIsoFields {
+function slotsToIso(slots: ZonedDateTimeSlots): FixedCalendarDateTimeFields {
   return zonedEpochSlotsToIso(slots)
 }

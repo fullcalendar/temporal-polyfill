@@ -1,7 +1,8 @@
 import { BigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
+import { timeFieldDefaults } from './fieldNames'
+import { TimeFields } from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
-import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { OffsetDisambig } from './optionsModel'
 import {
   PlainDateSlots,
@@ -23,14 +24,14 @@ import {
 
 export function zonedDateTimeWithPlainTime(
   zonedDateTimeSlots: ZonedDateTimeSlots,
-  plainTimeSlots: IsoTimeFields | undefined,
+  plainTimeSlots: TimeFields | undefined,
 ): ZonedDateTimeSlots {
   const timeZoneId = zonedDateTimeSlots.timeZone
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const isoFields = {
     ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl),
-    ...(plainTimeSlots || isoTimeFieldDefaults),
+    ...(plainTimeSlots || timeFieldDefaults),
   }
 
   let epochNano: BigNano
@@ -84,7 +85,7 @@ export function zonedDateTimeWithPlainDate(
 
 export function plainDateTimeWithPlainTime(
   plainDateTimeSlots: PlainDateTimeSlots,
-  plainTimeSlots: IsoTimeFields = isoTimeFieldDefaults,
+  plainTimeSlots: TimeFields = timeFieldDefaults,
 ): PlainDateTimeSlots {
   return createPlainDateTimeSlots(
     checkIsoDateTimeInBounds({

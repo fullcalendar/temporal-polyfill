@@ -10,7 +10,6 @@ import { isoTimeFieldsToCal } from '../internal/fieldConvert'
 import { TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { mergePlainTimeFields } from '../internal/merge'
@@ -38,42 +37,22 @@ export type Record = {
    */
   branding: typeof PlainTimeBranding
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoHour: number
+  readonly hour: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMinute: number
+  readonly minute: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoSecond: number
+  readonly second: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMillisecond: number
+  readonly millisecond: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMicrosecond: number
+  readonly microsecond: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoNanosecond: number
+  readonly nanosecond: number
 }
 
 export type Fields = TimeFields
 export type FromFields = Partial<TimeFields>
 export type WithFields = Partial<TimeFields>
-export type ISOFields = IsoTimeFields
-
 export type AssignmentOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
@@ -87,12 +66,12 @@ export type ToZonedDateTimeOptions = {
 // -----------------------------------------------------------------------------
 
 export const create = constructPlainTimeSlots as (
-  isoHour?: number,
-  isoMinute?: number,
-  isoSecond?: number,
-  isoMillisecond?: number,
-  isoMicrosecond?: number,
-  isoNanosecond?: number,
+  hour?: number,
+  minute?: number,
+  second?: number,
+  millisecond?: number,
+  microsecond?: number,
+  nanosecond?: number,
 ) => Record
 
 export const fromFields = refinePlainTimeObjectLike as (
@@ -112,8 +91,6 @@ export function isInstance(record: any): record is Record {
 export const getFields = memoize(isoTimeFieldsToCal, WeakMap) as (
   record: Record,
 ) => Fields
-
-export const getISOFields = identity as (record: Record) => ISOFields
 
 // Setters
 // -----------------------------------------------------------------------------

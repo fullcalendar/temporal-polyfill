@@ -10,7 +10,6 @@ import {
   yearMonthConfig,
 } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoDateFields } from '../internal/isoFields'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
 import { mergePlainYearMonthFields } from '../internal/merge'
@@ -22,7 +21,7 @@ import {
 } from '../internal/optionsModel'
 import { PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -47,26 +46,16 @@ export type Record = {
    */
   readonly calendar: string
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoYear: number
+  readonly year: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMonth: number
+  readonly month: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoDay: number
+  readonly day: number
 }
 
 export type Fields = YearMonthFields
 export type FromFields = YearMonthLikeObject
 export type WithFields = Partial<YearMonthFields>
-export type ISOFields = IsoDateFields
 export type ToPlainDateFields = { day: number }
 
 export type AssignmentOptions = OverflowOptions
@@ -107,8 +96,6 @@ export function isInstance(record: any): record is Record {
 export const getFields = memoize(computeYearMonthFields, WeakMap) as (
   record: Record,
 ) => Fields
-
-export const getISOFields = identity as (record: Record) => ISOFields
 
 export const calendarId = getCalendarId as (record: Record) => string
 

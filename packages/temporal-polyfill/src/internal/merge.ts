@@ -27,7 +27,6 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { japaneseCalendarId } from './intlCalendarConfig'
-import { IsoTimeFields } from './isoFields'
 import { constrainIsoTimeFields } from './isoMath'
 import {
   refineOverflowOptions,
@@ -319,7 +318,7 @@ function mergePlainTimeBag(
   initialFields: TimeFields,
   modFields: Partial<TimeFields>,
   options: OverflowOptions | undefined,
-): IsoTimeFields {
+): TimeFields {
   const origFields = pluckProps(timeFieldNamesAlpha, initialFields)
   const newFields = readAndRefineBagFields(modFields, timeFieldNamesAlpha)
 

@@ -86,6 +86,8 @@ export interface CalendarDateFields {
   year: number
 }
 
+export type CalendarDateTimeFields = CalendarDateFields & TimeFields
+
 export interface CalendarEraFields {
   era?: string
   eraYear?: number

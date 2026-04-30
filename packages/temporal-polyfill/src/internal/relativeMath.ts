@@ -1,11 +1,8 @@
 import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
-import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  isoTimeFieldDefaults,
-} from './isoFields'
+import { timeFieldDefaults } from './fieldNames'
+import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
@@ -22,12 +19,15 @@ import { Callable, bindArgs } from './utils'
 export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 
 // the relative-to "origin", returned from bag refining
-export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
+export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
 // A date/time marker that can be moved away from the relative-to origin and
 // then compared back against it. Zoned markers keep epoch nanoseconds because
 // their day lengths are time-zone dependent.
-export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
+export type Marker =
+  | CalendarDateFields
+  | CalendarDateTimeFields
+  | ZonedEpochSlots
 
 export type RelativeOrigin = [marker: Marker, timeZoneImpl?: TimeZoneImpl]
 
@@ -39,9 +39,9 @@ export function createRelativeOrigin(
   }
 
   return [
-    // convert IsoDateFields->IsoDateTimeFields
+    // convert CalendarDateFields->CalendarDateTimeFields
     // because expected in createMoveMarker/createDiffMarkers
-    { ...relativeToSlots, ...isoTimeFieldDefaults },
+    { ...relativeToSlots, ...timeFieldDefaults },
   ]
 }
 

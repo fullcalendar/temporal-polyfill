@@ -6,6 +6,7 @@ import {
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
+import { timeFieldDefaults } from './fieldNames'
 import {
   dateFieldNamesAlpha,
   dateFieldNamesAlphaWithEra,
@@ -31,7 +32,6 @@ import {
   TimeFields,
   YearMonthFields,
 } from './fieldTypes'
-import { isoTimeFieldDefaults } from './isoFields'
 import { isoEpochFirstLeapYear } from './isoMath'
 import {
   refineOverflowOptions,
@@ -109,7 +109,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   }
 
   const isoDateInternals = createPlainDateFromFields(calendarId, fields as any)
-  return { ...isoDateInternals, ...isoTimeFieldDefaults }
+  return { ...isoDateInternals, ...timeFieldDefaults }
 }
 
 export function refineZonedDateTimeObjectLike(

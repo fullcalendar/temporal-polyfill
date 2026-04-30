@@ -14,7 +14,6 @@ import {
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
 import { timeFieldNamesAsc } from '../internal/fieldNames'
-import { isoTimeFieldNamesAsc } from '../internal/isoFields'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
@@ -96,7 +95,7 @@ export const durationGetters = mapPropNames(
 
 export const timeGetters = mapPropNames((_name, i) => {
   return function (this: any, slots: any) {
-    return slots[isoTimeFieldNamesAsc[i]]
+    return slots[timeFieldNamesAsc[i]]
   }
 }, timeFieldNamesAsc)
 

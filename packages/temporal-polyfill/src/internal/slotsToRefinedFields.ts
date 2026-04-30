@@ -51,12 +51,12 @@ export function computeDateTimeEssentials(slots: AbstractDateTimeSlots) {
     ...computeDateEssentials(slots),
     // Keep the public Temporal field names here. The slot names are ISO-prefixed
     // because they represent storage, but .with() needs calendar-style fields.
-    hour: slots.isoHour,
-    minute: slots.isoMinute,
-    second: slots.isoSecond,
-    millisecond: slots.isoMillisecond,
-    microsecond: slots.isoMicrosecond,
-    nanosecond: slots.isoNanosecond,
+    hour: slots.hour,
+    minute: slots.minute,
+    second: slots.second,
+    millisecond: slots.millisecond,
+    microsecond: slots.microsecond,
+    nanosecond: slots.nanosecond,
   }
 }
 

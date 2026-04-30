@@ -1,7 +1,11 @@
 import * as errorMessages from './errorMessages'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
 import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -438,30 +442,30 @@ export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = [
   getForcedCommonTimeZone,
 ]
 
-export const dateTimeConfig: ClassFormatConfig<IsoDateTimeFields> = [
+export const dateTimeConfig: ClassFormatConfig<CalendarDateTimeFields> = [
   transformDateTimeOptions,
-  isoToEpochMilli as (isoFields: IsoDateTimeFields) => number,
+  isoToEpochMilli as (isoFields: CalendarDateTimeFields) => number,
 ]
 
-export const dateConfig: ClassFormatConfig<IsoDateFields> = [
+export const dateConfig: ClassFormatConfig<CalendarDateFields> = [
   transformDateOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
 ]
 
-export const timeConfig: ClassFormatConfig<IsoTimeFields> = [
+export const timeConfig: ClassFormatConfig<TimeFields> = [
   transformTimeOptions,
-  (isoFields: IsoTimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
+  (isoFields: TimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
 ]
 
-export const yearMonthConfig: ClassFormatConfig<IsoDateFields> = [
+export const yearMonthConfig: ClassFormatConfig<CalendarDateFields> = [
   transformYearMonthOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
   nonBuggyIsoResolve, // strictCalendarChecks
 ]
 
-export const monthDayConfig: ClassFormatConfig<IsoDateFields> = [
+export const monthDayConfig: ClassFormatConfig<CalendarDateFields> = [
   transformMonthDayOptions,
-  isoToEpochMilli as (isoFields: IsoDateFields) => number,
+  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
   nonBuggyIsoResolve, // strictCalendarChecks
 ]
 

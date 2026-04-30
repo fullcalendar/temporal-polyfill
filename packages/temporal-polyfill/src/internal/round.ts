@@ -23,7 +23,8 @@ import {
   nanoToDurationTimeFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { IsoDateTimeFields, IsoTimeFields, clearIsoFields } from './isoFields'
+import { calendarDateTimeFieldNamesAsc } from './fieldNames'
+import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
@@ -72,7 +73,7 @@ import {
   nanoInUtcDay,
   unitNanoMap,
 } from './units'
-import { divModFloor, divTrunc } from './utils'
+import { divModFloor, divTrunc, zeroOutProps } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -214,7 +215,7 @@ export function computeZonedStartOfDay(
 For year/month/week/day only
 */
 export function alignZonedEpoch(
-  computeAlignment: (slots: AbstractDateTimeSlots) => IsoDateTimeFields,
+  computeAlignment: (slots: AbstractDateTimeSlots) => CalendarDateTimeFields,
   timeZoneImpl: TimeZoneImpl,
   slots: ZonedDateTimeSlots,
 ): BigNano {
@@ -255,11 +256,11 @@ export function roundZonedEpochToInterval(
 // TODO: combine with below?
 
 function roundDateTime(
-  isoFields: IsoDateTimeFields,
+  isoFields: CalendarDateTimeFields,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-): IsoDateTimeFields {
+): CalendarDateTimeFields {
   return roundDateTimeToNano(
     isoFields,
     computeNanoInc(smallestUnit, roundingInc),
@@ -268,10 +269,10 @@ function roundDateTime(
 }
 
 export function roundDateTimeToNano(
-  isoFields: IsoDateTimeFields,
+  isoFields: CalendarDateTimeFields,
   nanoInc: number,
   roundingMode: RoundingMode,
-): IsoDateTimeFields {
+): CalendarDateTimeFields {
   const [roundedIsoFields, dayDelta] = roundTimeToNano(
     isoFields,
     nanoInc,
@@ -285,11 +286,11 @@ export function roundDateTimeToNano(
 }
 
 function roundTime(
-  isoFields: IsoTimeFields,
+  isoFields: TimeFields,
   smallestUnit: TimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
-): IsoTimeFields {
+): TimeFields {
   return roundTimeToNano(
     isoFields,
     computeNanoInc(smallestUnit, roundingInc),
@@ -298,10 +299,10 @@ function roundTime(
 }
 
 export function roundTimeToNano(
-  isoFields: IsoTimeFields,
+  isoFields: TimeFields,
   nanoInc: number,
   roundingMode: RoundingMode,
-): [IsoTimeFields, number] {
+): [TimeFields, number] {
   return nanoToIsoTimeAndDay(
     roundByInc(isoTimeFieldsToNano(isoFields), nanoInc, roundingMode),
   )
@@ -325,10 +326,13 @@ export function computeNanoInc(
 // Interval / Floor Funcs
 // -----------------------------------------------------------------------------
 
-export type IsoDateTimeInterval = [IsoDateTimeFields, IsoDateTimeFields]
+export type IsoDateTimeInterval = [
+  CalendarDateTimeFields,
+  CalendarDateTimeFields,
+]
 
 export function computeDayInterval(
-  isoFields: IsoDateTimeFields,
+  isoFields: CalendarDateTimeFields,
 ): IsoDateTimeInterval {
   const isoFields0 = computeDayFloor(isoFields)
   const isoFields1 = moveByDays(isoFields0, 1)
@@ -336,9 +340,13 @@ export function computeDayInterval(
 }
 
 export function computeDayFloor(
-  isoFields: IsoDateTimeFields,
-): IsoDateTimeFields {
-  return clearIsoFields(Unit.Day, isoFields)
+  isoFields: CalendarDateTimeFields,
+): CalendarDateTimeFields {
+  return zeroOutProps(
+    calendarDateTimeFieldNamesAsc,
+    Unit.Day,
+    isoFields as unknown as Record<string, number>,
+  ) as unknown as CalendarDateTimeFields
 }
 
 // Duration

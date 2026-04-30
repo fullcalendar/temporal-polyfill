@@ -1,7 +1,7 @@
 import { expect } from 'vitest'
 import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
-import { IsoTimeFields } from '../internal/isoFields'
+import { TimeFields } from '../internal/fieldTypes'
 import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
 import { isoToEpochNano } from '../internal/timeMath'
 import * as DurationFns from './duration'
@@ -35,62 +35,62 @@ export function getCurrentZonedDateTime(
 // All props should be alphabetized because they serve as a base for
 // constructing comparable slots, retaining order.
 
-const isoDateDefaults = {
-  isoDay: 0,
-  isoMonth: 0,
-  isoYear: 0,
+const dateDefaults = {
+  day: 0,
+  month: 0,
+  year: 0,
 }
 
-const isoTimeDefaults = {
-  isoHour: 0,
-  isoMicrosecond: 0,
-  isoMillisecond: 0,
-  isoMinute: 0,
-  isoNanosecond: 0,
-  isoSecond: 0,
+const timeDefaults = {
+  hour: 0,
+  microsecond: 0,
+  millisecond: 0,
+  minute: 0,
+  nanosecond: 0,
+  second: 0,
 }
 
-const isoDateTimeDefaults = {
-  isoDay: 0,
-  isoHour: 0,
-  isoMicrosecond: 0,
-  isoMillisecond: 0,
-  isoMinute: 0,
-  isoMonth: 0,
-  isoNanosecond: 0,
-  isoSecond: 0,
-  isoYear: 0,
+const dateTimeDefaults = {
+  day: 0,
+  hour: 0,
+  microsecond: 0,
+  millisecond: 0,
+  minute: 0,
+  month: 0,
+  nanosecond: 0,
+  second: 0,
+  year: 0,
 }
 
 const plainDateDefaults = {
   branding: 'PlainDate',
   calendar: 'iso8601',
-  ...isoDateDefaults,
+  ...dateDefaults,
 }
 
 const plainYearMonthDefaults = {
   branding: 'PlainYearMonth',
   calendar: 'iso8601',
-  ...isoDateDefaults,
-  isoDay: 1,
+  ...dateDefaults,
+  day: 1,
 }
 
 const plainMonthDayDefaults = {
   branding: 'PlainMonthDay',
   calendar: 'iso8601',
-  ...isoDateDefaults,
-  isoYear: 1972,
+  ...dateDefaults,
+  year: 1972,
 }
 
 const plainDateTimeDefaults = {
   branding: 'PlainDateTime',
   calendar: 'iso8601',
-  ...isoDateTimeDefaults,
+  ...dateTimeDefaults,
 }
 
 const plainTimeDefaults = {
   branding: 'PlainTime',
-  ...isoTimeDefaults,
+  ...timeDefaults,
 }
 
 const zonedDateTimeDefaults = {
@@ -180,7 +180,7 @@ export function expectZonedDateTimeEquals(
 
 export function expectPlainTimeEquals(
   pt: PlainTimeFns.Record,
-  slots: Partial<IsoTimeFields>,
+  slots: Partial<TimeFields>,
 ): void {
   expectPropsEqualStrict(pt, {
     ...plainTimeDefaults,
@@ -279,8 +279,8 @@ export function expectPlainTimesSimilar(
   expect(pt0.branding).toBe('PlainTime')
   expect(pt1.branding).toBe('PlainTime')
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt0 })!),
-    bigNanoToBigInt(isoToEpochNano({ ...isoDateDefaults, ...pt1 })!),
+    bigNanoToBigInt(isoToEpochNano({ ...dateDefaults, ...pt0 })!),
+    bigNanoToBigInt(isoToEpochNano({ ...dateDefaults, ...pt1 })!),
   )
 }
 

@@ -1,4 +1,8 @@
-import type { TimeFields } from './fieldTypes'
+import type {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
 import { mapPropNamesToConstant, sortStrings } from './utils'
 
@@ -37,6 +41,23 @@ export const yearFieldNamesWithEra = [...eraYearFieldNames, ...yearFieldNames]
 export const monthCodeFieldNames = ['monthCode']
 export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
 export const dayFieldNames = ['day']
+
+export const calendarDateFieldNamesAsc = [
+  ...dayFieldNames,
+  'month',
+  ...yearFieldNames,
+] as (keyof CalendarDateFields)[]
+export const calendarDateTimeFieldNamesAsc = [
+  ...timeFieldNamesAsc,
+  ...calendarDateFieldNamesAsc,
+] as (keyof CalendarDateTimeFields)[]
+
+export const calendarDateFieldNamesAlpha = sortStrings(
+  calendarDateFieldNamesAsc,
+)
+export const calendarDateTimeFieldNamesAlpha = sortStrings(
+  calendarDateTimeFieldNamesAsc,
+)
 
 // month/monthCode/year
 export const yearMonthFieldNames = [...monthFieldNames, ...yearFieldNames]

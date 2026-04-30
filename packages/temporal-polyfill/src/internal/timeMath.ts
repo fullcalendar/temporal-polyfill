@@ -8,13 +8,15 @@ import {
 } from './bigNano'
 import * as errorMessages from './errorMessages'
 import {
-  IsoDateFields,
-  IsoDateTimeFields,
-  IsoTimeFields,
-  isoDateTimeFieldNamesAsc,
-  isoTimeFieldDefaults,
-  isoTimeFieldNamesAsc,
-} from './isoFields'
+  calendarDateTimeFieldNamesAsc,
+  timeFieldDefaults,
+  timeFieldNamesAsc,
+} from './fieldNames'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
 import { Overflow } from './optionsModel'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
@@ -61,33 +63,29 @@ const epochNanoMax: BigNano = [maxDays, 0]
 const epochNanoMin: BigNano = [-maxDays, 0]
 const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 const isoYearMin = -271821 // optimization. isoYear at epochNanoMin
-const isoNoonFieldDefaults: IsoTimeFields = {
-  ...isoTimeFieldDefaults,
-  isoHour: 12,
+const isoNoonFieldDefaults: TimeFields = {
+  ...timeFieldDefaults,
+  hour: 12,
 }
 
-export function checkIsoYearMonthInBounds<T extends IsoDateFields>(
+export function checkIsoYearMonthInBounds<T extends CalendarDateFields>(
   isoFields: T,
 ): T {
   // TODO: just authenticate based on hardcoded min/max isoYear/Month/Day. for other types too
-  clampProp(
-    isoFields,
-    'isoYear' as any,
-    isoYearMin,
-    isoYearMax,
-    Overflow.Reject,
-  )
+  clampProp(isoFields, 'year' as any, isoYearMin, isoYearMax, Overflow.Reject)
 
-  if (isoFields.isoYear === isoYearMin) {
-    clampProp(isoFields, 'isoMonth' as any, 4, 12, Overflow.Reject)
-  } else if (isoFields.isoYear === isoYearMax) {
-    clampProp(isoFields, 'isoMonth' as any, 1, 9, Overflow.Reject)
+  if (isoFields.year === isoYearMin) {
+    clampProp(isoFields, 'month' as any, 4, 12, Overflow.Reject)
+  } else if (isoFields.year === isoYearMax) {
+    clampProp(isoFields, 'month' as any, 1, 9, Overflow.Reject)
   }
 
   return isoFields
 }
 
-export function checkIsoDateInBounds<T extends IsoDateFields>(isoFields: T): T {
+export function checkIsoDateInBounds<T extends CalendarDateFields>(
+  isoFields: T,
+): T {
   // PlainDate bounds are date-level bounds, not midnight-instant bounds.
   // Noon is inside the valid PlainDateTime range for both edge dates:
   // -271821-04-19 and +275760-09-13.
@@ -103,12 +101,12 @@ Used on isoYear/Month/Date before doing zoned operations
 See CheckISODaysRange in spec
 TEMPORARY
 */
-export function checkIsoDateInBoundsStrict<T extends IsoDateFields>(
+export function checkIsoDateInBoundsStrict<T extends CalendarDateFields>(
   isoFields: T,
 ): T {
   const bigNano = isoToEpochNano({
     ...isoFields,
-    ...isoTimeFieldDefaults,
+    ...timeFieldDefaults,
   })
 
   // TODO: better way to do this besides hardcoding limit
@@ -119,26 +117,26 @@ export function checkIsoDateInBoundsStrict<T extends IsoDateFields>(
   return isoFields
 }
 
-export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(
+export function checkIsoDateTimeInBounds<T extends CalendarDateTimeFields>(
   isoFields: T,
 ): T {
-  const isoYear = clampProp(
-    isoFields as IsoDateFields,
-    'isoYear',
+  const year = clampProp(
+    isoFields as CalendarDateFields,
+    'year',
     isoYearMin,
     isoYearMax,
     Overflow.Reject,
   )
   // this seems bad because this 'nudge' already happens in isoToLegacyDate
-  const nudge = isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+  const nudge = year === isoYearMin ? 1 : year === isoYearMax ? -1 : 0
 
   if (nudge) {
     // needs to be within 23:59:59.999 of min/max epochNano
     checkEpochNanoInBounds(
       isoToEpochNano({
         ...isoFields,
-        isoDay: isoFields.isoDay + nudge,
-        isoNanosecond: isoFields.isoNanosecond - nudge,
+        day: isoFields.day + nudge,
+        nanosecond: isoFields.nanosecond - nudge,
       }),
     )
   }
@@ -158,17 +156,17 @@ export function checkEpochNanoInBounds(
 // Field <-> Nanosecond Conversion
 // -----------------------------------------------------------------------------
 
-export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
-  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, isoTimeFieldNamesAsc)[1]
+export function isoTimeFieldsToNano(isoTimeFields: TimeFields): number {
+  return givenFieldsToBigNano(isoTimeFields, Unit.Hour, timeFieldNamesAsc)[1]
 }
 
-export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
+export function nanoToIsoTimeAndDay(nano: number): [TimeFields, number] {
   const [dayDelta, timeNano] = divModFloor(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(
     timeNano,
     Unit.Hour,
-    isoTimeFieldNamesAsc,
-  ) as IsoTimeFields
+    timeFieldNamesAsc,
+  ) as TimeFields
 
   return [isoTimeFields, dayDelta]
 }
@@ -207,23 +205,23 @@ export function epochMilliToNano(epochMilli: number): BigNano {
 // ISO Fields -> Epoch
 
 export function isoToEpochSec(
-  isoDateTimeFields: IsoDateTimeFields,
+  isoDateTimeFields: CalendarDateTimeFields,
 ): [number, number] {
   // assume valid
   // TODO: nicer way to splice this (while still excluding subsec)
   const epochSec = isoArgsToEpochSec(
-    isoDateTimeFields.isoYear,
-    isoDateTimeFields.isoMonth,
-    isoDateTimeFields.isoDay,
-    isoDateTimeFields.isoHour,
-    isoDateTimeFields.isoMinute,
-    isoDateTimeFields.isoSecond,
+    isoDateTimeFields.year,
+    isoDateTimeFields.month,
+    isoDateTimeFields.day,
+    isoDateTimeFields.hour,
+    isoDateTimeFields.minute,
+    isoDateTimeFields.second,
   )
 
   const subsecNano =
-    isoDateTimeFields.isoMillisecond * nanoInMilli +
-    isoDateTimeFields.isoMicrosecond * nanoInMicro +
-    isoDateTimeFields.isoNanosecond
+    isoDateTimeFields.millisecond * nanoInMilli +
+    isoDateTimeFields.microsecond * nanoInMicro +
+    isoDateTimeFields.nanosecond
 
   return [epochSec, subsecNano]
 }
@@ -232,16 +230,16 @@ export function isoToEpochSec(
 If out-of-bounds, returns undefined
 */
 export function isoToEpochMilli(
-  isoDateTimeFields: IsoDateTimeFields | IsoDateFields,
+  isoDateTimeFields: CalendarDateTimeFields | CalendarDateFields,
 ): number | undefined {
   return isoArgsToEpochMilli(
-    isoDateTimeFields.isoYear,
-    isoDateTimeFields.isoMonth,
-    isoDateTimeFields.isoDay,
-    (isoDateTimeFields as IsoDateTimeFields).isoHour,
-    (isoDateTimeFields as IsoDateTimeFields).isoMinute,
-    (isoDateTimeFields as IsoDateTimeFields).isoSecond,
-    (isoDateTimeFields as IsoDateTimeFields).isoMillisecond,
+    isoDateTimeFields.year,
+    isoDateTimeFields.month,
+    isoDateTimeFields.day,
+    (isoDateTimeFields as CalendarDateTimeFields).hour,
+    (isoDateTimeFields as CalendarDateTimeFields).minute,
+    (isoDateTimeFields as CalendarDateTimeFields).second,
+    (isoDateTimeFields as CalendarDateTimeFields).millisecond,
   )
 }
 
@@ -250,7 +248,7 @@ For converting to fake epochNano values for math
 If out-of-bounds, returns undefined
 */
 export function isoToEpochNano(
-  isoFields: IsoDateTimeFields | IsoDateFields,
+  isoFields: CalendarDateTimeFields | CalendarDateFields,
 ): BigNano | undefined {
   const epochMilli = isoToEpochMilli(isoFields)
 
@@ -259,8 +257,8 @@ export function isoToEpochNano(
 
     const timeNano =
       milliRemainder * nanoInMilli +
-      ((isoFields as IsoDateTimeFields).isoMicrosecond || 0) * nanoInMicro +
-      ((isoFields as IsoDateTimeFields).isoNanosecond || 0)
+      ((isoFields as CalendarDateTimeFields).microsecond || 0) * nanoInMicro +
+      ((isoFields as CalendarDateTimeFields).nanosecond || 0)
 
     return [days, timeNano]
   }
@@ -272,7 +270,7 @@ CALLERS DO NOT NEED TO CHECK in-bounds!
 (Result should be considered a finalized "Instant")
 */
 export function isoToEpochNanoWithOffset(
-  isoFields: IsoDateTimeFields,
+  isoFields: CalendarDateTimeFields,
   offsetNano: number,
 ): BigNano {
   const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(
@@ -280,7 +278,7 @@ export function isoToEpochNanoWithOffset(
   )
   const epochNano = isoToEpochNano({
     ...isoFields,
-    isoDay: isoFields.isoDay + dayDelta,
+    day: isoFields.day + dayDelta,
     ...newIsoTimeFields,
   })
   return checkEpochNanoInBounds(epochNano)
@@ -289,12 +287,12 @@ export function isoToEpochNanoWithOffset(
 // ISO Arguments -> Epoch
 
 export type IsoTuple = [
-  isoYear: number,
-  isoMonth?: number,
-  isoDay?: number,
-  isoHour?: number,
-  isoMinute?: number,
-  isoSecond?: number,
+  year: number,
+  month?: number,
+  day?: number,
+  hour?: number,
+  minute?: number,
+  second?: number,
   isoMilli?: number,
 ]
 
@@ -325,24 +323,23 @@ export function diffEpochMilliDays(
 }
 
 export function isoToLegacyDate(
-  isoYear: number,
-  isoMonth = 1,
-  isoDay = 1,
-  isoHour = 0,
-  isoMinute = 0,
+  year: number,
+  month = 1,
+  day = 1,
+  hour = 0,
+  minute = 0,
   isoSec = 0,
   isoMilli = 0,
 ): [Date, number] {
   // allows this function to accept values beyond valid Instants
   // (PlainDateTime allows values within 24hrs)
-  const daysNudged =
-    isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+  const daysNudged = year === isoYearMin ? 1 : year === isoYearMax ? -1 : 0
 
   // Note: Date.UTC() interprets one and two-digit years as being in the
   // 20th century, so don't use it
   const legacyDate = new Date() // should throw out-of-range error here?
-  legacyDate.setUTCHours(isoHour, isoMinute, isoSec, isoMilli)
-  legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay + daysNudged)
+  legacyDate.setUTCHours(hour, minute, isoSec, isoMilli)
+  legacyDate.setUTCFullYear(year, month - 1, day + daysNudged)
 
   return [legacyDate, daysNudged]
 }
@@ -352,7 +349,7 @@ export function isoToLegacyDate(
 export function epochNanoToIso(
   epochNano: BigNano,
   offsetNano: number,
-): IsoDateTimeFields {
+): CalendarDateTimeFields {
   let [days, timeNano] = moveBigNano(epochNano, offsetNano)
 
   // convert to start-of-day and time-of-day
@@ -363,11 +360,11 @@ export function epochNanoToIso(
 
   const [timeMilli, nanoRemainder] = divModFloor(timeNano, nanoInMilli)
   const microParts = divModFloor(nanoRemainder, nanoInMicro)
-  const isoMicrosecond = microParts[0]
-  const isoNanosecond = microParts[1]
+  const microsecond = microParts[0]
+  const nanosecond = microParts[1]
   const epochMilli = days * milliInDay + timeMilli
 
-  return epochMilliToIso(epochMilli, isoMicrosecond, isoNanosecond)
+  return epochMilliToIso(epochMilli, microsecond, nanosecond)
 }
 
 /*
@@ -375,9 +372,9 @@ Accommodates epochMillis that are slightly out-of-range
 */
 export function epochMilliToIso(
   epochMilli: number,
-  isoMicrosecond = 0,
-  isoNanosecond = 0,
-): IsoDateTimeFields {
+  microsecond = 0,
+  nanosecond = 0,
+): CalendarDateTimeFields {
   const daysOver = // beyond min/max
     Math.ceil(Math.max(0, Math.abs(epochMilli) - maxMilli) / milliInDay) *
     Math.sign(epochMilli)
@@ -385,7 +382,7 @@ export function epochMilliToIso(
   // create a date that's forced within bounds
   const legacyDate = new Date(epochMilli - daysOver * milliInDay)
 
-  return zipProps(isoDateTimeFieldNamesAsc as any, [
+  return zipProps(calendarDateTimeFieldNamesAsc as any, [
     legacyDate.getUTCFullYear(),
     legacyDate.getUTCMonth() + 1,
     legacyDate.getUTCDate() + daysOver, // push back out-of-bounds
@@ -393,7 +390,7 @@ export function epochMilliToIso(
     legacyDate.getUTCMinutes(),
     legacyDate.getUTCSeconds(),
     legacyDate.getUTCMilliseconds(),
-    isoMicrosecond,
-    isoNanosecond,
+    microsecond,
+    nanosecond,
   ])
 }

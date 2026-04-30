@@ -12,7 +12,7 @@ import {
   prepareZonedEpochDiff,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
-import { IsoDateFields } from '../internal/isoFields'
+import { CalendarDateFields } from '../internal/fieldTypes'
 import { moveDateTime, moveZonedEpochs } from '../internal/move'
 import { RoundingMathOptions, RoundingModeName } from '../internal/optionsModel'
 import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
@@ -75,7 +75,7 @@ function diffZonedLargeUnits(
     extractEpochNano as MarkerToEpochNano,
     bindArgs(prepareZonedEpochDiff, timeZoneImpl) as MarkersToIsoFields,
     bindArgs(moveZonedEpochs, timeZoneImpl, calendarId) as MoveMarker,
-    (f0: IsoDateFields, f1: IsoDateFields) =>
+    (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendarId, f0, f1, unit),
     unit,
     record0,
@@ -96,7 +96,7 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
     isoToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
     bindArgs(moveDateTime, calendarId) as MoveMarker,
-    (f0: IsoDateFields, f1: IsoDateFields) =>
+    (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendarId, f0, f1, unit),
     unit,
     record0,
@@ -112,12 +112,12 @@ type MarkersToIsoFields = (
   m0: Marker,
   m1: Marker,
   sign: NumberSign,
-) => [IsoDateFields, IsoDateFields, ...any[]]
+) => [CalendarDateFields, CalendarDateFields, ...any[]]
 
 function identityMarkersToIsoFields(
-  m0: IsoDateFields,
-  m1: IsoDateFields,
-): [IsoDateFields, IsoDateFields] {
+  m0: CalendarDateFields,
+  m1: CalendarDateFields,
+): [CalendarDateFields, CalendarDateFields] {
   return [m0, m1]
 }
 
@@ -125,7 +125,10 @@ function diffDateUnits(
   markerToEpochNano: MarkerToEpochNano,
   markersToIsoFields: MarkersToIsoFields,
   moveMarker: MoveMarker,
-  diffIsoFields: (f0: IsoDateFields, f1: IsoDateFields) => DurationFields,
+  diffIsoFields: (
+    f0: CalendarDateFields,
+    f1: CalendarDateFields,
+  ) => DurationFields,
   unit: Unit, // guaranteed Y/M/W
   marker0: Marker,
   marker1: Marker,

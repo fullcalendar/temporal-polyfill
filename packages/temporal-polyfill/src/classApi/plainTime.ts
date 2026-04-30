@@ -5,7 +5,6 @@ import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
 import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
 import { mergePlainTimeFields } from '../internal/merge'
@@ -158,6 +157,6 @@ export function toPlainTimeSlots(
 
 export function optionalToPlainTimeFields(
   timeArg: PlainTimeArg | undefined,
-): IsoTimeFields | undefined {
+): TimeFields | undefined {
   return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
 }

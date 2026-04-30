@@ -9,10 +9,10 @@ import {
 } from '../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes } from '../internal/diff'
+import { timeFieldDefaults } from '../internal/fieldNames'
 import { DateLikeObject, DateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { isoTimeFieldDefaults } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { mergePlainDateTimeFields } from '../internal/merge'
@@ -237,7 +237,7 @@ export function toPlainDateTimeSlots(
         refineOverflowOptions(options) // parse unused options
         return createPlainDateTimeSlots({
           ...(slots as PlainDateSlots),
-          ...isoTimeFieldDefaults,
+          ...timeFieldDefaults,
         })
 
       case ZonedDateTimeBranding:

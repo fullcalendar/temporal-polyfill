@@ -9,11 +9,11 @@ import {
 } from '../internal/convert'
 import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates } from '../internal/diff'
+import { CalendarDateTimeFields } from '../internal/fieldTypes'
 import { DateLikeObject } from '../internal/fieldTypes'
 import { DateFields } from '../internal/fieldTypes'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoDateFields, IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
@@ -98,27 +98,16 @@ export type Record = {
    */
   readonly calendar: string
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoYear: number
+  readonly year: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoMonth: number
+  readonly month: number
 
-  /**
-   * @deprecated Use the getISOFields() function instead.
-   */
-  readonly isoDay: number
+  readonly day: number
 }
 
 export type Fields = DateFields
 export type FromFields = DateLikeObject
 export type WithFields = Partial<DateFields>
-export type ISOFields = IsoDateFields
-
 export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<DateUnitName>
@@ -161,8 +150,6 @@ export function isInstance(record: any): record is Record {
 export const getFields = memoize(computeDateFields, WeakMap) as (
   record: Record,
 ) => Fields
-
-export const getISOFields = identity as (record: Record) => ISOFields
 
 export const calendarId = getCalendarId as (record: Record) => string
 
@@ -383,7 +370,7 @@ export function addYears(
   years: number,
   options?: OverflowOptions,
 ): Record {
-  // No need for createPlainDateTimeSlots because moveByYears guarantees IsoDateFields
+  // No need for createPlainDateTimeSlots because moveByYears guarantees CalendarDateFields
   return checkIsoDateInBounds(moveByYears(record, years, options))
 }
 
@@ -392,7 +379,7 @@ export function addMonths(
   months: number,
   options?: OverflowOptions,
 ): Record {
-  // No need for createPlainDateTimeSlots because moveByMonths guarantees IsoDateFields
+  // No need for createPlainDateTimeSlots because moveByMonths guarantees CalendarDateFields
   return checkIsoDateInBounds(moveByMonths(record, months, options))
 }
 
@@ -499,7 +486,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: AbstractDateSlots) => IsoDateTimeFields,
+  computeAlignment: (slots: AbstractDateSlots) => CalendarDateTimeFields,
   dayDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {

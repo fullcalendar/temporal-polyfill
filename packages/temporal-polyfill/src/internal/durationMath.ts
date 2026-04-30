@@ -8,7 +8,7 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import { IsoDateTimeFields } from './isoFields'
+import { CalendarDateTimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
 import { DurationRoundingOptions, RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
@@ -206,8 +206,8 @@ export function roundDuration<RA>(
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
   if (!isZonedEpochSlots(relativeToSlots)) {
-    checkIsoDateTimeInBounds(marker as IsoDateTimeFields)
-    checkIsoDateTimeInBounds(endMarker as IsoDateTimeFields)
+    checkIsoDateTimeInBounds(marker as CalendarDateTimeFields)
+    checkIsoDateTimeInBounds(endMarker as CalendarDateTimeFields)
   }
 
   let balancedDuration = diffMarkers(marker, endMarker, largestUnit)

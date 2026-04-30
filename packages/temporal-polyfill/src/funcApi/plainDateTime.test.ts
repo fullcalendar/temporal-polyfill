@@ -30,12 +30,12 @@ describe('create', () => {
     )
     expectPlainDateTimeEquals(pdt, {
       calendar: 'hebrew',
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-      isoHour: 12,
-      isoMinute: 30,
-      isoNanosecond: 1,
+      year: 2024,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 30,
+      nanosecond: 1,
     })
   })
 })
@@ -61,11 +61,11 @@ describe('fromString', () => {
     const pd = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
     expectPlainDateTimeEquals(pd, {
       calendar: 'hebrew',
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-      isoHour: 12,
-      isoMinute: 30,
+      year: 2024,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -82,11 +82,11 @@ describe('fromFields', () => {
     })
     expectPlainDateTimeEquals(pdt, {
       calendar: 'hebrew',
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-      isoHour: 12,
-      isoMinute: 30,
+      year: 2024,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -152,11 +152,11 @@ describe('withPlainDate', () => {
     const pd = PlainDateFns.create(2009, 6, 1)
     const pdt1 = PlainDateTimeFns.withPlainDate(pdt0, pd)
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2009,
-      isoMonth: 6,
-      isoDay: 1,
-      isoHour: 12,
-      isoMinute: 30,
+      year: 2009,
+      month: 6,
+      day: 1,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -167,10 +167,10 @@ describe('withPlainTime', () => {
     const pt = PlainTimeFns.create(3) // 3:00
     const pdt1 = PlainDateTimeFns.withPlainTime(pdt0, pt)
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-      isoHour: 3,
+      year: 2024,
+      month: 1,
+      day: 1,
+      hour: 3,
     })
   })
 
@@ -178,9 +178,9 @@ describe('withPlainTime', () => {
     const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
     const pdt1 = PlainDateTimeFns.withPlainTime(pdt0)
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
+      year: 2024,
+      month: 1,
+      day: 1,
     })
   })
 })
@@ -191,11 +191,11 @@ describe('withCalendar', () => {
     const pdt1 = PlainDateTimeFns.withCalendar(pdt0, 'gregory')
     expectPlainDateTimeEquals(pdt1, {
       calendar: 'gregory',
-      isoYear: 2024,
-      isoMonth: 1,
-      isoDay: 1,
-      isoHour: 12,
-      isoMinute: 30,
+      year: 2024,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 30,
     })
   })
 })
@@ -291,11 +291,11 @@ describe('add', () => {
       DurationFns.create(1, 1, 0, 0, 4, 5),
     )
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2025,
-      isoMonth: 3,
-      isoDay: 27,
-      isoHour: 16,
-      isoMinute: 35,
+      year: 2025,
+      month: 3,
+      day: 27,
+      hour: 16,
+      minute: 35,
     })
   })
 })
@@ -308,11 +308,11 @@ describe('subtract', () => {
       DurationFns.create(1, 1, 0, 0, 4, 5),
     )
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2023,
-      isoMonth: 1,
-      isoDay: 27,
-      isoHour: 8,
-      isoMinute: 25,
+      year: 2023,
+      month: 1,
+      day: 27,
+      hour: 8,
+      minute: 25,
     })
   })
 })
@@ -370,9 +370,9 @@ describe('round', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 12)
     const pdt1 = PlainDateTimeFns.round(pdt0, 'day')
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2023,
-      isoMonth: 1,
-      isoDay: 26,
+      year: 2023,
+      month: 1,
+      day: 26,
     })
   })
 
@@ -382,9 +382,9 @@ describe('round', () => {
       smallestUnit: 'day',
     })
     expectPlainDateTimeEquals(pdt1, {
-      isoYear: 2023,
-      isoMonth: 1,
-      isoDay: 26,
+      year: 2023,
+      month: 1,
+      day: 26,
     })
   })
 })
@@ -442,9 +442,9 @@ describe('toPlainDate', () => {
     const pd = PlainDateTimeFns.toPlainDate(pdt)
     expectPlainDateEquals(pd, {
       calendar: 'hebrew',
-      isoYear: 2024,
-      isoMonth: 2,
-      isoDay: 27,
+      year: 2024,
+      month: 2,
+      day: 27,
     })
   })
 })
@@ -454,8 +454,8 @@ describe('toPlainYearMonth', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     const pym = PlainDateTimeFns.toPlainYearMonth(pdt)
     expectPlainYearMonthEquals(pym, {
-      isoYear: 2024,
-      isoMonth: 2,
+      year: 2024,
+      month: 2,
     })
   })
 })
@@ -465,8 +465,8 @@ describe('toPlainMonthDay', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     const pmd = PlainDateTimeFns.toPlainMonthDay(pdt)
     expectPlainMonthDayEquals(pmd, {
-      isoMonth: 2,
-      isoDay: 27,
+      month: 2,
+      day: 27,
     })
   })
 })
@@ -476,8 +476,8 @@ describe('toPlainTime', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     const pt = PlainDateTimeFns.toPlainTime(pdt)
     expectPlainTimeEquals(pt, {
-      isoHour: 12,
-      isoMinute: 30,
+      hour: 12,
+      minute: 30,
     })
   })
 })

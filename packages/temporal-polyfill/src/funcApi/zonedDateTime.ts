@@ -19,11 +19,11 @@ import {
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
 import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { CalendarDateTimeFields } from '../internal/fieldTypes'
 import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
@@ -68,8 +68,6 @@ import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   ZonedDateTimeFields,
-  ZonedIsoFields,
-  buildZonedIsoFields,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
@@ -165,8 +163,6 @@ export type Record = {
 export type Fields = ZonedDateTimeFields
 export type FromFields = ZonedDateTimeLikeObject
 export type WithFields = Partial<DateTimeFields>
-export type ISOFields = ZonedIsoFields
-
 export type AssignmentOptions = ZonedFieldOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<UnitName>
@@ -217,8 +213,6 @@ export const getFields = memoize((record: Record): Fields => {
     offset: offsetString,
   }
 }, WeakMap)
-
-export const getISOFields = buildZonedIsoFields as (record: Record) => ISOFields
 
 export const calendarId = getCalendarId as (record: Record) => string
 
@@ -602,7 +596,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (record: AbstractDateTimeSlots) => IsoDateTimeFields,
+  computeAlignment: (record: AbstractDateTimeSlots) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
@@ -622,7 +616,7 @@ function zonedTransform<A extends any[]>(
   transformIso: (
     isoSlots: AbstractDateTimeSlots,
     ...args: A
-  ) => IsoDateTimeFields,
+  ) => CalendarDateTimeFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
     const timeZoneImpl = queryTimeZone(record.timeZone)
