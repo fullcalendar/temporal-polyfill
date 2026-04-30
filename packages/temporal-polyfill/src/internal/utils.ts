@@ -306,6 +306,21 @@ export function allPropsEqual(
   return true
 }
 
+export function areNumberArraysEqual(a: number[], b: number[]): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+
+  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false
+    }
+  }
+
+  return true
+}
+
 export function zeroOutProps(
   propNames: string[],
   clearUntilI: number,
