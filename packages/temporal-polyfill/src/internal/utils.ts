@@ -372,6 +372,41 @@ export function sortStrings<T extends string>(strs: T[]): T[] {
   return strs.slice().sort()
 }
 
+export function createRegExp(meat: string): RegExp {
+  return new RegExp(`^${meat}$`, 'i')
+}
+
+export function validateTimeSeparators(s: string): boolean {
+  if (s[0] === 'T' || s[0] === 't') {
+    s = s.slice(1)
+  }
+
+  const fractionIndex = s.search(/[.,]/)
+  const main = fractionIndex < 0 ? s : s.slice(0, fractionIndex)
+  const parts = main.split(':')
+
+  if (parts.length === 1) {
+    return /^(?:\d{2}|\d{4}|\d{6})$/i.test(main)
+  }
+
+  return (
+    (parts.length === 2 || parts.length === 3) &&
+    parts.every((part) => part.length === 2 && /^\d{2}$/i.test(part))
+  )
+}
+
+export function parseSubsecNano(fracStr: string): number {
+  return parseInt(fracStr.padEnd(9, '0'))
+}
+
+export function parseSign(s: string | undefined): number {
+  return !s || s === '+' ? 1 : -1
+}
+
+export function parseInt0(s: string | undefined): number {
+  return s === undefined ? 0 : parseInt(s)
+}
+
 export function padNumber(digits: number, num: number): string {
   return String(num).padStart(digits, '0')
 }

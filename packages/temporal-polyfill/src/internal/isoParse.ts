@@ -27,6 +27,11 @@ import {
 } from './isoMath'
 import { RelativeToSlots } from './relativeMath'
 import { moveToDayOfMonthUnsafe } from './move'
+import {
+  parseOffsetNano,
+  parseOffsetNanoMaybe,
+  validateOffsetSeparators,
+} from './offsetParse'
 import { EpochDisambig, OffsetDisambig, Overflow } from './options'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import {
@@ -63,18 +68,23 @@ import { FixedTimeZone, queryNativeTimeZone } from './timeZoneNative'
 import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
-  validateTimeZoneOffset,
 } from './timeZoneNativeMath'
 import {
   TimeUnit,
   Unit,
-  nanoInHour,
-  nanoInMinute,
   nanoInSec,
   unitNanoMap,
 } from './units'
 import { nanoToGivenFields } from './unitMath'
-import { divModFloor, zipProps } from './utils'
+import {
+  createRegExp,
+  divModFloor,
+  parseInt0,
+  parseSign,
+  parseSubsecNano,
+  validateTimeSeparators,
+  zipProps,
+} from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
@@ -152,17 +162,6 @@ export function parseZonedDateTime(
     offsetDisambig,
     epochDisambig,
   )
-}
-
-/*
-`s` already validated as a string
-*/
-export function parseOffsetNano(s: string): number {
-  const offsetNano = parseOffsetNanoMaybe(s)
-  if (offsetNano === undefined) {
-    throw new RangeError(errorMessages.failedParse(s)) // Invalid offset string
-  }
-  return offsetNano
 }
 
 export function parsePlainDateTime(s: string): PlainDateTimeSlots {
@@ -464,7 +463,6 @@ const timeRegExp = createRegExp(
     ')?' + // 5-9
     annotationsRegExpStr, // 10
 )
-const offsetRegExp = createRegExp(offsetRegExpStr)
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
 const durationRegExp = createRegExp(
@@ -488,7 +486,6 @@ const durationRegExp = createRegExp(
   monthDayRegExp,
   dateTimeRegExp,
   timeRegExp,
-  offsetRegExp,
   // annotationRegExp, // no need to check. see note above
   durationRegExp,
 ].forEach((re) => console.log(re.source))
@@ -503,25 +500,6 @@ function validateDateSeparators(s: string): boolean {
   const m = s.match(/^[+-]?(?:\d{6}|\d{4})(-?)(\d{2})(-?)(\d{2})/)
   if (!m) return true
   return m[1] === m[3]
-}
-
-function validateTimeSeparators(s: string): boolean {
-  if (s[0] === 'T' || s[0] === 't') {
-    s = s.slice(1)
-  }
-
-  const fractionIndex = s.search(/[.,]/)
-  const main = fractionIndex < 0 ? s : s.slice(0, fractionIndex)
-  const parts = main.split(':')
-
-  if (parts.length === 1) {
-    return /^(?:\d{2}|\d{4}|\d{6})$/i.test(main)
-  }
-
-  return (
-    (parts.length === 2 || parts.length === 3) &&
-    parts.every((part) => part.length === 2 && /^\d{2}$/i.test(part))
-  )
 }
 
 function extractDateTimeTimePortion(
@@ -579,10 +557,6 @@ function extractTimeOnlyOffset(
   const annotationStart = s.indexOf('[', offsetStart)
 
   return s.slice(offsetStart, annotationStart < 0 ? undefined : annotationStart)
-}
-
-function validateOffsetSeparators(s: string): boolean {
-  return validateTimeSeparators(s.slice(1))
 }
 
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
@@ -649,16 +623,6 @@ function parseTimeOnlyParts(s: string): string[] | undefined {
 function parseDurationFields(s: string): DurationFields | undefined {
   const parts = durationRegExp.exec(s)
   return parts ? organizeDurationParts(parts) : undefined
-}
-
-export function parseOffsetNanoMaybe(
-  s: string,
-  onlyHourMinute?: boolean,
-): number | undefined {
-  const parts = offsetRegExp.exec(s)
-  if (!parts) return undefined
-  if (!validateOffsetSeparators(parts[0])) return undefined
-  return organizeOffsetParts(parts, onlyHourMinute)
 }
 
 // Parts Organization
@@ -744,25 +708,6 @@ function organizeTimeParts(parts: string[]): IsoTimeFields {
     isoMinute: parseInt0(parts[2]),
     isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage leap-second
   }
-}
-
-function organizeOffsetParts(
-  parts: string[],
-  onlyHourMinute?: boolean,
-): number {
-  const firstSubMinutePart = parts[4] || parts[5]
-
-  if (onlyHourMinute && firstSubMinutePart) {
-    throw new RangeError(errorMessages.invalidSubstring(firstSubMinutePart))
-  }
-
-  const offsetNanoPos =
-    parseInt0(parts[2]) * nanoInHour +
-    parseInt0(parts[3]) * nanoInMinute +
-    parseInt0(parts[4]) * nanoInSec +
-    parseSubsecNano(parts[5] || '')
-
-  return validateTimeZoneOffset(offsetNanoPos * parseSign(parts[1]))
 }
 
 function organizeDurationParts(parts: string[]): DurationFields {
@@ -881,22 +826,6 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
 
 // Utils
 // -----------------------------------------------------------------------------
-
-function parseSubsecNano(fracStr: string): number {
-  return parseInt(fracStr.padEnd(9, '0'))
-}
-
-function createRegExp(meat: string): RegExp {
-  return new RegExp(`^${meat}$`, 'i')
-}
-
-function parseSign(s: string | undefined): number {
-  return !s || s === '+' ? 1 : -1
-}
-
-function parseInt0(s: string | undefined): number {
-  return s === undefined ? 0 : parseInt(s)
-}
 
 /*
 Guaranteed to be non-Infinity (which can happen if number beyond maxint I think)

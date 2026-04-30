@@ -1,6 +1,6 @@
 import * as errorMessages from './errorMessages'
 import { formatOffsetNano } from './isoFormat'
-import { parseOffsetNanoMaybe } from './isoParse'
+import { parseOffsetNanoMaybe } from './offsetParse'
 import { capitalize } from './utils'
 
 export function parseTimeZoneOffsetId(id: string):

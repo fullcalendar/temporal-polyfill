@@ -4,6 +4,7 @@ import { DateTimeFields } from './fields'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambig, OffsetDisambig } from './options'
+import { validateTimeZoneOffset } from './offsetParse'
 import { roundToMinute } from './round'
 import { ZonedDateTimeSlots, ZonedEpochSlots } from './slots'
 import {
@@ -236,13 +237,6 @@ function computeGapNear(
 
 // Utils
 // -----------------------------------------------------------------------------
-
-export function validateTimeZoneOffset(offsetNano: number): number {
-  if (Math.abs(offsetNano) >= nanoInUtcDay) {
-    throw new RangeError(errorMessages.outOfBoundsOffset)
-  }
-  return offsetNano
-}
 
 export function validateTimeZoneGap(gapNano: number): number {
   if (gapNano > nanoInUtcDay) {

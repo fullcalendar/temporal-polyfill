@@ -78,7 +78,7 @@ import {
 } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
-import { parseOffsetNano } from './isoParse'
+import { parseOffsetNano } from './offsetParse'
 import { RelativeToSlotsNoCalendar } from './relativeMath'
 import { OffsetDisambig, Overflow } from './options'
 import {
