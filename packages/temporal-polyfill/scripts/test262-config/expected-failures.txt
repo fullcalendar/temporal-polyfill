@@ -184,25 +184,3 @@ intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unico
 # end users understand that Chinese/lunisolar formatting fidelity is bounded by
 # their runtime's Intl/ICU data.
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
-
-# TEMPORARY
-# See CALENDAR-YEAR-DATA-PLAN.md. These failures are the host-Intl calendar
-# data disagreements that were previously hidden by narrow year-data massaging
-# and daysInYear accessor overrides. Keep them serialized here until the planned
-# canonical year-data table can replace known-bad scraped years coherently.
-# That plan is also intended to fix the Hebrew roundtrip failures below by
-# using corrected year data for both calendar-field directions instead of
-# trusting raw Intl fields on one side of the bridge.
-intl402/Temporal/PlainDate/from/calc-epoch-year-hebrew.js
-intl402/Temporal/PlainDate/from/hebrew-keviah.js
-intl402/Temporal/PlainDate/from/roundtrip-from-string.js
-intl402/Temporal/PlainDate/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainDate/prototype/daysInYear/basic-hebrew.js
-intl402/Temporal/PlainDateTime/from/roundtrip-from-string.js
-intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-hebrew.js
-intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-hebrew.js
-intl402/Temporal/ZonedDateTime/from/roundtrip-from-string.js
-intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-hebrew.js

@@ -33,7 +33,12 @@ import {
 } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { milliInDay } from './units'
-import { compareNumbers, memoize } from './utils'
+import {
+  areNumberArraysEqual,
+  compareNumbers,
+  memoize,
+  modFloor,
+} from './utils'
 
 interface IntlDateFields {
   era: string | undefined
@@ -51,12 +56,57 @@ interface IntlYearData {
   monthStrings: string[]
 }
 
+type IntlYearDataCache = (year: number) => IntlYearData
+
 export interface IntlCalendar extends NativeCalendar {
   queryFields: (isoFields: IsoDateFields) => IntlDateFields
-  queryYearData: (year: number) => IntlYearData
+  queryYearData: IntlYearDataCache
 }
 
 const hebrewEpochYearKislevDay30EpochMilli = isoArgsToEpochMilli(-3761, 11, 17)!
+
+const hebrewEpochYearOneStartEpochMilli = isoArgsToEpochMilli(-3760, 9, 7)!
+
+// Hebrew year 0 is a correction candidate because some ICU data has an
+// epoch-year bug around the Kislev/Tevet boundary. Its corrected start affects
+// the previous-year interval, but unlike the year-shape cases below it does not
+// require canonicalizing year 1.
+const hebrewSingleYearDataCorrectionCandidates: Record<number, true> = {
+  0: true,
+}
+
+// These are Hebrew year-shape correction candidates. Current ICU data reports
+// them one day too long: CALENDAR-INTL-DATA-NOTES.md documents the historical
+// cases as impossible 3C1 complete leap years, and 5806 has the same practical
+// bad-year-shape effect. The actual bad-data detection happens later by
+// comparing scraped month starts with the rule-derived table, so a future ICU
+// data set that already matches the rule-based shape passes through unchanged.
+const hebrewYearShapeCorrectionCandidates: Record<number, true> = {
+  3705: true,
+  3952: true,
+  4050: true,
+  4297: true,
+  4544: true,
+  4642: true,
+  4889: true,
+  4967: true,
+  5136: true,
+  5214: true,
+  5461: true,
+  5559: true,
+  5806: true,
+}
+
+// test262's Chinese year-length data implies two one-day new-year boundary
+// disagreements with the ICU4C data bundled in Node 22. Keep this intentionally
+// tiny until a broader ICU4X-sourced lunisolar table is available.
+const chineseFirstMonthStartCorrections: Record<
+  number,
+  [knownBadEpochMilli: number, dayOffset: number]
+> = {
+  2027: [isoArgsToEpochMilli(2027, 2, 7)!, -1],
+  2030: [isoArgsToEpochMilli(2030, 2, 2)!, 1],
+}
 
 // -----------------------------------------------------------------------------
 
@@ -69,19 +119,30 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   const intlFormat = queryCalendarIntlFormat(calendarId)
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
-  function epochMilliToIntlFields(epochMilli: number) {
+  function rawEpochMilliToIntlFields(epochMilli: number) {
     const intlParts = hashIntlFormatParts(intlFormat, epochMilli)
     const intlFields = parseIntlDateFields(intlParts, calendarIdBase)
     return correctIntlDateFields(calendarIdBase, epochMilli, intlFields)
   }
 
+  const queryYearData = createIntlYearDataCache(
+    calendarIdBase,
+    rawEpochMilliToIntlFields,
+  )
+
+  function epochMilliToIntlFields(epochMilli: number) {
+    return computeIntlFieldsFromCorrectedYearData(
+      calendarIdBase,
+      queryYearData,
+      epochMilli,
+      rawEpochMilliToIntlFields(epochMilli),
+    )
+  }
+
   return {
     id: calendarId,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
-    queryYearData: createIntlYearDataCache(
-      calendarIdBase,
-      epochMilliToIntlFields,
-    ),
+    queryYearData,
   }
 }
 
@@ -100,7 +161,7 @@ function createIntlFieldCache(
 function createIntlYearDataCache(
   calendarIdBase: string,
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
-): (year: number) => IntlYearData {
+): IntlYearDataCache {
   const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
@@ -164,14 +225,364 @@ function createIntlYearDataCache(
       }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
-    return {
+    const scrapedYearData = {
       monthEpochMillis: millisReversed.reverse(),
       monthStrings: monthStringsReversed.reverse(),
     }
+
+    return correctIntlYearData(calendarIdBase, year, scrapedYearData)
   }
 
   return memoize(buildYear)
 }
+
+// Corrected Year-Data Canonicalization
+// -----------------------------------------------------------------------------
+//
+// "Canonicalization" in this file means: keep the host-Intl scrape as the
+// default data source, but replace a bounded set of known-bad scraped year data
+// with the calendar shape expected by Temporal/test262. The corrected table is
+// then used for both calendar->ISO construction and ISO->calendar field access.
+
+function correctIntlYearData(
+  calendarIdBase: string,
+  year: number,
+  scrapedYearData: IntlYearData,
+): IntlYearData {
+  // Keep Intl scraping as the first step for every calendar. Known corrections
+  // are applied afterward so future host data can pass through unchanged when
+  // it already matches the canonical shape.
+  if (hasHebrewYearDataCorrectionCandidate(calendarIdBase, year)) {
+    const canonicalMonthEpochMillis = buildCanonicalHebrewMonthEpochMillis(year)
+
+    if (
+      shouldCanonicalizeHebrewYearData(
+        scrapedYearData,
+        canonicalMonthEpochMillis,
+      )
+    ) {
+      return {
+        monthEpochMillis: canonicalMonthEpochMillis,
+        // Month labels are not the source of the Hebrew-data disagreement.
+        // Reuse the scraped labels so this correction does not ship localized
+        // month-name strings or risk drifting from the host's label shape.
+        monthStrings: scrapedYearData.monthStrings.slice(),
+      }
+    }
+  }
+
+  const chineseStartOffset = queryChineseFirstMonthStartCorrection(
+    calendarIdBase,
+    year,
+    scrapedYearData,
+  )
+  if (chineseStartOffset !== undefined) {
+    const monthEpochMillis = scrapedYearData.monthEpochMillis.slice()
+
+    // Only the new-year boundary is known to disagree. Preserve the host's
+    // month labels and later month starts so leap-month detection stays tied to
+    // the same bounded ICU data that was scraped for the rest of the year.
+    monthEpochMillis[0] += chineseStartOffset * milliInDay
+
+    return {
+      monthEpochMillis,
+      monthStrings: scrapedYearData.monthStrings.slice(),
+    }
+  }
+
+  return scrapedYearData
+}
+
+// Canonicalization Detection
+// -----------------------------------------------------------------------------
+//
+// These helpers choose candidate years and prove whether the scraped data is
+// actually bad. Candidate tables alone are not enough to replace anything; the
+// scraped data must also match the known-bad shape or differ from the generated
+// canonical Hebrew table.
+
+function hasCorrectedIntlYearInterval(
+  calendarIdBase: string,
+  year: number,
+): boolean {
+  // A corrected year start changes both the starting year and the previous
+  // year's closing interval, so either side of the candidate interval can make
+  // field derivation necessary.
+  return (
+    hasCanonicalIntlYearDataCandidate(calendarIdBase, year) ||
+    hasCanonicalIntlYearDataCandidate(calendarIdBase, year + 1)
+  )
+}
+
+function hasCanonicalIntlYearDataCandidate(
+  calendarIdBase: string,
+  year: number,
+): boolean {
+  // This is intentionally a list of years with canonical replacement data, not
+  // every year whose interval may be affected. Neighboring interval checks are
+  // handled by hasCorrectedIntlYearInterval.
+  return (
+    hasHebrewYearDataCorrectionCandidate(calendarIdBase, year) ||
+    (calendarIdBase === 'chinese' &&
+      chineseFirstMonthStartCorrections[year] !== undefined)
+  )
+}
+
+function hasHebrewYearDataCorrectionCandidate(
+  calendarIdBase: string,
+  year: number,
+): boolean {
+  // A single-year correction is used as-is. A bad-year-shape correction also
+  // covers the following year, whose first month start moves when the bad year
+  // is shortened by one day.
+  return (
+    calendarIdBase === 'hebrew' &&
+    Boolean(
+      hebrewSingleYearDataCorrectionCandidates[year] ||
+        hebrewYearShapeCorrectionCandidates[year] ||
+        hebrewYearShapeCorrectionCandidates[year - 1],
+    )
+  )
+}
+
+function shouldCanonicalizeHebrewYearData(
+  scrapedYearData: IntlYearData,
+  canonicalMonthEpochMillis: number[],
+): boolean {
+  // If the host reports a different leap/common shape than the Hebrew rules,
+  // leave it alone instead of trying to pair rule boundaries with bad labels.
+  // The known ICU mismatches have the same month count as the canonical year.
+  if (
+    scrapedYearData.monthStrings.length !== canonicalMonthEpochMillis.length
+  ) {
+    return false
+  }
+
+  // This is the future-ICU-data guard: a candidate year whose scraped table is
+  // already canonical needs no replacement.
+  return !areNumberArraysEqual(
+    canonicalMonthEpochMillis,
+    scrapedYearData.monthEpochMillis,
+  )
+}
+
+function queryChineseFirstMonthStartCorrection(
+  calendarIdBase: string,
+  year: number,
+  scrapedYearData: IntlYearData,
+): number | undefined {
+  const chineseStartCorrection = chineseFirstMonthStartCorrections[year]
+
+  if (
+    calendarIdBase === 'chinese' &&
+    chineseStartCorrection !== undefined &&
+    scrapedYearData.monthEpochMillis[0] === chineseStartCorrection[0]
+  ) {
+    // The known-bad boundary match keeps this dormant if a future ICU data set
+    // already reports the canonical boundary.
+    return chineseStartCorrection[1]
+  }
+}
+
+// Canonical Hebrew Month-Start Generation
+// -----------------------------------------------------------------------------
+//
+// These helpers build rule-derived Hebrew month starts for the bounded
+// correction candidates above. The final IntlYearData object is assembled
+// inline where the correction is applied, because that step mostly preserves
+// scraped labels. General Hebrew behavior still flows through the normal Intl
+// scrape unless a candidate year is proven non-canonical.
+
+function buildCanonicalHebrewMonthEpochMillis(year: number): number[] {
+  const monthEpochMillis: number[] = []
+  let epochMilli = computeHebrewYearStartEpochMilli(year)
+  const monthLengths = computeHebrewMonthLengths(year)
+
+  for (let i = 0; i < monthLengths.length; i++) {
+    monthEpochMillis.push(epochMilli)
+    epochMilli += monthLengths[i] * milliInDay
+  }
+
+  return monthEpochMillis
+}
+
+function computeHebrewYearStartEpochMilli(year: number): number {
+  // Anchor arithmetic at Hebrew year 1 Tishri 1, then move by elapsed Hebrew
+  // calendar days. This avoids asking Intl about exactly the years it gets
+  // wrong.
+  return (
+    hebrewEpochYearOneStartEpochMilli +
+    (computeHebrewElapsedDays(year) - computeHebrewElapsedDays(1)) * milliInDay
+  )
+}
+
+function computeHebrewDaysInYear(year: number): number {
+  // Hebrew year length is the distance between adjacent Rosh Hashanah starts.
+  return computeHebrewElapsedDays(year + 1) - computeHebrewElapsedDays(year)
+}
+
+function computeHebrewMonthLengths(year: number): number[] {
+  // Heshvan and Kislev encode the deficient/regular/complete shape. All other
+  // month lengths are fixed once the year is known to be common or leap.
+  const daysInYear = computeHebrewDaysInYear(year)
+  const isCompleteYear = daysInYear % 10 === 5
+  const isDeficientYear = daysInYear % 10 === 3
+  const monthLengths = [
+    30, // Tishri
+    isCompleteYear ? 30 : 29, // Heshvan
+    isDeficientYear ? 29 : 30, // Kislev
+    29, // Tevet
+    30, // Shevat
+  ]
+
+  if (isHebrewLeapYear(year)) {
+    monthLengths.push(30) // Adar I
+  }
+
+  monthLengths.push(
+    29, // Adar / Adar II
+    30, // Nisan
+    29, // Iyar
+    30, // Sivan
+    29, // Tamuz
+    30, // Av
+    29, // Elul
+  )
+
+  return monthLengths
+}
+
+function isHebrewLeapYear(year: number): boolean {
+  // Hebrew leap years are 7 out of every 19 years in the Metonic cycle.
+  return modFloor(year * 7 + 1, 19) < 7
+}
+
+function computeHebrewElapsedDays(year: number): number {
+  // Elapsed days are first calculated from lunar months, then adjusted by the
+  // Rosh Hashanah postponement rules.
+  return computeHebrewDelay1(year) + computeHebrewDelay2(year)
+}
+
+function computeHebrewDelay1(year: number): number {
+  // Count elapsed lunar months and parts before this year's molad. Hebrew time
+  // uses 1080 parts per hour, so a day is 25920 parts.
+  const monthsElapsed = Math.floor((235 * year - 234) / 19)
+  const partsElapsed = 12084 + 13753 * monthsElapsed
+  let daysElapsed = 29 * monthsElapsed + Math.floor(partsElapsed / 25920)
+
+  // Postpone Rosh Hashanah away from Sunday, Wednesday, and Friday. This is the
+  // compact form of the Lo ADU Rosh rule used by common Hebrew-calendar code.
+  if (modFloor(3 * (daysElapsed + 1), 7) < 3) {
+    daysElapsed++
+  }
+
+  return daysElapsed
+}
+
+function computeHebrewDelay2(year: number): number {
+  // The second-stage postponements compare adjacent provisional year starts.
+  // They reject 356-day common years and 382-day leap years by moving one side
+  // of the adjacent boundary.
+  const lastYearStart = computeHebrewDelay1(year - 1)
+  const currentYearStart = computeHebrewDelay1(year)
+  const nextYearStart = computeHebrewDelay1(year + 1)
+
+  // These two postponements prevent adjacent impossible year lengths. They are
+  // what turns ICU's old complete-leap-year shape into the regular leap year
+  // expected by Temporal for the documented historical cases.
+  if (nextYearStart - currentYearStart === 356) {
+    return 2
+  }
+  if (currentYearStart - lastYearStart === 382) {
+    return 1
+  }
+
+  return 0
+}
+
+// ISO -> Calendar Fields From Corrected Year Data
+// -----------------------------------------------------------------------------
+
+function computeIntlFieldsFromCorrectedYearData(
+  calendarIdBase: string,
+  queryYearData: IntlYearDataCache,
+  epochMilli: number,
+  rawIntlFields: IntlDateFields,
+): IntlDateFields {
+  // Raw formatToParts output is normally authoritative. For a corrected year
+  // interval, derive Y/M/D from the same month-boundary table used for
+  // construction so ISO->calendar and calendar->ISO stay coherent.
+  const firstCandidateYear = rawIntlFields.year - 1
+
+  // Raw Intl is still a good hint; corrected boundaries only move by one day in
+  // the known data, so the containing corrected year must be the raw year or an
+  // immediate neighbor.
+  for (let yearMove = 0; yearMove < 3; yearMove++) {
+    const year = firstCandidateYear + yearMove
+
+    // Most years have no override table nearby. Skip those before querying
+    // extra year data so the normal raw-Intl path stays cheap.
+    if (!hasCorrectedIntlYearInterval(calendarIdBase, year)) {
+      continue
+    }
+
+    const yearData = queryYearData(year)
+    const yearStart = yearData.monthEpochMillis[0]
+    const nextYearStart = queryYearData(year + 1).monthEpochMillis[0]
+
+    // Neighboring candidates can be checked even when they do not contain this
+    // ISO date. Only the corrected interval that actually contains epochMilli
+    // is allowed to replace raw formatToParts fields.
+    if (yearStart <= epochMilli && epochMilli < nextYearStart) {
+      const monthIndex = computeIntlYearDataMonthIndex(yearData, epochMilli)
+      const monthStart = yearData.monthEpochMillis[monthIndex]
+
+      return {
+        ...computeCorrectedIntlYearParts(calendarIdBase, year, rawIntlFields),
+        monthString: yearData.monthStrings[monthIndex],
+        day: diffEpochMilliByDay(monthStart, epochMilli) + 1,
+      }
+    }
+  }
+
+  return rawIntlFields
+}
+
+function computeCorrectedIntlYearParts(
+  calendarIdBase: string,
+  year: number,
+  rawIntlFields: IntlDateFields,
+): Pick<IntlDateFields, 'era' | 'eraYear' | 'year'> {
+  // Month/day can come entirely from corrected year data, but era labels still
+  // need to follow the normal Intl parsing path and calendar fallback rules.
+  const era = rawIntlFields.era || defaultEraByCalendarIdBase[calendarIdBase]
+
+  return {
+    era,
+    eraYear: era === undefined ? rawIntlFields.eraYear : year,
+    year,
+  }
+}
+
+function computeIntlYearDataMonthIndex(
+  yearData: IntlYearData,
+  epochMilli: number,
+): number {
+  const { monthEpochMillis } = yearData
+
+  // Month tables are tiny. Walk backward because most lookups are ordinary
+  // in-year dates, and the last matching boundary is the containing month.
+  for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
+    if (epochMilli >= monthEpochMillis[i]) {
+      return i
+    }
+  }
+
+  throw new RangeError(errorMessages.invalidProtocolResults)
+}
+
+// Raw Intl Field Corrections
+// -----------------------------------------------------------------------------
 
 function correctIntlDateFields(
   calendarIdBase: string,
