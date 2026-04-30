@@ -7,6 +7,7 @@ import {
   monthCodeNumberToMonth,
   parseMonthCode,
 } from './calendarNative'
+import type { MonthCodeParts } from './calendarNative'
 import {
   queryNativeDaysInMonthPart,
   queryNativeLeapMonth,
@@ -87,11 +88,18 @@ export function resolveMonth(
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
+  monthCodeParts?: MonthCodeParts,
 ): number {
   let { month, monthCode } = fields
 
   if (monthCode !== undefined) {
-    const monthByCode = resolveMonthCode(calendarId, monthCode, year, overflow)
+    const monthByCode = resolveMonthCode(
+      calendarId,
+      monthCode,
+      year,
+      overflow,
+      monthCodeParts,
+    )
 
     if (month !== undefined && month !== monthByCode) {
       throw new RangeError(errorMessages.mismatchingMonthAndCode)
@@ -133,9 +141,10 @@ function resolveMonthCode(
   monthCode: string,
   year: number,
   overflow: Overflow,
+  monthCodeParts = parseMonthCode(monthCode),
 ) {
   const leapMonth = queryNativeLeapMonth(calendarId, year)
-  const [monthCodeNumber, wantsLeapMonth] = parseMonthCode(monthCode)
+  const [monthCodeNumber, wantsLeapMonth] = monthCodeParts
   let month = monthCodeNumberToMonth(monthCodeNumber, wantsLeapMonth, leapMonth)
 
   if (wantsLeapMonth) {

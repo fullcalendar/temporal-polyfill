@@ -3,7 +3,7 @@ import {
   mergeCalendarFields,
   readNativeCalendarFields,
 } from './bagCalendarFields'
-import { readBagFields } from './bagFields'
+import { readAndCoerceBagFields } from './bagFields'
 import {
   dateFromFields,
   monthDayFromFields,
@@ -109,10 +109,10 @@ function convertToNativeIso(
   input = pluckProps(inputFieldNames, input as Record<string, unknown>)
 
   extraFieldNames = getCalendarFieldNames(calendarId, extraFieldNames)
-  extra = readBagFields(extra, extraFieldNames, [])
+  extra = readAndCoerceBagFields(extra, extraFieldNames, [])
 
   let mergedFields = mergeCalendarFields(calendarId, input, extra)
-  mergedFields = readBagFields(
+  mergedFields = readAndCoerceBagFields(
     mergedFields,
     [...inputFieldNames, ...extraFieldNames].sort(),
     [],

@@ -1,5 +1,5 @@
 import { readNativeCalendarFields } from './bagCalendarFields'
-import { readBagFields } from './bagFields'
+import { readAndCoerceBagFields } from './bagFields'
 import {
   dateFromFields,
   monthDayFromFields,
@@ -227,7 +227,7 @@ export function refinePlainTimeBag(
   options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
   // disallowEmpty
-  const fields = readBagFields(bag, timeFieldNamesAlpha, [], true) as TimeBag
+  const fields = readAndCoerceBagFields(bag, timeFieldNamesAlpha, [], true) as TimeBag
 
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
@@ -237,7 +237,7 @@ export function refinePlainTimeBag(
 
 export function refineDurationBag(bag: DurationBag): DurationSlots {
   // refine in 'partial' mode
-  const durationFields = readBagFields(
+  const durationFields = readAndCoerceBagFields(
     bag,
     durationFieldNamesAlpha,
   ) as DurationBag

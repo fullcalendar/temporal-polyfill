@@ -39,10 +39,6 @@ export const overflowMap = {
   reject: Overflow.Reject,
 }
 
-export const overflowMapNames = Object.keys(
-  overflowMap,
-) as (keyof typeof overflowMap)[]
-
 export const epochDisambigMap = {
   compatible: EpochDisambig.Compat,
   reject: EpochDisambig.Reject,

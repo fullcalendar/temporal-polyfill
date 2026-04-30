@@ -56,7 +56,20 @@ export function dateAdd(
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): IsoDateFields {
-  const overflow = refineOverflowOptions(options)
+  return dateAddWithOverflow(
+    calendarId,
+    isoDateFields,
+    durationFields,
+    refineOverflowOptions(options),
+  )
+}
+
+export function dateAddWithOverflow(
+  calendarId: string,
+  isoDateFields: IsoDateFields,
+  durationFields: DurationFields,
+  overflow: Overflow,
+): IsoDateFields {
   const intlCalendar = queryIntlCalendarMaybe(calendarId)
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined

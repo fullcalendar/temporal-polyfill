@@ -1,4 +1,4 @@
-import { readBagFields } from './bagFields'
+import { readAndCoerceBagFields } from './bagFields'
 import { japaneseCalendarId } from './calendarConfig'
 import { getCalendarEraOrigins } from './calendarNative'
 import {
@@ -33,7 +33,7 @@ export function readNativeCalendarFields(
     ...forcedValidFieldNames,
   ].sort()
 
-  return readBagFields(bag, fieldNames, requiredFieldNames)
+  return readAndCoerceBagFields(bag, fieldNames, requiredFieldNames)
 }
 
 export function mergeCalendarFields(

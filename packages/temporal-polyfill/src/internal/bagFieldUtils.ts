@@ -1,8 +1,9 @@
 import { parseMonthCode } from './calendarNative'
+import type { MonthCodeParts } from './calendarNative'
 import { requireString } from './cast'
 import { MonthFields } from './fields'
 
-export function refineMonthCodeString(
+export function coerceMonthCodeString(
   monthCode: unknown,
   entityName: string,
 ): string {
@@ -21,15 +22,13 @@ export function refineMonthCodeString(
   return requireString(monthCode as string, entityName)
 }
 
-export function passThroughDateField<T>(fieldVal: T): T {
-  return fieldVal
-}
-
-export function validateMonthCodeSyntax(fields: Partial<MonthFields>): void {
+export function parseMonthCodeField(
+  fields: Partial<MonthFields>,
+): MonthCodeParts | undefined {
   if (fields.monthCode !== undefined) {
     // Syntax is part of resolving the supplied fields, not calendar suitability.
     // `M99L` is syntactically valid and is rejected later against the chosen
     // calendar/year, but `L99M` should fail before year numeric coercion.
-    parseMonthCode(fields.monthCode)
+    return parseMonthCode(fields.monthCode)
   }
 }

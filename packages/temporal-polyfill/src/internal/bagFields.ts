@@ -1,4 +1,4 @@
-import { builtinRefiners } from './bagRefineConfig'
+import { builtinFieldCoercers } from './bagRefineConfig'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fields'
 
@@ -8,12 +8,12 @@ Read the selected fields from a Temporal property bag in sorted order.
 This is intentionally only the first bag phase: property access plus the
 built-in, field-local coercions that must happen while reading the bag. Calendar
 semantics, required-field relationships, and option-dependent validation happen
-later in bagRefine.ts.
+in later bag phases.
 
 If `requiredFieldNames` is undefined, this is a partial read, used by .with()
 style calls. In that mode an empty matching field set is rejected by default.
 */
-export function readBagFields(
+export function readAndCoerceBagFields(
   bag: Record<string, unknown>,
   validFieldNames: string[], // must be alphabetized
   requiredFieldNames?: string[],
@@ -36,11 +36,12 @@ export function readBagFields(
     if (fieldVal !== undefined) {
       anyMatching = true
 
-      const refiner = builtinRefiners[fieldName as keyof typeof builtinRefiners]
+      const coercer =
+        builtinFieldCoercers[fieldName as keyof typeof builtinFieldCoercers]
 
-      if (refiner) {
+      if (coercer) {
         fieldVal = (
-          refiner as (fieldVal: unknown, fieldName: string) => unknown
+          coercer as (fieldVal: unknown, fieldName: string) => unknown
         )(fieldVal, fieldName)
       }
 

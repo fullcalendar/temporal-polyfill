@@ -1,5 +1,5 @@
 import { BigNano, addBigNanos } from './bigNano'
-import { dateAdd } from './calendarNativeMath'
+import { dateAdd, dateAddWithOverflow } from './calendarNativeMath'
 import { queryNativeDay } from './calendarNativeQuery'
 import { DurationFields, durationTimeFieldDefaults } from './durationFields'
 import {
@@ -19,7 +19,6 @@ import {
 } from './isoFields'
 import {
   OverflowOptions,
-  fabricateOverflowOptions,
   refineOverflowOptions,
 } from './optionsRefine'
 import {
@@ -130,9 +129,13 @@ export function movePlainYearMonth(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const refinedOptions = fabricateOverflowOptions(
-    refineOverflowOptions(options),
-  )
+  /*
+  PlainYearMonth has one awkward ordering rule: overflow must be read before
+  rejecting units below months. Date arithmetic normally reads overflow inside
+  dateAdd(), so use the pre-refined entry point below to avoid reading the
+  caller's options twice or fabricating an internal options bag.
+  */
+  const overflow = refineOverflowOptions(options)
 
   if (durationSlots.sign && getMaxDurationUnit(durationSlots) < Unit.Month) {
     throw new RangeError(errorMessages.invalidSmallUnits)
@@ -151,11 +154,11 @@ export function movePlainYearMonth(
     durationSlots = negateDuration(durationSlots)
   }
 
-  const movedIsoDateFields = dateAdd(
+  const movedIsoDateFields = dateAddWithOverflow(
     calendarId,
     isoDateFields,
     durationSlots,
-    refinedOptions,
+    overflow,
   )
 
   return createPlainYearMonthSlots(

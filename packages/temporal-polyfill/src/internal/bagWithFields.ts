@@ -6,7 +6,7 @@ import {
   computeYearMonthEssentials,
   computeZonedDateTimeEssentials,
 } from './bagEssentials'
-import { readBagFields } from './bagFields'
+import { readAndCoerceBagFields } from './bagFields'
 import {
   dateFromFields,
   monthDayFromFields,
@@ -76,7 +76,7 @@ export function zonedDateTimeWithFields(
   ].sort()
 
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
-  const partialFields = readBagFields(modFields, validFieldNames)
+  const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
   const mergedCalendarFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -122,7 +122,7 @@ export function plainDateTimeWithFields(
   ].sort()
 
   const origFields = computeDateTimeEssentials(plainDateTimeSlots)
-  const partialFields = readBagFields(modFields, validFieldNames)
+  const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
   const mergedCalendarFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
@@ -164,7 +164,7 @@ export function plainDateWithFields(
   ).sort()
 
   const origFields = computeDateEssentials(plainDateSlots)
-  const partialFields = readBagFields(modFields, validFieldNames)
+  const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
   const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
@@ -186,7 +186,7 @@ export function plainYearMonthWithFields(
   ).sort()
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
-  const partialFields = readBagFields(modFields, validFieldNames)
+  const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
   const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
@@ -208,7 +208,7 @@ export function plainMonthDayWithFields(
   ).sort()
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)
-  const partialFields = readBagFields(modFields, validFieldNames)
+  const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
   const mergedFields = mergeCalendarFields(
     calendarId,
     origFields as unknown as Record<string, unknown>,
@@ -242,7 +242,7 @@ function mergePlainTimeBag(
   options: OverflowOptions | undefined,
 ): IsoTimeFields {
   const origFields = pluckProps(timeFieldNamesAlpha, initialFields)
-  const newFields = readBagFields(modFields, timeFieldNamesAlpha)
+  const newFields = readAndCoerceBagFields(modFields, timeFieldNamesAlpha)
 
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
@@ -255,7 +255,7 @@ function mergeDurationBag(
   initialFields: DurationFields,
   modFields: DurationBag,
 ): DurationFields {
-  const newFields = readBagFields(modFields, durationFieldNamesAlpha)
+  const newFields = readAndCoerceBagFields(modFields, durationFieldNamesAlpha)
   return checkDurationUnits({ ...initialFields, ...newFields })
 }
 

@@ -18,7 +18,6 @@ export {
   refineZonedDateTimeDisplayOptions,
 } from './optionsDisplayRefine'
 export {
-  fabricateOverflowOptions,
   refineEpochDisambigOptions,
   refineOverflowOptions,
   refineZonedFieldOptions,

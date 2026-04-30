@@ -1,4 +1,4 @@
-import { validateMonthCodeSyntax } from './bagFieldUtils'
+import { parseMonthCodeField } from './bagFieldUtils'
 import { resolveDay, resolveMonth, resolveYear } from './bagNativeFieldResolve'
 import type {
   DateOptionsRefiner,
@@ -14,7 +14,7 @@ import {
   plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
-import { getCalendarEraOrigins, parseMonthCode } from './calendarNative'
+import { getCalendarEraOrigins } from './calendarNative'
 import {
   queryNativeIsoFieldsFromParts,
   queryNativeMonthCodeParts,
@@ -71,7 +71,7 @@ export function resolveDateFromFields<T extends DateOptionsTuple>(
     throw new TypeError(errorMessages.missingField('day'))
   }
 
-  validateMonthCodeSyntax(fields)
+  const monthCodeParts = parseMonthCodeField(fields)
 
   const year = resolveYear(calendarId, fields)
 
@@ -80,7 +80,7 @@ export function resolveDateFromFields<T extends DateOptionsTuple>(
   // this is the latest point shared by Date, DateTime, and ZonedDateTime paths.
   const refinedOptions = refineOptions()
   const overflow = refinedOptions[0]
-  const month = resolveMonth(calendarId, fields, year, overflow)
+  const month = resolveMonth(calendarId, fields, year, overflow, monthCodeParts)
   const day = resolveDay(calendarId, fields as DayFields, month, year, overflow)
   const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, day)
 
@@ -118,14 +118,14 @@ function resolveYearMonthFromFields(
     throw new TypeError(errorMessages.missingMonth)
   }
 
-  validateMonthCodeSyntax(fields)
+  const monthCodeParts = parseMonthCodeField(fields)
 
   const year = resolveYear(calendarId, fields)
 
   // Keep option coercion after year coercion; month resolution is the first
   // step that needs overflow.
   const overflow = refineOverflow()
-  const month = resolveMonth(calendarId, fields, year, overflow)
+  const month = resolveMonth(calendarId, fields, year, overflow, monthCodeParts)
   const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, 1)
 
   return [
@@ -165,7 +165,7 @@ function resolveMonthDayFromFields(
     throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
 
-  validateMonthCodeSyntax(fields)
+  const monthCodeParts = parseMonthCodeField(fields)
 
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
@@ -200,7 +200,13 @@ function resolveMonthDayFromFields(
     }
 
     // might limit overflow
-    const month = resolveMonth(calendarId, fields, yearMaybe, overflow)
+    const month = resolveMonth(
+      calendarId,
+      fields,
+      yearMaybe,
+      overflow,
+      monthCodeParts,
+    )
     // NOTE: internal call of getDefinedProp not necessary
     day = resolveDay(
       calendarId,
@@ -220,8 +226,9 @@ function resolveMonthDayFromFields(
       // TODO: should this message be more specific about month *CODE*?
       throw new TypeError(errorMessages.missingMonth)
     }
-    // pluck monthCode/day number without limiting overflow
-    ;[monthCodeNumber, isLeapMonth] = parseMonthCode(fields.monthCode)
+    // Pluck monthCode/day number without limiting overflow. The syntax check
+    // already parsed this before option reads, so reuse that tuple here.
+    ;[monthCodeNumber, isLeapMonth] = monthCodeParts!
 
     // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's monthDayFromFields
     // to limit the day in calendar with predictable max-days-in-month without the year
@@ -236,7 +243,13 @@ function resolveMonthDayFromFields(
       // year that corresponds to ISO 1972 so February 29 remains available.
       const referenceYear =
         isoEpochFirstLeapYear + (isoYearOffsetsByCalendarId[calendarId] || 0)
-      const month = resolveMonth(calendarId, fields, referenceYear, overflow)
+      const month = resolveMonth(
+        calendarId,
+        fields,
+        referenceYear,
+        overflow,
+        monthCodeParts,
+      )
       day = resolveDay(
         calendarId,
         fields as DayFields,

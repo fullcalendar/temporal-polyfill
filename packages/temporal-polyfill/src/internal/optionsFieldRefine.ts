@@ -4,7 +4,6 @@ import {
   coerceOffsetDisambig,
   coerceOverflow,
 } from './optionsCoerce'
-import { overflowMapNames } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import type {
   EpochDisambigOptions,
@@ -49,13 +48,4 @@ export function refineEpochDisambigOptions(
   options: EpochDisambigOptions | undefined,
 ): EpochDisambig {
   return coerceEpochDisambig(normalizeOptions(options))
-}
-
-/*
-TODO: Eventually remove. Not passed to user-defined Calendars anymore
-*/
-export function fabricateOverflowOptions(overflow: Overflow): OverflowOptions {
-  return {
-    overflow: overflowMapNames[overflow],
-  }
 }

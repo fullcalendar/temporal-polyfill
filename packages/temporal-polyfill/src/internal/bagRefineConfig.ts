@@ -1,4 +1,4 @@
-import { passThroughDateField, refineMonthCodeString } from './bagFieldUtils'
+import { coerceMonthCodeString } from './bagFieldUtils'
 import {
   toInteger,
   toPositiveInteger,
@@ -36,39 +36,34 @@ export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
 export type OverflowRefiner = () => Overflow
 
 // These maps define the first, property-by-property coercion pass over user
-// bags. Calendar-sensitive validation stays in bagRefine.ts because its exact
-// position relative to option reads is observable by test262.
-export const dateFieldRefiners = {
+// bags. Calendar-sensitive validation stays in bagFromFields.ts because its
+// exact position relative to option reads is observable by test262.
+export const dateFieldCoercers = {
   era: toStringViaPrimitive,
-  // `year` and `eraYear` are coerced inside refineYear().  That lets the
-  // *-from-fields routines perform their required-field checks and the
-  // monthCode syntax check before observing numeric coercion failures.
-  //
-  // TODO: better separation/refactoring of coercion/validation
-  //
-  eraYear: passThroughDateField,
-  year: passThroughDateField,
+  // `year` and `eraYear` are intentionally absent. resolveYear() coerces them
+  // after required-field checks and monthCode syntax parsing, preserving the
+  // observable error order required by the from-fields algorithms.
   month: toPositiveInteger,
-  // The monthCode refiner only validates type. Range validation is deferred to
+  // The monthCode coercer only validates type. Range validation is deferred to
   // dateFromFields/yearMonthFromFields/monthDayFromFields so missing-field
   // TypeError precedes invalid-monthCode RangeError.
-  monthCode(monthCode: string, entityName = 'monthCode') {
-    return refineMonthCodeString(monthCode, entityName)
+  monthCode(monthCode: unknown, entityName = 'monthCode') {
+    return coerceMonthCodeString(monthCode, entityName)
   },
   day: toPositiveInteger,
 }
 
-export const timeFieldRefiners = mapPropNamesToConstant(
+export const timeFieldCoercers = mapPropNamesToConstant(
   timeFieldNamesAsc,
   toInteger,
 )
 
-export const durationFieldRefiners = mapPropNamesToConstant(
+export const durationFieldCoercers = mapPropNamesToConstant(
   durationFieldNamesAsc,
   toStrictInteger,
 )
 
-const builtinOffsetRefiners = {
+const builtinOffsetCoercers = {
   offset(offsetString: string) {
     const s = toStringViaPrimitive(offsetString)
     // Validate now so bad offset strings fail during the field-coercion pass.
@@ -78,11 +73,11 @@ const builtinOffsetRefiners = {
   },
 }
 
-export const builtinRefiners = {
-  ...dateFieldRefiners,
-  ...timeFieldRefiners,
-  ...durationFieldRefiners,
-  ...builtinOffsetRefiners,
+export const builtinFieldCoercers = {
+  ...dateFieldCoercers,
+  ...timeFieldCoercers,
+  ...durationFieldCoercers,
+  ...builtinOffsetCoercers,
 }
 
 export const timeFieldsToIso = bindArgs(
