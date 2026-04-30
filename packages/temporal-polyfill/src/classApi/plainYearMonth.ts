@@ -1,26 +1,20 @@
-import {
-  PlainYearMonthBag,
-  convertNativePlainYearMonthToDate,
-  plainYearMonthWithFields,
-  refineNativePlainYearMonthBag,
-} from '../internal/bagRefine'
-import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
+import { convertPlainYearMonthToDate } from '../internal/convert'
+import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth } from '../internal/diff'
-import { YearMonthBag, YearMonthFields } from '../internal/fields'
+import { YearMonthLikeObject } from '../internal/fieldTypes'
+import { YearMonthFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
+import { mergePlainYearMonthFields } from '../internal/merge'
 import { movePlainYearMonth } from '../internal/move'
-import {
-  DiffOptions,
-  OverflowOptions,
-  refineOverflowOptions,
-} from '../internal/optionsRefine'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
+import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import { getCalendarIdFromBag } from './calendarArg'
 import {
   Duration,
@@ -34,12 +28,12 @@ import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainYearMonth = any & YearMonthFields
-export type PlainYearMonthArg = PlainYearMonth | PlainYearMonthBag | string
+export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    bindArgs(constructPlainYearMonthSlots, refineCalendarId),
+    constructPlainYearMonthSlots,
     {
       ...calendarIdGetters,
       ...yearMonthGetters,
@@ -47,11 +41,11 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
     {
       with(
         slots: PlainYearMonthSlots,
-        mod: YearMonthBag,
+        mod: Partial<YearMonthFields>,
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
-          plainYearMonthWithFields(slots, rejectInvalidBag(mod), options),
+          mergePlainYearMonthFields(slots, rejectInvalidBag(mod), options),
         )
       },
       add(
@@ -115,7 +109,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       },
       toPlainDate(slots: PlainYearMonthSlots, bag: { day: number }): PlainDate {
         return createPlainDate(
-          convertNativePlainYearMonthToDate(slots.calendar, this, bag),
+          convertPlainYearMonthToDate(slots.calendar, this, bag),
         )
       },
       toLocaleString(
@@ -165,7 +159,7 @@ export function toPlainYearMonthSlots(
       return slots as PlainYearMonthSlots
     }
 
-    return refineNativePlainYearMonthBag(
+    return refinePlainYearMonthObjectLike(
       getCalendarIdFromBag(arg as any),
       arg as any, // !!!
       options,

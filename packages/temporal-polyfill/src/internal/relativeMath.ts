@@ -8,18 +8,18 @@ import {
 } from './isoFields'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
-  DateSlots,
+  AbstractDateSlots,
   EpochAndZoneSlots,
   ZonedEpochSlots,
   extractEpochNano,
 } from './slots'
 import { isoToEpochNano } from './timeMath'
-import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
+import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
 // the relative-to "origin"
-export type RelativeToSlots = DateSlots | ZonedEpochSlots
+export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 
 // the relative-to "origin", returned from bag refining
 export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
@@ -29,13 +29,13 @@ export type RelativeToSlotsNoCalendar = IsoDateFields | EpochAndZoneSlots
 // their day lengths are time-zone dependent.
 export type Marker = IsoDateFields | IsoDateTimeFields | ZonedEpochSlots
 
-export type RelativeOrigin = [marker: Marker, nativeTimeZone?: NativeTimeZone]
+export type RelativeOrigin = [marker: Marker, timeZoneImpl?: TimeZoneImpl]
 
 export function createRelativeOrigin(
   relativeToSlots: RelativeToSlots,
 ): RelativeOrigin {
   if (isZonedEpochSlots(relativeToSlots)) {
-    return [relativeToSlots, queryNativeTimeZone(relativeToSlots.timeZone)]
+    return [relativeToSlots, queryTimeZone(relativeToSlots.timeZone)]
   }
 
   return [
@@ -62,33 +62,27 @@ export type DiffMarkers = (
 ) => DurationFields
 
 export function createMarkerToEpochNano(
-  nativeTimeZone: NativeTimeZone | undefined,
+  timeZoneImpl: TimeZoneImpl | undefined,
 ): MarkerToEpochNano {
-  return (
-    nativeTimeZone ? extractEpochNano : isoToEpochNano
-  ) as MarkerToEpochNano
+  return (timeZoneImpl ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
 }
 
 export function createMoveMarker(
-  nativeTimeZone: NativeTimeZone | undefined,
+  timeZoneImpl: TimeZoneImpl | undefined,
   calendarId: string,
 ): MoveMarker {
-  if (nativeTimeZone) {
-    return bindArgs(moveZonedEpochs, nativeTimeZone, calendarId) as Callable
+  if (timeZoneImpl) {
+    return bindArgs(moveZonedEpochs, timeZoneImpl, calendarId) as Callable
   }
   return bindArgs(moveDateTime, calendarId) as Callable
 }
 
 export function createDiffMarkers(
-  nativeTimeZone: NativeTimeZone | undefined,
+  timeZoneImpl: TimeZoneImpl | undefined,
   calendarId: string,
 ): DiffMarkers {
-  if (nativeTimeZone) {
-    return bindArgs(
-      diffZonedEpochsExact,
-      nativeTimeZone,
-      calendarId,
-    ) as Callable
+  if (timeZoneImpl) {
+    return bindArgs(diffZonedEpochsExact, timeZoneImpl, calendarId) as Callable
   }
   return bindArgs(diffDateTimesExact, calendarId) as Callable
 }

@@ -12,10 +12,8 @@ export type BigNano = [days: number, timeNano: number]
 does balancing
 */
 export function createBigNano(days: number, timeNano: number): BigNano {
-  const dayAndNano = divModTrunc(timeNano, nanoInUtcDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const extraDays = dayAndNano[0]
-  let newTimeNano = dayAndNano[1]
+  const [extraDays, timeNanoRemainder] = divModTrunc(timeNano, nanoInUtcDay)
+  let newTimeNano = timeNanoRemainder
   let newDays = days + extraDays
   const newDaysSign = Math.sign(newDays)
 
@@ -54,7 +52,7 @@ export function compareBigNanos(a: BigNano, b: BigNano): NumberSign {
   return compareNumbers(a[0], b[0]) || compareNumbers(a[1], b[1])
 }
 
-export function bigNanoOutside(
+export function isBigNanoOutside(
   subject: BigNano,
   rangeStart: BigNano,
   rangeEndExcl: BigNano,
@@ -83,10 +81,7 @@ Expects a proper integer. For user input, call toStrictInteger
 */
 export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
   const wholeInDay = nanoInUtcDay / multiplierNano
-  const dayAndRemainder = divModTrunc(num, wholeInDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const days = dayAndRemainder[0]
-  const remainder = dayAndRemainder[1]
+  const [days, remainder] = divModTrunc(num, wholeInDay)
   return [days, remainder * multiplierNano] // scaled. doesn't need balancing
 }
 
@@ -109,10 +104,7 @@ export function bigNanoToNumber(
 ): number {
   const days = bigNano[0]
   const timeNano = bigNano[1]
-  const wholeAndRemainder = divModTrunc(timeNano, divisorNano)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const whole = wholeAndRemainder[0]
-  const remainderNano = wholeAndRemainder[1]
+  const [whole, remainderNano] = divModTrunc(timeNano, divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
   // adding fraction to whole first results in better precision
   return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
@@ -129,10 +121,7 @@ export function divModBigNano(
 ): [whole: number, remainderNano: number] {
   const days = bigNano[0]
   const timeNano = bigNano[1]
-  const wholeAndRemainder = divModFunc(timeNano, divisorNano)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const whole = wholeAndRemainder[0]
-  const remainderNano = wholeAndRemainder[1]
+  const [whole, remainderNano] = divModFunc(timeNano, divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
   return [days * wholeInDay + whole, remainderNano]
 }

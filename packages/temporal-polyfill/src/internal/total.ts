@@ -17,7 +17,8 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields } from './isoFields'
-import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
+import { DurationTotalOptions } from './optionsModel'
+import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   Marker,
   MarkerToEpochNano,
@@ -63,13 +64,10 @@ export function totalDuration<RA>(
     return 0
   }
 
-  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
-  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(
-    nativeTimeZone,
-    relativeToSlots.calendar,
-  )
+  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendar)
 
   const endMarker = moveMarker(marker, slots)
 

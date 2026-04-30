@@ -1,5 +1,5 @@
-import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
+import { isoCalendarId } from './intlCalendarConfig'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
 import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'

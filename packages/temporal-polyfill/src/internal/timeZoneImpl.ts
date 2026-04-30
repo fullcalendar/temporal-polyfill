@@ -1,6 +1,6 @@
 import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
-import { hashIntlFormatParts } from './intlFormatUtils'
-import { parseIntlPartsYear } from './intlMath'
+import { parseIntlPartsYear } from './intlCalendar'
+import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
 import { IsoDateTimeFields } from './isoFields'
 import {
   checkEpochNanoInBounds,
@@ -19,26 +19,24 @@ import { resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
 
-export interface NativeTimeZone {
+export interface TimeZoneImpl {
   getOffsetNanosecondsFor(epochNano: BigNano): number
   getPossibleInstantsFor(isoFields: IsoDateTimeFields): BigNano[]
   getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
 }
 
-export const queryNativeTimeZone = memoize(
-  (timeZoneId: string): NativeTimeZone => {
-    const record = resolveTimeZoneRecord(timeZoneId)
+export const queryTimeZone = memoize((timeZoneId: string): TimeZoneImpl => {
+  const record = resolveTimeZoneRecord(timeZoneId)
 
-    return record.kind === 'named'
-      ? new IntlTimeZone(record.id, record.format)
-      : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
-  },
-)
+  return record.kind === 'named'
+    ? new IntlTimeZone(record.id, record.format)
+    : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
+})
 
 // Fixed
 // -----------------------------------------------------------------------------
 
-export class FixedTimeZone implements NativeTimeZone {
+export class FixedTimeZone implements TimeZoneImpl {
   constructor(public offsetNano: number) {}
 
   getOffsetNanosecondsFor(): number {
@@ -66,7 +64,7 @@ interface IntlTimeZoneStore {
   getTransition: (epochSec: number, direction: -1 | 1) => number | undefined
 }
 
-export class IntlTimeZone implements NativeTimeZone {
+export class IntlTimeZone implements TimeZoneImpl {
   tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
   constructor(timeZoneId: string, format: Intl.DateTimeFormat) {
@@ -268,7 +266,10 @@ function createComputeOffsetSec(
   format: Intl.DateTimeFormat,
 ): (epochSec: number) => number {
   return (epochSec: number) => {
-    const intlParts = hashIntlFormatParts(format, epochSec * milliInSec)
+    const intlParts = formatEpochMilliToPartsRecord(
+      format,
+      epochSec * milliInSec,
+    )
     const zonedEpochSec = isoArgsToEpochSec(
       parseIntlPartsYear(intlParts),
       parseInt(intlParts.month),

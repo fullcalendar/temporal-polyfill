@@ -1,6 +1,6 @@
-import { durationWithFields, refineDurationBag } from '../internal/bagRefine'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
+import { refineDurationObjectLike } from '../internal/createFromFields'
 import { DurationFields } from '../internal/durationFields'
 import {
   absDuration,
@@ -9,16 +9,16 @@ import {
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
-import { DurationBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration } from '../internal/isoParse'
+import { mergeDurationFields } from '../internal/merge'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { DurationBranding } from '../internal/slots'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
@@ -36,8 +36,8 @@ export type Record = Readonly<DurationFields> & {
   readonly sign: NumberSign
 }
 
-export type FromFields = DurationBag
-export type WithFields = DurationBag
+export type FromFields = Partial<DurationFields>
+export type WithFields = Partial<DurationFields>
 export type RelativeToRecord =
   | ZonedDateTimeFns.Record
   | PlainDateTimeFns.Record
@@ -65,7 +65,9 @@ export const create = constructDurationSlots as (
   nanoseconds?: number,
 ) => Record
 
-export const fromFields = refineDurationBag as (fields: FromFields) => Record
+export const fromFields = refineDurationObjectLike as (
+  fields: FromFields,
+) => Record
 
 export const fromString = parseDuration as (s: string) => Record
 
@@ -81,7 +83,7 @@ export const blank = getDurationBlank as (record: Record) => boolean
 // Setters
 // -----------------------------------------------------------------------------
 
-export const withFields = durationWithFields as (
+export const withFields = mergeDurationFields as (
   record: Record,
   fields: WithFields,
 ) => Record

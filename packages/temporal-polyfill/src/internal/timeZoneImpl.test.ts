@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { bigNanoToNumber, numberToBigNano } from './bigNano'
-import { queryNativeTimeZone } from './timeZoneNative'
+import { queryTimeZone } from './timeZoneImpl'
 import { nanoInSec } from './units'
 
-describe('queryNativeTimeZone', () => {
+describe('queryTimeZone', () => {
   it('finds close-together transitions without hiding the in-between offset', () => {
-    const nativeTimeZone = queryNativeTimeZone('Africa/Tunis')
+    const timeZoneImpl = queryTimeZone('Africa/Tunis')
 
     // Africa/Tunis changed from +02:00 to +01:00 on 1943-04-17, then back to
     // +02:00 just over eight days later. A broad endpoint-only period can see
@@ -14,14 +14,14 @@ describe('queryNativeTimeZone', () => {
     // feeds ordinary Temporal wall-clock/DST-gap math, not only public
     // transition queries.
     expect(
-      nativeTimeZone.getOffsetNanosecondsFor(
+      timeZoneImpl.getOffsetNanosecondsFor(
         numberToBigNano(-842_916_600, nanoInSec),
       ),
     ).toBe(3_600_000_000_000)
 
     expect(
       bigNanoToNumber(
-        nativeTimeZone.getTransition(
+        timeZoneImpl.getTransition(
           numberToBigNano(-842_920_200, nanoInSec),
           1,
         )!,
@@ -31,7 +31,7 @@ describe('queryNativeTimeZone', () => {
 
     expect(
       bigNanoToNumber(
-        nativeTimeZone.getTransition(
+        timeZoneImpl.getTransition(
           numberToBigNano(-842_916_600, nanoInSec),
           -1,
         )!,

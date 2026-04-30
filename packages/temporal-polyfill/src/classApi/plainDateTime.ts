@@ -1,11 +1,4 @@
 import {
-  PlainDateBag,
-  PlainDateTimeBag,
-  plainDateTimeWithFields,
-  refineNativePlainDateTimeBag,
-} from '../internal/bagRefine'
-import { refineCalendarId } from '../internal/calendarId'
-import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../internal/compare'
@@ -14,24 +7,27 @@ import {
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
 } from '../internal/convert'
+import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes } from '../internal/diff'
-import { DateTimeBag, DateTimeFields } from '../internal/fields'
+import { DateLikeObject, DateTimeLikeObject } from '../internal/fieldTypes'
+import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { isoTimeFieldDefaults } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { parsePlainDateTime } from '../internal/isoParse'
+import { mergePlainDateTimeFields } from '../internal/merge'
 import {
   plainDateTimeWithPlainTime,
   slotsWithCalendarId,
 } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
   RoundingOptions,
-  refineOverflowOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { roundPlainDateTime } from '../internal/round'
 import {
   BrandingSlots,
@@ -46,7 +42,7 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarIdFromBag,
@@ -77,11 +73,11 @@ import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDateTime = any & DateTimeFields
-export type PlainDateTimeArg = PlainDateTime | PlainDateTimeBag | string
+export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  bindArgs(constructPlainDateTimeSlots, refineCalendarId),
+  constructPlainDateTimeSlots,
   {
     ...calendarIdGetters,
     ...dateGetters,
@@ -90,11 +86,11 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   {
     with(
       slots: PlainDateTimeSlots,
-      mod: DateTimeBag,
+      mod: Partial<DateTimeFields>,
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
-        plainDateTimeWithFields(slots, rejectInvalidBag(mod), options),
+        mergePlainDateTimeFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
@@ -249,9 +245,9 @@ export function toPlainDateTimeSlots(
         return zonedDateTimeToPlainDateTime(slots as ZonedDateTimeSlots)
     }
 
-    return refineNativePlainDateTimeBag(
-      getCalendarIdFromBag(arg as PlainDateBag),
-      arg as PlainDateBag,
+    return refinePlainDateTimeObjectLike(
+      getCalendarIdFromBag(arg as DateLikeObject),
+      arg as DateLikeObject,
       options,
     )
   }

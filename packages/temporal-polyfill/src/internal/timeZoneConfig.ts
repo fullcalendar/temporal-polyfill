@@ -1,7 +1,7 @@
 import { isoArgsToEpochSec } from './timeMath'
 export const utcTimeZoneId = 'UTC'
 
-// Native time-zone transition search works by sampling the offset at both ends
+// Time-zone transition search works by sampling the offset at both ends
 // of a period and then bisecting only when those samples differ. Keep the broad
 // default for ordinary zones, but use shorter periods for tzdb histories where
 // the offset can change away and back within a few days. This period is used by

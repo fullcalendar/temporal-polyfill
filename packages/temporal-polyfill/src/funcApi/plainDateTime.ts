@@ -1,11 +1,3 @@
-import {
-  PlainDateTimeBag,
-  convertNativeToPlainMonthDay,
-  convertNativeToPlainYearMonth,
-  isoTimeFieldsToCal,
-  plainDateTimeWithFields,
-  refineNativePlainDateTimeBag,
-} from '../internal/bagRefine'
 import { addBigNanos, numberToBigNano } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import { toStrictInteger } from '../internal/cast'
@@ -14,15 +6,23 @@ import {
   plainDateTimesEqual,
 } from '../internal/compare'
 import { constructPlainDateTimeSlots } from '../internal/construct'
-import { plainDateTimeToZonedDateTime } from '../internal/convert'
+import {
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+  plainDateTimeToZonedDateTime,
+} from '../internal/convert'
+import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes } from '../internal/diff'
-import { DateTimeBag, DateTimeFields } from '../internal/fields'
+import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { DateTimeLikeObject } from '../internal/fieldTypes'
+import { DateTimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
+import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
+import { mergePlainDateTimeFields } from '../internal/merge'
 import {
   plainDateTimeWithPlainDate,
   plainDateTimeWithPlainTime,
@@ -37,16 +37,16 @@ import {
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-  refineUnitRoundOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
+import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import {
   IsoDateTimeInterval,
   computeDayFloor,
   roundPlainDateTime,
 } from '../internal/round'
 import {
-  DateSlots,
-  DateTimeSlots,
+  AbstractDateSlots,
+  AbstractDateTimeSlots,
   PlainDateTimeBranding,
   createPlainDateSlots,
   createPlainDateTimeSlots,
@@ -183,8 +183,8 @@ export type Record = {
 }
 
 export type Fields = DateTimeFields
-export type FromFields = PlainDateTimeBag
-export type WithFields = DateTimeBag
+export type FromFields = DateTimeLikeObject
+export type WithFields = Partial<DateTimeFields>
 export type ISOFields = IsoDateTimeFields
 
 export type AssignmentOptions = OverflowOptions
@@ -197,10 +197,7 @@ export type ToStringOptions = DateTimeDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = bindArgs(
-  constructPlainDateTimeSlots,
-  refineCalendarId,
-) as (
+export const create = constructPlainDateTimeSlots as (
   isoYear: number,
   isoMonth: number,
   isoDay: number,
@@ -217,7 +214,7 @@ export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
-  return refineNativePlainDateTimeBag(
+  return refinePlainDateTimeObjectLike(
     getCalendarIdFromBag(fields),
     fields,
     options,
@@ -246,7 +243,7 @@ export const calendarId = getCalendarId as (record: Record) => string
 
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
-export const daysInWeek = computeIsoDaysInWeek as (record: Record) => number
+export const daysInWeek = (() => 7) as (record: Record) => number
 
 export const weekOfYear = computeWeekOfYear as (
   record: Record,
@@ -274,7 +271,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainDateTimeWithFields(record, fields, options)
+  return mergePlainDateTimeFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
@@ -352,13 +349,13 @@ export const toPlainTime = createPlainTimeSlots as (
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
   return createPlainYearMonthSlots({
-    ...record,
-    ...convertNativeToPlainYearMonth(getCalendarId(record), getFields(record)),
+    ...record, // why???
+    ...convertToPlainYearMonth(getCalendarId(record), getFields(record)),
   })
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertNativeToPlainMonthDay(getCalendarId(record), getFields(record))
+  return convertToPlainMonthDay(getCalendarId(record), getFields(record))
 }
 
 // Formatting
@@ -630,7 +627,7 @@ function moveByTimeUnit(
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: DateSlots) => IsoDateTimeInterval,
+  computeInterval: (isoFields: AbstractDateSlots) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -644,7 +641,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: DateTimeSlots) => IsoDateTimeFields,
+  computeAlignment: (slots: AbstractDateTimeSlots) => IsoDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {

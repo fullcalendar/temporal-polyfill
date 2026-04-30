@@ -2,7 +2,7 @@ import { expect } from 'vitest'
 import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import { IsoTimeFields } from '../internal/isoFields'
-import { DateSlots, DateTimeSlots } from '../internal/slots'
+import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
 import { isoToEpochNano } from '../internal/timeMath'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
@@ -122,7 +122,7 @@ const durationSlotDefaults = {
 
 export function expectPlainDateEquals(
   pd: PlainDateFns.Record,
-  slots: Partial<DateSlots>,
+  slots: Partial<AbstractDateSlots>,
 ): void {
   expectPropsEqualStrict(pd, {
     ...plainDateDefaults,
@@ -132,7 +132,7 @@ export function expectPlainDateEquals(
 
 export function expectPlainYearMonthEquals(
   pym: PlainYearMonthFns.Record,
-  slots: Partial<DateSlots>,
+  slots: Partial<AbstractDateSlots>,
 ): void {
   expectPropsEqualStrict(pym, {
     ...plainYearMonthDefaults,
@@ -142,7 +142,7 @@ export function expectPlainYearMonthEquals(
 
 export function expectPlainMonthDayEquals(
   pym: PlainMonthDayFns.Record,
-  slots: Partial<DateSlots>,
+  slots: Partial<AbstractDateSlots>,
 ): void {
   expectPropsEqualStrict(pym, {
     ...plainMonthDayDefaults,
@@ -152,7 +152,7 @@ export function expectPlainMonthDayEquals(
 
 export function expectPlainDateTimeEquals(
   pdt: PlainDateTimeFns.Record,
-  slots: Partial<DateTimeSlots>,
+  slots: Partial<AbstractDateTimeSlots>,
 ): void {
   expectPropsEqualStrict(pdt, {
     ...plainDateTimeDefaults,

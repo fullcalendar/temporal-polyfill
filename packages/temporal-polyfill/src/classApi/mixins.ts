@@ -1,21 +1,21 @@
 import {
-  queryNativeDateParts,
-  queryNativeDay,
-  queryNativeDayOfYear,
-  queryNativeDaysInMonth,
-  queryNativeDaysInYear,
-  queryNativeEraParts,
-  queryNativeInLeapYear,
-  queryNativeMonthCode,
-  queryNativeMonthsInYear,
-  queryNativeWeekOfYear,
-  queryNativeYearOfWeek,
-} from '../internal/calendarNativeQuery'
+  queryCalendarDateFields,
+  queryCalendarDay,
+  queryCalendarDayOfYear,
+  queryCalendarDaysInMonth,
+  queryCalendarDaysInYear,
+  queryCalendarEraFields,
+  queryCalendarInLeapYear,
+  queryCalendarMonthCode,
+  queryCalendarMonthsInYear,
+  queryCalendarWeekOfYear,
+  queryCalendarYearOfWeek,
+} from '../internal/calendarQuery'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
-import { timeFieldNamesAsc } from '../internal/fields'
+import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { isoTimeFieldNamesAsc } from '../internal/isoFields'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
+import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
 import {
@@ -29,21 +29,23 @@ import {
 // -----------------------------------------------------------------------------
 
 const calendarGetterQueries = {
-  era: (slots: any) => queryNativeEraParts(slots.calendar, slots)[0],
-  eraYear: (slots: any) => queryNativeEraParts(slots.calendar, slots)[1],
-  year: (slots: any) => queryNativeDateParts(slots.calendar, slots)[0],
-  month: (slots: any) => queryNativeDateParts(slots.calendar, slots)[1],
-  day: (slots: any) => queryNativeDay(slots.calendar, slots),
-  monthCode: (slots: any) => queryNativeMonthCode(slots.calendar, slots),
-  inLeapYear: (slots: any) => queryNativeInLeapYear(slots.calendar, slots),
-  monthsInYear: (slots: any) => queryNativeMonthsInYear(slots.calendar, slots),
-  daysInMonth: (slots: any) => queryNativeDaysInMonth(slots.calendar, slots),
-  daysInYear: (slots: any) => queryNativeDaysInYear(slots.calendar, slots),
+  era: (slots: any) => queryCalendarEraFields(slots.calendar, slots).era,
+  eraYear: (slots: any) =>
+    queryCalendarEraFields(slots.calendar, slots).eraYear,
+  year: (slots: any) => queryCalendarDateFields(slots.calendar, slots).year,
+  month: (slots: any) => queryCalendarDateFields(slots.calendar, slots).month,
+  day: (slots: any) => queryCalendarDay(slots.calendar, slots),
+  monthCode: (slots: any) => queryCalendarMonthCode(slots.calendar, slots),
+  inLeapYear: (slots: any) => queryCalendarInLeapYear(slots.calendar, slots),
+  monthsInYear: (slots: any) =>
+    queryCalendarMonthsInYear(slots.calendar, slots),
+  daysInMonth: (slots: any) => queryCalendarDaysInMonth(slots.calendar, slots),
+  daysInYear: (slots: any) => queryCalendarDaysInYear(slots.calendar, slots),
   dayOfWeek: computeIsoDayOfWeek,
-  daysInWeek: computeIsoDaysInWeek,
-  dayOfYear: (slots: any) => queryNativeDayOfYear(slots.calendar, slots),
-  weekOfYear: (slots: any) => queryNativeWeekOfYear(slots.calendar, slots),
-  yearOfWeek: (slots: any) => queryNativeYearOfWeek(slots.calendar, slots),
+  daysInWeek: () => 7,
+  dayOfYear: (slots: any) => queryCalendarDayOfYear(slots.calendar, slots),
+  weekOfYear: (slots: any) => queryCalendarWeekOfYear(slots.calendar, slots),
+  yearOfWeek: (slots: any) => queryCalendarYearOfWeek(slots.calendar, slots),
 }
 
 function createCalendarGetters<M>(methodNameMap: M): {

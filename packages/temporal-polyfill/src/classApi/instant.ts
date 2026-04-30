@@ -16,7 +16,7 @@ import {
   DiffOptions,
   InstantDisplayOptions,
   RoundingOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { roundInstant } from '../internal/round'
 import {
   InstantBranding,

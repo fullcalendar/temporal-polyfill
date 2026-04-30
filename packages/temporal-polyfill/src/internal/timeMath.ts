@@ -1,8 +1,8 @@
 import {
   BigNano,
-  bigNanoOutside,
   bigNanoToBigInt,
   divModBigNano,
+  isBigNanoOutside,
   moveBigNano,
   numberToBigNano,
 } from './bigNano'
@@ -149,7 +149,7 @@ export function checkIsoDateTimeInBounds<T extends IsoDateTimeFields>(
 export function checkEpochNanoInBounds(
   epochNano: BigNano | undefined,
 ): BigNano {
-  if (!epochNano || bigNanoOutside(epochNano, epochNanoMin, epochNanoMax)) {
+  if (!epochNano || isBigNanoOutside(epochNano, epochNanoMin, epochNanoMax)) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
   return epochNano
@@ -163,10 +163,7 @@ export function isoTimeFieldsToNano(isoTimeFields: IsoTimeFields): number {
 }
 
 export function nanoToIsoTimeAndDay(nano: number): [IsoTimeFields, number] {
-  const dayAndNano = divModFloor(nano, nanoInUtcDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const dayDelta = dayAndNano[0]
-  const timeNano = dayAndNano[1]
+  const [dayDelta, timeNano] = divModFloor(nano, nanoInUtcDay)
   const isoTimeFields = nanoToGivenFields(
     timeNano,
     Unit.Hour,
@@ -258,10 +255,7 @@ export function isoToEpochNano(
   const epochMilli = isoToEpochMilli(isoFields)
 
   if (epochMilli !== undefined) {
-    const dayAndMilli = divModTrunc(epochMilli, milliInDay)
-    // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-    const days = dayAndMilli[0]
-    const milliRemainder = dayAndMilli[1]
+    const [days, milliRemainder] = divModTrunc(epochMilli, milliInDay)
 
     const timeNano =
       milliRemainder * nanoInMilli +
@@ -281,12 +275,9 @@ export function isoToEpochNanoWithOffset(
   isoFields: IsoDateTimeFields,
   offsetNano: number,
 ): BigNano {
-  const timeAndDay = nanoToIsoTimeAndDay(
+  const [newIsoTimeFields, dayDelta] = nanoToIsoTimeAndDay(
     isoTimeFieldsToNano(isoFields) - offsetNano,
   )
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const newIsoTimeFields = timeAndDay[0]
-  const dayDelta = timeAndDay[1]
   const epochNano = isoToEpochNano({
     ...isoFields,
     isoDay: isoFields.isoDay + dayDelta,
@@ -318,15 +309,19 @@ export function isoArgsToEpochSec(...args: IsoTuple): number {
 If out-of-bounds, returns undefined
 */
 export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
-  const legacyDateTuple = isoToLegacyDate.apply(undefined, args)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const legacyDate = legacyDateTuple[0]
-  const daysNudged = legacyDateTuple[1]
+  const [legacyDate, daysNudged] = isoToLegacyDate(...args)
   const epochMilli = legacyDate.valueOf()
 
   if (!isNaN(epochMilli)) {
     return epochMilli - daysNudged * milliInDay
   }
+}
+
+export function diffEpochMilliDays(
+  epochMilli0: number,
+  epochMilli1: number,
+): number {
+  return Math.trunc((epochMilli1 - epochMilli0) / milliInDay)
 }
 
 export function isoToLegacyDate(
@@ -358,10 +353,7 @@ export function epochNanoToIso(
   epochNano: BigNano,
   offsetNano: number,
 ): IsoDateTimeFields {
-  const dayAndTimeNano = moveBigNano(epochNano, offsetNano)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  let days = dayAndTimeNano[0]
-  let timeNano = dayAndTimeNano[1]
+  let [days, timeNano] = moveBigNano(epochNano, offsetNano)
 
   // convert to start-of-day and time-of-day
   if (timeNano < 0) {
@@ -369,10 +361,7 @@ export function epochNanoToIso(
     days -= 1
   }
 
-  const milliParts = divModFloor(timeNano, nanoInMilli)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const timeMilli = milliParts[0]
-  const nanoRemainder = milliParts[1]
+  const [timeMilli, nanoRemainder] = divModFloor(timeNano, nanoInMilli)
   const microParts = divModFloor(nanoRemainder, nanoInMicro)
   const isoMicrosecond = microParts[0]
   const isoNanosecond = microParts[1]

@@ -1,31 +1,12 @@
+import { getCalendarFieldNames } from './calendarFields'
 import {
-  getCalendarFieldNames,
-  readNativeCalendarFields,
-} from './bagCalendarFields'
-import { readAndCoerceBagFields } from './bagFields'
-import {
-  dateFromFields,
-  monthDayFromFields,
-  resolveDateFromFields,
-  yearMonthFromFields,
-} from './bagFromFields'
-import { timeFieldsToIso } from './bagRefineConfig'
-import type {
-  CoercedZonedDateTimeBag,
-  ZonedDateTimeBag,
-} from './bagRefineConfig'
-import {
+  DurationFields,
   durationFieldDefaults,
   durationFieldNamesAlpha,
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
+import { resolveTimeFields } from './fieldConvert'
 import {
-  DateBag,
-  DateTimeBag,
-  DurationBag,
-  MonthDayBag,
-  TimeBag,
-  YearMonthBag,
   dateFieldNamesAlpha,
   dateFieldNamesAlphaWithEra,
   dateTimeAndZoneFieldNamesAlpha,
@@ -33,21 +14,30 @@ import {
   dateTimeFieldNamesAlpha,
   dateTimeFieldNamesAlphaWithEra,
   dayFieldNames,
-  timeFieldDefaults,
   timeFieldNamesAlpha,
   timeZoneFieldNames,
   yearMonthFieldNames,
   yearMonthFieldNamesWithEra,
-} from './fields'
-import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
-import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
-import { Overflow } from './optionsModel'
+} from './fieldNames'
+import { readAndRefineBagFields } from './fieldRefine'
+import type {
+  ZonedDateTimeLikeObject,
+  ZonedDateTimeRefinedObject,
+} from './fieldTypes'
 import {
-  OverflowOptions,
-  ZonedFieldOptions,
+  DateFields,
+  DateTimeFields,
+  MonthDayFields,
+  TimeFields,
+  YearMonthFields,
+} from './fieldTypes'
+import { isoTimeFieldDefaults } from './isoFields'
+import { isoEpochFirstLeapYear } from './isoMath'
+import {
   refineOverflowOptions,
   refineZonedFieldOptions,
-} from './optionsRefine'
+} from './optionsFieldRefine'
+import { OverflowOptions, ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlotsNoCalendar } from './relativeMath'
 import {
   DurationSlots,
@@ -62,50 +52,55 @@ import {
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
+import {
+  createPlainDateFromFields,
+  createPlainDateFromFieldsWithOptionsRefiner,
+  createPlainMonthDayFromFields,
+  createPlainYearMonthFromFields,
+} from './slotsFromRefinedFields'
 import { checkIsoDateTimeInBounds } from './timeMath'
-import { queryNativeTimeZone } from './timeZoneNative'
-import { getMatchingInstantFor } from './timeZoneNativeMath'
+import { queryTimeZone } from './timeZoneImpl'
+import { getMatchingInstantFor } from './timeZoneMath'
 
 /*
-Top-level Temporal property-bag entrypoints.
+Top-level Temporal object-like entrypoints.
 
-These functions take user-provided bags, read/coerce their fields in the
-observable order required by Temporal, resolve calendar/time-zone pieces through
-the built-in calendar/time-zone implementation, and return slots. "Native" here
-means "using this polyfill's built-in calendar/time-zone path", not a host API
-distinction. A better module name would avoid that overloaded word.
+These functions take user-provided object-like inputs, read/refine their fields in the
+observable order required by Temporal, resolve calendar/time-zone pieces
+through the built-in calendar/time-zone implementation, and return slots.
 */
 
 // High-Level Refining
 // -----------------------------------------------------------------------------
 
-export function refineMaybeNativeZonedDateTimeBag(
+// Input could be ZonedDateTime OR PlainDate fields (for relativeTo).
+export function refineMaybeZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
   calendarId: string,
-  bag: ZonedDateTimeBag,
+  bag: ZonedDateTimeLikeObject, // i think this needs type change
 ): RelativeToSlotsNoCalendar {
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesAlphaWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ [],
-  ) as CoercedZonedDateTimeBag
+  ) as ZonedDateTimeRefinedObject
 
   if (fields.timeZone !== undefined) {
-    const isoDateFields = dateFromFields(calendarId, fields as any)
+    const isoDateFields = createPlainDateFromFields(calendarId, fields as any)
     const isoTimeFields = resolveTimeFields(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
-    const nativeTimeZone = queryNativeTimeZone(timeZoneId)
+    const timeZoneImpl = queryTimeZone(timeZoneId)
 
     const epochNanoseconds = getMatchingInstantFor(
-      nativeTimeZone,
+      timeZoneImpl,
       { ...isoDateFields, ...isoTimeFields },
-      // After readAndCoerceBagFields(), the public "offset" field is stored
+      // After readAndRefineBagFields(), the public "offset" field is stored
       // internally as offset nanoseconds.
       fields.offset,
     )
@@ -113,14 +108,14 @@ export function refineMaybeNativeZonedDateTimeBag(
     return { epochNanoseconds, timeZone: timeZoneId }
   }
 
-  const isoDateInternals = dateFromFields(calendarId, fields as any)
+  const isoDateInternals = createPlainDateFromFields(calendarId, fields as any)
   return { ...isoDateInternals, ...isoTimeFieldDefaults }
 }
 
-export function refineNativeZonedDateTimeBag(
+export function refineZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
   calendarId: string,
-  bag: ZonedDateTimeBag,
+  bag: ZonedDateTimeLikeObject,
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
   const validFieldNames = getCalendarFieldNames(
@@ -128,25 +123,25 @@ export function refineNativeZonedDateTimeBag(
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesAlphaWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ timeZoneFieldNames,
-  ) as CoercedZonedDateTimeBag
+  ) as ZonedDateTimeRefinedObject
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
   const [isoDateFields, overflow, offsetDisambig, epochDisambig] =
-    resolveDateFromFields(calendarId, fields as any, () =>
+    createPlainDateFromFieldsWithOptionsRefiner(calendarId, fields as any, () =>
       refineZonedFieldOptions(options),
     )
   const isoTimeFields = resolveTimeFields(fields, overflow)
-  const nativeTimeZone = queryNativeTimeZone(timeZoneId)
+  const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
-    nativeTimeZone,
+    timeZoneImpl,
     { ...isoDateFields, ...isoTimeFields },
-    // After readAndCoerceBagFields(), the public "offset" field is stored
+    // After readAndRefineBagFields(), the public "offset" field is stored
     // internally as offset nanoseconds.
     fields.offset,
     offsetDisambig,
@@ -156,9 +151,9 @@ export function refineNativeZonedDateTimeBag(
   return createZonedDateTimeSlots(epochNanoseconds, timeZoneId, calendarId)
 }
 
-export function refineNativePlainDateTimeBag(
+export function refinePlainDateTimeObjectLike(
   calendarId: string,
-  bag: DateTimeBag,
+  bag: Partial<DateTimeFields>,
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
   const validFieldNames = getCalendarFieldNames(
@@ -166,17 +161,18 @@ export function refineNativePlainDateTimeBag(
     dateTimeFieldNamesAlpha,
     dateTimeFieldNamesAlphaWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ [],
-  ) as DateTimeBag
+  ) as Partial<DateTimeFields>
 
-  const [isoDateInternals, overflow] = resolveDateFromFields(
-    calendarId,
-    fields as any,
-    () => [refineOverflowOptions(options)],
-  )
+  const [isoDateInternals, overflow] =
+    createPlainDateFromFieldsWithOptionsRefiner(
+      calendarId,
+      fields as any,
+      () => [refineOverflowOptions(options)],
+    )
   const isoTimeFields = resolveTimeFields(fields, overflow)
 
   const isoFields = checkIsoDateTimeInBounds({
@@ -187,9 +183,9 @@ export function refineNativePlainDateTimeBag(
   return createPlainDateTimeSlots(isoFields)
 }
 
-export function refineNativePlainDateBag(
+export function refinePlainDateObjectLike(
   calendarId: string,
-  bag: DateBag,
+  bag: Partial<DateFields>,
   options: OverflowOptions | undefined,
   requireFields: string[] = [],
 ): PlainDateSlots {
@@ -198,18 +194,18 @@ export function refineNativePlainDateBag(
     dateFieldNamesAlpha,
     dateFieldNamesAlphaWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ requireFields,
   )
 
-  return dateFromFields(calendarId, fields as any, options)
+  return createPlainDateFromFields(calendarId, fields as any, options)
 }
 
-export function refineNativePlainYearMonthBag(
+export function refinePlainYearMonthObjectLike(
   calendarId: string,
-  bag: YearMonthBag,
+  bag: Partial<YearMonthFields>,
   options: OverflowOptions | undefined,
   requireFields?: string[],
 ): PlainYearMonthSlots {
@@ -218,19 +214,19 @@ export function refineNativePlainYearMonthBag(
     yearMonthFieldNames,
     yearMonthFieldNamesWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ requireFields,
   )
 
-  return yearMonthFromFields(calendarId, fields as any, options)
+  return createPlainYearMonthFromFields(calendarId, fields as any, options)
 }
 
-export function refineNativePlainMonthDayBag(
+export function refinePlainMonthDayObjectLike(
   calendarId: string,
   calendarAbsent: boolean,
-  bag: MonthDayBag,
+  bag: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const validFieldNames = getCalendarFieldNames(
@@ -238,11 +234,11 @@ export function refineNativePlainMonthDayBag(
     dateFieldNamesAlpha,
     dateFieldNamesAlphaWithEra,
   )
-  const fields = readNativeCalendarFields(
+  const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
     /* requiredFieldNames */ dayFieldNames,
-  ) as DateBag
+  ) as Partial<DateFields>
 
   if (
     calendarAbsent &&
@@ -253,20 +249,20 @@ export function refineNativePlainMonthDayBag(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return monthDayFromFields(calendarId, fields, options)
+  return createPlainMonthDayFromFields(calendarId, fields, options)
 }
 
-export function refinePlainTimeBag(
-  bag: TimeBag,
+export function refinePlainTimeObjectLike(
+  bag: Partial<TimeFields>,
   options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
   // disallowEmpty
-  const fields = readAndCoerceBagFields(
+  const fields = readAndRefineBagFields(
     bag,
     timeFieldNamesAlpha,
     [],
     true,
-  ) as TimeBag
+  ) as Partial<TimeFields>
 
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
@@ -274,27 +270,19 @@ export function refinePlainTimeBag(
   return createPlainTimeSlots(resolveTimeFields(fields, overflow))
 }
 
-export function refineDurationBag(bag: DurationBag): DurationSlots {
+export function refineDurationObjectLike(
+  bag: Partial<DurationFields>,
+): DurationSlots {
   // refine in 'partial' mode
-  const durationFields = readAndCoerceBagFields(
+  const durationFields = readAndRefineBagFields(
     bag,
     durationFieldNamesAlpha,
-  ) as DurationBag
+  ) as Partial<DurationFields>
 
   return createDurationSlots(
     checkDurationUnits({
       ...durationFieldDefaults,
       ...durationFields,
     }),
-  )
-}
-
-function resolveTimeFields(
-  fields: TimeBag,
-  overflow?: Overflow,
-): IsoTimeFields {
-  return constrainIsoTimeFields(
-    timeFieldsToIso({ ...timeFieldDefaults, ...fields }),
-    overflow,
   )
 }

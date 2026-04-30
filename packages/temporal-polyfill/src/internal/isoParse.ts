@@ -1,17 +1,17 @@
 import { BigNano } from './bigNano'
-import { isoCalendarId } from './calendarConfig'
 import { resolveCalendarId } from './calendarId'
 import {
-  queryNativeDateParts,
-  queryNativeDay,
-  queryNativeIsoFieldsFromParts,
-  queryNativeMonthCodeParts,
-  queryNativeYearMonthForMonthDay,
-} from './calendarNativeQuery'
+  queryCalendarDateFields,
+  queryCalendarDay,
+  queryCalendarIsoFieldsFromParts,
+  queryCalendarMonthCodeParts,
+  queryCalendarYearMonthForMonthDay,
+} from './calendarQuery'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { isoCalendarId } from './intlCalendarConfig'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -27,16 +27,19 @@ import {
 } from './isoMath'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
+  offsetHasSeconds,
+  offsetRegExpStr,
   parseOffsetNano,
   parseOffsetNanoMaybe,
   validateOffsetSeparators,
 } from './offsetParse'
+import { refineZonedFieldOptions } from './optionsFieldRefine'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
-import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
+import { ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
-  DateSlots,
-  DateTimeSlots,
+  AbstractDateSlots,
+  AbstractDateTimeSlots,
   DurationSlots,
   InstantSlots,
   PlainDateSlots,
@@ -60,23 +63,21 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoToEpochNanoWithOffset,
-  nanoToIsoTimeAndDay,
 } from './timeMath'
+import { organizeTimeParts, timeRegExpStr } from './timeParse'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
-import { FixedTimeZone, queryNativeTimeZone } from './timeZoneNative'
-import {
-  getMatchingInstantFor,
-  getStartOfDayInstantFor,
-} from './timeZoneNativeMath'
+import { FixedTimeZone, queryTimeZone } from './timeZoneImpl'
+import { getMatchingInstantFor, getStartOfDayInstantFor } from './timeZoneMath'
 import { nanoToGivenFields } from './unitMath'
 import { TimeUnit, Unit, nanoInSec, unitNanoMap } from './units'
 import {
   createRegExp,
   divModFloor,
-  parseInt0,
+  fractionRegExpStr,
   parseSign,
   parseSubsecNano,
+  signRegExpStr,
   validateTimeSeparators,
   zipProps,
 } from './utils'
@@ -214,7 +215,7 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
 
   const isoSlots = parsePlainDate(s, true)
   const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoFields) => queryNativeDay(isoSlots.calendar, isoFields),
+    (isoFields) => queryCalendarDay(isoSlots.calendar, isoFields),
     isoSlots,
   )
 
@@ -242,20 +243,24 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
   const { calendar } = dateSlots
 
   // normalize year&month to be as close as possible to epoch
-  const [origYear, origMonth, day] = queryNativeDateParts(calendar, dateSlots)
-  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+  const {
+    year: origYear,
+    month: origMonth,
+    day,
+  } = queryCalendarDateFields(calendar, dateSlots)
+  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     calendar,
     origYear,
     origMonth,
   )
-  const [year, month] = queryNativeYearMonthForMonthDay(
+  const { year, month } = queryCalendarYearMonthForMonthDay(
     calendar,
     monthCodeNumber,
     isLeapMonth,
     day,
   )! // !HACK
   const isoFields = checkIsoDateInBounds(
-    queryNativeIsoFieldsFromParts(calendar, year, month, day),
+    queryCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
   return createPlainMonthDaySlots(isoFields, calendar)
@@ -341,7 +346,7 @@ function finalizeZonedDateTime(
   epochDisambig: EpochDisambig = EpochDisambig.Compat,
 ): ZonedDateTimeSlots {
   const timeZoneId = resolveTimeZoneId(organized.timeZone)
-  const timeZoneImpl = queryNativeTimeZone(timeZoneId)
+  const timeZoneImpl = queryTimeZone(timeZoneId)
 
   checkIsoDateTimeFields(organized)
 
@@ -376,17 +381,15 @@ function finalizeZonedDateTime(
   )
 }
 
-function offsetHasSeconds(offset: string): boolean {
-  return offset.replace(/\D/g, '').length > 4
-}
-
-function finalizeDateTime(organized: DateTimeLikeOrganized): DateTimeSlots {
+function finalizeDateTime(
+  organized: DateTimeLikeOrganized,
+): AbstractDateTimeSlots {
   return resolveSlotsCalendar(
     checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)),
   )
 }
 
-function finalizeDate(organized: DateOrganized): DateSlots {
+function finalizeDate(organized: DateOrganized): AbstractDateSlots {
   return resolveSlotsCalendar(
     checkIsoDateInBounds(checkIsoDateFields(organized)),
   )
@@ -402,9 +405,6 @@ function resolveSlotsCalendar<T extends { calendar: string }>(organized: T): T {
 // RegExp
 // -----------------------------------------------------------------------------
 
-const signRegExpStr = '([+-])' // outer captures
-const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
-
 const yearMonthRegExpStr =
   `(?:(?:${signRegExpStr}(\\d{6}))|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
   '-?(\\d{2})' // 4:month
@@ -416,18 +416,6 @@ const dateRegExpStr =
 const monthDayRegExpStr =
   '(?:--)?(\\d{2})' + // 1:month
   '-?(\\d{2})' // 2:day
-
-const timeRegExpStr =
-  '(\\d{2})' + // 1:hour
-  '(?::?(\\d{2})' + // 2:minute
-  '(?::?(\\d{2})' + // 3:second
-  fractionRegExpStr + // 4:afterDecimal
-  ')?' +
-  ')?'
-
-const offsetRegExpStr =
-  signRegExpStr + // 1:offsetSign
-  timeRegExpStr // 2:hour, 3:minute, 4:second, 5:afterDecimal
 
 const dateTimeRegExpStr =
   dateRegExpStr + // // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:month, 5:day
@@ -663,7 +651,7 @@ function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
 /*
 Result assumed to be ISO
 */
-function organizeYearMonthParts(parts: string[]): DateSlots {
+function organizeYearMonthParts(parts: string[]): AbstractDateSlots {
   return {
     isoYear: organizeIsoYearParts(parts),
     isoMonth: parseInt(parts[4]),
@@ -672,7 +660,7 @@ function organizeYearMonthParts(parts: string[]): DateSlots {
   }
 }
 
-function organizeMonthDayParts(parts: string[]): DateSlots {
+function organizeMonthDayParts(parts: string[]): AbstractDateSlots {
   return {
     isoYear: isoEpochFirstLeapYear,
     isoMonth: parseInt(parts[1]),
@@ -692,17 +680,6 @@ function organizeIsoYearParts(parts: string[]): number {
   }
 
   return yearSign * year
-}
-
-function organizeTimeParts(parts: string[]): IsoTimeFields {
-  const isoSecond = parseInt0(parts[3])
-
-  return {
-    ...nanoToIsoTimeAndDay(parseSubsecNano(parts[4] || ''))[0],
-    isoHour: parseInt0(parts[1]),
-    isoMinute: parseInt0(parts[2]),
-    isoSecond: isoSecond === 60 ? 59 : isoSecond, // massage leap-second
-  }
 }
 
 function organizeDurationParts(parts: string[]): DurationFields {

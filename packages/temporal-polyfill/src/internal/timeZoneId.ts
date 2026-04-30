@@ -1,5 +1,5 @@
-import { isoCalendarId } from './calendarConfig'
 import { requireString } from './cast'
+import { isoCalendarId } from './intlCalendarConfig'
 import { RawDateTimeFormat } from './intlFormatUtils'
 import { utcTimeZoneId } from './timeZoneConfig'
 import {

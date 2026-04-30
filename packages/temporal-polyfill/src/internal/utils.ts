@@ -80,12 +80,7 @@ export function memoize<K, V, A extends any[]>(
     if (map.has(key)) {
       return map.get(key) as V
     }
-    const args = [key] as unknown[]
-    // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
-    for (let i = 0; i < otherArgs.length; i++) {
-      args[i + 1] = otherArgs[i]
-    }
-    const val = generator.apply(undefined, args as [K, ...A])
+    const val = generator(key, ...otherArgs)
     map.set(key, val)
     return val
   }
@@ -150,9 +145,8 @@ export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
   const res = {} as any
   let i = propNamesRev.length
 
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let argI = 0; argI < args.length; argI++) {
-    res[propNamesRev[--i]] = args[argI]
+  for (const arg of args) {
+    res[propNamesRev[--i]] = arg
   }
 
   return res
@@ -186,9 +180,7 @@ export function mapPropNames<P, R, E = undefined>(
 ): { [K in keyof P]: R } {
   const props = {} as { [K in keyof P]: R }
 
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < propNames.length; i++) {
-    const propName = propNames[i]
+  for (const [i, propName] of propNames.entries()) {
     props[propName] = generator(propName, i, extraArg)
   }
 
@@ -212,8 +204,7 @@ export function remapProps<O, N>(
 ): N {
   const newProps = {} as N
 
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < oldNames.length; i++) {
+  for (const [i] of oldNames.entries()) {
     newProps[newNames[i]] = oldProps[oldNames[i]] as any
   }
 
@@ -224,9 +215,7 @@ export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
   // Avoid inherited fields from Object.prototype pollution.
   const res = Object.create(null) as P
 
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < propNames.length; i++) {
-    const propName = propNames[i]
+  for (const propName of propNames) {
     res[propName] = props[propName]
   }
 
@@ -248,57 +237,12 @@ export function excludePropsByName<P, K extends keyof P>(
   return filteredProps
 }
 
-export function excludeUndefinedProps<P extends {}>(props: P): Partial<P> {
-  props = { ...props }
-  const propNames = Object.keys(props) as (keyof P)[]
-
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < propNames.length; i++) {
-    const propName = propNames[i]
-    if (props[propName] === undefined) {
-      delete props[propName]
-    }
-  }
-
-  return props
-}
-
-export function hasAnyPropsByName<P extends {}>(
-  props: P,
-  names: (keyof P)[],
-): boolean {
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i]
-    if (name in props) {
-      return true
-    }
-  }
-  return false
-}
-
-export function hasAllPropsByName<P extends {}>(
-  props: P,
-  names: (keyof P)[],
-): boolean {
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i]
-    if (!(name in props)) {
-      return false
-    }
-  }
-  return true
-}
-
 export function allPropsEqual(
   propNames: string[],
   props0: any,
   props1: any,
 ): boolean {
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < propNames.length; i++) {
-    const propName = propNames[i]
+  for (const propName of propNames) {
     if (props0[propName] !== props1[propName]) {
       return false
     }
@@ -311,9 +255,8 @@ export function areNumberArraysEqual(a: number[], b: number[]): boolean {
     return false
   }
 
-  // Avoid array iteration; it observes Array.prototype[Symbol.iterator].
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
+  for (const [i, val] of a.entries()) {
+    if (val !== b[i]) {
       return false
     }
   }
@@ -343,20 +286,13 @@ export function bindArgs<BA extends any[], DA extends any[], R>(
   ...boundArgs: BA
 ): (...dynamicArgs: DA) => R {
   return (...dynamicArgs: DA) => {
-    const args = boundArgs.slice() as unknown[]
-    // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
-    for (let i = 0; i < dynamicArgs.length; i++) {
-      args[boundArgs.length + i] = dynamicArgs[i]
-    }
-    return f.apply(undefined, args as [...BA, ...DA])
+    return f(...boundArgs, ...dynamicArgs)
   }
 }
 
 export function identity<T>(arg: T): T {
   return arg
 }
-
-export function noop(): void {}
 
 // String / Formatting
 // -----------------------------------------------------------------------------
@@ -371,6 +307,11 @@ Easier to mark pure than calling .slice().sort() directly, which has 2 calls
 export function sortStrings<T extends string>(strs: T[]): T[] {
   return strs.slice().sort()
 }
+
+export const signRegExpStr = '([+-])' // outer captures
+
+// only afterDecimal captures
+export const fractionRegExpStr = '(?:[.,](\\d{1,9}))?'
 
 export function createRegExp(meat: string): RegExp {
   return new RegExp(`^${meat}$`, 'i')

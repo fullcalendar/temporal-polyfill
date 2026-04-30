@@ -16,14 +16,14 @@
 
 
 ##
-## Spec deviations (5 total)
+## Spec deviations (8 total)
 ##
 
 # WONTFIX (1)
 # The spec calls for higher floating-point division precision than what JS's
 # 64-bit floats provide. proposal-temporal/polyfill achieves this via string
 # manipulation hacks:
-# https://github.com/tc39/proposal-temporal/blob/999937370cfd0f6d2ce3cc83a01ab82ab3771b46/polyfill/lib/timeduration.mjs#L92
+# https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/timeduration.mjs#L92
 #
 # Our polyfill avoids the associated performance degradation and filesize
 # increase by doing simple native JS number division, but this sometimes results
@@ -35,8 +35,8 @@
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # TEMPORARY
-# See DURATION-TOTAL-PRECISION-MEMORY.md. This representative Duration.total()
-# test's months expectation matches separate JS Number arithmetic:
+# This representative Duration.total() test's months expectation matches
+# separate JS Number arithmetic:
 #
 #   integerPart + numerator / denom
 #
@@ -46,8 +46,18 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 #   built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
 #
 # The proper fix is exact numerator construction plus one final rational-to-
-# Number conversion, not another parenthesizing change.
+# Number conversion. The proposal-temporal polyfill handles similar edge cases
+# with an fdiv string-manipulation hack:
+# https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/timeduration.mjs#L92
 built-ins/Temporal/Duration/prototype/total/relativeto-total-of-each-unit.js
+
+# TEMPORARY (3)
+# We intentionally allow tuple/argument spread again in a few internal paths.
+# These tests assert that Array.prototype[Symbol.iterator] is not observed
+# while plumbing Temporal tuples through time-zone conversion helpers.
+built-ins/Temporal/Instant/prototype/toZonedDateTimeISO/no-observable-array-iteration.js
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/no-observable-array-iteration.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/no-observable-array-iteration.js
 
 # WONTFIX (2)
 # Our polyfill does not fully support the lowest/highest year of some i18n
@@ -152,6 +162,12 @@ intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 intl402/DateTimeFormat/prototype/formatToParts/era.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
+
+# WONTFIX for real
+# Node/ICU can preserve Antarctica/South_Pole instead of canonicalizing it to
+# Antarctica/McMurdo via Intl.DateTimeFormat resolvedOptions(). We intentionally
+# avoid a one-off IANA-link workaround in isTimeZoneIdsEqual().
+intl402/Temporal/ZonedDateTime/links.js
 
 # WONTFIX for real - TODO: combine with groups above
 # Chinese/lunisolar DateTimeFormat output follows the host ICU data.

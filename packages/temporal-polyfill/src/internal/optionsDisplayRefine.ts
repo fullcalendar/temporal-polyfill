@@ -1,9 +1,9 @@
 import {
   coerceCalendarDisplay,
+  coerceFractionalSecondDigits,
   coerceOffsetDisplay,
   coerceRoundingMode,
   coerceSmallestUnit,
-  coerceSubsecDigits,
   coerceTimeZoneDisplay,
 } from './optionsCoerce'
 import { smallestUnitStr } from './optionsConfig'
@@ -36,7 +36,7 @@ function refineTimeDisplayTuple(
   maxSmallestUnit: TimeUnit = Unit.Minute,
 ): TimeDisplayTuple {
   // alphabetical
-  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const subsecDigits = coerceFractionalSecondDigits(options)
   const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
 
@@ -50,8 +50,7 @@ function refineTimeDisplayTuple(
     subsecDigits,
   )
 
-  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
-  return [roundingMode, unitDisplayTuple[0], unitDisplayTuple[1]]
+  return [roundingMode, ...unitDisplayTuple]
 }
 
 export function refineDateTimeDisplayOptions(
@@ -66,13 +65,7 @@ export function refineDateTimeDisplayOptions(
   const calendarDisplay = coerceCalendarDisplay(options)
   const timeDisplayTuple = refineTimeDisplayTuple(options)
 
-  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
-  return [
-    calendarDisplay,
-    timeDisplayTuple[0],
-    timeDisplayTuple[1],
-    timeDisplayTuple[2],
-  ]
+  return [calendarDisplay, ...timeDisplayTuple]
 }
 
 export function refineDateDisplayOptions(
@@ -95,7 +88,7 @@ export function refineZonedDateTimeDisplayOptions(
 
   // alphabetical
   const calendarDisplay = coerceCalendarDisplay(options)
-  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const subsecDigits = coerceFractionalSecondDigits(options)
   const offsetDisplay = coerceOffsetDisplay(options)
   const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
@@ -111,14 +104,12 @@ export function refineZonedDateTimeDisplayOptions(
     subsecDigits,
   )
 
-  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
   return [
     calendarDisplay,
     timeZoneDisplay,
     offsetDisplay,
     roundingMode,
-    unitDisplayTuple[0],
-    unitDisplayTuple[1],
+    ...unitDisplayTuple,
   ]
 }
 
@@ -128,7 +119,7 @@ export function refineInstantDisplayOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const subsecDigits = coerceSubsecDigits(options) // "fractionalSecondDigits". rename in our code?
+  const subsecDigits = coerceFractionalSecondDigits(options)
   const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
   const timeZoneArg: string | undefined = options.timeZone
@@ -143,8 +134,7 @@ export function refineInstantDisplayOptions(
     subsecDigits,
   )
 
-  // Avoid tuple spread; it observes Array.prototype[Symbol.iterator].
-  return [timeZoneArg, roundingMode, unitDisplayTuple[0], unitDisplayTuple[1]]
+  return [timeZoneArg, roundingMode, ...unitDisplayTuple]
 }
 
 function resolveSmallestUnitAndSubsecDigits(

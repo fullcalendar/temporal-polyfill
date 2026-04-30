@@ -1,7 +1,7 @@
-import { isoCalendarId } from '../internal/calendarConfig'
 import { resolveCalendarId } from '../internal/calendarId'
 import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
+import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { parseCalendarId } from '../internal/isoParse'
 import { isObjectLike } from '../internal/utils'
 import { PlainDate } from './plainDate'

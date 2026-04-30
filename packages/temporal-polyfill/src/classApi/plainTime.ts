@@ -1,24 +1,21 @@
-import {
-  PlainTimeBag,
-  plainTimeWithFields,
-  refinePlainTimeBag,
-} from '../internal/bagRefine'
 import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
+import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { TimeBag, TimeFields } from '../internal/fields'
+import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
+import { mergePlainTimeFields } from '../internal/merge'
 import { movePlainTime } from '../internal/move'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import {
   DiffOptions,
   OverflowOptions,
   RoundingOptions,
-  refineOverflowOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
 import {
   BrandingSlots,
@@ -43,7 +40,7 @@ import { neverValueOf, timeGetters } from './mixins'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainTime = any & TimeFields
-export type PlainTimeArg = PlainTime | PlainTimeBag | string
+export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 
 export const [PlainTime, createPlainTime] = createSlotClass(
   PlainTimeBranding,
@@ -52,11 +49,11 @@ export const [PlainTime, createPlainTime] = createSlotClass(
   {
     with(
       _slots: PlainTimeSlots,
-      mod: TimeBag,
+      mod: Partial<TimeFields>,
       options?: OverflowOptions,
     ): PlainTime {
       return createPlainTime(
-        plainTimeWithFields(this, rejectInvalidBag(mod), options),
+        mergePlainTimeFields(this, rejectInvalidBag(mod), options),
       )
     },
     add(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
@@ -148,7 +145,7 @@ export function toPlainTimeSlots(
         return zonedDateTimeToPlainTime(slots as ZonedDateTimeSlots)
     }
 
-    return refinePlainTimeBag(arg as PlainTimeBag, options)
+    return refinePlainTimeObjectLike(arg as Partial<TimeFields>, options)
   }
 
   const timeSlots = parsePlainTime(arg)

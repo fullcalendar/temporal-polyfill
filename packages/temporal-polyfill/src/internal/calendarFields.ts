@@ -1,23 +1,29 @@
-import { eraRemapsByCalendarId, normalizeEraName } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
+import type { MonthCodeParts } from './calendarMonthCode'
+import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
 import {
-  eraYearToYear,
   getCalendarEraOrigins,
   getCalendarLeapMonthMeta,
-  monthCodeNumberToMonth,
-  parseMonthCode,
-} from './calendarNative'
-import type { MonthCodeParts } from './calendarNative'
-import {
-  queryNativeDaysInMonthPart,
-  queryNativeLeapMonth,
-  queryNativeMonthsInYearPart,
-} from './calendarNativeQuery'
+  queryCalendarDaysInMonthPart,
+  queryCalendarLeapMonth,
+  queryCalendarMonthsInYearPart,
+} from './calendarQuery'
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
-import { DateBag, DayFields, MonthFields } from './fields'
+import { DateFields, DayFields, MonthFields } from './fieldTypes'
+import { eraRemapsByCalendarId, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
 import { clampEntity, clampProp } from './utils'
+
+export function getCalendarFieldNames(
+  calendarId: string,
+  fieldNames: string[],
+  fieldNamesWithEra: string[] = fieldNames,
+): string[] {
+  // Both inputs are caller-owned, pre-sorted lists. Calendars with eras swap in
+  // the explicit era-bearing variant instead of building field order here.
+  return getCalendarEraOrigins(calendarId) ? fieldNamesWithEra : fieldNames
+}
 
 /*
 These helpers run after the user bag has already been read in sorted field
@@ -26,8 +32,11 @@ from-fields algorithms need required-field and monthCode syntax checks to
 happen before those deferred coercions.
 */
 
-export function resolveYear(calendarId: string, fields: DateBag): number {
-  const eraOrigins = getCalendarEraOrigins({ id: calendarId })
+export function resolveCalendarYear(
+  calendarId: string,
+  fields: Partial<DateFields>,
+): number {
+  const eraOrigins = getCalendarEraOrigins(calendarId)
   const eraRemaps =
     eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
   let { era, eraYear, year } = fields
@@ -83,7 +92,7 @@ export function resolveYear(calendarId: string, fields: DateBag): number {
   return year
 }
 
-export function resolveMonth(
+export function resolveCalendarMonth(
   calendarId: string,
   fields: Partial<MonthFields>,
   year: number,
@@ -115,12 +124,12 @@ export function resolveMonth(
     'month',
     month,
     1,
-    queryNativeMonthsInYearPart(calendarId, year),
+    queryCalendarMonthsInYearPart(calendarId, year),
     overflow,
   )
 }
 
-export function resolveDay(
+export function resolveCalendarDay(
   calendarId: string,
   fields: DayFields,
   month: number,
@@ -131,7 +140,7 @@ export function resolveDay(
     fields,
     'day',
     1,
-    queryNativeDaysInMonthPart(calendarId, year, month),
+    queryCalendarDaysInMonthPart(calendarId, year, month),
     overflow,
   )
 }
@@ -143,12 +152,12 @@ function resolveMonthCode(
   overflow: Overflow,
   monthCodeParts = parseMonthCode(monthCode),
 ) {
-  const leapMonth = queryNativeLeapMonth(calendarId, year)
+  const leapMonth = queryCalendarLeapMonth(calendarId, year)
   const [monthCodeNumber, wantsLeapMonth] = monthCodeParts
   let month = monthCodeNumberToMonth(monthCodeNumber, wantsLeapMonth, leapMonth)
 
   if (wantsLeapMonth) {
-    const leapMonthMeta = getCalendarLeapMonthMeta({ id: calendarId })
+    const leapMonthMeta = getCalendarLeapMonthMeta(calendarId)
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {
@@ -186,4 +195,10 @@ function resolveMonthCode(
   }
 
   return month
+}
+
+export function eraYearToYear(eraYear: number, eraOrigin: number): number {
+  // Era origins use calendarConfig's signed offset convention. The `|| 0`
+  // collapses the possible -0 result into Temporal's observable +0 year.
+  return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0
 }

@@ -1,10 +1,10 @@
-import { isoCalendarId } from '../internal/calendarConfig'
 import { refineCalendarId } from '../internal/calendarId'
 import {
   getCurrentEpochNano,
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
 } from '../internal/current'
+import { isoCalendarId } from '../internal/intlCalendarConfig'
 import {
   createInstantSlots,
   createPlainDateSlots,
@@ -13,7 +13,7 @@ import {
   createZonedDateTimeSlots,
 } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -52,7 +52,7 @@ export function plainDateTime(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateTimeFns.Record {
   return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneId(timeZone))),
+    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
     refineCalendarId(calendar),
   )
 }
@@ -61,7 +61,7 @@ export function plainDateTimeISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateTimeFns.Record {
   return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneId(timeZone))),
+    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
     isoCalendarId,
   )
 }
@@ -71,7 +71,7 @@ export function plainDate(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateFns.Record {
   return createPlainDateSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneId(timeZone))),
+    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
     refineCalendarId(calendar),
   )
 }
@@ -80,7 +80,7 @@ export function plainDateISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateFns.Record {
   return createPlainDateSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneId(timeZone))),
+    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
     isoCalendarId,
   )
 }
@@ -89,6 +89,6 @@ export function plainTimeISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainTimeFns.Record {
   return createPlainTimeSlots(
-    getCurrentIsoDateTime(queryNativeTimeZone(refineTimeZoneId(timeZone))),
+    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
   )
 }

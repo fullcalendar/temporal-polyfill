@@ -1,7 +1,17 @@
 import { BigNano, addBigNanos } from './bigNano'
-import { dateAdd, dateAddWithOverflow } from './calendarNativeMath'
-import { queryNativeDay } from './calendarNativeQuery'
-import { DurationFields, durationTimeFieldDefaults } from './durationFields'
+import { monthCodeNumberToMonth } from './calendarMonthCode'
+import {
+  getCalendarLeapMonthMeta,
+  isIsoBasedCalendarId,
+  queryCalendarDay,
+  queryIntlCalendarMaybe,
+  queryIsoYearOffset,
+} from './calendarQuery'
+import {
+  DurationFields,
+  durationFieldNamesAsc,
+  durationTimeFieldDefaults,
+} from './durationFields'
 import {
   durationFieldsToBigNano,
   durationHasDateParts,
@@ -11,13 +21,31 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import type { CalendarYearMonthFields } from './fieldTypes'
+import {
+  IntlCalendar,
+  computeIntlDateFields,
+  computeIntlDaysInMonth,
+  computeIntlEpochMilli,
+  computeIntlLeapMonth,
+  computeIntlMonthCodeParts,
+  computeIntlMonthsInYear,
+  queryIntlCalendar,
+} from './intlCalendar'
 import {
   IsoDateFields,
   IsoDateTimeFields,
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
+import {
+  computeIsoDateFields,
+  computeIsoDaysInMonth,
+  computeIsoMonthCodeParts,
+  isoMonthsInYear,
+} from './isoMath'
+import { refineOverflowOptions } from './optionsFieldRefine'
+import { Overflow, OverflowOptions } from './optionsModel'
 import {
   DurationSlots,
   EpochSlots,
@@ -39,14 +67,16 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   epochMilliToIso,
+  isoArgsToEpochMilli,
   isoTimeFieldsToNano,
   isoToEpochMilli,
   nanoToIsoTimeAndDay,
 } from './timeMath'
-import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
-import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneNativeMath'
+import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
+import { givenFieldsToBigNano } from './unitMath'
 import { Unit, milliInDay } from './units'
-import { pluckProps } from './utils'
+import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -70,12 +100,12 @@ export function moveZonedDateTime(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
-  const nativeTimeZone = queryNativeTimeZone(zonedDateTimeSlots.timeZone)
+  const timeZoneImpl = queryTimeZone(zonedDateTimeSlots.timeZone)
 
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
-      nativeTimeZone,
+      timeZoneImpl,
       zonedDateTimeSlots.calendar,
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
@@ -140,7 +170,7 @@ export function movePlainYearMonth(
 
   const calendarId = plainYearMonthSlots.calendar
   const getDay = (isoFields: IsoDateFields) =>
-    queryNativeDay(calendarId, isoFields)
+    queryCalendarDay(calendarId, isoFields)
 
   // The first-of-month must be representable, this check in-bounds
   const isoDateFields: IsoDateFields = checkIsoDateInBounds(
@@ -190,10 +220,10 @@ function moveEpochNano(
 }
 
 /*
-nativeTimeZone must be derived from zonedEpochSlots.timeZone
+timeZoneImpl must be derived from zonedEpochSlots.timeZone
 */
 export function moveZonedEpochs(
-  nativeTimeZone: NativeTimeZone,
+  timeZoneImpl: TimeZoneImpl,
   calendarId: string,
   slots: ZonedEpochSlots,
   durationFields: DurationFields,
@@ -206,7 +236,7 @@ export function moveZonedEpochs(
     epochNano = addBigNanos(epochNano, timeOnlyNano)
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTimeFields = zonedEpochSlotsToIso(slots, nativeTimeZone)
+    const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
     const movedIsoDateFields = moveDate(
       calendarId,
       isoDateTimeFields,
@@ -221,7 +251,7 @@ export function moveZonedEpochs(
       ...pluckProps(isoTimeFieldNamesAsc, isoDateTimeFields), // time parts
     }
     epochNano = addBigNanos(
-      getSingleInstantFor(nativeTimeZone, movedIsoDateTimeFields),
+      getSingleInstantFor(timeZoneImpl, movedIsoDateTimeFields),
       timeOnlyNano,
     )
   }
@@ -322,4 +352,228 @@ export function moveByDays<F extends IsoDateFields>(
     }
   }
   return isoFields
+}
+
+export function dateAdd(
+  calendarId: string,
+  isoDateFields: IsoDateFields,
+  durationFields: DurationFields,
+  options?: OverflowOptions,
+): IsoDateFields {
+  return dateAddWithOverflow(
+    calendarId,
+    isoDateFields,
+    durationFields,
+    refineOverflowOptions(options),
+  )
+}
+
+export function dateAddWithOverflow(
+  calendarId: string,
+  isoDateFields: IsoDateFields,
+  durationFields: DurationFields,
+  overflow: Overflow,
+): IsoDateFields {
+  const intlCalendar = queryIntlCalendarMaybe(calendarId)
+  let { years, months, weeks, days } = durationFields
+  let epochMilli: number | undefined
+
+  days += givenFieldsToBigNano(
+    durationFields,
+    Unit.Hour,
+    durationFieldNamesAsc,
+  )[0]
+
+  if (years || months) {
+    epochMilli = addDateMonths(
+      calendarId,
+      isoDateFields,
+      years,
+      months,
+      overflow,
+      intlCalendar,
+    )
+  } else if (weeks || days) {
+    epochMilli = isoToEpochMilli(isoDateFields)
+  } else {
+    return isoDateFields
+  }
+
+  if (epochMilli === undefined) {
+    throw new RangeError(errorMessages.outOfBoundsDate)
+  }
+
+  epochMilli += (weeks * 7 + days) * milliInDay
+
+  return checkIsoDateInBounds(epochMilliToIso(epochMilli))
+}
+
+export function addCalendarMonths(
+  calendarId: string,
+  year: number,
+  month: number,
+  monthDelta: number,
+): CalendarYearMonthFields {
+  const isoYearOffset = queryIsoYearOffset(calendarId)
+  if (isoYearOffset !== undefined) {
+    const res = addIsoMonths(year - isoYearOffset, month, monthDelta)
+    return { year: res.year + isoYearOffset, month: res.month }
+  }
+
+  return isIsoBasedCalendarId(calendarId)
+    ? addIsoMonths(year, month, monthDelta)
+    : addIntlMonths(queryIntlCalendar(calendarId), year, month, monthDelta)
+}
+
+export function addCalendarDateMonths(
+  calendarId: string,
+  isoFields: Parameters<typeof addDateMonths>[1],
+  years: Parameters<typeof addDateMonths>[2],
+  months: Parameters<typeof addDateMonths>[3],
+  overflow: Parameters<typeof addDateMonths>[4],
+): ReturnType<typeof addDateMonths> {
+  return addDateMonths(calendarId, isoFields, years, months, overflow)
+}
+
+export function addDateMonths(
+  calendarId: string,
+  isoDateFields: IsoDateFields,
+  years: number,
+  months: number,
+  overflow: Overflow,
+  intlCalendar = queryIntlCalendarMaybe(calendarId),
+): number {
+  const dateParts = intlCalendar
+    ? computeIntlDateFields(intlCalendar, isoDateFields)
+    : computeIsoDateFields(isoDateFields)
+  let { year, month, day } = dateParts
+
+  if (years) {
+    const [monthCodeNumber, isLeapMonth] = intlCalendar
+      ? computeIntlMonthCodeParts(intlCalendar, year, month)
+      : computeIsoMonthCodeParts(month)
+    year += years
+    month = computeYearMovedMonth(
+      intlCalendar,
+      monthCodeNumber,
+      isLeapMonth,
+      intlCalendar ? computeIntlLeapMonth(intlCalendar, year) : undefined,
+      overflow,
+    )
+    month = clampEntity(
+      'month',
+      month,
+      1,
+      intlCalendar
+        ? computeIntlMonthsInYear(intlCalendar, year)
+        : isoMonthsInYear,
+      overflow,
+    )
+  }
+
+  if (months) {
+    const yearMonthParts = intlCalendar
+      ? addIntlMonths(intlCalendar, year, month, months)
+      : addIsoMonths(year, month, months)
+    ;({ year, month } = yearMonthParts)
+  }
+
+  day = clampEntity(
+    'day',
+    day,
+    1,
+    intlCalendar
+      ? computeIntlDaysInMonth(intlCalendar, year, month)
+      : computeIsoDaysInMonth(year, month),
+    overflow,
+  )
+
+  return intlCalendar
+    ? computeIntlEpochMilli(intlCalendar, year, month, day)
+    : isoArgsToEpochMilli(year, month, day)!
+}
+
+export function computeYearMovedMonth(
+  intlCalendar: IntlCalendar | undefined,
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  targetLeapMonth: number | undefined,
+  overflow: Overflow,
+): number {
+  if (isLeapMonth) {
+    const leapMonthMeta = intlCalendar
+      ? getCalendarLeapMonthMeta(intlCalendar.id)
+      : undefined
+
+    // Year arithmetic preserves the source monthCode. If the exact leap-month
+    // code exists in the target year, use that ordinal month directly.
+    if (
+      targetLeapMonth !== undefined &&
+      (leapMonthMeta! < 0 || targetLeapMonth === monthCodeNumber + 1)
+    ) {
+      return targetLeapMonth
+    }
+
+    // If the target year cannot represent the source leap month, reject mode
+    // must fail instead of silently sliding to a neighboring ordinal month.
+    if (overflow === Overflow.Reject) {
+      throw new RangeError(errorMessages.invalidLeapMonth)
+    }
+
+    // Chinese/Dangi-style calendars constrain MxxL to the matching common Mxx.
+    // Hebrew has a fixed Adar I leap slot; constraining it lands in common Adar.
+    return leapMonthMeta! < 0 ? -leapMonthMeta! : monthCodeNumber
+  }
+
+  return monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)
+}
+
+export function addIsoMonths(
+  year: number,
+  month: number,
+  monthDelta: number,
+): CalendarYearMonthFields {
+  year += divTrunc(monthDelta, isoMonthsInYear)
+  month += modTrunc(monthDelta, isoMonthsInYear)
+
+  if (month < 1) {
+    year--
+    month += isoMonthsInYear
+  } else if (month > isoMonthsInYear) {
+    year++
+    month -= isoMonthsInYear
+  }
+
+  return { year, month }
+}
+
+export function addIntlMonths(
+  intlCalendar: IntlCalendar,
+  year: number,
+  month: number,
+  monthDelta: number,
+): CalendarYearMonthFields {
+  if (monthDelta) {
+    month += monthDelta
+
+    if (!Number.isSafeInteger(month)) {
+      throw new RangeError(errorMessages.outOfBoundsDate)
+    }
+
+    if (monthDelta < 0) {
+      while (month < 1) {
+        month += computeIntlMonthsInYear(intlCalendar, --year)
+      }
+    } else {
+      let monthsInYear: number
+      while (
+        month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))
+      ) {
+        month -= monthsInYear
+        year++
+      }
+    }
+  }
+
+  return { year, month }
 }

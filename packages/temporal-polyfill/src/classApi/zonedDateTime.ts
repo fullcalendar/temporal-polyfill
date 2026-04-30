@@ -1,9 +1,3 @@
-import {
-  ZonedDateTimeBag,
-  refineNativeZonedDateTimeBag,
-  zonedDateTimeWithFields,
-} from '../internal/bagRefine'
-import { refineCalendarId } from '../internal/calendarId'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
@@ -12,17 +6,21 @@ import {
   zonedDateTimeToPlainDateTime,
   zonedDateTimeToPlainTime,
 } from '../internal/convert'
+import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
-import { DateTimeBag } from '../internal/fields'
+import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
+import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { parseZonedDateTime } from '../internal/isoParse'
+import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
   slotsWithCalendarId,
   slotsWithTimeZoneId,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
+import { refineZonedFieldOptions } from '../internal/optionsFieldRefine'
 import {
   DiffOptions,
   DirectionOptions,
@@ -30,9 +28,8 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-  refineDirectionOptions,
-  refineZonedFieldOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
+import { refineDirectionOptions } from '../internal/optionsTransitionRefine'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
@@ -43,14 +40,10 @@ import {
   ZonedDateTimeSlots,
   createDurationSlots,
 } from '../internal/slots'
-import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
-import {
-  FixedIsoFields,
-  zonedEpochSlotsToIso,
-} from '../internal/timeZoneNativeMath'
+import { queryTimeZone } from '../internal/timeZoneImpl'
+import { FixedIsoFields, zonedEpochSlotsToIso } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
+import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarIdFromBag,
@@ -83,11 +76,11 @@ import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
 export type ZonedDateTime = any
-export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeBag | string
+export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
-  bindArgs(constructZonedDateTimeSlots, refineCalendarId, refineTimeZoneId),
+  constructZonedDateTimeSlots,
   {
     ...epochGetters,
     ...calendarIdGetters,
@@ -109,11 +102,11 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   {
     with(
       slots: ZonedDateTimeSlots,
-      mod: DateTimeBag,
+      mod: Partial<DateTimeFields>,
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
-        zonedDateTimeWithFields(slots, rejectInvalidBag(mod), options),
+        mergeZonedDateTimeFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
@@ -248,8 +241,8 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       const { timeZone: timeZoneId, epochNanoseconds: epochNano } = slots
 
       const direction = refineDirectionOptions(options)
-      const nativeTimeZone = queryNativeTimeZone(timeZoneId)
-      const newEpochNano = nativeTimeZone.getTransition(epochNano, direction)
+      const timeZoneImpl = queryTimeZone(timeZoneId)
+      const newEpochNano = timeZoneImpl.getTransition(epochNano, direction)
 
       if (newEpochNano) {
         return createZonedDateTime({
@@ -292,7 +285,7 @@ export function toZonedDateTimeSlots(
 
     const calendarId = getCalendarIdFromBag(arg as any)
 
-    return refineNativeZonedDateTimeBag(
+    return refineZonedDateTimeObjectLike(
       refineTimeZoneArg,
       calendarId,
       arg as any, // !!!

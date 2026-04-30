@@ -3,7 +3,8 @@ import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
-import { RelativeToOptions, normalizeOptions } from './optionsRefine'
+import { RelativeToOptions } from './optionsModel'
+import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
   createMarkerToEpochNano,
@@ -78,9 +79,9 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
-  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
+  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
 
   return compareBigNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
@@ -211,22 +212,8 @@ export function isTimeZoneIdsEqual(
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    return (
-      getTimeZoneAtomic(a) === getTimeZoneAtomic(b) ||
-      isSouthPoleTimeZoneLink(a, b)
-    )
+    return getTimeZoneAtomic(a) === getTimeZoneAtomic(b)
   } catch {}
 
   // If reaching here, there was an error, so NOT equal
-}
-
-function isSouthPoleTimeZoneLink(a: string, b: string): boolean {
-  // Host Intl on Node 22 can preserve Antarctica/South_Pole instead of exposing
-  // its canonical target, Antarctica/McMurdo, through resolvedOptions(). That
-  // makes the generic atomic-ID comparison miss this IANA link. Keep the
-  // workaround explicit instead of adding broad offset-sampling heuristics.
-  return (
-    (a === 'Antarctica/South_Pole' && b === 'Antarctica/McMurdo') ||
-    (a === 'Antarctica/McMurdo' && b === 'Antarctica/South_Pole')
-  )
 }

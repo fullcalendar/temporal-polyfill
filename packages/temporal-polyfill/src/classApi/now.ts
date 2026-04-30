@@ -1,9 +1,9 @@
-import { isoCalendarId } from '../internal/calendarConfig'
 import {
   getCurrentEpochNano,
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
 } from '../internal/current'
+import { isoCalendarId } from '../internal/intlCalendarConfig'
 import {
   createInstantSlots,
   createPlainDateSlots,
@@ -11,7 +11,7 @@ import {
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from '../internal/slots'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   createPropDescriptors,
   createStringTagDescriptors,
@@ -54,7 +54,7 @@ export const Now = Object.defineProperties(
         return createPlainDateTime(
           createPlainDateTimeSlots(
             getCurrentIsoDateTime(
-              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
+              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
             isoCalendarId,
           ),
@@ -67,7 +67,7 @@ export const Now = Object.defineProperties(
         return createPlainDate(
           createPlainDateSlots(
             getCurrentIsoDateTime(
-              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
+              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
             isoCalendarId,
           ),
@@ -80,7 +80,7 @@ export const Now = Object.defineProperties(
         return createPlainTime(
           createPlainTimeSlots(
             getCurrentIsoDateTime(
-              queryNativeTimeZone(refineTimeZoneArg(timeZoneArg)),
+              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
             ),
           ),
         )

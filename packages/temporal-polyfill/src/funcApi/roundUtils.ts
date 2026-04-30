@@ -1,8 +1,7 @@
 import {
-  queryNativeDateParts,
-  queryNativeEpochMilli,
-  queryNativeMonthAdd,
-} from '../internal/calendarNativeQuery'
+  queryCalendarDateFields,
+  queryCalendarEpochMilli,
+} from '../internal/calendarQuery'
 import {
   IsoDateFields,
   IsoDateTimeFields,
@@ -10,10 +9,10 @@ import {
   isoTimeFieldDefaults,
 } from '../internal/isoFields'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
-import { moveByDays } from '../internal/move'
+import { addCalendarMonths, moveByDays } from '../internal/move'
 import { RoundingMode } from '../internal/optionsModel'
 import { IsoDateTimeInterval, roundWithMode } from '../internal/round'
-import { DateSlots } from '../internal/slots'
+import { AbstractDateSlots } from '../internal/slots'
 import { epochMilliToIso, isoToEpochNano } from '../internal/timeMath'
 import { computeEpochNanoFrac } from '../internal/total'
 import { Unit } from '../internal/units'
@@ -24,21 +23,24 @@ import { moveByIsoWeeks } from './moveUtils'
 // -----------------------------------------------------------------------------
 
 export function computeYearFloor(
-  slots: DateSlots,
+  slots: AbstractDateSlots,
 ): IsoDateTimeFields & { year: number } {
-  const [year0] = queryNativeDateParts(slots.calendar, slots)
+  const { year: year0 } = queryCalendarDateFields(slots.calendar, slots)
   const isoFields0 = epochMilliToIso(
-    queryNativeEpochMilli(slots.calendar, year0),
+    queryCalendarEpochMilli(slots.calendar, year0),
   )
   return { ...isoFields0, year: year0 }
 }
 
 export function computeMonthFloor(
-  slots: DateSlots,
+  slots: AbstractDateSlots,
 ): IsoDateTimeFields & { year: number; month: number } {
-  const [year0, month0] = queryNativeDateParts(slots.calendar, slots)
+  const { year: year0, month: month0 } = queryCalendarDateFields(
+    slots.calendar,
+    slots,
+  )
   const isoFields0 = epochMilliToIso(
-    queryNativeEpochMilli(slots.calendar, year0, month0),
+    queryCalendarEpochMilli(slots.calendar, year0, month0),
   )
   return { ...isoFields0, year: year0, month: month0 }
 }
@@ -58,11 +60,11 @@ export const computeMicroFloor = bindArgs(clearIsoFields, Unit.Microsecond)
 // Ceil
 // -----------------------------------------------------------------------------
 
-export function computeYearCeil(slots: DateSlots): IsoDateTimeFields {
+export function computeYearCeil(slots: AbstractDateSlots): IsoDateTimeFields {
   return computeYearInterval(slots)[1]
 }
 
-export function computeMonthCeil(slots: DateSlots): IsoDateTimeFields {
+export function computeMonthCeil(slots: AbstractDateSlots): IsoDateTimeFields {
   return computeMonthInterval(slots)[1]
 }
 
@@ -73,25 +75,29 @@ export function computeIsoWeekCeil(slots: IsoDateFields): IsoDateTimeFields {
 // Interval
 // -----------------------------------------------------------------------------
 
-export function computeYearInterval(slots: DateSlots): IsoDateTimeInterval {
+export function computeYearInterval(
+  slots: AbstractDateSlots,
+): IsoDateTimeInterval {
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
   const isoFields1 = epochMilliToIso(
-    queryNativeEpochMilli(slots.calendar, year1),
+    queryCalendarEpochMilli(slots.calendar, year1),
   )
   return [isoFields0, isoFields1]
 }
 
-export function computeMonthInterval(slots: DateSlots): IsoDateTimeInterval {
+export function computeMonthInterval(
+  slots: AbstractDateSlots,
+): IsoDateTimeInterval {
   const isoFields0 = computeMonthFloor(slots)
-  const [year1, month1] = queryNativeMonthAdd(
+  const { year: year1, month: month1 } = addCalendarMonths(
     slots.calendar,
     isoFields0.year,
     isoFields0.month,
     1,
   )
   const isoFields1 = epochMilliToIso(
-    queryNativeEpochMilli(slots.calendar, year1, month1),
+    queryCalendarEpochMilli(slots.calendar, year1, month1),
   )
   return [isoFields0, isoFields1]
 }
@@ -107,7 +113,7 @@ export function computeIsoWeekInterval(
 /*
 For year/month/week only
 */
-export function roundDateTimeToInterval<S extends DateSlots>(
+export function roundDateTimeToInterval<S extends AbstractDateSlots>(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
   roundingMode: RoundingMode,

@@ -1,29 +1,26 @@
-import {
-  PlainTimeBag,
-  isoTimeFieldsToCal,
-  plainTimeWithFields,
-  refinePlainTimeBag,
-} from '../internal/bagRefine'
 import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructPlainTimeSlots } from '../internal/construct'
 import {
   plainTimeToPlainDateTime,
   plainTimeToZonedDateTime,
 } from '../internal/convert'
+import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { TimeBag, TimeFields } from '../internal/fields'
+import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { IsoTimeFields } from '../internal/isoFields'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
+import { mergePlainTimeFields } from '../internal/merge'
 import { movePlainTime } from '../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
@@ -73,8 +70,8 @@ export type Record = {
 }
 
 export type Fields = TimeFields
-export type FromFields = PlainTimeBag
-export type WithFields = TimeBag
+export type FromFields = Partial<TimeFields>
+export type WithFields = Partial<TimeFields>
 export type ISOFields = IsoTimeFields
 
 export type AssignmentOptions = OverflowOptions
@@ -98,7 +95,7 @@ export const create = constructPlainTimeSlots as (
   isoNanosecond?: number,
 ) => Record
 
-export const fromFields = refinePlainTimeBag as (
+export const fromFields = refinePlainTimeObjectLike as (
   fields: FromFields,
   options?: AssignmentOptions,
 ) => Record
@@ -126,7 +123,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainTimeWithFields(getFields(record), fields, options)
+  return mergePlainTimeFields(getFields(record), fields, options)
 }
 
 // Math

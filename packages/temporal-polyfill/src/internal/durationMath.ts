@@ -10,12 +10,9 @@ import {
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields } from './isoFields'
 import { Overflow } from './optionsModel'
-import {
-  DurationRoundingOptions,
-  RelativeToOptions,
-  normalizeOptions,
-  refineDurationRoundOptions,
-} from './optionsRefine'
+import { DurationRoundingOptions, RelativeToOptions } from './optionsModel'
+import { normalizeOptions } from './optionsNormalize'
+import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
   createDiffMarkers,
@@ -117,12 +114,9 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
-  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(
-    nativeTimeZone,
-    relativeToSlots.calendar,
-  )
+  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendar)
 
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
@@ -202,13 +196,10 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, nativeTimeZone] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(nativeTimeZone)
-  const moveMarker = createMoveMarker(nativeTimeZone, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(
-    nativeTimeZone,
-    relativeToSlots.calendar,
-  )
+  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
+  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
+  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendar)
 
   const endMarker = moveMarker(marker, slots)
 

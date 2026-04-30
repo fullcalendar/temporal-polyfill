@@ -1,12 +1,4 @@
 import {
-  ZonedDateTimeBag,
-  convertNativeToPlainMonthDay,
-  convertNativeToPlainYearMonth,
-  isoTimeFieldsToCal,
-  refineNativeZonedDateTimeBag,
-  zonedDateTimeWithFields,
-} from '../internal/bagRefine'
-import {
   BigNano,
   addBigNanos,
   moveBigNano,
@@ -17,19 +9,25 @@ import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import { constructZonedDateTimeSlots } from '../internal/construct'
 import {
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
   zonedDateTimeToPlainTime,
 } from '../internal/convert'
+import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
-import { DateTimeBag } from '../internal/fields'
+import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
+import { DateTimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { IsoDateTimeFields } from '../internal/isoFields'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
-import { computeIsoDayOfWeek, computeIsoDaysInWeek } from '../internal/isoMath'
+import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
+import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
   slotsWithCalendarId,
   slotsWithTimeZoneId,
@@ -45,8 +43,8 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-  refineUnitRoundOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
+import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import {
   IsoDateTimeInterval,
   alignZonedEpoch,
@@ -57,8 +55,8 @@ import {
   roundZonedEpochToInterval,
 } from '../internal/round'
 import {
-  DateSlots,
-  DateTimeSlots,
+  AbstractDateSlots,
+  AbstractDateTimeSlots,
   ZonedDateTimeBranding,
   getEpochMicro,
   getEpochMilli,
@@ -67,14 +65,14 @@ import {
 } from '../internal/slots'
 import { checkEpochNanoInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   ZonedDateTimeFields,
   ZonedIsoFields,
   buildZonedIsoFields,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
-} from '../internal/timeZoneNativeMath'
+} from '../internal/timeZoneMath'
 import {
   DayTimeUnitName,
   Unit,
@@ -165,8 +163,8 @@ export type Record = {
 }
 
 export type Fields = ZonedDateTimeFields
-export type FromFields = ZonedDateTimeBag
-export type WithFields = DateTimeBag
+export type FromFields = ZonedDateTimeLikeObject
+export type WithFields = Partial<DateTimeFields>
 export type ISOFields = ZonedIsoFields
 
 export type AssignmentOptions = ZonedFieldOptions
@@ -178,18 +176,18 @@ export type ToStringOptions = ZonedDateTimeDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = bindArgs(
-  constructZonedDateTimeSlots,
-  refineCalendarId,
-  refineTimeZoneId,
-) as (epochNanoseconds: bigint, timeZone: string, calendar?: string) => Record
+export const create = constructZonedDateTimeSlots as (
+  epochNanoseconds: bigint,
+  timeZone: string,
+  calendar?: string,
+) => Record
 
 export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
-  return refineNativeZonedDateTimeBag(
+  return refineZonedDateTimeObjectLike(
     refineTimeZoneId,
     calendarId,
     fields,
@@ -248,9 +246,7 @@ export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek) as (
   record: Record,
 ) => number
 
-export const daysInWeek = adaptDateFunc(computeIsoDaysInWeek) as (
-  record: Record,
-) => number
+export const daysInWeek = (() => 7) as (record: Record) => number
 
 export const weekOfYear = adaptDateFunc(computeWeekOfYear) as (
   record: Record,
@@ -292,7 +288,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return zonedDateTimeWithFields(record, fields, options)
+  return mergeZonedDateTimeFields(record, fields, options)
 }
 
 export function withCalendar(record: Record, calendar: string): Record {
@@ -379,11 +375,11 @@ export const toPlainTime = bindArgs(zonedDateTimeToPlainTime) as (
 ) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return convertNativeToPlainYearMonth(getCalendarId(record), getFields(record))
+  return convertToPlainYearMonth(getCalendarId(record), getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertNativeToPlainMonthDay(getCalendarId(record), getFields(record))
+  return convertToPlainMonthDay(getCalendarId(record), getFields(record))
 }
 
 // Formatting
@@ -451,7 +447,7 @@ export const toString = bindArgs(formatZonedDateTimeIso) as (
 // -----------------------------------------------------------------------------
 
 function adaptDateFunc<R>(
-  dateFunc: (dateSlots: DateSlots) => R,
+  dateFunc: (dateSlots: AbstractDateSlots) => R,
 ): (record: Record) => R {
   return (record: Record) => {
     return dateFunc(zonedEpochSlotsToIso(record))
@@ -498,19 +494,19 @@ export const subtractNanoseconds = reversedMove(addNanoseconds)
 // -----------------------------------------------------------------------------
 
 export const roundToYear = bindArgs(
-  rountToInterval,
+  roundToInterval,
   Unit.Year,
   computeYearInterval,
 )
 
 export const roundToMonth = bindArgs(
-  rountToInterval,
+  roundToInterval,
   Unit.Month,
   computeMonthInterval,
 )
 
 export const roundToWeek = bindArgs(
-  rountToInterval,
+  roundToInterval,
   Unit.Week,
   computeIsoWeekInterval,
 )
@@ -585,17 +581,17 @@ function moveByTimeUnit(
   }
 }
 
-function rountToInterval(
+function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: DateSlots) => IsoDateTimeInterval,
+  computeInterval: (isoFields: AbstractDateSlots) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
-  const nativeTimeZone = queryNativeTimeZone(record.timeZone)
+  const timeZoneImpl = queryTimeZone(record.timeZone)
   const epochNano1 = roundZonedEpochToInterval(
     computeInterval,
-    nativeTimeZone,
+    timeZoneImpl,
     record,
     roundingMode,
   )
@@ -606,13 +602,13 @@ function rountToInterval(
 }
 
 function aligned(
-  computeAlignment: (record: DateTimeSlots) => IsoDateTimeFields,
+  computeAlignment: (record: AbstractDateTimeSlots) => IsoDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
-    const nativeTimeZone = queryNativeTimeZone(record.timeZone)
+    const timeZoneImpl = queryTimeZone(record.timeZone)
     const epochNano1 = moveBigNano(
-      alignZonedEpoch(computeAlignment, nativeTimeZone, record),
+      alignZonedEpoch(computeAlignment, timeZoneImpl, record),
       nanoDelta,
     )
     return {
@@ -623,13 +619,16 @@ function aligned(
 }
 
 function zonedTransform<A extends any[]>(
-  transformIso: (isoSlots: DateTimeSlots, ...args: A) => IsoDateTimeFields,
+  transformIso: (
+    isoSlots: AbstractDateTimeSlots,
+    ...args: A
+  ) => IsoDateTimeFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
-    const nativeTimeZone = queryNativeTimeZone(record.timeZone)
-    const isoSlots = zonedEpochSlotsToIso(record, nativeTimeZone)
+    const timeZoneImpl = queryTimeZone(record.timeZone)
+    const isoSlots = zonedEpochSlotsToIso(record, timeZoneImpl)
     const transformedIsoSlots = transformIso(isoSlots, ...args)
-    const epochNano1 = getSingleInstantFor(nativeTimeZone, transformedIsoSlots)
+    const epochNano1 = getSingleInstantFor(timeZoneImpl, transformedIsoSlots)
     return {
       ...record,
       epochNanoseconds: checkEpochNanoInBounds(epochNano1),

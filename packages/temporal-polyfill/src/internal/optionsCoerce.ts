@@ -54,7 +54,7 @@ export function coerceRoundingIncInteger(options: {
   return toInteger(roundingInc, roundingIncName)
 }
 
-export function coerceSubsecDigits(options: {
+export function coerceFractionalSecondDigits(options: {
   fractionalSecondDigits?: SubsecDigits
 }): SubsecDigits | undefined {
   let subsecDigits = options[subsecDigitsName]

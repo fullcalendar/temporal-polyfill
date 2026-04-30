@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { numberToBigNano } from './bigNano'
-import { isTimeZoneIdsEqual } from './compare'
 import {
   getTimeZoneAtomic,
   resolveTimeZoneId,
   resolveTimeZoneRecord,
 } from './timeZoneId'
-import { queryNativeTimeZone } from './timeZoneNative'
+import { queryTimeZone } from './timeZoneImpl'
 
 describe('resolveTimeZoneRecord', () => {
   it('keeps fixed-offset zones numeric for comparison and native math', () => {
     const record = resolveTimeZoneRecord('+05:30')
-    const nativeTimeZone = queryNativeTimeZone(record.id)
+    const timeZoneImpl = queryTimeZone(record.id)
 
     expect(record).toMatchObject({
       kind: 'fixed',
@@ -19,7 +18,7 @@ describe('resolveTimeZoneRecord', () => {
       offsetNano: 19_800_000_000_000,
       compareKey: 19_800_000_000_000,
     })
-    expect(nativeTimeZone.getOffsetNanosecondsFor(numberToBigNano(0))).toBe(
+    expect(timeZoneImpl.getOffsetNanosecondsFor(numberToBigNano(0))).toBe(
       19_800_000_000_000,
     )
   })
@@ -38,12 +37,6 @@ describe('resolveTimeZoneRecord', () => {
     expect(canberra.kind).toBe('named')
     expect(canberra.id).toBe('Australia/Canberra')
     expect(canberra.compareKey).toBe(sydney.compareKey)
-  })
-
-  it('preserves the explicit South Pole link equality workaround', () => {
-    expect(
-      !!isTimeZoneIdsEqual('Antarctica/South_Pole', 'Antarctica/McMurdo'),
-    ).toBe(true)
   })
 
   it('resolves repeated named-zone queries to the same record object', () => {

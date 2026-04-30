@@ -22,20 +22,14 @@ export function givenFieldsToBigNano<K extends string>(
     // Absorb whole days from the current unit to prevent overflow before
     // folding the remainder into the time-within-day nanosecond bucket.
     const unitInDay = nanoInUtcDay / unitNano
-    const unitParts = divModTrunc(fieldVal, unitInDay)
-    // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-    const unitDays = unitParts[0]
-    const leftoverUnits = unitParts[1]
+    const [unitDays, leftoverUnits] = divModTrunc(fieldVal, unitInDay)
 
     timeNano += leftoverUnits * unitNano
     days += unitDays
   }
 
   // Absorb whole days from timeNano after all sub-day units were added.
-  const timeParts = divModTrunc(timeNano, nanoInUtcDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const timeDays = timeParts[0]
-  const leftoverNano = timeParts[1]
+  const [timeDays, leftoverNano] = divModTrunc(timeNano, nanoInUtcDay)
   return [days + timeDays, leftoverNano]
 }
 

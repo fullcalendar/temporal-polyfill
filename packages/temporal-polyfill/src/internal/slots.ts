@@ -153,10 +153,10 @@ export type ZonedEpochSlots = EpochAndZoneSlots & {
 }
 
 // without branding
-export type DateSlots = IsoDateFields & { calendar: string }
-export type DateTimeSlots = IsoDateTimeFields & { calendar: string }
+export type AbstractDateSlots = IsoDateFields & { calendar: string }
+export type AbstractDateTimeSlots = IsoDateTimeFields & { calendar: string }
 
-export type PlainDateSlots = DateSlots & {
+export type PlainDateSlots = AbstractDateSlots & {
   branding: typeof PlainDateBranding
 }
 
@@ -164,7 +164,7 @@ export type PlainTimeSlots = IsoTimeFields & {
   branding: typeof PlainTimeBranding
 }
 
-export type PlainDateTimeSlots = DateTimeSlots & {
+export type PlainDateTimeSlots = AbstractDateTimeSlots & {
   branding: typeof PlainDateTimeBranding
 }
 
@@ -172,11 +172,11 @@ export type ZonedDateTimeSlots = ZonedEpochSlots & {
   branding: typeof ZonedDateTimeBranding
 }
 
-export type PlainMonthDaySlots = DateSlots & {
+export type PlainMonthDaySlots = AbstractDateSlots & {
   branding: typeof PlainMonthDayBranding
 }
 
-export type PlainYearMonthSlots = DateSlots & {
+export type PlainYearMonthSlots = AbstractDateSlots & {
   branding: typeof PlainYearMonthBranding
 }
 

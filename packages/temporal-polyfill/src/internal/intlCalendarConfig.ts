@@ -1,5 +1,3 @@
-import { dayFieldNames, yearFieldNames } from './fields'
-
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
 export const japaneseCalendarId = 'japanese'
@@ -175,19 +173,4 @@ export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
 > = {
   'chinese': 30,
   'dangi': 30,
-}
-
-// only used by calendar
-// ---------------------
-
-export function getRequiredYearMonthFields(calendarId: string): string[] {
-  return calendarId === isoCalendarId ? yearFieldNames : []
-}
-
-export function getRequiredMonthDayFields(calendarId: string): string[] {
-  return calendarId === isoCalendarId ? dayFieldNames : []
-}
-
-export function getRequiredDateFields(calendarId: string): string[] {
-  return calendarId === isoCalendarId ? ['year', 'day'] : []
 }

@@ -1,14 +1,10 @@
-import {
-  PlainYearMonthBag,
-  convertNativePlainYearMonthToDate,
-  plainYearMonthWithFields,
-  refineNativePlainYearMonthBag,
-} from '../internal/bagRefine'
-import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
+import { convertPlainYearMonthToDate } from '../internal/convert'
+import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth } from '../internal/diff'
-import { YearMonthBag, YearMonthFields } from '../internal/fields'
+import { YearMonthLikeObject } from '../internal/fieldTypes'
+import { YearMonthFields } from '../internal/fieldTypes'
 import {
   createFormatPrepper,
   yearMonthConfig,
@@ -17,12 +13,13 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { IsoDateFields } from '../internal/isoFields'
 import { formatPlainYearMonthIso } from '../internal/isoFormat'
 import { parsePlainYearMonth } from '../internal/isoParse'
+import { mergePlainYearMonthFields } from '../internal/merge'
 import { movePlainYearMonth } from '../internal/move'
 import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
@@ -67,8 +64,8 @@ export type Record = {
 }
 
 export type Fields = YearMonthFields
-export type FromFields = PlainYearMonthBag
-export type WithFields = YearMonthBag
+export type FromFields = YearMonthLikeObject
+export type WithFields = Partial<YearMonthFields>
 export type ISOFields = IsoDateFields
 export type ToPlainDateFields = { day: number }
 
@@ -80,10 +77,7 @@ export type ToStringOptions = CalendarDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = bindArgs(
-  constructPlainYearMonthSlots,
-  refineCalendarId,
-) as (
+export const create = constructPlainYearMonthSlots as (
   isoYear: number,
   isoMonth: number,
   calendar?: string,
@@ -94,7 +88,7 @@ export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
-  return refineNativePlainYearMonthBag(
+  return refinePlainYearMonthObjectLike(
     getCalendarIdFromBag(fields),
     fields,
     options,
@@ -134,7 +128,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return plainYearMonthWithFields(record, fields, options)
+  return mergePlainYearMonthFields(record, fields, options)
 }
 
 // Math
@@ -181,7 +175,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertNativePlainYearMonthToDate(
+  return convertPlainYearMonthToDate(
     getCalendarId(record),
     getFields(record),
     fields,

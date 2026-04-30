@@ -1,25 +1,16 @@
 import * as errorMessages from './errorMessages'
+import { timeRegExpStr } from './timeParse'
 import { nanoInHour, nanoInMinute, nanoInSec, nanoInUtcDay } from './units'
 import {
   createRegExp,
   parseInt0,
   parseSign,
   parseSubsecNano,
+  signRegExpStr,
   validateTimeSeparators,
 } from './utils'
 
-const signRegExpStr = '([+-])' // outer captures
-const fractionRegExpStr = '(?:[.,](\\d{1,9}))?' // only afterDecimal captures
-
-const timeRegExpStr =
-  '(\\d{2})' + // 1:hour
-  '(?::?(\\d{2})' + // 2:minute
-  '(?::?(\\d{2})' + // 3:second
-  fractionRegExpStr + // 4:afterDecimal
-  ')?' +
-  ')?'
-
-const offsetRegExpStr =
+export const offsetRegExpStr =
   signRegExpStr + // 1:offsetSign
   timeRegExpStr // 2:hour, 3:minute, 4:second, 5:afterDecimal
 
@@ -45,6 +36,10 @@ export function parseOffsetNanoMaybe(
 
 export function validateOffsetSeparators(s: string): boolean {
   return validateTimeSeparators(s.slice(1))
+}
+
+export function offsetHasSeconds(offset: string): boolean {
+  return offset.replace(/\D/g, '').length > 4
 }
 
 export function validateTimeZoneOffset(offsetNano: number): number {

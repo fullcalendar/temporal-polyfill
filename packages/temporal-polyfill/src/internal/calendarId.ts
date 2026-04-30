@@ -1,7 +1,7 @@
-import { gregoryCalendarId, isoCalendarId } from './calendarConfig'
 import { requireString } from './cast'
 import * as errorMessages from './errorMessages'
-import { queryCalendarIntlFormat } from './intlMath'
+import { queryCalendarIntlFormat } from './intlCalendar'
+import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
 
 // Temporal accepts a small set of deprecated calendar aliases and
 // canonicalizes them up front. `ethiopic-amete-alem` is included because

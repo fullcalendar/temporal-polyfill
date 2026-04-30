@@ -1,30 +1,24 @@
-import {
-  PlainDateBag,
-  convertNativeToPlainMonthDay,
-  convertNativeToPlainYearMonth,
-  plainDateWithFields,
-  refineNativePlainDateBag,
-} from '../internal/bagRefine'
-import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import { constructPlainDateSlots } from '../internal/construct'
 import {
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
   plainDateToPlainDateTime,
   plainDateToZonedDateTime,
   zonedDateTimeToPlainDate,
 } from '../internal/convert'
+import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates } from '../internal/diff'
-import { DateBag, DateFields } from '../internal/fields'
+import { DateLikeObject } from '../internal/fieldTypes'
+import { DateFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { parsePlainDate } from '../internal/isoParse'
+import { mergePlainDateFields } from '../internal/merge'
 import { slotsWithCalendarId } from '../internal/modify'
 import { movePlainDate } from '../internal/move'
-import {
-  DiffOptions,
-  OverflowOptions,
-  refineOverflowOptions,
-} from '../internal/optionsRefine'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
+import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import {
   BrandingSlots,
   PlainDateBranding,
@@ -36,7 +30,7 @@ import {
   createPlainDateSlots,
 } from '../internal/slots'
 import { DateUnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarIdFromBag,
@@ -63,21 +57,25 @@ import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type PlainDate = any & DateFields
-export type PlainDateArg = PlainDate | PlainDateBag | string
+export type PlainDateArg = PlainDate | DateLikeObject | string
 
 // TODO: give `this` a type
 
 export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
-  bindArgs(constructPlainDateSlots, refineCalendarId),
+  constructPlainDateSlots,
   {
     ...calendarIdGetters,
     ...dateGetters,
   },
   {
-    with(slots: PlainDateSlots, mod: DateBag, options?: OverflowOptions) {
+    with(
+      slots: PlainDateSlots,
+      mod: Partial<DateFields>,
+      options?: OverflowOptions,
+    ) {
       return createPlainDate(
-        plainDateWithFields(slots, rejectInvalidBag(mod), options),
+        mergePlainDateFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
@@ -155,14 +153,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(
-        convertNativeToPlainYearMonth(slots.calendar, this),
-      )
+      return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(
-        convertNativeToPlainMonthDay(slots.calendar, this),
-      )
+      return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
     },
     toLocaleString(
       slots: PlainDateSlots,
@@ -216,9 +210,9 @@ export function toPlainDateSlots(
         return zonedDateTimeToPlainDate(slots as ZonedDateTimeSlots)
     }
 
-    return refineNativePlainDateBag(
-      getCalendarIdFromBag(arg as PlainDateBag),
-      arg as PlainDateBag,
+    return refinePlainDateObjectLike(
+      getCalendarIdFromBag(arg as DateLikeObject),
+      arg as DateLikeObject,
       options,
     )
   }

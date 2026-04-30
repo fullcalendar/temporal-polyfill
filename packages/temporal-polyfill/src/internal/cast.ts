@@ -36,13 +36,6 @@ export function requireInteger(arg: number): number {
   return requireNumberIsInteger(requireNumber(arg))
 }
 
-export function requireNonNullish<T>(o: T): T {
-  if (o == null) {
-    throw new TypeError(errorMessages.forbiddenNullish)
-  }
-  return o
-}
-
 /*
 Disallows undefined/null. Does RangeError
 */

@@ -1,6 +1,6 @@
 import { createInstantSlots } from '../internal/slots'
 import { getTimeZoneAtomic, refineTimeZoneId } from '../internal/timeZoneId'
-import { queryNativeTimeZone } from '../internal/timeZoneNative'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import { bindArgs } from '../internal/utils'
 import * as InstantFns from './instant'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -9,8 +9,8 @@ export function getPossibleInstantsFor(
   timeZoneId: string,
   plainDateTime: PlainDateTimeFns.Record,
 ): InstantFns.Record[] {
-  const nativeTimeZone = queryNativeTimeZone(refineTimeZoneId(timeZoneId))
-  return nativeTimeZone
+  const timeZoneImpl = queryTimeZone(refineTimeZoneId(timeZoneId))
+  return timeZoneImpl
     .getPossibleInstantsFor(plainDateTime)
     .map(createInstantSlots)
 }
@@ -20,8 +20,8 @@ function getTransition(
   timeZoneId: string,
   instant: InstantFns.Record,
 ): InstantFns.Record | null {
-  const nativeTimeZone = queryNativeTimeZone(refineTimeZoneId(timeZoneId))
-  const epochNano = nativeTimeZone.getTransition(instant.epochNanoseconds, dir)
+  const timeZoneImpl = queryTimeZone(refineTimeZoneId(timeZoneId))
+  const epochNano = timeZoneImpl.getTransition(instant.epochNanoseconds, dir)
   return epochNano ? createInstantSlots(epochNano) : null
 }
 

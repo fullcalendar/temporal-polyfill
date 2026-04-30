@@ -32,10 +32,6 @@ export const numberOutOfRange = (
 export const invalidEntity = (fieldName: string, val: any) =>
   `Invalid ${fieldName}: ${val}`
 export const missingField = (fieldName: string) => `Missing ${fieldName}`
-export const forbiddenField = (fieldName: string) =>
-  `Invalid field ${fieldName}`
-export const duplicateFields = (fieldName: string) =>
-  `Duplicate field ${fieldName}`
 export const noValidFields = (validFields: string[]) =>
   'No valid fields: ' + validFields.join()
 export const invalidBag = 'Invalid bag'

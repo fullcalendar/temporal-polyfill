@@ -21,7 +21,6 @@ import type {
   DurationRoundingOptions,
   DurationRoundingTuple,
   DurationTotalOptions,
-  LargestUnitOptions,
   RoundingMathOptions,
   RoundingMathTuple,
   RoundingModeName,
@@ -35,7 +34,6 @@ import {
   validateUnitRange,
 } from './optionsValidate'
 import {
-  type DateUnitName,
   type DayTimeUnit,
   type DayTimeUnitName,
   Unit,
@@ -50,19 +48,6 @@ not generic coercion helpers: their job is preserving Temporal's option read
 order while validating relationships such as largest/smallest unit and
 rounding increment divisibility.
 */
-
-export function refineDateDiffOptions(
-  options: LargestUnitOptions<DateUnitName> | undefined,
-): Unit {
-  // TODO: only year/month/week/day?
-  options = normalizeOptions(options)
-  return validateUnitRange(
-    largestUnitStr,
-    coerceLargestUnit(options, Unit.Day, true)!,
-    Unit.Day,
-    Unit.Year,
-  )!
-}
 
 function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
   if (roundingMode < 4) {

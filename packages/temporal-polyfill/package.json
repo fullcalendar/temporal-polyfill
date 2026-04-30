@@ -23,6 +23,7 @@
   },
   "scripts": {
     "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
     "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:license npm:bundle",
     "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",

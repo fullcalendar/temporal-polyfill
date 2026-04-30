@@ -24,8 +24,7 @@ export function createSlotClass(
 ): any {
   function Class(this: any, ...args: any[]) {
     if (this instanceof Class) {
-      // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
-      const slots = construct.apply(undefined, args)
+      const slots = construct(...args)
       setSlots(this, slots)
       dbg(this, slots, formatFunc)
     } else {
@@ -46,12 +45,7 @@ export function createSlotClass(
 
   function bindMethod(method: any, methodName: string) {
     return Object.defineProperties(function (this: any, ...args: any[]) {
-      // Avoid argument spread; it observes Array.prototype[Symbol.iterator].
-      for (let i = args.length; i; i--) {
-        args[i] = args[i - 1]
-      }
-      args[0] = getSpecificSlots(this)
-      return method.apply(this, args)
+      return method.call(this, getSpecificSlots(this), ...args)
     }, createNameDescriptors(methodName))
   }
 

@@ -7,12 +7,11 @@ export type RawFormattable = Date | number
 
 export const RawDateTimeFormat = Intl.DateTimeFormat
 
-export function hashIntlFormatParts(
+export function formatEpochMilliToPartsRecord(
   intlFormat: Intl.DateTimeFormat,
   epochMilli: number,
 ): Record<string, string> {
-  // TODO: best level for this?
-  // Probably do it when date is *converted* to epochMilli
+  // Guard before native Intl.DateTimeFormat observes the epoch value.
   if (epochMilli < -maxMilli) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }

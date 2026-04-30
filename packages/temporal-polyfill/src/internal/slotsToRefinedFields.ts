@@ -1,12 +1,16 @@
-import { isoTimeFieldsToCal } from './bagRefineConfig'
-import { formatMonthCode } from './calendarNative'
+import { formatMonthCode } from './calendarMonthCode'
 import {
-  queryNativeDateParts,
-  queryNativeMonthCodeParts,
-} from './calendarNativeQuery'
-import { TimeFields } from './fields'
-import { DateSlots, DateTimeSlots, ZonedDateTimeSlots } from './slots'
-import { zonedEpochSlotsToIso } from './timeZoneNativeMath'
+  queryCalendarDateFields,
+  queryCalendarMonthCodeParts,
+} from './calendarQuery'
+import { isoTimeFieldsToCal } from './fieldConvert'
+import { TimeFields } from './fieldTypes'
+import {
+  AbstractDateSlots,
+  AbstractDateTimeSlots,
+  ZonedDateTimeSlots,
+} from './slots'
+import { zonedEpochSlotsToIso } from './timeZoneMath'
 
 /*
 "Essentials" are the minimal, canonical fields copied from an existing Temporal
@@ -25,7 +29,10 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
 } & TimeFields & { offset: number } {
   const isoFields = zonedEpochSlotsToIso(slots)
 
-  const [year, month, day] = queryNativeDateParts(slots.calendar, isoFields)
+  const { year, month, day } = queryCalendarDateFields(
+    slots.calendar,
+    isoFields,
+  )
   const monthCode = computeMonthCode(slots.calendar, year, month)
 
   return {
@@ -39,7 +46,7 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   }
 }
 
-export function computeDateTimeEssentials(slots: DateTimeSlots) {
+export function computeDateTimeEssentials(slots: AbstractDateTimeSlots) {
   return {
     ...computeDateEssentials(slots),
     // Keep the public Temporal field names here. The slot names are ISO-prefixed
@@ -53,30 +60,30 @@ export function computeDateTimeEssentials(slots: DateTimeSlots) {
   }
 }
 
-export function computeDateEssentials(slots: DateSlots): {
+export function computeDateEssentials(slots: AbstractDateSlots): {
   year: number
   monthCode: string
   day: number
 } {
-  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { year, monthCode, day }
 }
 
-export function computeYearMonthEssentials(slots: DateSlots): {
+export function computeYearMonthEssentials(slots: AbstractDateSlots): {
   year: number
   monthCode: string
 } {
-  const [year, month] = queryNativeDateParts(slots.calendar, slots)
+  const { year, month } = queryCalendarDateFields(slots.calendar, slots)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { year, monthCode }
 }
 
-export function computeMonthDayEssentials(slots: DateSlots): {
+export function computeMonthDayEssentials(slots: AbstractDateSlots): {
   monthCode: string
   day: number
 } {
-  const [year, month, day] = queryNativeDateParts(slots.calendar, slots)
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { monthCode, day }
 }
@@ -86,7 +93,7 @@ function computeMonthCode(
   year: number,
   month: number,
 ): string {
-  const [monthCodeNumber, isLeapMonth] = queryNativeMonthCodeParts(
+  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     calendarId,
     year,
     month,

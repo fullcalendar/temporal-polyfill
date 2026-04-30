@@ -1,11 +1,11 @@
 import {
   BigNano,
   addBigNanos,
-  bigNanoOutside,
   bigNanoToExactDays,
   bigNanoToNumber,
   createBigNano,
   diffBigNanos,
+  isBigNanoOutside,
   moveBigNano,
 } from './bigNano'
 import {
@@ -27,7 +27,8 @@ import { IsoDateTimeFields, IsoTimeFields, clearIsoFields } from './isoFields'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
-import { RoundingOptions, refineRoundingOptions } from './optionsRefine'
+import { RoundingOptions } from './optionsModel'
+import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
   Marker,
   MarkerToEpochNano,
@@ -36,7 +37,7 @@ import {
   isZonedEpochSlots,
 } from './relativeMath'
 import {
-  DateTimeSlots,
+  AbstractDateTimeSlots,
   InstantSlots,
   PlainDateTimeSlots,
   PlainTimeSlots,
@@ -53,12 +54,12 @@ import {
   isoTimeFieldsToNano,
   nanoToIsoTimeAndDay,
 } from './timeMath'
-import { NativeTimeZone, queryNativeTimeZone } from './timeZoneNative'
+import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
-} from './timeZoneNativeMath'
+} from './timeZoneMath'
 import { clampRelativeDuration, computeEpochNanoFrac } from './total'
 import {
   DayTimeUnit,
@@ -112,18 +113,18 @@ export function roundZonedDateTime(
     return slots
   }
 
-  const nativeTimeZone = queryNativeTimeZone(timeZone)
+  const timeZoneImpl = queryTimeZone(timeZone)
 
   if (smallestUnit === Unit.Day) {
     // no need for checking in-bounds. entire day of valid zdt is valid
     epochNanoseconds = roundZonedEpochToInterval(
       computeDayInterval,
-      nativeTimeZone,
+      timeZoneImpl,
       slots,
       roundingMode,
     )
   } else {
-    const offsetNano = nativeTimeZone.getOffsetNanosecondsFor(epochNanoseconds)
+    const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNanoseconds)
     const isoFields = epochNanoToIso(epochNanoseconds, offsetNano)
     // TODO: ^optimize with zonedEpochSlotsToIso?
 
@@ -134,7 +135,7 @@ export function roundZonedDateTime(
       roundingMode,
     )
     epochNanoseconds = getMatchingInstantFor(
-      nativeTimeZone,
+      timeZoneImpl,
       roundedIsoFields,
       offsetNano,
       OffsetDisambig.Prefer, // keep old offsetNano if possible
@@ -178,13 +179,13 @@ export function roundPlainTime(
 // -----------------------------------------------------------------------------
 
 export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
-  const nativeTimeZone = queryNativeTimeZone(slots.timeZone)
+  const timeZoneImpl = queryTimeZone(slots.timeZone)
 
-  const isoFields = zonedEpochSlotsToIso(slots, nativeTimeZone)
+  const isoFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const [isoFields0, isoFields1] = computeDayInterval(isoFields)
 
-  const epochNano0 = getStartOfDayInstantFor(nativeTimeZone, isoFields0)
-  const epochNano1 = getStartOfDayInstantFor(nativeTimeZone, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(timeZoneImpl, isoFields0)
+  const epochNano1 = getStartOfDayInstantFor(timeZoneImpl, isoFields1)
 
   const hoursExact = bigNanoToNumber(
     diffBigNanos(epochNano0, epochNano1),
@@ -203,8 +204,8 @@ export function computeZonedStartOfDay(
   slots: ZonedDateTimeSlots,
 ): ZonedDateTimeSlots {
   const { timeZone, calendar } = slots
-  const nativeTimeZone = queryNativeTimeZone(timeZone)
-  const epochNano1 = alignZonedEpoch(computeDayFloor, nativeTimeZone, slots)
+  const timeZoneImpl = queryTimeZone(timeZone)
+  const epochNano1 = alignZonedEpoch(computeDayFloor, timeZoneImpl, slots)
   // nudging within-day guarantees in-bounds
   return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
 }
@@ -213,13 +214,13 @@ export function computeZonedStartOfDay(
 For year/month/week/day only
 */
 export function alignZonedEpoch(
-  computeAlignment: (slots: DateTimeSlots) => IsoDateTimeFields,
-  nativeTimeZone: NativeTimeZone,
+  computeAlignment: (slots: AbstractDateTimeSlots) => IsoDateTimeFields,
+  timeZoneImpl: TimeZoneImpl,
   slots: ZonedDateTimeSlots,
 ): BigNano {
-  const isoFields = zonedEpochSlotsToIso(slots, nativeTimeZone)
+  const isoFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const isoFields1 = computeAlignment(isoFields)
-  const epochNano1 = getStartOfDayInstantFor(nativeTimeZone, isoFields1)
+  const epochNano1 = getStartOfDayInstantFor(timeZoneImpl, isoFields1)
   return epochNano1
 }
 
@@ -227,19 +228,19 @@ export function alignZonedEpoch(
 For year/month/week/day only
 */
 export function roundZonedEpochToInterval(
-  computeInterval: (slots: DateTimeSlots) => IsoDateTimeInterval,
-  nativeTimeZone: NativeTimeZone,
+  computeInterval: (slots: AbstractDateTimeSlots) => IsoDateTimeInterval,
+  timeZoneImpl: TimeZoneImpl,
   slots: ZonedEpochSlots,
   roundingMode: RoundingMode,
 ): BigNano {
-  const isoSlots = zonedEpochSlotsToIso(slots, nativeTimeZone)
+  const isoSlots = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const [isoFields0, isoFields1] = computeInterval(isoSlots)
 
   const epochNano = slots.epochNanoseconds
-  const epochNano0 = getStartOfDayInstantFor(nativeTimeZone, isoFields0)
-  const epochNano1 = getStartOfDayInstantFor(nativeTimeZone, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(timeZoneImpl, isoFields0)
+  const epochNano1 = getStartOfDayInstantFor(timeZoneImpl, isoFields1)
 
-  if (bigNanoOutside(epochNano, epochNano0, epochNano1)) {
+  if (isBigNanoOutside(epochNano, epochNano0, epochNano1)) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
 
@@ -271,10 +272,11 @@ export function roundDateTimeToNano(
   nanoInc: number,
   roundingMode: RoundingMode,
 ): IsoDateTimeFields {
-  const timeAndDay = roundTimeToNano(isoFields, nanoInc, roundingMode)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const roundedIsoFields = timeAndDay[0]
-  const dayDelta = timeAndDay[1]
+  const [roundedIsoFields, dayDelta] = roundTimeToNano(
+    isoFields,
+    nanoInc,
+    roundingMode,
+  )
 
   return checkIsoDateTimeInBounds({
     ...moveByDays(isoFields, dayDelta),
@@ -468,9 +470,7 @@ export function roundBigNanoByInc(
   roundingMode: RoundingMode,
   useDayOrigin?: boolean,
 ): BigNano {
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  let days = bigNano[0]
-  let timeNano = bigNano[1]
+  let [days, timeNano] = bigNano
 
   // consider the start-of-day the origin?
   // convert to start-of-day and time-of-day
@@ -504,10 +504,7 @@ export function roundBigNanoByInc(
     roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
   }
 
-  const dayAndNano = divModFloor(roundedTimeNano, nanoInUtcDay)
-  // Avoid tuple destructuring; it observes Array.prototype[Symbol.iterator].
-  const dayDelta = dayAndNano[0]
-  const finalTimeNano = dayAndNano[1]
+  const [dayDelta, finalTimeNano] = divModFloor(roundedTimeNano, nanoInUtcDay)
 
   return createBigNano(days + dayDelta, finalTimeNano)
 }

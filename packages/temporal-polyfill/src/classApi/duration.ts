@@ -1,11 +1,9 @@
-import {
-  ZonedDateTimeBag,
-  durationWithFields,
-  refineDurationBag,
-  refineMaybeNativeZonedDateTimeBag,
-} from '../internal/bagRefine'
 import { compareDurations } from '../internal/compare'
 import { constructDurationSlots } from '../internal/construct'
+import {
+  refineDurationObjectLike,
+  refineMaybeZonedDateTimeObjectLike,
+} from '../internal/createFromFields'
 import { DurationFields } from '../internal/durationFields'
 import {
   absDuration,
@@ -14,15 +12,16 @@ import {
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
-import { DurationBag } from '../internal/fields'
+import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
+import { mergeDurationFields } from '../internal/merge'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
-} from '../internal/optionsRefine'
+} from '../internal/optionsModel'
 import { RelativeToSlots } from '../internal/relativeMath'
 import {
   BrandingSlots,
@@ -48,7 +47,7 @@ import { refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTimeArg } from './zonedDateTime'
 
 export type Duration = any & DurationFields
-export type DurationArg = Duration | DurationBag | string
+export type DurationArg = Duration | Partial<DurationFields> | string
 
 export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   DurationBranding,
@@ -58,8 +57,8 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
     blank: getDurationBlank,
   },
   {
-    with(slots: DurationSlots, mod: DurationBag): Duration {
-      return createDuration(durationWithFields(slots, mod))
+    with(slots: DurationSlots, mod: Partial<DurationFields>): Duration {
+      return createDuration(mergeDurationFields(slots, mod))
     },
     negated(slots: DurationSlots): Duration {
       return createDuration(negateDuration(slots))
@@ -157,7 +156,7 @@ export function toDurationSlots(arg: DurationArg): DurationSlots {
       return slots as DurationSlots
     }
 
-    return refineDurationBag(arg as DurationBag)
+    return refineDurationObjectLike(arg as Partial<DurationFields>)
   }
 
   return parseDuration(arg)
@@ -180,10 +179,10 @@ function refinePublicRelativeTo(
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
-      const res = refineMaybeNativeZonedDateTimeBag(
+      const res = refineMaybeZonedDateTimeObjectLike(
         refineTimeZoneArg,
         calendarId,
-        relativeTo as unknown as ZonedDateTimeBag, // !!!
+        relativeTo as unknown as ZonedDateTimeLikeObject, // !!!
       )
 
       return { ...res, calendar: calendarId }
