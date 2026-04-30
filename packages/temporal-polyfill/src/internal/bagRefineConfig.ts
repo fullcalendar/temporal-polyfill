@@ -37,7 +37,6 @@ export type PlainMonthDayBag = MonthDayBag & { calendar?: string }
 
 export type DateOptionsTuple = [overflow: Overflow, ...extraOptions: unknown[]]
 export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
-export type OverflowRefiner = () => Overflow
 
 // These maps define the first, property-by-property coercion pass over user
 // bags. Calendar-sensitive validation stays in bagFromFields.ts because its

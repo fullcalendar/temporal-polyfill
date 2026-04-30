@@ -1,9 +1,9 @@
 import { parseMonthCodeField } from './bagFieldUtils'
 import { resolveDay, resolveMonth, resolveYear } from './bagNativeFieldResolve'
+import type { MonthCodeParts } from './calendarNative'
 import type {
   DateOptionsRefiner,
   DateOptionsTuple,
-  OverflowRefiner,
 } from './bagRefineConfig'
 import {
   gregoryCalendarId,
@@ -44,9 +44,7 @@ export function dateFromFields(
   fields: DateBag,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  return resolveDateFromFields(calendarId, fields, () => [
-    refineOverflowOptions(options),
-  ])[0]
+  return resolveDateFromFieldsWithOverflowOptions(calendarId, fields, options)
 }
 
 export function resolveDateFromFields<T extends DateOptionsTuple>(
@@ -54,6 +52,72 @@ export function resolveDateFromFields<T extends DateOptionsTuple>(
   fields: DateBag,
   refineOptions: DateOptionsRefiner<T>,
 ): [slots: PlainDateSlots, ...options: T] {
+  const prepared = prepareDateFields(calendarId, fields)
+
+  // Options are deliberately read after all observable calendar fields,
+  // including numeric year coercion. Month/day validation needs overflow, so
+  // this is the latest point shared by Date, DateTime, and ZonedDateTime paths.
+  const refinedOptions = refineOptions()
+
+  return [
+    resolvePreparedDateFields(calendarId, fields, prepared, refinedOptions[0]),
+    ...refinedOptions,
+  ]
+}
+
+function resolveDateFromFieldsWithOverflowOptions(
+  calendarId: string,
+  fields: DateBag,
+  options: OverflowOptions | undefined,
+): PlainDateSlots {
+  const prepared = prepareDateFields(calendarId, fields)
+
+  // This wrapper no longer needs the generic callback machinery, but it still
+  // reads overflow at the same phase: after date field syntax/year resolution
+  // and immediately before month/day validation need the overflow behavior.
+  const overflow = refineOverflowOptions(options)
+  return resolvePreparedDateFields(calendarId, fields, prepared, overflow)
+}
+
+function resolvePreparedDateFields(
+  calendarId: string,
+  fields: DateBag,
+  prepared: PreparedDateFields,
+  overflow: Overflow,
+): PlainDateSlots {
+  const month = resolveMonth(
+    calendarId,
+    fields,
+    prepared.year,
+    overflow,
+    prepared.monthCodeParts,
+  )
+  const day = resolveDay(
+    calendarId,
+    fields as DayFields,
+    month,
+    prepared.year,
+    overflow,
+  )
+  const isoFields = queryNativeIsoFieldsFromParts(
+    calendarId,
+    prepared.year,
+    month,
+    day,
+  )
+
+  return createPlainDateSlots(checkIsoDateInBounds(isoFields), calendarId)
+}
+
+interface PreparedDateFields {
+  monthCodeParts: MonthCodeParts | undefined
+  year: number
+}
+
+function prepareDateFields(
+  calendarId: string,
+  fields: DateBag,
+): PreparedDateFields {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   // This ensures correct error ordering per spec (e.g. calendarresolvefields-error-ordering tests).
@@ -72,22 +136,9 @@ export function resolveDateFromFields<T extends DateOptionsTuple>(
   }
 
   const monthCodeParts = parseMonthCodeField(fields)
-
   const year = resolveYear(calendarId, fields)
 
-  // Options are deliberately read after all observable calendar fields,
-  // including numeric year coercion. Month/day validation needs overflow, so
-  // this is the latest point shared by Date, DateTime, and ZonedDateTime paths.
-  const refinedOptions = refineOptions()
-  const overflow = refinedOptions[0]
-  const month = resolveMonth(calendarId, fields, year, overflow, monthCodeParts)
-  const day = resolveDay(calendarId, fields as DayFields, month, year, overflow)
-  const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, day)
-
-  return [
-    createPlainDateSlots(checkIsoDateInBounds(isoFields), calendarId),
-    ...refinedOptions,
-  ]
+  return { monthCodeParts, year }
 }
 
 export function yearMonthFromFields(
@@ -95,16 +146,14 @@ export function yearMonthFromFields(
   fields: YearMonthBag,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  return resolveYearMonthFromFields(calendarId, fields, () =>
-    refineOverflowOptions(options),
-  )[0]
+  return resolveYearMonthFromFields(calendarId, fields, options)
 }
 
 function resolveYearMonthFromFields(
   calendarId: string,
   fields: YearMonthBag,
-  refineOverflow: OverflowRefiner,
-): [slots: PlainYearMonthSlots, overflow: Overflow] {
+  options: OverflowOptions | undefined,
+): PlainYearMonthSlots {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
@@ -124,14 +173,14 @@ function resolveYearMonthFromFields(
 
   // Keep option coercion after year coercion; month resolution is the first
   // step that needs overflow.
-  const overflow = refineOverflow()
+  const overflow = refineOverflowOptions(options)
   const month = resolveMonth(calendarId, fields, year, overflow, monthCodeParts)
   const isoFields = queryNativeIsoFieldsFromParts(calendarId, year, month, 1)
 
-  return [
-    createPlainYearMonthSlots(checkIsoYearMonthInBounds(isoFields), calendarId),
-    overflow,
-  ]
+  return createPlainYearMonthSlots(
+    checkIsoYearMonthInBounds(isoFields),
+    calendarId,
+  )
 }
 
 export function monthDayFromFields(
@@ -139,16 +188,14 @@ export function monthDayFromFields(
   fields: DateBag, // guaranteed `day`
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  return resolveMonthDayFromFields(calendarId, fields, () =>
-    refineOverflowOptions(options),
-  )[0]
+  return resolveMonthDayFromFields(calendarId, fields, options)
 }
 
 function resolveMonthDayFromFields(
   calendarId: string,
   fields: DateBag, // guaranteed `day`
-  refineOverflow: OverflowRefiner,
-): [slots: PlainMonthDaySlots, overflow: Overflow] {
+  options: OverflowOptions | undefined,
+): PlainMonthDaySlots {
   const eraOrigins = getCalendarEraOrigins({ id: calendarId })
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
@@ -174,7 +221,7 @@ function resolveMonthDayFromFields(
 
   // PlainMonthDay may not have a year, but if it does, that year is part of the
   // observable field coercion sequence and must precede overflow option reads.
-  const overflow = refineOverflow()
+  const overflow = refineOverflowOptions(options)
   let day: number
   let monthCodeNumber: number
   let isLeapMonth: boolean
@@ -332,15 +379,12 @@ function resolveMonthDayFromFields(
   }
   const [finalYear, finalMonth] = res
 
-  return [
-    createPlainMonthDaySlots(
-      checkIsoDateInBounds(
-        queryNativeIsoFieldsFromParts(calendarId, finalYear, finalMonth, day),
-      ),
-      calendarId,
+  return createPlainMonthDaySlots(
+    checkIsoDateInBounds(
+      queryNativeIsoFieldsFromParts(calendarId, finalYear, finalMonth, day),
     ),
-    overflow,
-  ]
+    calendarId,
+  )
 }
 
 function queryPlainMonthDayLeapMonthMaxDay(
