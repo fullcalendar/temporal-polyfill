@@ -13,16 +13,15 @@ import {
 } from '../internal/calendarQuery'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
-import { timeFieldNamesAsc } from '../internal/fieldNames'
+import {
+  dateGetterFieldNames,
+  monthDayGetterFieldNames,
+  timeFieldNamesAsc,
+  yearMonthGetterFieldNames,
+} from '../internal/fieldNames'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
-import {
-  dateRefiners,
-  dayOnlyRefiners,
-  monthOnlyRefiners,
-  yearMonthOnlyRefiners,
-} from './calendarRefiners'
 
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
@@ -47,14 +46,16 @@ const calendarGetterQueries = {
   yearOfWeek: (slots: any) => queryCalendarYearOfWeek(slots.calendar, slots),
 }
 
-function createCalendarGetters<M>(methodNameMap: M): {
-  [K in keyof M]: () => any
+function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
+  methodNames: K[],
+): {
+  [P in K]: () => any
 } {
   const methods = {} as any
 
-  for (const methodName in methodNameMap) {
-    const getter =
-      calendarGetterQueries[methodName as keyof typeof calendarGetterQueries]
+  for (let i = 0; i < methodNames.length; i++) {
+    const methodName = methodNames[i]
+    const getter = calendarGetterQueries[methodName]
     methods[methodName] = function (this: any, slots: any) {
       return getter(slots)
     }
@@ -63,15 +64,9 @@ function createCalendarGetters<M>(methodNameMap: M): {
   return methods
 }
 
-export const dateGetters = createCalendarGetters(dateRefiners)
-export const yearMonthGetters = createCalendarGetters({
-  ...yearMonthOnlyRefiners,
-  ...monthOnlyRefiners,
-})
-export const monthDayGetters = createCalendarGetters({
-  ...monthOnlyRefiners,
-  ...dayOnlyRefiners,
-})
+export const dateGetters = createCalendarGetters(dateGetterFieldNames)
+export const yearMonthGetters = createCalendarGetters(yearMonthGetterFieldNames)
+export const monthDayGetters = createCalendarGetters(monthDayGetterFieldNames)
 export const calendarIdGetters = {
   calendarId(slots: any): string {
     return slots.calendar

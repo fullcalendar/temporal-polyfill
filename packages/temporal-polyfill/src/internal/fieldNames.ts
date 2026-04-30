@@ -1,10 +1,22 @@
 import type {
   CalendarDateFields,
   CalendarDateTimeFields,
+  DateStats,
   TimeFields,
+  YearMonthStats,
 } from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
 import { mapPropNamesToConstant, sortStrings } from './utils'
+
+export type CalendarGetterFieldName =
+  | keyof DateStats
+  | keyof YearMonthStats
+  | 'era'
+  | 'eraYear'
+  | 'year'
+  | 'month'
+  | 'monthCode'
+  | 'day'
 
 // Field Names
 // -----------------------------------------------------------------------------
@@ -40,7 +52,47 @@ export const yearFieldNames = ['year']
 export const yearFieldNamesWithEra = [...eraYearFieldNames, ...yearFieldNames]
 export const monthCodeFieldNames = ['monthCode']
 export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
-export const dayFieldNames = ['day']
+export const dayFieldName = 'day'
+// Used as a public-facing entity label for move-to-day-of-month helpers. It is
+// intentionally distinct from the actual Temporal field name, which is "day".
+export const dayOfMonthName = 'dayOfMonth'
+export const dayOfWeekFieldName = 'dayOfWeek'
+export const weekOfYearFieldName = 'weekOfYear'
+export const dayFieldNames = [dayFieldName]
+
+// Getter surfaces for PlainDate/PlainYearMonth include both structural calendar
+// fields and derived calendar stats. Keep these names independent from
+// calendarRefiners so class API mixins can enumerate methods without importing
+// the validation functions behind those refiner maps.
+export const yearMonthStatsFieldNames = [
+  'daysInMonth',
+  'daysInYear',
+  'inLeapYear',
+  'monthsInYear',
+] as (keyof YearMonthStats)[]
+export const dateStatsFieldNames = [
+  dayOfWeekFieldName,
+  'dayOfYear',
+  weekOfYearFieldName,
+  'yearOfWeek',
+  'daysInWeek',
+] as (keyof DateStats)[]
+export const yearMonthGetterFieldNames = [
+  ...eraYearFieldNames,
+  ...yearFieldNames,
+  'month',
+  ...yearMonthStatsFieldNames,
+  ...monthCodeFieldNames,
+] as CalendarGetterFieldName[]
+export const monthDayGetterFieldNames = [
+  ...monthCodeFieldNames,
+  ...dayFieldNames,
+] as CalendarGetterFieldName[]
+export const dateGetterFieldNames = [
+  ...yearMonthGetterFieldNames,
+  ...dayFieldNames,
+  ...dateStatsFieldNames,
+] as CalendarGetterFieldName[]
 
 export const calendarDateFieldNamesAsc = [
   ...dayFieldNames,

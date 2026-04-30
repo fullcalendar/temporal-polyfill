@@ -7,7 +7,13 @@ import {
 } from '../internal/calendarQuery'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
-import { calendarDateFieldNamesAlpha } from '../internal/fieldNames'
+import {
+  calendarDateFieldNamesAlpha,
+  dayFieldName,
+  dayOfMonthName,
+  dayOfWeekFieldName,
+  weekOfYearFieldName,
+} from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import {
@@ -94,11 +100,6 @@ export function moveByDaysStrict<F extends CalendarDateFields>(
 // Day-of-Unit / Week
 // -----------------------------------------------------------------------------
 
-const dayOfMonthLabel = 'dayOfMonth'
-const dayLabel = 'day'
-const dayOfWeekLabel = 'dayOfWeek'
-const weekOfYearLabel = 'weekOfYear'
-
 export function moveToDayOfYear<S extends AbstractDateSlots>(
   slots: S,
   dayOfYear: number,
@@ -108,8 +109,8 @@ export function moveToDayOfYear<S extends AbstractDateSlots>(
   const { calendar } = slots
   const daysInYear = queryCalendarDaysInYear(calendar, slots)
   const normDayOfYear = clampEntity(
-    dayOfMonthLabel,
-    toInteger(dayOfYear, dayOfMonthLabel),
+    dayOfMonthName,
+    toInteger(dayOfYear, dayOfMonthName),
     1,
     daysInYear,
     overflow,
@@ -128,8 +129,8 @@ export function moveToDayOfMonth<S extends AbstractDateSlots>(
   const { calendar } = slots
   const daysInMonth = queryCalendarDaysInMonth(calendar, slots)
   const normDayOfMonth = clampEntity(
-    dayLabel,
-    toInteger(day, dayLabel),
+    dayFieldName,
+    toInteger(day, dayFieldName),
     1,
     daysInMonth,
     overflow,
@@ -149,8 +150,8 @@ export function moveToDayOfWeek<S extends CalendarDateFields>(
 ): S {
   const overflow = refineOverflowOptions(options)
   const normDayOfWeek = clampEntity(
-    dayOfWeekLabel,
-    toInteger(dayOfWeek, dayOfWeekLabel),
+    dayOfWeekFieldName,
+    toInteger(dayOfWeek, dayOfWeekFieldName),
     1,
     7,
     overflow,
@@ -172,8 +173,8 @@ export function slotsWithWeekOfYear<S extends AbstractDateSlots>(
   }
 
   const normWeekOfYear = clampEntity(
-    weekOfYearLabel,
-    toInteger(weekOfYear, weekOfYearLabel),
+    weekOfYearFieldName,
+    toInteger(weekOfYear, weekOfYearFieldName),
     1,
     weeksInYear!,
     overflow,
