@@ -25,7 +25,6 @@ import {
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
-import { RelativeToSlots } from './relativeMath'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
   parseOffsetNano,
@@ -34,6 +33,7 @@ import {
 } from './offsetParse'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
+import { RelativeToSlots } from './relativeMath'
 import {
   DateSlots,
   DateTimeSlots,
@@ -69,13 +69,8 @@ import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
 } from './timeZoneNativeMath'
-import {
-  TimeUnit,
-  Unit,
-  nanoInSec,
-  unitNanoMap,
-} from './units'
 import { nanoToGivenFields } from './unitMath'
+import { TimeUnit, Unit, nanoInSec, unitNanoMap } from './units'
 import {
   createRegExp,
   divModFloor,

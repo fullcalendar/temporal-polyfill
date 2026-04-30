@@ -18,12 +18,12 @@ import { DurationBag } from '../internal/fields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
-import { RelativeToSlots } from '../internal/relativeMath'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
 } from '../internal/optionsRefine'
+import { RelativeToSlots } from '../internal/relativeMath'
 import {
   BrandingSlots,
   DurationBranding,

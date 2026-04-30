@@ -17,10 +17,7 @@ import {
   IsoTimeFields,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import {
-  OverflowOptions,
-  refineOverflowOptions,
-} from './optionsRefine'
+import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   DurationSlots,
   EpochSlots,

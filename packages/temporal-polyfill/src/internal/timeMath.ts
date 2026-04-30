@@ -16,6 +16,7 @@ import {
   isoTimeFieldNamesAsc,
 } from './isoFields'
 import { Overflow } from './optionsModel'
+import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
   Unit,
   milliInDay,
@@ -25,7 +26,6 @@ import {
   nanoInSec,
   nanoInUtcDay,
 } from './units'
-import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import { clampProp, divModFloor, divModTrunc, zipProps } from './utils'
 
 /*

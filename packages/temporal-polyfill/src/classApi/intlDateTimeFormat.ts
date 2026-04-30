@@ -293,7 +293,11 @@ function readOwnDataTimeZoneOption(
 ): string | undefined {
   const descriptor = Object.getOwnPropertyDescriptor(options, 'timeZone')
 
-  if (!descriptor || !('value' in descriptor) || descriptor.value === undefined) {
+  if (
+    !descriptor ||
+    !('value' in descriptor) ||
+    descriptor.value === undefined
+  ) {
     return undefined
   }
 

@@ -17,6 +17,7 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields } from './isoFields'
+import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import {
   Marker,
   MarkerToEpochNano,
@@ -29,7 +30,6 @@ import {
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
-import { DurationTotalOptions, refineTotalOptions } from './optionsRefine'
 import { DurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'

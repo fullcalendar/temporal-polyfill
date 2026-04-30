@@ -21,7 +21,6 @@ import {
   isoDateFieldNamesAsc,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { MarkerToEpochNano, MoveMarker } from './relativeMath'
 import {
   moveByDays,
   moveDate,
@@ -31,6 +30,7 @@ import {
 } from './move'
 import { RoundingMode } from './optionsModel'
 import { DiffOptions, refineDiffOptions } from './optionsRefine'
+import { MarkerToEpochNano, MoveMarker } from './relativeMath'
 import {
   computeNanoInc,
   roundBigNano,

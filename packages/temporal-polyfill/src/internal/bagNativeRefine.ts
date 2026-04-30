@@ -233,7 +233,12 @@ export function refinePlainTimeBag(
   options?: OverflowOptions, // optional b/c func API can use directly
 ): PlainTimeSlots {
   // disallowEmpty
-  const fields = readAndCoerceBagFields(bag, timeFieldNamesAlpha, [], true) as TimeBag
+  const fields = readAndCoerceBagFields(
+    bag,
+    timeFieldNamesAlpha,
+    [],
+    true,
+  ) as TimeBag
 
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)

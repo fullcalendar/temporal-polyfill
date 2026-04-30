@@ -1,10 +1,6 @@
 import { parseMonthCodeField } from './bagFieldUtils'
 import { resolveDay, resolveMonth, resolveYear } from './bagNativeFieldResolve'
-import type { MonthCodeParts } from './calendarNative'
-import type {
-  DateOptionsRefiner,
-  DateOptionsTuple,
-} from './bagRefineConfig'
+import type { DateOptionsRefiner, DateOptionsTuple } from './bagRefineConfig'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -14,6 +10,7 @@ import {
   plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
 } from './calendarConfig'
 import { computeCalendarIdBase } from './calendarId'
+import type { MonthCodeParts } from './calendarNative'
 import { getCalendarEraOrigins } from './calendarNative'
 import {
   queryNativeIsoFieldsFromParts,

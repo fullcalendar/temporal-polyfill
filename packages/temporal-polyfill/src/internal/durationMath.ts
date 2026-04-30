@@ -9,6 +9,13 @@ import {
 } from './durationFields'
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields } from './isoFields'
+import { Overflow } from './optionsModel'
+import {
+  DurationRoundingOptions,
+  RelativeToOptions,
+  normalizeOptions,
+  refineDurationRoundOptions,
+} from './optionsRefine'
 import {
   RelativeToSlots,
   createDiffMarkers,
@@ -18,13 +25,6 @@ import {
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
-import { Overflow } from './optionsModel'
-import {
-  DurationRoundingOptions,
-  RelativeToOptions,
-  normalizeOptions,
-  refineDurationRoundOptions,
-} from './optionsRefine'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './timeMath'

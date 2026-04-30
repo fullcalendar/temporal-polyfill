@@ -3,6 +3,7 @@ import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateFields, IsoDateTimeFields, IsoTimeFields } from './isoFields'
+import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   RelativeToSlots,
   createMarkerToEpochNano,
@@ -10,7 +11,6 @@ import {
   createRelativeOrigin,
   isUniformUnit,
 } from './relativeMath'
-import { RelativeToOptions, normalizeOptions } from './optionsRefine'
 import {
   DurationSlots,
   InstantSlots,

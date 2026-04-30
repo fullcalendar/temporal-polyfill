@@ -4,7 +4,6 @@ import { DateTimeFields } from './fields'
 import { IsoDateTimeFields, isoDateTimeFieldNamesAlpha } from './isoFields'
 import { formatOffsetNano } from './isoFormat'
 import { EpochDisambig, OffsetDisambig } from './optionsModel'
-import { validateTimeZoneOffset } from './offsetParse'
 import { roundToMinute } from './round'
 import { ZonedDateTimeSlots, ZonedEpochSlots } from './slots'
 import {
