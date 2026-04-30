@@ -5,25 +5,25 @@ import {
   queryNativeMonthCodeParts,
 } from './calendarNativeQuery'
 import { TimeFields } from './fields'
-import { formatOffsetNano } from './isoFormat'
 import { DateSlots, DateTimeSlots, ZonedDateTimeSlots } from './slots'
 import { zonedEpochSlotsToIso } from './timeZoneNativeMath'
 
 /*
-"Essentials" are the minimal, canonical property-bag-shaped fields copied from
-an existing Temporal object before applying a .with() modification bag. They are
-already internal data, so these helpers do not perform user-observable property
-reads; they only translate slots into the field names that mergeCalendarFields()
-and the later from-fields resolution steps expect.
+"Essentials" are the minimal, canonical fields copied from an existing Temporal
+object before applying a .with() modification bag. They are already internal
+data, so these helpers do not perform user-observable property reads; they
+translate slots into the field names that mergeCalendarFields() and the later
+from-fields resolution steps expect. Values match the post-coercion field
+representation, so ZonedDateTime's public "offset" field is stored as
+nanoseconds here.
 */
 
 export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   year: number
   monthCode: string
   day: number
-} & TimeFields & { offset: string } {
+} & TimeFields & { offset: number } {
   const isoFields = zonedEpochSlotsToIso(slots)
-  const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
 
   const [year, month, day] = queryNativeDateParts(slots.calendar, isoFields)
   const monthCode = computeMonthCode(slots.calendar, year, month)
@@ -33,7 +33,9 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
     year,
     monthCode,
     day,
-    offset: offsetString,
+    // Keep this in the same post-coercion representation as user .with()
+    // fields: the public "offset" field is stored internally as nanoseconds.
+    offset: isoFields.offsetNanoseconds,
   }
 }
 

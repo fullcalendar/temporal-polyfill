@@ -33,7 +33,6 @@ import {
 } from './fields'
 import { IsoTimeFields } from './isoFields'
 import { constrainIsoTimeFields } from './isoMath'
-import { parseOffsetNano } from './offsetParse'
 import { OffsetDisambig, Overflow } from './optionsModel'
 import {
   OverflowOptions,
@@ -100,7 +99,9 @@ export function zonedDateTimeWithFields(
     getMatchingInstantFor(
       nativeTimeZone,
       { ...isoDateFields, ...isoTimeFields },
-      parseOffsetNano(mergedAllFields.offset),
+      // Existing fields and user .with() fields are both past the first bag
+      // coercion phase, so "offset" is the offset in nanoseconds here.
+      mergedAllFields.offset,
       offsetDisambig,
       epochDisambig,
     ),

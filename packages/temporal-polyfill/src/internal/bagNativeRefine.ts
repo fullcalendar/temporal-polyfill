@@ -7,7 +7,10 @@ import {
   yearMonthFromFields,
 } from './bagFromFields'
 import { timeFieldsToIso } from './bagRefineConfig'
-import type { ZonedDateTimeBag } from './bagRefineConfig'
+import type {
+  CoercedZonedDateTimeBag,
+  ZonedDateTimeBag,
+} from './bagRefineConfig'
 import {
   durationFieldDefaults,
   durationFieldNamesAlpha,
@@ -31,7 +34,6 @@ import {
 } from './fields'
 import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
-import { parseOffsetNano } from './offsetParse'
 import { Overflow } from './optionsModel'
 import {
   OverflowOptions,
@@ -81,7 +83,7 @@ export function refineMaybeNativeZonedDateTimeBag(
     dateFieldNamesAlpha,
     [],
     timeAndZoneFieldNames,
-  ) as ZonedDateTimeBag
+  ) as CoercedZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
     const isoDateFields = dateFromFields(calendarId, fields as any)
@@ -93,7 +95,9 @@ export function refineMaybeNativeZonedDateTimeBag(
     const epochNanoseconds = getMatchingInstantFor(
       nativeTimeZone,
       { ...isoDateFields, ...isoTimeFields },
-      fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
+      // After readAndCoerceBagFields(), the public "offset" field is stored
+      // internally as offset nanoseconds.
+      fields.offset,
     )
 
     return { epochNanoseconds, timeZone: timeZoneId }
@@ -115,7 +119,7 @@ export function refineNativeZonedDateTimeBag(
     dateFieldNamesAlpha,
     timeZoneFieldNames,
     timeAndZoneFieldNames,
-  ) as ZonedDateTimeBag
+  ) as CoercedZonedDateTimeBag
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
@@ -129,7 +133,9 @@ export function refineNativeZonedDateTimeBag(
   const epochNanoseconds = getMatchingInstantFor(
     nativeTimeZone,
     { ...isoDateFields, ...isoTimeFields },
-    fields.offset !== undefined ? parseOffsetNano(fields.offset) : undefined,
+    // After readAndCoerceBagFields(), the public "offset" field is stored
+    // internally as offset nanoseconds.
+    fields.offset,
     offsetDisambig,
     epochDisambig,
   )

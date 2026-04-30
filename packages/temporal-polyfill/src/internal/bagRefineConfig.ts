@@ -27,6 +27,10 @@ export type ZonedDateTimeBag = PlainDateTimeBag & {
   timeZone: string
   offset?: string
 }
+export type CoercedZonedDateTimeBag = PlainDateTimeBag & {
+  timeZone: string
+  offset?: number
+}
 export type PlainTimeBag = TimeBag
 export type PlainYearMonthBag = YearMonthBag & { calendar?: string }
 export type PlainMonthDayBag = MonthDayBag & { calendar?: string }
@@ -64,12 +68,12 @@ export const durationFieldCoercers = mapPropNamesToConstant(
 )
 
 const builtinOffsetCoercers = {
-  offset(offsetString: string) {
-    const s = toStringViaPrimitive(offsetString)
-    // Validate now so bad offset strings fail during the field-coercion pass.
-    // Consumers intentionally parse again later when they need the nanoseconds.
-    parseOffsetNano(s)
-    return s
+  offset(offsetString: unknown) {
+    const s = toStringViaPrimitive(offsetString as string)
+    // The public field is named "offset" and is supplied as a string, but after
+    // this first bag phase the internal field value is offset nanoseconds. This
+    // keeps the observable string coercion here and avoids later reparsing.
+    return parseOffsetNano(s)
   },
 }
 
