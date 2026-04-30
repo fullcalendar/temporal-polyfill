@@ -1,4 +1,7 @@
-import { getCalendarFieldNames, mergeCalendarFields } from './bagCalendarFields'
+import {
+  getCalendarFieldNames,
+  mergeCalendarFields,
+} from './bagCalendarFields'
 import {
   computeDateEssentials,
   computeDateTimeEssentials,
@@ -25,11 +28,15 @@ import {
   TimeFields,
   YearMonthBag,
   dateFieldNamesAlpha,
-  timeAndOffsetFieldNames,
+  dateFieldNamesAlphaWithEra,
+  dateTimeAndOffsetFieldNamesAlpha,
+  dateTimeAndOffsetFieldNamesAlphaWithEra,
+  dateTimeFieldNamesAlpha,
+  dateTimeFieldNamesAlphaWithEra,
   timeFieldDefaults,
   timeFieldNamesAlpha,
-  timeFieldNamesAsc,
   yearMonthFieldNames,
+  yearMonthFieldNamesWithEra,
 } from './fields'
 import { IsoTimeFields } from './isoFields'
 import { constrainIsoTimeFields } from './isoMath'
@@ -69,10 +76,11 @@ export function zonedDateTimeWithFields(
   const { calendar, timeZone } = zonedDateTimeSlots
   const nativeTimeZone = queryNativeTimeZone(timeZone)
 
-  const validFieldNames = [
-    ...getCalendarFieldNames(calendar, dateFieldNamesAlpha),
-    ...timeAndOffsetFieldNames,
-  ].sort()
+  const validFieldNames = getCalendarFieldNames(
+    calendar,
+    dateTimeAndOffsetFieldNamesAlpha,
+    dateTimeAndOffsetFieldNamesAlphaWithEra,
+  )
 
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
   const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
@@ -117,10 +125,11 @@ export function plainDateTimeWithFields(
 ): PlainDateTimeSlots {
   const calendarId = plainDateTimeSlots.calendar
 
-  const validFieldNames = [
-    ...getCalendarFieldNames(calendarId, dateFieldNamesAlpha),
-    ...timeFieldNamesAsc,
-  ].sort()
+  const validFieldNames = getCalendarFieldNames(
+    calendarId,
+    dateTimeFieldNamesAlpha,
+    dateTimeFieldNamesAlphaWithEra,
+  )
 
   const origFields = computeDateTimeEssentials(plainDateTimeSlots)
   const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
@@ -162,7 +171,8 @@ export function plainDateWithFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-  ).sort()
+    dateFieldNamesAlphaWithEra,
+  )
 
   const origFields = computeDateEssentials(plainDateSlots)
   const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
@@ -184,7 +194,8 @@ export function plainYearMonthWithFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     yearMonthFieldNames,
-  ).sort()
+    yearMonthFieldNamesWithEra,
+  )
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
   const partialFields = readAndCoerceBagFields(modFields, validFieldNames)
@@ -206,7 +217,8 @@ export function plainMonthDayWithFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-  ).sort()
+    dateFieldNamesAlphaWithEra,
+  )
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)
   const partialFields = readAndCoerceBagFields(modFields, validFieldNames)

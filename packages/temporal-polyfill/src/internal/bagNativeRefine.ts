@@ -1,4 +1,7 @@
-import { readNativeCalendarFields } from './bagCalendarFields'
+import {
+  getCalendarFieldNames,
+  readNativeCalendarFields,
+} from './bagCalendarFields'
 import { readAndCoerceBagFields } from './bagFields'
 import {
   dateFromFields,
@@ -24,13 +27,17 @@ import {
   TimeBag,
   YearMonthBag,
   dateFieldNamesAlpha,
+  dateFieldNamesAlphaWithEra,
+  dateTimeAndZoneFieldNamesAlpha,
+  dateTimeAndZoneFieldNamesAlphaWithEra,
+  dateTimeFieldNamesAlpha,
+  dateTimeFieldNamesAlphaWithEra,
   dayFieldNames,
-  timeAndZoneFieldNames,
   timeFieldDefaults,
   timeFieldNamesAlpha,
-  timeFieldNamesAsc,
   timeZoneFieldNames,
   yearMonthFieldNames,
+  yearMonthFieldNamesWithEra,
 } from './fields'
 import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
 import { constrainIsoTimeFields, isoEpochFirstLeapYear } from './isoMath'
@@ -77,12 +84,15 @@ export function refineMaybeNativeZonedDateTimeBag(
   calendarId: string,
   bag: ZonedDateTimeBag,
 ): RelativeToSlotsNoCalendar {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
-    dateFieldNamesAlpha,
-    [],
-    timeAndZoneFieldNames,
+    dateTimeAndZoneFieldNamesAlpha,
+    dateTimeAndZoneFieldNamesAlphaWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ [],
   ) as CoercedZonedDateTimeBag
 
   if (fields.timeZone !== undefined) {
@@ -113,12 +123,15 @@ export function refineNativeZonedDateTimeBag(
   bag: ZonedDateTimeBag,
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
-    dateFieldNamesAlpha,
-    timeZoneFieldNames,
-    timeAndZoneFieldNames,
+    dateTimeAndZoneFieldNamesAlpha,
+    dateTimeAndZoneFieldNamesAlphaWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ timeZoneFieldNames,
   ) as CoercedZonedDateTimeBag
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
@@ -148,12 +161,15 @@ export function refineNativePlainDateTimeBag(
   bag: DateTimeBag,
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
-    dateFieldNamesAlpha,
-    [],
-    timeFieldNamesAsc,
+    dateTimeFieldNamesAlpha,
+    dateTimeFieldNamesAlphaWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ [],
   ) as DateTimeBag
 
   const [isoDateInternals, overflow] = resolveDateFromFields(
@@ -177,11 +193,15 @@ export function refineNativePlainDateBag(
   options: OverflowOptions | undefined,
   requireFields: string[] = [],
 ): PlainDateSlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
     dateFieldNamesAlpha,
-    requireFields,
+    dateFieldNamesAlphaWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ requireFields,
   )
 
   return dateFromFields(calendarId, fields as any, options)
@@ -193,11 +213,15 @@ export function refineNativePlainYearMonthBag(
   options: OverflowOptions | undefined,
   requireFields?: string[],
 ): PlainYearMonthSlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
     yearMonthFieldNames,
-    requireFields,
+    yearMonthFieldNamesWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ requireFields,
   )
 
   return yearMonthFromFields(calendarId, fields as any, options)
@@ -209,11 +233,15 @@ export function refineNativePlainMonthDayBag(
   bag: MonthDayBag,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    bag,
     dateFieldNamesAlpha,
-    dayFieldNames,
+    dateFieldNamesAlphaWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ bag,
+    /* validFieldNames */ validFieldNames,
+    /* requiredFieldNames */ dayFieldNames,
   ) as DateBag
 
   if (

@@ -11,29 +11,21 @@ import {
 export function getCalendarFieldNames(
   calendarId: string,
   fieldNames: string[],
+  fieldNamesWithEra: string[] = fieldNames,
 ): string[] {
-  if (
-    getCalendarEraOrigins({ id: calendarId }) &&
-    fieldNames.includes('year')
-  ) {
-    return [...fieldNames, ...eraYearFieldNames]
-  }
-  return fieldNames
+  // Both inputs are caller-owned, pre-sorted lists. Calendars with eras swap in
+  // the explicit era-bearing variant instead of building field order here.
+  return getCalendarEraOrigins({ id: calendarId })
+    ? fieldNamesWithEra
+    : fieldNames
 }
 
 export function readNativeCalendarFields(
-  calendarId: string,
   bag: Record<string, unknown>,
   validFieldNames: string[],
   requiredFieldNames: string[] = [],
-  forcedValidFieldNames: string[] = [],
 ): Record<string, unknown> {
-  const fieldNames = [
-    ...getCalendarFieldNames(calendarId, validFieldNames),
-    ...forcedValidFieldNames,
-  ].sort()
-
-  return readAndCoerceBagFields(bag, fieldNames, requiredFieldNames)
+  return readAndCoerceBagFields(bag, validFieldNames, requiredFieldNames)
 }
 
 export function mergeCalendarFields(

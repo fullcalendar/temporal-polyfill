@@ -19,7 +19,11 @@ import {
   dayFieldNames,
   monthCodeDayFieldNames,
   yearFieldNames,
+  yearFieldNamesWithEra,
   yearMonthCodeFieldNames,
+  yearMonthCodeDayFieldNamesAlpha,
+  yearMonthCodeDayFieldNamesAlphaWithEra,
+  yearMonthCodeFieldNamesWithEra,
 } from './fields'
 import { OverflowOptions } from './optionsRefine'
 import {
@@ -50,9 +54,8 @@ export function convertNativeToPlainMonthDay(
   input: { monthCode: string; day: number },
 ): PlainMonthDaySlots {
   const fields = readNativeCalendarFields(
-    calendarId,
-    input,
-    monthCodeDayFieldNames,
+    /* bag */ input,
+    /* validFieldNames */ monthCodeDayFieldNames,
   )
   return monthDayFromFields(calendarId, fields as DateBag)
 }
@@ -62,10 +65,14 @@ export function convertNativeToPlainYearMonth(
   input: { year: number; monthCode: string },
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const fields = readNativeCalendarFields(
+  const validFieldNames = getCalendarFieldNames(
     calendarId,
-    input,
     yearMonthCodeFieldNames,
+    yearMonthCodeFieldNamesWithEra,
+  )
+  const fields = readNativeCalendarFields(
+    /* bag */ input,
+    /* validFieldNames */ validFieldNames,
   )
   return yearMonthFromFields(calendarId, fields as YearMonthBag, options)
 }
@@ -75,13 +82,22 @@ export function convertNativePlainMonthDayToDate(
   input: { monthCode: string; day: number },
   bag: EraYearOrYear,
 ): PlainDateSlots {
-  return convertToNativeIso(
+  const extraFieldNames = getCalendarFieldNames(
     calendarId,
-    input,
-    monthCodeDayFieldNames,
-    requireObjectLike(bag),
     yearFieldNames,
+    yearFieldNamesWithEra,
   )
+  const inputFields = pluckProps(
+    monthCodeDayFieldNames,
+    input as Record<string, unknown>,
+  )
+  const extraFields = readAndCoerceBagFields(
+    requireObjectLike(bag) as Record<string, unknown>,
+    extraFieldNames,
+    [],
+  )
+
+  return nativeIsoFromMergedFields(calendarId, inputFields, extraFields)
 }
 
 export function convertNativePlainYearMonthToDate(
@@ -89,34 +105,37 @@ export function convertNativePlainYearMonthToDate(
   input: YearMonthFields,
   bag: DayFields,
 ): PlainDateSlots {
-  return convertToNativeIso(
+  const inputFieldNames = getCalendarFieldNames(
     calendarId,
-    input,
     yearMonthCodeFieldNames,
-    requireObjectLike(bag),
-    dayFieldNames,
+    yearMonthCodeFieldNamesWithEra,
   )
-}
-
-function convertToNativeIso(
-  calendarId: string,
-  input: any,
-  inputFieldNames: string[],
-  extra: any,
-  extraFieldNames: string[],
-): PlainDateSlots {
-  inputFieldNames = getCalendarFieldNames(calendarId, inputFieldNames)
-  input = pluckProps(inputFieldNames, input as Record<string, unknown>)
-
-  extraFieldNames = getCalendarFieldNames(calendarId, extraFieldNames)
-  extra = readAndCoerceBagFields(extra, extraFieldNames, [])
-
-  let mergedFields = mergeCalendarFields(calendarId, input, extra)
-  mergedFields = readAndCoerceBagFields(
-    mergedFields,
-    [...inputFieldNames, ...extraFieldNames].sort(),
+  const inputFields = pluckProps(
+    inputFieldNames,
+    input as unknown as Record<string, unknown>,
+  )
+  const extraFields = readAndCoerceBagFields(
+    requireObjectLike(bag) as unknown as Record<string, unknown>,
+    dayFieldNames,
     [],
   )
+
+  return nativeIsoFromMergedFields(calendarId, inputFields, extraFields)
+}
+
+function nativeIsoFromMergedFields(
+  calendarId: string,
+  inputFields: Record<string, unknown>,
+  extraFields: Record<string, unknown>,
+): PlainDateSlots {
+  const mergedFieldNames = getCalendarFieldNames(
+    calendarId,
+    yearMonthCodeDayFieldNamesAlpha,
+    yearMonthCodeDayFieldNamesAlphaWithEra,
+  )
+
+  let mergedFields = mergeCalendarFields(calendarId, inputFields, extraFields)
+  mergedFields = readAndCoerceBagFields(mergedFields, mergedFieldNames, [])
 
   return dateFromFields(calendarId, mergedFields as any)
 }
