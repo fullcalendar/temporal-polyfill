@@ -15,7 +15,7 @@ import {
   isoDateFieldNamesAsc,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 import {
   isoArgsToEpochMilli,
   isoToEpochMilli,

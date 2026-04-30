@@ -24,6 +24,10 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { IsoDateTimeFields, IsoTimeFields, clearIsoFields } from './isoFields'
+import { moveByDays } from './move'
+import { roundingModeFuncs } from './optionsConfig'
+import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
+import { RoundingOptions, refineRoundingOptions } from './optionsRefine'
 import {
   Marker,
   MarkerToEpochNano,
@@ -31,14 +35,6 @@ import {
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
-import { moveByDays } from './move'
-import {
-  EpochDisambig,
-  OffsetDisambig,
-  RoundingMode,
-  roundingModeFuncs,
-} from './options'
-import { RoundingOptions, refineRoundingOptions } from './optionsRefine'
 import {
   DateTimeSlots,
   InstantSlots,

@@ -32,7 +32,7 @@ import {
   parseOffsetNanoMaybe,
   validateOffsetSeparators,
 } from './offsetParse'
-import { EpochDisambig, OffsetDisambig, Overflow } from './options'
+import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import { ZonedFieldOptions, refineZonedFieldOptions } from './optionsRefine'
 import {
   DateSlots,

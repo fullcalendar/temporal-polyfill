@@ -15,7 +15,7 @@ import {
   isoTimeFieldDefaults,
   isoTimeFieldNamesAsc,
 } from './isoFields'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 import {
   Unit,
   milliInDay,

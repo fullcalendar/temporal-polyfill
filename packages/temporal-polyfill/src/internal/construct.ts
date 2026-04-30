@@ -10,7 +10,7 @@ import {
   checkIsoDateTimeFields,
   constrainIsoTimeFields,
 } from './isoMath'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 import {
   DurationSlots,
   InstantSlots,

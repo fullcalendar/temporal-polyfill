@@ -11,7 +11,7 @@ import {
 } from '../internal/isoFields'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { moveByDays } from '../internal/move'
-import { RoundingMode } from '../internal/options'
+import { RoundingMode } from '../internal/optionsModel'
 import { IsoDateTimeInterval, roundWithMode } from '../internal/round'
 import { DateSlots } from '../internal/slots'
 import { epochMilliToIso, isoToEpochNano } from '../internal/timeMath'

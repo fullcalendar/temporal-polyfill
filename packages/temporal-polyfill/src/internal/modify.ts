@@ -2,7 +2,7 @@ import { BigNano } from './bigNano'
 import { isoCalendarId } from './calendarConfig'
 import * as errorMessages from './errorMessages'
 import { IsoTimeFields, isoTimeFieldDefaults } from './isoFields'
-import { OffsetDisambig } from './options'
+import { OffsetDisambig } from './optionsModel'
 import {
   PlainDateSlots,
   PlainDateTimeSlots,

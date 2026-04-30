@@ -13,7 +13,7 @@ import {
   RoundingMode,
   SubsecDigits,
   TimeZoneDisplay,
-} from './options'
+} from './optionsModel'
 import {
   CalendarDisplayOptions,
   DateTimeDisplayOptions,

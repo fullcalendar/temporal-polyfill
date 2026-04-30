@@ -18,7 +18,7 @@ import {
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 import {
   DurationRoundingOptions,
   RelativeToOptions,

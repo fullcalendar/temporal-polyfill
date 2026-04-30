@@ -32,7 +32,7 @@ import {
   computeIsoMonthsInYear,
   isoMonthsInYear,
 } from './isoMath'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 import { OverflowOptions, refineOverflowOptions } from './optionsRefine'
 import {
   checkIsoDateInBounds,

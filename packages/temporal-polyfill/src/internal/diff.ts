@@ -29,7 +29,7 @@ import {
   moveToDayOfMonthUnsafe,
   moveZonedEpochs,
 } from './move'
-import { RoundingMode } from './options'
+import { RoundingMode } from './optionsModel'
 import { DiffOptions, refineDiffOptions } from './optionsRefine'
 import {
   computeNanoInc,

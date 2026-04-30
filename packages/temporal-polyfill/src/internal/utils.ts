@@ -1,5 +1,5 @@
 import * as errorMessages from './errorMessages'
-import { Overflow } from './options'
+import { Overflow } from './optionsModel'
 
 // Types
 // -----------------------------------------------------------------------------
