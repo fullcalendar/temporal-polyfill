@@ -18,7 +18,7 @@ import {
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
-import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { CalendarDateTimeFields } from '../internal/fieldTypes'
 import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
@@ -82,7 +82,7 @@ import {
   nanoInSec,
   nanoInUtcDay,
 } from '../internal/units'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, memoize, pluckProps } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -209,7 +209,7 @@ export const getFields = memoize((record: Record): Fields => {
 
   return {
     ...computeDateFields(isoFields),
-    ...isoTimeFieldsToCal(isoFields),
+    ...pluckProps(timeFieldNamesAsc, isoFields),
     offset: offsetString,
   }
 }, WeakMap)

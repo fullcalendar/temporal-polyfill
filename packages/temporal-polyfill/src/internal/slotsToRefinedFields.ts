@@ -3,7 +3,7 @@ import {
   queryCalendarDateFields,
   queryCalendarMonthCodeParts,
 } from './calendarQuery'
-import { isoTimeFieldsToCal } from './fieldConvert'
+import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import {
   AbstractDateSlots,
@@ -11,6 +11,7 @@ import {
   ZonedDateTimeSlots,
 } from './slots'
 import { zonedEpochSlotsToIso } from './timeZoneMath'
+import { pluckProps } from './utils'
 
 /*
 "Essentials" are the minimal, canonical fields copied from an existing Temporal
@@ -36,7 +37,7 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   const monthCode = computeMonthCode(slots.calendar, year, month)
 
   return {
-    ...isoTimeFieldsToCal(isoFields),
+    ...pluckProps(timeFieldNamesAsc, isoFields),
     year,
     monthCode,
     day,

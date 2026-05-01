@@ -2,7 +2,7 @@ import { getCalendarFieldNames } from './calendarFields'
 import { getCalendarEraOrigins } from './calendarQuery'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import { resolveTimeFields, timeFieldsToIso } from './fieldConvert'
+import { resolveTimeFields } from './fieldConvert'
 import {
   allYearFieldNames,
   dateFieldNamesAlpha,
@@ -160,7 +160,7 @@ export function mergeZonedDateTimeFields(
       () => refineZonedFieldOptions(options, OffsetDisambig.Prefer),
     )
   const isoTimeFields = constrainIsoTimeFields(
-    timeFieldsToIso(mergedAllFields),
+    pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
 
@@ -211,7 +211,7 @@ export function mergePlainDateTimeFields(
   )
 
   const isoTimeFields = constrainIsoTimeFields(
-    timeFieldsToIso(mergedAllFields),
+    pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
 

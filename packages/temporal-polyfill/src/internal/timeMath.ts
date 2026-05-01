@@ -300,7 +300,7 @@ export type IsoTuple = [
 Assumes in-bounds
 */
 export function isoArgsToEpochSec(...args: IsoTuple): number {
-  return isoArgsToEpochMilli.apply(undefined, args)! / milliInSec
+  return isoArgsToEpochMilli(...args)! / milliInSec
 }
 
 /*

@@ -6,7 +6,7 @@ import {
 } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { isoTimeFieldsToCal } from '../internal/fieldConvert'
+import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -24,7 +24,13 @@ import { roundPlainTime } from '../internal/round'
 import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { TimeUnitName } from '../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import {
+  NumberSign,
+  bindArgs,
+  identity,
+  memoize,
+  pluckProps,
+} from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -88,7 +94,10 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = memoize(isoTimeFieldsToCal, WeakMap) as (
+export const getFields = memoize(
+  bindArgs(pluckProps<TimeFields>, timeFieldNamesAsc),
+  WeakMap,
+) as (
   record: Record,
 ) => Fields
 
