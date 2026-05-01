@@ -1,5 +1,5 @@
 import { TimeFields } from './fieldTypes'
-import { nanoToIsoTimeAndDay } from './timeMath'
+import { nanoToTimeAndDay } from './timeMath'
 import { fractionRegExpStr, parseInt0, parseSubsecNano } from './utils'
 
 export const timeRegExpStr =
@@ -14,7 +14,7 @@ export function organizeTimeParts(parts: string[]): TimeFields {
   const second = parseInt0(parts[3])
 
   return {
-    ...nanoToIsoTimeAndDay(parseSubsecNano(parts[4] || ''))[0],
+    ...nanoToTimeAndDay(parseSubsecNano(parts[4] || ''))[0],
     hour: parseInt0(parts[1]),
     minute: parseInt0(parts[2]),
     second: second === 60 ? 59 : second, // massage leap-second

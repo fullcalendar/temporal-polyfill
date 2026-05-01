@@ -22,7 +22,7 @@
     "url": "https://github.com/fullcalendar/temporal-polyfill.git"
   },
   "scripts": {
-    "lint": "biome check .",
+    "lint": "biome check . --max-diagnostics=1000",
     "lint:fix": "biome check --apply .",
     "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:license npm:bundle",
     "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:bundle:dev",

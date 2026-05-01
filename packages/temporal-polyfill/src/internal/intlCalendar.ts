@@ -29,9 +29,9 @@ import {
 } from './isoMath'
 import {
   diffEpochMilliDays,
-  epochMilliToIso,
+  epochMilliToIsoDateTime,
   isoArgsToEpochMilli,
-  isoToEpochMilli,
+  isoDateToEpochMilli,
   maxMilli,
 } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -63,7 +63,7 @@ type IntlYearDataCache = (year: number) => IntlYearData
 
 export interface IntlCalendar {
   id: string
-  queryFields: (isoFields: CalendarDateFields) => IntlDateFields
+  queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
 }
 
@@ -157,7 +157,7 @@ function createIntlFieldCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
 ) {
   return memoize((isoDateFields: CalendarDateFields) => {
-    const epochMilli = isoToEpochMilli(isoDateFields)!
+    const epochMilli = isoDateToEpochMilli(isoDateFields)!
     return epochMilliToIntlFields(epochMilli)
   }, WeakMap)
 }
@@ -738,17 +738,17 @@ export const queryCalendarIntlFormat = memoize(
 
 export function computeIntlDay(
   intlCalendar: IntlCalendar,
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
 ): number {
-  return intlCalendar.queryFields(isoFields).day
+  return intlCalendar.queryFields(isoDate).day
 }
 
 export function computeIntlDateFields(
   intlCalendar: IntlCalendar,
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
 ): CalendarDateFields {
-  const { year, day } = intlCalendar.queryFields(isoFields)
-  const epochMilli = isoToEpochMilli(isoFields)!
+  const { year, day } = intlCalendar.queryFields(isoDate)
+  const epochMilli = isoDateToEpochMilli(isoDate)!
   return {
     year,
     month: computeIntlMonthIndex(intlCalendar, year, epochMilli),
@@ -762,7 +762,9 @@ export function computeIsoFieldsFromIntlParts(
   month?: number,
   day?: number,
 ): CalendarDateFields {
-  return epochMilliToIso(computeIntlEpochMilli(intlCalendar, year, month, day))
+  return epochMilliToIsoDateTime(
+    computeIntlEpochMilli(intlCalendar, year, month, day),
+  )
 }
 
 export function computeIntlEpochMilli(
@@ -899,9 +901,9 @@ export function computeIntlMonthsInYear(
 
 export function computeIntlEraFields(
   intlCalendar: IntlCalendar,
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
 ): CalendarEraFields {
-  const intlFields = intlCalendar.queryFields(isoFields)
+  const intlFields = intlCalendar.queryFields(isoDate)
   return { era: intlFields.era, eraYear: intlFields.eraYear }
 }
 

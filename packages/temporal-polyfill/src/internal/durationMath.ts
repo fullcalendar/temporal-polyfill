@@ -8,7 +8,9 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import { CalendarDateTimeFields } from './fieldTypes'
+import { timeFieldDefaults } from './fieldNames'
+import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { Overflow } from './optionsModel'
 import { DurationRoundingOptions, RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
@@ -206,8 +208,12 @@ export function roundDuration<RA>(
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
   if (!isZonedEpochSlots(relativeToSlots)) {
-    checkIsoDateTimeInBounds(marker as CalendarDateTimeFields)
-    checkIsoDateTimeInBounds(endMarker as CalendarDateTimeFields)
+    checkPlainMarkerInBounds(
+      marker as CalendarDateFields | CalendarDateTimeFields,
+    )
+    checkPlainMarkerInBounds(
+      endMarker as CalendarDateFields | CalendarDateTimeFields,
+    )
   }
 
   let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
@@ -231,6 +237,14 @@ export function roundDuration<RA>(
   )
 
   return createDurationSlots(balancedDuration)
+}
+
+function checkPlainMarkerInBounds(
+  marker: CalendarDateFields | CalendarDateTimeFields,
+): void {
+  checkIsoDateTimeInBounds(
+    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
+  )
 }
 
 // Sign / Abs / Blank

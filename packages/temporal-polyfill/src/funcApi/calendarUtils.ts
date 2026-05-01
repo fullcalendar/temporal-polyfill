@@ -20,6 +20,8 @@ import {
 import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { AbstractDateSlots } from '../internal/slots'
 
+// these utils used directly by func-api-based slots
+
 // Calendar ID
 // -----------------------------------------------------------------------------
 

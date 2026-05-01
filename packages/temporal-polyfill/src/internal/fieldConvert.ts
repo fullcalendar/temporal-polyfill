@@ -1,6 +1,6 @@
 import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
-import { constrainIsoTimeFields } from './isoMath'
+import { constrainTimeFields } from './isoMath'
 import { Overflow } from './optionsModel'
 import { pluckProps } from './utils'
 
@@ -10,7 +10,7 @@ export function resolveTimeFields(
 ): TimeFields {
   // Start from Temporal's default time bag so partial inputs behave like full
   // records before overflow handling clamps or rejects out-of-range values.
-  return constrainIsoTimeFields(
+  return constrainTimeFields(
     pluckProps(timeFieldNamesAsc, { ...timeFieldDefaults, ...fields }),
     overflow,
   )

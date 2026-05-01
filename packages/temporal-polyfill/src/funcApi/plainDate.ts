@@ -4,14 +4,15 @@ import { constructPlainDateSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
-  plainDateToPlainDateTime,
   plainDateToZonedDateTime,
 } from '../internal/convert'
 import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates } from '../internal/diff'
-import { CalendarDateTimeFields } from '../internal/fieldTypes'
+import { timeFieldDefaults } from '../internal/fieldNames'
+import { CalendarDateFields } from '../internal/fieldTypes'
 import { DateLikeObject } from '../internal/fieldTypes'
 import { DateFields } from '../internal/fieldTypes'
+import { TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
@@ -32,12 +33,14 @@ import { IsoDateTimeInterval } from '../internal/round'
 import {
   AbstractDateSlots,
   PlainDateBranding,
+  PlainDateSlots,
   createPlainDateSlots,
 } from '../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { DateUnitName, Unit } from '../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -87,23 +90,7 @@ import {
 } from './roundUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof PlainDateBranding
-
-  /**
-   * @deprecated Use the calendarId() function instead.
-   */
-  readonly calendar: string
-
-  readonly year: number
-
-  readonly month: number
-
-  readonly day: number
-}
+export type Record = PlainDateSlots
 
 export type Fields = DateFields
 export type FromFields = DateLikeObject
@@ -153,7 +140,9 @@ export const getFields = memoize(computeDateFields, WeakMap) as (
 
 export const calendarId = getCalendarId as (record: Record) => string
 
-export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
+export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
+  record: Record,
+) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
@@ -239,16 +228,22 @@ export function toZonedDateTime(
 
   return plainDateToZonedDateTime(
     refineTimeZoneId,
-    identity,
+    (plainTime) => plainTime,
     record,
     optionsObj,
   )
 }
 
-export const toPlainDateTime = plainDateToPlainDateTime as (
+export function toPlainDateTime(
   plainDateRecord: Record,
-  plainTimeRecord?: PlainTimeFns.Record,
-) => PlainDateTimeFns.Record
+  plainTimeRecord: PlainTimeFns.Record | TimeFields = timeFieldDefaults,
+): PlainDateTimeFns.Record {
+  return createPlainDateTimeFromRefinedFields(
+    plainDateRecord,
+    plainTimeRecord,
+    plainDateRecord.calendar,
+  )
+}
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
   return convertToPlainYearMonth(getCalendarId(record), getFields(record))
@@ -327,8 +322,9 @@ export function withDayOfYear(
   dayOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(moveToDayOfYear(record, dayOfYear, options)),
+  return createRecordFromDateFields(
+    moveToDayOfYear(record.calendar, record, dayOfYear, options),
+    record.calendar,
   )
 }
 
@@ -337,8 +333,9 @@ export function withDayOfMonth(
   dayOfMonth: number,
   options?: OverflowOptions,
 ): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(moveToDayOfMonth(record, dayOfMonth, options)),
+  return createRecordFromDateFields(
+    moveToDayOfMonth(record.calendar, record, dayOfMonth, options),
+    record.calendar,
   )
 }
 
@@ -347,8 +344,9 @@ export function withDayOfWeek(
   dayOfWeek: number,
   options?: OverflowOptions,
 ): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(moveToDayOfWeek(record, dayOfWeek, options)),
+  return createRecordFromDateFields(
+    moveToDayOfWeek(record.calendar, record, dayOfWeek, options),
+    record.calendar,
   )
 }
 
@@ -357,8 +355,9 @@ export function withWeekOfYear(
   weekOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(slotsWithWeekOfYear(record, weekOfYear, options)),
+  return createRecordFromDateFields(
+    slotsWithWeekOfYear(record.calendar, record, weekOfYear, options),
+    record.calendar,
   )
 }
 
@@ -370,8 +369,10 @@ export function addYears(
   years: number,
   options?: OverflowOptions,
 ): Record {
-  // No need for createPlainDateTimeSlots because moveByYears guarantees CalendarDateFields
-  return checkIsoDateInBounds(moveByYears(record, years, options))
+  return createRecordFromDateFields(
+    moveByYears(record.calendar, record, years, options),
+    record.calendar,
+  )
 }
 
 export function addMonths(
@@ -379,19 +380,23 @@ export function addMonths(
   months: number,
   options?: OverflowOptions,
 ): Record {
-  // No need for createPlainDateTimeSlots because moveByMonths guarantees CalendarDateFields
-  return checkIsoDateInBounds(moveByMonths(record, months, options))
+  return createRecordFromDateFields(
+    moveByMonths(record.calendar, record, months, options),
+    record.calendar,
+  )
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(moveByIsoWeeks(record, weeks)),
+  return createRecordFromDateFields(
+    moveByIsoWeeks(record.calendar, record, weeks),
+    record.calendar,
   )
 }
 
 export function addDays(record: Record, days: number): Record {
-  return createPlainDateSlots(
-    checkIsoDateInBounds(moveByDaysStrict(record, days)),
+  return createRecordFromDateFields(
+    moveByDaysStrict(record.calendar, record, days),
+    record.calendar,
   )
 }
 
@@ -470,29 +475,33 @@ export const diffDays = diffPlainDays as (
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: AbstractDateSlots) => IsoDateTimeInterval,
+  computeInterval: (slots: AbstractDateSlots) => IsoDateTimeInterval,
   record0: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
-  const isoFields = roundDateTimeToInterval(
+  const roundedIsoDateTime = roundDateTimeToInterval(
     computeInterval,
     record0,
     roundingMode,
   )
-  return createPlainDateSlots(
-    checkIsoDateInBounds({ ...record0, ...isoFields }),
-  )
+  return createRecordFromDateFields(roundedIsoDateTime, record0.calendar)
 }
 
 function aligned(
-  computeAlignment: (slots: AbstractDateSlots) => CalendarDateTimeFields,
+  computeAlignment: (slots: AbstractDateSlots) => CalendarDateFields,
   dayDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {
-    const isoFields = moveByDays(computeAlignment(record0), dayDelta)
-    return createPlainDateSlots(
-      checkIsoDateInBounds({ ...record0, ...isoFields }),
-    )
+    const isoDate = moveByDays(computeAlignment(record0), dayDelta)
+    return createRecordFromDateFields(isoDate, record0.calendar)
   }
+}
+
+function createRecordFromDateFields(
+  isoDate: CalendarDateFields,
+  calendar: string,
+): Record {
+  checkIsoDateInBounds(isoDate)
+  return createPlainDateSlots(isoDate, calendar)
 }

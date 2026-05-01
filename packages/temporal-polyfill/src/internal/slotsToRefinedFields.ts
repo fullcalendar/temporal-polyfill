@@ -3,7 +3,6 @@ import {
   queryCalendarDateFields,
   queryCalendarMonthCodeParts,
 } from './calendarQuery'
-import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import {
   AbstractDateSlots,
@@ -11,7 +10,6 @@ import {
   ZonedDateTimeSlots,
 } from './slots'
 import { zonedEpochSlotsToIso } from './timeZoneMath'
-import { pluckProps } from './utils'
 
 /*
 "Essentials" are the minimal, canonical fields copied from an existing Temporal
@@ -28,30 +26,45 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   monthCode: string
   day: number
 } & TimeFields & { offset: number } {
-  const isoFields = zonedEpochSlotsToIso(slots)
+  const isoDateTime = zonedEpochSlotsToIso(slots)
+  const {
+    offsetNanoseconds,
+    hour,
+    minute,
+    second,
+    millisecond,
+    microsecond,
+    nanosecond,
+  } = isoDateTime
 
   const { year, month, day } = queryCalendarDateFields(
     slots.calendar,
-    isoFields,
+    isoDateTime,
   )
   const monthCode = computeMonthCode(slots.calendar, year, month)
 
   return {
-    ...pluckProps(timeFieldNamesAsc, isoFields),
     year,
     monthCode,
     day,
+    hour,
+    minute,
+    second,
+    millisecond,
+    microsecond,
+    nanosecond,
     // Keep this in the same post-coercion representation as user .with()
     // fields: the public "offset" field is stored internally as nanoseconds.
-    offset: isoFields.offsetNanoseconds,
+    offset: offsetNanoseconds,
   }
 }
 
 export function computeDateTimeEssentials(slots: AbstractDateTimeSlots) {
+  const { year, monthCode, day } = computeDateEssentials(slots)
   return {
-    ...computeDateEssentials(slots),
-    // Keep the public Temporal field names here. The slot names are ISO-prefixed
-    // because they represent storage, but .with() needs calendar-style fields.
+    year,
+    monthCode,
+    day,
     hour: slots.hour,
     minute: slots.minute,
     second: slots.second,

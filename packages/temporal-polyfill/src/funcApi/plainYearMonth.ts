@@ -19,7 +19,7 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsModel'
-import { PlainYearMonthBranding } from '../internal/slots'
+import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
@@ -35,23 +35,7 @@ import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof PlainYearMonthBranding
-
-  /**
-   * @deprecated Use the calendarId() function instead.
-   */
-  readonly calendar: string
-
-  readonly year: number
-
-  readonly month: number
-
-  readonly day: number
-}
+export type Record = PlainYearMonthSlots
 
 export type Fields = YearMonthFields
 export type FromFields = YearMonthLikeObject

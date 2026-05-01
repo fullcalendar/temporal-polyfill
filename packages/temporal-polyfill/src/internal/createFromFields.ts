@@ -6,19 +6,18 @@ import {
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
-import { timeFieldDefaults } from './fieldNames'
 import {
   dateFieldNamesAlpha,
-  dateFieldNamesAlphaWithEra,
+  dateFieldNamesWithEraAlpha,
   dateTimeAndZoneFieldNamesAlpha,
-  dateTimeAndZoneFieldNamesAlphaWithEra,
+  dateTimeAndZoneFieldNamesWithEraAlpha,
   dateTimeFieldNamesAlpha,
-  dateTimeFieldNamesAlphaWithEra,
-  dayFieldNames,
+  dateTimeFieldNamesWithEraAlpha,
+  dayFieldNamesAsc,
   timeFieldNamesAlpha,
-  timeZoneFieldNames,
-  yearMonthFieldNames,
-  yearMonthFieldNamesWithEra,
+  timeZoneFieldNamesAsc,
+  yearMonthFieldNamesAsc,
+  yearMonthFieldNamesWithEraAsc,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
 import type {
@@ -32,6 +31,7 @@ import {
   TimeFields,
   YearMonthFields,
 } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { isoEpochFirstLeapYear } from './isoMath'
 import {
   refineOverflowOptions,
@@ -48,17 +48,16 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createDurationSlots,
-  createPlainDateTimeSlots,
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
   createPlainDateFromFieldsWithOptionsRefiner,
+  createPlainDateTimeFromRefinedFields,
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
 
@@ -82,7 +81,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateTimeAndZoneFieldNamesAlpha,
-    dateTimeAndZoneFieldNamesAlphaWithEra,
+    dateTimeAndZoneFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
@@ -92,14 +91,14 @@ export function refineMaybeZonedDateTimeObjectLike(
 
   if (fields.timeZone !== undefined) {
     const isoDateFields = createPlainDateFromFields(calendarId, fields as any)
-    const isoTimeFields = resolveTimeFields(fields)
+    const timeFields = resolveTimeFields(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
     const timeZoneImpl = queryTimeZone(timeZoneId)
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZoneImpl,
-      { ...isoDateFields, ...isoTimeFields },
+      combineDateAndTime(isoDateFields, timeFields),
       // After readAndRefineBagFields(), the public "offset" field is stored
       // internally as offset nanoseconds.
       fields.offset,
@@ -108,8 +107,7 @@ export function refineMaybeZonedDateTimeObjectLike(
     return { epochNanoseconds, timeZone: timeZoneId }
   }
 
-  const isoDateInternals = createPlainDateFromFields(calendarId, fields as any)
-  return { ...isoDateInternals, ...timeFieldDefaults }
+  return createPlainDateFromFields(calendarId, fields as any)
 }
 
 export function refineZonedDateTimeObjectLike(
@@ -121,12 +119,12 @@ export function refineZonedDateTimeObjectLike(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateTimeAndZoneFieldNamesAlpha,
-    dateTimeAndZoneFieldNamesAlphaWithEra,
+    dateTimeAndZoneFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
-    /* requiredFieldNames */ timeZoneFieldNames,
+    /* requiredFieldNames */ timeZoneFieldNamesAsc,
   ) as ZonedDateTimeRefinedObject
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
@@ -135,12 +133,12 @@ export function refineZonedDateTimeObjectLike(
     createPlainDateFromFieldsWithOptionsRefiner(calendarId, fields as any, () =>
       refineZonedFieldOptions(options),
     )
-  const isoTimeFields = resolveTimeFields(fields, overflow)
+  const timeFields = resolveTimeFields(fields, overflow)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
-    { ...isoDateFields, ...isoTimeFields },
+    combineDateAndTime(isoDateFields, timeFields),
     // After readAndRefineBagFields(), the public "offset" field is stored
     // internally as offset nanoseconds.
     fields.offset,
@@ -159,7 +157,7 @@ export function refinePlainDateTimeObjectLike(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateTimeFieldNamesAlpha,
-    dateTimeFieldNamesAlphaWithEra,
+    dateTimeFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
@@ -173,14 +171,13 @@ export function refinePlainDateTimeObjectLike(
       fields as any,
       () => [refineOverflowOptions(options)],
     )
-  const isoTimeFields = resolveTimeFields(fields, overflow)
+  const timeFields = resolveTimeFields(fields, overflow)
 
-  const isoFields = checkIsoDateTimeInBounds({
-    ...isoDateInternals,
-    ...isoTimeFields,
-  })
-
-  return createPlainDateTimeSlots(isoFields)
+  return createPlainDateTimeFromRefinedFields(
+    isoDateInternals,
+    timeFields,
+    calendarId,
+  )
 }
 
 export function refinePlainDateObjectLike(
@@ -192,7 +189,7 @@ export function refinePlainDateObjectLike(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-    dateFieldNamesAlphaWithEra,
+    dateFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
@@ -211,8 +208,8 @@ export function refinePlainYearMonthObjectLike(
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
     calendarId,
-    yearMonthFieldNames,
-    yearMonthFieldNamesWithEra,
+    yearMonthFieldNamesAsc,
+    yearMonthFieldNamesWithEraAsc,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
@@ -232,12 +229,12 @@ export function refinePlainMonthDayObjectLike(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-    dateFieldNamesAlphaWithEra,
+    dateFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
-    /* requiredFieldNames */ dayFieldNames,
+    /* requiredFieldNames */ dayFieldNamesAsc,
   ) as Partial<DateFields>
 
   if (

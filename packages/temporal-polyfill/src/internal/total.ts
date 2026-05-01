@@ -16,7 +16,9 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { CalendarDateTimeFields } from './fieldTypes'
+import { timeFieldDefaults } from './fieldNames'
+import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { DurationTotalOptions } from './optionsModel'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
@@ -74,8 +76,12 @@ export function totalDuration<RA>(
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
   if (!isZonedEpochSlots(relativeToSlots)) {
-    checkIsoDateTimeInBounds(marker as CalendarDateTimeFields)
-    checkIsoDateTimeInBounds(endMarker as CalendarDateTimeFields)
+    checkPlainMarkerInBounds(
+      marker as CalendarDateFields | CalendarDateTimeFields,
+    )
+    checkPlainMarkerInBounds(
+      endMarker as CalendarDateFields | CalendarDateTimeFields,
+    )
   }
 
   const balancedDuration = diffMarkers(marker, endMarker, totalUnit)
@@ -91,6 +97,14 @@ export function totalDuration<RA>(
     marker,
     markerToEpochNano,
     moveMarker,
+  )
+}
+
+function checkPlainMarkerInBounds(
+  marker: CalendarDateFields | CalendarDateTimeFields,
+): void {
+  checkIsoDateTimeInBounds(
+    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
   )
 }
 

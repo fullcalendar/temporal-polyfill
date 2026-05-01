@@ -1,6 +1,5 @@
 import type {
   CalendarDateFields,
-  CalendarDateTimeFields,
   DateStats,
   TimeFields,
   YearMonthStats,
@@ -8,7 +7,7 @@ import type {
 import { Unit, unitNamesAsc } from './units'
 import { mapPropNamesToConstant, sortStrings } from './utils'
 
-export type CalendarGetterFieldName =
+type CalendarGetterFieldName =
   | keyof DateStats
   | keyof YearMonthStats
   | 'era'
@@ -20,7 +19,8 @@ export type CalendarGetterFieldName =
 
 // Field Names
 // -----------------------------------------------------------------------------
-// TODO: converge on 'alpha' naming or not
+// `Asc` lists are the source definitions. `Alpha` lists are derived as a
+// separate pass for observable bag-read order.
 
 export const timeFieldNamesAsc = unitNamesAsc.slice(
   0,
@@ -29,147 +29,166 @@ export const timeFieldNamesAsc = unitNamesAsc.slice(
 
 export const timeFieldNamesAlpha = sortStrings(timeFieldNamesAsc)
 
-export const offsetFieldNames = ['offset']
-export const timeZoneFieldNames = ['timeZone']
+const offsetFieldNamesAsc = ['offset']
+export const timeZoneFieldNamesAsc = ['timeZone']
 
-export const timeAndOffsetFieldNames = [
+const timeAndOffsetFieldNamesAsc = [
   ...timeFieldNamesAsc,
-  ...offsetFieldNames,
+  ...offsetFieldNamesAsc,
 ]
-export const timeAndZoneFieldNames = [
-  ...timeAndOffsetFieldNames,
-  ...timeZoneFieldNames,
+const timeAndZoneFieldNamesAsc = [
+  ...timeAndOffsetFieldNamesAsc,
+  ...timeZoneFieldNamesAsc,
 ]
-export const timeAndOffsetFieldNamesAlpha = sortStrings(timeAndOffsetFieldNames)
-export const timeAndZoneFieldNamesAlpha = sortStrings(timeAndZoneFieldNames)
 
-// pre-sorted!!!...
+export const eraYearFieldNamesAsc = ['era', 'eraYear']
+export const allYearFieldNamesAsc = [...eraYearFieldNamesAsc, 'year']
 
-export const eraYearFieldNames = ['era', 'eraYear']
-export const allYearFieldNames = [...eraYearFieldNames, 'year']
-
-export const yearFieldNames = ['year']
-export const yearFieldNamesWithEra = [...eraYearFieldNames, ...yearFieldNames]
-export const monthCodeFieldNames = ['monthCode']
-export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
+export const yearFieldNamesAsc = ['year']
+export const yearFieldNamesWithEraAsc = [
+  ...eraYearFieldNamesAsc,
+  ...yearFieldNamesAsc,
+]
+const monthCodeFieldNamesAsc = ['monthCode']
+export const monthFieldNamesAsc = ['month', ...monthCodeFieldNamesAsc] // month/monthCode
 export const dayFieldName = 'day'
 // Used as a public-facing entity label for move-to-day-of-month helpers. It is
 // intentionally distinct from the actual Temporal field name, which is "day".
 export const dayOfMonthName = 'dayOfMonth'
 export const dayOfWeekFieldName = 'dayOfWeek'
 export const weekOfYearFieldName = 'weekOfYear'
-export const dayFieldNames = [dayFieldName]
+export const dayFieldNamesAsc = [dayFieldName]
 
 // Getter surfaces for PlainDate/PlainYearMonth include both structural calendar
 // fields and derived calendar stats. Keep these names independent from
 // calendarRefiners so class API mixins can enumerate methods without importing
 // the validation functions behind those refiner maps.
-export const yearMonthStatsFieldNames = [
+const yearMonthStatsFieldNamesAsc = [
   'daysInMonth',
   'daysInYear',
   'inLeapYear',
   'monthsInYear',
 ] as (keyof YearMonthStats)[]
-export const dateStatsFieldNames = [
+const dateStatsFieldNamesAsc = [
   dayOfWeekFieldName,
   'dayOfYear',
   weekOfYearFieldName,
   'yearOfWeek',
   'daysInWeek',
 ] as (keyof DateStats)[]
-export const yearMonthGetterFieldNames = [
-  ...eraYearFieldNames,
-  ...yearFieldNames,
+export const yearMonthGetterFieldNamesAsc = [
+  ...eraYearFieldNamesAsc,
+  ...yearFieldNamesAsc,
   'month',
-  ...yearMonthStatsFieldNames,
-  ...monthCodeFieldNames,
+  ...yearMonthStatsFieldNamesAsc,
+  ...monthCodeFieldNamesAsc,
 ] as CalendarGetterFieldName[]
-export const monthDayGetterFieldNames = [
-  ...monthCodeFieldNames,
-  ...dayFieldNames,
+export const monthDayGetterFieldNamesAsc = [
+  ...monthCodeFieldNamesAsc,
+  ...dayFieldNamesAsc,
 ] as CalendarGetterFieldName[]
-export const dateGetterFieldNames = [
-  ...yearMonthGetterFieldNames,
-  ...dayFieldNames,
-  ...dateStatsFieldNames,
+export const dateGetterFieldNamesAsc = [
+  ...yearMonthGetterFieldNamesAsc,
+  ...dayFieldNamesAsc,
+  ...dateStatsFieldNamesAsc,
 ] as CalendarGetterFieldName[]
 
 export const calendarDateFieldNamesAsc = [
-  ...dayFieldNames,
+  ...dayFieldNamesAsc,
   'month',
-  ...yearFieldNames,
+  ...yearFieldNamesAsc,
 ] as (keyof CalendarDateFields)[]
-export const calendarDateTimeFieldNamesAsc = [
-  ...timeFieldNamesAsc,
-  ...calendarDateFieldNamesAsc,
-] as (keyof CalendarDateTimeFields)[]
 
-export const calendarDateFieldNamesAlpha = sortStrings(
-  calendarDateFieldNamesAsc,
-)
-export const calendarDateTimeFieldNamesAlpha = sortStrings(
-  calendarDateTimeFieldNamesAsc,
-)
-
-// month/monthCode/year
-export const yearMonthFieldNames = [...monthFieldNames, ...yearFieldNames]
-export const yearMonthFieldNamesWithEra = [
-  ...eraYearFieldNames,
-  ...yearMonthFieldNames,
+export const yearMonthFieldNamesAsc = [
+  ...monthFieldNamesAsc,
+  ...yearFieldNamesAsc,
+]
+export const yearMonthFieldNamesWithEraAsc = [
+  ...eraYearFieldNamesAsc,
+  ...yearMonthFieldNamesAsc,
 ]
 
 // monthCode/year
-export const yearMonthCodeFieldNames = [
-  ...monthCodeFieldNames,
-  ...yearFieldNames,
+export const yearMonthCodeFieldNamesAsc = [
+  ...monthCodeFieldNamesAsc,
+  ...yearFieldNamesAsc,
 ]
-export const yearMonthCodeFieldNamesWithEra = [
-  ...eraYearFieldNames,
-  ...yearMonthCodeFieldNames,
+export const yearMonthCodeFieldNamesWithEraAsc = [
+  ...eraYearFieldNamesAsc,
+  ...yearMonthCodeFieldNamesAsc,
 ]
 
-export const dateFieldNamesAlpha = [...dayFieldNames, ...yearMonthFieldNames]
-export const dateFieldNamesAlphaWithEra = [
-  ...dayFieldNames,
-  ...eraYearFieldNames,
-  ...yearMonthFieldNames,
+const dateFieldNamesAsc = [...dayFieldNamesAsc, ...yearMonthFieldNamesAsc]
+const dateFieldNamesWithEraAsc = [
+  ...dayFieldNamesAsc,
+  ...eraYearFieldNamesAsc,
+  ...yearMonthFieldNamesAsc,
 ]
-export const dateTimeFieldNamesAlpha = sortStrings([
-  ...dateFieldNamesAlpha,
-  ...timeFieldNamesAlpha,
-])
-export const dateTimeFieldNamesAlphaWithEra = sortStrings([
-  ...dateFieldNamesAlphaWithEra,
-  ...timeFieldNamesAlpha,
-])
-export const dateTimeAndOffsetFieldNamesAlpha = sortStrings([
-  ...dateFieldNamesAlpha,
-  ...timeAndOffsetFieldNamesAlpha,
-])
-export const dateTimeAndOffsetFieldNamesAlphaWithEra = sortStrings([
-  ...dateFieldNamesAlphaWithEra,
-  ...timeAndOffsetFieldNamesAlpha,
-])
-export const dateTimeAndZoneFieldNamesAlpha = sortStrings([
-  ...dateFieldNamesAlpha,
-  ...timeAndZoneFieldNamesAlpha,
-])
-export const dateTimeAndZoneFieldNamesAlphaWithEra = sortStrings([
-  ...dateFieldNamesAlphaWithEra,
-  ...timeAndZoneFieldNamesAlpha,
-])
+const dateTimeFieldNamesAsc = [...dateFieldNamesAsc, ...timeFieldNamesAsc]
+const dateTimeFieldNamesWithEraAsc = [
+  ...dateFieldNamesWithEraAsc,
+  ...timeFieldNamesAsc,
+]
+const dateTimeAndOffsetFieldNamesAsc = [
+  ...dateFieldNamesAsc,
+  ...timeAndOffsetFieldNamesAsc,
+]
+const dateTimeAndOffsetFieldNamesWithEraAsc = [
+  ...dateFieldNamesWithEraAsc,
+  ...timeAndOffsetFieldNamesAsc,
+]
+const dateTimeAndZoneFieldNamesAsc = [
+  ...dateFieldNamesAsc,
+  ...timeAndZoneFieldNamesAsc,
+]
+const dateTimeAndZoneFieldNamesWithEraAsc = [
+  ...dateFieldNamesWithEraAsc,
+  ...timeAndZoneFieldNamesAsc,
+]
 
-export const monthDayFieldNames = [...dayFieldNames, ...monthFieldNames] // day/month/monthCode
-export const monthCodeDayFieldNames = [...dayFieldNames, ...monthCodeFieldNames] // day/monthCode
-export const yearMonthCodeDayFieldNamesAlpha = [
-  ...dayFieldNames,
-  ...yearMonthCodeFieldNames,
+export const dateFieldNamesAlpha = sortStrings(dateFieldNamesAsc)
+export const dateFieldNamesWithEraAlpha = sortStrings(dateFieldNamesWithEraAsc)
+export const dateTimeFieldNamesAlpha = sortStrings(dateTimeFieldNamesAsc)
+export const dateTimeFieldNamesWithEraAlpha = sortStrings(
+  dateTimeFieldNamesWithEraAsc,
+)
+export const dateTimeAndOffsetFieldNamesAlpha = sortStrings(
+  dateTimeAndOffsetFieldNamesAsc,
+)
+export const dateTimeAndOffsetFieldNamesWithEraAlpha = sortStrings(
+  dateTimeAndOffsetFieldNamesWithEraAsc,
+)
+export const dateTimeAndZoneFieldNamesAlpha = sortStrings(
+  dateTimeAndZoneFieldNamesAsc,
+)
+export const dateTimeAndZoneFieldNamesWithEraAlpha = sortStrings(
+  dateTimeAndZoneFieldNamesWithEraAsc,
+)
+
+export const monthDayFieldNamesAsc = [
+  ...dayFieldNamesAsc,
+  ...monthFieldNamesAsc,
 ]
-export const yearMonthCodeDayFieldNamesAlphaWithEra = [
-  ...dayFieldNames,
-  ...eraYearFieldNames,
-  ...yearMonthCodeFieldNames,
+export const monthCodeDayFieldNamesAsc = [
+  ...dayFieldNamesAsc,
+  ...monthCodeFieldNamesAsc,
 ]
+const yearMonthCodeDayFieldNamesAsc = [
+  ...dayFieldNamesAsc,
+  ...yearMonthCodeFieldNamesAsc,
+]
+const yearMonthCodeDayFieldNamesWithEraAsc = [
+  ...dayFieldNamesAsc,
+  ...eraYearFieldNamesAsc,
+  ...yearMonthCodeFieldNamesAsc,
+]
+export const yearMonthCodeDayFieldNamesAlpha = sortStrings(
+  yearMonthCodeDayFieldNamesAsc,
+)
+export const yearMonthCodeDayFieldNamesWithEraAlpha = sortStrings(
+  yearMonthCodeDayFieldNamesWithEraAsc,
+)
 
 // NOTE: bad place for this!
+// TODO: rename to zero-time?
 export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAsc, 0)

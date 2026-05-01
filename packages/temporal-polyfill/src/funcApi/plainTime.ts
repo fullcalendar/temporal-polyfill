@@ -1,12 +1,8 @@
-import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
+import { compareTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructPlainTimeSlots } from '../internal/construct'
-import {
-  plainTimeToPlainDateTime,
-  plainTimeToZonedDateTime,
-} from '../internal/convert'
+import { plainTimeToZonedDateTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -21,40 +17,22 @@ import {
   TimeDisplayOptions,
 } from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
-import { PlainDateSlots, PlainTimeBranding } from '../internal/slots'
+import {
+  PlainDateSlots,
+  PlainTimeBranding,
+  PlainTimeSlots,
+} from '../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { TimeUnitName } from '../internal/units'
-import {
-  NumberSign,
-  bindArgs,
-  identity,
-  memoize,
-  pluckProps,
-} from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  branding: typeof PlainTimeBranding
-
-  readonly hour: number
-
-  readonly minute: number
-
-  readonly second: number
-
-  readonly millisecond: number
-
-  readonly microsecond: number
-
-  readonly nanosecond: number
-}
+export type Record = PlainTimeSlots
 
 export type Fields = TimeFields
 export type FromFields = Partial<TimeFields>
@@ -94,10 +72,7 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = memoize(
-  bindArgs(pluckProps<TimeFields>, timeFieldNamesAsc),
-  WeakMap,
-) as (
+export const getFields = memoize((record: Record) => record, WeakMap) as (
   record: Record,
 ) => Fields
 
@@ -147,7 +122,7 @@ export const equals = plainTimesEqual as (
   record1: Record,
 ) => boolean
 
-export const compare = compareIsoTimeFields as (
+export const compare = compareTimeFields as (
   record0: Record,
   record1: Record,
 ) => NumberSign
@@ -164,10 +139,16 @@ export const toZonedDateTime = bindArgs(
   options: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
-export const toPlainDateTime = plainTimeToPlainDateTime as (
+export function toPlainDateTime(
   plainTimeRecord: Record,
   plainDateRecord: PlainDateFns.Record,
-) => PlainDateTimeFns.Record
+): PlainDateTimeFns.Record {
+  return createPlainDateTimeFromRefinedFields(
+    plainDateRecord,
+    plainTimeRecord,
+    plainDateRecord.calendar,
+  )
+}
 
 // Formatting
 // -----------------------------------------------------------------------------

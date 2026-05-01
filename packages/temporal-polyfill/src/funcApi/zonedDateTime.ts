@@ -18,10 +18,14 @@ import {
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
-import { timeFieldNamesAsc } from '../internal/fieldNames'
-import { CalendarDateTimeFields } from '../internal/fieldTypes'
-import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
-import { DateTimeFields } from '../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  DateTimeFields,
+  TimeFields,
+  ZonedDateTimeLikeObject,
+} from '../internal/fieldTypes'
+import { combineDateAndTime } from '../internal/fieldUtils'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
@@ -48,14 +52,12 @@ import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import {
   IsoDateTimeInterval,
   alignZonedEpoch,
-  computeDayFloor,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
   roundZonedDateTime,
   roundZonedEpochToInterval,
 } from '../internal/round'
 import {
-  AbstractDateSlots,
   AbstractDateTimeSlots,
   ZonedDateTimeBranding,
   getEpochMicro,
@@ -80,9 +82,8 @@ import {
   nanoInMilli,
   nanoInMinute,
   nanoInSec,
-  nanoInUtcDay,
 } from '../internal/units'
-import { NumberSign, bindArgs, memoize, pluckProps } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -122,6 +123,7 @@ import * as PlainMonthDayFns from './plainMonthDay'
 import * as PlainTimeFns from './plainTime'
 import * as PlainYearMonthFns from './plainYearMonth'
 import {
+  computeDayCeil,
   computeHourFloor,
   computeIsoWeekCeil,
   computeIsoWeekFloor,
@@ -203,13 +205,24 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
+// TODO: improve prop mergeing and combining here
 export const getFields = memoize((record: Record): Fields => {
-  const isoFields = zonedEpochSlotsToIso(record)
-  const offsetString = formatOffsetNano(isoFields.offsetNanoseconds)
+  const isoDateTime = zonedEpochSlotsToIso(record)
+  const { offsetNanoseconds } = isoDateTime
+  const { year, month, day, ...time } = combineDateAndTime(
+    isoDateTime,
+    isoDateTime,
+  )
+  const offsetString = formatOffsetNano(offsetNanoseconds)
 
   return {
-    ...computeDateFields(isoFields),
-    ...pluckProps(timeFieldNamesAsc, isoFields),
+    ...computeDateFields({
+      calendar: record.calendar,
+      year,
+      month,
+      day,
+    }),
+    ...time,
     offset: offsetString,
   }
 }, WeakMap)
@@ -236,9 +249,9 @@ export function offset(record: Record): string {
   return formatOffsetNano(offsetNanoseconds(record))
 }
 
-export const dayOfWeek = adaptDateFunc(computeIsoDayOfWeek) as (
-  record: Record,
-) => number
+export function dayOfWeek(record: Record): number {
+  return computeIsoDayOfWeek(zonedEpochSlotsToIso(record))
+}
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
@@ -298,10 +311,12 @@ export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
   plainDateRecord: PlainDateFns.Record,
 ) => Record
 
-export const withPlainTime = bindArgs(zonedDateTimeWithPlainTime) as (
+export function withPlainTime(
   zonedDateTimeRecord: Record,
   plainTimeRecord?: PlainTimeFns.Record,
-) => Record
+): Record {
+  return zonedDateTimeWithPlainTime(zonedDateTimeRecord, plainTimeRecord)
+}
 
 // Math
 // -----------------------------------------------------------------------------
@@ -441,10 +456,11 @@ export const toString = bindArgs(formatZonedDateTimeIso) as (
 // -----------------------------------------------------------------------------
 
 function adaptDateFunc<R>(
-  dateFunc: (dateSlots: AbstractDateSlots) => R,
+  dateFunc: (dateSlots: any) => R,
 ): (record: Record) => R {
   return (record: Record) => {
-    return dateFunc(zonedEpochSlotsToIso(record))
+    const isoDate = zonedEpochSlotsToIso(record)
+    return dateFunc({ ...isoDate, calendar: record.calendar })
   }
 }
 
@@ -511,11 +527,11 @@ export const roundToWeek = bindArgs(
 export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
-export const startOfHour = aligned(computeHourFloor)
-export const startOfMinute = aligned(computeMinuteFloor)
-export const startOfSecond = aligned(computeSecFloor)
-export const startOfMillisecond = aligned(computeMilliFloor)
-export const startOfMicrosecond = aligned(computeMicroFloor)
+export const startOfHour = aligned(alignedTime(computeHourFloor))
+export const startOfMinute = aligned(alignedTime(computeMinuteFloor))
+export const startOfSecond = aligned(alignedTime(computeSecFloor))
+export const startOfMillisecond = aligned(alignedTime(computeMilliFloor))
+export const startOfMicrosecond = aligned(alignedTime(computeMicroFloor))
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -523,12 +539,21 @@ export const startOfMicrosecond = aligned(computeMicroFloor)
 export const endOfYear = aligned(computeYearCeil, -1)
 export const endOfMonth = aligned(computeMonthCeil, -1)
 export const endOfWeek = aligned(computeIsoWeekCeil, -1)
-export const endOfDay = aligned(computeDayFloor, nanoInUtcDay - 1)
-export const endOfHour = aligned(computeHourFloor, nanoInHour - 1)
-export const endOfMinute = aligned(computeMinuteFloor, nanoInMinute - 1)
-export const endOfSecond = aligned(computeSecFloor, nanoInSec - 1)
-export const endOfMillisecond = aligned(computeMilliFloor, nanoInMilli - 1)
-export const endOfMicrosecond = aligned(computeMicroFloor, nanoInMicro - 1)
+export const endOfDay = aligned(computeDayCeil, -1)
+export const endOfHour = aligned(alignedTime(computeHourFloor), nanoInHour - 1)
+export const endOfMinute = aligned(
+  alignedTime(computeMinuteFloor),
+  nanoInMinute - 1,
+)
+export const endOfSecond = aligned(alignedTime(computeSecFloor), nanoInSec - 1)
+export const endOfMillisecond = aligned(
+  alignedTime(computeMilliFloor),
+  nanoInMilli - 1,
+)
+export const endOfMicrosecond = aligned(
+  alignedTime(computeMicroFloor),
+  nanoInMicro - 1,
+)
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------
@@ -577,7 +602,7 @@ function moveByTimeUnit(
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: AbstractDateSlots) => IsoDateTimeInterval,
+  computeInterval: (slots: any) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -612,17 +637,29 @@ function aligned(
   }
 }
 
+function alignedTime(
+  computeAlignment: (time: TimeFields) => TimeFields,
+): (slots: AbstractDateTimeSlots) => CalendarDateTimeFields {
+  return (slots) => combineDateAndTime(slots, computeAlignment(slots))
+}
+
 function zonedTransform<A extends any[]>(
-  transformIso: (
-    isoSlots: AbstractDateTimeSlots,
+  transformIsoDate: (
+    calendar: string,
+    isoDate: CalendarDateFields,
     ...args: A
-  ) => CalendarDateTimeFields,
+  ) => CalendarDateFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
     const timeZoneImpl = queryTimeZone(record.timeZone)
-    const isoSlots = zonedEpochSlotsToIso(record, timeZoneImpl)
-    const transformedIsoSlots = transformIso(isoSlots, ...args)
-    const epochNano1 = getSingleInstantFor(timeZoneImpl, transformedIsoSlots)
+    const isoDateTime = zonedEpochSlotsToIso(record, timeZoneImpl)
+    const isoDate = transformIsoDate(record.calendar, isoDateTime, ...args)
+    // zonedTransform is used by date-only operations. Preserve the original
+    // wall-clock time while allowing the transform to replace the ISO date.
+    const epochNano1 = getSingleInstantFor(
+      timeZoneImpl,
+      combineDateAndTime(isoDate, isoDateTime),
+    )
     return {
       ...record,
       epochNanoseconds: checkEpochNanoInBounds(epochNano1),

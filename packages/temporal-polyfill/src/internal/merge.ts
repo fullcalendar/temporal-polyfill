@@ -4,19 +4,19 @@ import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
 import {
-  allYearFieldNames,
+  allYearFieldNamesAsc,
   dateFieldNamesAlpha,
-  dateFieldNamesAlphaWithEra,
+  dateFieldNamesWithEraAlpha,
   dateTimeAndOffsetFieldNamesAlpha,
-  dateTimeAndOffsetFieldNamesAlphaWithEra,
+  dateTimeAndOffsetFieldNamesWithEraAlpha,
   dateTimeFieldNamesAlpha,
-  dateTimeFieldNamesAlphaWithEra,
-  eraYearFieldNames,
-  monthDayFieldNames,
-  monthFieldNames,
+  dateTimeFieldNamesWithEraAlpha,
+  eraYearFieldNamesAsc,
+  monthDayFieldNamesAsc,
+  monthFieldNamesAsc,
   timeFieldNamesAlpha,
-  yearMonthFieldNames,
-  yearMonthFieldNamesWithEra,
+  yearMonthFieldNamesAsc,
+  yearMonthFieldNamesWithEraAsc,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
 import {
@@ -26,8 +26,9 @@ import {
   TimeFields,
   YearMonthFields,
 } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { japaneseCalendarId } from './intlCalendarConfig'
-import { constrainIsoTimeFields } from './isoMath'
+import { constrainTimeFields } from './isoMath'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -43,13 +44,13 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createDurationSlots,
-  createPlainDateTimeSlots,
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
   createPlainDateFromFieldsWithOptionsRefiner,
+  createPlainDateTimeFromRefinedFields,
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
@@ -60,7 +61,6 @@ import {
   computeYearMonthEssentials,
   computeZonedDateTimeEssentials,
 } from './slotsToRefinedFields'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
 import { pluckProps } from './utils'
@@ -72,10 +72,10 @@ export function mergeCalendarFields(
 ): Record<string, unknown> {
   const merged = Object.assign(Object.create(null), baseFields)
 
-  spliceFields(merged, additionalFields, monthFieldNames)
+  spliceFields(merged, additionalFields, monthFieldNamesAsc)
 
   if (getCalendarEraOrigins(calendarId)) {
-    spliceFields(merged, additionalFields, allYearFieldNames)
+    spliceFields(merged, additionalFields, allYearFieldNamesAsc)
 
     // Japanese eras can begin mid-year. When month/day are supplied, era fields
     // from the original object can become stale, so the replacement year path
@@ -84,8 +84,8 @@ export function mergeCalendarFields(
       spliceFields(
         merged,
         additionalFields,
-        monthDayFieldNames, // any found?
-        eraYearFieldNames, // then, delete these
+        monthDayFieldNamesAsc, // any found?
+        eraYearFieldNamesAsc, // then, delete these
       )
     }
   }
@@ -138,7 +138,7 @@ export function mergeZonedDateTimeFields(
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeAndOffsetFieldNamesAlpha,
-    dateTimeAndOffsetFieldNamesAlphaWithEra,
+    dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
@@ -159,7 +159,7 @@ export function mergeZonedDateTimeFields(
       mergedCalendarFields as any,
       () => refineZonedFieldOptions(options, OffsetDisambig.Prefer),
     )
-  const isoTimeFields = constrainIsoTimeFields(
+  const timeFields = constrainTimeFields(
     pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
@@ -167,7 +167,7 @@ export function mergeZonedDateTimeFields(
   return createZonedDateTimeSlots(
     getMatchingInstantFor(
       timeZoneImpl,
-      { ...isoDateFields, ...isoTimeFields },
+      combineDateAndTime(isoDateFields, timeFields),
       // Existing fields and user .with() fields are both past the first bag
       // refinement phase, so "offset" is the offset in nanoseconds here.
       mergedAllFields.offset,
@@ -189,7 +189,7 @@ export function mergePlainDateTimeFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateTimeFieldNamesAlpha,
-    dateTimeFieldNamesAlphaWithEra,
+    dateTimeFieldNamesWithEraAlpha,
   )
 
   const origFields = computeDateTimeEssentials(plainDateTimeSlots)
@@ -204,22 +204,23 @@ export function mergePlainDateTimeFields(
     ...partialFields,
   }
 
-  const [isoDateFields, overflow] = createPlainDateFromFieldsWithOptionsRefiner(
-    calendarId,
-    mergedCalendarFields as any,
-    () => [refineOverflowOptions(options)],
-  )
+  const [plainDateSlots, overflow] =
+    createPlainDateFromFieldsWithOptionsRefiner(
+      calendarId,
+      mergedCalendarFields as any,
+      () => [refineOverflowOptions(options)],
+    )
+  const isoDateFields = plainDateSlots
 
-  const isoTimeFields = constrainIsoTimeFields(
+  const timeFields = constrainTimeFields(
     pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
 
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds({
-      ...isoDateFields,
-      ...isoTimeFields,
-    }),
+  return createPlainDateTimeFromRefinedFields(
+    isoDateFields,
+    timeFields,
+    calendarId,
   )
 }
 
@@ -232,7 +233,7 @@ export function mergePlainDateFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-    dateFieldNamesAlphaWithEra,
+    dateFieldNamesWithEraAlpha,
   )
 
   const origFields = computeDateEssentials(plainDateSlots)
@@ -254,8 +255,8 @@ export function mergePlainYearMonthFields(
   const calendarId = plainYearMonthSlots.calendar
   const validFieldNames = getCalendarFieldNames(
     calendarId,
-    yearMonthFieldNames,
-    yearMonthFieldNamesWithEra,
+    yearMonthFieldNamesAsc,
+    yearMonthFieldNamesWithEraAsc,
   )
 
   const origFields = computeYearMonthEssentials(plainYearMonthSlots)
@@ -282,7 +283,7 @@ export function mergePlainMonthDayFields(
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
-    dateFieldNamesAlphaWithEra,
+    dateFieldNamesWithEraAlpha,
   )
 
   const origFields = computeMonthDayEssentials(plainMonthDaySlots)

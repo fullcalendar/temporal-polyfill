@@ -374,6 +374,8 @@ async function readTemporalReservedWords(pkgDir) {
     .concat([
       // exposed in func API
       'branding',
+      'isoDate',
+      'time',
 
       // JS props Rollup doesn't know about
       'resolvedOptions',

@@ -23,8 +23,13 @@ import {
   nanoToDurationTimeFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { calendarDateTimeFieldNamesAsc } from './fieldNames'
-import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
+import { timeFieldDefaults } from './fieldNames'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
@@ -52,8 +57,8 @@ import {
 import {
   checkIsoDateTimeInBounds,
   epochNanoToIso,
-  isoTimeFieldsToNano,
-  nanoToIsoTimeAndDay,
+  nanoToTimeAndDay,
+  timeFieldsToNano,
 } from './timeMath'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
@@ -73,7 +78,7 @@ import {
   nanoInUtcDay,
   unitNanoMap,
 } from './units'
-import { divModFloor, divTrunc, zeroOutProps } from './utils'
+import { divModFloor, divTrunc } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -126,18 +131,18 @@ export function roundZonedDateTime(
     )
   } else {
     const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNanoseconds)
-    const isoFields = epochNanoToIso(epochNanoseconds, offsetNano)
+    const isoDateTime = epochNanoToIso(epochNanoseconds, offsetNano)
     // TODO: ^optimize with zonedEpochSlotsToIso?
 
-    const roundedIsoFields = roundDateTime(
-      isoFields,
+    const roundedIsoDateTime = roundDateTime(
+      isoDateTime,
       smallestUnit as DayTimeUnit,
       roundingInc,
       roundingMode,
     )
     epochNanoseconds = getMatchingInstantFor(
       timeZoneImpl,
-      roundedIsoFields,
+      roundedIsoDateTime,
       offsetNano,
       OffsetDisambig.Prefer, // keep old offsetNano if possible
       EpochDisambig.Compat,
@@ -155,11 +160,11 @@ export function roundPlainDateTime(
   slots: PlainDateTimeSlots,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeSlots {
-  const roundedIsoFields = roundDateTime(
+  const roundedIsoDateTime = roundDateTime(
     slots,
     ...(refineRoundingOptions(options) as [DayTimeUnit, number, RoundingMode]),
   )
-  return createPlainDateTimeSlots(roundedIsoFields, slots.calendar)
+  return createPlainDateTimeSlots(roundedIsoDateTime, slots.calendar)
 }
 
 export function roundPlainTime(
@@ -172,8 +177,8 @@ export function roundPlainTime(
     number,
     RoundingMode,
   ]
-  const roundedIsoFields = roundTime(slots, a, b, c)
-  return createPlainTimeSlots(roundedIsoFields)
+  const roundedTimeFields = roundTime(slots, a, b, c)
+  return createPlainTimeSlots(roundedTimeFields)
 }
 
 // Zoned Utils
@@ -182,8 +187,8 @@ export function roundPlainTime(
 export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
   const timeZoneImpl = queryTimeZone(slots.timeZone)
 
-  const isoFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
-  const [isoFields0, isoFields1] = computeDayInterval(isoFields)
+  const isoDate = zonedEpochSlotsToIso(slots, timeZoneImpl)
+  const [isoFields0, isoFields1] = computeDayInterval(isoDate)
 
   const epochNano0 = getStartOfDayInstantFor(timeZoneImpl, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZoneImpl, isoFields1)
@@ -219,8 +224,8 @@ export function alignZonedEpoch(
   timeZoneImpl: TimeZoneImpl,
   slots: ZonedDateTimeSlots,
 ): BigNano {
-  const isoFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
-  const isoFields1 = computeAlignment(isoFields)
+  const isoDateTime = zonedEpochSlotsToIso(slots, timeZoneImpl)
+  const isoFields1 = computeAlignment(isoDateTime)
   const epochNano1 = getStartOfDayInstantFor(timeZoneImpl, isoFields1)
   return epochNano1
 }
@@ -256,55 +261,61 @@ export function roundZonedEpochToInterval(
 // TODO: combine with below?
 
 function roundDateTime(
-  isoFields: CalendarDateTimeFields,
+  isoDateTime: CalendarDateTimeFields,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
 ): CalendarDateTimeFields {
   return roundDateTimeToNano(
-    isoFields,
+    isoDateTime,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
 }
 
 export function roundDateTimeToNano(
-  isoFields: CalendarDateTimeFields,
+  isoDateTime: CalendarDateTimeFields,
   nanoInc: number,
   roundingMode: RoundingMode,
 ): CalendarDateTimeFields {
-  const [roundedIsoFields, dayDelta] = roundTimeToNano(
-    isoFields,
+  // Time rounding can carry into the neighboring ISO date. Keep the original
+  // date and time together here so the day delta is applied to the same
+  // wall-clock value that produced the rounded time.
+  const [roundedTimeFields, dayDelta] = roundTimeToNano(
+    isoDateTime,
     nanoInc,
     roundingMode,
   )
 
-  return checkIsoDateTimeInBounds({
-    ...moveByDays(isoFields, dayDelta),
-    ...roundedIsoFields,
-  })
+  const roundedIsoDate = moveByDays(isoDateTime, dayDelta)
+  const roundedIsoDateTime = combineDateAndTime(
+    roundedIsoDate,
+    roundedTimeFields,
+  )
+  checkIsoDateTimeInBounds(roundedIsoDateTime)
+  return roundedIsoDateTime
 }
 
 function roundTime(
-  isoFields: TimeFields,
+  timeFields: TimeFields,
   smallestUnit: TimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
 ): TimeFields {
   return roundTimeToNano(
-    isoFields,
+    timeFields,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )[0]
 }
 
 export function roundTimeToNano(
-  isoFields: TimeFields,
+  timeFields: TimeFields,
   nanoInc: number,
   roundingMode: RoundingMode,
 ): [TimeFields, number] {
-  return nanoToIsoTimeAndDay(
-    roundByInc(isoTimeFieldsToNano(isoFields), nanoInc, roundingMode),
+  return nanoToTimeAndDay(
+    roundByInc(timeFieldsToNano(timeFields), nanoInc, roundingMode),
   )
 }
 
@@ -332,21 +343,22 @@ export type IsoDateTimeInterval = [
 ]
 
 export function computeDayInterval(
-  isoFields: CalendarDateTimeFields,
+  isoDate: CalendarDateFields,
 ): IsoDateTimeInterval {
-  const isoFields0 = computeDayFloor(isoFields)
-  const isoFields1 = moveByDays(isoFields0, 1)
+  const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
+  const isoFields1 = combineDateAndTime(
+    moveByDays(isoFields0, 1),
+    timeFieldDefaults,
+  )
   return [isoFields0, isoFields1]
 }
 
+// for date-times
+// to convert date -> date-time, merge the date fields with timeFieldDefaults.
 export function computeDayFloor(
-  isoFields: CalendarDateTimeFields,
+  slots: CalendarDateTimeFields,
 ): CalendarDateTimeFields {
-  return zeroOutProps(
-    calendarDateTimeFieldNamesAsc,
-    Unit.Day,
-    isoFields as unknown as Record<string, number>,
-  ) as unknown as CalendarDateTimeFields
+  return combineDateAndTime(slots, timeFieldDefaults)
 }
 
 // Duration

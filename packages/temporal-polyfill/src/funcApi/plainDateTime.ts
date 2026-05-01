@@ -13,10 +13,14 @@ import {
 } from '../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes } from '../internal/diff'
-import { timeFieldNamesAsc } from '../internal/fieldNames'
-import { CalendarDateTimeFields } from '../internal/fieldTypes'
-import { DateTimeLikeObject } from '../internal/fieldTypes'
-import { DateTimeFields } from '../internal/fieldTypes'
+import { timeFieldDefaults } from '../internal/fieldNames'
+import {
+  CalendarDateTimeFields,
+  DateTimeFields,
+  DateTimeLikeObject,
+  TimeFields,
+} from '../internal/fieldTypes'
+import { combineDateAndTime } from '../internal/fieldUtils'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
@@ -25,7 +29,6 @@ import { parsePlainDateTime } from '../internal/isoParse'
 import { mergePlainDateTimeFields } from '../internal/merge'
 import {
   plainDateTimeWithPlainDate,
-  plainDateTimeWithPlainTime,
   slotsWithCalendarId,
 } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
@@ -46,18 +49,13 @@ import {
 } from '../internal/round'
 import {
   AbstractDateSlots,
-  AbstractDateTimeSlots,
   PlainDateTimeBranding,
+  PlainDateTimeSlots,
   createPlainDateSlots,
-  createPlainDateTimeSlots,
   createPlainTimeSlots,
-  createPlainYearMonthSlots,
 } from '../internal/slots'
-import {
-  checkIsoDateTimeInBounds,
-  epochNanoToIso,
-  isoToEpochNano,
-} from '../internal/timeMath'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
+import { epochNanoToIso, isoDateTimeToEpochNano } from '../internal/timeMath'
 import {
   DayTimeUnitName,
   Unit,
@@ -67,9 +65,8 @@ import {
   nanoInMilli,
   nanoInMinute,
   nanoInSec,
-  nanoInUtcDay,
 } from '../internal/units'
-import { NumberSign, bindArgs, memoize, pluckProps } from '../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -107,6 +104,7 @@ import * as PlainMonthDayFns from './plainMonthDay'
 import * as PlainTimeFns from './plainTime'
 import * as PlainYearMonthFns from './plainYearMonth'
 import {
+  computeDayCeil,
   computeHourFloor,
   computeIsoWeekCeil,
   computeIsoWeekFloor,
@@ -125,35 +123,7 @@ import {
 } from './roundUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  branding: typeof PlainDateTimeBranding
-
-  /**
-   * @deprecated Use the calendarId() function instead.
-   */
-  readonly calendar: string
-
-  readonly year: number
-
-  readonly month: number
-
-  readonly day: number
-
-  readonly hour: number
-
-  readonly minute: number
-
-  readonly second: number
-
-  readonly millisecond: number
-
-  readonly microsecond: number
-
-  readonly nanosecond: number
-}
+export type Record = PlainDateTimeSlots
 
 export type Fields = DateTimeFields
 export type FromFields = DateTimeLikeObject
@@ -172,12 +142,12 @@ export const create = constructPlainDateTimeSlots as (
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  isoHour?: number,
-  isoMinute?: number,
-  isoSecond?: number,
-  isoMillisecond?: number,
-  isoMicrosecond?: number,
-  isoNanosecond?: number,
+  hour?: number,
+  minute?: number,
+  second?: number,
+  millisecond?: number,
+  microsecond?: number,
+  nanosecond?: number,
   calendar?: string,
 ) => Record
 
@@ -202,15 +172,23 @@ export function isInstance(record: any): record is Record {
 // -----------------------------------------------------------------------------
 
 export const getFields = memoize((record: Record): Fields => {
+  const {
+    year: _year,
+    month: _month,
+    day: _day,
+    ...time
+  } = combineDateAndTime(record, record)
   return {
-    ...computeDateFields(record),
-    ...pluckProps(timeFieldNamesAsc, record),
+    ...computeDateFields(record), // contains era/eraYear/monthCode
+    ...time, // the _* fields basically plucked
   }
 }, WeakMap)
 
 export const calendarId = getCalendarId as (record: Record) => string
 
-export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
+export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
+  record: Record,
+) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
@@ -252,10 +230,16 @@ export const withPlainDate = plainDateTimeWithPlainDate as (
   plainDateRecord: PlainDateFns.Record,
 ) => Record
 
-export const withPlainTime = plainDateTimeWithPlainTime as (
+export function withPlainTime(
   plainDateTimeRecord: Record,
-  plainTimeRecord?: PlainTimeFns.Record,
-) => Record
+  plainTimeRecord: PlainTimeFns.Record | TimeFields = timeFieldDefaults,
+): Record {
+  return createPlainDateTimeFromRefinedFields(
+    plainDateTimeRecord,
+    plainTimeRecord,
+    plainDateTimeRecord.calendar,
+  )
+}
 
 // Math
 // -----------------------------------------------------------------------------
@@ -308,19 +292,16 @@ export const toZonedDateTime = bindArgs(plainDateTimeToZonedDateTime) as (
   options?: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
-export const toPlainDate = createPlainDateSlots as (
-  record: Record,
-) => PlainDateFns.Record
+export function toPlainDate(record: Record): PlainDateFns.Record {
+  return createPlainDateSlots(record, record.calendar)
+}
 
-export const toPlainTime = createPlainTimeSlots as (
-  record: Record,
-) => PlainTimeFns.Record
+export function toPlainTime(record: Record): PlainTimeFns.Record {
+  return createPlainTimeSlots(record)
+}
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return createPlainYearMonthSlots({
-    ...record, // why???
-    ...convertToPlainYearMonth(getCalendarId(record), getFields(record)),
-  })
+  return convertToPlainYearMonth(getCalendarId(record), getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
@@ -397,7 +378,11 @@ export function withDayOfYear(
   dayOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(moveToDayOfYear(record, dayOfYear, options))
+  return createPlainDateTimeFromRefinedFields(
+    moveToDayOfYear(record.calendar, record, dayOfYear, options),
+    record,
+    record.calendar,
+  )
 }
 
 export function withDayOfMonth(
@@ -405,7 +390,11 @@ export function withDayOfMonth(
   dayOfMonth: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(moveToDayOfMonth(record, dayOfMonth, options))
+  return createPlainDateTimeFromRefinedFields(
+    moveToDayOfMonth(record.calendar, record, dayOfMonth, options),
+    record,
+    record.calendar,
+  )
 }
 
 export function withDayOfWeek(
@@ -413,7 +402,11 @@ export function withDayOfWeek(
   dayOfWeek: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(moveToDayOfWeek(record, dayOfWeek, options))
+  return createPlainDateTimeFromRefinedFields(
+    moveToDayOfWeek(record.calendar, record, dayOfWeek, options),
+    record,
+    record.calendar,
+  )
 }
 
 export function withWeekOfYear(
@@ -421,21 +414,26 @@ export function withWeekOfYear(
   weekOfYear: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(
-    slotsWithWeekOfYear(record, weekOfYear, options),
+  return createPlainDateTimeFromRefinedFields(
+    slotsWithWeekOfYear(record.calendar, record, weekOfYear, options),
+    record,
+    record.calendar,
   )
 }
 
 // Non-standard: Add
 // -----------------------------------------------------------------------------
-// No need for createPlainDateTimeSlots because move* utils return self
 
 export function addYears(
   record: Record,
   years: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(moveByYears(record, years, options))
+  return createPlainDateTimeFromRefinedFields(
+    moveByYears(record.calendar, record, years, options),
+    record,
+    record.calendar,
+  )
 }
 
 export function addMonths(
@@ -443,15 +441,27 @@ export function addMonths(
   months: number,
   options?: OverflowOptions,
 ): Record {
-  return checkIsoDateTimeInBounds(moveByMonths(record, months, options))
+  return createPlainDateTimeFromRefinedFields(
+    moveByMonths(record.calendar, record, months, options),
+    record,
+    record.calendar,
+  )
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
-  return checkIsoDateTimeInBounds(moveByIsoWeeks(record, weeks))
+  return createPlainDateTimeFromRefinedFields(
+    moveByIsoWeeks(record.calendar, record, weeks),
+    record,
+    record.calendar,
+  )
 }
 
 export function addDays(record: Record, days: number): Record {
-  return checkIsoDateTimeInBounds(moveByDaysStrict(record, days))
+  return createPlainDateTimeFromRefinedFields(
+    moveByDaysStrict(record.calendar, record, days),
+    record,
+    record.calendar,
+  )
 }
 
 export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
@@ -503,11 +513,11 @@ export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
 export const startOfDay = aligned(computeDayFloor)
-export const startOfHour = aligned(computeHourFloor)
-export const startOfMinute = aligned(computeMinuteFloor)
-export const startOfSecond = aligned(computeSecFloor)
-export const startOfMillisecond = aligned(computeMilliFloor)
-export const startOfMicrosecond = aligned(computeMicroFloor)
+export const startOfHour = aligned(alignedTime(computeHourFloor))
+export const startOfMinute = aligned(alignedTime(computeMinuteFloor))
+export const startOfSecond = aligned(alignedTime(computeSecFloor))
+export const startOfMillisecond = aligned(alignedTime(computeMilliFloor))
+export const startOfMicrosecond = aligned(alignedTime(computeMicroFloor))
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -515,12 +525,21 @@ export const startOfMicrosecond = aligned(computeMicroFloor)
 export const endOfYear = aligned(computeYearCeil, -1)
 export const endOfMonth = aligned(computeMonthCeil, -1)
 export const endOfWeek = aligned(computeIsoWeekCeil, -1)
-export const endOfDay = aligned(computeDayFloor, nanoInUtcDay - 1)
-export const endOfHour = aligned(computeHourFloor, nanoInHour - 1)
-export const endOfMinute = aligned(computeMinuteFloor, nanoInMinute - 1)
-export const endOfSecond = aligned(computeSecFloor, nanoInSec - 1)
-export const endOfMillisecond = aligned(computeMilliFloor, nanoInMilli - 1)
-export const endOfMicrosecond = aligned(computeMicroFloor, nanoInMicro - 1)
+export const endOfDay = aligned(computeDayCeil, -1)
+export const endOfHour = aligned(alignedTime(computeHourFloor), nanoInHour - 1)
+export const endOfMinute = aligned(
+  alignedTime(computeMinuteFloor),
+  nanoInMinute - 1,
+)
+export const endOfSecond = aligned(alignedTime(computeSecFloor), nanoInSec - 1)
+export const endOfMillisecond = aligned(
+  alignedTime(computeMilliFloor),
+  nanoInMilli - 1,
+)
+export const endOfMicrosecond = aligned(
+  alignedTime(computeMicroFloor),
+  nanoInMicro - 1,
+)
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------
@@ -581,50 +600,64 @@ function moveByTimeUnit(
   record: Record,
   units: number,
 ): Record {
-  const epochNano0 = isoToEpochNano(record)!
+  const epochNano0 = isoDateTimeToEpochNano(record)!
   const epochNano1 = addBigNanos(
     epochNano0,
     numberToBigNano(toStrictInteger(units), nanoInUnit),
   )
+  const isoDateTime1 = epochNanoToIso(epochNano1, 0)
 
-  // No need for createPlainDateTimeSlots because...
-  return checkIsoDateTimeInBounds({
-    ...record,
-    ...epochNanoToIso(epochNano1, 0), // ...guaranteed ONLY ISO fields
-  })
+  return createPlainDateTimeFromRefinedFields(
+    isoDateTime1,
+    isoDateTime1,
+    record.calendar,
+  )
 }
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (isoFields: AbstractDateSlots) => IsoDateTimeInterval,
+  computeInterval: (slots: AbstractDateSlots) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
 
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds(
-      roundDateTimeToInterval(computeInterval, record, roundingMode),
-    ),
+  const isoDateTime = roundDateTimeToInterval(
+    computeInterval,
+    record,
+    roundingMode,
+  )
+  return createPlainDateTimeFromRefinedFields(
+    isoDateTime,
+    isoDateTime,
+    record.calendar,
   )
 }
 
 function aligned(
-  computeAlignment: (slots: AbstractDateTimeSlots) => CalendarDateTimeFields,
+  computeAlignment: (slots: Record) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {
-    let isoFields = computeAlignment(record0)
+    let isoDateTime = computeAlignment(record0)
 
     if (nanoDelta) {
-      isoFields = epochNanoToIso(isoToEpochNano(isoFields)!, nanoDelta)
+      isoDateTime = epochNanoToIso(
+        isoDateTimeToEpochNano(isoDateTime)!,
+        nanoDelta,
+      )
     }
 
-    return createPlainDateTimeSlots(
-      checkIsoDateTimeInBounds({
-        ...record0,
-        ...isoFields,
-      }),
+    return createPlainDateTimeFromRefinedFields(
+      isoDateTime,
+      isoDateTime,
+      record0.calendar,
     )
   }
+}
+
+function alignedTime(
+  computeAlignment: (time: TimeFields) => TimeFields,
+): (slots: Record) => CalendarDateTimeFields {
+  return (slots) => combineDateAndTime(slots, computeAlignment(slots))
 }

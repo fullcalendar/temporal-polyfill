@@ -3,7 +3,6 @@ import { constructPlainDateSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
-  plainDateToPlainDateTime,
   plainDateToZonedDateTime,
   zonedDateTimeToPlainDate,
 } from '../internal/convert'
@@ -29,6 +28,7 @@ import {
   ZonedDateTimeSlots,
   createPlainDateSlots,
 } from '../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {
@@ -135,7 +135,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       return createZonedDateTime(
         plainDateToZonedDateTime(
           refineTimeZoneArg,
-          toPlainTimeSlots,
+          (plainTimeArg) => toPlainTimeSlots(plainTimeArg),
           slots,
           optionsObj,
         ),
@@ -146,9 +146,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       plainTimeArg?: PlainTimeArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        plainDateToPlainDateTime(
+        createPlainDateTimeFromRefinedFields(
           slots,
           optionalToPlainTimeFields(plainTimeArg),
+          slots.calendar,
         ),
       )
     },
@@ -203,7 +204,10 @@ export function toPlainDateSlots(
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainDateSlots(slots as PlainDateTimeSlots)
+        return createPlainDateSlots(
+          slots as PlainDateTimeSlots,
+          (slots as PlainDateTimeSlots).calendar,
+        )
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options

@@ -26,7 +26,7 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
 } from './slots'
-import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import { isoDateToEpochMilli, timeFieldsToNano } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
 import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
@@ -97,12 +97,12 @@ export function compareDurations<RA>(
 // -----------------------------------------------------------------------------
 
 export function compareIsoDateTimeFields(
-  isoFields0: CalendarDateTimeFields,
-  isoFields1: CalendarDateTimeFields,
+  isoDateTime0: CalendarDateTimeFields,
+  isoDateTime1: CalendarDateTimeFields,
 ): NumberSign {
   return (
-    compareIsoDateFields(isoFields0, isoFields1) ||
-    compareIsoTimeFields(isoFields0, isoFields1)
+    compareIsoDateFields(isoDateTime0, isoDateTime1) ||
+    compareTimeFields(isoDateTime0, isoDateTime1)
   )
 }
 
@@ -111,18 +111,18 @@ export function compareIsoDateFields(
   isoFields1: CalendarDateFields,
 ): NumberSign {
   return compareNumbers(
-    isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!,
+    isoDateToEpochMilli(isoFields0)!,
+    isoDateToEpochMilli(isoFields1)!,
   )
 }
 
-export function compareIsoTimeFields(
+export function compareTimeFields(
   isoFields0: TimeFields,
   isoFields1: TimeFields,
 ): NumberSign {
   return compareNumbers(
-    isoTimeFieldsToNano(isoFields0),
-    isoTimeFieldsToNano(isoFields1),
+    timeFieldsToNano(isoFields0),
+    timeFieldsToNano(isoFields1),
   )
 }
 
@@ -194,7 +194,7 @@ export function plainTimesEqual(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
 ): boolean {
-  return !compareIsoTimeFields(plainTimeSlots0, plainTimeSlots1)
+  return !compareTimeFields(plainTimeSlots0, plainTimeSlots1)
 }
 
 // TimeZone

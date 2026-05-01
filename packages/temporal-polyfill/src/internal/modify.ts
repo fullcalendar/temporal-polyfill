@@ -2,6 +2,7 @@ import { BigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import { TimeFields } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
 import { OffsetDisambig } from './optionsModel'
 import {
@@ -11,7 +12,6 @@ import {
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import {
   getMatchingInstantFor,
@@ -24,27 +24,29 @@ import {
 
 export function zonedDateTimeWithPlainTime(
   zonedDateTimeSlots: ZonedDateTimeSlots,
-  plainTimeSlots: TimeFields | undefined,
+  plainTimeFields: TimeFields | undefined,
 ): ZonedDateTimeSlots {
   const timeZoneId = zonedDateTimeSlots.timeZone
   const timeZoneImpl = queryTimeZone(timeZoneId)
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
+  const { offsetNanoseconds } = isoDateTime
 
-  const isoFields = {
-    ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl),
-    ...(plainTimeSlots || timeFieldDefaults),
-  }
+  const time = plainTimeFields || timeFieldDefaults
 
   let epochNano: BigNano
 
-  if (plainTimeSlots) {
+  if (plainTimeFields) {
     epochNano = getMatchingInstantFor(
       timeZoneImpl,
-      isoFields,
-      isoFields.offsetNanoseconds,
+      combineDateAndTime(isoDateTime, time),
+      offsetNanoseconds,
       OffsetDisambig.Prefer, // OffsetDisambig
     )
   } else {
-    epochNano = getStartOfDayInstantFor(timeZoneImpl, isoFields)
+    epochNano = getStartOfDayInstantFor(
+      timeZoneImpl,
+      combineDateAndTime(isoDateTime, time),
+    )
   }
 
   return createZonedDateTimeSlots(
@@ -60,11 +62,9 @@ export function zonedDateTimeWithPlainDate(
 ): ZonedDateTimeSlots {
   const timeZoneId = zonedDateTimeSlots.timeZone
   const timeZoneImpl = queryTimeZone(timeZoneId)
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
+  const { offsetNanoseconds } = isoDateTime
 
-  const isoFields = {
-    ...zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl),
-    ...plainDateSlots,
-  }
   const calendar = getPreferredCalendarId(
     zonedDateTimeSlots.calendar,
     plainDateSlots.calendar,
@@ -72,27 +72,12 @@ export function zonedDateTimeWithPlainDate(
 
   const epochNano = getMatchingInstantFor(
     timeZoneImpl,
-    isoFields,
-    isoFields.offsetNanoseconds,
+    combineDateAndTime(plainDateSlots, isoDateTime),
+    offsetNanoseconds,
     OffsetDisambig.Prefer, // OffsetDisambig
   )
 
   return createZonedDateTimeSlots(epochNano, timeZoneId, calendar)
-}
-
-// PlainDateTime with *
-// -----------------------------------------------------------------------------
-
-export function plainDateTimeWithPlainTime(
-  plainDateTimeSlots: PlainDateTimeSlots,
-  plainTimeSlots: TimeFields = timeFieldDefaults,
-): PlainDateTimeSlots {
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds({
-      ...plainDateTimeSlots,
-      ...plainTimeSlots,
-    }),
-  )
 }
 
 /*
@@ -103,10 +88,7 @@ export function plainDateTimeWithPlainDate(
   plainDateSlots: PlainDateSlots,
 ) {
   return createPlainDateTimeSlots(
-    {
-      ...plainDateTimeSlots,
-      ...plainDateSlots,
-    },
+    combineDateAndTime(plainDateSlots, plainDateTimeSlots),
     getPreferredCalendarId(
       plainDateTimeSlots.calendar,
       plainDateSlots.calendar,

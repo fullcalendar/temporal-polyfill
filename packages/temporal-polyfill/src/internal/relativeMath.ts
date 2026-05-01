@@ -3,6 +3,7 @@ import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
@@ -10,7 +11,7 @@ import {
   ZonedEpochSlots,
   extractEpochNano,
 } from './slots'
-import { isoToEpochNano } from './timeMath'
+import { isoDateTimeToEpochNano } from './timeMath'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
@@ -39,9 +40,12 @@ export function createRelativeOrigin(
   }
 
   return [
-    // convert CalendarDateFields->CalendarDateTimeFields
-    // because expected in createMoveMarker/createDiffMarkers
-    { ...relativeToSlots, ...timeFieldDefaults },
+    combineDateAndTime(
+      relativeToSlots,
+      'hour' in relativeToSlots
+        ? (relativeToSlots as unknown as CalendarDateTimeFields)
+        : timeFieldDefaults,
+    ),
   ]
 }
 
@@ -64,7 +68,9 @@ export type DiffMarkers = (
 export function createMarkerToEpochNano(
   timeZoneImpl: TimeZoneImpl | undefined,
 ): MarkerToEpochNano {
-  return (timeZoneImpl ? extractEpochNano : isoToEpochNano) as MarkerToEpochNano
+  return (
+    timeZoneImpl ? extractEpochNano : isoMarkerToEpochNano
+  ) as MarkerToEpochNano
 }
 
 export function createMoveMarker(
@@ -74,7 +80,7 @@ export function createMoveMarker(
   if (timeZoneImpl) {
     return bindArgs(moveZonedEpochs, timeZoneImpl, calendarId) as Callable
   }
-  return bindArgs(moveDateTime, calendarId) as Callable
+  return bindArgs(moveDateTimeMarker, calendarId) as Callable
 }
 
 export function createDiffMarkers(
@@ -84,23 +90,57 @@ export function createDiffMarkers(
   if (timeZoneImpl) {
     return bindArgs(diffZonedEpochsExact, timeZoneImpl, calendarId) as Callable
   }
-  return bindArgs(diffDateTimesExact, calendarId) as Callable
+  return bindArgs(diffDateTimeMarkersExact, calendarId) as Callable
 }
 
 // Utils
 // -----------------------------------------------------------------------------
 
 export function isZonedEpochSlots(
-  marker: Marker | undefined,
+  marker: Marker | RelativeToSlots | undefined,
 ): marker is ZonedEpochSlots {
   return (marker &&
     (marker as ZonedEpochSlots).epochNanoseconds) as unknown as boolean
+}
+
+function moveDateTimeMarker(
+  calendarId: string,
+  isoDateTime: CalendarDateTimeFields,
+  durationFields: DurationFields,
+): CalendarDateTimeFields {
+  return moveDateTime(calendarId, isoDateTime, durationFields)
+}
+
+export function isoMarkerToEpochNano(marker: Marker): BigNano {
+  if (!isZonedEpochSlots(marker)) {
+    return isoDateTimeToEpochNano(
+      combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
+    )!
+  }
+  return marker.epochNanoseconds
+}
+
+function diffDateTimeMarkersExact(
+  calendarId: string,
+  startIsoDateTime: CalendarDateTimeFields,
+  endIsoDateTime: CalendarDateTimeFields,
+  largestUnit: Unit,
+): DurationFields {
+  return diffDateTimesExact(
+    calendarId,
+    startIsoDateTime,
+    endIsoDateTime,
+    largestUnit,
+  )
 }
 
 /*
 For PlainDate(Time) markers, days+time are uniform
 For ZonedDateTime markers, only time is uniform (days can vary in length)
 */
-export function isUniformUnit(unit: Unit, marker: Marker | undefined): boolean {
+export function isUniformUnit(
+  unit: Unit,
+  marker: Marker | RelativeToSlots | undefined,
+): boolean {
   return unit <= Unit.Day - (isZonedEpochSlots(marker) ? 1 : 0)
 }

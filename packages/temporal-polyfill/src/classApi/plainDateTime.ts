@@ -12,14 +12,12 @@ import { diffPlainDateTimes } from '../internal/diff'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import { DateLikeObject, DateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
+import { combineDateAndTime } from '../internal/fieldUtils'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { mergePlainDateTimeFields } from '../internal/merge'
-import {
-  plainDateTimeWithPlainTime,
-  slotsWithCalendarId,
-} from '../internal/modify'
+import { slotsWithCalendarId } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import {
@@ -41,6 +39,7 @@ import {
   createPlainDateTimeSlots,
   createPlainTimeSlots,
 } from '../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {
@@ -106,9 +105,10 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       plainTimeArg?: PlainTimeArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        plainDateTimeWithPlainTime(
+        createPlainDateTimeFromRefinedFields(
           slots,
           optionalToPlainTimeFields(plainTimeArg),
+          slots.calendar,
         ),
       )
     },
@@ -181,7 +181,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     toPlainDate(slots: PlainDateTimeSlots): PlainDate {
-      return createPlainDate(createPlainDateSlots(slots))
+      return createPlainDate(createPlainDateSlots(slots, slots.calendar))
     },
     toPlainTime(slots: PlainDateTimeSlots): PlainTime {
       return createPlainTime(createPlainTimeSlots(slots))
@@ -209,10 +209,9 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       return createPlainDateTime(toPlainDateTimeSlots(arg, options))
     },
     compare(arg0: PlainDateTimeArg, arg1: PlainDateTimeArg): NumberSign {
-      return compareIsoDateTimeFields(
-        toPlainDateTimeSlots(arg0),
-        toPlainDateTimeSlots(arg1),
-      )
+      const slots0 = toPlainDateTimeSlots(arg0)
+      const slots1 = toPlainDateTimeSlots(arg1)
+      return compareIsoDateTimeFields(slots0, slots1)
     },
   },
   formatPlainDateTimeIso,
@@ -235,10 +234,10 @@ export function toPlainDateTimeSlots(
 
       case PlainDateBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainDateTimeSlots({
-          ...(slots as PlainDateSlots),
-          ...timeFieldDefaults,
-        })
+        return createPlainDateTimeSlots(
+          combineDateAndTime(slots as PlainDateSlots, timeFieldDefaults),
+          (slots as PlainDateSlots).calendar,
+        )
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
