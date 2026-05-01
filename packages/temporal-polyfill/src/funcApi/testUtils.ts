@@ -3,7 +3,7 @@ import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import { TimeFields } from '../internal/fieldTypes'
 import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
-import { isoToEpochNano } from '../internal/timeMath'
+import { isoDateAndTimeToEpochNano, isoToEpochNano } from '../internal/timeMath'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
@@ -50,47 +50,28 @@ const timeDefaults = {
   second: 0,
 }
 
-const dateTimeDefaults = {
-  day: 0,
-  hour: 0,
-  microsecond: 0,
-  millisecond: 0,
-  minute: 0,
-  month: 0,
-  nanosecond: 0,
-  second: 0,
-  year: 0,
-}
-
 const plainDateDefaults = {
   branding: 'PlainDate',
   calendar: 'iso8601',
-  ...dateDefaults,
 }
 
 const plainYearMonthDefaults = {
   branding: 'PlainYearMonth',
   calendar: 'iso8601',
-  ...dateDefaults,
-  day: 1,
 }
 
 const plainMonthDayDefaults = {
   branding: 'PlainMonthDay',
   calendar: 'iso8601',
-  ...dateDefaults,
-  year: 1972,
 }
 
 const plainDateTimeDefaults = {
   branding: 'PlainDateTime',
   calendar: 'iso8601',
-  ...dateTimeDefaults,
 }
 
 const plainTimeDefaults = {
   branding: 'PlainTime',
-  ...timeDefaults,
 }
 
 const zonedDateTimeDefaults = {
@@ -126,7 +107,8 @@ export function expectPlainDateEquals(
 ): void {
   expectPropsEqualStrict(pd, {
     ...plainDateDefaults,
-    ...slots,
+    calendar: slots.calendar || plainDateDefaults.calendar,
+    isoDate: { ...dateDefaults, ...slots.isoDate },
   })
 }
 
@@ -136,7 +118,12 @@ export function expectPlainYearMonthEquals(
 ): void {
   expectPropsEqualStrict(pym, {
     ...plainYearMonthDefaults,
-    ...slots,
+    calendar: slots.calendar || plainYearMonthDefaults.calendar,
+    isoDate: {
+      ...dateDefaults,
+      day: 1,
+      ...slots.isoDate,
+    },
   })
 }
 
@@ -146,7 +133,12 @@ export function expectPlainMonthDayEquals(
 ): void {
   expectPropsEqualStrict(pym, {
     ...plainMonthDayDefaults,
-    ...slots,
+    calendar: slots.calendar || plainMonthDayDefaults.calendar,
+    isoDate: {
+      ...dateDefaults,
+      year: 1972,
+      ...slots.isoDate,
+    },
   })
 }
 
@@ -156,7 +148,9 @@ export function expectPlainDateTimeEquals(
 ): void {
   expectPropsEqualStrict(pdt, {
     ...plainDateTimeDefaults,
-    ...slots,
+    calendar: slots.calendar || plainDateTimeDefaults.calendar,
+    isoDate: { ...dateDefaults, ...slots.isoDate },
+    time: { ...timeDefaults, ...slots.time },
   })
 }
 
@@ -180,11 +174,11 @@ export function expectZonedDateTimeEquals(
 
 export function expectPlainTimeEquals(
   pt: PlainTimeFns.Record,
-  slots: Partial<TimeFields>,
+  slots: { time?: Partial<TimeFields> },
 ): void {
   expectPropsEqualStrict(pt, {
     ...plainTimeDefaults,
-    ...slots,
+    time: { ...timeDefaults, ...slots.time },
   })
 }
 
@@ -254,8 +248,8 @@ export function expectPlainDateTimesSimilar(
   expect(pdt1.branding).toBe('PlainDateTime')
   expect(pdt0.calendar).toBe(pdt1.calendar)
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoToEpochNano(pdt0)!),
-    bigNanoToBigInt(isoToEpochNano(pdt1)!),
+    bigNanoToBigInt(isoDateAndTimeToEpochNano(pdt0.isoDate, pdt0.time)!),
+    bigNanoToBigInt(isoDateAndTimeToEpochNano(pdt1.isoDate, pdt1.time)!),
   )
 }
 
@@ -267,8 +261,8 @@ export function expectPlainDatesSimilar(
   expect(pd1.branding).toBe('PlainDate')
   expect(pd0.calendar).toBe(pd1.calendar)
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoToEpochNano(pd0)!),
-    bigNanoToBigInt(isoToEpochNano(pd1)!),
+    bigNanoToBigInt(isoToEpochNano(pd0.isoDate)!),
+    bigNanoToBigInt(isoToEpochNano(pd1.isoDate)!),
   )
 }
 
@@ -279,8 +273,8 @@ export function expectPlainTimesSimilar(
   expect(pt0.branding).toBe('PlainTime')
   expect(pt1.branding).toBe('PlainTime')
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoToEpochNano({ ...dateDefaults, ...pt0 })!),
-    bigNanoToBigInt(isoToEpochNano({ ...dateDefaults, ...pt1 })!),
+    bigNanoToBigInt(isoDateAndTimeToEpochNano(dateDefaults, pt0.time)!),
+    bigNanoToBigInt(isoDateAndTimeToEpochNano(dateDefaults, pt1.time)!),
   )
 }
 

@@ -586,11 +586,15 @@ describe('toPlainDateTime', () => {
     )
     const pdt = ZonedDateTimeFns.toPlainDateTime(zdt)
     expectPlainDateTimeEquals(pdt, {
-      year: 2024,
-      month: 2,
-      day: 27,
-      hour: 12,
-      minute: 30,
+      isoDate: {
+        year: 2024,
+        month: 2,
+        day: 27,
+      },
+      time: {
+        hour: 12,
+        minute: 30,
+      },
     })
   })
 })
@@ -602,9 +606,11 @@ describe('toPlainDate', () => {
     )
     const pd = ZonedDateTimeFns.toPlainDate(zdt)
     expectPlainDateEquals(pd, {
-      year: 2024,
-      month: 2,
-      day: 27,
+      isoDate: {
+        year: 2024,
+        month: 2,
+        day: 27,
+      },
     })
   })
 })
@@ -616,8 +622,10 @@ describe('toPlainTime', () => {
     )
     const pt = ZonedDateTimeFns.toPlainTime(zdt)
     expectPlainTimeEquals(pt, {
-      hour: 12,
-      minute: 30,
+      time: {
+        hour: 12,
+        minute: 30,
+      },
     })
   })
 })
@@ -629,8 +637,10 @@ describe('toPlainYearMonth', () => {
     )
     const pym = ZonedDateTimeFns.toPlainYearMonth(zdt)
     expectPlainYearMonthEquals(pym, {
-      year: 2024,
-      month: 2,
+      isoDate: {
+        year: 2024,
+        month: 2,
+      },
     })
   })
 })
@@ -642,8 +652,10 @@ describe('toPlainMonthDay', () => {
     )
     const pmd = ZonedDateTimeFns.toPlainMonthDay(zdt)
     expectPlainMonthDayEquals(pmd, {
-      month: 2,
-      day: 27,
+      isoDate: {
+        month: 2,
+        day: 27,
+      },
     })
   })
 })

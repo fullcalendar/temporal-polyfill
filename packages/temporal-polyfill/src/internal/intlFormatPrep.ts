@@ -1,13 +1,13 @@
 import * as errorMessages from './errorMessages'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
+import { IsoDateCarrier, IsoDateTimeCarrier, TimeCarrier } from './isoFields'
 import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
-import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import {
+  isoDateAndTimeToEpochMilli,
+  isoDateToEpochMilli,
+  timeFieldsToNano,
+} from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { nanoInMilli } from './units'
 import { excludePropsByName } from './utils'
@@ -322,12 +322,12 @@ function throwIfStyleFieldConflicts(
 // Config Utils
 // -----------------------------------------------------------------------------
 
-export type ClassFormatConfig<S> = [
-  optionsTransformer: OptionsTransformer,
-  slotsToEpochMilli: EpochNanoConverter<S>,
-  strictCalendarChecks?: boolean,
-  getForcedTimeZoneId?: (...slotsList: S[]) => string,
-]
+export type ClassFormatConfig<S> = {
+  transformOptions: OptionsTransformer
+  slotsToEpochMilli: EpochNanoConverter<S>
+  strictCalendarChecks?: boolean
+  getForcedTimeZoneId?: (...slotsList: S[]) => string
+}
 
 export type EpochNanoConverter<S> = (
   slots: S,
@@ -356,7 +356,7 @@ export function createFormatPrepper<S>(
   queryFormat: FormatQuerier = createFormatForPrep,
   strictOptions = false,
 ): FormatPrepper<S> {
-  const [transformOptions, , , getForcedTimeZoneId] = config
+  const { transformOptions, getForcedTimeZoneId } = config
 
   return (locales, options = emptyOptions, ...slotsList: S[]) => {
     const subformat = queryFormat(
@@ -430,44 +430,56 @@ function computeNonBuggyIsoResolve() {
 }
 const nonBuggyIsoResolve = computeNonBuggyIsoResolve()
 
-export const instantConfig: ClassFormatConfig<EpochSlots> = [
-  transformInstantOptions,
-  getEpochMilli,
-]
+export const instantConfig: ClassFormatConfig<EpochSlots> = {
+  transformOptions: transformInstantOptions,
+  slotsToEpochMilli: getEpochMilli,
+}
 
-export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = [
-  transformZonedOptions,
-  getEpochMilli,
-  false, // strictCalendarChecks
-  getForcedCommonTimeZone,
-]
+export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = {
+  transformOptions: transformZonedOptions,
+  slotsToEpochMilli: getEpochMilli,
+  strictCalendarChecks: false,
+  getForcedTimeZoneId: getForcedCommonTimeZone,
+}
 
-export const dateTimeConfig: ClassFormatConfig<CalendarDateTimeFields> = [
-  transformDateTimeOptions,
-  isoToEpochMilli as (isoFields: CalendarDateTimeFields) => number,
-]
+function formatDateTimeToEpochMilli(fields: IsoDateTimeCarrier): number {
+  return isoDateAndTimeToEpochMilli(fields.isoDate, fields.time)!
+}
 
-export const dateConfig: ClassFormatConfig<CalendarDateFields> = [
-  transformDateOptions,
-  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
-]
+function formatDateToEpochMilli(fields: IsoDateCarrier): number {
+  return isoDateToEpochMilli(fields.isoDate)!
+}
 
-export const timeConfig: ClassFormatConfig<TimeFields> = [
-  transformTimeOptions,
-  (isoFields: TimeFields) => isoTimeFieldsToNano(isoFields) / nanoInMilli,
-]
+function formatTimeToEpochMilli(fields: TimeCarrier): number {
+  return timeFieldsToNano(fields.time) / nanoInMilli
+}
 
-export const yearMonthConfig: ClassFormatConfig<CalendarDateFields> = [
-  transformYearMonthOptions,
-  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
-  nonBuggyIsoResolve, // strictCalendarChecks
-]
+export const dateTimeConfig: ClassFormatConfig<IsoDateTimeCarrier> = {
+  transformOptions: transformDateTimeOptions,
+  slotsToEpochMilli: formatDateTimeToEpochMilli,
+}
 
-export const monthDayConfig: ClassFormatConfig<CalendarDateFields> = [
-  transformMonthDayOptions,
-  isoToEpochMilli as (isoFields: CalendarDateFields) => number,
-  nonBuggyIsoResolve, // strictCalendarChecks
-]
+export const dateConfig: ClassFormatConfig<IsoDateCarrier> = {
+  transformOptions: transformDateOptions,
+  slotsToEpochMilli: formatDateToEpochMilli,
+}
+
+export const timeConfig: ClassFormatConfig<TimeCarrier> = {
+  transformOptions: transformTimeOptions,
+  slotsToEpochMilli: formatTimeToEpochMilli,
+}
+
+export const yearMonthConfig: ClassFormatConfig<IsoDateCarrier> = {
+  transformOptions: transformYearMonthOptions,
+  slotsToEpochMilli: formatDateToEpochMilli,
+  strictCalendarChecks: nonBuggyIsoResolve,
+}
+
+export const monthDayConfig: ClassFormatConfig<IsoDateCarrier> = {
+  transformOptions: transformMonthDayOptions,
+  slotsToEpochMilli: formatDateToEpochMilli,
+  strictCalendarChecks: nonBuggyIsoResolve,
+}
 
 // General Epoch Conversion
 // -----------------------------------------------------------------------------
@@ -477,14 +489,14 @@ function toEpochMillis<S>(
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
   slotsList: S[],
 ): number[] {
-  const [, slotsToEpochMilli, strictCalendarCheck] = config
+  const { slotsToEpochMilli, strictCalendarChecks } = config
 
   return slotsList.map((slots: S) => {
     if ((slots as any).calendar) {
       checkCalendarsCompatible(
         (slots as any).calendar, // !!!
         resolvedOptions.calendar,
-        strictCalendarCheck,
+        strictCalendarChecks,
       )
     }
 

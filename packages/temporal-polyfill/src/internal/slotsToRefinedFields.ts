@@ -3,7 +3,6 @@ import {
   queryCalendarDateFields,
   queryCalendarMonthCodeParts,
 } from './calendarQuery'
-import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import {
   AbstractDateSlots,
@@ -11,7 +10,6 @@ import {
   ZonedDateTimeSlots,
 } from './slots'
 import { zonedEpochSlotsToIso } from './timeZoneMath'
-import { pluckProps } from './utils'
 
 /*
 "Essentials" are the minimal, canonical fields copied from an existing Temporal
@@ -28,36 +26,34 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   monthCode: string
   day: number
 } & TimeFields & { offset: number } {
-  const isoFields = zonedEpochSlotsToIso(slots)
+  const { isoDate, time, offsetNanoseconds } = zonedEpochSlotsToIso(slots)
 
-  const { year, month, day } = queryCalendarDateFields(
-    slots.calendar,
-    isoFields,
-  )
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, isoDate)
   const monthCode = computeMonthCode(slots.calendar, year, month)
 
   return {
-    ...pluckProps(timeFieldNamesAsc, isoFields),
+    ...time,
     year,
     monthCode,
     day,
     // Keep this in the same post-coercion representation as user .with()
     // fields: the public "offset" field is stored internally as nanoseconds.
-    offset: isoFields.offsetNanoseconds,
+    offset: offsetNanoseconds,
   }
 }
 
 export function computeDateTimeEssentials(slots: AbstractDateTimeSlots) {
+  const { time } = slots
   return {
     ...computeDateEssentials(slots),
     // Keep the public Temporal field names here. The slot names are ISO-prefixed
     // because they represent storage, but .with() needs calendar-style fields.
-    hour: slots.hour,
-    minute: slots.minute,
-    second: slots.second,
-    millisecond: slots.millisecond,
-    microsecond: slots.microsecond,
-    nanosecond: slots.nanosecond,
+    hour: time.hour,
+    minute: time.minute,
+    second: time.second,
+    millisecond: time.millisecond,
+    microsecond: time.microsecond,
+    nanosecond: time.nanosecond,
   }
 }
 
@@ -66,7 +62,8 @@ export function computeDateEssentials(slots: AbstractDateSlots): {
   monthCode: string
   day: number
 } {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, isoDate)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { year, monthCode, day }
 }
@@ -75,7 +72,8 @@ export function computeYearMonthEssentials(slots: AbstractDateSlots): {
   year: number
   monthCode: string
 } {
-  const { year, month } = queryCalendarDateFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month } = queryCalendarDateFields(slots.calendar, isoDate)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { year, monthCode }
 }
@@ -84,7 +82,8 @@ export function computeMonthDayEssentials(slots: AbstractDateSlots): {
   monthCode: string
   day: number
 } {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, isoDate)
   const monthCode = computeMonthCode(slots.calendar, year, month)
   return { monthCode, day }
 }

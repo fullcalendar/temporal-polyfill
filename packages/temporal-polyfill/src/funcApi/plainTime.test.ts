@@ -13,8 +13,10 @@ describe('create', () => {
   it('works', () => {
     const pt = PlainTimeFns.create(12, 30)
     expectPlainTimeEquals(pt, {
-      hour: 12,
-      minute: 30,
+      time: {
+        hour: 12,
+        minute: 30,
+      },
     })
   })
 })
@@ -39,8 +41,10 @@ describe('fromString', () => {
   it('works', () => {
     const pt = PlainTimeFns.fromString('12:30')
     expectPlainTimeEquals(pt, {
-      hour: 12,
-      minute: 30,
+      time: {
+        hour: 12,
+        minute: 30,
+      },
     })
   })
 })
@@ -51,7 +55,9 @@ describe('fromFields', () => {
       hour: 12,
     })
     expectPlainTimeEquals(pt, {
-      hour: 12,
+      time: {
+        hour: 12,
+      },
     })
   })
 })
@@ -79,9 +85,11 @@ describe('withFields', () => {
       second: 1,
     })
     expectPlainTimeEquals(pt1, {
-      hour: 12,
-      minute: 45,
-      second: 1,
+      time: {
+        hour: 12,
+        minute: 45,
+        second: 1,
+      },
     })
   })
 })
@@ -92,8 +100,10 @@ describe('add', () => {
     const d = DurationFns.create(0, 0, 0, 0, 14, 15) // +14:15
     const pt1 = PlainTimeFns.add(pt0, d)
     expectPlainTimeEquals(pt1, {
-      hour: 2,
-      minute: 45,
+      time: {
+        hour: 2,
+        minute: 45,
+      },
     })
   })
 })
@@ -104,8 +114,10 @@ describe('subtract', () => {
     const d = DurationFns.create(0, 0, 0, 0, 14, 15) // +14:15
     const pt1 = PlainTimeFns.subtract(pt0, d)
     expectPlainTimeEquals(pt1, {
-      hour: 22,
-      minute: 15,
+      time: {
+        hour: 22,
+        minute: 15,
+      },
     })
   })
 })
@@ -139,7 +151,9 @@ describe('round', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.round(pt0, 'hour')
     expectPlainTimeEquals(pt1, {
-      hour: 13,
+      time: {
+        hour: 13,
+      },
     })
   })
 
@@ -147,7 +161,9 @@ describe('round', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.round(pt0, { smallestUnit: 'hour' })
     expectPlainTimeEquals(pt1, {
-      hour: 13,
+      time: {
+        hour: 13,
+      },
     })
   })
 })
@@ -177,11 +193,15 @@ describe('toPlainDateTime', () => {
     const pd = PlainDateFns.create(2024, 6, 3)
     const pdt = PlainTimeFns.toPlainDateTime(pt, pd)
     expectPlainDateTimeEquals(pdt, {
-      year: 2024,
-      month: 6,
-      day: 3,
-      hour: 12,
-      minute: 30,
+      isoDate: {
+        year: 2024,
+        month: 6,
+        day: 3,
+      },
+      time: {
+        hour: 12,
+        minute: 30,
+      },
     })
   })
 })

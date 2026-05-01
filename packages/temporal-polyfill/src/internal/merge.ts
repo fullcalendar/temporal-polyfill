@@ -27,7 +27,7 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { japaneseCalendarId } from './intlCalendarConfig'
-import { constrainIsoTimeFields } from './isoMath'
+import { constrainTimeFields } from './isoMath'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -43,13 +43,13 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createDurationSlots,
-  createPlainDateTimeSlots,
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
   createPlainDateFromFieldsWithOptionsRefiner,
+  createPlainDateTimeFromRefinedFields,
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
@@ -60,7 +60,6 @@ import {
   computeYearMonthEssentials,
   computeZonedDateTimeEssentials,
 } from './slotsToRefinedFields'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
 import { pluckProps } from './utils'
@@ -159,7 +158,7 @@ export function mergeZonedDateTimeFields(
       mergedCalendarFields as any,
       () => refineZonedFieldOptions(options, OffsetDisambig.Prefer),
     )
-  const isoTimeFields = constrainIsoTimeFields(
+  const timeFields = constrainTimeFields(
     pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
@@ -167,7 +166,8 @@ export function mergeZonedDateTimeFields(
   return createZonedDateTimeSlots(
     getMatchingInstantFor(
       timeZoneImpl,
-      { ...isoDateFields, ...isoTimeFields },
+      isoDateFields.isoDate,
+      timeFields,
       // Existing fields and user .with() fields are both past the first bag
       // refinement phase, so "offset" is the offset in nanoseconds here.
       mergedAllFields.offset,
@@ -204,22 +204,23 @@ export function mergePlainDateTimeFields(
     ...partialFields,
   }
 
-  const [isoDateFields, overflow] = createPlainDateFromFieldsWithOptionsRefiner(
-    calendarId,
-    mergedCalendarFields as any,
-    () => [refineOverflowOptions(options)],
-  )
+  const [plainDateSlots, overflow] =
+    createPlainDateFromFieldsWithOptionsRefiner(
+      calendarId,
+      mergedCalendarFields as any,
+      () => [refineOverflowOptions(options)],
+    )
+  const isoDateFields = plainDateSlots.isoDate
 
-  const isoTimeFields = constrainIsoTimeFields(
+  const timeFields = constrainTimeFields(
     pluckProps(timeFieldNamesAlpha, mergedAllFields),
     overflow,
   )
 
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds({
-      ...isoDateFields,
-      ...isoTimeFields,
-    }),
+  return createPlainDateTimeFromRefinedFields(
+    isoDateFields,
+    timeFields,
+    calendarId,
   )
 }
 

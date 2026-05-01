@@ -136,8 +136,8 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       },
       compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumberSign {
         return compareIsoDateFields(
-          toPlainYearMonthSlots(arg0),
-          toPlainYearMonthSlots(arg1),
+          toPlainYearMonthSlots(arg0).isoDate,
+          toPlainYearMonthSlots(arg1).isoDate,
         )
       },
     },

@@ -13,8 +13,15 @@ import {
   queryCalendarYearMonthForMonthDay,
 } from './calendarQuery'
 import * as errorMessages from './errorMessages'
+import { timeFieldDefaults } from './fieldNames'
 import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
-import { DateFields, DayFields, YearMonthFields } from './fieldTypes'
+import {
+  CalendarDateFields,
+  DateFields,
+  DayFields,
+  TimeFields,
+  YearMonthFields,
+} from './fieldTypes'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -29,17 +36,36 @@ import { Overflow } from './optionsModel'
 import { OverflowOptions } from './optionsModel'
 import {
   PlainDateSlots,
+  PlainDateTimeSlots,
   PlainMonthDaySlots,
   PlainYearMonthSlots,
   createPlainDateSlots,
+  createPlainDateTimeSlots,
   createPlainMonthDaySlots,
   createPlainYearMonthSlots,
 } from './slots'
-import { checkIsoDateInBounds, checkIsoYearMonthInBounds } from './timeMath'
+import {
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+  checkIsoYearMonthInBounds,
+} from './timeMath'
 import { clampNumber } from './utils'
 
 // Built-in *-from-fields
 // -----------------------------------------------------------------------------
+
+export function createPlainDateTimeFromRefinedFields(
+  isoDate: CalendarDateFields,
+  // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
+  time: TimeFields | undefined = timeFieldDefaults,
+  calendarId: string,
+): PlainDateTimeSlots {
+  // Calendar/date pipelines and time pipelines resolve their own fields before
+  // reaching this point. The only cross-field validation left is whether the
+  // combined PlainDateTime is inside Temporal's supported ISO range.
+  checkIsoDateTimeInBounds(isoDate, time)
+  return createPlainDateTimeSlots(isoDate, time, calendarId)
+}
 
 export function createPlainDateFromFields(
   calendarId: string,
@@ -117,14 +143,14 @@ function createPlainDateFromPreparedFields(
     prepared.year,
     overflow,
   )
-  const isoFields = queryCalendarIsoFieldsFromParts(
+  const isoDate = queryCalendarIsoFieldsFromParts(
     calendarId,
     prepared.year,
     month,
     day,
   )
 
-  return createPlainDateSlots(checkIsoDateInBounds(isoFields), calendarId)
+  return createPlainDateSlots(checkIsoDateInBounds(isoDate), calendarId)
 }
 
 interface PreparedDateFields {
@@ -214,10 +240,10 @@ function createPlainYearMonthFromFieldsWithOverflowOptions(
     overflow,
     monthCodeParts,
   )
-  const isoFields = queryCalendarIsoFieldsFromParts(calendarId, year, month, 1)
+  const isoDate = queryCalendarIsoFieldsFromParts(calendarId, year, month, 1)
 
   return createPlainYearMonthSlots(
-    checkIsoYearMonthInBounds(isoFields),
+    checkIsoYearMonthInBounds(isoDate),
     calendarId,
   )
 }

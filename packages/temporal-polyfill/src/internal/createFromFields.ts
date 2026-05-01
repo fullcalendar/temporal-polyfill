@@ -6,7 +6,6 @@ import {
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
-import { timeFieldDefaults } from './fieldNames'
 import {
   dateFieldNamesAlpha,
   dateFieldNamesAlphaWithEra,
@@ -48,17 +47,16 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
   createDurationSlots,
-  createPlainDateTimeSlots,
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
   createPlainDateFromFieldsWithOptionsRefiner,
+  createPlainDateTimeFromRefinedFields,
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor } from './timeZoneMath'
 
@@ -92,14 +90,15 @@ export function refineMaybeZonedDateTimeObjectLike(
 
   if (fields.timeZone !== undefined) {
     const isoDateFields = createPlainDateFromFields(calendarId, fields as any)
-    const isoTimeFields = resolveTimeFields(fields)
+    const timeFields = resolveTimeFields(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
     const timeZoneImpl = queryTimeZone(timeZoneId)
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZoneImpl,
-      { ...isoDateFields, ...isoTimeFields },
+      isoDateFields.isoDate,
+      timeFields,
       // After readAndRefineBagFields(), the public "offset" field is stored
       // internally as offset nanoseconds.
       fields.offset,
@@ -109,7 +108,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   }
 
   const isoDateInternals = createPlainDateFromFields(calendarId, fields as any)
-  return { ...isoDateInternals, ...timeFieldDefaults }
+  return { isoDate: isoDateInternals.isoDate }
 }
 
 export function refineZonedDateTimeObjectLike(
@@ -135,12 +134,13 @@ export function refineZonedDateTimeObjectLike(
     createPlainDateFromFieldsWithOptionsRefiner(calendarId, fields as any, () =>
       refineZonedFieldOptions(options),
     )
-  const isoTimeFields = resolveTimeFields(fields, overflow)
+  const timeFields = resolveTimeFields(fields, overflow)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZoneImpl,
-    { ...isoDateFields, ...isoTimeFields },
+    isoDateFields.isoDate,
+    timeFields,
     // After readAndRefineBagFields(), the public "offset" field is stored
     // internally as offset nanoseconds.
     fields.offset,
@@ -173,14 +173,10 @@ export function refinePlainDateTimeObjectLike(
       fields as any,
       () => [refineOverflowOptions(options)],
     )
-  const isoTimeFields = resolveTimeFields(fields, overflow)
+  const timeFields = resolveTimeFields(fields, overflow)
+  const isoDate = isoDateInternals.isoDate
 
-  const isoFields = checkIsoDateTimeInBounds({
-    ...isoDateInternals,
-    ...isoTimeFields,
-  })
-
-  return createPlainDateTimeSlots(isoFields)
+  return createPlainDateTimeFromRefinedFields(isoDate, timeFields, calendarId)
 }
 
 export function refinePlainDateObjectLike(

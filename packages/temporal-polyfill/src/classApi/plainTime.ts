@@ -1,4 +1,4 @@
-import { compareIsoTimeFields, plainTimesEqual } from '../internal/compare'
+import { compareTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructPlainTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
@@ -111,9 +111,9 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       return createPlainTime(toPlainTimeSlots(arg, options))
     },
     compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumberSign {
-      return compareIsoTimeFields(
-        toPlainTimeSlots(arg0),
-        toPlainTimeSlots(arg1),
+      return compareTimeFields(
+        toPlainTimeSlots(arg0).time,
+        toPlainTimeSlots(arg1).time,
       )
     },
   },
@@ -137,7 +137,7 @@ export function toPlainTimeSlots(
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainTimeSlots(slots as PlainDateTimeSlots)
+        return createPlainTimeSlots((slots as PlainDateTimeSlots).time)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
@@ -158,5 +158,5 @@ export function toPlainTimeSlots(
 export function optionalToPlainTimeFields(
   timeArg: PlainTimeArg | undefined,
 ): TimeFields | undefined {
-  return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
+  return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg).time
 }

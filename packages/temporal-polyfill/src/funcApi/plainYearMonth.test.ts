@@ -13,9 +13,11 @@ describe('create', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory', 5)
     expectPlainYearMonthEquals(pym, {
       calendar: 'gregory',
-      year: 2024,
-      month: 6,
-      day: 5,
+      isoDate: {
+        year: 2024,
+        month: 6,
+        day: 5,
+      },
     })
   })
 
@@ -23,8 +25,10 @@ describe('create', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
     expectPlainYearMonthEquals(pym, {
       calendar: 'gregory',
-      year: 2024,
-      month: 6,
+      isoDate: {
+        year: 2024,
+        month: 6,
+      },
     })
   })
 })
@@ -50,8 +54,10 @@ describe('fromString', () => {
     const pym = PlainYearMonthFns.fromString('2024-06-01[u-ca=gregory]')
     expectPlainYearMonthEquals(pym, {
       calendar: 'gregory',
-      year: 2024,
-      month: 6,
+      isoDate: {
+        year: 2024,
+        month: 6,
+      },
     })
   })
 })
@@ -65,8 +71,10 @@ describe('fromFields', () => {
     })
     expectPlainYearMonthEquals(pym, {
       calendar: 'gregory',
-      year: 2024,
-      month: 6,
+      isoDate: {
+        year: 2024,
+        month: 6,
+      },
     })
   })
 })
@@ -93,8 +101,10 @@ describe('withFields', () => {
     })
     expectPlainYearMonthEquals(pym1, {
       calendar: 'gregory',
-      year: 2009,
-      month: 6,
+      isoDate: {
+        year: 2009,
+        month: 6,
+      },
     })
   })
 })
@@ -132,8 +142,10 @@ describe('add', () => {
     const pym0 = PlainYearMonthFns.create(2024, 2)
     const pym1 = PlainYearMonthFns.add(pym0, DurationFns.create(1, 1))
     expectPlainYearMonthEquals(pym1, {
-      year: 2025,
-      month: 3,
+      isoDate: {
+        year: 2025,
+        month: 3,
+      },
     })
   })
 
@@ -145,8 +157,10 @@ describe('add', () => {
         overflow: 'reject',
       }),
       {
-        year: 2023,
-        month: 2,
+        isoDate: {
+          year: 2023,
+          month: 2,
+        },
       },
     )
     expectPlainYearMonthEquals(
@@ -154,8 +168,10 @@ describe('add', () => {
         overflow: 'constrain',
       }),
       {
-        year: 2023,
-        month: 2,
+        isoDate: {
+          year: 2023,
+          month: 2,
+        },
       },
     )
   })
@@ -166,15 +182,19 @@ describe('add', () => {
     expectPlainYearMonthEquals(
       PlainYearMonthFns.add(last, DurationFns.create(-1)),
       {
-        year: 275759,
-        month: 9,
+        isoDate: {
+          year: 275759,
+          month: 9,
+        },
       },
     )
     expectPlainYearMonthEquals(
       PlainYearMonthFns.add(last, DurationFns.create(0, -1)),
       {
-        year: 275760,
-        month: 8,
+        isoDate: {
+          year: 275760,
+          month: 8,
+        },
       },
     )
   })
@@ -185,8 +205,10 @@ describe('subtract', () => {
     const pym0 = PlainYearMonthFns.create(2024, 2)
     const pym1 = PlainYearMonthFns.subtract(pym0, DurationFns.create(1, 1))
     expectPlainYearMonthEquals(pym1, {
-      year: 2023,
-      month: 1,
+      isoDate: {
+        year: 2023,
+        month: 1,
+      },
     })
   })
 
@@ -198,8 +220,10 @@ describe('subtract', () => {
         overflow: 'reject',
       }),
       {
-        year: 2023,
-        month: 2,
+        isoDate: {
+          year: 2023,
+          month: 2,
+        },
       },
     )
     expectPlainYearMonthEquals(
@@ -207,8 +231,10 @@ describe('subtract', () => {
         overflow: 'constrain',
       }),
       {
-        year: 2023,
-        month: 2,
+        isoDate: {
+          year: 2023,
+          month: 2,
+        },
       },
     )
   })
@@ -219,15 +245,19 @@ describe('subtract', () => {
     expectPlainYearMonthEquals(
       PlainYearMonthFns.subtract(last, DurationFns.create(1)),
       {
-        year: 275759,
-        month: 9,
+        isoDate: {
+          year: 275759,
+          month: 9,
+        },
       },
     )
     expectPlainYearMonthEquals(
       PlainYearMonthFns.subtract(last, DurationFns.create(0, 1)),
       {
-        year: 275760,
-        month: 8,
+        isoDate: {
+          year: 275760,
+          month: 8,
+        },
       },
     )
   })
@@ -281,9 +311,11 @@ describe('toPlainDate', () => {
     const pym = PlainYearMonthFns.create(2024, 2)
     const pd = PlainYearMonthFns.toPlainDate(pym, { day: 10 })
     expectPlainDateEquals(pd, {
-      year: 2024,
-      month: 2,
-      day: 10,
+      isoDate: {
+        year: 2024,
+        month: 2,
+        day: 10,
+      },
     })
   })
 })

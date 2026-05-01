@@ -44,8 +44,9 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
 // -----------------------------------------------------------------------------
 
 export function computeDateFields(slots: AbstractDateSlots): DateFields {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
-  const { era, eraYear } = queryCalendarEraFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, isoDate)
+  const { era, eraYear } = queryCalendarEraFields(slots.calendar, isoDate)
   const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     slots.calendar,
     year,
@@ -58,8 +59,9 @@ export function computeDateFields(slots: AbstractDateSlots): DateFields {
 export function computeYearMonthFields(
   slots: AbstractDateSlots,
 ): YearMonthFields {
-  const { year, month } = queryCalendarDateFields(slots.calendar, slots)
-  const { era, eraYear } = queryCalendarEraFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month } = queryCalendarDateFields(slots.calendar, isoDate)
+  const { era, eraYear } = queryCalendarEraFields(slots.calendar, isoDate)
   const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     slots.calendar,
     year,
@@ -72,7 +74,8 @@ export function computeYearMonthFields(
 export function computeMonthDayFields(
   slots: AbstractDateSlots,
 ): MonthDayFields {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
+  const { isoDate } = slots
+  const { year, month, day } = queryCalendarDateFields(slots.calendar, isoDate)
   const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     slots.calendar,
     year,
@@ -86,33 +89,33 @@ export function computeMonthDayFields(
 // -----------------------------------------------------------------------------
 
 export function computeInLeapYear(slots: AbstractDateSlots): boolean {
-  return queryCalendarInLeapYear(slots.calendar, slots)
+  return queryCalendarInLeapYear(slots.calendar, slots.isoDate)
 }
 
 export function computeMonthsInYear(slots: AbstractDateSlots): number {
-  return queryCalendarMonthsInYear(slots.calendar, slots)
+  return queryCalendarMonthsInYear(slots.calendar, slots.isoDate)
 }
 
 export function computeDaysInMonth(slots: AbstractDateSlots): number {
-  return queryCalendarDaysInMonth(slots.calendar, slots)
+  return queryCalendarDaysInMonth(slots.calendar, slots.isoDate)
 }
 
 export function computeDaysInYear(slots: AbstractDateSlots): number {
-  return queryCalendarDaysInYear(slots.calendar, slots)
+  return queryCalendarDaysInYear(slots.calendar, slots.isoDate)
 }
 
 export function computeDayOfYear(slots: AbstractDateSlots): number {
-  return queryCalendarDayOfYear(slots.calendar, slots)
+  return queryCalendarDayOfYear(slots.calendar, slots.isoDate)
 }
 
 export function computeWeekOfYear(
   slots: AbstractDateSlots,
 ): number | undefined {
-  return queryCalendarWeekOfYear(slots.calendar, slots)
+  return queryCalendarWeekOfYear(slots.calendar, slots.isoDate)
 }
 
 export function computeYearOfWeek(
   slots: AbstractDateSlots,
 ): number | undefined {
-  return queryCalendarYearOfWeek(slots.calendar, slots)
+  return queryCalendarYearOfWeek(slots.calendar, slots.isoDate)
 }

@@ -13,7 +13,7 @@ import {
   yearMonthCodeFieldNamesWithEra,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
-import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
 import {
   DateFields,
   DayFields,
@@ -43,7 +43,7 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { checkEpochNanoInBounds, checkIsoDateTimeInBounds } from './timeMath'
+import { checkEpochNanoInBounds } from './timeMath'
 import { queryTimeZone } from './timeZoneImpl'
 import {
   getSingleInstantFor,
@@ -80,19 +80,23 @@ export function zonedDateTimeToInstant(
 export function zonedDateTimeToPlainDateTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateTimeSlots {
-  return createPlainDateTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
+  const { isoDate, time } = zonedEpochSlotsToIso(zonedDateTimeSlots0)
+  return createPlainDateTimeSlots(isoDate, time, zonedDateTimeSlots0.calendar)
 }
 
 export function zonedDateTimeToPlainDate(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateSlots {
-  return createPlainDateSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
+  return createPlainDateSlots(
+    zonedEpochSlotsToIso(zonedDateTimeSlots0).isoDate,
+    zonedDateTimeSlots0.calendar,
+  )
 }
 
 export function zonedDateTimeToPlainTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainTimeSlots {
-  return createPlainTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
+  return createPlainTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0).time)
 }
 
 // PlainDateTime -> *
@@ -103,7 +107,12 @@ export function plainDateTimeToZonedDateTime(
   timeZoneId: string,
   options?: EpochDisambigOptions,
 ): ZonedDateTimeSlots {
-  const epochNano = dateToEpochNano(timeZoneId, plainDateTimeSlots, options)
+  const epochNano = dateToEpochNano(
+    timeZoneId,
+    plainDateTimeSlots.isoDate,
+    plainDateTimeSlots.time,
+    options,
+  )
   return createZonedDateTimeSlots(
     checkEpochNanoInBounds(epochNano),
     timeZoneId,
@@ -113,12 +122,13 @@ export function plainDateTimeToZonedDateTime(
 
 function dateToEpochNano(
   timeZoneId: string,
-  isoFields: CalendarDateTimeFields,
+  isoDate: CalendarDateFields,
+  time: TimeFields,
   options?: EpochDisambigOptions,
 ): BigNano | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
   const timeZoneImpl = queryTimeZone(timeZoneId)
-  return getSingleInstantFor(timeZoneImpl, isoFields, epochDisambig)
+  return getSingleInstantFor(timeZoneImpl, isoDate, time, epochDisambig)
 }
 
 // PlainDate -> *
@@ -132,40 +142,30 @@ export function plainDateToZonedDateTime<PA>(
 ): ZonedDateTimeSlots {
   const timeZoneId = refineTimeZoneString(options.timeZone)
   const plainTimeArg = options.plainTime
-  const isoTimeFields =
+  const timeFields =
     plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
 
   const timeZoneImpl = queryTimeZone(timeZoneId)
   let epochNano: BigNano
 
-  if (isoTimeFields) {
-    epochNano = getSingleInstantFor(timeZoneImpl, {
-      ...plainDateSlots,
-      ...isoTimeFields,
-    })
+  if (timeFields) {
+    epochNano = getSingleInstantFor(
+      timeZoneImpl,
+      plainDateSlots.isoDate,
+      timeFields,
+    )
   } else {
-    epochNano = getStartOfDayInstantFor(timeZoneImpl, {
-      ...plainDateSlots,
-      ...timeFieldDefaults,
-    })
+    epochNano = getStartOfDayInstantFor(
+      timeZoneImpl,
+      plainDateSlots.isoDate,
+      timeFieldDefaults,
+    )
   }
 
   return createZonedDateTimeSlots(
     epochNano,
     timeZoneId,
     plainDateSlots.calendar,
-  )
-}
-
-export function plainDateToPlainDateTime(
-  plainDateSlots: PlainDateSlots,
-  plainTimeFields: TimeFields = timeFieldDefaults,
-): PlainDateTimeSlots {
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds({
-      ...plainDateSlots,
-      ...plainTimeFields,
-    }),
   )
 }
 
@@ -299,24 +299,9 @@ export function plainTimeToZonedDateTime<PA>(
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   return createZonedDateTimeSlots(
-    getSingleInstantFor(timeZoneImpl, { ...plainDateSlots, ...slots }),
+    getSingleInstantFor(timeZoneImpl, plainDateSlots.isoDate, slots.time),
     timeZoneId,
     plainDateSlots.calendar,
-  )
-}
-
-/*
-Only used by funcApi
-*/
-export function plainTimeToPlainDateTime(
-  plainTimeSlots0: PlainTimeSlots,
-  plainDateSlots1: PlainDateSlots,
-): PlainDateTimeSlots {
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds({
-      ...plainTimeSlots0,
-      ...plainDateSlots1,
-    }),
   )
 }
 

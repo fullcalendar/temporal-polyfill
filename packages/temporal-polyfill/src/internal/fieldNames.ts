@@ -1,6 +1,5 @@
 import type {
   CalendarDateFields,
-  CalendarDateTimeFields,
   DateStats,
   TimeFields,
   YearMonthStats,
@@ -102,7 +101,7 @@ export const calendarDateFieldNamesAsc = [
 export const calendarDateTimeFieldNamesAsc = [
   ...timeFieldNamesAsc,
   ...calendarDateFieldNamesAsc,
-] as (keyof CalendarDateTimeFields)[]
+] as (keyof CalendarDateFields | keyof TimeFields)[]
 
 export const calendarDateFieldNamesAlpha = sortStrings(
   calendarDateFieldNamesAsc,
@@ -172,4 +171,5 @@ export const yearMonthCodeDayFieldNamesAlphaWithEra = [
 ]
 
 // NOTE: bad place for this!
+// TODO: rename to zero-time?
 export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAsc, 0)

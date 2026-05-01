@@ -2,11 +2,7 @@ import { compareBigNanos } from './bigNano'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
 import { RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import {
@@ -26,7 +22,7 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
 } from './slots'
-import { isoTimeFieldsToNano, isoToEpochMilli } from './timeMath'
+import { isoDateToEpochMilli, timeFieldsToNano } from './timeMath'
 import { getTimeZoneAtomic } from './timeZoneId'
 import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
@@ -97,12 +93,13 @@ export function compareDurations<RA>(
 // -----------------------------------------------------------------------------
 
 export function compareIsoDateTimeFields(
-  isoFields0: CalendarDateTimeFields,
-  isoFields1: CalendarDateTimeFields,
+  isoDate0: CalendarDateFields,
+  time0: TimeFields,
+  isoDate1: CalendarDateFields,
+  time1: TimeFields,
 ): NumberSign {
   return (
-    compareIsoDateFields(isoFields0, isoFields1) ||
-    compareIsoTimeFields(isoFields0, isoFields1)
+    compareIsoDateFields(isoDate0, isoDate1) || compareTimeFields(time0, time1)
   )
 }
 
@@ -111,18 +108,18 @@ export function compareIsoDateFields(
   isoFields1: CalendarDateFields,
 ): NumberSign {
   return compareNumbers(
-    isoToEpochMilli(isoFields0)!,
-    isoToEpochMilli(isoFields1)!,
+    isoDateToEpochMilli(isoFields0)!,
+    isoDateToEpochMilli(isoFields1)!,
   )
 }
 
-export function compareIsoTimeFields(
+export function compareTimeFields(
   isoFields0: TimeFields,
   isoFields1: TimeFields,
 ): NumberSign {
   return compareNumbers(
-    isoTimeFieldsToNano(isoFields0),
-    isoTimeFieldsToNano(isoFields1),
+    timeFieldsToNano(isoFields0),
+    timeFieldsToNano(isoFields1),
   )
 }
 
@@ -155,8 +152,12 @@ export function plainDateTimesEqual(
   plainDateTimeSlots1: PlainDateTimeSlots,
 ): boolean {
   return (
-    !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    plainDateTimeSlots0.calendar === plainDateTimeSlots1.calendar
+    !compareIsoDateTimeFields(
+      plainDateTimeSlots0.isoDate,
+      plainDateTimeSlots0.time,
+      plainDateTimeSlots1.isoDate,
+      plainDateTimeSlots1.time,
+    ) && plainDateTimeSlots0.calendar === plainDateTimeSlots1.calendar
   )
 }
 
@@ -165,7 +166,7 @@ export function plainDatesEqual(
   plainDateSlots1: PlainDateSlots,
 ): boolean {
   return (
-    !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
+    !compareIsoDateFields(plainDateSlots0.isoDate, plainDateSlots1.isoDate) &&
     plainDateSlots0.calendar === plainDateSlots1.calendar
   )
 }
@@ -175,8 +176,10 @@ export function plainYearMonthsEqual(
   plainYearMonthSlots1: PlainYearMonthSlots,
 ): boolean {
   return (
-    !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    plainYearMonthSlots0.calendar === plainYearMonthSlots1.calendar
+    !compareIsoDateFields(
+      plainYearMonthSlots0.isoDate,
+      plainYearMonthSlots1.isoDate,
+    ) && plainYearMonthSlots0.calendar === plainYearMonthSlots1.calendar
   )
 }
 
@@ -185,8 +188,10 @@ export function plainMonthDaysEqual(
   plainMonthDaySlots1: PlainMonthDaySlots,
 ): boolean {
   return (
-    !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    plainMonthDaySlots0.calendar === plainMonthDaySlots1.calendar
+    !compareIsoDateFields(
+      plainMonthDaySlots0.isoDate,
+      plainMonthDaySlots1.isoDate,
+    ) && plainMonthDaySlots0.calendar === plainMonthDaySlots1.calendar
   )
 }
 
@@ -194,7 +199,7 @@ export function plainTimesEqual(
   plainTimeSlots0: PlainTimeSlots,
   plainTimeSlots1: PlainTimeSlots,
 ): boolean {
-  return !compareIsoTimeFields(plainTimeSlots0, plainTimeSlots1)
+  return !compareTimeFields(plainTimeSlots0.time, plainTimeSlots1.time)
 }
 
 // TimeZone

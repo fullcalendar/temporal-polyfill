@@ -13,17 +13,23 @@ import {
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import { moveDateTime, moveZonedEpochs } from '../internal/move'
+import { IsoDateCarrier, IsoDateTimeCarrier } from '../internal/isoFields'
+import { moveDate, moveZonedEpochs } from '../internal/move'
 import { RoundingMathOptions, RoundingModeName } from '../internal/optionsModel'
 import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
-import { Marker, MarkerToEpochNano, MoveMarker } from '../internal/relativeMath'
+import {
+  Marker,
+  MarkerToEpochNano,
+  MoveMarker,
+  isoMarkerToEpochNano,
+} from '../internal/relativeMath'
 import { roundBigNanoByInc, roundByInc } from '../internal/round'
 import {
   AbstractDateSlots,
   ZonedDateTimeSlots,
   extractEpochNano,
 } from '../internal/slots'
-import { isoToEpochNano } from '../internal/timeMath'
+import { isoDateAndTimeToEpochNano } from '../internal/timeMath'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
@@ -42,19 +48,19 @@ export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
 export const diffPlainMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
 export const diffPlainWeeks = bindArgs(
   diffPlainDayLikeUnit,
-  isoToEpochNano as MarkerToEpochNano,
+  isoMarkerToEpochNano as MarkerToEpochNano,
   Unit.Week,
   7,
 )
 export const diffPlainDays = bindArgs(
   diffPlainDayLikeUnit,
-  isoToEpochNano as MarkerToEpochNano,
+  isoMarkerToEpochNano as MarkerToEpochNano,
   Unit.Day,
   1,
 )
 export const diffPlainTimeUnits = bindArgs(
   diffTimeUnit,
-  isoToEpochNano as MarkerToEpochNano,
+  isoMarkerToEpochNano as MarkerToEpochNano,
 )
 
 // Large Units (years, months)
@@ -93,9 +99,9 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
   const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
 
   return diffDateUnits(
-    isoToEpochNano as MarkerToEpochNano,
+    isoMarkerToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(moveDateTime, calendarId) as MoveMarker,
+    bindArgs(moveDateLikeMarker, calendarId) as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendarId, f0, f1, unit),
     unit,
@@ -115,10 +121,19 @@ type MarkersToIsoFields = (
 ) => [CalendarDateFields, CalendarDateFields, ...any[]]
 
 function identityMarkersToIsoFields(
-  m0: CalendarDateFields,
-  m1: CalendarDateFields,
+  m0: IsoDateCarrier,
+  m1: IsoDateCarrier,
 ): [CalendarDateFields, CalendarDateFields] {
-  return [m0, m1]
+  return [m0.isoDate, m1.isoDate]
+}
+
+function moveDateLikeMarker(
+  calendarId: string,
+  marker: IsoDateCarrier | IsoDateTimeCarrier,
+  durationFields: DurationFields,
+): IsoDateCarrier | IsoDateTimeCarrier {
+  const isoDate = moveDate(calendarId, marker.isoDate, durationFields)
+  return 'time' in marker ? { isoDate, time: marker.time } : { isoDate }
 }
 
 function diffDateUnits(
@@ -181,14 +196,13 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
-  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZoneImpl,
-    record0,
-    record1,
-    sign,
-  )
+  const [isoFields0, isoFields1, remainderNano, startTime] =
+    prepareZonedEpochDiff(timeZoneImpl, record0, record1, sign)
   const nanoDiff = moveBigNano(
-    diffBigNanos(isoToEpochNano(isoFields0)!, isoToEpochNano(isoFields1)!),
+    diffBigNanos(
+      isoDateAndTimeToEpochNano(isoFields0, startTime)!,
+      isoDateAndTimeToEpochNano(isoFields1, startTime)!,
+    ),
     remainderNano,
   )
 

@@ -51,39 +51,30 @@ export const Now = Object.defineProperties(
       plainDateTimeISO(
         timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainDateTime {
+        const { isoDate, time } = getCurrentIsoDateTime(
+          queryTimeZone(refineTimeZoneArg(timeZoneArg)),
+        )
         return createPlainDateTime(
-          createPlainDateTimeSlots(
-            getCurrentIsoDateTime(
-              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-            ),
-            isoCalendarId,
-          ),
+          createPlainDateTimeSlots(isoDate, time, isoCalendarId),
         )
       },
 
       plainDateISO(
         timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainDate {
-        return createPlainDate(
-          createPlainDateSlots(
-            getCurrentIsoDateTime(
-              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-            ),
-            isoCalendarId,
-          ),
+        const { isoDate } = getCurrentIsoDateTime(
+          queryTimeZone(refineTimeZoneArg(timeZoneArg)),
         )
+        return createPlainDate(createPlainDateSlots(isoDate, isoCalendarId))
       },
 
       plainTimeISO(
         timeZoneArg: TimeZoneArg = getCurrentTimeZoneId(),
       ): PlainTime {
-        return createPlainTime(
-          createPlainTimeSlots(
-            getCurrentIsoDateTime(
-              queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-            ),
-          ),
+        const { time } = getCurrentIsoDateTime(
+          queryTimeZone(refineTimeZoneArg(timeZoneArg)),
         )
+        return createPlainTime(createPlainTimeSlots(time))
       },
     }),
   },

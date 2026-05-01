@@ -1,16 +1,8 @@
 import { BigNano, bigNanoToBigInt } from './bigNano'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { computeDurationSign } from './durationMath'
-import {
-  calendarDateFieldNamesAlpha,
-  calendarDateTimeFieldNamesAlpha,
-  timeFieldNamesAlpha,
-} from './fieldNames'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
+import { IsoDateCarrier, IsoDateTimeCarrier } from './isoFields'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
 import { NumberSign, pluckProps } from './utils'
 
@@ -46,91 +38,56 @@ export function createZonedDateTimeSlots(
   }
 }
 
-/*
-TODO: simpler way of doing method overloading?
-*/
 export function createPlainDateTimeSlots(
-  isoFields: CalendarDateTimeFields & { calendar: string },
-): PlainDateTimeSlots
-export function createPlainDateTimeSlots(
-  isoFields: CalendarDateTimeFields,
+  isoDate: CalendarDateFields,
+  time: TimeFields,
   calendar: string,
-): PlainDateTimeSlots
-export function createPlainDateTimeSlots(
-  isoFields: CalendarDateTimeFields & { calendar?: string },
-  calendar = isoFields.calendar,
 ): PlainDateTimeSlots {
   return {
     branding: PlainDateTimeBranding,
-    calendar: calendar!,
-    ...pluckProps(calendarDateTimeFieldNamesAlpha, isoFields),
+    calendar,
+    isoDate,
+    time,
   }
 }
 
 export function createPlainDateSlots(
-  isoFields: CalendarDateFields & { calendar: string },
-): PlainDateSlots
-export function createPlainDateSlots(
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   calendar: string,
-): PlainDateSlots
-export function createPlainDateSlots(
-  isoFields: CalendarDateFields & { calendar?: string },
-  calendar = isoFields.calendar,
 ): PlainDateSlots {
   return {
     branding: PlainDateBranding,
-    calendar: calendar!,
-    ...pluckProps(calendarDateFieldNamesAlpha, isoFields),
+    calendar,
+    isoDate,
   }
 }
 
-/*
-TODO: simpler way of doing method overloading?
-*/
 export function createPlainYearMonthSlots(
-  isoFields: CalendarDateFields & { calendar: string },
-): PlainYearMonthSlots
-export function createPlainYearMonthSlots(
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   calendar: string,
-): PlainYearMonthSlots
-export function createPlainYearMonthSlots(
-  isoFields: CalendarDateFields & { calendar?: string },
-  calendar = isoFields.calendar,
 ): PlainYearMonthSlots {
   return {
     branding: PlainYearMonthBranding,
-    calendar: calendar!,
-    ...pluckProps(calendarDateFieldNamesAlpha, isoFields),
+    calendar,
+    isoDate,
   }
 }
 
-/*
-TODO: simpler way of doing method overloading?
-*/
 export function createPlainMonthDaySlots(
-  isoFields: CalendarDateFields & { calendar: string },
-): PlainMonthDaySlots
-export function createPlainMonthDaySlots(
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   calendar: string,
-): PlainMonthDaySlots
-export function createPlainMonthDaySlots(
-  isoFields: CalendarDateFields & { calendar?: string },
-  calendar = isoFields.calendar,
 ): PlainMonthDaySlots {
   return {
     branding: PlainMonthDayBranding,
-    calendar: calendar!,
-    ...pluckProps(calendarDateFieldNamesAlpha, isoFields),
+    calendar,
+    isoDate,
   }
 }
 
-export function createPlainTimeSlots(isoFields: TimeFields): PlainTimeSlots {
+export function createPlainTimeSlots(time: TimeFields): PlainTimeSlots {
   return {
     branding: PlainTimeBranding,
-    ...pluckProps(timeFieldNamesAlpha, isoFields),
+    time,
   }
 }
 
@@ -155,20 +112,25 @@ export type ZonedEpochSlots = EpochAndZoneSlots & {
 }
 
 // without branding
-export type AbstractDateSlots = CalendarDateFields & { calendar: string }
-export type AbstractDateTimeSlots = CalendarDateTimeFields & {
-  calendar: string
-}
+export type AbstractDateSlots = IsoDateCarrier & { calendar: string }
+export type AbstractDateTimeSlots = IsoDateTimeCarrier & { calendar: string }
 
-export type PlainDateSlots = AbstractDateSlots & {
+export type PlainDateSlots = {
+  calendar: string
+  isoDate: CalendarDateFields
+} & {
   branding: typeof PlainDateBranding
 }
 
-export type PlainTimeSlots = TimeFields & {
+export type PlainTimeSlots = { time: TimeFields } & {
   branding: typeof PlainTimeBranding
 }
 
-export type PlainDateTimeSlots = AbstractDateTimeSlots & {
+export type PlainDateTimeSlots = {
+  calendar: string
+  isoDate: CalendarDateFields
+  time: TimeFields
+} & {
   branding: typeof PlainDateTimeBranding
 }
 
@@ -176,11 +138,17 @@ export type ZonedDateTimeSlots = ZonedEpochSlots & {
   branding: typeof ZonedDateTimeBranding
 }
 
-export type PlainMonthDaySlots = AbstractDateSlots & {
+export type PlainMonthDaySlots = {
+  calendar: string
+  isoDate: CalendarDateFields
+} & {
   branding: typeof PlainMonthDayBranding
 }
 
-export type PlainYearMonthSlots = AbstractDateSlots & {
+export type PlainYearMonthSlots = {
+  calendar: string
+  isoDate: CalendarDateFields
+} & {
   branding: typeof PlainYearMonthBranding
 }
 

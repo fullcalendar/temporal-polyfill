@@ -21,12 +21,7 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { timeFieldNamesAsc } from './fieldNames'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
 import type { CalendarYearMonthFields } from './fieldTypes'
 import {
   IntlCalendar,
@@ -38,6 +33,7 @@ import {
   computeIntlMonthsInYear,
   queryIntlCalendar,
 } from './intlCalendar'
+import { IsoDateTimeCarrier } from './isoFields'
 import {
   computeIsoDateFields,
   computeIsoDaysInMonth,
@@ -68,15 +64,15 @@ import {
   checkIsoDateTimeInBounds,
   epochMilliToIso,
   isoArgsToEpochMilli,
-  isoTimeFieldsToNano,
-  isoToEpochMilli,
-  nanoToIsoTimeAndDay,
+  isoDateToEpochMilli,
+  nanoToTimeAndDay,
+  timeFieldsToNano,
 } from './timeMath'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'
 import { Unit, milliInDay } from './units'
-import { clampEntity, divTrunc, modTrunc, pluckProps } from './utils'
+import { clampEntity, divTrunc, modTrunc } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -121,13 +117,16 @@ export function movePlainDateTime(
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots {
   const { calendar } = plainDateTimeSlots
+  const isoDateTime = moveDateTime(
+    calendar,
+    plainDateTimeSlots.isoDate,
+    plainDateTimeSlots.time,
+    doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+    options,
+  )
   return createPlainDateTimeSlots(
-    moveDateTime(
-      calendar,
-      plainDateTimeSlots,
-      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
-      options,
-    ),
+    isoDateTime.isoDate,
+    isoDateTime.time,
     calendar,
   )
 }
@@ -142,7 +141,7 @@ export function movePlainDate(
   return createPlainDateSlots(
     moveDate(
       calendar,
-      plainDateSlots,
+      plainDateSlots.isoDate,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
@@ -169,12 +168,12 @@ export function movePlainYearMonth(
   }
 
   const calendarId = plainYearMonthSlots.calendar
-  const getDay = (isoFields: CalendarDateFields) =>
-    queryCalendarDay(calendarId, isoFields)
+  const getDay = (isoDate: CalendarDateFields) =>
+    queryCalendarDay(calendarId, isoDate)
 
   // The first-of-month must be representable, this check in-bounds
   const isoDateFields: CalendarDateFields = checkIsoDateInBounds(
-    moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots),
+    moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots.isoDate),
   )
 
   if (doSubtract) {
@@ -201,7 +200,7 @@ export function movePlainTime(
 ): PlainTimeSlots {
   return createPlainTimeSlots(
     moveTime(
-      slots,
+      slots.time,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     )[0],
   )
@@ -236,22 +235,18 @@ export function moveZonedEpochs(
     epochNano = addBigNanos(epochNano, timeOnlyNano)
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTimeFields = zonedEpochSlotsToIso(slots, timeZoneImpl)
+    const { isoDate, time } = zonedEpochSlotsToIso(slots, timeZoneImpl)
     const movedIsoDateFields = moveDate(
       calendarId,
-      isoDateTimeFields,
+      isoDate,
       {
         ...durationFields, // date parts
         ...durationTimeFieldDefaults, // ZERO-OUT time parts
       },
       options,
     )
-    const movedIsoDateTimeFields = {
-      ...movedIsoDateFields, // date parts (could be a superset)
-      ...pluckProps(timeFieldNamesAsc, isoDateTimeFields), // time parts
-    }
     epochNano = addBigNanos(
-      getSingleInstantFor(timeZoneImpl, movedIsoDateTimeFields),
+      getSingleInstantFor(timeZoneImpl, movedIsoDateFields, time),
       timeOnlyNano,
     )
   }
@@ -263,19 +258,17 @@ export function moveZonedEpochs(
 
 export function moveDateTime(
   calendarId: string,
-  isoDateTimeFields: CalendarDateTimeFields,
+  isoDateFields: CalendarDateFields,
+  timeFields: TimeFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
-): CalendarDateTimeFields {
+): IsoDateTimeCarrier {
   // could have over 24 hours in certain zones
-  const [movedIsoTimeFields, dayDelta] = moveTime(
-    isoDateTimeFields,
-    durationFields,
-  )
+  const [movedTimeFields, dayDelta] = moveTime(timeFields, durationFields)
 
   const movedIsoDateFields = moveDate(
     calendarId,
-    isoDateTimeFields, // only date parts will be used
+    isoDateFields,
     {
       ...durationFields, // date parts
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
@@ -284,10 +277,11 @@ export function moveDateTime(
     options,
   )
 
-  return checkIsoDateTimeInBounds({
-    ...movedIsoDateFields,
-    ...movedIsoTimeFields,
-  })
+  checkIsoDateTimeInBounds(movedIsoDateFields, movedTimeFields)
+  return {
+    isoDate: movedIsoDateFields,
+    time: movedTimeFields,
+  }
 }
 
 /*
@@ -319,39 +313,43 @@ export function moveDate(
 Callers should ensure in-bounds
 */
 export function moveToDayOfMonthUnsafe<F extends CalendarDateFields>(
-  getDay: (isoFields: CalendarDateFields) => number,
-  isoFields: F,
+  getDay: (isoDate: CalendarDateFields) => number,
+  isoDate: F,
   dayOfMonth = 1,
-): F {
-  return moveByDays(isoFields, dayOfMonth - getDay(isoFields))
+): CalendarDateFields {
+  return moveByDays(isoDate, dayOfMonth - getDay(isoDate))
 }
 
 function moveTime(
-  isoFields: TimeFields,
+  timeFields: TimeFields,
   durationFields: DurationFields,
 ): [TimeFields, number] {
   const [durDays, durTimeNano] = durationFieldsToBigNano(
     durationFields,
     Unit.Hour,
   )
-  const [newIsoFields, overflowDays] = nanoToIsoTimeAndDay(
-    isoTimeFieldsToNano(isoFields) + durTimeNano,
+  const [newTimeFields, overflowDays] = nanoToTimeAndDay(
+    timeFieldsToNano(timeFields) + durTimeNano,
   )
 
-  return [newIsoFields, durDays + overflowDays]
+  return [newTimeFields, durDays + overflowDays]
 }
 
-export function moveByDays<F extends CalendarDateFields>(
-  isoFields: F,
+export function moveByDays(
+  isoDate: CalendarDateFields,
   days: number,
-): F & Partial<TimeFields> {
+): CalendarDateFields {
   if (days) {
-    return {
-      ...isoFields,
-      ...epochMilliToIso(isoToEpochMilli(isoFields)! + days * milliInDay),
-    }
+    const { isoDate: movedIsoDate } = epochMilliToIso(
+      isoDateToEpochMilli(isoDate)! + days * milliInDay,
+    )
+    return movedIsoDate
   }
-  return isoFields
+  return {
+    year: isoDate.year,
+    month: isoDate.month,
+    day: isoDate.day,
+  }
 }
 
 export function dateAdd(
@@ -394,7 +392,7 @@ export function dateAddWithOverflow(
       intlCalendar,
     )
   } else if (weeks || days) {
-    epochMilli = isoToEpochMilli(isoDateFields)
+    epochMilli = isoDateToEpochMilli(isoDateFields)
   } else {
     return isoDateFields
   }
@@ -405,7 +403,8 @@ export function dateAddWithOverflow(
 
   epochMilli += (weeks * 7 + days) * milliInDay
 
-  return checkIsoDateInBounds(epochMilliToIso(epochMilli))
+  const { isoDate } = epochMilliToIso(epochMilli)
+  return checkIsoDateInBounds(isoDate)
 }
 
 export function addCalendarMonths(
@@ -427,12 +426,12 @@ export function addCalendarMonths(
 
 export function addCalendarDateMonths(
   calendarId: string,
-  isoFields: Parameters<typeof addDateMonths>[1],
+  isoDate: Parameters<typeof addDateMonths>[1],
   years: Parameters<typeof addDateMonths>[2],
   months: Parameters<typeof addDateMonths>[3],
   overflow: Parameters<typeof addDateMonths>[4],
 ): ReturnType<typeof addDateMonths> {
-  return addDateMonths(calendarId, isoFields, years, months, overflow)
+  return addDateMonths(calendarId, isoDate, years, months, overflow)
 }
 
 export function addDateMonths(

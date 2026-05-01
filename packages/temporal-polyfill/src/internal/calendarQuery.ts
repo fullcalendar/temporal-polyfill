@@ -40,38 +40,38 @@ import {
 import {
   diffEpochMilliDays,
   isoArgsToEpochMilli,
-  isoToEpochMilli,
+  isoDateToEpochMilli,
 } from './timeMath'
 
 export function queryCalendarDateFields(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): ReturnType<typeof computeIsoDateFields> {
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
     return {
-      year: isoFields.year + isoYearOffset,
-      month: isoFields.month,
-      day: isoFields.day,
+      year: isoDate.year + isoYearOffset,
+      month: isoDate.month,
+      day: isoDate.day,
     }
   }
 
   return isIsoBasedCalendarId(calendarId)
-    ? computeIsoDateFields(isoFields)
-    : computeIntlDateFields(queryIntlCalendar(calendarId), isoFields)
+    ? computeIsoDateFields(isoDate)
+    : computeIntlDateFields(queryIntlCalendar(calendarId), isoDate)
 }
 
 export function queryCalendarDay(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): number {
   if (queryIsoYearOffset(calendarId) !== undefined) {
-    return isoFields.day
+    return isoDate.day
   }
 
   return isIsoBasedCalendarId(calendarId)
-    ? isoFields.day
-    : computeIntlDay(queryIntlCalendar(calendarId), isoFields)
+    ? isoDate.day
+    : computeIntlDay(queryIntlCalendar(calendarId), isoDate)
 }
 
 export function queryCalendarEpochMilli(
@@ -92,11 +92,11 @@ export function queryCalendarEpochMilli(
 
 export function queryCalendarEraFields(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoEraFields>[1],
+  isoDate: Parameters<typeof computeIsoEraFields>[1],
 ): ReturnType<typeof computeIsoEraFields> {
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
-    const year = isoFields.year + isoYearOffset
+    const year = isoDate.year + isoYearOffset
 
     if (calendarId === 'buddhist') {
       return { era: 'be', eraYear: year }
@@ -110,8 +110,8 @@ export function queryCalendarEraFields(
   }
 
   return isIsoBasedCalendarId(calendarId)
-    ? computeIsoEraFields(queryIsoCalendarId(calendarId), isoFields)
-    : computeIntlEraFields(queryIntlCalendar(calendarId), isoFields)
+    ? computeIsoEraFields(queryIsoCalendarId(calendarId), isoDate)
+    : computeIntlEraFields(queryIntlCalendar(calendarId), isoDate)
 }
 
 export function queryCalendarMonthCodeParts(
@@ -131,9 +131,9 @@ export function queryCalendarMonthCodeParts(
 
 export function queryCalendarMonthCode(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): string {
-  const { year, month } = queryCalendarDateFields(calendarId, isoFields)
+  const { year, month } = queryCalendarDateFields(calendarId, isoDate)
   const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     calendarId,
     year,
@@ -190,9 +190,9 @@ export function queryCalendarIsoFieldsFromParts(
 
 export function queryCalendarInLeapYear(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): boolean {
-  const { year } = queryCalendarDateFields(calendarId, isoFields)
+  const { year } = queryCalendarDateFields(calendarId, isoDate)
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
     return computeIsoInLeapYear(year - isoYearOffset)
@@ -205,9 +205,9 @@ export function queryCalendarInLeapYear(
 
 export function queryCalendarMonthsInYear(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): number {
-  const { year } = queryCalendarDateFields(calendarId, isoFields)
+  const { year } = queryCalendarDateFields(calendarId, isoDate)
   return queryCalendarMonthsInYearPart(calendarId, year)
 }
 
@@ -227,9 +227,9 @@ export function queryCalendarMonthsInYearPart(
 
 export function queryCalendarDaysInMonth(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): number {
-  const { year, month } = queryCalendarDateFields(calendarId, isoFields)
+  const { year, month } = queryCalendarDateFields(calendarId, isoDate)
   return queryCalendarDaysInMonthPart(calendarId, year, month)
 }
 
@@ -250,9 +250,9 @@ export function queryCalendarDaysInMonthPart(
 
 export function queryCalendarDaysInYear(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): number {
-  const { year } = queryCalendarDateFields(calendarId, isoFields)
+  const { year } = queryCalendarDateFields(calendarId, isoDate)
   const isoYearOffset = queryIsoYearOffset(calendarId)
   if (isoYearOffset !== undefined) {
     return computeIsoDaysInYear(year - isoYearOffset)
@@ -278,9 +278,9 @@ export function queryCalendarLeapMonth(
 
 export function queryCalendarDayOfYear(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoDateFields>[0],
+  isoDate: Parameters<typeof computeIsoDateFields>[0],
 ): number {
-  const { year } = queryCalendarDateFields(calendarId, isoFields)
+  const { year } = queryCalendarDateFields(calendarId, isoDate)
   const isoYearOffset = queryIsoYearOffset(calendarId)
   const milli0 =
     isoYearOffset !== undefined
@@ -288,36 +288,36 @@ export function queryCalendarDayOfYear(
       : isIsoBasedCalendarId(calendarId)
         ? isoArgsToEpochMilli(year)
         : computeIntlEpochMilli(queryIntlCalendar(calendarId), year)
-  const milli1 = isoToEpochMilli(isoFields)!
+  const milli1 = isoDateToEpochMilli(isoDate)!
   return diffEpochMilliDays(milli0!, milli1) + 1
 }
 
 export function queryCalendarWeekFields(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoWeekFields>[1],
+  isoDate: Parameters<typeof computeIsoWeekFields>[1],
 ): CalendarWeekFields {
   if (calendarId !== isoCalendarId) {
     return {}
   }
 
   return computeIsoWeekFields(
-    (innerIsoFields) => queryCalendarDayOfYear(calendarId, innerIsoFields),
-    isoFields,
+    (innerIsoDate) => queryCalendarDayOfYear(calendarId, innerIsoDate),
+    isoDate,
   )
 }
 
 export function queryCalendarWeekOfYear(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoWeekFields>[1],
+  isoDate: Parameters<typeof computeIsoWeekFields>[1],
 ): number | undefined {
-  return queryCalendarWeekFields(calendarId, isoFields).weekOfYear
+  return queryCalendarWeekFields(calendarId, isoDate).weekOfYear
 }
 
 export function queryCalendarYearOfWeek(
   calendarId: string,
-  isoFields: Parameters<typeof computeIsoWeekFields>[1],
+  isoDate: Parameters<typeof computeIsoWeekFields>[1],
 ): number | undefined {
-  return queryCalendarWeekFields(calendarId, isoFields).yearOfWeek
+  return queryCalendarWeekFields(calendarId, isoDate).yearOfWeek
 }
 
 export function isIsoBasedCalendarId(calendarId: string): boolean {

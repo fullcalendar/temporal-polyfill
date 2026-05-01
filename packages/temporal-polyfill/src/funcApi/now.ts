@@ -51,44 +51,45 @@ export function plainDateTime(
   calendar: string,
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateTimeFns.Record {
-  return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
-    refineCalendarId(calendar),
+  const { isoDate, time } = getCurrentIsoDateTime(
+    queryTimeZone(refineTimeZoneId(timeZone)),
   )
+  return createPlainDateTimeSlots(isoDate, time, refineCalendarId(calendar))
 }
 
 export function plainDateTimeISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateTimeFns.Record {
-  return createPlainDateTimeSlots(
-    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
-    isoCalendarId,
+  const { isoDate, time } = getCurrentIsoDateTime(
+    queryTimeZone(refineTimeZoneId(timeZone)),
   )
+  return createPlainDateTimeSlots(isoDate, time, isoCalendarId)
 }
 
 export function plainDate(
   calendar: string,
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateFns.Record {
-  return createPlainDateSlots(
-    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
-    refineCalendarId(calendar),
+  const { isoDate } = getCurrentIsoDateTime(
+    queryTimeZone(refineTimeZoneId(timeZone)),
   )
+  return createPlainDateSlots(isoDate, refineCalendarId(calendar))
 }
 
 export function plainDateISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainDateFns.Record {
-  return createPlainDateSlots(
-    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
-    isoCalendarId,
+  const { isoDate } = getCurrentIsoDateTime(
+    queryTimeZone(refineTimeZoneId(timeZone)),
   )
+  return createPlainDateSlots(isoDate, isoCalendarId)
 }
 
 export function plainTimeISO(
   timeZone: string = getCurrentTimeZoneId(),
 ): PlainTimeFns.Record {
-  return createPlainTimeSlots(
-    getCurrentIsoDateTime(queryTimeZone(refineTimeZoneId(timeZone))),
+  const { time } = getCurrentIsoDateTime(
+    queryTimeZone(refineTimeZoneId(timeZone)),
   )
+  return createPlainTimeSlots(time)
 }

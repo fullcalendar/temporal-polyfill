@@ -12,16 +12,12 @@ import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
 import {
   checkIsoDateFields,
   checkIsoDateTimeFields,
-  constrainIsoTimeFields,
+  checkTimeFields,
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
@@ -34,7 +30,7 @@ import {
   validateOffsetSeparators,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
-import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
+import { EpochDisambig, OffsetDisambig } from './optionsModel'
 import { ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
@@ -62,7 +58,7 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
-  isoToEpochNanoWithOffset,
+  isoDateAndTimeToEpochNanoWithOffset,
 } from './timeMath'
 import { organizeTimeParts, timeRegExpStr } from './timeParse'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -110,8 +106,10 @@ export function parseInstant(s: string): InstantSlots {
     parseOffsetNanoMaybe(organized.timeZone, true) // onlyHourMinute=true
   }
 
-  const epochNanoseconds = isoToEpochNanoWithOffset(
-    checkIsoDateTimeFields(organized),
+  checkIsoDateTimeFields(organized.isoDate, organized.time)
+  const epochNanoseconds = isoDateAndTimeToEpochNanoWithOffset(
+    organized.isoDate,
+    organized.time,
     offsetNano,
   )
 
@@ -167,7 +165,8 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  return createPlainDateTimeSlots(finalizeDateTime(organized))
+  const slots = finalizeDateTime(organized)
+  return createPlainDateTimeSlots(slots.isoDate, slots.time, slots.calendar)
 }
 
 export function parsePlainDate(
@@ -185,22 +184,34 @@ export function parsePlainDate(
   if (isPlainYearMonth) {
     // HACK to not limit the D in the YMD string because it'll get thrown away
     if (organized.calendar === isoCalendarId) {
-      if (organized.year === -271821 && organized.month === 4) {
-        organized = { ...organized, day: 20, ...timeFieldDefaults }
+      if (organized.isoDate.year === -271821 && organized.isoDate.month === 4) {
+        organized = {
+          ...organized,
+          isoDate: { ...organized.isoDate, day: 20 },
+          time: timeFieldDefaults,
+        }
       } else {
-        organized = { ...organized, day: 1, ...timeFieldDefaults }
+        organized = {
+          ...organized,
+          isoDate: { ...organized.isoDate, day: 1 },
+          time: timeFieldDefaults,
+        }
       }
     }
   } else if (isPlainMonthDay) {
     // HACK
     if (organized.calendar === isoCalendarId) {
-      organized = { ...organized, year: isoEpochFirstLeapYear }
+      organized = {
+        ...organized,
+        isoDate: { ...organized.isoDate, year: isoEpochFirstLeapYear },
+      }
     }
   }
 
-  return createPlainDateSlots(
-    organized.hasTime ? finalizeDateTime(organized) : finalizeDate(organized),
-  )
+  const slots = organized.hasTime
+    ? finalizeDateTime(organized)
+    : finalizeDate(organized)
+  return createPlainDateSlots(slots.isoDate, slots.calendar)
 }
 
 export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
@@ -209,17 +220,18 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
   if (organized) {
     requireIsoCalendar(organized)
     return createPlainYearMonthSlots(
-      checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
+      checkIsoYearMonthInBounds(checkIsoDateFields(organized.isoDate)),
+      resolveCalendarId(organized.calendar),
     )
   }
 
   const isoSlots = parsePlainDate(s, true)
   const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoFields) => queryCalendarDay(isoSlots.calendar, isoFields),
-    isoSlots,
+    (isoDate) => queryCalendarDay(isoSlots.calendar, isoDate),
+    isoSlots.isoDate,
   )
 
-  return createPlainYearMonthSlots(moveIsoSlots)
+  return createPlainYearMonthSlots(moveIsoSlots, isoSlots.calendar)
 }
 
 function requireIsoCalendar(organized: { calendar: string }): void {
@@ -235,7 +247,8 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     requireIsoCalendar(organized)
 
     return createPlainMonthDaySlots(
-      checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
+      checkIsoDateFields(organized.isoDate), // `organized` has isoEpochFirstLeapYear
+      resolveCalendarId(organized.calendar),
     )
   }
 
@@ -247,7 +260,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     year: origYear,
     month: origMonth,
     day,
-  } = queryCalendarDateFields(calendar, dateSlots)
+  } = queryCalendarDateFields(calendar, dateSlots.isoDate)
   const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
     calendar,
     origYear,
@@ -259,11 +272,11 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     isLeapMonth,
     day,
   )! // !HACK
-  const isoFields = checkIsoDateInBounds(
+  const isoDate = checkIsoDateInBounds(
     queryCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
-  return createPlainMonthDaySlots(isoFields, calendar)
+  return createPlainMonthDaySlots(isoDate, calendar)
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
@@ -289,15 +302,21 @@ export function parsePlainTime(s: string): PlainTimeSlots {
   }
 
   let altParsed: DateOrganized | undefined
-  if ((altParsed = parseYearMonthOnly(s)) && isIsoDateFieldsValid(altParsed)) {
+  if (
+    (altParsed = parseYearMonthOnly(s)) &&
+    isIsoDateFieldsValid(altParsed.isoDate)
+  ) {
     throw new RangeError(errorMessages.failedParse(s))
   }
-  if ((altParsed = parseMonthDayOnly(s)) && isIsoDateFieldsValid(altParsed)) {
+  if (
+    (altParsed = parseMonthDayOnly(s)) &&
+    isIsoDateFieldsValid(altParsed.isoDate)
+  ) {
     throw new RangeError(errorMessages.failedParse(s))
   }
 
   return createPlainTimeSlots(
-    constrainIsoTimeFields(organized, Overflow.Reject),
+    checkTimeFields('time' in organized ? organized.time : organized),
   )
 }
 
@@ -348,14 +367,15 @@ function finalizeZonedDateTime(
   const timeZoneId = resolveTimeZoneId(organized.timeZone)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
-  checkIsoDateTimeFields(organized)
+  checkIsoDateTimeFields(organized.isoDate, organized.time)
 
   let epochNano: BigNano
 
   if (organized.hasTime) {
     epochNano = getMatchingInstantFor(
       timeZoneImpl,
-      organized,
+      organized.isoDate,
+      organized.time,
       offsetNano,
       offsetDisambig,
       epochDisambig,
@@ -367,7 +387,8 @@ function finalizeZonedDateTime(
   } else {
     epochNano = getStartOfDayInstantFor(
       timeZoneImpl as any, // !!!
-      organized,
+      organized.isoDate,
+      organized.time,
     )
   }
 
@@ -384,21 +405,21 @@ function finalizeZonedDateTime(
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
 ): AbstractDateTimeSlots {
-  return resolveSlotsCalendar(
-    checkIsoDateTimeInBounds(checkIsoDateTimeFields(organized)),
-  )
+  checkIsoDateTimeFields(organized.isoDate, organized.time)
+  checkIsoDateTimeInBounds(organized.isoDate, organized.time)
+  return {
+    calendar: resolveCalendarId(organized.calendar),
+    isoDate: organized.isoDate,
+    time: organized.time,
+  }
 }
 
 function finalizeDate(organized: DateOrganized): AbstractDateSlots {
-  return resolveSlotsCalendar(
-    checkIsoDateInBounds(checkIsoDateFields(organized)),
-  )
-}
-
-function resolveSlotsCalendar<T extends { calendar: string }>(organized: T): T {
+  checkIsoDateFields(organized.isoDate)
+  checkIsoDateInBounds(organized.isoDate)
   return {
-    ...organized,
     calendar: resolveCalendarId(organized.calendar),
+    isoDate: organized.isoDate,
   }
 }
 
@@ -611,34 +632,34 @@ function parseDurationFields(s: string): DurationFields | undefined {
 // Parts Organization
 // -----------------------------------------------------------------------------
 
-type DateTimeLikeOrganized = CalendarDateTimeFields & {
+type DateTimeLikeOrganized = DateOrganized & {
+  time: TimeFields
   hasTime: boolean
   hasZ: boolean
   offset: string | undefined
-  calendar: string
   timeZone: string | undefined
 }
 
-type ZonedDateTimeOrganized = CalendarDateTimeFields & {
-  hasTime: boolean
-  hasZ: boolean
-  offset: string | undefined
-  calendar: string
+type ZonedDateTimeOrganized = DateTimeLikeOrganized & {
   timeZone: string
 }
 
 type WithCalendarStr = { calendar: string }
-type DateOrganized = CalendarDateFields & WithCalendarStr
+type DateOrganized = {
+  isoDate: CalendarDateFields
+} & WithCalendarStr
 
 function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
   const zOrOffset = parts[10]
   const hasZ = (zOrOffset || '').toUpperCase() === 'Z'
 
   return {
-    year: organizeIsoYearParts(parts),
-    month: parseInt(parts[4]),
-    day: parseInt(parts[5]),
-    ...organizeTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
+    isoDate: {
+      year: organizeIsoYearParts(parts),
+      month: parseInt(parts[4]),
+      day: parseInt(parts[5]),
+    },
+    time: organizeTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
     ...organizeAnnotationParts(parts[16]),
     hasTime: Boolean(parts[6]),
     hasZ,
@@ -651,20 +672,24 @@ function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
 /*
 Result assumed to be ISO
 */
-function organizeYearMonthParts(parts: string[]): AbstractDateSlots {
+function organizeYearMonthParts(parts: string[]): DateOrganized {
   return {
-    year: organizeIsoYearParts(parts),
-    month: parseInt(parts[4]),
-    day: 1,
+    isoDate: {
+      year: organizeIsoYearParts(parts),
+      month: parseInt(parts[4]),
+      day: 1,
+    },
     ...organizeAnnotationParts(parts[5]),
   }
 }
 
-function organizeMonthDayParts(parts: string[]): AbstractDateSlots {
+function organizeMonthDayParts(parts: string[]): DateOrganized {
   return {
-    year: isoEpochFirstLeapYear,
-    month: parseInt(parts[1]),
-    day: parseInt(parts[2]),
+    isoDate: {
+      year: isoEpochFirstLeapYear,
+      month: parseInt(parts[1]),
+      day: parseInt(parts[2]),
+    },
     ...organizeAnnotationParts(parts[3]),
   }
 }

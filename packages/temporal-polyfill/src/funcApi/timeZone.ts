@@ -11,7 +11,7 @@ export function getPossibleInstantsFor(
 ): InstantFns.Record[] {
   const timeZoneImpl = queryTimeZone(refineTimeZoneId(timeZoneId))
   return timeZoneImpl
-    .getPossibleInstantsFor(plainDateTime)
+    .getPossibleInstantsFor(plainDateTime.isoDate, plainDateTime.time)
     .map(createInstantSlots)
 }
 

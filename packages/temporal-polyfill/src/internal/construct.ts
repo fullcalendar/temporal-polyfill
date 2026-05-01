@@ -3,15 +3,10 @@ import { refineCalendarId } from './calendarId'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import { calendarDateTimeFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
+import { timeFieldNamesAsc } from './fieldNames'
 import { isoCalendarId } from './intlCalendarConfig'
 import { isoEpochFirstLeapYear } from './isoMath'
-import {
-  checkIsoDateFields,
-  checkIsoDateTimeFields,
-  constrainIsoTimeFields,
-} from './isoMath'
-import { Overflow } from './optionsModel'
+import { checkIsoDateFields, checkTimeFields } from './isoMath'
 import {
   DurationSlots,
   InstantSlots,
@@ -61,31 +56,33 @@ export function constructPlainDateTimeSlots(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  isoHour = 0,
-  isoMinute = 0,
-  isoSecond = 0,
-  isoMillisecond = 0,
-  isoMicrosecond = 0,
-  isoNanosecond = 0,
+  hour = 0,
+  minute = 0,
+  second = 0,
+  millisecond = 0,
+  microsecond = 0,
+  nanosecond = 0,
   calendarId = isoCalendarId,
 ): PlainDateTimeSlots {
-  const isoFields = zipProps(calendarDateTimeFieldNamesAsc, [
-    isoYear,
-    isoMonth,
-    isoDay,
-    isoHour,
-    isoMinute,
-    isoSecond,
-    isoMillisecond,
-    isoMicrosecond,
-    isoNanosecond,
-  ])
-  return createPlainDateTimeSlots(
-    checkIsoDateTimeInBounds(
-      checkIsoDateTimeFields(mapProps(toInteger, isoFields)),
-    ),
-    refineCalendarId(calendarId),
+  const isoDate = checkIsoDateFields(
+    mapProps(toInteger, {
+      year: isoYear,
+      month: isoMonth,
+      day: isoDay,
+    }),
   )
+  const time = checkTimeFields(
+    mapProps(toInteger, {
+      hour: hour,
+      minute: minute,
+      second: second,
+      millisecond: millisecond,
+      microsecond: microsecond,
+      nanosecond: nanosecond,
+    }),
+  )
+  checkIsoDateTimeInBounds(isoDate, time)
+  return createPlainDateTimeSlots(isoDate, time, refineCalendarId(calendarId))
 }
 
 export function constructPlainDateSlots(
@@ -162,7 +159,7 @@ export function constructPlainTimeSlots(
   microsecond = 0,
   nanosecond = 0,
 ): PlainTimeSlots {
-  const isoFields = zipProps(timeFieldNamesAsc, [
+  const timeFields = zipProps(timeFieldNamesAsc, [
     hour,
     minute,
     second,
@@ -170,9 +167,7 @@ export function constructPlainTimeSlots(
     microsecond,
     nanosecond,
   ])
-  return createPlainTimeSlots(
-    constrainIsoTimeFields(mapProps(toInteger, isoFields), Overflow.Reject),
-  )
+  return createPlainTimeSlots(checkTimeFields(mapProps(toInteger, timeFields)))
 }
 
 export function constructDurationSlots(

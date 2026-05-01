@@ -5,11 +5,7 @@ import {
   durationFieldsToBigNano,
   negateDurationFields,
 } from './durationMath'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateFields, TimeFields } from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
 import {
   refineDateDisplayOptions,
@@ -110,7 +106,8 @@ export function formatPlainDateTimeIso(
   const displayOptions = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
     plainDateTimeSlots0.calendar,
-    plainDateTimeSlots0,
+    plainDateTimeSlots0.isoDate,
+    plainDateTimeSlots0.time,
     ...displayOptions,
   )
 }
@@ -121,7 +118,7 @@ export function formatPlainDateIso(
 ): string {
   return formatDateIso(
     plainDateSlots.calendar,
-    plainDateSlots,
+    plainDateSlots.isoDate,
     refineDateDisplayOptions(options),
   )
 }
@@ -133,7 +130,7 @@ export function formatPlainYearMonthIso(
   return formatDateLikeIso(
     plainYearMonthSlots.calendar,
     formatIsoYearMonthFields,
-    plainYearMonthSlots,
+    plainYearMonthSlots.isoDate,
     refineDateDisplayOptions(options),
   )
 }
@@ -145,7 +142,7 @@ export function formatPlainMonthDayIso(
   return formatDateLikeIso(
     plainMonthDaySlots.calendar,
     formatIsoMonthDayFields,
-    plainMonthDaySlots,
+    plainMonthDaySlots.isoDate,
     refineDateDisplayOptions(options),
   )
 }
@@ -155,7 +152,7 @@ export function formatPlainTimeIso(
   options?: TimeDisplayOptions,
 ): string {
   const displayOptions = refineTimeDisplayOptions(options)
-  return formatTimeIso(slots, ...displayOptions)
+  return formatTimeIso(slots.time, ...displayOptions)
 }
 
 export function formatDurationIso(
@@ -203,10 +200,10 @@ function formatEpochNanoIso(
   )
 
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
-  const isoFields = epochNanoToIso(epochNano, offsetNano)
+  const { isoDate, time } = epochNanoToIso(epochNano, offsetNano)
 
   return (
-    formatIsoDateTimeFields(isoFields, subsecDigits) +
+    formatIsoDateTimeFields(isoDate, time, subsecDigits) +
     (providedTimeZone ? formatOffsetNano(roundToMinute(offsetNano)) : 'Z')
   )
 }
@@ -225,10 +222,10 @@ function formatZonedEpochNanoIso(
   epochNano = roundBigNanoByInc(epochNano, nanoInc, roundingMode, true)
   const timeZoneImpl = queryTimeZone(timeZoneId)
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
-  const isoFields = epochNanoToIso(epochNano, offsetNano)
+  const { isoDate, time } = epochNanoToIso(epochNano, offsetNano)
 
   return (
-    formatIsoDateTimeFields(isoFields, subsecDigits) +
+    formatIsoDateTimeFields(isoDate, time, subsecDigits) +
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
     formatTimeZone(timeZoneId, timeZoneDisplay) +
     formatCalendar(calendarId, calendarDisplay)
@@ -237,34 +234,43 @@ function formatZonedEpochNanoIso(
 
 function formatDateTimeIso(
   calendarId: string,
-  isoFields: CalendarDateTimeFields,
+  isoDate: CalendarDateFields,
+  time: TimeFields,
   calendarDisplay: CalendarDisplay,
   roundingMode: RoundingMode,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const roundedIsoFields = roundDateTimeToNano(isoFields, nanoInc, roundingMode)
+  const roundedIsoFields = roundDateTimeToNano(
+    isoDate,
+    time,
+    nanoInc,
+    roundingMode,
+  )
 
   return (
-    formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-    formatCalendar(calendarId, calendarDisplay)
+    formatIsoDateTimeFields(
+      roundedIsoFields.isoDate,
+      roundedIsoFields.time,
+      subsecDigits,
+    ) + formatCalendar(calendarId, calendarDisplay)
   )
 }
 
 function formatDateIso(
   calendarId: string,
-  isoFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
 ): string {
   return (
-    formatIsoDateFields(isoFields) + formatCalendar(calendarId, calendarDisplay)
+    formatIsoDateFields(isoDate) + formatCalendar(calendarId, calendarDisplay)
   )
 }
 
 function formatDateLikeIso(
   calendarId: string,
-  formatSimple: (isoFields: CalendarDateFields) => string,
-  isoFields: CalendarDateFields,
+  formatSimple: (isoDate: CalendarDateFields) => string,
+  isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
 ) {
   const showCalendar =
@@ -273,19 +279,19 @@ function formatDateLikeIso(
 
   if (calendarDisplay === CalendarDisplay.Never) {
     if (calendarId === isoCalendarId) {
-      return formatSimple(isoFields)
+      return formatSimple(isoDate)
     }
-    return formatIsoDateFields(isoFields)
+    return formatIsoDateFields(isoDate)
   }
 
   if (showCalendar) {
     return (
-      formatIsoDateFields(isoFields) +
+      formatIsoDateFields(isoDate) +
       formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
     )
   }
 
-  return formatSimple(isoFields)
+  return formatSimple(isoDate)
 }
 
 function formatTimeIso(
@@ -294,7 +300,7 @@ function formatTimeIso(
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  return formatIsoTimeFields(
+  return formatTimeFields(
     roundTimeToNano(fields, nanoInc, roundingMode)[0],
     subsecDigits,
   )
@@ -366,13 +372,12 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
 // -----------------------------------------------------------------------------
 
 function formatIsoDateTimeFields(
-  isoDateTimeFields: CalendarDateTimeFields,
+  isoDate: CalendarDateFields,
+  time: TimeFields,
   subsecDigits: SubsecDigits | -1 | undefined,
 ) {
   return (
-    formatIsoDateFields(isoDateTimeFields) +
-    'T' +
-    formatIsoTimeFields(isoDateTimeFields, subsecDigits)
+    formatIsoDateFields(isoDate) + 'T' + formatTimeFields(time, subsecDigits)
   )
 }
 
@@ -399,23 +404,20 @@ function formatIsoMonthDayFields(isoDateFields: CalendarDateFields): string {
   return padNumber2(isoDateFields.month) + '-' + padNumber2(isoDateFields.day)
 }
 
-function formatIsoTimeFields(
-  isoTimeFields: TimeFields,
+function formatTimeFields(
+  timeFields: TimeFields,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  const parts = [
-    padNumber2(isoTimeFields.hour),
-    padNumber2(isoTimeFields.minute),
-  ]
+  const parts = [padNumber2(timeFields.hour), padNumber2(timeFields.minute)]
 
   if (subsecDigits !== -1) {
     // show seconds?
     parts.push(
-      padNumber2(isoTimeFields.second) +
+      padNumber2(timeFields.second) +
         formatSubsec(
-          isoTimeFields.millisecond,
-          isoTimeFields.microsecond,
-          isoTimeFields.nanosecond,
+          timeFields.millisecond,
+          timeFields.microsecond,
+          timeFields.nanosecond,
           subsecDigits,
         ),
     )

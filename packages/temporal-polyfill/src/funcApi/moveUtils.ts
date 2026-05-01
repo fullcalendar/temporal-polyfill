@@ -8,13 +8,12 @@ import {
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import {
-  calendarDateFieldNamesAlpha,
   dayFieldName,
   dayOfMonthName,
   dayOfWeekFieldName,
   weekOfYearFieldName,
 } from '../internal/fieldNames'
-import { CalendarDateFields } from '../internal/fieldTypes'
+import { IsoDateCarrier } from '../internal/isoFields'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import {
   addCalendarDateMonths,
@@ -25,7 +24,7 @@ import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
 import { AbstractDateSlots } from '../internal/slots'
 import { epochMilliToIso } from '../internal/timeMath'
-import { clampEntity, pluckProps } from '../internal/utils'
+import { clampEntity } from '../internal/utils'
 
 export function reversedMove<S>(
   f: (slots: S, units: number, options?: OverflowOptions) => S,
@@ -48,17 +47,16 @@ export function moveByYears<S extends AbstractDateSlots>(
   if (!years) {
     return slots
   }
-  const isoFields = epochMilliToIso(
+  const { isoDate } = epochMilliToIso(
     addCalendarDateMonths(
       slots.calendar,
-      slots,
+      slots.isoDate,
       toStrictInteger(years),
       0,
       overflow,
     ),
   )
-  const isoDateFields = pluckProps(calendarDateFieldNamesAlpha, isoFields)
-  return { ...slots, ...isoDateFields }
+  return { ...slots, isoDate }
 }
 
 export function moveByMonths<S extends AbstractDateSlots>(
@@ -70,31 +68,36 @@ export function moveByMonths<S extends AbstractDateSlots>(
   if (!months) {
     return slots
   }
-  const isoFields = epochMilliToIso(
+  const { isoDate } = epochMilliToIso(
     addCalendarDateMonths(
       slots.calendar,
-      slots,
+      slots.isoDate,
       0,
       toStrictInteger(months),
       overflow,
     ),
   )
-  const isoDateFields = pluckProps(calendarDateFieldNamesAlpha, isoFields)
-  return { ...slots, ...isoDateFields }
+  return { ...slots, isoDate }
 }
 
-export function moveByIsoWeeks<F extends CalendarDateFields>(
+export function moveByIsoWeeks<F extends IsoDateCarrier>(
   slots: F,
   weeks: number,
 ): F {
-  return moveByDays(slots, toStrictInteger(weeks) * 7)
+  return {
+    ...slots,
+    isoDate: moveByDays(slots.isoDate, toStrictInteger(weeks) * 7),
+  }
 }
 
-export function moveByDaysStrict<F extends CalendarDateFields>(
+export function moveByDaysStrict<F extends IsoDateCarrier>(
   slots: F,
   weeks: number,
 ): F {
-  return moveByDays(slots, toStrictInteger(weeks))
+  return {
+    ...slots,
+    isoDate: moveByDays(slots.isoDate, toStrictInteger(weeks)),
+  }
 }
 
 // Day-of-Unit / Week
@@ -107,7 +110,8 @@ export function moveToDayOfYear<S extends AbstractDateSlots>(
 ): S {
   const overflow = refineOverflowOptions(options)
   const { calendar } = slots
-  const daysInYear = queryCalendarDaysInYear(calendar, slots)
+  const { isoDate } = slots
+  const daysInYear = queryCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
     dayOfMonthName,
     toInteger(dayOfYear, dayOfMonthName),
@@ -116,8 +120,11 @@ export function moveToDayOfYear<S extends AbstractDateSlots>(
     overflow,
   )
 
-  const currentDayOfYear = queryCalendarDayOfYear(calendar, slots)
-  return moveByDays(slots, normDayOfYear - currentDayOfYear)
+  const currentDayOfYear = queryCalendarDayOfYear(calendar, isoDate)
+  return {
+    ...slots,
+    isoDate: moveByDays(isoDate, normDayOfYear - currentDayOfYear),
+  }
 }
 
 export function moveToDayOfMonth<S extends AbstractDateSlots>(
@@ -127,7 +134,8 @@ export function moveToDayOfMonth<S extends AbstractDateSlots>(
 ): S {
   const overflow = refineOverflowOptions(options)
   const { calendar } = slots
-  const daysInMonth = queryCalendarDaysInMonth(calendar, slots)
+  const { isoDate } = slots
+  const daysInMonth = queryCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
     dayFieldName,
     toInteger(day, dayFieldName),
@@ -136,14 +144,17 @@ export function moveToDayOfMonth<S extends AbstractDateSlots>(
     overflow,
   )
 
-  return moveToDayOfMonthUnsafe(
-    (isoFields) => queryCalendarDay(calendar, isoFields),
-    slots,
-    normDayOfMonth,
-  )
+  return {
+    ...slots,
+    isoDate: moveToDayOfMonthUnsafe(
+      (isoDate) => queryCalendarDay(calendar, isoDate),
+      isoDate,
+      normDayOfMonth,
+    ),
+  }
 }
 
-export function moveToDayOfWeek<S extends CalendarDateFields>(
+export function moveToDayOfWeek<S extends IsoDateCarrier>(
   slots: S,
   dayOfWeek: number,
   options?: OverflowOptions,
@@ -156,7 +167,11 @@ export function moveToDayOfWeek<S extends CalendarDateFields>(
     7,
     overflow,
   )
-  return moveByDays(slots, normDayOfWeek - computeIsoDayOfWeek(slots))
+  const { isoDate } = slots
+  return {
+    ...slots,
+    isoDate: moveByDays(isoDate, normDayOfWeek - computeIsoDayOfWeek(isoDate)),
+  }
 }
 
 export function slotsWithWeekOfYear<S extends AbstractDateSlots>(
@@ -165,8 +180,9 @@ export function slotsWithWeekOfYear<S extends AbstractDateSlots>(
   options?: OverflowOptions,
 ): S {
   const overflow = refineOverflowOptions(options)
+  const { isoDate } = slots
   const { weekOfYear: currentWeekOfYear, weeksInYear } =
-    queryCalendarWeekFields(slots.calendar, slots)
+    queryCalendarWeekFields(slots.calendar, isoDate)
 
   if (currentWeekOfYear === undefined) {
     throw new RangeError(errorMessages.unsupportedWeekNumbers)

@@ -1,12 +1,12 @@
 import { BigNano } from './bigNano'
-import { CalendarDateTimeFields } from './fieldTypes'
 import { RawDateTimeFormat } from './intlFormatUtils'
+import { IsoDateTimeCarrier } from './isoFields'
 import { epochMilliToNano, epochNanoToIso } from './timeMath'
 import { TimeZoneImpl } from './timeZoneImpl'
 
 export function getCurrentIsoDateTime(
   timeZoneImpl: TimeZoneImpl,
-): CalendarDateTimeFields {
+): IsoDateTimeCarrier {
   const epochNano = getCurrentEpochNano()
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
   return epochNanoToIso(epochNano, offsetNano)

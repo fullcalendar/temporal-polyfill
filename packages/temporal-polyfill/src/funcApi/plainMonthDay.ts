@@ -14,7 +14,7 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../internal/optionsModel'
-import { PlainMonthDayBranding } from '../internal/slots'
+import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { memoize } from '../internal/utils'
 import {
   computeMonthDayFields,
@@ -24,23 +24,7 @@ import {
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof PlainMonthDayBranding
-
-  /**
-   * @deprecated Use the calendarId() function instead.
-   */
-  readonly calendar: string
-
-  readonly year: number
-
-  readonly month: number
-
-  readonly day: number
-}
+export type Record = PlainMonthDaySlots
 
 export type Fields = MonthDayFields
 export type FromFields = MonthDayLikeObject
