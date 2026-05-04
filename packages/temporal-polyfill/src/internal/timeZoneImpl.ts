@@ -1,7 +1,7 @@
 import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
 import { CalendarDateTimeFields } from './fieldTypes'
-import { parseIntlPartsYear } from './intlCalendar'
 import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
+import { parseIntlPartsYear } from './intlParts'
 import {
   checkEpochNanoInBounds,
   epochNanoToSec,

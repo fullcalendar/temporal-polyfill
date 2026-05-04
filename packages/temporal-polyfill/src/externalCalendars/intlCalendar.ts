@@ -1,47 +1,51 @@
-import { eraYearToYear } from './calendarFields'
-import { computeCalendarIdBase } from './calendarId'
-import type { MonthCodeParts } from './calendarMonthCode'
+import { eraYearToYear } from '../internal/calendarFields'
+import { computeCalendarIdBase } from '../internal/calendarId'
+import type { MonthCodeParts } from '../internal/calendarMonthCode'
 import {
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
-} from './calendarMonthCode'
-import { getCalendarLeapMonthMeta } from './calendarQuery'
-import * as errorMessages from './errorMessages'
+} from '../internal/calendarMonthCode'
+import * as errorMessages from '../internal/errorMessages'
+import type { ExternalCalendar } from '../internal/externalCalendar'
 import type {
   CalendarDateFields,
   CalendarEraFields,
   CalendarYearMonthFields,
-} from './fieldTypes'
-import {
-  defaultEraByCalendarIdBase,
-  eraOriginsByCalendarId,
-  eraRemapsByCalendarId,
-  normalizeEraName,
-} from './intlCalendarConfig'
+} from '../internal/fieldTypes'
+import { normalizeEraName } from '../internal/intlCalendarConfig'
 import {
   RawDateTimeFormat,
   formatEpochMilliToPartsRecord,
-} from './intlFormatUtils'
+} from '../internal/intlFormatUtils'
+import { parseIntlPartsYear } from '../internal/intlParts'
 import {
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
   isoMonthsInYear,
-} from './isoMath'
+} from '../internal/isoMath'
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,
   isoArgsToEpochMilli,
   isoDateToEpochMilli,
   maxMilli,
-} from './timeMath'
-import { utcTimeZoneId } from './timeZoneConfig'
-import { milliInDay } from './units'
+} from '../internal/timeMath'
+import { utcTimeZoneId } from '../internal/timeZoneConfig'
+import { milliInDay } from '../internal/units'
 import {
   areNumberArraysEqual,
   compareNumbers,
   memoize,
   modFloor,
-} from './utils'
+} from '../internal/utils'
+import {
+  defaultEraByCalendarIdBase,
+  eraOriginsByCalendarId,
+  eraRemapsByCalendarId,
+  leapMonthMetas,
+  plainMonthDayCommonMonthMaxDayByCalendarIdBase,
+  plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
+} from './intlCalendarData'
 
 interface IntlDateFields {
   era: string | undefined
@@ -61,7 +65,7 @@ interface IntlYearData {
 
 type IntlYearDataCache = (year: number) => IntlYearData
 
-export interface IntlCalendar {
+export interface IntlCalendar extends ExternalCalendar {
   id: string
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
@@ -143,11 +147,87 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
     )
   }
 
-  return {
+  const calendar: IntlCalendar = {
     id: calendarId,
     queryFields: createIntlFieldCache(epochMilliToIntlFields),
     queryYearData,
+    eraOrigins: eraOriginsByCalendarId[calendarIdBase],
+    eraRemaps: eraRemapsByCalendarId[calendarIdBase],
+    leapMonthMeta: queryIntlCalendarLeapMonthMeta(calendarId),
+    plainMonthDayLeapMonthMaxDays:
+      plainMonthDayLeapMonthMaxDaysByCalendarIdBase[calendarIdBase],
+    plainMonthDayCommonMonthMaxDay:
+      plainMonthDayCommonMonthMaxDayByCalendarIdBase[calendarIdBase],
+    computeDateFields(isoDate) {
+      return computeIntlDateFields(calendar, isoDate)
+    },
+    computeDay(isoDate) {
+      return computeIntlDay(calendar, isoDate)
+    },
+    computeIsoFieldsFromParts(year, month, day) {
+      return computeIsoFieldsFromIntlParts(calendar, year, month, day)
+    },
+    computeEpochMilli(year, month, day) {
+      return computeIntlEpochMilli(calendar, year, month, day)
+    },
+    computeMonthCodeParts(year, month) {
+      return computeIntlMonthCodeParts(calendar, year, month)
+    },
+    computeYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth, day) {
+      return computeIntlYearMonthFieldsForMonthDay(
+        calendar,
+        monthCodeNumber,
+        isLeapMonth,
+        day,
+      )
+    },
+    computeInLeapYear(year) {
+      return computeIntlInLeapYear(calendar, year)
+    },
+    computeMonthsInYear(year) {
+      return computeIntlMonthsInYear(calendar, year)
+    },
+    computeDaysInMonth(year, month) {
+      return computeIntlDaysInMonth(calendar, year, month)
+    },
+    computeDaysInYear(year) {
+      return computeIntlDaysInYear(calendar, year)
+    },
+    computeLeapMonth(year) {
+      return computeIntlLeapMonth(calendar, year)
+    },
+    computeEraFields(isoDate) {
+      return computeIntlEraFields(calendar, isoDate)
+    },
+    addMonths(year, month, monthDelta) {
+      return addIntlMonths(calendar, year, month, monthDelta)
+    },
+    diffMonthSlots(year0, month0, year1, month1) {
+      return diffIntlMonthSlots(calendar, year0, month0, year1, month1)
+    },
+    isConstrainedFinalIntercalaryMonthDiff(
+      sign,
+      year0,
+      month0,
+      day0,
+      year1,
+      month1,
+      day1,
+    ) {
+      return isConstrainedFinalIntercalaryMonthDiff(
+        calendar,
+        sign,
+        year0,
+        month0,
+        day0,
+        year1,
+        month1,
+        day1,
+      )
+    },
   }
+
+  return calendar
 }
 
 // Caches
@@ -713,10 +793,6 @@ export function parseIntlYear(
   return { era, eraYear, year }
 }
 
-export function parseIntlPartsYear(intlParts: Record<string, string>): number {
-  return parseInt(intlParts.relatedYear || intlParts.year)
-}
-
 /**
  * @param id Expects already-normalized
  */
@@ -794,7 +870,7 @@ export function computeIntlLeapMonth(
   intlCalendar: IntlCalendar,
   year: number,
 ): number | undefined {
-  const leapMonthMeta = getCalendarLeapMonthMeta(intlCalendar.id)
+  const leapMonthMeta = queryIntlCalendarLeapMonthMeta(intlCalendar.id)
   if (leapMonthMeta === undefined) {
     return undefined
   }
@@ -852,7 +928,7 @@ export function computeIntlInLeapYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): boolean {
-  if (getCalendarLeapMonthMeta(intlCalendar.id) !== undefined) {
+  if (queryIntlCalendarLeapMonthMeta(intlCalendar.id) !== undefined) {
     return computeIntlMonthsInYear(intlCalendar, year) > 12
   }
 
@@ -1005,6 +1081,98 @@ function chineseMonthDaySearchStartYear(
   return 1972
 }
 
+export function addIntlMonths(
+  intlCalendar: IntlCalendar,
+  year: number,
+  month: number,
+  monthDelta: number,
+): CalendarYearMonthFields {
+  if (monthDelta) {
+    month += monthDelta
+
+    if (!Number.isSafeInteger(month)) {
+      throw new RangeError(errorMessages.outOfBoundsDate)
+    }
+
+    if (monthDelta < 0) {
+      while (month < 1) {
+        month += computeIntlMonthsInYear(intlCalendar, --year)
+      }
+    } else {
+      let monthsInYear: number
+      while (
+        month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))
+      ) {
+        month -= monthsInYear
+        year++
+      }
+    }
+  }
+
+  return { year, month }
+}
+
+export function diffIntlMonthSlots(
+  intlCalendar: IntlCalendar,
+  year0: number,
+  month0: number,
+  year1: number,
+  month1: number,
+): number {
+  const cmp = compareNumbers(year0, year1) || compareNumbers(month0, month1)
+
+  if (!cmp) {
+    return 0
+  }
+
+  if (year0 === year1) {
+    return month1 - month0
+  }
+
+  if (cmp < 0) {
+    let months = computeIntlMonthsInYear(intlCalendar, year0) - month0 + month1
+    for (let year = year0 + 1; year < year1; year++) {
+      months += computeIntlMonthsInYear(intlCalendar, year)
+    }
+    return months
+  }
+
+  return -diffIntlMonthSlots(intlCalendar, year1, month1, year0, month0)
+}
+
+function isConstrainedFinalIntercalaryMonthDiff(
+  intlCalendar: IntlCalendar,
+  sign: number,
+  year0: number,
+  month0: number,
+  day0: number,
+  year1: number,
+  month1: number,
+  day1: number,
+): boolean {
+  const monthsInYear0 = computeIntlMonthsInYear(intlCalendar, year0)
+  const monthsInYear1 = computeIntlMonthsInYear(intlCalendar, year1)
+
+  // Coptic/Ethiopic-style calendars have a real final intercalary month every
+  // year: M13 exists in both common and leap years, but its length is 5 or 6
+  // days. Calendar date diffing determines the year/month span before
+  // constraining the day, so Coptic 1739-M13-06.since(1738-M13-05,
+  // { largestUnit: "months" }) should be 13 months, not 12 months + 6 days:
+  // adding -13 months from 1739-M13-06 constrains exactly to 1738-M13-05.
+  // Ordinary Jan 31 -> Feb 28 wrapping still backs off because it changes
+  // monthCode instead of staying on the same final intercalary month.
+  return (
+    sign < 0 &&
+    monthsInYear0 > isoMonthsInYear &&
+    monthsInYear1 > isoMonthsInYear &&
+    month0 === monthsInYear0 &&
+    month1 === monthsInYear1 &&
+    day0 === computeIntlDaysInMonth(intlCalendar, year0, month0) &&
+    day1 === computeIntlDaysInMonth(intlCalendar, year1, month1) &&
+    day0 > day1
+  )
+}
+
 // -----------------------------------------------------------------------------
 
 function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
@@ -1025,4 +1193,10 @@ function computeIntlMonthIndex(
   }
 
   throw new RangeError(errorMessages.invalidProtocolResults)
+}
+
+function queryIntlCalendarLeapMonthMeta(
+  calendarId: string,
+): number | undefined {
+  return leapMonthMetas[computeCalendarIdBase(calendarId)]
 }

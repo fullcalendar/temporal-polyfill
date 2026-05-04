@@ -55,6 +55,10 @@
         "types": "typeOverrides/global",
         "iife": true
       },
+      "./intl-calendars": {
+        "src": "intl-calendars",
+        "iife": true
+      },
       "./fns/instant": {
         "src": "funcApi/instant"
       },

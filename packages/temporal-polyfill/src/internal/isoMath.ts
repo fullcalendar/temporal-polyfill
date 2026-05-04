@@ -10,16 +10,17 @@ import type {
   CalendarWeekFields,
   CalendarYearMonthFields,
 } from './fieldTypes'
-import { parseIntlYear, queryCalendarIntlFormat } from './intlCalendar'
-import { gregoryCalendarId, japaneseCalendarId } from './intlCalendarConfig'
-import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
+import { gregoryCalendarId } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
+import { isoToLegacyDate } from './timeMath'
 import {
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-  isoToLegacyDate,
-} from './timeMath'
-import { allPropsEqual, clampProp, memoize, modFloor, zipProps } from './utils'
+  allPropsEqual,
+  clampProp,
+  divTrunc,
+  modFloor,
+  modTrunc,
+  zipProps,
+} from './utils'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -76,6 +77,34 @@ export function computeIsoDaysInYear(year: number): number {
 export function computeIsoInLeapYear(year: number): boolean {
   // % is dangerous, but comparing 0 with -0 is fine
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+}
+
+export function addIsoMonths(
+  year: number,
+  month: number,
+  monthDelta: number,
+): CalendarYearMonthFields {
+  year += divTrunc(monthDelta, isoMonthsInYear)
+  month += modTrunc(monthDelta, isoMonthsInYear)
+
+  if (month < 1) {
+    year--
+    month += isoMonthsInYear
+  } else if (month > isoMonthsInYear) {
+    year++
+    month -= isoMonthsInYear
+  }
+
+  return { year, month }
+}
+
+export function diffIsoMonthSlots(
+  year0: number,
+  month0: number,
+  year1: number,
+  month1: number,
+): number {
+  return (year1 - year0) * isoMonthsInYear + month1 - month0
 }
 
 export function computeIsoDayOfWeek(isoDateFields: CalendarDateFields): number {
@@ -148,11 +177,6 @@ export function computeIsoWeekFields(
 // Era (complicated stuff)
 // -----------------------------------------------------------------------------
 
-// Temporal's Japanese era round-tripping follows the Gregorian-aligned era
-// model used by test262, where dates before 1873 remain in CE/BCE.
-const primaryJapaneseEraMilli = isoArgsToEpochMilli(1873, 1, 1)!
-const queryJapaneseEraFields = memoize(computeJapaneseEraFields, WeakMap)
-
 export function computeIsoEraFields(
   calendarId: string | undefined,
   isoDate: CalendarDateFields,
@@ -161,40 +185,16 @@ export function computeIsoEraFields(
     return computeGregoryEraFields(isoDate)
   }
 
-  if (calendarId === japaneseCalendarId) {
-    return queryJapaneseEraFields(isoDate)
-  }
-
   return {}
 }
 
-function computeGregoryEraFields({
+export function computeGregoryEraFields({
   year,
 }: CalendarDateFields): CalendarEraFields {
   if (year < 1) {
     return { era: 'bce', eraYear: -year + 1 }
   }
   return { era: 'ce', eraYear: year }
-}
-
-function computeJapaneseEraFields(
-  isoDate: CalendarDateFields,
-): CalendarEraFields {
-  const epochMilli = isoDateToEpochMilli(isoDate)!
-
-  if (epochMilli < primaryJapaneseEraMilli) {
-    // Pre-Meiji dates round-trip through generic CE/BCE in Temporal instead of
-    // exposing ICU's large set of historical Japanese era names.
-    return computeGregoryEraFields(isoDate)
-  }
-
-  const intlParts = formatEpochMilliToPartsRecord(
-    queryCalendarIntlFormat(japaneseCalendarId),
-    epochMilli,
-  )
-
-  const { era, eraYear } = parseIntlYear(intlParts, japaneseCalendarId)
-  return { era, eraYear }
 }
 
 // Checking Fields

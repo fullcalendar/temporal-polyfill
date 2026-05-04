@@ -72,6 +72,8 @@ async function buildConfigs(pkgDir, isDev) {
   const chunkNamesEnabled = true // isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
+  const externalCalendarsSrcBase =
+    resolvePath(pkgDir, 'dist/.tsc', 'externalCalendars') + pathSep
   const classApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
   const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
 
@@ -132,6 +134,9 @@ async function buildConfigs(pkgDir, isDev) {
   }
 
   function manuallyResolveChunk(id) {
+    if (id.startsWith(externalCalendarsSrcBase)) {
+      return 'intl-calendars'
+    }
     if (id.startsWith(internalSrcBase)) {
       return 'internal'
     }

@@ -8,6 +8,9 @@ import type { MonthCodeParts } from './calendarMonthCode'
 import { parseMonthCode } from './calendarMonthCode'
 import {
   getCalendarEraOrigins,
+  getCalendarMonthDayReferenceYear,
+  getPlainMonthDayCommonMonthMaxDay,
+  getPlainMonthDayLeapMonthMaxDays,
   queryCalendarIsoFieldsFromParts,
   queryCalendarMonthCodeParts,
   queryCalendarYearMonthForMonthDay,
@@ -23,14 +26,7 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import {
-  gregoryCalendarId,
-  isoCalendarId,
-  isoYearOffsetsByCalendarId,
-  japaneseCalendarId,
-  plainMonthDayCommonMonthMaxDayByCalendarIdBase,
-  plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
-} from './intlCalendarConfig'
+import { isoCalendarId } from './intlCalendarConfig'
 import { isoEpochFirstLeapYear } from './isoMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow } from './optionsModel'
@@ -350,17 +346,11 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
 
     // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's createPlainMonthDayFromFields
     // to limit the day in calendar with predictable max-days-in-month without the year
-    const isIsoLike =
-      calendarId === isoCalendarId ||
-      calendarId === gregoryCalendarId ||
-      calendarId === japaneseCalendarId ||
-      isoYearOffsetsByCalendarId[calendarId] !== undefined
-    if (isIsoLike) {
-      // Offset ISO-like calendars (Buddhist/ROC) share Gregorian month lengths,
-      // but their calendar year is not the ISO year. Use the calendar
-      // year that corresponds to ISO 1972 so February 29 remains available.
-      const referenceYear =
-        isoEpochFirstLeapYear + (isoYearOffsetsByCalendarId[calendarId] || 0)
+    const referenceYear = getCalendarMonthDayReferenceYear(calendarId)
+    if (referenceYear !== undefined) {
+      // ISO-derived calendars share Gregorian month lengths, but their
+      // calendar year may not be the ISO year. The reference year corresponds
+      // to ISO 1972 so February 29 remains available.
       const month = resolveCalendarMonth(
         calendarId,
         fields,
@@ -463,16 +453,10 @@ function queryPlainMonthDayLeapMonthMaxDay(
   monthCodeNumber: number,
 ): number {
   return (
-    plainMonthDayLeapMonthMaxDaysByCalendarIdBase[
-      computeCalendarIdBase(calendarId)
-    ]?.[monthCodeNumber] ?? Infinity
+    getPlainMonthDayLeapMonthMaxDays(calendarId)?.[monthCodeNumber] ?? Infinity
   )
 }
 
 function queryPlainMonthDayCommonMonthMaxDay(calendarId: string): number {
-  return (
-    plainMonthDayCommonMonthMaxDayByCalendarIdBase[
-      computeCalendarIdBase(calendarId)
-    ] ?? Infinity
-  )
+  return getPlainMonthDayCommonMonthMaxDay(calendarId) ?? Infinity
 }
