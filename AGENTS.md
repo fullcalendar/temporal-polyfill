@@ -73,7 +73,6 @@ Please add a healthy amount of comments to the code. With this temporal stuff,
 small portions of code can back be packed with a lot of meaning.
 
 
-## When to Pause on Test Failures
+## Bundle Size
 
-If it is discovered that a solution to a set of failures is a medium to large algorithmic change,
-please pause and notify the user. This is especially true if BigNano needs adjustment.
+For testing minification+gzip of global.min.js, you would run `pnpm run size`. However, the package in `packages/export-size` must be built first.
