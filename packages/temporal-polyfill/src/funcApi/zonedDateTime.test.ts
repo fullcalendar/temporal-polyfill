@@ -21,7 +21,7 @@ describe('create', () => {
       'America/New_York',
     )
     expectZonedDateTimeEquals(zdt, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -33,8 +33,8 @@ describe('create', () => {
       'hebrew',
     )
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -65,7 +65,7 @@ describe('fromString', () => {
       '2024-02-27T12:30:00[America/New_York]',
     )
     expectZonedDateTimeEquals(zdt, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -75,8 +75,8 @@ describe('fromString', () => {
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
     )
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -94,8 +94,8 @@ describe('fromFields', () => {
       minute: 30,
     })
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1704130200000000000n,
     })
   })
@@ -410,7 +410,7 @@ describe('startOfDay', () => {
     )
     const zdt1 = ZonedDateTimeFns.startOfDay(zdt0)
     expectZonedDateTimeEquals(zdt1, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709010000000000000n,
     })
   })
@@ -436,7 +436,7 @@ describe('add', () => {
       DurationFns.create(1, 1, 0, 0, 4, 5),
     )
     expectZonedDateTimeEquals(zdt1, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1743107700000000000n,
     })
   })
@@ -452,7 +452,7 @@ describe('subtract', () => {
       DurationFns.create(1, 1, 0, 0, 4, 5),
     )
     expectZonedDateTimeEquals(zdt1, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1674825900000000000n,
     })
   })
@@ -529,7 +529,7 @@ describe('round', () => {
     )
     const zdt1 = ZonedDateTimeFns.round(zdt0, 'day')
     expectZonedDateTimeEquals(zdt1, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709096400000000000n,
     })
   })
@@ -540,7 +540,7 @@ describe('round', () => {
     )
     const zdt1 = ZonedDateTimeFns.round(zdt0, { smallestUnit: 'day' })
     expectZonedDateTimeEquals(zdt1, {
-      timeZone: 'America/New_York',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709096400000000000n,
     })
   })
@@ -904,8 +904,8 @@ describe('withDayOfWeek', () => {
     const zdtExp = {
       // 2024-02-29T12:30:00[America/New_York][u-ca=hebrew]
       epochNanoseconds: 1709227800000000000n,
-      timeZone: 'America/New_York',
-      calendar: 'hebrew',
+      timeZoneId: 'America/New_York',
+      calendarId: 'hebrew',
     }
 
     const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)

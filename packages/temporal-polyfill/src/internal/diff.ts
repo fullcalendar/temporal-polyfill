@@ -134,7 +134,7 @@ export function diffZonedDateTimes(
   slots1: ZonedDateTimeSlots,
   options?: DiffOptions<UnitName>,
 ): DurationSlots {
-  const calendarId = getCommonCalendarId(slots0.calendar, slots1.calendar)
+  const calendarId = getCommonCalendarId(slots0.calendarId, slots1.calendarId)
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour)
 
@@ -155,7 +155,7 @@ export function diffZonedDateTimes(
       roundingMode,
     )
   } else {
-    const timeZoneId = getCommonTimeZoneId(slots0.timeZone, slots1.timeZone)
+    const timeZoneId = getCommonTimeZoneId(slots0.timeZoneId, slots1.timeZoneId)
     const timeZoneImpl = queryTimeZone(timeZoneId)
     const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZoneImpl)
     const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZoneImpl)
@@ -213,8 +213,8 @@ export function diffPlainDateTimes(
   options?: DiffOptions<UnitName>,
 ): DurationSlots {
   const calendarId = getCommonCalendarId(
-    plainDateTimeSlots0.calendar,
-    plainDateTimeSlots1.calendar,
+    plainDateTimeSlots0.calendarId,
+    plainDateTimeSlots1.calendarId,
   )
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
@@ -269,8 +269,8 @@ export function diffPlainDates(
   options?: DiffOptions<DateUnitName>,
 ): DurationSlots {
   const calendarId = getCommonCalendarId(
-    plainDateSlots0.calendar,
-    plainDateSlots1.calendar,
+    plainDateSlots0.calendarId,
+    plainDateSlots1.calendarId,
   )
   const optionsTuple = refineDiffOptions(
     invert,
@@ -296,8 +296,8 @@ export function diffPlainYearMonth(
   options?: DiffOptions<YearMonthUnitName>,
 ): DurationSlots {
   const calendarId = getCommonCalendarId(
-    plainYearMonthSlots0.calendar,
-    plainYearMonthSlots1.calendar,
+    plainYearMonthSlots0.calendarId,
+    plainYearMonthSlots1.calendarId,
   )
   const optionsTuple = refineDiffOptions(
     invert,

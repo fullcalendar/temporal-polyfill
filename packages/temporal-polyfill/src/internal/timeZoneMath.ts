@@ -20,7 +20,7 @@ export type PossibleInstantsOp = (
 ) => BigNano[]
 
 export type FixedIsoZonedFields = CalendarDateTimeFields & {
-  calendar: string
+  calendarId: string
   offsetNanoseconds: number
 }
 
@@ -36,7 +36,7 @@ export const zonedEpochSlotsToIso = memoize(
 
 function _zonedEpochSlotsToIso(
   slots: ZonedEpochSlots,
-  timeZoneImpl: TimeZoneImpl = queryTimeZone(slots.timeZone),
+  timeZoneImpl: TimeZoneImpl = queryTimeZone(slots.timeZoneId),
 ): FixedIsoZonedFields {
   const { epochNanoseconds } = slots
 
@@ -45,7 +45,7 @@ function _zonedEpochSlotsToIso(
   const isoDateTime = epochNanoToIso(epochNanoseconds, offsetNanoseconds)
 
   return {
-    calendar: slots.calendar,
+    calendarId: slots.calendarId,
     ...isoDateTime,
     offsetNanoseconds,
   }

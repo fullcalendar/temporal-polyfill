@@ -146,7 +146,7 @@ export function toPlainDateTime(
   return createPlainDateTimeFromRefinedFields(
     plainDateRecord,
     plainTimeRecord,
-    plainDateRecord.calendar,
+    plainDateRecord.calendarId,
   )
 }
 

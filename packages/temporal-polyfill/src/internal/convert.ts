@@ -82,7 +82,7 @@ export function zonedDateTimeToPlainDateTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateTimeSlots {
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots0)
-  return createPlainDateTimeSlots(isoDateTime, zonedDateTimeSlots0.calendar)
+  return createPlainDateTimeSlots(isoDateTime, zonedDateTimeSlots0.calendarId)
 }
 
 export function zonedDateTimeToPlainDate(
@@ -90,7 +90,7 @@ export function zonedDateTimeToPlainDate(
 ): PlainDateSlots {
   return createPlainDateSlots(
     zonedEpochSlotsToIso(zonedDateTimeSlots0),
-    zonedDateTimeSlots0.calendar,
+    zonedDateTimeSlots0.calendarId,
   )
 }
 
@@ -112,7 +112,7 @@ export function plainDateTimeToZonedDateTime(
   return createZonedDateTimeSlots(
     checkEpochNanoInBounds(epochNano),
     timeZoneId,
-    plainDateTimeSlots.calendar,
+    plainDateTimeSlots.calendarId,
   )
 }
 
@@ -158,7 +158,7 @@ export function plainDateToZonedDateTime<PA>(
   return createZonedDateTimeSlots(
     epochNano,
     timeZoneId,
-    plainDateSlots.calendar,
+    plainDateSlots.calendarId,
   )
 }
 
@@ -297,7 +297,7 @@ export function plainTimeToZonedDateTime<PA>(
       combineDateAndTime(plainDateSlots, slots),
     ),
     timeZoneId,
-    plainDateSlots.calendar,
+    plainDateSlots.calendarId,
   )
 }
 

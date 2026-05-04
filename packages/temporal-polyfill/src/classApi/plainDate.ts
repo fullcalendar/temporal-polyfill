@@ -130,7 +130,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     ): ZonedDateTime {
       const optionsObj = !isObjectLike(options)
         ? { timeZone: options }
-        : (options as { timeZone: TimeZoneArg; plainTime?: PlainTimeArg })
+        : {
+            timeZone: (options as { timeZone: TimeZoneArg }).timeZone,
+            plainTime: (options as { plainTime?: PlainTimeArg }).plainTime,
+          }
 
       return createZonedDateTime(
         plainDateToZonedDateTime(
@@ -149,15 +152,15 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
         createPlainDateTimeFromRefinedFields(
           slots,
           optionalToPlainTimeFields(plainTimeArg),
-          slots.calendar,
+          slots.calendarId,
         ),
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
+      return createPlainYearMonth(convertToPlainYearMonth(slots.calendarId, this))
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
+      return createPlainMonthDay(convertToPlainMonthDay(slots.calendarId, this))
     },
     toLocaleString(
       slots: PlainDateSlots,
@@ -206,7 +209,7 @@ export function toPlainDateSlots(
         refineOverflowOptions(options) // parse unused options
         return createPlainDateSlots(
           slots as PlainDateTimeSlots,
-          (slots as PlainDateTimeSlots).calendar,
+          (slots as PlainDateTimeSlots).calendarId,
         )
 
       case ZonedDateTimeBranding:

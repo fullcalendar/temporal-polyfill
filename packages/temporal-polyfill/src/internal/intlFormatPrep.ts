@@ -397,11 +397,11 @@ export function createFormatForPrep(
 }
 
 function getForcedCommonTimeZone(
-  slots0?: { timeZone: string }, // actually needed
-  slots1?: { timeZone: string }, // optional!
+  slots0?: { timeZoneId: string }, // actually needed
+  slots1?: { timeZoneId: string }, // optional!
 ): string {
-  const timeZoneId = slots0!.timeZone
-  if (slots1 && slots1.timeZone !== timeZoneId) {
+  const timeZoneId = slots0!.timeZoneId
+  if (slots1 && slots1.timeZoneId !== timeZoneId) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
   return timeZoneId
@@ -496,9 +496,9 @@ function toEpochMillis<S>(
   const { slotsToEpochMilli, strictCalendarChecks } = config
 
   return slotsList.map((slots: S) => {
-    if ((slots as any).calendar) {
+    if ((slots as any).calendarId) {
       checkCalendarsCompatible(
-        (slots as any).calendar, // !!!
+        (slots as any).calendarId, // !!!
         resolvedOptions.calendar,
         strictCalendarChecks,
       )

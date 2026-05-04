@@ -73,6 +73,9 @@ export function createSlotClass(
 export function rejectInvalidBag<B>(bag: B): B {
   if (
     getSlots(bag) ||
+    // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.
+    // It deliberately observes the spec field names even though internal
+    // slots store the corresponding strings as calendarId/timeZoneId.
     (bag as any).calendar !== undefined ||
     (bag as any).timeZone !== undefined
   ) {

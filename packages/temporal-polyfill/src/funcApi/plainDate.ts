@@ -138,8 +138,6 @@ export const getFields = memoize(computeDateFields, WeakMap) as (
   record: Record,
 ) => Fields
 
-export const calendarId = getCalendarId as (record: Record) => string
-
 export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
   record: Record,
 ) => number
@@ -175,8 +173,8 @@ export function withFields(
   return mergePlainDateFields(record, fields, options)
 }
 
-export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendarId(record, refineCalendarId(calendar))
+export function withCalendar(record: Record, calendarId: string): Record {
+  return slotsWithCalendarId(record, refineCalendarId(calendarId))
 }
 
 // Math
@@ -241,7 +239,7 @@ export function toPlainDateTime(
   return createPlainDateTimeFromRefinedFields(
     plainDateRecord,
     plainTimeRecord,
-    plainDateRecord.calendar,
+    plainDateRecord.calendarId,
   )
 }
 
@@ -323,8 +321,8 @@ export function withDayOfYear(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    moveToDayOfYear(record.calendar, record, dayOfYear, options),
-    record.calendar,
+    moveToDayOfYear(record.calendarId, record, dayOfYear, options),
+    record.calendarId,
   )
 }
 
@@ -334,8 +332,8 @@ export function withDayOfMonth(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    moveToDayOfMonth(record.calendar, record, dayOfMonth, options),
-    record.calendar,
+    moveToDayOfMonth(record.calendarId, record, dayOfMonth, options),
+    record.calendarId,
   )
 }
 
@@ -345,8 +343,8 @@ export function withDayOfWeek(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    moveToDayOfWeek(record.calendar, record, dayOfWeek, options),
-    record.calendar,
+    moveToDayOfWeek(record.calendarId, record, dayOfWeek, options),
+    record.calendarId,
   )
 }
 
@@ -356,8 +354,8 @@ export function withWeekOfYear(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    slotsWithWeekOfYear(record.calendar, record, weekOfYear, options),
-    record.calendar,
+    slotsWithWeekOfYear(record.calendarId, record, weekOfYear, options),
+    record.calendarId,
   )
 }
 
@@ -370,8 +368,8 @@ export function addYears(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    moveByYears(record.calendar, record, years, options),
-    record.calendar,
+    moveByYears(record.calendarId, record, years, options),
+    record.calendarId,
   )
 }
 
@@ -381,22 +379,22 @@ export function addMonths(
   options?: OverflowOptions,
 ): Record {
   return createRecordFromDateFields(
-    moveByMonths(record.calendar, record, months, options),
-    record.calendar,
+    moveByMonths(record.calendarId, record, months, options),
+    record.calendarId,
   )
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
   return createRecordFromDateFields(
-    moveByIsoWeeks(record.calendar, record, weeks),
-    record.calendar,
+    moveByIsoWeeks(record.calendarId, record, weeks),
+    record.calendarId,
   )
 }
 
 export function addDays(record: Record, days: number): Record {
   return createRecordFromDateFields(
-    moveByDaysStrict(record.calendar, record, days),
-    record.calendar,
+    moveByDaysStrict(record.calendarId, record, days),
+    record.calendarId,
   )
 }
 
@@ -485,7 +483,7 @@ function roundToInterval(
     record0,
     roundingMode,
   )
-  return createRecordFromDateFields(roundedIsoDateTime, record0.calendar)
+  return createRecordFromDateFields(roundedIsoDateTime, record0.calendarId)
 }
 
 function aligned(
@@ -494,14 +492,14 @@ function aligned(
 ): (record: Record) => Record {
   return (record0) => {
     const isoDate = moveByDays(computeAlignment(record0), dayDelta)
-    return createRecordFromDateFields(isoDate, record0.calendar)
+    return createRecordFromDateFields(isoDate, record0.calendarId)
   }
 }
 
 function createRecordFromDateFields(
   isoDate: CalendarDateFields,
-  calendar: string,
+  calendarId: string,
 ): Record {
   checkIsoDateInBounds(isoDate)
-  return createPlainDateSlots(isoDate, calendar)
+  return createPlainDateSlots(isoDate, calendarId)
 }

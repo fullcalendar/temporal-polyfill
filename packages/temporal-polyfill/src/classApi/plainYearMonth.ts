@@ -109,7 +109,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       },
       toPlainDate(slots: PlainYearMonthSlots, bag: { day: number }): PlainDate {
         return createPlainDate(
-          convertPlainYearMonthToDate(slots.calendar, this, bag),
+          convertPlainYearMonthToDate(slots.calendarId, this, bag),
         )
       },
       toLocaleString(

@@ -96,7 +96,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return slotsToIso(slots).offsetNanoseconds
     },
     timeZoneId(slots: ZonedDateTimeSlots): string {
-      return slots.timeZone
+      return slots.timeZoneId // TODO: smarter getter?
     },
     hoursInDay(slots: ZonedDateTimeSlots): number {
       return computeZonedHoursInDay(slots)
@@ -241,7 +241,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       slots: ZonedDateTimeSlots,
       options: DirectionOptions,
     ): ZonedDateTime | null {
-      const { timeZone: timeZoneId, epochNanoseconds: epochNano } = slots
+      const { timeZoneId, epochNanoseconds: epochNano } = slots
 
       const direction = refineDirectionOptions(options)
       const timeZoneImpl = queryTimeZone(timeZoneId)

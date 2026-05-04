@@ -154,9 +154,9 @@ export function toZonedDateTime(
 
 export function toZonedDateTimeISO(
   record: Record,
-  timeZone: string,
+  timeZoneId: string,
 ): ZonedDateTimeFns.Record {
-  return instantToZonedDateTime(record, refineTimeZoneId(timeZone))
+  return instantToZonedDateTime(record, refineTimeZoneId(timeZoneId))
 }
 
 // Formatting

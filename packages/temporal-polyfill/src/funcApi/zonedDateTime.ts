@@ -146,15 +146,9 @@ export type Record = {
    */
   readonly branding: typeof ZonedDateTimeBranding
 
-  /**
-   * @deprecated Use the calendarId() function instead.
-   */
-  readonly calendar: string
+  readonly calendarId: string
 
-  /**
-   * @deprecated Use the timeZoneId() function instead.
-   */
-  readonly timeZone: string
+  readonly timeZoneId: string
 
   /**
    * @deprecated Use the epochNanoseconds() function instead.
@@ -176,7 +170,7 @@ export type ToStringOptions = ZonedDateTimeDisplayOptions
 
 export const create = constructZonedDateTimeSlots as (
   epochNanoseconds: bigint,
-  timeZone: string,
+  timeZoneId: string,
   calendar?: string,
 ) => Record
 
@@ -217,7 +211,7 @@ export const getFields = memoize((record: Record): Fields => {
 
   return {
     ...computeDateFields({
-      calendar: record.calendar,
+      calendarId: record.calendarId,
       year,
       month,
       day,
@@ -226,12 +220,6 @@ export const getFields = memoize((record: Record): Fields => {
     offset: offsetString,
   }
 }, WeakMap)
-
-export const calendarId = getCalendarId as (record: Record) => string
-
-export function timeZoneId(record: Record): string {
-  return record.timeZone
-}
 
 export const epochSeconds = getEpochSec as (record: Record) => number
 
@@ -298,12 +286,12 @@ export function withFields(
   return mergeZonedDateTimeFields(record, fields, options)
 }
 
-export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendarId(record, refineCalendarId(calendar))
+export function withCalendar(record: Record, calendarId: string): Record {
+  return slotsWithCalendarId(record, refineCalendarId(calendarId))
 }
 
-export function withTimeZone(record: Record, timeZone: string): Record {
-  return slotsWithTimeZoneId(record, refineTimeZoneId(timeZone))
+export function withTimeZone(record: Record, timeZoneId: string): Record {
+  return slotsWithTimeZoneId(record, refineTimeZoneId(timeZoneId))
 }
 
 export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
@@ -460,7 +448,7 @@ function adaptDateFunc<R>(
 ): (record: Record) => R {
   return (record: Record) => {
     const isoDate = zonedEpochSlotsToIso(record)
-    return dateFunc({ ...isoDate, calendar: record.calendar })
+    return dateFunc({ ...isoDate, calendarId: record.calendarId })
   }
 }
 
@@ -607,7 +595,7 @@ function roundToInterval(
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
-  const timeZoneImpl = queryTimeZone(record.timeZone)
+  const timeZoneImpl = queryTimeZone(record.timeZoneId)
   const epochNano1 = roundZonedEpochToInterval(
     computeInterval,
     timeZoneImpl,
@@ -625,7 +613,7 @@ function aligned(
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
-    const timeZoneImpl = queryTimeZone(record.timeZone)
+    const timeZoneImpl = queryTimeZone(record.timeZoneId)
     const epochNano1 = moveBigNano(
       alignZonedEpoch(computeAlignment, timeZoneImpl, record),
       nanoDelta,
@@ -645,15 +633,15 @@ function alignedTime(
 
 function zonedTransform<A extends any[]>(
   transformIsoDate: (
-    calendar: string,
+    calendarId: string,
     isoDate: CalendarDateFields,
     ...args: A
   ) => CalendarDateFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
-    const timeZoneImpl = queryTimeZone(record.timeZone)
+    const timeZoneImpl = queryTimeZone(record.timeZoneId)
     const isoDateTime = zonedEpochSlotsToIso(record, timeZoneImpl)
-    const isoDate = transformIsoDate(record.calendar, isoDateTime, ...args)
+    const isoDate = transformIsoDate(record.calendarId, isoDateTime, ...args)
     // zonedTransform is used by date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
     const epochNano1 = getSingleInstantFor(

@@ -132,11 +132,11 @@ export function mergeZonedDateTimeFields(
   modFields: Partial<DateTimeFields>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  const { calendar, timeZone } = zonedDateTimeSlots
-  const timeZoneImpl = queryTimeZone(timeZone)
+  const { calendarId, timeZoneId } = zonedDateTimeSlots
+  const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const validFieldNames = getCalendarFieldNames(
-    calendar,
+    calendarId,
     dateTimeAndOffsetFieldNamesAlpha,
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
@@ -144,7 +144,7 @@ export function mergeZonedDateTimeFields(
   const origFields = computeZonedDateTimeEssentials(zonedDateTimeSlots)
   const partialFields = readAndRefineBagFields(modFields, validFieldNames)
   const mergedCalendarFields = mergeCalendarFields(
-    calendar,
+    calendarId,
     origFields as unknown as Record<string, unknown>,
     partialFields,
   )
@@ -155,7 +155,7 @@ export function mergeZonedDateTimeFields(
 
   const [isoDateFields, overflow, offsetDisambig, epochDisambig] =
     createPlainDateFromFieldsWithOptionsRefiner(
-      calendar,
+      calendarId,
       mergedCalendarFields as any,
       () => refineZonedFieldOptions(options, OffsetDisambig.Prefer),
     )
@@ -174,8 +174,8 @@ export function mergeZonedDateTimeFields(
       offsetDisambig,
       epochDisambig,
     ),
-    timeZone,
-    calendar,
+    timeZoneId,
+    calendarId,
   )
 }
 
@@ -184,7 +184,7 @@ export function mergePlainDateTimeFields(
   modFields: Partial<DateTimeFields>,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
-  const calendarId = plainDateTimeSlots.calendar
+  const calendarId = plainDateTimeSlots.calendarId
 
   const validFieldNames = getCalendarFieldNames(
     calendarId,
@@ -229,7 +229,7 @@ export function mergePlainDateFields(
   modFields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  const calendarId = plainDateSlots.calendar
+  const calendarId = plainDateSlots.calendarId
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,
@@ -252,7 +252,7 @@ export function mergePlainYearMonthFields(
   modFields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const calendarId = plainYearMonthSlots.calendar
+  const calendarId = plainYearMonthSlots.calendarId
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     yearMonthFieldNamesAsc,
@@ -279,7 +279,7 @@ export function mergePlainMonthDayFields(
   modFields: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  const calendarId = plainMonthDaySlots.calendar
+  const calendarId = plainMonthDaySlots.calendarId
   const validFieldNames = getCalendarFieldNames(
     calendarId,
     dateFieldNamesAlpha,

@@ -177,7 +177,7 @@ function refinePublicRelativeTo(
         case PlainDateTimeBranding:
           return createPlainDateSlots(
             slots as PlainDateTimeSlots,
-            (slots as PlainDateTimeSlots).calendar,
+            (slots as PlainDateTimeSlots).calendarId,
           )
       }
 
@@ -188,7 +188,7 @@ function refinePublicRelativeTo(
         relativeTo as unknown as ZonedDateTimeLikeObject, // !!!
       )
 
-      return { ...res, calendar: calendarId }
+      return { ...res, calendarId }
     }
 
     return parseRelativeToSlots(relativeTo)

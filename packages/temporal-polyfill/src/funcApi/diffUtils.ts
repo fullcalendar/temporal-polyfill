@@ -72,10 +72,10 @@ function diffZonedLargeUnits(
   record1: ZonedDateTimeSlots,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
+  const timeZoneId = getCommonTimeZoneId(record0.timeZoneId, record1.timeZoneId)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
-  const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
+  const calendarId = getCommonCalendarId(record0.calendarId, record1.calendarId)
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
@@ -96,7 +96,7 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
   record1: S,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const calendarId = getCommonCalendarId(record0.calendar, record1.calendar)
+  const calendarId = getCommonCalendarId(record0.calendarId, record1.calendarId)
 
   return diffDateUnits(
     isoMarkerToEpochNano as MarkerToEpochNano,
@@ -183,7 +183,7 @@ function diffZonedDayLikeUnits(
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
-  const timeZoneId = getCommonTimeZoneId(record0.timeZone, record1.timeZone)
+  const timeZoneId = getCommonTimeZoneId(record0.timeZoneId, record1.timeZoneId)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const sign = compareBigNanos(

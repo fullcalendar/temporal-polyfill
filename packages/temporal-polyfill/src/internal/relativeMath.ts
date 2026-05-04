@@ -36,7 +36,7 @@ export function createRelativeOrigin(
   relativeToSlots: RelativeToSlots,
 ): RelativeOrigin {
   if (isZonedEpochSlots(relativeToSlots)) {
-    return [relativeToSlots, queryTimeZone(relativeToSlots.timeZone)]
+    return [relativeToSlots, queryTimeZone(relativeToSlots.timeZoneId)]
   }
 
   return [

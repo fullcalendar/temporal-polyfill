@@ -81,8 +81,6 @@ export const getFields = memoize(computeYearMonthFields, WeakMap) as (
   record: Record,
 ) => Fields
 
-export const calendarId = getCalendarId as (record: Record) => string
-
 export const daysInMonth = computeDaysInMonth as (record: Record) => number
 
 export const daysInYear = computeDaysInYear as (record: Record) => number

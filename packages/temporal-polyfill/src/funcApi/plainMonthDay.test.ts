@@ -11,7 +11,7 @@ describe('create', () => {
   it('works with a referenceYear', () => {
     const pmd = PlainMonthDayFns.create(6, 18, 'gregory', 2024)
     expectPlainMonthDayEquals(pmd, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 6,
       day: 18,
@@ -21,7 +21,7 @@ describe('create', () => {
   it('works without a referenceYear', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     expectPlainMonthDayEquals(pmd, {
-      calendar: 'iso8601',
+      calendarId: 'iso8601',
       month: 6,
       day: 18,
     })
@@ -48,7 +48,7 @@ describe('fromString', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.fromString('2024-06-18[u-ca=gregory]')
     expectPlainMonthDayEquals(pmd, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       month: 6,
       day: 18,
     })
@@ -63,7 +63,7 @@ describe('fromFields', () => {
       day: 18,
     })
     expectPlainMonthDayEquals(pmd, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       month: 6,
       day: 18,
     })

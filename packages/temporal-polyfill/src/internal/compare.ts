@@ -85,7 +85,7 @@ export function compareDurations<RA>(
 
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
 
   return compareBigNanos(
     markerToEpochNano(moveMarker(marker, durationSlots0)),
@@ -143,10 +143,10 @@ export function zonedDateTimesEqual(
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
     !!isTimeZoneIdsEqual(
-      zonedDateTimeSlots0.timeZone,
-      zonedDateTimeSlots1.timeZone,
+      zonedDateTimeSlots0.timeZoneId,
+      zonedDateTimeSlots1.timeZoneId,
     ) &&
-    zonedDateTimeSlots0.calendar === zonedDateTimeSlots1.calendar
+    zonedDateTimeSlots0.calendarId === zonedDateTimeSlots1.calendarId
   )
 }
 
@@ -156,7 +156,7 @@ export function plainDateTimesEqual(
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    plainDateTimeSlots0.calendar === plainDateTimeSlots1.calendar
+    plainDateTimeSlots0.calendarId === plainDateTimeSlots1.calendarId
   )
 }
 
@@ -166,7 +166,7 @@ export function plainDatesEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
-    plainDateSlots0.calendar === plainDateSlots1.calendar
+    plainDateSlots0.calendarId === plainDateSlots1.calendarId
   )
 }
 
@@ -176,7 +176,7 @@ export function plainYearMonthsEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    plainYearMonthSlots0.calendar === plainYearMonthSlots1.calendar
+    plainYearMonthSlots0.calendarId === plainYearMonthSlots1.calendarId
   )
 }
 
@@ -186,7 +186,7 @@ export function plainMonthDaysEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    plainMonthDaySlots0.calendar === plainMonthDaySlots1.calendar
+    plainMonthDaySlots0.calendarId === plainMonthDaySlots1.calendarId
   )
 }
 

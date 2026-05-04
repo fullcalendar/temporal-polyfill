@@ -72,8 +72,6 @@ export const getFields = memoize(computeMonthDayFields, WeakMap) as (
   record: Record,
 ) => Fields
 
-export const calendarId = getCalendarId as (record: Record) => string
-
 // Setters
 // -----------------------------------------------------------------------------
 

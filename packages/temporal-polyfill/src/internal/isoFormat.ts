@@ -96,8 +96,8 @@ export function formatZonedDateTimeIso(
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
-    zonedDateTimeSlots0.calendar,
-    zonedDateTimeSlots0.timeZone,
+    zonedDateTimeSlots0.calendarId,
+    zonedDateTimeSlots0.timeZoneId,
     zonedDateTimeSlots0.epochNanoseconds,
     ...displayOptions,
   )
@@ -109,7 +109,7 @@ export function formatPlainDateTimeIso(
 ): string {
   const displayOptions = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
-    plainDateTimeSlots0.calendar,
+    plainDateTimeSlots0.calendarId,
     plainDateTimeSlots0,
     ...displayOptions,
   )
@@ -120,7 +120,7 @@ export function formatPlainDateIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateIso(
-    plainDateSlots.calendar,
+    plainDateSlots.calendarId,
     plainDateSlots,
     refineDateDisplayOptions(options),
   )
@@ -131,7 +131,7 @@ export function formatPlainYearMonthIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
-    plainYearMonthSlots.calendar,
+    plainYearMonthSlots.calendarId,
     formatIsoYearMonthFields,
     plainYearMonthSlots,
     refineDateDisplayOptions(options),
@@ -143,7 +143,7 @@ export function formatPlainMonthDayIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
-    plainMonthDaySlots.calendar,
+    plainMonthDaySlots.calendarId,
     formatIsoMonthDayFields,
     plainMonthDaySlots,
     refineDateDisplayOptions(options),

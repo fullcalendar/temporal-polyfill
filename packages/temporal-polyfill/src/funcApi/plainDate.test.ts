@@ -16,7 +16,7 @@ describe('create', () => {
   it('works', () => {
     const pd = PlainDateFns.create(2024, 1, 1, 'hebrew')
     expectPlainDateEquals(pd, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -44,7 +44,7 @@ describe('fromString', () => {
   it('works', () => {
     const pd = PlainDateFns.fromString('2024-01-01[u-ca=hebrew]')
     expectPlainDateEquals(pd, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -61,7 +61,7 @@ describe('fromFields', () => {
       day: 20,
     })
     expectPlainDateEquals(pd, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -138,7 +138,7 @@ describe('withCalendar', () => {
     const pd0 = PlainDateFns.create(2024, 1, 1, 'hebrew')
     const pd1 = PlainDateFns.withCalendar(pd0, 'gregory')
     expectPlainDateEquals(pd1, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 1,
       day: 1,
@@ -326,8 +326,8 @@ describe('toZonedDateTime', () => {
     const pd = PlainDateFns.create(2024, 2, 27, 'hebrew')
     const zdt = PlainDateFns.toZonedDateTime(pd, 'America/New_York')
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709010000000000000n,
     })
   })
@@ -338,8 +338,8 @@ describe('toZonedDateTime', () => {
       timeZone: 'America/New_York',
     })
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709010000000000000n,
     })
   })
@@ -351,8 +351,8 @@ describe('toZonedDateTime', () => {
       plainTime: PlainTimeFns.create(12),
     })
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709053200000000000n,
     })
   })
@@ -363,7 +363,7 @@ describe('toPlainDateTime', () => {
     const pd = PlainDateFns.create(2024, 2, 27, 'hebrew')
     const pdt = PlainDateFns.toPlainDateTime(pd)
     expectPlainDateTimeEquals(pdt, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 2,
       day: 27,
@@ -374,7 +374,7 @@ describe('toPlainDateTime', () => {
     const pd = PlainDateFns.create(2024, 2, 27, 'hebrew')
     const pdt = PlainDateFns.toPlainDateTime(pd, PlainTimeFns.create(12, 30))
     expectPlainDateTimeEquals(pdt, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 2,
       day: 27,

@@ -117,8 +117,8 @@ export function addDurations<RA>(
   }
 
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendar)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
+  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendarId)
 
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
@@ -200,8 +200,8 @@ export function roundDuration<RA>(
 
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendar)
-  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendar)
+  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
+  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendarId)
 
   const endMarker = moveMarker(marker, slots)
 

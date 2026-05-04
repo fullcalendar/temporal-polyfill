@@ -100,13 +100,13 @@ export function moveZonedDateTime(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
-  const timeZoneImpl = queryTimeZone(zonedDateTimeSlots.timeZone)
+  const timeZoneImpl = queryTimeZone(zonedDateTimeSlots.timeZoneId)
 
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
       timeZoneImpl,
-      zonedDateTimeSlots.calendar,
+      zonedDateTimeSlots.calendarId,
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -120,14 +120,14 @@ export function movePlainDateTime(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots {
-  const { calendar } = plainDateTimeSlots
+  const { calendarId } = plainDateTimeSlots
   const isoDateTime = moveDateTime(
-    calendar,
+    calendarId,
     plainDateTimeSlots,
     doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     options,
   )
-  return createPlainDateTimeSlots(isoDateTime, calendar)
+  return createPlainDateTimeSlots(isoDateTime, calendarId)
 }
 
 export function movePlainDate(
@@ -136,15 +136,15 @@ export function movePlainDate(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  const { calendar } = plainDateSlots
+  const { calendarId } = plainDateSlots
   return createPlainDateSlots(
     moveDate(
-      calendar,
+      calendarId,
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
     ),
-    calendar,
+    calendarId,
   )
 }
 
@@ -166,7 +166,7 @@ export function movePlainYearMonth(
     throw new RangeError(errorMessages.invalidSmallUnits)
   }
 
-  const calendarId = plainYearMonthSlots.calendar
+  const calendarId = plainYearMonthSlots.calendarId
   const getDay = (isoDate: CalendarDateFields) =>
     queryCalendarDay(calendarId, isoDate)
 
@@ -218,7 +218,7 @@ function moveEpochNano(
 }
 
 /*
-timeZoneImpl must be derived from zonedEpochSlots.timeZone
+timeZoneImpl must be derived from zonedEpochSlots.timeZoneId
 */
 export function moveZonedEpochs(
   timeZoneImpl: TimeZoneImpl,

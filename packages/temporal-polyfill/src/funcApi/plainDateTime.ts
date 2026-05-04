@@ -184,8 +184,6 @@ export const getFields = memoize((record: Record): Fields => {
   }
 }, WeakMap)
 
-export const calendarId = getCalendarId as (record: Record) => string
-
 export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
   record: Record,
 ) => number
@@ -221,8 +219,8 @@ export function withFields(
   return mergePlainDateTimeFields(record, fields, options)
 }
 
-export function withCalendar(record: Record, calendar: string): Record {
-  return slotsWithCalendarId(record, refineCalendarId(calendar))
+export function withCalendar(record: Record, calendarId: string): Record {
+  return slotsWithCalendarId(record, refineCalendarId(calendarId))
 }
 
 export const withPlainDate = plainDateTimeWithPlainDate as (
@@ -237,7 +235,7 @@ export function withPlainTime(
   return createPlainDateTimeFromRefinedFields(
     plainDateTimeRecord,
     plainTimeRecord,
-    plainDateTimeRecord.calendar,
+    plainDateTimeRecord.calendarId,
   )
 }
 
@@ -288,12 +286,12 @@ export const compare = compareIsoDateTimeFields as (
 
 export const toZonedDateTime = bindArgs(plainDateTimeToZonedDateTime) as (
   record: Record,
-  timeZone: string,
+  timeZoneId: string,
   options?: ToZonedDateTimeOptions,
 ) => ZonedDateTimeFns.Record
 
 export function toPlainDate(record: Record): PlainDateFns.Record {
-  return createPlainDateSlots(record, record.calendar)
+  return createPlainDateSlots(record, record.calendarId)
 }
 
 export function toPlainTime(record: Record): PlainTimeFns.Record {
@@ -379,9 +377,9 @@ export function withDayOfYear(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveToDayOfYear(record.calendar, record, dayOfYear, options),
+    moveToDayOfYear(record.calendarId, record, dayOfYear, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -391,9 +389,9 @@ export function withDayOfMonth(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveToDayOfMonth(record.calendar, record, dayOfMonth, options),
+    moveToDayOfMonth(record.calendarId, record, dayOfMonth, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -403,9 +401,9 @@ export function withDayOfWeek(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveToDayOfWeek(record.calendar, record, dayOfWeek, options),
+    moveToDayOfWeek(record.calendarId, record, dayOfWeek, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -415,9 +413,9 @@ export function withWeekOfYear(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    slotsWithWeekOfYear(record.calendar, record, weekOfYear, options),
+    slotsWithWeekOfYear(record.calendarId, record, weekOfYear, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -430,9 +428,9 @@ export function addYears(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveByYears(record.calendar, record, years, options),
+    moveByYears(record.calendarId, record, years, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -442,25 +440,25 @@ export function addMonths(
   options?: OverflowOptions,
 ): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveByMonths(record.calendar, record, months, options),
+    moveByMonths(record.calendarId, record, months, options),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveByIsoWeeks(record.calendar, record, weeks),
+    moveByIsoWeeks(record.calendarId, record, weeks),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
 export function addDays(record: Record, days: number): Record {
   return createPlainDateTimeFromRefinedFields(
-    moveByDaysStrict(record.calendar, record, days),
+    moveByDaysStrict(record.calendarId, record, days),
     record,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -610,7 +608,7 @@ function moveByTimeUnit(
   return createPlainDateTimeFromRefinedFields(
     isoDateTime1,
     isoDateTime1,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -630,7 +628,7 @@ function roundToInterval(
   return createPlainDateTimeFromRefinedFields(
     isoDateTime,
     isoDateTime,
-    record.calendar,
+    record.calendarId,
   )
 }
 
@@ -651,7 +649,7 @@ function aligned(
     return createPlainDateTimeFromRefinedFields(
       isoDateTime,
       isoDateTime,
-      record0.calendar,
+      record0.calendarId,
     )
   }
 }

@@ -12,7 +12,7 @@ describe('create', () => {
   it('works with a referenceDay', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory', 5)
     expectPlainYearMonthEquals(pym, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 6,
       day: 5,
@@ -22,7 +22,7 @@ describe('create', () => {
   it('works without a referenceDay', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
     expectPlainYearMonthEquals(pym, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 6,
     })
@@ -49,7 +49,7 @@ describe('fromString', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.fromString('2024-06-01[u-ca=gregory]')
     expectPlainYearMonthEquals(pym, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 6,
     })
@@ -64,7 +64,7 @@ describe('fromFields', () => {
       month: 6,
     })
     expectPlainYearMonthEquals(pym, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 6,
     })
@@ -92,7 +92,7 @@ describe('withFields', () => {
       year: 2009,
     })
     expectPlainYearMonthEquals(pym1, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2009,
       month: 6,
     })

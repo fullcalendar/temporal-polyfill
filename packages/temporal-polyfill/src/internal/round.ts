@@ -111,7 +111,7 @@ export function roundZonedDateTime(
   slots: ZonedDateTimeSlots,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeSlots {
-  let { epochNanoseconds, timeZone, calendar } = slots
+  let { epochNanoseconds, timeZoneId, calendarId } = slots
   const [smallestUnit, roundingInc, roundingMode] =
     refineRoundingOptions(options)
 
@@ -119,7 +119,7 @@ export function roundZonedDateTime(
     return slots
   }
 
-  const timeZoneImpl = queryTimeZone(timeZone)
+  const timeZoneImpl = queryTimeZone(timeZoneId)
 
   if (smallestUnit === Unit.Day) {
     // no need for checking in-bounds. entire day of valid zdt is valid
@@ -150,7 +150,7 @@ export function roundZonedDateTime(
     )
   }
 
-  return createZonedDateTimeSlots(epochNanoseconds, timeZone, calendar)
+  return createZonedDateTimeSlots(epochNanoseconds, timeZoneId, calendarId)
 }
 
 /*
@@ -164,7 +164,7 @@ export function roundPlainDateTime(
     slots,
     ...(refineRoundingOptions(options) as [DayTimeUnit, number, RoundingMode]),
   )
-  return createPlainDateTimeSlots(roundedIsoDateTime, slots.calendar)
+  return createPlainDateTimeSlots(roundedIsoDateTime, slots.calendarId)
 }
 
 export function roundPlainTime(
@@ -185,7 +185,7 @@ export function roundPlainTime(
 // -----------------------------------------------------------------------------
 
 export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
-  const timeZoneImpl = queryTimeZone(slots.timeZone)
+  const timeZoneImpl = queryTimeZone(slots.timeZoneId)
 
   const isoDate = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const [isoFields0, isoFields1] = computeDayInterval(isoDate)
@@ -209,11 +209,11 @@ export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
 export function computeZonedStartOfDay(
   slots: ZonedDateTimeSlots,
 ): ZonedDateTimeSlots {
-  const { timeZone, calendar } = slots
-  const timeZoneImpl = queryTimeZone(timeZone)
+  const { timeZoneId, calendarId } = slots
+  const timeZoneImpl = queryTimeZone(timeZoneId)
   const epochNano1 = alignZonedEpoch(computeDayFloor, timeZoneImpl, slots)
   // nudging within-day guarantees in-bounds
-  return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
+  return createZonedDateTimeSlots(epochNano1, timeZoneId, calendarId)
 }
 
 /*

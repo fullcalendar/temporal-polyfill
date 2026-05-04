@@ -26,7 +26,7 @@ export function zonedDateTimeWithPlainTime(
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainTimeFields: TimeFields | undefined,
 ): ZonedDateTimeSlots {
-  const timeZoneId = zonedDateTimeSlots.timeZone
+  const timeZoneId = zonedDateTimeSlots.timeZoneId
   const timeZoneImpl = queryTimeZone(timeZoneId)
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
   const { offsetNanoseconds } = isoDateTime
@@ -52,7 +52,7 @@ export function zonedDateTimeWithPlainTime(
   return createZonedDateTimeSlots(
     epochNano,
     timeZoneId,
-    zonedDateTimeSlots.calendar,
+    zonedDateTimeSlots.calendarId,
   )
 }
 
@@ -60,14 +60,14 @@ export function zonedDateTimeWithPlainDate(
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainDateSlots: PlainDateSlots,
 ): ZonedDateTimeSlots {
-  const timeZoneId = zonedDateTimeSlots.timeZone
+  const timeZoneId = zonedDateTimeSlots.timeZoneId
   const timeZoneImpl = queryTimeZone(timeZoneId)
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
   const { offsetNanoseconds } = isoDateTime
 
   const calendar = getPreferredCalendarId(
-    zonedDateTimeSlots.calendar,
-    plainDateSlots.calendar,
+    zonedDateTimeSlots.calendarId,
+    plainDateSlots.calendarId,
   )
 
   const epochNano = getMatchingInstantFor(
@@ -90,8 +90,8 @@ export function plainDateTimeWithPlainDate(
   return createPlainDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
     getPreferredCalendarId(
-      plainDateTimeSlots.calendar,
-      plainDateSlots.calendar,
+      plainDateTimeSlots.calendarId,
+      plainDateSlots.calendarId,
     ),
   )
 }
@@ -99,18 +99,18 @@ export function plainDateTimeWithPlainDate(
 // Anything with calendar/timeZone
 // -----------------------------------------------------------------------------
 
-export function slotsWithCalendarId<S extends { calendar: string }>(
+export function slotsWithCalendarId<S extends { calendarId: string }>(
   slots: S,
   calendarId: string,
 ): S {
-  return { ...slots, calendar: calendarId }
+  return { ...slots, calendarId: calendarId }
 }
 
-export function slotsWithTimeZoneId<S extends { timeZone: string }>(
+export function slotsWithTimeZoneId<S extends { timeZoneId: string }>(
   slots: S,
   timeZoneId: string,
 ): S {
-  return { ...slots, timeZone: timeZoneId }
+  return { ...slots, timeZoneId: timeZoneId }
 }
 
 // -----------------------------------------------------------------------------

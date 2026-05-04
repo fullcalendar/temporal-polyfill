@@ -45,12 +45,12 @@ Returns a calendarId
 */
 export function refineCalendarArg(arg: CalendarArg): string {
   if (isObjectLike(arg)) {
-    const { calendar } = (getSlots(arg) || {}) as { calendar?: string }
-    if (!calendar) {
+    const { calendarId } = (getSlots(arg) || {}) as { calendarId?: string }
+    if (!calendarId) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
-    return calendar // other object already refined it
+    return calendarId // other object already refined it
   }
   return refineCalendarString(arg)
 }

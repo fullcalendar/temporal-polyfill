@@ -33,10 +33,10 @@ const clearTimeFields = bindArgs(
 export function computeYearFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number } {
-  const { calendar } = slots
-  const { year: year0 } = queryCalendarDateFields(calendar, slots)
+  const { calendarId } = slots
+  const { year: year0 } = queryCalendarDateFields(calendarId, slots)
   return {
-    ...epochMilliToIsoDateTime(queryCalendarEpochMilli(calendar, year0)),
+    ...epochMilliToIsoDateTime(queryCalendarEpochMilli(calendarId, year0)),
     year: year0,
   }
 }
@@ -44,14 +44,14 @@ export function computeYearFloor(
 export function computeMonthFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number; month: number } {
-  const { calendar } = slots
+  const { calendarId } = slots
   const { year: year0, month: month0 } = queryCalendarDateFields(
-    calendar,
+    calendarId,
     slots,
   )
   return {
     ...epochMilliToIsoDateTime(
-      queryCalendarEpochMilli(calendar, year0, month0),
+      queryCalendarEpochMilli(calendarId, year0, month0),
     ),
     year: year0,
     month: month0,
@@ -107,29 +107,29 @@ export function computeDayCeil(
 export function computeYearInterval(
   slots: AbstractDateSlots,
 ): IsoDateTimeInterval {
-  const { calendar } = slots
+  const { calendarId } = slots
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
   return [
     isoFields0,
-    epochMilliToIsoDateTime(queryCalendarEpochMilli(calendar, year1)),
+    epochMilliToIsoDateTime(queryCalendarEpochMilli(calendarId, year1)),
   ]
 }
 
 export function computeMonthInterval(
   slots: AbstractDateSlots,
 ): IsoDateTimeInterval {
-  const { calendar } = slots
+  const { calendarId } = slots
   const isoFields0 = computeMonthFloor(slots)
   const { year: year1, month: month1 } = addCalendarMonths(
-    calendar,
+    calendarId,
     isoFields0.year,
     isoFields0.month,
     1,
   )
   return [
     isoFields0,
-    epochMilliToIsoDateTime(queryCalendarEpochMilli(calendar, year1, month1)),
+    epochMilliToIsoDateTime(queryCalendarEpochMilli(calendarId, year1, month1)),
   ]
 }
 

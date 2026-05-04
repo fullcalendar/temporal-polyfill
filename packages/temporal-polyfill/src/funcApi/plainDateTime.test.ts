@@ -29,7 +29,7 @@ describe('create', () => {
       'hebrew',
     )
     expectPlainDateTimeEquals(pdt, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -60,7 +60,7 @@ describe('fromString', () => {
   it('works', () => {
     const pd = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
     expectPlainDateTimeEquals(pd, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -81,7 +81,7 @@ describe('fromFields', () => {
       minute: 30,
     })
     expectPlainDateTimeEquals(pdt, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 1,
       day: 1,
@@ -190,7 +190,7 @@ describe('withCalendar', () => {
     const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
     const pdt1 = PlainDateTimeFns.withCalendar(pdt0, 'gregory')
     expectPlainDateTimeEquals(pdt1, {
-      calendar: 'gregory',
+      calendarId: 'gregory',
       year: 2024,
       month: 1,
       day: 1,
@@ -417,8 +417,8 @@ describe('toZonedDateTime', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
     const zdt = PlainDateTimeFns.toZonedDateTime(pdt, 'America/New_York')
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -429,8 +429,8 @@ describe('toZonedDateTime', () => {
       disambiguation: 'later',
     })
     expectZonedDateTimeEquals(zdt, {
-      calendar: 'hebrew',
-      timeZone: 'America/New_York',
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
       epochNanoseconds: 1709055000000000000n,
     })
   })
@@ -441,7 +441,7 @@ describe('toPlainDate', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
     const pd = PlainDateTimeFns.toPlainDate(pdt)
     expectPlainDateEquals(pd, {
-      calendar: 'hebrew',
+      calendarId: 'hebrew',
       year: 2024,
       month: 2,
       day: 27,

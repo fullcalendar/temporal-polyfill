@@ -13,12 +13,12 @@ Returns a timeZoneId
 */
 export function refineTimeZoneArg(arg: TimeZoneArg): string {
   if (isObjectLike(arg)) {
-    const { timeZone } = (getSlots(arg) || {}) as { timeZone?: string }
-    if (!timeZone) {
+    const { timeZoneId } = (getSlots(arg) || {}) as { timeZoneId?: string }
+    if (!timeZoneId) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidTimeZone(arg as any)) // !!!
     }
-    return timeZone
+    return timeZoneId
   }
   return refineTimeZoneString(arg)
 }

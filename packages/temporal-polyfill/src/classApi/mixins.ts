@@ -27,23 +27,23 @@ import { mapPropNames } from '../internal/utils'
 // -----------------------------------------------------------------------------
 
 const calendarGetterQueries = {
-  era: (slots: any) => queryCalendarEraFields(slots.calendar, slots).era,
+  era: (slots: any) => queryCalendarEraFields(slots.calendarId, slots).era,
   eraYear: (slots: any) =>
-    queryCalendarEraFields(slots.calendar, slots).eraYear,
-  year: (slots: any) => queryCalendarDateFields(slots.calendar, slots).year,
-  month: (slots: any) => queryCalendarDateFields(slots.calendar, slots).month,
-  day: (slots: any) => queryCalendarDay(slots.calendar, slots),
-  monthCode: (slots: any) => queryCalendarMonthCode(slots.calendar, slots),
-  inLeapYear: (slots: any) => queryCalendarInLeapYear(slots.calendar, slots),
+    queryCalendarEraFields(slots.calendarId, slots).eraYear,
+  year: (slots: any) => queryCalendarDateFields(slots.calendarId, slots).year,
+  month: (slots: any) => queryCalendarDateFields(slots.calendarId, slots).month,
+  day: (slots: any) => queryCalendarDay(slots.calendarId, slots),
+  monthCode: (slots: any) => queryCalendarMonthCode(slots.calendarId, slots),
+  inLeapYear: (slots: any) => queryCalendarInLeapYear(slots.calendarId, slots),
   monthsInYear: (slots: any) =>
-    queryCalendarMonthsInYear(slots.calendar, slots),
-  daysInMonth: (slots: any) => queryCalendarDaysInMonth(slots.calendar, slots),
-  daysInYear: (slots: any) => queryCalendarDaysInYear(slots.calendar, slots),
+    queryCalendarMonthsInYear(slots.calendarId, slots),
+  daysInMonth: (slots: any) => queryCalendarDaysInMonth(slots.calendarId, slots),
+  daysInYear: (slots: any) => queryCalendarDaysInYear(slots.calendarId, slots),
   dayOfWeek: (slots: any) => computeIsoDayOfWeek(slots),
   daysInWeek: () => 7,
-  dayOfYear: (slots: any) => queryCalendarDayOfYear(slots.calendar, slots),
-  weekOfYear: (slots: any) => queryCalendarWeekOfYear(slots.calendar, slots),
-  yearOfWeek: (slots: any) => queryCalendarYearOfWeek(slots.calendar, slots),
+  dayOfYear: (slots: any) => queryCalendarDayOfYear(slots.calendarId, slots),
+  weekOfYear: (slots: any) => queryCalendarWeekOfYear(slots.calendarId, slots),
+  yearOfWeek: (slots: any) => queryCalendarYearOfWeek(slots.calendarId, slots),
 }
 
 function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
@@ -73,7 +73,7 @@ export const monthDayGetters = createCalendarGetters(
 )
 export const calendarIdGetters = {
   calendarId(slots: any): string {
-    return slots.calendar
+    return slots.calendarId // TODO: make smarter getter based on prop-name?
   },
 }
 

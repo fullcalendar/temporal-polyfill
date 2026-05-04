@@ -25,10 +25,13 @@ export function getCurrentInstant() {
 }
 
 export function getCurrentZonedDateTime(
-  calendar: string,
-  timeZone: string,
+  calendarId: string,
+  timeZoneId: string,
 ): ZonedDateTimeFns.Record {
-  return InstantFns.toZonedDateTime(getCurrentInstant(), { timeZone, calendar })
+  return InstantFns.toZonedDateTime(getCurrentInstant(), {
+    timeZone: timeZoneId,
+    calendar: calendarId,
+  })
 }
 
 // Equality
@@ -53,22 +56,22 @@ const timeDefaults = {
 
 const plainDateDefaults = {
   branding: 'PlainDate',
-  calendar: 'iso8601',
+  calendarId: 'iso8601',
 }
 
 const plainYearMonthDefaults = {
   branding: 'PlainYearMonth',
-  calendar: 'iso8601',
+  calendarId: 'iso8601',
 }
 
 const plainMonthDayDefaults = {
   branding: 'PlainMonthDay',
-  calendar: 'iso8601',
+  calendarId: 'iso8601',
 }
 
 const plainDateTimeDefaults = {
   branding: 'PlainDateTime',
-  calendar: 'iso8601',
+  calendarId: 'iso8601',
 }
 
 const plainTimeDefaults = {
@@ -77,8 +80,8 @@ const plainTimeDefaults = {
 
 const zonedDateTimeDefaults = {
   branding: 'ZonedDateTime',
-  calendar: 'iso8601',
-  timeZone: '',
+  calendarId: 'iso8601',
+  timeZoneId: '',
   epochNanoseconds: 0n,
 }
 
@@ -153,8 +156,8 @@ export function expectZonedDateTimeEquals(
   zdt: ZonedDateTimeFns.Record,
   slots: {
     epochNanoseconds: bigint | BigNano
-    timeZone: string
-    calendar?: string
+    timeZoneId: string
+    calendarId?: string
   },
 ): void {
   expectPropsEqualStrict(zdt, {
@@ -228,8 +231,8 @@ export function expectZonedDateTimesSimilar(
 ): void {
   expect(zdt0.branding).toBe('ZonedDateTime')
   expect(zdt1.branding).toBe('ZonedDateTime')
-  expect(zdt0.calendar).toBe(zdt1.calendar)
-  expect(zdt0.timeZone).toBe(zdt1.timeZone)
+  expect(zdt0.calendarId).toBe(zdt1.calendarId)
+  expect(zdt0.timeZoneId).toBe(zdt1.timeZoneId)
   expectEpochNanosSimilar(
     ZonedDateTimeFns.epochNanoseconds(zdt0),
     ZonedDateTimeFns.epochNanoseconds(zdt1),
@@ -242,7 +245,7 @@ export function expectPlainDateTimesSimilar(
 ): void {
   expect(pdt0.branding).toBe('PlainDateTime')
   expect(pdt1.branding).toBe('PlainDateTime')
-  expect(pdt0.calendar).toBe(pdt1.calendar)
+  expect(pdt0.calendarId).toBe(pdt1.calendarId)
   expectEpochNanosSimilar(
     bigNanoToBigInt(isoDateTimeToEpochNano(pdt0)!),
     bigNanoToBigInt(isoDateTimeToEpochNano(pdt1)!),
@@ -255,7 +258,7 @@ export function expectPlainDatesSimilar(
 ): void {
   expect(pd0.branding).toBe('PlainDate')
   expect(pd1.branding).toBe('PlainDate')
-  expect(pd0.calendar).toBe(pd1.calendar)
+  expect(pd0.calendarId).toBe(pd1.calendarId)
   expectEpochNanosSimilar(
     bigNanoToBigInt(isoToEpochNano(pd0)!),
     bigNanoToBigInt(isoToEpochNano(pd1)!),

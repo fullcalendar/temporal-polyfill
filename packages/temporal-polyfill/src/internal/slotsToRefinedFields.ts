@@ -38,10 +38,10 @@ export function computeZonedDateTimeEssentials(slots: ZonedDateTimeSlots): {
   } = isoDateTime
 
   const { year, month, day } = queryCalendarDateFields(
-    slots.calendar,
+    slots.calendarId,
     isoDateTime,
   )
-  const monthCode = computeMonthCode(slots.calendar, year, month)
+  const monthCode = computeMonthCode(slots.calendarId, year, month)
 
   return {
     year,
@@ -79,8 +79,8 @@ export function computeDateEssentials(slots: AbstractDateSlots): {
   monthCode: string
   day: number
 } {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
-  const monthCode = computeMonthCode(slots.calendar, year, month)
+  const { year, month, day } = queryCalendarDateFields(slots.calendarId, slots)
+  const monthCode = computeMonthCode(slots.calendarId, year, month)
   return { year, monthCode, day }
 }
 
@@ -88,8 +88,8 @@ export function computeYearMonthEssentials(slots: AbstractDateSlots): {
   year: number
   monthCode: string
 } {
-  const { year, month } = queryCalendarDateFields(slots.calendar, slots)
-  const monthCode = computeMonthCode(slots.calendar, year, month)
+  const { year, month } = queryCalendarDateFields(slots.calendarId, slots)
+  const monthCode = computeMonthCode(slots.calendarId, year, month)
   return { year, monthCode }
 }
 
@@ -97,8 +97,8 @@ export function computeMonthDayEssentials(slots: AbstractDateSlots): {
   monthCode: string
   day: number
 } {
-  const { year, month, day } = queryCalendarDateFields(slots.calendar, slots)
-  const monthCode = computeMonthCode(slots.calendar, year, month)
+  const { year, month, day } = queryCalendarDateFields(slots.calendarId, slots)
+  const monthCode = computeMonthCode(slots.calendarId, year, month)
   return { monthCode, day }
 }
 

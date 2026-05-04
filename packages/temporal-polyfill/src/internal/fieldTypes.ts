@@ -67,7 +67,9 @@ export type ZonedDateTimeLikeObject = DateTimeLikeObject & {
   timeZone: string
   offset?: string
 }
-// after dateFieldRefiners does its thing
+// After readAndRefineBagFields(), keys still match public Temporal bag fields,
+// but field-local values may already be refined. In particular, "offset" is
+// offset nanoseconds and "timeZone" is the refined time-zone ID string.
 export type ZonedDateTimeRefinedObject = DateTimeLikeObject & {
   timeZone: string
   offset?: number

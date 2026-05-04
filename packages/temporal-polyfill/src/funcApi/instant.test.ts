@@ -195,8 +195,8 @@ describe('toZonedDateTimeISO', () => {
     const zdt = InstantFns.toZonedDateTimeISO(inst, 'America/New_York')
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
     expect(zdt.branding).toBe('ZonedDateTime')
-    expect(zdt.timeZone).toBe('America/New_York')
-    expect(zdt.calendar).toBe('iso8601')
+    expect(zdt.timeZoneId).toBe('America/New_York')
+    expect(zdt.calendarId).toBe('iso8601')
   })
 })
 
@@ -209,8 +209,8 @@ describe('toZonedDateTime', () => {
     })
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
     expect(zdt.branding).toBe('ZonedDateTime')
-    expect(zdt.timeZone).toBe('America/New_York')
-    expect(zdt.calendar).toBe('hebrew')
+    expect(zdt.timeZoneId).toBe('America/New_York')
+    expect(zdt.calendarId).toBe('hebrew')
   })
 })
 

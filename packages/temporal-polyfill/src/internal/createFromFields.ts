@@ -104,7 +104,7 @@ export function refineMaybeZonedDateTimeObjectLike(
       fields.offset,
     )
 
-    return { epochNanoseconds, timeZone: timeZoneId }
+    return { epochNanoseconds, timeZoneId: timeZoneId }
   }
 
   return createPlainDateFromFields(calendarId, fields as any)

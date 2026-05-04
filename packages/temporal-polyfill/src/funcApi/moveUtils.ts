@@ -38,7 +38,7 @@ export function reversedMove<S>(
 // These functions validate input
 
 export function moveByYears(
-  calendar: string,
+  calendarId: string,
   isoDate: CalendarDateFields,
   years: number,
   options?: OverflowOptions,
@@ -49,7 +49,7 @@ export function moveByYears(
   }
   return epochMilliToIsoDateTime(
     addCalendarDateMonths(
-      calendar,
+      calendarId,
       isoDate,
       toStrictInteger(years),
       0,
@@ -59,7 +59,7 @@ export function moveByYears(
 }
 
 export function moveByMonths(
-  calendar: string,
+  calendarId: string,
   isoDate: CalendarDateFields,
   months: number,
   options?: OverflowOptions,
@@ -70,7 +70,7 @@ export function moveByMonths(
   }
   return epochMilliToIsoDateTime(
     addCalendarDateMonths(
-      calendar,
+      calendarId,
       isoDate,
       0,
       toStrictInteger(months),
@@ -99,13 +99,13 @@ export function moveByDaysStrict(
 // -----------------------------------------------------------------------------
 
 export function moveToDayOfYear(
-  calendar: string,
+  calendarId: string,
   isoDate: CalendarDateFields,
   dayOfYear: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const daysInYear = queryCalendarDaysInYear(calendar, isoDate)
+  const daysInYear = queryCalendarDaysInYear(calendarId, isoDate)
   const normDayOfYear = clampEntity(
     dayOfMonthName,
     toInteger(dayOfYear, dayOfMonthName),
@@ -114,18 +114,18 @@ export function moveToDayOfYear(
     overflow,
   )
 
-  const currentDayOfYear = queryCalendarDayOfYear(calendar, isoDate)
+  const currentDayOfYear = queryCalendarDayOfYear(calendarId, isoDate)
   return moveByDays(isoDate, normDayOfYear - currentDayOfYear)
 }
 
 export function moveToDayOfMonth(
-  calendar: string,
+  calendarId: string,
   isoDate: CalendarDateFields,
   day: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const daysInMonth = queryCalendarDaysInMonth(calendar, isoDate)
+  const daysInMonth = queryCalendarDaysInMonth(calendarId, isoDate)
   const normDayOfMonth = clampEntity(
     dayFieldName,
     toInteger(day, dayFieldName),
@@ -135,7 +135,7 @@ export function moveToDayOfMonth(
   )
 
   return moveToDayOfMonthUnsafe(
-    (isoDate) => queryCalendarDay(calendar, isoDate),
+    (isoDate) => queryCalendarDay(calendarId, isoDate),
     isoDate,
     normDayOfMonth,
   )
@@ -160,14 +160,14 @@ export function moveToDayOfWeek(
 
 // TODO: fix weird "slots" name
 export function slotsWithWeekOfYear(
-  calendar: string,
+  calendarId: string,
   isoDate: CalendarDateFields,
   weekOfYear: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const { weekOfYear: currentWeekOfYear, weeksInYear } =
-    queryCalendarWeekFields(calendar, isoDate)
+    queryCalendarWeekFields(calendarId, isoDate)
 
   if (currentWeekOfYear === undefined) {
     throw new RangeError(errorMessages.unsupportedWeekNumbers)
@@ -181,5 +181,5 @@ export function slotsWithWeekOfYear(
     overflow,
   )
 
-  return moveByIsoWeeks(calendar, isoDate, normWeekOfYear - currentWeekOfYear)
+  return moveByIsoWeeks(calendarId, isoDate, normWeekOfYear - currentWeekOfYear)
 }

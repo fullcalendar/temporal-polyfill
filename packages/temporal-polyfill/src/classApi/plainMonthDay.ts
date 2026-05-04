@@ -45,7 +45,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       },
       toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
         return createPlainDate(
-          convertPlainMonthDayToDate(slots.calendar, this, bag),
+          convertPlainMonthDayToDate(slots.calendarId, this, bag),
         )
       },
       toLocaleString(
@@ -89,7 +89,7 @@ export function toPlainMonthDaySlots(
       return slots as PlainMonthDaySlots
     }
 
-    const calendarIdMaybe = extractCalendarIdFromBag(arg as PlainMonthDaySlots)
+    const calendarIdMaybe = extractCalendarIdFromBag(arg as { calendar?: any })
     const calendarId = calendarIdMaybe || isoCalendarId
 
     return refinePlainMonthDayObjectLike(
