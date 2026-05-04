@@ -41,41 +41,57 @@ import { NumberSign, clampEntity } from './utils'
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 const maxDurationSeconds = 2 ** 53
 
-const maxTimeFieldByUnit: bigint[] = [
-  computeMaxTimeField(Unit.Nanosecond),
-  computeMaxTimeField(Unit.Microsecond),
-  computeMaxTimeField(Unit.Millisecond),
-  BigInt(Number.MAX_SAFE_INTEGER),
+// For second-and-smaller units, units-per-day has a useful decimal shape:
+//
+//   seconds/day      = 864 * 10^2
+//   milliseconds/day = 864 * 10^5
+//   microseconds/day = 864 * 10^8
+//   nanoseconds/day  = 864 * 10^11
+//
+// That lets us convert a BigNano's day bucket into a huge unit field without
+// first doing a lossy multiplication like `days * 86_400_000_000_000`.
+const dayTimeFieldDecimalShiftByUnit = [
+  11, // nanosecond
+  8, // microsecond
+  5, // millisecond
+  2, // second
 ]
 
-function computeMaxTimeField(unit: TimeUnit): bigint {
-  const unitsPerSecond = nanoInSec / unitNanoMap[unit]
-  let lower = BigInt(0)
-  let upper = BigInt(2) ** BigInt(53)
-  upper = upper * BigInt(unitsPerSecond) - BigInt(1)
+function bigNanoToLargeTimeField(bigNano: BigNano, unit: TimeUnit): number {
+  const [days, timeNano] = bigNano
+  const sign = Math.sign(days || timeNano)
 
-  while (lower < upper) {
-    const middle = (lower + upper + BigInt(1)) >> BigInt(1)
-
-    if (Number(middle) / unitsPerSecond < maxDurationSeconds) {
-      lower = middle
-    } else {
-      upper = middle - BigInt(1)
-    }
+  if (!sign) {
+    return 0
   }
 
-  return lower
-}
+  const unitNano = unitNanoMap[unit]
+  const decimalShift = dayTimeFieldDecimalShiftByUnit[unit]
+  const decimalBase = 10 ** decimalShift
 
-function truncBigNanoToBigInt(bigNano: BigNano, divisorNano: number): bigint {
-  return (
-    BigInt(bigNano[0]) * BigInt(nanoInUtcDay / divisorNano) +
-    BigInt(Math.trunc(bigNano[1] / divisorNano))
-  )
-}
+  // BigNano stores the day-sized part separately from the within-day remainder.
+  // Work with absolute values so truncation below behaves the same for positive
+  // and negative durations, then reapply the sign at the end.
+  const absDays = Math.abs(days)
+  const absTimeNano = Math.abs(timeNano)
 
-function absBigInt(num: bigint): bigint {
-  return num < BigInt(0) ? -num : num
+  // Convert the within-day nanoseconds into the requested unit. This value is
+  // bounded by one day, so ordinary number arithmetic is still precise enough.
+  const timeUnits = Math.trunc(absTimeNano / unitNano)
+
+  // Instead of computing:
+  //
+  //   absDays * (864 * 10^decimalShift) + timeUnits
+  //
+  // split it at the decimal boundary. `absDays * 864` stays small enough to be
+  // a safe integer for any valid Temporal duration, and `timeUnits` supplies
+  // the trailing decimalShift digits plus any carry into the high part.
+  const high = absDays * 864 + Math.trunc(timeUnits / decimalBase)
+  const low = timeUnits % decimalBase
+
+  // Let Number's string parser perform the one unavoidable float64 rounding
+  // step from the exact decimal integer to the public Duration field value.
+  return sign * Number(String(high) + String(low).padStart(decimalShift, '0'))
 }
 
 // Adding
@@ -356,23 +372,34 @@ export function nanoToDurationDayTimeFields(
     durationFieldNamesAsc,
   )
 
-  dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
-    days * (nanoInUtcDay / unitNanoMap[largestUnit])
+  if (largestUnit <= Unit.Second) {
+    // For sub-minute largest units, the public largest field can be far larger
+    // than Number.MAX_SAFE_INTEGER. Compute that field from the full BigNano
+    // tuple in one place so we do not lose precision by adding a huge day
+    // contribution to the small within-day remainder.
+    dayTimeFields[durationFieldNamesAsc[largestUnit]] =
+      bigNanoToLargeTimeField(bigNano, largestUnit as TimeUnit)
+  } else {
+    // Hour/minute/day outputs stay well within safe integer arithmetic for the
+    // valid duration range, so the simple day contribution is sufficient here.
+    dayTimeFields[durationFieldNamesAsc[largestUnit]]! +=
+      days * (nanoInUtcDay / unitNanoMap[largestUnit])
+  }
 
   const largestUnitVal = dayTimeFields[durationFieldNamesAsc[largestUnit]]!
 
-  // Duration fields are stored as float64 values. For second-and-smaller
-  // largest units, validate the exact pre-rounded integer against the largest
-  // field value whose Number conversion still stays below the 2^53-seconds
-  // limit. This preserves large float64-representable microsecond diffs while
-  // still rejecting out-of-range round() results.
+  // Duration fields are stored as float64 values. The conversion above may
+  // produce an unsafe-but-finite integer Number for millisecond/microsecond/
+  // nanosecond largest units, which is allowed. What is not allowed is a
+  // returned largest field whose Number value has rounded up to the 2^53-second
+  // boundary.
   if (!Number.isFinite(largestUnitVal)) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
   if (
     largestUnit <= Unit.Second &&
-    absBigInt(truncBigNanoToBigInt(bigNano, unitNanoMap[largestUnit])) >
-      maxTimeFieldByUnit[largestUnit as TimeUnit]
+    Math.abs(largestUnitVal) / (nanoInSec / unitNanoMap[largestUnit]) >=
+      maxDurationSeconds
   ) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
