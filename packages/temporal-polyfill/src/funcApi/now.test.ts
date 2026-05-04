@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as NowFns from '../../dist/fns/now'
 import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
+import '../intl-calendars'
 import {
   expectInstantsSimilar,
   expectPlainDateTimesSimilar,

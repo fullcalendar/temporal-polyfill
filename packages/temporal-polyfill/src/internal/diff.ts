@@ -4,11 +4,7 @@ import {
   compareBigNanos,
   diffBigNanos,
 } from './bigNano'
-import {
-  getCalendarLeapMonthMeta,
-  queryCalendarDay,
-  queryIntlCalendarMaybe,
-} from './calendarQuery'
+import { getCalendarLeapMonthMeta, queryCalendarDay } from './calendarQuery'
 import { isTimeZoneIdsEqual } from './compare'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
@@ -17,6 +13,11 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import {
+  ExternalCalendar,
+  getExternalCalendar,
+  isCoreCalendarId,
+} from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import {
   CalendarDateFields,
@@ -25,23 +26,15 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import {
-  IntlCalendar,
-  computeIntlDateFields,
-  computeIntlDaysInMonth,
-  computeIntlLeapMonth,
-  computeIntlMonthCodeParts,
-  computeIntlMonthsInYear,
-} from './intlCalendar'
-import {
+  addIsoMonths,
   computeIsoDateFields,
   computeIsoDaysInMonth,
   computeIsoMonthCodeParts,
+  diffIsoMonthSlots,
   isoMonthsInYear,
 } from './isoMath'
 import {
   addDateMonths,
-  addIntlMonths,
-  addIsoMonths,
   computeYearMovedMonth,
   moveByDays,
   moveDate,
@@ -559,7 +552,9 @@ export function diffCalendarDates(
   endIsoDate: CalendarDateFields,
   largestUnit: Unit,
 ): DurationFields {
-  const intlCalendar = queryIntlCalendarMaybe(calendarId)
+  const externalCalendar = isCoreCalendarId(calendarId)
+    ? undefined
+    : getExternalCalendar(calendarId)
 
   if (largestUnit <= Unit.Week) {
     let weeks = 0
@@ -572,17 +567,17 @@ export function diffCalendarDates(
     return { ...durationFieldDefaults, weeks, days }
   }
 
-  const yearMonthDayStart = intlCalendar
-    ? computeIntlDateFields(intlCalendar, startIsoDate)
+  const yearMonthDayStart = externalCalendar
+    ? externalCalendar.computeDateFields(startIsoDate)
     : computeIsoDateFields(startIsoDate)
-  const yearMonthDayEnd = intlCalendar
-    ? computeIntlDateFields(intlCalendar, endIsoDate)
+  const yearMonthDayEnd = externalCalendar
+    ? externalCalendar.computeDateFields(endIsoDate)
     : computeIsoDateFields(endIsoDate)
 
   if (largestUnit === Unit.Month) {
     const [months, days] = diffCalendarMonthDay(
       calendarId,
-      intlCalendar,
+      externalCalendar,
       startIsoDate,
       endIsoDate,
       yearMonthDayStart,
@@ -592,7 +587,7 @@ export function diffCalendarDates(
   }
 
   const [years, months, days] = diffCalendarYearMonthDay(
-    intlCalendar,
+    externalCalendar,
     yearMonthDayStart,
     yearMonthDayEnd,
   )
@@ -602,7 +597,7 @@ export function diffCalendarDates(
 
 function diffCalendarMonthDay(
   calendarId: string,
-  intlCalendar: IntlCalendar | undefined,
+  externalCalendar: ExternalCalendar | undefined,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
   startCalendarDateFields: CalendarDateFields,
@@ -622,8 +617,8 @@ function diffCalendarMonthDay(
   // For largestUnit: "months", Temporal counts concrete calendar month slots.
   // In lunisolar calendars this must include inserted leap months instead of
   // collapsing everything to 12 month-code numbers per calendar year.
-  let months = intlCalendar
-    ? diffIntlMonthSlots(intlCalendar, year0, month0, year1, month1)
+  let months = externalCalendar
+    ? externalCalendar.diffMonthSlots(year0, month0, year1, month1)
     : diffIsoMonthSlots(year0, month0, year1, month1)
 
   let anchorIsoDate = epochMilliToIsoDateTime(
@@ -634,15 +629,14 @@ function diffCalendarMonthDay(
   // month. This deliberately uses the full date comparison, which avoids
   // treating a constrained 30th -> 29th move as a complete calendar month.
   const anchorCompare = compareIsoDate(anchorIsoDate, endIsoDate)
-  const anchorCalendarDateFields = intlCalendar
-    ? computeIntlDateFields(intlCalendar, anchorIsoDate)
+  const anchorCalendarDateFields = externalCalendar
+    ? externalCalendar.computeDateFields(anchorIsoDate)
     : computeIsoDateFields(anchorIsoDate)
   if (
     anchorCompare === sign ||
     (anchorCompare === 0 &&
       anchorCalendarDateFields.day !== day0 &&
-      !isConstrainedFinalIntercalaryMonthDiff(
-        intlCalendar,
+      !externalCalendar?.isConstrainedFinalIntercalaryMonthDiff(
         sign,
         year0,
         month0,
@@ -659,80 +653,6 @@ function diffCalendarMonthDay(
   }
 
   return [months, diffDays(anchorIsoDate, endIsoDate)]
-}
-
-function isConstrainedFinalIntercalaryMonthDiff(
-  intlCalendar: IntlCalendar | undefined,
-  sign: number,
-  year0: number,
-  month0: number,
-  day0: number,
-  year1: number,
-  month1: number,
-  day1: number,
-): boolean {
-  if (!intlCalendar) {
-    return false
-  }
-
-  const monthsInYear0 = computeIntlMonthsInYear(intlCalendar, year0)
-  const monthsInYear1 = computeIntlMonthsInYear(intlCalendar, year1)
-
-  // Coptic/Ethiopic-style calendars have a real final intercalary month every
-  // year: M13 exists in both common and leap years, but its length is 5 or 6
-  // days. Calendar date diffing determines the year/month span before
-  // constraining the day, so Coptic 1739-M13-06.since(1738-M13-05,
-  // { largestUnit: "months" }) should be 13 months, not 12 months + 6 days:
-  // adding -13 months from 1739-M13-06 constrains exactly to 1738-M13-05.
-  // Ordinary Jan 31 -> Feb 28 wrapping still backs off because it changes
-  // monthCode instead of staying on the same final intercalary month.
-  return (
-    sign < 0 &&
-    monthsInYear0 > isoMonthsInYear &&
-    monthsInYear1 > isoMonthsInYear &&
-    month0 === monthsInYear0 &&
-    month1 === monthsInYear1 &&
-    day0 === computeIntlDaysInMonth(intlCalendar, year0, month0) &&
-    day1 === computeIntlDaysInMonth(intlCalendar, year1, month1) &&
-    day0 > day1
-  )
-}
-
-function diffIsoMonthSlots(
-  year0: number,
-  month0: number,
-  year1: number,
-  month1: number,
-): number {
-  return (year1 - year0) * isoMonthsInYear + month1 - month0
-}
-
-function diffIntlMonthSlots(
-  intlCalendar: IntlCalendar,
-  year0: number,
-  month0: number,
-  year1: number,
-  month1: number,
-): number {
-  const cmp = compareYearMonth(year0, month0, year1, month1)
-
-  if (!cmp) {
-    return 0
-  }
-
-  if (year0 === year1) {
-    return month1 - month0
-  }
-
-  if (cmp < 0) {
-    let months = computeIntlMonthsInYear(intlCalendar, year0) - month0 + month1
-    for (let year = year0 + 1; year < year1; year++) {
-      months += computeIntlMonthsInYear(intlCalendar, year)
-    }
-    return months
-  }
-
-  return -diffIntlMonthSlots(intlCalendar, year1, month1, year0, month0)
 }
 
 // comparison util used ONLY in this file
@@ -758,7 +678,7 @@ function compareIsoDate(
 }
 
 function diffCalendarYearMonthDay(
-  intlCalendar: IntlCalendar | undefined,
+  externalCalendar: ExternalCalendar | undefined,
   startCalendarDateFields: CalendarDateFields,
   endCalendarDateFields: CalendarDateFields,
 ): [yearDiff: number, monthDiff: number, dayDiff: number] {
@@ -770,8 +690,8 @@ function diffCalendarYearMonthDay(
 
   if (yearDiff || monthDiff) {
     const sign = Math.sign(yearDiff || monthDiff)
-    let daysInMonth1 = intlCalendar
-      ? computeIntlDaysInMonth(intlCalendar, year1, month1)
+    let daysInMonth1 = externalCalendar
+      ? externalCalendar.computeDaysInMonth(year1, month1)
       : computeIsoDaysInMonth(year1, month1)
     let dayCorrect = 0
 
@@ -780,14 +700,14 @@ function diffCalendarYearMonthDay(
     // Compare against the original day, not the truncated target-month day.
     if (Math.sign(day1 - day0) === -sign) {
       const origDaysInMonth1 = daysInMonth1
-      const yearMonthParts = intlCalendar
-        ? addIntlMonths(intlCalendar, year1, month1, -sign)
+      const yearMonthParts = externalCalendar
+        ? externalCalendar.addMonths(year1, month1, -sign)
         : addIsoMonths(year1, month1, -sign)
       ;({ year: year1, month: month1 } = yearMonthParts)
       yearDiff = year1 - year0
       monthDiff = month1 - month0
-      daysInMonth1 = intlCalendar
-        ? computeIntlDaysInMonth(intlCalendar, year1, month1)
+      daysInMonth1 = externalCalendar
+        ? externalCalendar.computeDaysInMonth(year1, month1)
         : computeIsoDaysInMonth(year1, month1)
 
       dayCorrect = sign < 0 ? -origDaysInMonth1 : daysInMonth1
@@ -797,14 +717,14 @@ function diffCalendarYearMonthDay(
     dayDiff = day1 - day0Trunc + dayCorrect
 
     if (yearDiff) {
-      const [monthCodeNumber0, isLeapMonth0] = intlCalendar
-        ? computeIntlMonthCodeParts(intlCalendar, year0, month0)
+      const [monthCodeNumber0, isLeapMonth0] = externalCalendar
+        ? externalCalendar.computeMonthCodeParts(year0, month0)
         : computeIsoMonthCodeParts(month0)
-      const [monthCodeNumber1, isLeapMonth1] = intlCalendar
-        ? computeIntlMonthCodeParts(intlCalendar, year1, month1)
+      const [monthCodeNumber1, isLeapMonth1] = externalCalendar
+        ? externalCalendar.computeMonthCodeParts(year1, month1)
         : computeIsoMonthCodeParts(month1)
       monthDiff = diffBalancedYearMonths(
-        intlCalendar,
+        externalCalendar,
         sign,
         monthCodeNumber0,
         isLeapMonth0,
@@ -815,33 +735,35 @@ function diffCalendarYearMonthDay(
       if (Math.sign(monthDiff) === -sign) {
         const monthCorrect =
           sign < 0 &&
-          -(intlCalendar
-            ? computeIntlMonthsInYear(intlCalendar, year1)
+          -(externalCalendar
+            ? externalCalendar.computeMonthsInYear(year1)
             : isoMonthsInYear)
 
         year1 -= sign
         yearDiff = year1 - year0
 
         const month0Trunc = computeYearMovedMonth(
-          intlCalendar,
+          externalCalendar,
           monthCodeNumber0,
           isLeapMonth0,
-          intlCalendar ? computeIntlLeapMonth(intlCalendar, year1) : undefined,
+          externalCalendar
+            ? externalCalendar.computeLeapMonth(year1)
+            : undefined,
           Overflow.Constrain,
         )
         monthDiff =
           month1 -
           month0Trunc +
           (monthCorrect ||
-            (intlCalendar
-              ? computeIntlMonthsInYear(intlCalendar, year1)
+            (externalCalendar
+              ? externalCalendar.computeMonthsInYear(year1)
               : isoMonthsInYear))
-      } else if (intlCalendar) {
+      } else if (externalCalendar) {
         const month0Projected = computeYearMovedMonth(
-          intlCalendar,
+          externalCalendar,
           monthCodeNumber0,
           isLeapMonth0,
-          computeIntlLeapMonth(intlCalendar, year1),
+          externalCalendar.computeLeapMonth(year1),
           Overflow.Constrain,
         )
 
@@ -851,8 +773,7 @@ function diffCalendarYearMonthDay(
         // target month. This matters for variable-leap calendars: M07 in a
         // year with an inserted M05L is ordinal month 8, so M01 - M07 is
         // seven month slots, not six month-code numbers.
-        monthDiff = diffIntlMonthSlots(
-          intlCalendar,
+        monthDiff = externalCalendar.diffMonthSlots(
           year1,
           month0Projected,
           year1,
@@ -866,15 +787,15 @@ function diffCalendarYearMonthDay(
 }
 
 function diffBalancedYearMonths(
-  intlCalendar: IntlCalendar | undefined,
+  externalCalendar: ExternalCalendar | undefined,
   sign: number,
   monthCodeNumber0: number,
   isLeapMonth0: boolean,
   monthCodeNumber1: number,
   isLeapMonth1: boolean,
 ): number {
-  const leapMonthMeta = intlCalendar
-    ? getCalendarLeapMonthMeta(intlCalendar.id)
+  const leapMonthMeta = externalCalendar
+    ? getCalendarLeapMonthMeta(externalCalendar.id)
     : undefined
 
   if (leapMonthMeta !== undefined && leapMonthMeta < 0) {

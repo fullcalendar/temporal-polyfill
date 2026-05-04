@@ -3,6 +3,7 @@
 
 import { join as joinPaths } from 'path'
 import runTest262 from '@js-temporal/temporal-test262-runner'
+import { mkdir, readFile, writeFile } from 'fs/promises'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { extensions } from './lib/config.js'
@@ -107,10 +108,18 @@ yargs(hideBin(process.argv))
       const globalIsMin = options.min || process.env.TEST262_MIN
 
       // from package root
-      const polyfillPath = esmOpt
+      const globalPolyfillPath = esmOpt
         ? './dist/.bundled/global' +
           (esmOptIsMin ? '.' + esmOpt + extensions.iifeMin : extensions.iife)
         : './dist/global' + (globalIsMin ? extensions.iifeMin : extensions.iife)
+      const intlCalendarsPath =
+        './dist/intl-calendars' +
+        (globalIsMin ? extensions.iifeMin : extensions.iife)
+      const polyfillPath = await writeTest262PolyfillBootstrap(
+        pkgDir,
+        globalPolyfillPath,
+        intlCalendarsPath,
+      )
 
       console.log(`Testing ${polyfillPath} with Node ${currentNodeVersion} ...`)
 
@@ -145,4 +154,22 @@ function filterEnv(oldEnv) {
   }
 
   return newEnv
+}
+
+async function writeTest262PolyfillBootstrap(
+  pkgDir,
+  globalPolyfillPath,
+  intlCalendarsPath,
+) {
+  const bootstrapPath = './dist/.test262/polyfill.js'
+  const banner = (path) => `\n// ${path}\n`
+  const code =
+    banner(globalPolyfillPath) +
+    (await readFile(joinPaths(pkgDir, globalPolyfillPath), 'utf8')) +
+    banner(intlCalendarsPath) +
+    (await readFile(joinPaths(pkgDir, intlCalendarsPath), 'utf8'))
+
+  await mkdir(joinPaths(pkgDir, 'dist/.test262'), { recursive: true })
+  await writeFile(joinPaths(pkgDir, bootstrapPath), code)
+  return bootstrapPath
 }

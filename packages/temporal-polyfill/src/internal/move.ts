@@ -1,12 +1,6 @@
 import { BigNano, addBigNanos } from './bigNano'
 import { monthCodeNumberToMonth } from './calendarMonthCode'
-import {
-  getCalendarLeapMonthMeta,
-  isIsoBasedCalendarId,
-  queryCalendarDay,
-  queryIntlCalendarMaybe,
-  queryIsoYearOffset,
-} from './calendarQuery'
+import { getCalendarLeapMonthMeta, queryCalendarDay } from './calendarQuery'
 import {
   DurationFields,
   durationFieldNamesAsc,
@@ -22,6 +16,11 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
+  ExternalCalendar,
+  getExternalCalendar,
+  isCoreCalendarId,
+} from './externalCalendar'
+import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
@@ -29,16 +28,7 @@ import {
 import type { CalendarYearMonthFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import {
-  IntlCalendar,
-  computeIntlDateFields,
-  computeIntlDaysInMonth,
-  computeIntlEpochMilli,
-  computeIntlLeapMonth,
-  computeIntlMonthCodeParts,
-  computeIntlMonthsInYear,
-  queryIntlCalendar,
-} from './intlCalendar'
-import {
+  addIsoMonths,
   computeIsoDateFields,
   computeIsoDaysInMonth,
   computeIsoMonthCodeParts,
@@ -76,7 +66,7 @@ import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'
 import { Unit, milliInDay } from './units'
-import { clampEntity, divTrunc, modTrunc } from './utils'
+import { clampEntity } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -374,7 +364,9 @@ export function dateAddWithOverflow(
   durationFields: DurationFields,
   overflow: Overflow,
 ): CalendarDateFields {
-  const intlCalendar = queryIntlCalendarMaybe(calendarId)
+  const externalCalendar = isCoreCalendarId(calendarId)
+    ? undefined
+    : getExternalCalendar(calendarId)
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
@@ -391,7 +383,7 @@ export function dateAddWithOverflow(
       years,
       months,
       overflow,
-      intlCalendar,
+      externalCalendar,
     )
   } else if (weeks || days) {
     epochMilli = isoDateToEpochMilli(isoDateFields)
@@ -423,15 +415,9 @@ export function addCalendarMonths(
   month: number,
   monthDelta: number,
 ): CalendarYearMonthFields {
-  const isoYearOffset = queryIsoYearOffset(calendarId)
-  if (isoYearOffset !== undefined) {
-    const res = addIsoMonths(year - isoYearOffset, month, monthDelta)
-    return { year: res.year + isoYearOffset, month: res.month }
-  }
-
-  return isIsoBasedCalendarId(calendarId)
+  return isCoreCalendarId(calendarId)
     ? addIsoMonths(year, month, monthDelta)
-    : addIntlMonths(queryIntlCalendar(calendarId), year, month, monthDelta)
+    : getExternalCalendar(calendarId).addMonths(year, month, monthDelta)
 }
 
 export function addCalendarDateMonths(
@@ -450,39 +436,41 @@ export function addDateMonths(
   years: number,
   months: number,
   overflow: Overflow,
-  intlCalendar = queryIntlCalendarMaybe(calendarId),
+  externalCalendar = isCoreCalendarId(calendarId)
+    ? undefined
+    : getExternalCalendar(calendarId),
 ): number {
-  const dateParts = intlCalendar
-    ? computeIntlDateFields(intlCalendar, isoDateFields)
+  const dateParts = externalCalendar
+    ? externalCalendar.computeDateFields(isoDateFields)
     : computeIsoDateFields(isoDateFields)
   let { year, month, day } = dateParts
 
   if (years) {
-    const [monthCodeNumber, isLeapMonth] = intlCalendar
-      ? computeIntlMonthCodeParts(intlCalendar, year, month)
+    const [monthCodeNumber, isLeapMonth] = externalCalendar
+      ? externalCalendar.computeMonthCodeParts(year, month)
       : computeIsoMonthCodeParts(month)
     year += years
     month = computeYearMovedMonth(
-      intlCalendar,
+      externalCalendar,
       monthCodeNumber,
       isLeapMonth,
-      intlCalendar ? computeIntlLeapMonth(intlCalendar, year) : undefined,
+      externalCalendar ? externalCalendar.computeLeapMonth(year) : undefined,
       overflow,
     )
     month = clampEntity(
       'month',
       month,
       1,
-      intlCalendar
-        ? computeIntlMonthsInYear(intlCalendar, year)
+      externalCalendar
+        ? externalCalendar.computeMonthsInYear(year)
         : isoMonthsInYear,
       overflow,
     )
   }
 
   if (months) {
-    const yearMonthParts = intlCalendar
-      ? addIntlMonths(intlCalendar, year, month, months)
+    const yearMonthParts = externalCalendar
+      ? externalCalendar.addMonths(year, month, months)
       : addIsoMonths(year, month, months)
     ;({ year, month } = yearMonthParts)
   }
@@ -491,27 +479,27 @@ export function addDateMonths(
     'day',
     day,
     1,
-    intlCalendar
-      ? computeIntlDaysInMonth(intlCalendar, year, month)
+    externalCalendar
+      ? externalCalendar.computeDaysInMonth(year, month)
       : computeIsoDaysInMonth(year, month),
     overflow,
   )
 
-  return intlCalendar
-    ? computeIntlEpochMilli(intlCalendar, year, month, day)
+  return externalCalendar
+    ? externalCalendar.computeEpochMilli(year, month, day)
     : isoArgsToEpochMilli(year, month, day)!
 }
 
 export function computeYearMovedMonth(
-  intlCalendar: IntlCalendar | undefined,
+  externalCalendar: ExternalCalendar | undefined,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   targetLeapMonth: number | undefined,
   overflow: Overflow,
 ): number {
   if (isLeapMonth) {
-    const leapMonthMeta = intlCalendar
-      ? getCalendarLeapMonthMeta(intlCalendar.id)
+    const leapMonthMeta = externalCalendar
+      ? getCalendarLeapMonthMeta(externalCalendar.id)
       : undefined
 
     // Year arithmetic preserves the source monthCode. If the exact leap-month
@@ -535,54 +523,4 @@ export function computeYearMovedMonth(
   }
 
   return monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)
-}
-
-export function addIsoMonths(
-  year: number,
-  month: number,
-  monthDelta: number,
-): CalendarYearMonthFields {
-  year += divTrunc(monthDelta, isoMonthsInYear)
-  month += modTrunc(monthDelta, isoMonthsInYear)
-
-  if (month < 1) {
-    year--
-    month += isoMonthsInYear
-  } else if (month > isoMonthsInYear) {
-    year++
-    month -= isoMonthsInYear
-  }
-
-  return { year, month }
-}
-
-export function addIntlMonths(
-  intlCalendar: IntlCalendar,
-  year: number,
-  month: number,
-  monthDelta: number,
-): CalendarYearMonthFields {
-  if (monthDelta) {
-    month += monthDelta
-
-    if (!Number.isSafeInteger(month)) {
-      throw new RangeError(errorMessages.outOfBoundsDate)
-    }
-
-    if (monthDelta < 0) {
-      while (month < 1) {
-        month += computeIntlMonthsInYear(intlCalendar, --year)
-      }
-    } else {
-      let monthsInYear: number
-      while (
-        month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))
-      ) {
-        month -= monthsInYear
-        year++
-      }
-    }
-  }
-
-  return { year, month }
 }

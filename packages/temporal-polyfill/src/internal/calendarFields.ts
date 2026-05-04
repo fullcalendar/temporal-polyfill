@@ -3,6 +3,7 @@ import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
 import {
   getCalendarEraOrigins,
+  getCalendarEraRemaps,
   getCalendarLeapMonthMeta,
   queryCalendarDaysInMonthPart,
   queryCalendarLeapMonth,
@@ -11,7 +12,7 @@ import {
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
-import { eraRemapsByCalendarId, normalizeEraName } from './intlCalendarConfig'
+import { normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
 import { clampEntity, clampProp } from './utils'
 
@@ -37,8 +38,7 @@ export function resolveCalendarYear(
   fields: Partial<DateFields>,
 ): number {
   const eraOrigins = getCalendarEraOrigins(calendarId)
-  const eraRemaps =
-    eraRemapsByCalendarId[computeCalendarIdBase(calendarId)] || {}
+  const eraRemaps = getCalendarEraRemaps(calendarId) || {}
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {

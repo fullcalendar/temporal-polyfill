@@ -1,0 +1,150 @@
+import {
+  gregoryEraOrigins,
+  japaneseCalendarId,
+} from '../internal/intlCalendarConfig'
+
+/*
+for converting from [era,eraYear] -> year
+if origin is >=0,
+  year = origin + eraYear
+if origin is <0, consider the era to be 'reverse' direction
+  year = -origin - eraYear, same as...
+  year = -(origin + eraYear)
+*/
+export const eraOriginsByCalendarId: {
+  [calendarId: string]: Record<string, number>
+} = {
+  [japaneseCalendarId]: {
+    ...gregoryEraOrigins,
+    'meiji': 1867,
+    'taisho': 1911,
+    'showa': 1925,
+    'heisei': 1988,
+    'reiwa': 2018,
+  },
+  'ethioaa': {
+    'aa': 0,
+  },
+  'ethiopic': {
+    'am': 0,
+    'aa': 0,
+  },
+  'coptic': {
+    'am': 0,
+  },
+  'roc': {
+    'broc': -1,
+    'roc': 0,
+  },
+  'buddhist': {
+    'be': 0,
+  },
+  'hebrew': {
+    'am': 0,
+  },
+  'islamic': {
+    'bh': -1,
+    'ah': 0,
+  },
+  'indian': {
+    'shaka': 0,
+  },
+  'persian': {
+    'ap': 0,
+  },
+}
+
+export const eraRemapsByCalendarId: {
+  [calendarId: string]: Record<string, string>
+} = {
+  'ethiopic': {
+    'era0': 'aa',
+    'era1': 'am',
+    'ethioaa': 'aa',
+    'ethiopic': 'am',
+  },
+  'ethioaa': {
+    'era0': 'aa',
+    'era1': 'aa',
+    'ethioaa': 'aa',
+  },
+  'coptic': {
+    'era0': 'am',
+    'era1': 'am',
+    'coptic': 'am',
+  },
+  'roc': {
+    'minguo': 'roc',
+  },
+  'indian': {
+    // Some Intl implementations surface the older `saka` label while
+    // Temporal test262 expects the canonical `shaka` code.
+    'saka': 'shaka',
+  },
+}
+
+// A few calendars are structurally Gregorian/ISO for month/day math and their
+// arithmetic year can be derived from a fixed ISO-year offset. Keep those local
+// and data-driven instead of routing them through Intl, whose historical data
+// can be non-proleptic.
+export const isoYearOffsetsByCalendarId: Record<string, number> = {
+  'buddhist': 543,
+  'roc': -1911,
+}
+
+// Some Intl implementations omit `era` for single-era calendars. Keep the
+// canonical Temporal-era fallback next to the rest of the calendar metadata.
+export const defaultEraByCalendarIdBase: Record<string, string> = {
+  'buddhist': 'be',
+  'coptic': 'am',
+  'ethioaa': 'aa',
+  'hebrew': 'am',
+  'indian': 'shaka',
+  'islamic': 'ah',
+  'persian': 'ap',
+}
+
+export const leapMonthMetas: Record<string, number> = {
+  'chinese': 13, // (positive) max possible leap month
+  'dangi': 13, // "
+  'hebrew': -6, // (negative) constant leap month
+}
+
+// PlainMonthDay stores a canonical reference date, not the user-supplied year.
+// For Chinese/Dangi leap months, Temporal uses a modern reference table rather
+// than blindly accepting every historical Intl result. A value of 0 means that
+// monthCode has no accepted PlainMonthDay leap-month reference row; 29 means
+// that days 1-29 are accepted as leap month-days, but day 30 constrains to the
+// corresponding common month. Month codes omitted from this table are accepted
+// according to normal calendar lookup.
+const chineseDangiPlainMonthDayLeapMonthMaxDays: Record<number, number> = {
+  1: 0,
+  2: 29,
+  8: 29,
+  9: 29,
+  10: 29,
+  11: 29,
+  12: 0,
+}
+
+export const plainMonthDayLeapMonthMaxDaysByCalendarIdBase: Record<
+  string,
+  Record<number, number>
+> = {
+  'chinese': chineseDangiPlainMonthDayLeapMonthMaxDays,
+  'dangi': chineseDangiPlainMonthDayLeapMonthMaxDays,
+}
+
+// When a Chinese/Dangi PlainMonthDay leap month-day falls outside the accepted
+// leap reference table, Temporal constrains through the corresponding common
+// month. Common lunisolar months top out at 30 days.
+//
+// TODO: maybe hardcode 30 for user
+//
+export const plainMonthDayCommonMonthMaxDayByCalendarIdBase: Record<
+  string,
+  number
+> = {
+  'chinese': 30,
+  'dangi': 30,
+}
