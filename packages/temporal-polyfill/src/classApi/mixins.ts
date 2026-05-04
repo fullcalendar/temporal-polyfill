@@ -37,7 +37,8 @@ const calendarGetterQueries = {
   inLeapYear: (slots: any) => queryCalendarInLeapYear(slots.calendarId, slots),
   monthsInYear: (slots: any) =>
     queryCalendarMonthsInYear(slots.calendarId, slots),
-  daysInMonth: (slots: any) => queryCalendarDaysInMonth(slots.calendarId, slots),
+  daysInMonth: (slots: any) =>
+    queryCalendarDaysInMonth(slots.calendarId, slots),
   daysInYear: (slots: any) => queryCalendarDaysInYear(slots.calendarId, slots),
   dayOfWeek: (slots: any) => computeIsoDayOfWeek(slots),
   daysInWeek: () => 7,

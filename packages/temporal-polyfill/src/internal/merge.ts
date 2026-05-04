@@ -1,5 +1,5 @@
-import { formatMonthCode } from './calendarMonthCode'
 import { getCalendarFieldNames } from './calendarFields'
+import { formatMonthCode } from './calendarMonthCode'
 import {
   getCalendarEraOrigins,
   queryCalendarDateFields,
@@ -153,10 +153,7 @@ export function mergeZonedDateTimeFields(
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.
-  const { year, month, day } = queryCalendarDateFields(
-    calendarId,
-    isoDateTime,
-  )
+  const { year, month, day } = queryCalendarDateFields(calendarId, isoDateTime)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendarId, year, month),

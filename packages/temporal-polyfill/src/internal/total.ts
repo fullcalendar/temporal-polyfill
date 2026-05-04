@@ -69,7 +69,10 @@ export function totalDuration<RA>(
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
   const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendarId)
+  const diffMarkers = createDiffMarkers(
+    timeZoneImpl,
+    relativeToSlots.calendarId,
+  )
 
   const endMarker = moveMarker(marker, slots)
 

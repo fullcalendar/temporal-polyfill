@@ -134,7 +134,10 @@ export function addDurations<RA>(
 
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
   const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendarId)
+  const diffMarkers = createDiffMarkers(
+    timeZoneImpl,
+    relativeToSlots.calendarId,
+  )
 
   const midMarker = moveMarker(marker, slots)
   const endMarker = moveMarker(midMarker, otherSlots)
@@ -217,7 +220,10 @@ export function roundDuration<RA>(
   const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
   const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
   const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(timeZoneImpl, relativeToSlots.calendarId)
+  const diffMarkers = createDiffMarkers(
+    timeZoneImpl,
+    relativeToSlots.calendarId,
+  )
 
   const endMarker = moveMarker(marker, slots)
 
@@ -377,8 +383,10 @@ export function nanoToDurationDayTimeFields(
     // than Number.MAX_SAFE_INTEGER. Compute that field from the full BigNano
     // tuple in one place so we do not lose precision by adding a huge day
     // contribution to the small within-day remainder.
-    dayTimeFields[durationFieldNamesAsc[largestUnit]] =
-      bigNanoToLargeTimeField(bigNano, largestUnit as TimeUnit)
+    dayTimeFields[durationFieldNamesAsc[largestUnit]] = bigNanoToLargeTimeField(
+      bigNano,
+      largestUnit as TimeUnit,
+    )
   } else {
     // Hour/minute/day outputs stay well within safe integer arithmetic for the
     // valid duration range, so the simple day contribution is sufficient here.

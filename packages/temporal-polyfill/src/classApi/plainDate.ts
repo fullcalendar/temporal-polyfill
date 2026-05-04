@@ -157,7 +157,9 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       )
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
-      return createPlainYearMonth(convertToPlainYearMonth(slots.calendarId, this))
+      return createPlainYearMonth(
+        convertToPlainYearMonth(slots.calendarId, this),
+      )
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
       return createPlainMonthDay(convertToPlainMonthDay(slots.calendarId, this))
