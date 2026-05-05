@@ -43,6 +43,8 @@ import {
 import { moveZonedDateTime } from '../internal/move'
 import {
   DiffOptions,
+  DirectionName,
+  DirectionOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
@@ -72,6 +74,7 @@ import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   ZonedDateTimeFields,
+  getTimeZoneTransitionEpochNanoseconds,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
@@ -358,6 +361,17 @@ export const round = bindArgs(roundZonedDateTime) as (
 export const startOfDay = bindArgs(computeZonedStartOfDay) as (
   record: Record,
 ) => Record
+
+export function getTimeZoneTransition(
+  record: Record,
+  options: DirectionOptions | DirectionName,
+): Record | null {
+  const epochNano = getTimeZoneTransitionEpochNanoseconds(record, options)
+
+  // The transition keeps the same calendar and time-zone identity. Only the
+  // represented instant changes to the exact boundary returned by the zone.
+  return epochNano ? { ...record, epochNanoseconds: epochNano } : null
+}
 
 export const equals = zonedDateTimesEqual as (
   record0: Record,

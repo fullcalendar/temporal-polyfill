@@ -24,13 +24,13 @@ import { moveZonedDateTime } from '../internal/move'
 import { refineZonedFieldOptions } from '../internal/optionsFieldRefine'
 import {
   DiffOptions,
+  DirectionName,
   DirectionOptions,
   OverflowOptions,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsModel'
-import { refineDirectionOptions } from '../internal/optionsTransitionRefine'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
@@ -41,9 +41,9 @@ import {
   ZonedDateTimeSlots,
   createDurationSlots,
 } from '../internal/slots'
-import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   FixedIsoZonedFields,
+  getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
@@ -243,13 +243,12 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     // TODO: optimize minification of this method
     getTimeZoneTransition(
       slots: ZonedDateTimeSlots,
-      options: DirectionOptions,
+      options: DirectionOptions | DirectionName,
     ): ZonedDateTime | null {
-      const { timeZoneId, epochNanoseconds: epochNano } = slots
-
-      const direction = refineDirectionOptions(options)
-      const timeZoneImpl = queryTimeZone(timeZoneId)
-      const newEpochNano = timeZoneImpl.getTransition(epochNano, direction)
+      const newEpochNano = getTimeZoneTransitionEpochNanoseconds(
+        slots,
+        options,
+      )
 
       if (newEpochNano) {
         return createZonedDateTime({

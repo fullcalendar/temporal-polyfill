@@ -417,6 +417,42 @@ describe('startOfDay', () => {
   })
 })
 
+describe('getTimeZoneTransition', () => {
+  it('can return the next transition', () => {
+    const zdt0 = ZonedDateTimeFns.create(
+      1711962000000000000n,
+      'America/New_York',
+    )
+    const zdt1 = ZonedDateTimeFns.getTimeZoneTransition(zdt0, 'next')
+    expectZonedDateTimeEquals(zdt1!, {
+      timeZoneId: 'America/New_York',
+      epochNanoseconds: 1730613600000000000n,
+    })
+  })
+
+  it('can return the previous transition', () => {
+    const zdt0 = ZonedDateTimeFns.create(
+      1711962000000000000n,
+      'America/New_York',
+      'hebrew',
+    )
+    const zdt1 = ZonedDateTimeFns.getTimeZoneTransition(zdt0, {
+      direction: 'previous',
+    })
+    expectZonedDateTimeEquals(zdt1!, {
+      calendarId: 'hebrew',
+      timeZoneId: 'America/New_York',
+      epochNanoseconds: 1710054000000000000n,
+    })
+  })
+
+  it('can return null for a fixed-offset time zone', () => {
+    const zdt0 = ZonedDateTimeFns.create(1711962000000000000n, 'UTC')
+    const zdt1 = ZonedDateTimeFns.getTimeZoneTransition(zdt0, 'next')
+    expect(zdt1).toBe(null)
+  })
+})
+
 describe('hoursInDay', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
