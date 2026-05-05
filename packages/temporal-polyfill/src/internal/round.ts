@@ -37,11 +37,10 @@ import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
 import { RoundingOptions } from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
-  Marker,
-  MarkerToEpochNano,
-  MoveMarker,
+  MarkerMath,
   isUniformUnit,
   isZonedEpochSlots,
+  moveMarkerToEpochNano,
 } from './relativeMath'
 import {
   AbstractDateTimeSlots,
@@ -385,9 +384,7 @@ export function roundRelativeDuration(
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
@@ -399,9 +396,9 @@ export function roundRelativeDuration(
   // direction as the spec-default tie direction.
   const sign = (computeDurationSign(durationFields) || 1) as NumberSign
   const nudgeFunc = (
-    !isUniformUnit(smallestUnit, marker)
+    !isUniformUnit(smallestUnit, markerMath.marker)
       ? nudgeRelativeDuration
-      : isZonedEpochSlots(marker) &&
+      : isZonedEpochSlots(markerMath.marker) &&
           smallestUnit < Unit.Day &&
           largestUnit >= Unit.Day
         ? nudgeZonedTimeDuration
@@ -416,9 +413,7 @@ export function roundRelativeDuration(
     smallestUnit,
     roundingInc,
     roundingMode,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    markerMath,
   )
 
   // grew a day/week/month/year?
@@ -429,9 +424,7 @@ export function roundRelativeDuration(
       largestUnit,
       Math.max(Unit.Day, smallestUnit), // force to Day or larger
       sign,
-      marker,
-      markerToEpochNano,
-      moveMarker,
+      markerMath,
     )
   }
 
@@ -571,9 +564,7 @@ function nudgeZonedTimeDuration(
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number, // always >=Day
   roundingMode: RoundingMode,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: BigNano,
@@ -589,9 +580,7 @@ function nudgeZonedTimeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day, // clampUnit
     sign, // clampDistance
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    markerMath,
     endEpochNano,
   )
   const dayEpochNano0 = dayWindow.epochNano0
@@ -632,9 +621,7 @@ function nudgeRelativeDuration(
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ): [
   durationFields: DurationFields,
   movedEpochNano: BigNano,
@@ -646,8 +633,8 @@ function nudgeRelativeDuration(
   // convert days to whole weeks
   if (smallestUnit === Unit.Week) {
     // HACK to assume 7 days in a week. Works okay for now since applies to all current calendars.
-    // Necessary because NudgeToCalendarUnit requires the PlainDate fields for this conversion.
-    // TODO: refactor marker system. use RelativeTo record instead:
+    // Necessary because week nudging works from duration fields; the marker
+    // context gives us movement/epoch math but not calendar-specific week data.
     // https://github.com/tc39/proposal-temporal/issues/2837
     durationFields = {
       ...durationFields,
@@ -664,9 +651,7 @@ function nudgeRelativeDuration(
     baseDurationFields,
     smallestUnit, // clampUnit
     roundingInc * sign, // clampDistance
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    markerMath,
     endEpochNano,
   )
   const epochNano0 = nudgeWindow.epochNano0
@@ -700,9 +685,7 @@ function bubbleRelativeDuration(
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
   sign: NumberSign,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ): DurationFields {
   for (
     let currentUnit: Unit = smallestUnit + 1;
@@ -717,8 +700,9 @@ function bubbleRelativeDuration(
     const baseDurationFields = clearDurationFields(currentUnit, durationFields)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
-    const thresholdEpochNano = markerToEpochNano(
-      moveMarker(marker, baseDurationFields),
+    const thresholdEpochNano = moveMarkerToEpochNano(
+      markerMath,
+      baseDurationFields,
     )
     const thresholdCompare = compareBigNanos(endEpochNano, thresholdEpochNano)
 

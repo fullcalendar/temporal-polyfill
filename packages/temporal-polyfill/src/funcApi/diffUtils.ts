@@ -22,6 +22,7 @@ import {
   Marker,
   MarkerToEpochNano,
   MoveMarker,
+  createMarkerMath,
   isoMarkerToEpochNano,
 } from '../internal/relativeMath'
 import { roundBigNanoByInc, roundByInc } from '../internal/round'
@@ -81,7 +82,10 @@ function diffZonedLargeUnits(
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
-    bindArgs(prepareZonedEpochDiff, timeZoneImpl) as MarkersToIsoFields,
+    bindArgs(
+      prepareZonedEpochDiff,
+      timeZoneImpl,
+    ) as unknown as MarkersToIsoFields,
     bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
@@ -162,9 +166,7 @@ function diffDateUnits(
     durationFields,
     endEpochNano,
     unit,
-    marker0,
-    markerToEpochNano,
-    moveMarker,
+    createMarkerMath(marker0, markerToEpochNano, moveMarker),
   )
 
   if (roundingInc) {

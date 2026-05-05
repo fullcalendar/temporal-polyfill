@@ -8,25 +8,19 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import { timeFieldDefaults } from './fieldNames'
-import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
-import { combineDateAndTime } from './fieldUtils'
 import { Overflow } from './optionsModel'
 import { DurationRoundingOptions, RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
-  createDiffMarkers,
-  createMarkerToEpochNano,
-  createMoveMarker,
-  createRelativeOrigin,
+  checkRelativeMarkersInBounds,
+  createRelativeMath,
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { DurationSlots, createDurationSlots } from './slots'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
@@ -132,16 +126,14 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(
-    timeZoneImpl,
-    relativeToSlots.calendarId,
+  const relativeMath = createRelativeMath(relativeToSlots)
+  const midMarker = relativeMath.moveMarker(relativeMath.marker, slots)
+  const endMarker = relativeMath.moveMarker(midMarker, otherSlots)
+  const balancedDuration = relativeMath.diffMarkers(
+    relativeMath.marker,
+    endMarker,
+    maxUnit,
   )
-
-  const midMarker = moveMarker(marker, slots)
-  const endMarker = moveMarker(midMarker, otherSlots)
-  const balancedDuration = diffMarkers(marker, endMarker, maxUnit)
 
   return createDurationSlots(balancedDuration)
 }
@@ -185,7 +177,9 @@ export function roundDuration<RA>(
 
   const maxUnit = Math.max(durationLargestUnit, largestUnit)
 
-  // NEW: Only do time-rounding short-circuit if no relativeTo specified
+  // Without a relativeTo, day-and-smaller durations can round as fixed 24-hour
+  // math. Any supplied relativeTo must stay observable, especially for zoned
+  // day lengths.
   if (!relativeToSlots && maxUnit <= Unit.Day) {
     return createDurationSlots(
       checkDurationUnits(
@@ -217,28 +211,18 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(
-    timeZoneImpl,
-    relativeToSlots.calendarId,
-  )
-
-  const endMarker = moveMarker(marker, slots)
+  const relativeMath = createRelativeMath(relativeToSlots)
+  const endMarker = relativeMath.moveMarker(relativeMath.marker, slots)
 
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
-  if (!isZonedEpochSlots(relativeToSlots)) {
-    checkPlainMarkerInBounds(
-      marker as CalendarDateFields | CalendarDateTimeFields,
-    )
-    checkPlainMarkerInBounds(
-      endMarker as CalendarDateFields | CalendarDateTimeFields,
-    )
-  }
+  checkRelativeMarkersInBounds(relativeMath, endMarker)
 
-  let balancedDuration = diffMarkers(marker, endMarker, largestUnit)
+  let balancedDuration = relativeMath.diffMarkers(
+    relativeMath.marker,
+    endMarker,
+    largestUnit,
+  )
 
   const origSign = slots.sign
   const balancedSign = computeDurationSign(balancedDuration)
@@ -248,25 +232,15 @@ export function roundDuration<RA>(
 
   balancedDuration = roundRelativeDuration(
     balancedDuration,
-    markerToEpochNano(endMarker),
+    relativeMath.markerToEpochNano(endMarker),
     largestUnit,
     smallestUnit,
     roundingInc,
     roundingMode,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    relativeMath,
   )
 
   return createDurationSlots(balancedDuration)
-}
-
-function checkPlainMarkerInBounds(
-  marker: CalendarDateFields | CalendarDateTimeFields,
-): void {
-  checkIsoDateTimeInBounds(
-    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
-  )
 }
 
 // Sign / Abs / Blank

@@ -42,6 +42,7 @@ import { refineDiffOptions } from './optionsRoundingRefine'
 import {
   MarkerToEpochNano,
   MoveMarker,
+  createMarkerMath,
   isoMarkerToEpochNano,
 } from './relativeMath'
 import {
@@ -158,13 +159,15 @@ export function diffZonedDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      slots0,
-      extractEpochNano as MarkerToEpochNano,
-      bindArgs(
-        moveZonedEpochs,
-        timeZoneImpl,
-        getInternalCalendar(calendarId),
-      ) as MoveMarker,
+      createMarkerMath(
+        slots0,
+        extractEpochNano as MarkerToEpochNano,
+        bindArgs(
+          moveZonedEpochs,
+          timeZoneImpl,
+          getInternalCalendar(calendarId),
+        ) as MoveMarker,
+      ),
     )
   }
 
@@ -216,9 +219,11 @@ export function diffPlainDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      plainDateTimeSlots0,
-      isoMarkerToEpochNano as MarkerToEpochNano,
-      bindArgs(moveDateTime, getInternalCalendar(calendarId)) as MoveMarker,
+      createMarkerMath(
+        plainDateTimeSlots0,
+        isoMarkerToEpochNano as MarkerToEpochNano,
+        bindArgs(moveDateTime, getInternalCalendar(calendarId)) as MoveMarker,
+      ),
     )
   }
 
@@ -342,9 +347,11 @@ function diffDateLike(
         smallestUnit,
         roundingInc,
         roundingMode,
-        combineDateAndTime(startIsoDate, timeFieldDefaults),
-        isoMarkerToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDate, calendar) as MoveMarker,
+        createMarkerMath(
+          combineDateAndTime(startIsoDate, timeFieldDefaults),
+          isoMarkerToEpochNano as MarkerToEpochNano,
+          bindArgs(moveDate, calendar) as MoveMarker,
+        ),
       )
     }
   }

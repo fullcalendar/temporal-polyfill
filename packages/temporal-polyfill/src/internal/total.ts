@@ -16,25 +16,17 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { timeFieldDefaults } from './fieldNames'
-import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
-import { combineDateAndTime } from './fieldUtils'
 import { DurationTotalOptions } from './optionsModel'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
-  Marker,
-  MarkerToEpochNano,
-  MoveMarker,
+  MarkerMath,
   RelativeToSlots,
-  createDiffMarkers,
-  createMarkerToEpochNano,
-  createMoveMarker,
-  createRelativeOrigin,
+  checkRelativeMarkersInBounds,
+  createRelativeMath,
   isUniformUnit,
-  isZonedEpochSlots,
+  moveMarkerToEpochNano,
 } from './relativeMath'
 import { DurationSlots } from './slots'
-import { checkIsoDateTimeInBounds } from './timeMath'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
 
 export function totalDuration<RA>(
@@ -49,7 +41,6 @@ export function totalDuration<RA>(
   )
   const maxUnit = Math.max(totalUnit, maxDurationUnit)
 
-  // NEW: short-circuit
   if (!relativeToSlots && isUniformUnit(maxUnit, relativeToSlots)) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
@@ -66,28 +57,18 @@ export function totalDuration<RA>(
     return 0
   }
 
-  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
-  const diffMarkers = createDiffMarkers(
-    timeZoneImpl,
-    relativeToSlots.calendarId,
-  )
-
-  const endMarker = moveMarker(marker, slots)
+  const relativeMath = createRelativeMath(relativeToSlots)
+  const endMarker = relativeMath.moveMarker(relativeMath.marker, slots)
 
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
-  if (!isZonedEpochSlots(relativeToSlots)) {
-    checkPlainMarkerInBounds(
-      marker as CalendarDateFields | CalendarDateTimeFields,
-    )
-    checkPlainMarkerInBounds(
-      endMarker as CalendarDateFields | CalendarDateTimeFields,
-    )
-  }
+  checkRelativeMarkersInBounds(relativeMath, endMarker)
 
-  const balancedDuration = diffMarkers(marker, endMarker, totalUnit)
+  const balancedDuration = relativeMath.diffMarkers(
+    relativeMath.marker,
+    endMarker,
+    totalUnit,
+  )
 
   if (isUniformUnit(totalUnit, relativeToSlots)) {
     return totalDayTimeDuration(balancedDuration, totalUnit as DayTimeUnit)
@@ -95,19 +76,9 @@ export function totalDuration<RA>(
 
   return totalRelativeDuration(
     balancedDuration,
-    markerToEpochNano(endMarker),
+    relativeMath.markerToEpochNano(endMarker),
     totalUnit,
-    marker,
-    markerToEpochNano,
-    moveMarker,
-  )
-}
-
-function checkPlainMarkerInBounds(
-  marker: CalendarDateFields | CalendarDateTimeFields,
-): void {
-  checkIsoDateTimeInBounds(
-    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
+    relativeMath,
   )
 }
 
@@ -115,9 +86,7 @@ export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit, // always >=Day
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ): number {
   // The spec treats zero relative durations as positive when probing the
   // surrounding unit window. That matters at the upper Instant boundary:
@@ -127,9 +96,7 @@ export function totalRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    markerMath,
     endEpochNano,
   )
   const epochNano0 = nudgeWindow.epochNano0
@@ -166,9 +133,7 @@ export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit, // always >=Day
   clampDistance: number,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
   epochNanoProgress?: BigNano,
 ) {
   const unitName = durationFieldNamesAsc[clampUnit]
@@ -178,9 +143,7 @@ export function clampRelativeDuration(
     startDurationFields,
     unitName,
     clampDistance,
-    marker,
-    markerToEpochNano,
-    moveMarker,
+    markerMath,
   )
 
   // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
@@ -205,9 +168,7 @@ export function clampRelativeDuration(
       startDurationFields,
       unitName,
       clampDistance,
-      marker,
-      markerToEpochNano,
-      moveMarker,
+      markerMath,
     )
 
     if (
@@ -233,19 +194,15 @@ function computeRelativeDurationWindow(
   startDurationFields: DurationFields,
   unitName: DurationFieldName,
   clampDistance: number,
-  marker: Marker,
-  markerToEpochNano: MarkerToEpochNano,
-  moveMarker: MoveMarker,
+  markerMath: MarkerMath,
 ) {
   const endDurationFields = {
     ...startDurationFields,
     [unitName]: startDurationFields[unitName] + clampDistance,
   }
 
-  const marker0 = moveMarker(marker, startDurationFields)
-  const marker1 = moveMarker(marker, endDurationFields)
-  const epochNano0 = markerToEpochNano(marker0)
-  const epochNano1 = markerToEpochNano(marker1)
+  const epochNano0 = moveMarkerToEpochNano(markerMath, startDurationFields)
+  const epochNano1 = moveMarkerToEpochNano(markerMath, endDurationFields)
   return { epochNano0, epochNano1, endDurationFields }
 }
 

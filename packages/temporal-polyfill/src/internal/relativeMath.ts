@@ -9,11 +9,12 @@ import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
   EpochAndZoneSlots,
+  EpochSlots,
   ZonedEpochSlots,
   extractEpochNano,
 } from './slots'
-import { isoDateTimeToEpochNano } from './timeMath'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { checkIsoDateTimeInBounds, isoDateTimeToEpochNano } from './timeMath'
+import { queryTimeZone } from './timeZoneImpl'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
@@ -23,32 +24,14 @@ export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 // the relative-to "origin", returned from bag refining
 export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
+export type IsoMarker = CalendarDateFields | CalendarDateTimeFields
+
 // A date/time marker that can be moved away from the relative-to origin and
-// then compared back against it. Zoned markers keep epoch nanoseconds because
-// their day lengths are time-zone dependent.
-export type Marker =
-  | CalendarDateFields
-  | CalendarDateTimeFields
-  | ZonedEpochSlots
+// then compared back against it. Zoned relative math carries the time zone and
+// calendar in RelativeMath, so moved zoned markers only need epoch nanoseconds.
+export type Marker = IsoMarker | EpochSlots
 
-export type RelativeOrigin = [marker: Marker, timeZoneImpl?: TimeZoneImpl]
-
-export function createRelativeOrigin(
-  relativeToSlots: RelativeToSlots,
-): RelativeOrigin {
-  if (isZonedEpochSlots(relativeToSlots)) {
-    return [relativeToSlots, queryTimeZone(relativeToSlots.timeZoneId)]
-  }
-
-  return [
-    combineDateAndTime(
-      relativeToSlots,
-      'hour' in relativeToSlots
-        ? (relativeToSlots as unknown as CalendarDateTimeFields)
-        : timeFieldDefaults,
-    ),
-  ]
-}
+export type RelativeMarker = CalendarDateTimeFields | EpochSlots
 
 // Atomic Operations
 // -----------------------------------------------------------------------------
@@ -66,57 +49,95 @@ export type DiffMarkers = (
   largestUnit: Unit,
 ) => DurationFields
 
-export function createMarkerToEpochNano(
-  timeZoneImpl: TimeZoneImpl | undefined,
-): MarkerToEpochNano {
-  return (
-    timeZoneImpl ? extractEpochNano : isoMarkerToEpochNano
-  ) as MarkerToEpochNano
+export interface MarkerMath {
+  marker: Marker
+  markerToEpochNano: MarkerToEpochNano
+  moveMarker: MoveMarker
 }
 
-export function createMoveMarker(
-  timeZoneImpl: TimeZoneImpl | undefined,
-  calendarId: string,
-): MoveMarker {
-  if (timeZoneImpl) {
-    return bindArgs(
-      moveZonedEpochs,
-      timeZoneImpl,
-      getInternalCalendar(calendarId),
-    ) as Callable
-  }
-  return bindArgs(moveDateTimeMarker, calendarId) as Callable
+export interface RelativeMath extends MarkerMath {
+  marker: RelativeMarker
+  diffMarkers: DiffMarkers
+  isZoned: boolean
 }
 
-export function createDiffMarkers(
-  timeZoneImpl: TimeZoneImpl | undefined,
-  calendarId: string,
-): DiffMarkers {
-  if (timeZoneImpl) {
-    return bindArgs(diffZonedEpochsExact, timeZoneImpl, calendarId) as Callable
+export function createMarkerMath(
+  marker: Marker,
+  markerToEpochNano: MarkerToEpochNano,
+  moveMarker: MoveMarker,
+): MarkerMath {
+  return { marker, markerToEpochNano, moveMarker }
+}
+
+export function moveMarkerToEpochNano(
+  markerMath: MarkerMath,
+  durationFields: DurationFields,
+): BigNano {
+  return markerMath.markerToEpochNano(
+    markerMath.moveMarker(markerMath.marker, durationFields),
+  )
+}
+
+export function createRelativeMath(
+  relativeToSlots: RelativeToSlots,
+): RelativeMath {
+  const calendarId = relativeToSlots.calendarId
+  const calendar = getInternalCalendar(calendarId)
+
+  if (isZonedEpochSlots(relativeToSlots)) {
+    const timeZoneImpl = queryTimeZone(relativeToSlots.timeZoneId)
+
+    return {
+      marker: relativeToSlots,
+      markerToEpochNano: extractEpochNano as MarkerToEpochNano,
+      moveMarker: bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as Callable,
+      diffMarkers: bindArgs(
+        diffZonedEpochsExact,
+        timeZoneImpl,
+        calendarId,
+      ) as Callable,
+      isZoned: true,
+    }
   }
-  return bindArgs(diffDateTimeMarkersExact, calendarId) as Callable
+
+  const marker = createPlainDateTimeMarker(relativeToSlots as AbstractDateSlots)
+
+  return {
+    marker,
+    markerToEpochNano: isoMarkerToEpochNano as MarkerToEpochNano,
+    moveMarker: bindArgs(moveDateTime, calendar) as Callable,
+    diffMarkers: bindArgs(diffDateTimesExact, calendarId) as Callable,
+    isZoned: false,
+  }
 }
 
 // Utils
 // -----------------------------------------------------------------------------
 
 export function isZonedEpochSlots(
+  marker: RelativeToSlots | undefined,
+): marker is ZonedEpochSlots
+export function isZonedEpochSlots(
+  marker: Marker | undefined,
+): marker is EpochSlots
+export function isZonedEpochSlots(
   marker: Marker | RelativeToSlots | undefined,
-): marker is ZonedEpochSlots {
+): marker is EpochSlots | ZonedEpochSlots
+export function isZonedEpochSlots(
+  marker: Marker | RelativeToSlots | undefined,
+): boolean {
   return (marker &&
-    (marker as ZonedEpochSlots).epochNanoseconds) as unknown as boolean
+    (marker as EpochSlots).epochNanoseconds) as unknown as boolean
 }
 
-function moveDateTimeMarker(
-  calendarId: string,
-  isoDateTime: CalendarDateTimeFields,
-  durationFields: DurationFields,
+function createPlainDateTimeMarker(
+  relativeToSlots: AbstractDateSlots,
 ): CalendarDateTimeFields {
-  return moveDateTime(
-    getInternalCalendar(calendarId),
-    isoDateTime,
-    durationFields,
+  return combineDateAndTime(
+    relativeToSlots,
+    'hour' in relativeToSlots
+      ? (relativeToSlots as unknown as CalendarDateTimeFields)
+      : timeFieldDefaults,
   )
 }
 
@@ -129,17 +150,21 @@ export function isoMarkerToEpochNano(marker: Marker): BigNano {
   return marker.epochNanoseconds
 }
 
-function diffDateTimeMarkersExact(
-  calendarId: string,
-  startIsoDateTime: CalendarDateTimeFields,
-  endIsoDateTime: CalendarDateTimeFields,
-  largestUnit: Unit,
-): DurationFields {
-  return diffDateTimesExact(
-    calendarId,
-    startIsoDateTime,
-    endIsoDateTime,
-    largestUnit,
+export function checkRelativeMarkersInBounds(
+  relativeMath: RelativeMath,
+  endMarker: Marker,
+): void {
+  // Zoned math is already bounded by Instant conversion. Plain relative math
+  // must explicitly validate the origin and destination as ISO date-times.
+  if (!relativeMath.isZoned) {
+    checkIsoMarkerInBounds(relativeMath.marker as IsoMarker)
+    checkIsoMarkerInBounds(endMarker as IsoMarker)
+  }
+}
+
+function checkIsoMarkerInBounds(marker: IsoMarker): void {
+  checkIsoDateTimeInBounds(
+    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
   )
 }
 
