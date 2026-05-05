@@ -149,9 +149,7 @@ export function computeIsoWeekInterval(
   return [isoFields0, isoFields1]
 }
 
-/*
-For year/month/week only
-*/
+// TODO: split this instead of using 'hour' conditional
 export function roundDateTimeToInterval<S extends AbstractDateSlots>(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,

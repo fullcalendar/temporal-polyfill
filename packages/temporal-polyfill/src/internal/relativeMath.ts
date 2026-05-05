@@ -79,6 +79,12 @@ export function createMarkerMoveOps(
 // of that window is diffed to produce a Duration, for "balancing"
 // The lone `relativeToSlots` argument always comes from a .relativeTo option,
 // which for the classApi comes from `refinePublicRelativeTo()`
+// and for the funcApi comes from `identity` (uses relativeTo slots as-is)
+//
+// This function has a zoned-nonzoned split nature because refinePublicRelativeTo,
+// which calls refineMaybeZonedDateTimeObjectLike, has a split nature.
+// We *could* create the marker system at that time, but there are numerous
+// short-circuits during rounding/totalling that could make it premature.
 export function createMarkerSpanOps(
   relativeToSlots: RelativeToSlots,
 ): MarkerSpanOps {
@@ -100,7 +106,7 @@ export function createMarkerSpanOps(
     }
   }
 
-  const marker = createPlainDateTimeMarker(relativeToSlots as AbstractDateSlots)
+  const marker = normalizeDateTimeMarker(relativeToSlots)
 
   return {
     marker,
@@ -115,14 +121,17 @@ export function createMarkerSpanOps(
 
 // NOTE: bad name. it moves the marker and RETURNS the epoch-nanoseconds
 export function moveMarkerToEpochNano(
-  markerMath: MarkerMoveOps,
+  markerMoveOps: MarkerMoveOps,
   durationFields: DurationFields,
 ): BigNano {
-  return markerMath.markerToEpochNano(
-    markerMath.moveMarker(markerMath.marker, durationFields),
+  return markerMoveOps.markerToEpochNano(
+    markerMoveOps.moveMarker(markerMoveOps.marker, durationFields),
   )
 }
 
+// Done for Duration::round/total, which has a forked flow because .relativeTo
+// could be multiple things.
+// See note in createMarkerSpanOps about short-circuiting.
 export function isZonedEpochSlots(
   marker: RelativeToSlots | undefined,
 ): marker is ZonedEpochSlots
@@ -139,40 +148,41 @@ export function isZonedEpochSlots(
     (marker as EpochSlots).epochNanoseconds) as unknown as boolean
 }
 
-// Will coerce Date -> DateTime
-function createPlainDateTimeMarker(
-  relativeToSlots: AbstractDateSlots,
-): CalendarDateTimeFields {
-  return combineDateAndTime(
-    relativeToSlots,
-    'hour' in relativeToSlots
-      ? (relativeToSlots as unknown as CalendarDateTimeFields)
-      : timeFieldDefaults,
-  )
-}
-
-export function checkRelativeMarkersInBounds(
-  relativeMath: MarkerSpanOps,
+// Done with MarkerSpanOps, which has a forked flow because .relativeTo in the
+// Duration::round/total functions could be multiple things.
+// See note in createMarkerSpanOps about short-circuiting.
+export function checkMarkerSpanInBounds(
+  markerSpanOps: MarkerSpanOps,
   endMarker: MovableMarker,
 ): void {
   // Zoned math is already bounded by Instant conversion. Plain relative math
   // must explicitly validate the origin and destination as ISO date-times.
-  if (!isZonedEpochSlots(relativeMath.marker)) {
-    checkIsoMarkerInBounds(
-      relativeMath.marker as CalendarDateFields | CalendarDateTimeFields,
+  if (!isZonedEpochSlots(markerSpanOps.marker)) {
+    checkMarkerInBounds(
+      markerSpanOps.marker as CalendarDateFields | CalendarDateTimeFields,
     )
-    checkIsoMarkerInBounds(
+    checkMarkerInBounds(
       endMarker as CalendarDateFields | CalendarDateTimeFields,
     )
   }
 }
 
-function checkIsoMarkerInBounds(
+function normalizeDateTimeMarker(
+  marker: CalendarDateFields | CalendarDateTimeFields,
+): CalendarDateTimeFields {
+  // Date-only relativeTo values are treated as starting at midnight. Date-time
+  // values keep their own time fields, which avoids fabricating a second object
+  // just to pass time fields alongside the same date fields.
+  return combineDateAndTime(
+    marker,
+    'hour' in marker ? marker : timeFieldDefaults,
+  )
+}
+
+function checkMarkerInBounds(
   marker: CalendarDateFields | CalendarDateTimeFields,
 ): void {
-  checkIsoDateTimeInBounds(
-    combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
-  )
+  checkIsoDateTimeInBounds(normalizeDateTimeMarker(marker))
 }
 
 /*

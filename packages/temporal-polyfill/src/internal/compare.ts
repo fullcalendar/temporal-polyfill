@@ -82,11 +82,11 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const relativeMath = createMarkerSpanOps(relativeToSlots)
+  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
 
   return compareBigNanos(
-    moveMarkerToEpochNano(relativeMath, durationSlots0),
-    moveMarkerToEpochNano(relativeMath, durationSlots1),
+    moveMarkerToEpochNano(markerSpanOps, durationSlots0),
+    moveMarkerToEpochNano(markerSpanOps, durationSlots1),
   )
 }
 

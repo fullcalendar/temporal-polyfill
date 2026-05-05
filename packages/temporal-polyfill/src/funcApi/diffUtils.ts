@@ -109,6 +109,7 @@ function diffZonedLargeUnits(
   )
 }
 
+// TODO: split this instead of using 'hour' conditional
 function diffPlainLargeUnits<S extends AbstractDateSlots>(
   unit: Unit,
   record0: S,

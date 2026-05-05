@@ -14,7 +14,7 @@ import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
-  checkRelativeMarkersInBounds,
+  checkMarkerSpanInBounds,
   createMarkerSpanOps,
   isUniformUnit,
   isZonedEpochSlots,
@@ -126,11 +126,11 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const relativeMath = createMarkerSpanOps(relativeToSlots)
-  const midMarker = relativeMath.moveMarker(relativeMath.marker, slots)
-  const endMarker = relativeMath.moveMarker(midMarker, otherSlots)
-  const balancedDuration = relativeMath.diffMarkers(
-    relativeMath.marker,
+  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
+  const midMarker = markerSpanOps.moveMarker(markerSpanOps.marker, slots)
+  const endMarker = markerSpanOps.moveMarker(midMarker, otherSlots)
+  const balancedDuration = markerSpanOps.diffMarkers(
+    markerSpanOps.marker,
     endMarker,
     maxUnit,
   )
@@ -211,15 +211,15 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const relativeMath = createMarkerSpanOps(relativeToSlots)
-  const endMarker = relativeMath.moveMarker(relativeMath.marker, slots)
+  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
+  const endMarker = markerSpanOps.moveMarker(markerSpanOps.marker, slots)
 
   // sanitize start/end markers
   // see DifferencePlainDateTimeWithRounding
-  checkRelativeMarkersInBounds(relativeMath, endMarker)
+  checkMarkerSpanInBounds(markerSpanOps, endMarker)
 
-  let balancedDuration = relativeMath.diffMarkers(
-    relativeMath.marker,
+  let balancedDuration = markerSpanOps.diffMarkers(
+    markerSpanOps.marker,
     endMarker,
     largestUnit,
   )
@@ -232,12 +232,12 @@ export function roundDuration<RA>(
 
   balancedDuration = roundRelativeDuration(
     balancedDuration,
-    relativeMath.markerToEpochNano(endMarker),
+    markerSpanOps.markerToEpochNano(endMarker),
     largestUnit,
     smallestUnit,
     roundingInc,
     roundingMode,
-    relativeMath,
+    markerSpanOps,
   )
 
   return createDurationSlots(balancedDuration)
