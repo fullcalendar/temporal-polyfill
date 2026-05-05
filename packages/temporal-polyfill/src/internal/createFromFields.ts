@@ -23,7 +23,14 @@ import {
   yearMonthFieldNamesAlpha,
   yearMonthFieldNamesWithEraAlpha,
 } from './fieldNames'
-import { readAndRefineBagFields } from './fieldRefine'
+import {
+  dateFieldRefiners,
+  dateTimeFieldRefiners,
+  durationFieldRefiners,
+  readAndRefineBagFields,
+  timeFieldRefiners,
+  zonedDateTimeFieldRefiners,
+} from './fieldRefine'
 import type {
   ZonedDateTimeLikeObject,
   ZonedDateTimeRefinedObject,
@@ -90,7 +97,9 @@ export function refineMaybeZonedDateTimeObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ zonedDateTimeFieldRefiners,
     /* requiredFieldNames */ [],
+    /* disallowEmpty */ false,
   ) as ZonedDateTimeRefinedObject
 
   if (fields.timeZone !== undefined) {
@@ -129,7 +138,9 @@ export function refineZonedDateTimeObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ zonedDateTimeFieldRefiners,
     /* requiredFieldNames */ timeZoneFieldNames,
+    /* disallowEmpty */ false,
   ) as ZonedDateTimeRefinedObject
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
@@ -168,7 +179,9 @@ export function refinePlainDateTimeObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ dateTimeFieldRefiners,
     /* requiredFieldNames */ [],
+    /* disallowEmpty */ false,
   ) as Partial<DateTimeFields>
 
   const [isoDateInternals, overflow] =
@@ -198,6 +211,7 @@ export function refinePlainDateObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ dateFieldRefiners,
     /* requiredFieldNames */ requireFields,
   )
 
@@ -218,6 +232,7 @@ export function refinePlainYearMonthObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ dateFieldRefiners,
     /* requiredFieldNames */ requireFields,
   )
 
@@ -238,7 +253,9 @@ export function refinePlainMonthDayObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ dateFieldRefiners,
     /* requiredFieldNames */ dayFieldNamesAsc,
+    /* disallowEmpty */ false,
   ) as Partial<DateFields>
 
   if (
@@ -261,6 +278,7 @@ export function refinePlainTimeObjectLike(
   const fields = readAndRefineBagFields(
     bag,
     timeFieldNamesAlpha,
+    timeFieldRefiners,
     [],
     true,
   ) as Partial<TimeFields>
@@ -278,6 +296,7 @@ export function refineDurationObjectLike(
   const durationFields = readAndRefineBagFields(
     bag,
     durationFieldNamesAlpha,
+    durationFieldRefiners,
   ) as Partial<DurationFields>
 
   return createDurationSlots(
