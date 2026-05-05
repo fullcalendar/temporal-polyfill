@@ -68,53 +68,6 @@ describe('intl calendar addon', () => {
     expect(JSON.parse(output)).toEqual(['hebrew', 'buddhist', 2024])
   })
 
-  it('reports concrete DateTimeFormat fallbacks for islamic calendar aliases', () => {
-    const output = runNode(`
-      const { Intl, Temporal } = await import('./dist/index.js')
-      await import('./dist/intl-calendars.esm.js')
-
-      const fallbackCalendars = [
-        'islamic-civil',
-        'islamic-tbla',
-        'islamic-umalqura',
-      ]
-      const calendars = [
-        new Intl.DateTimeFormat('en', {
-          calendar: 'islamic',
-        }).resolvedOptions().calendar,
-        new Intl.DateTimeFormat('en', {
-          calendar: 'islamic-rgsa',
-        }).resolvedOptions().calendar,
-        new Intl.DateTimeFormat('en-u-ca-islamic').resolvedOptions().calendar,
-        new Intl.DateTimeFormat('en-u-ca-islamic-rgsa').resolvedOptions()
-          .calendar,
-      ]
-      const fallbackCalendar = calendars[2]
-      const date = Temporal.PlainDate.from({
-        calendar: fallbackCalendar,
-        year: 1445,
-        month: 6,
-        day: 19,
-      })
-      const formatted = [
-        new Intl.DateTimeFormat('en-u-ca-islamic', {
-          year: 'numeric',
-        }).format(date),
-        date.toLocaleString('en-u-ca-islamic', { year: 'numeric' }),
-      ]
-
-      console.log(JSON.stringify({
-        calendars: calendars.map((id) => fallbackCalendars.includes(id)),
-        formatted: formatted.map((value) => typeof value === 'string' && !!value),
-      }))
-    `)
-
-    expect(JSON.parse(output)).toEqual({
-      calendars: [true, true, true, true],
-      formatted: [true, true],
-    })
-  })
-
   it('marks addon artifacts as side-effectful in the package manifest', () => {
     const manifest = JSON.parse(readFileSync('./dist/package.json', 'utf8'))
 

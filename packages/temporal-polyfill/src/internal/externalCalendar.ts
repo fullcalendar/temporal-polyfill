@@ -73,15 +73,6 @@ export interface ExternalCalendarProvider {
   // Temporal-recognized aliases, and may reject broad Intl fallback IDs.
   resolveCalendarId(id: string): string | undefined
 
-  // Intl.DateTimeFormat resolvedOptions calendar IDs. Intl can surface broad
-  // fallback IDs like `islamic`; this hook reports the concrete calendar that
-  // Temporal calendar checks should compare against.
-  resolveDateTimeFormatCalendarId?(
-    locale: string,
-    calendarId: string,
-    rawDateTimeFormat: typeof Intl.DateTimeFormat,
-  ): string | undefined
-
   getCalendar(id: string): ExternalCalendar | undefined
 }
 
@@ -105,18 +96,6 @@ export function registerExternalCalendarProvider(
 
 export function resolveExternalCalendarId(id: string): string | undefined {
   return getExternalCalendarProvider()?.resolveCalendarId(id)
-}
-
-export function resolveExternalDateTimeFormatCalendarId(
-  locale: string,
-  calendarId: string,
-  rawDateTimeFormat: typeof Intl.DateTimeFormat,
-): string | undefined {
-  return getExternalCalendarProvider()?.resolveDateTimeFormatCalendarId?.(
-    locale,
-    calendarId,
-    rawDateTimeFormat,
-  )
 }
 
 export function getExternalCalendar(id: string): ExternalCalendar {

@@ -1,5 +1,4 @@
 import * as errorMessages from './errorMessages'
-import { resolveExternalDateTimeFormatCalendarId } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -372,28 +371,10 @@ export function createFormatPrepper<S>(
       strictOptions,
     )
 
-    const resolvedOptions = resolveDateTimeFormatResolvedOptions(subformat)
+    const resolvedOptions = subformat.resolvedOptions()
 
     return [subformat, ...toEpochMillis(config, resolvedOptions, slotsList)]
   }
-}
-
-export function resolveDateTimeFormatResolvedOptions(
-  format: Intl.DateTimeFormat,
-): Intl.ResolvedDateTimeFormatOptions {
-  const resolvedOptions = format.resolvedOptions()
-  const calendar =
-    resolveExternalDateTimeFormatCalendarId(
-      resolvedOptions.locale,
-      resolvedOptions.calendar,
-      RawDateTimeFormat,
-    ) || resolvedOptions.calendar
-
-  // The object returned by Intl is already detached from user input. Only clone
-  // when the calendar-provider addon has a concrete Temporal ID to expose.
-  return calendar === resolvedOptions.calendar
-    ? resolvedOptions
-    : { ...resolvedOptions, calendar }
 }
 
 export function createFormatForPrep(

@@ -156,9 +156,12 @@ intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 # feature that the host Intl implementation has not caught up with yet.
 #
 # In particular, these failures come from Node/ICU behavior that would require
-# patching formatted era strings or reimplementing Unicode-extension option
-# resolution. That kind of broad Intl shim is brittle and out of scope unless a
-# future fix is small, local, and clearly improves real Temporal behavior.
+# patching formatted era strings, reimplementing Unicode-extension option
+# resolution, or normalizing broad Islamic fallback calendar IDs from native
+# Intl.DateTimeFormat resolvedOptions(). That kind of broad Intl shim is brittle
+# and out of scope unless a future fix is small, local, and clearly improves
+# real Temporal behavior.
+intl402/DateTimeFormat/constructor-options-calendar-islamic-fallback.js
 intl402/DateTimeFormat/prototype/formatToParts/era.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
 intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js

@@ -3,7 +3,6 @@ import {
   FormatPrepper,
   createFormatForPrep,
   createFormatPrepper,
-  resolveDateTimeFormatResolvedOptions,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
@@ -152,9 +151,7 @@ function createProxiedMethod(methodName: string) {
 function createResolvedOptionsMethod() {
   const func = function (this: DateTimeFormat) {
     const internals = getDateTimeFormatInternals(this)
-    const resolvedOptions = resolveDateTimeFormatResolvedOptions(
-      internals.rawFormat,
-    )
+    const resolvedOptions = internals.rawFormat.resolvedOptions()
     const timeZone = internals.timeZone || resolvedOptions.timeZone
 
     return timeZone === resolvedOptions.timeZone
@@ -197,7 +194,7 @@ function createDateTimeFormatInternals(
   options: Intl.DateTimeFormatOptions,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
-  const resolvedOptions = resolveDateTimeFormatResolvedOptions(rawFormat)
+  const resolvedOptions = rawFormat.resolvedOptions()
   const timeZone = readOwnDataTimeZoneOption(options)
 
   // Copy original options in an unobservable way, using resolveOptions' data
