@@ -26,7 +26,14 @@ import {
   yearMonthFieldNamesAlpha,
   yearMonthFieldNamesWithEraAlpha,
 } from './fieldNames'
-import { readAndRefineBagFields } from './fieldRefine'
+import {
+  dateFieldRefiners,
+  dateTimeFieldRefiners,
+  durationFieldRefiners,
+  readAndRefineBagFields,
+  timeFieldRefiners,
+  zonedDateTimeFieldRefiners,
+} from './fieldRefine'
 import {
   DateFields,
   DateTimeFields,
@@ -175,7 +182,11 @@ export function mergeZonedDateTimeFields(
     // so the copied receiver value must use that same internal representation.
     offset: offsetNanoseconds,
   }
-  const partialFields = readAndRefineBagFields(modFields, validFieldNames)
+  const partialFields = readAndRefineBagFields(
+    modFields,
+    validFieldNames,
+    zonedDateTimeFieldRefiners,
+  )
   const mergedCalendarFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -241,7 +252,11 @@ export function mergePlainDateTimeFields(
     microsecond: plainDateTimeSlots.microsecond,
     nanosecond: plainDateTimeSlots.nanosecond,
   }
-  const partialFields = readAndRefineBagFields(modFields, validFieldNames)
+  const partialFields = readAndRefineBagFields(
+    modFields,
+    validFieldNames,
+    dateTimeFieldRefiners,
+  )
   const mergedCalendarFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -293,7 +308,11 @@ export function mergePlainDateFields(
     monthCode: computeMonthCode(calendar, year, month),
     day,
   }
-  const partialFields = readAndRefineBagFields(modFields, validFieldNames)
+  const partialFields = readAndRefineBagFields(
+    modFields,
+    validFieldNames,
+    dateFieldRefiners,
+  )
   const mergedFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -323,7 +342,11 @@ export function mergePlainYearMonthFields(
     year,
     monthCode: computeMonthCode(calendar, year, month),
   }
-  const partialFields = readAndRefineBagFields(modFields, validFieldNames)
+  const partialFields = readAndRefineBagFields(
+    modFields,
+    validFieldNames,
+    dateFieldRefiners,
+  )
   const mergedFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -353,7 +376,11 @@ export function mergePlainMonthDayFields(
     monthCode: computeMonthCode(calendar, year, month),
     day,
   }
-  const partialFields = readAndRefineBagFields(modFields, validFieldNames)
+  const partialFields = readAndRefineBagFields(
+    modFields,
+    validFieldNames,
+    dateFieldRefiners,
+  )
   const mergedFields = mergeCalendarFields(
     calendar,
     origFields as unknown as Record<string, unknown>,
@@ -387,7 +414,11 @@ function mergePlainTimeBag(
   options: OverflowOptions | undefined,
 ): TimeFields {
   const origFields = pluckProps(timeFieldNamesAlpha, initialFields)
-  const newFields = readAndRefineBagFields(modFields, timeFieldNamesAlpha)
+  const newFields = readAndRefineBagFields(
+    modFields,
+    timeFieldNamesAlpha,
+    timeFieldRefiners,
+  )
 
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
@@ -400,7 +431,11 @@ function mergeDurationBag(
   initialFields: DurationFields,
   modFields: Partial<DurationFields>,
 ): DurationFields {
-  const newFields = readAndRefineBagFields(modFields, durationFieldNamesAlpha)
+  const newFields = readAndRefineBagFields(
+    modFields,
+    durationFieldNamesAlpha,
+    durationFieldRefiners,
+  )
   return checkDurationUnits({ ...initialFields, ...newFields })
 }
 

@@ -13,7 +13,7 @@ import {
   yearMonthCodeFieldNamesAlpha,
   yearMonthCodeFieldNamesWithEraAlpha,
 } from './fieldNames'
-import { readAndRefineBagFields } from './fieldRefine'
+import { dateFieldRefiners, readAndRefineBagFields } from './fieldRefine'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import {
   DateFields,
@@ -191,6 +191,7 @@ export function convertPlainYearMonthToDate(
   const extraFields = readAndRefineBagFields(
     requireObjectLike(bag) as unknown as Record<string, unknown>,
     dayFieldNamesAsc,
+    dateFieldRefiners,
     [],
   )
 
@@ -217,6 +218,7 @@ export function convertPlainMonthDayToDate(
   const extraFields = readAndRefineBagFields(
     requireObjectLike(bag) as Record<string, unknown>,
     extraFieldNames,
+    dateFieldRefiners,
     [],
   )
 
@@ -230,6 +232,7 @@ export function convertToPlainMonthDay(
   const fields = readAndRefineBagFields(
     /* bag */ input,
     /* validFieldNames */ monthCodeDayFieldNamesAlpha,
+    /* fieldRefiners */ dateFieldRefiners,
   )
   return createPlainMonthDayFromFields(calendar, fields as Partial<DateFields>)
 }
@@ -247,6 +250,7 @@ export function convertToPlainYearMonth(
   const fields = readAndRefineBagFields(
     /* bag */ input,
     /* validFieldNames */ validFieldNames,
+    /* fieldRefiners */ dateFieldRefiners,
   )
   return createPlainYearMonthFromFields(
     calendar,
@@ -267,7 +271,12 @@ function createPlainDateFromMergedFields(
   )
 
   let mergedFields = mergeCalendarFields(calendar, inputFields, extraFields)
-  mergedFields = readAndRefineBagFields(mergedFields, mergedFieldNames, [])
+  mergedFields = readAndRefineBagFields(
+    mergedFields,
+    mergedFieldNames,
+    dateFieldRefiners,
+    [],
+  )
 
   return createPlainDateFromFields(calendar, mergedFields as any)
 }

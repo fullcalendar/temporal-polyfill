@@ -7,13 +7,15 @@ import {
 } from './cast'
 import { durationFieldNamesAsc } from './durationFields'
 import * as errorMessages from './errorMessages'
-import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
+import { timeFieldNamesAsc } from './fieldNames'
 import { parseOffsetNano } from './offsetParse'
 import { Overflow } from './optionsModel'
 import { mapPropNamesToConstant } from './utils'
 
 export type DateOptionsTuple = [overflow: Overflow, ...extraOptions: unknown[]]
 export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
+type FieldRefiner = (fieldVal: any, fieldName: string) => unknown
+export type FieldRefinerMap = Record<string, FieldRefiner | undefined>
 
 function coerceMonthCodeString(monthCode: unknown, entityName: string): string {
   if (typeof monthCode === 'string') {
@@ -62,7 +64,7 @@ export const durationFieldRefiners = mapPropNamesToConstant(
   toStrictInteger,
 )
 
-const builtinOffsetRefiners = {
+export const offsetFieldRefiners = {
   offset(offsetString: unknown) {
     const s = toStringViaPrimitive(offsetString as string)
     // The public field is named "offset" and is supplied as a string, but after
@@ -72,11 +74,14 @@ const builtinOffsetRefiners = {
   },
 }
 
-export const builtinFieldRefiners = {
+export const dateTimeFieldRefiners = {
   ...dateFieldRefiners,
   ...timeFieldRefiners,
-  ...durationFieldRefiners,
-  ...builtinOffsetRefiners,
+}
+
+export const zonedDateTimeFieldRefiners = {
+  ...dateTimeFieldRefiners,
+  ...offsetFieldRefiners,
 }
 
 /*
@@ -93,6 +98,7 @@ style calls. In that mode an empty matching field set is rejected by default.
 export function readAndRefineBagFields(
   bag: Record<string, unknown>,
   validFieldNames: string[], // must be alphabetized
+  fieldRefiners: FieldRefinerMap,
   requiredFieldNames?: string[],
   disallowEmpty = !requiredFieldNames,
 ): Record<string, unknown> {
@@ -105,8 +111,7 @@ export function readAndRefineBagFields(
     if (fieldVal !== undefined) {
       anyMatching = true
 
-      const refiner =
-        builtinFieldRefiners[fieldName as keyof typeof builtinFieldRefiners]
+      const refiner = fieldRefiners[fieldName]
 
       if (refiner) {
         fieldVal = (
@@ -120,9 +125,6 @@ export function readAndRefineBagFields(
         // TODO: have caller use a Set
         throw new TypeError(errorMessages.missingField(fieldName))
       }
-
-      res[fieldName] =
-        timeFieldDefaults[fieldName as keyof typeof timeFieldDefaults]
     }
   }
 
