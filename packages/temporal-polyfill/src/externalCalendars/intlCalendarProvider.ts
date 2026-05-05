@@ -1,9 +1,9 @@
 import * as errorMessages from '../internal/errorMessages'
 import type { ExternalCalendarProvider } from '../internal/externalCalendar'
-import { queryCalendarIntlFormat, queryIntlCalendar } from './intlCalendar'
+import { getCalendarIntlFormat, getIntlCalendar } from './intlCalendar'
 import {
+  getIsoDerivedCalendar,
   isIsoDerivedCalendarId,
-  queryIsoDerivedCalendar,
 } from './isoDerivedCalendar'
 
 // These aliases are Temporal-recognized legacy calendar IDs. Keep them in the
@@ -27,7 +27,7 @@ export const intlCalendarProvider: ExternalCalendarProvider = {
       return deprecatedId
     }
 
-    if (queryCalendarIntlFormat(id).resolvedOptions().calendar !== id) {
+    if (getCalendarIntlFormat(id).resolvedOptions().calendar !== id) {
       throw new RangeError(errorMessages.invalidCalendar(id))
     }
 
@@ -36,7 +36,7 @@ export const intlCalendarProvider: ExternalCalendarProvider = {
 
   getCalendar(id) {
     return isIsoDerivedCalendarId(id)
-      ? queryIsoDerivedCalendar(id)
-      : queryIntlCalendar(id)
+      ? getIsoDerivedCalendar(id)
+      : getIntlCalendar(id)
   },
 }

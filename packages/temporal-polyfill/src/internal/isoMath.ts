@@ -12,7 +12,12 @@ import type {
 } from './fieldTypes'
 import { gregoryCalendarId } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
-import { isoToLegacyDate } from './timeMath'
+import {
+  diffEpochMilliDays,
+  isoArgsToEpochMilli,
+  isoDateToEpochMilli,
+  isoToLegacyDate,
+} from './timeMath'
 import {
   allPropsEqual,
   clampProp,
@@ -117,8 +122,16 @@ export function computeIsoDayOfWeek(isoDateFields: CalendarDateFields): number {
   return modFloor(legacyDate.getUTCDay() - daysNudged, 7) || 7
 }
 
+export function computeIsoDayOfYear(isoDateFields: CalendarDateFields): number {
+  return (
+    diffEpochMilliDays(
+      isoArgsToEpochMilli(isoDateFields.year)!,
+      isoDateToEpochMilli(isoDateFields)!,
+    ) + 1
+  )
+}
+
 export function computeIsoWeekFields(
-  queryDayOfYear: (isoDate: CalendarDateFields) => number,
   isoDateFields: CalendarDateFields,
 ): CalendarWeekFields {
   // ISO weeks always start on Monday, and week 1 is the first week with at
@@ -128,7 +141,7 @@ export function computeIsoWeekFields(
   const minDaysInWeek = 4
 
   const isoDayOfWeek = computeIsoDayOfWeek(isoDateFields)
-  const isoDayOfYear = queryDayOfYear(isoDateFields)
+  const isoDayOfYear = computeIsoDayOfYear(isoDateFields)
 
   // 0-based
   // analyze current date, relative to calendar-decided start-of-week

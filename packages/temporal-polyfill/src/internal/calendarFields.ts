@@ -1,29 +1,37 @@
+import {
+  computeCalendarDaysInMonthForYearMonth,
+  computeCalendarMonthsInYearForYear,
+} from './calendarDerived'
 import { computeCalendarIdBase } from './calendarId'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
-import {
-  getCalendarEraOrigins,
-  getCalendarEraRemaps,
-  getCalendarLeapMonthMeta,
-  queryCalendarDaysInMonthPart,
-  queryCalendarLeapMonth,
-  queryCalendarMonthsInYearPart,
-} from './calendarQuery'
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
+import { gregoryCalendar } from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
-import { normalizeEraName } from './intlCalendarConfig'
+import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
 import { clampEntity, clampProp } from './utils'
 
+export function getCalendarEraOrigins(
+  calendar: InternalCalendar,
+): Record<string, number> | undefined {
+  return calendar === gregoryCalendar
+    ? gregoryEraOrigins
+    : calendar
+      ? calendar.eraOrigins
+      : undefined
+}
+
 export function getCalendarFieldNames(
-  calendarId: string,
+  calendar: InternalCalendar,
   fieldNames: string[],
   fieldNamesWithEra: string[] = fieldNames,
 ): string[] {
   // Both inputs are caller-owned, pre-sorted lists. Calendars with eras swap in
   // the explicit era-bearing variant instead of building field order here.
-  return getCalendarEraOrigins(calendarId) ? fieldNamesWithEra : fieldNames
+  return getCalendarEraOrigins(calendar) ? fieldNamesWithEra : fieldNames
 }
 
 /*
@@ -35,10 +43,11 @@ happen before those deferred coercions.
 
 export function resolveCalendarYear(
   calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>,
 ): number {
-  const eraOrigins = getCalendarEraOrigins(calendarId)
-  const eraRemaps = getCalendarEraRemaps(calendarId) || {}
+  const eraOrigins = getCalendarEraOrigins(calendar)
+  const eraRemaps = (calendar && calendar.eraRemaps) || {}
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {
@@ -93,7 +102,7 @@ export function resolveCalendarYear(
 }
 
 export function resolveCalendarMonth(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
@@ -103,7 +112,7 @@ export function resolveCalendarMonth(
 
   if (monthCode !== undefined) {
     const monthByCode = resolveMonthCode(
-      calendarId,
+      calendar,
       monthCode,
       year,
       overflow,
@@ -124,13 +133,13 @@ export function resolveCalendarMonth(
     'month',
     month,
     1,
-    queryCalendarMonthsInYearPart(calendarId, year),
+    computeCalendarMonthsInYearForYear(calendar, year),
     overflow,
   )
 }
 
 export function resolveCalendarDay(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: DayFields,
   month: number,
   year: number,
@@ -140,24 +149,24 @@ export function resolveCalendarDay(
     fields,
     'day',
     1,
-    queryCalendarDaysInMonthPart(calendarId, year, month),
+    computeCalendarDaysInMonthForYearMonth(calendar, year, month),
     overflow,
   )
 }
 
 function resolveMonthCode(
-  calendarId: string,
+  calendar: InternalCalendar,
   monthCode: string,
   year: number,
   overflow: Overflow,
   monthCodeParts = parseMonthCode(monthCode),
 ) {
-  const leapMonth = queryCalendarLeapMonth(calendarId, year)
+  const leapMonth = calendar ? calendar.computeLeapMonth(year) : undefined
   const [monthCodeNumber, wantsLeapMonth] = monthCodeParts
   let month = monthCodeNumberToMonth(monthCodeNumber, wantsLeapMonth, leapMonth)
 
   if (wantsLeapMonth) {
-    const leapMonthMeta = getCalendarLeapMonthMeta(calendarId)
+    const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {

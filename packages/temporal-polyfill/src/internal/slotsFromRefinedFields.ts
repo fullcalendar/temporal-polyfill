@@ -1,4 +1,9 @@
 import {
+  computeCalendarIsoFieldsFromParts,
+  computeCalendarMonthCodeParts,
+} from './calendarDerived'
+import {
+  getCalendarEraOrigins,
   resolveCalendarDay,
   resolveCalendarMonth,
   resolveCalendarYear,
@@ -6,16 +11,9 @@ import {
 import { computeCalendarIdBase } from './calendarId'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { parseMonthCode } from './calendarMonthCode'
-import {
-  getCalendarEraOrigins,
-  getCalendarMonthDayReferenceYear,
-  getPlainMonthDayCommonMonthMaxDay,
-  getPlainMonthDayLeapMonthMaxDays,
-  queryCalendarIsoFieldsFromParts,
-  queryCalendarMonthCodeParts,
-  queryCalendarYearMonthForMonthDay,
-} from './calendarQuery'
 import * as errorMessages from './errorMessages'
+import { getInternalCalendar } from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
 import {
@@ -27,7 +25,10 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
-import { isoEpochFirstLeapYear } from './isoMath'
+import {
+  computeIsoYearMonthFieldsForMonthDay,
+  isoEpochFirstLeapYear,
+} from './isoMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow } from './optionsModel'
 import { OverflowOptions } from './optionsModel'
@@ -84,7 +85,8 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   fields: Partial<DateFields>,
   refineOptions: DateOptionsRefiner<T>,
 ): [slots: PlainDateSlots, ...options: T] {
-  const prepared = prepareDateFields(calendarId, fields)
+  const calendar = getInternalCalendar(calendarId)
+  const prepared = prepareDateFields(calendarId, calendar, fields)
 
   // Options are deliberately read after all observable calendar fields,
   // including numeric year coercion. Month/day validation needs overflow, so
@@ -94,6 +96,7 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   return [
     createPlainDateFromPreparedFields(
       calendarId,
+      calendar,
       fields,
       prepared,
       refinedOptions[0],
@@ -107,7 +110,8 @@ function createPlainDateFromFieldsWithOverflowOptions(
   fields: Partial<DateFields>,
   options: OverflowOptions | undefined,
 ): PlainDateSlots {
-  const prepared = prepareDateFields(calendarId, fields)
+  const calendar = getInternalCalendar(calendarId)
+  const prepared = prepareDateFields(calendarId, calendar, fields)
 
   // This wrapper no longer needs the generic callback machinery, but it still
   // reads overflow at the same phase: after date field syntax/year resolution
@@ -115,6 +119,7 @@ function createPlainDateFromFieldsWithOverflowOptions(
   const overflow = refineOverflowOptions(options)
   return createPlainDateFromPreparedFields(
     calendarId,
+    calendar,
     fields,
     prepared,
     overflow,
@@ -123,26 +128,27 @@ function createPlainDateFromFieldsWithOverflowOptions(
 
 function createPlainDateFromPreparedFields(
   calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
 ): PlainDateSlots {
   const month = resolveCalendarMonth(
-    calendarId,
+    calendar,
     fields,
     prepared.year,
     overflow,
     prepared.monthCodeParts,
   )
   const day = resolveCalendarDay(
-    calendarId,
+    calendar,
     fields as DayFields,
     month,
     prepared.year,
     overflow,
   )
-  const isoDate = queryCalendarIsoFieldsFromParts(
-    calendarId,
+  const isoDate = computeCalendarIsoFieldsFromParts(
+    calendar,
     prepared.year,
     month,
     day,
@@ -169,12 +175,13 @@ function parseMonthCodeField(
 
 function prepareDateFields(
   calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>,
 ): PreparedDateFields {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   // This ensures correct error ordering per spec (e.g. calendarresolvefields-error-ordering tests).
-  const eraOrigins = getCalendarEraOrigins(calendarId)
+  const eraOrigins = getCalendarEraOrigins(calendar)
   if (
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
@@ -189,7 +196,7 @@ function prepareDateFields(
   }
 
   const monthCodeParts = parseMonthCodeField(fields)
-  const year = resolveCalendarYear(calendarId, fields)
+  const year = resolveCalendarYear(calendarId, calendar, fields)
 
   return { monthCodeParts, year }
 }
@@ -213,7 +220,8 @@ function createPlainYearMonthFromFieldsWithOverflowOptions(
 ): PlainYearMonthSlots {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
-  const eraOrigins = getCalendarEraOrigins(calendarId)
+  const calendar = getInternalCalendar(calendarId)
+  const eraOrigins = getCalendarEraOrigins(calendar)
   if (
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
@@ -226,19 +234,19 @@ function createPlainYearMonthFromFieldsWithOverflowOptions(
 
   const monthCodeParts = parseMonthCodeField(fields)
 
-  const year = resolveCalendarYear(calendarId, fields)
+  const year = resolveCalendarYear(calendarId, calendar, fields)
 
   // Keep option coercion after year coercion; month resolution is the first
   // step that needs overflow.
   const overflow = refineOverflowOptions(options)
   const month = resolveCalendarMonth(
-    calendarId,
+    calendar,
     fields,
     year,
     overflow,
     monthCodeParts,
   )
-  const isoDate = queryCalendarIsoFieldsFromParts(calendarId, year, month, 1)
+  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
 
   return createPlainYearMonthSlots(
     checkIsoYearMonthInBounds(isoDate),
@@ -263,7 +271,8 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
   fields: Partial<DateFields>, // guaranteed `day`
   options: OverflowOptions | undefined,
 ): PlainMonthDaySlots {
-  const eraOrigins = getCalendarEraOrigins(calendarId)
+  const calendar = getInternalCalendar(calendarId)
+  const eraOrigins = getCalendarEraOrigins(calendar)
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
@@ -283,7 +292,7 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
 
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
-      ? resolveCalendarYear(calendarId, fields)
+      ? resolveCalendarYear(calendarId, calendar, fields)
       : undefined
 
   // PlainMonthDay may not have a year, but if it does, that year is part of the
@@ -309,13 +318,13 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
     // in-range ISO date to anchor the supplied calendar year.
     if (!isIso) {
       checkIsoDateInBounds(
-        queryCalendarIsoFieldsFromParts(calendarId, yearMaybe, 1, 1),
+        computeCalendarIsoFieldsFromParts(calendar, yearMaybe, 1, 1),
       )
     }
 
     // might limit overflow
     const month = resolveCalendarMonth(
-      calendarId,
+      calendar,
       fields,
       yearMaybe,
       overflow,
@@ -323,14 +332,14 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
     )
     // NOTE: internal call of getDefinedProp not necessary
     day = resolveCalendarDay(
-      calendarId,
+      calendar,
       fields as DayFields,
       month,
       yearMaybe,
       overflow,
     )
-    ;[monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
-      calendarId,
+    ;[monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+      calendar,
       yearMaybe,
       month,
     )
@@ -346,20 +355,22 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
 
     // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's createPlainMonthDayFromFields
     // to limit the day in calendar with predictable max-days-in-month without the year
-    const referenceYear = getCalendarMonthDayReferenceYear(calendarId)
+    const referenceYear = calendar
+      ? calendar.monthDayReferenceYear
+      : isoEpochFirstLeapYear
     if (referenceYear !== undefined) {
       // ISO-derived calendars share Gregorian month lengths, but their
       // calendar year may not be the ISO year. The reference year corresponds
       // to ISO 1972 so February 29 remains available.
       const month = resolveCalendarMonth(
-        calendarId,
+        calendar,
         fields,
         referenceYear,
         overflow,
         monthCodeParts,
       )
       day = resolveCalendarDay(
-        calendarId,
+        calendar,
         fields as DayFields,
         month,
         referenceYear,
@@ -396,7 +407,8 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
 
   if (
     isLeapMonth &&
-    queryPlainMonthDayLeapMonthMaxDay(calendarId, monthCodeNumber) < fields.day
+    ((calendar && calendar.plainMonthDayLeapMonthMaxDays?.[monthCodeNumber]) ??
+      Infinity) < fields.day
   ) {
     if (overflow === Overflow.Reject) {
       throw new RangeError(errorMessages.invalidLeapMonth)
@@ -409,17 +421,21 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
     day = clampNumber(
       fields.day,
       1,
-      queryPlainMonthDayCommonMonthMaxDay(calendarId),
+      (calendar && calendar.plainMonthDayCommonMonthMaxDay) ?? Infinity,
     )
   }
 
   // query calendar for final year/month
-  let res = queryCalendarYearMonthForMonthDay(
-    calendarId,
-    monthCodeNumber,
-    Boolean(isLeapMonth),
-    day,
-  )
+  let res = calendar
+    ? calendar.computeYearMonthFieldsForMonthDay(
+        monthCodeNumber,
+        Boolean(isLeapMonth),
+        day,
+      )
+    : computeIsoYearMonthFieldsForMonthDay(
+        monthCodeNumber,
+        Boolean(isLeapMonth),
+      )
 
   // Without an explicit year, variable-length calendar months need the same
   // overflow behavior as year-specific fields: reject asks for an exact match,
@@ -427,12 +443,16 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
   // reference year/month.
   while (!res && overflow === Overflow.Constrain && day > 1) {
     day--
-    res = queryCalendarYearMonthForMonthDay(
-      calendarId,
-      monthCodeNumber,
-      Boolean(isLeapMonth),
-      day,
-    )
+    res = calendar
+      ? calendar.computeYearMonthFieldsForMonthDay(
+          monthCodeNumber,
+          Boolean(isLeapMonth),
+          day,
+        )
+      : computeIsoYearMonthFieldsForMonthDay(
+          monthCodeNumber,
+          Boolean(isLeapMonth),
+        )
   }
 
   if (!res) {
@@ -442,21 +462,8 @@ function createPlainMonthDayFromFieldsWithOverflowOptions(
 
   return createPlainMonthDaySlots(
     checkIsoDateInBounds(
-      queryCalendarIsoFieldsFromParts(calendarId, finalYear, finalMonth, day),
+      computeCalendarIsoFieldsFromParts(calendar, finalYear, finalMonth, day),
     ),
     calendarId,
   )
-}
-
-function queryPlainMonthDayLeapMonthMaxDay(
-  calendarId: string,
-  monthCodeNumber: number,
-): number {
-  return (
-    getPlainMonthDayLeapMonthMaxDays(calendarId)?.[monthCodeNumber] ?? Infinity
-  )
-}
-
-function queryPlainMonthDayCommonMonthMaxDay(calendarId: string): number {
-  return getPlainMonthDayCommonMonthMaxDay(calendarId) ?? Infinity
 }

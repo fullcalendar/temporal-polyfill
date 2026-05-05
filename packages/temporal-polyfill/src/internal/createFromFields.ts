@@ -5,6 +5,7 @@ import {
   durationFieldNamesAlpha,
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
+import { getInternalCalendar } from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
   dateFieldNamesAlpha,
@@ -79,7 +80,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   bag: ZonedDateTimeLikeObject, // i think this needs type change
 ): RelativeToSlotsNoCalendar {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesWithEraAlpha,
   )
@@ -117,7 +118,7 @@ export function refineZonedDateTimeObjectLike(
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesWithEraAlpha,
   )
@@ -155,7 +156,7 @@ export function refinePlainDateTimeObjectLike(
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateTimeFieldNamesAlpha,
     dateTimeFieldNamesWithEraAlpha,
   )
@@ -187,7 +188,7 @@ export function refinePlainDateObjectLike(
   requireFields: string[] = [],
 ): PlainDateSlots {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
@@ -207,7 +208,7 @@ export function refinePlainYearMonthObjectLike(
   requireFields?: string[],
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     yearMonthFieldNamesAsc,
     yearMonthFieldNamesWithEraAsc,
   )
@@ -227,7 +228,7 @@ export function refinePlainMonthDayObjectLike(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )

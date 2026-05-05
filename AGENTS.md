@@ -4,7 +4,7 @@ CD into that directory before running any npm-scripts.
 
 If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
 
-Don't bother running `pnpm run size` ever
+Don't bother running bare `pnpm run size` ever
 
 
 ## IMPORTANT: Repo Setup (ESPECIALLY right after creating a worktree)
@@ -75,4 +75,25 @@ small portions of code can back be packed with a lot of meaning.
 
 ## Bundle Size
 
-For testing minification+gzip of global.min.js, you would run `pnpm run size`. However, the package in `packages/export-size` must be built first.
+Before making size-oriented changes, measure and record the baseline size first.
+
+The size command depends on the `packages/export-size` submodule's built
+output. Always build `export-size` first:
+
+```
+cd <repo-root>/packages/export-size
+pnpm run build
+```
+
+Then measure from `packages/temporal-polyfill`:
+
+```
+cd <repo-root>/packages/temporal-polyfill
+pnpm run size --raw
+```
+
+Use `pnpm run size --raw` for raw byte size. Do not run bare `pnpm run size`.
+
+After a size-oriented code change is settled, run build and sizing. If sizing
+increased, do not revert the code automatically; pause so the user can inspect
+the built artifacts.

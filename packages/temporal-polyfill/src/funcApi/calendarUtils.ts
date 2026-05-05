@@ -1,23 +1,23 @@
+import {
+  computeCalendarDateFields,
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarEraFields,
+  computeCalendarInLeapYear,
+  computeCalendarMonthCodeParts,
+  computeCalendarMonthsInYear,
+} from '../internal/calendarDerived'
 import { refineCalendarId } from '../internal/calendarId'
 import { formatMonthCode } from '../internal/calendarMonthCode'
-import {
-  queryCalendarDateFields,
-  queryCalendarDayOfYear,
-  queryCalendarDaysInMonth,
-  queryCalendarDaysInYear,
-  queryCalendarEraFields,
-  queryCalendarInLeapYear,
-  queryCalendarMonthCodeParts,
-  queryCalendarMonthsInYear,
-  queryCalendarWeekOfYear,
-  queryCalendarYearOfWeek,
-} from '../internal/calendarQuery'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import {
   DateFields,
   MonthDayFields,
   YearMonthFields,
 } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
+import { computeIsoWeekFields } from '../internal/isoMath'
 import { AbstractDateSlots } from '../internal/slots'
 
 // these utils used directly by func-api-based slots
@@ -46,10 +46,15 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
 // -----------------------------------------------------------------------------
 
 export function computeDateFields(slots: AbstractDateSlots): DateFields {
-  const { year, month, day } = queryCalendarDateFields(slots.calendarId, slots)
-  const { era, eraYear } = queryCalendarEraFields(slots.calendarId, slots)
-  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
+  const calendar = getInternalCalendar(slots.calendarId)
+  const { year, month, day } = computeCalendarDateFields(calendar, slots)
+  const { era, eraYear } = computeCalendarEraFields(
+    calendar,
     slots.calendarId,
+    slots,
+  )
+  const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+    calendar,
     year,
     month,
   )
@@ -60,10 +65,15 @@ export function computeDateFields(slots: AbstractDateSlots): DateFields {
 export function computeYearMonthFields(
   slots: AbstractDateSlots,
 ): YearMonthFields {
-  const { year, month } = queryCalendarDateFields(slots.calendarId, slots)
-  const { era, eraYear } = queryCalendarEraFields(slots.calendarId, slots)
-  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
+  const calendar = getInternalCalendar(slots.calendarId)
+  const { year, month } = computeCalendarDateFields(calendar, slots)
+  const { era, eraYear } = computeCalendarEraFields(
+    calendar,
     slots.calendarId,
+    slots,
+  )
+  const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+    calendar,
     year,
     month,
   )
@@ -74,9 +84,10 @@ export function computeYearMonthFields(
 export function computeMonthDayFields(
   slots: AbstractDateSlots,
 ): MonthDayFields {
-  const { year, month, day } = queryCalendarDateFields(slots.calendarId, slots)
-  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
-    slots.calendarId,
+  const calendar = getInternalCalendar(slots.calendarId)
+  const { year, month, day } = computeCalendarDateFields(calendar, slots)
+  const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+    calendar,
     year,
     month,
   )
@@ -88,33 +99,43 @@ export function computeMonthDayFields(
 // -----------------------------------------------------------------------------
 
 export function computeInLeapYear(slots: AbstractDateSlots): boolean {
-  return queryCalendarInLeapYear(slots.calendarId, slots)
+  return computeCalendarInLeapYear(getInternalCalendar(slots.calendarId), slots)
 }
 
 export function computeMonthsInYear(slots: AbstractDateSlots): number {
-  return queryCalendarMonthsInYear(slots.calendarId, slots)
+  return computeCalendarMonthsInYear(
+    getInternalCalendar(slots.calendarId),
+    slots,
+  )
 }
 
 export function computeDaysInMonth(slots: AbstractDateSlots): number {
-  return queryCalendarDaysInMonth(slots.calendarId, slots)
+  return computeCalendarDaysInMonth(
+    getInternalCalendar(slots.calendarId),
+    slots,
+  )
 }
 
 export function computeDaysInYear(slots: AbstractDateSlots): number {
-  return queryCalendarDaysInYear(slots.calendarId, slots)
+  return computeCalendarDaysInYear(getInternalCalendar(slots.calendarId), slots)
 }
 
 export function computeDayOfYear(slots: AbstractDateSlots): number {
-  return queryCalendarDayOfYear(slots.calendarId, slots)
+  return computeCalendarDayOfYear(getInternalCalendar(slots.calendarId), slots)
 }
 
 export function computeWeekOfYear(
   slots: AbstractDateSlots,
 ): number | undefined {
-  return queryCalendarWeekOfYear(slots.calendarId, slots)
+  return slots.calendarId === isoCalendarId
+    ? computeIsoWeekFields(slots).weekOfYear
+    : undefined
 }
 
 export function computeYearOfWeek(
   slots: AbstractDateSlots,
 ): number | undefined {
-  return queryCalendarYearOfWeek(slots.calendarId, slots)
+  return slots.calendarId === isoCalendarId
+    ? computeIsoWeekFields(slots).yearOfWeek
+    : undefined
 }

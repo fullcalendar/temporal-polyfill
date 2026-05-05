@@ -51,6 +51,7 @@ interface IntlDateFields {
   era: string | undefined
   eraYear: number | undefined
   year: number
+  month: number
   monthString: string
   day: number
 }
@@ -121,10 +122,10 @@ const chineseFirstMonthStartCorrections: Record<
 /*
 Expects an already-normalized calendarId
 */
-export const queryIntlCalendar = memoize(createIntlCalendar)
+export const getIntlCalendar = memoize(createIntlCalendar)
 
 function createIntlCalendar(calendarId: string): IntlCalendar {
-  const intlFormat = queryCalendarIntlFormat(calendarId)
+  const intlFormat = getCalendarIntlFormat(calendarId)
   const calendarIdBase = computeCalendarIdBase(calendarId)
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
@@ -149,20 +150,17 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
 
   const calendar: IntlCalendar = {
     id: calendarId,
-    queryFields: createIntlFieldCache(epochMilliToIntlFields),
+    queryFields: createIntlFieldCache(epochMilliToIntlFields, queryYearData),
     queryYearData,
     eraOrigins: eraOriginsByCalendarId[calendarIdBase],
     eraRemaps: eraRemapsByCalendarId[calendarIdBase],
-    leapMonthMeta: queryIntlCalendarLeapMonthMeta(calendarId),
+    leapMonthMeta: getIntlCalendarLeapMonthMeta(calendarId),
     plainMonthDayLeapMonthMaxDays:
       plainMonthDayLeapMonthMaxDaysByCalendarIdBase[calendarIdBase],
     plainMonthDayCommonMonthMaxDay:
       plainMonthDayCommonMonthMaxDayByCalendarIdBase[calendarIdBase],
     computeDateFields(isoDate) {
-      return computeIntlDateFields(calendar, isoDate)
-    },
-    computeDay(isoDate) {
-      return computeIntlDay(calendar, isoDate)
+      return calendar.queryFields(isoDate)
     },
     computeIsoFieldsFromParts(year, month, day) {
       return computeIsoFieldsFromIntlParts(calendar, year, month, day)
@@ -235,10 +233,15 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
 
 function createIntlFieldCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
+  queryYearData: IntlYearDataCache,
 ) {
   return memoize((isoDateFields: CalendarDateFields) => {
     const epochMilli = isoDateToEpochMilli(isoDateFields)!
-    return epochMilliToIntlFields(epochMilli)
+    const intlFields = epochMilliToIntlFields(epochMilli)
+    return {
+      ...intlFields,
+      month: computeIntlMonthIndex(queryYearData, intlFields.year, epochMilli),
+    }
   }, WeakMap)
 }
 
@@ -623,6 +626,7 @@ function computeIntlFieldsFromCorrectedYearData(
 
       return {
         ...computeCorrectedIntlYearParts(calendarIdBase, year, rawIntlFields),
+        month: monthIndex + 1,
         monthString: yearData.monthStrings[monthIndex],
         day: diffEpochMilliDays(monthStart, epochMilli) + 1,
       }
@@ -694,6 +698,7 @@ function parseIntlDateFields(
 ): IntlDateFields {
   return {
     ...parseIntlYear(intlParts, calendarIdBase),
+    month: 0,
     monthString: intlParts.month,
     day: parseInt(intlParts.day),
   }
@@ -796,7 +801,7 @@ export function parseIntlYear(
 /**
  * @param id Expects already-normalized
  */
-export const queryCalendarIntlFormat = memoize(
+export const getCalendarIntlFormat = memoize(
   (id: string): Intl.DateTimeFormat =>
     new RawDateTimeFormat('en', {
       calendar: id,
@@ -812,24 +817,11 @@ export const queryCalendarIntlFormat = memoize(
 // Intl-Calendar methods
 // -----------------------------------------------------------------------------
 
-export function computeIntlDay(
-  intlCalendar: IntlCalendar,
-  isoDate: CalendarDateFields,
-): number {
-  return intlCalendar.queryFields(isoDate).day
-}
-
 export function computeIntlDateFields(
   intlCalendar: IntlCalendar,
   isoDate: CalendarDateFields,
 ): CalendarDateFields {
-  const { year, day } = intlCalendar.queryFields(isoDate)
-  const epochMilli = isoDateToEpochMilli(isoDate)!
-  return {
-    year,
-    month: computeIntlMonthIndex(intlCalendar, year, epochMilli),
-    day,
-  }
+  return intlCalendar.queryFields(isoDate)
 }
 
 export function computeIsoFieldsFromIntlParts(
@@ -870,7 +862,7 @@ export function computeIntlLeapMonth(
   intlCalendar: IntlCalendar,
   year: number,
 ): number | undefined {
-  const leapMonthMeta = queryIntlCalendarLeapMonthMeta(intlCalendar.id)
+  const leapMonthMeta = getIntlCalendarLeapMonthMeta(intlCalendar.id)
   if (leapMonthMeta === undefined) {
     return undefined
   }
@@ -928,7 +920,7 @@ export function computeIntlInLeapYear(
   intlCalendar: IntlCalendar,
   year: number,
 ): boolean {
-  if (queryIntlCalendarLeapMonthMeta(intlCalendar.id) !== undefined) {
+  if (getIntlCalendarLeapMonthMeta(intlCalendar.id) !== undefined) {
     return computeIntlMonthsInYear(intlCalendar, year) > 12
   }
 
@@ -1180,11 +1172,11 @@ function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
 }
 
 function computeIntlMonthIndex(
-  intlCalendar: IntlCalendar,
+  queryYearData: IntlYearDataCache,
   year: number,
   epochMilli: number,
 ): number {
-  const { monthEpochMillis } = intlCalendar.queryYearData(year)
+  const { monthEpochMillis } = queryYearData(year)
 
   for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
     if (epochMilli >= monthEpochMillis[i]) {
@@ -1195,8 +1187,6 @@ function computeIntlMonthIndex(
   throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
-function queryIntlCalendarLeapMonthMeta(
-  calendarId: string,
-): number | undefined {
+function getIntlCalendarLeapMonthMeta(calendarId: string): number | undefined {
   return leapMonthMetas[computeCalendarIdBase(calendarId)]
 }

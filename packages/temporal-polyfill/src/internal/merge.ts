@@ -1,12 +1,13 @@
-import { getCalendarFieldNames } from './calendarFields'
-import { formatMonthCode } from './calendarMonthCode'
 import {
-  getCalendarEraOrigins,
-  queryCalendarDateFields,
-  queryCalendarMonthCodeParts,
-} from './calendarQuery'
+  computeCalendarDateFields,
+  computeCalendarMonthCodeParts,
+} from './calendarDerived'
+import { getCalendarEraOrigins, getCalendarFieldNames } from './calendarFields'
+import { formatMonthCode } from './calendarMonthCode'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { checkDurationUnits } from './durationMath'
+import { getInternalCalendar } from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
   allYearFieldNamesAsc,
@@ -72,7 +73,10 @@ export function mergeCalendarFields(
 
   spliceFields(merged, additionalFields, monthFieldNamesAsc)
 
-  if (getCalendarEraOrigins(calendarId)) {
+  const calendar = getInternalCalendar(calendarId)
+  const eraOrigins = getCalendarEraOrigins(calendar)
+
+  if (eraOrigins) {
     spliceFields(merged, additionalFields, allYearFieldNamesAsc)
 
     // Japanese eras can begin mid-year. When month/day are supplied, era fields
@@ -134,7 +138,7 @@ export function mergeZonedDateTimeFields(
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateTimeAndOffsetFieldNamesAlpha,
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
@@ -149,14 +153,15 @@ export function mergeZonedDateTimeFields(
     microsecond,
     nanosecond,
   } = isoDateTime
+  const calendar = getInternalCalendar(calendarId)
 
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.
-  const { year, month, day } = queryCalendarDateFields(calendarId, isoDateTime)
+  const { year, month, day } = computeCalendarDateFields(calendar, isoDateTime)
   const origFields = {
     year,
-    monthCode: computeMonthCode(calendarId, year, month),
+    monthCode: computeMonthCode(calendar, year, month),
     day,
     hour,
     minute,
@@ -213,18 +218,19 @@ export function mergePlainDateTimeFields(
   const calendarId = plainDateTimeSlots.calendarId
 
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateTimeFieldNamesAlpha,
     dateTimeFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = queryCalendarDateFields(
-    calendarId,
+  const calendar = getInternalCalendar(calendarId)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
     plainDateTimeSlots,
   )
   const origFields = {
     year,
-    monthCode: computeMonthCode(calendarId, year, month),
+    monthCode: computeMonthCode(calendar, year, month),
     day,
     hour: plainDateTimeSlots.hour,
     minute: plainDateTimeSlots.minute,
@@ -271,18 +277,19 @@ export function mergePlainDateFields(
 ): PlainDateSlots {
   const calendarId = plainDateSlots.calendarId
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = queryCalendarDateFields(
-    calendarId,
+  const calendar = getInternalCalendar(calendarId)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
     plainDateSlots,
   )
   const origFields = {
     year,
-    monthCode: computeMonthCode(calendarId, year, month),
+    monthCode: computeMonthCode(calendar, year, month),
     day,
   }
   const partialFields = readAndRefineBagFields(modFields, validFieldNames)
@@ -302,18 +309,19 @@ export function mergePlainYearMonthFields(
 ): PlainYearMonthSlots {
   const calendarId = plainYearMonthSlots.calendarId
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     yearMonthFieldNamesAsc,
     yearMonthFieldNamesWithEraAsc,
   )
 
-  const { year, month } = queryCalendarDateFields(
-    calendarId,
+  const calendar = getInternalCalendar(calendarId)
+  const { year, month } = computeCalendarDateFields(
+    calendar,
     plainYearMonthSlots,
   )
   const origFields = {
     year,
-    monthCode: computeMonthCode(calendarId, year, month),
+    monthCode: computeMonthCode(calendar, year, month),
   }
   const partialFields = readAndRefineBagFields(modFields, validFieldNames)
   const mergedFields = mergeCalendarFields(
@@ -336,17 +344,18 @@ export function mergePlainMonthDayFields(
 ): PlainMonthDaySlots {
   const calendarId = plainMonthDaySlots.calendarId
   const validFieldNames = getCalendarFieldNames(
-    calendarId,
+    getInternalCalendar(calendarId),
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = queryCalendarDateFields(
-    calendarId,
+  const calendar = getInternalCalendar(calendarId)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
     plainMonthDaySlots,
   )
   const origFields = {
-    monthCode: computeMonthCode(calendarId, year, month),
+    monthCode: computeMonthCode(calendar, year, month),
     day,
   }
   const partialFields = readAndRefineBagFields(modFields, validFieldNames)
@@ -401,12 +410,12 @@ function mergeDurationBag(
 }
 
 function computeMonthCode(
-  calendarId: string,
+  calendar: InternalCalendar,
   year: number,
   month: number,
 ): string {
-  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
-    calendarId,
+  const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+    calendar,
     year,
     month,
   )

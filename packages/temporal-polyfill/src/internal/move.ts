@@ -1,6 +1,12 @@
 import { BigNano, addBigNanos } from './bigNano'
+import {
+  computeCalendarDateFields,
+  computeCalendarDaysInMonthForYearMonth,
+  computeCalendarEpochMilli,
+  computeCalendarMonthCodeParts,
+  computeCalendarMonthsInYearForYear,
+} from './calendarDerived'
 import { monthCodeNumberToMonth } from './calendarMonthCode'
-import { getCalendarLeapMonthMeta, queryCalendarDay } from './calendarQuery'
 import {
   DurationFields,
   durationFieldNamesAsc,
@@ -15,11 +21,8 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import {
-  ExternalCalendar,
-  getExternalCalendar,
-  isCoreCalendarId,
-} from './externalCalendar'
+import { getInternalCalendar } from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -27,13 +30,7 @@ import {
 } from './fieldTypes'
 import type { CalendarYearMonthFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import {
-  addIsoMonths,
-  computeIsoDateFields,
-  computeIsoDaysInMonth,
-  computeIsoMonthCodeParts,
-  isoMonthsInYear,
-} from './isoMath'
+import { addIsoMonths } from './isoMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
@@ -57,7 +54,6 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   epochMilliToIsoDateTime,
-  isoArgsToEpochMilli,
   isoDateToEpochMilli,
   nanoToTimeAndDay,
   timeFieldsToNano,
@@ -96,7 +92,7 @@ export function moveZonedDateTime(
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
       timeZoneImpl,
-      zonedDateTimeSlots.calendarId,
+      getInternalCalendar(zonedDateTimeSlots.calendarId),
       zonedDateTimeSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -111,8 +107,9 @@ export function movePlainDateTime(
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots {
   const { calendarId } = plainDateTimeSlots
+  const calendar = getInternalCalendar(calendarId)
   const isoDateTime = moveDateTime(
-    calendarId,
+    calendar,
     plainDateTimeSlots,
     doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     options,
@@ -127,9 +124,10 @@ export function movePlainDate(
   options?: OverflowOptions,
 ): PlainDateSlots {
   const { calendarId } = plainDateSlots
+  const calendar = getInternalCalendar(calendarId)
   return createPlainDateSlots(
     moveDate(
-      calendarId,
+      calendar,
       plainDateSlots,
       doSubtract ? negateDurationFields(durationSlots) : durationSlots,
       options,
@@ -157,8 +155,9 @@ export function movePlainYearMonth(
   }
 
   const calendarId = plainYearMonthSlots.calendarId
+  const calendar = getInternalCalendar(calendarId)
   const getDay = (isoDate: CalendarDateFields) =>
-    queryCalendarDay(calendarId, isoDate)
+    computeCalendarDateFields(calendar, isoDate).day
 
   // The first-of-month must be representable, this check in-bounds
   const isoDateFields: CalendarDateFields = checkIsoDateInBounds(
@@ -170,7 +169,7 @@ export function movePlainYearMonth(
   }
 
   const movedIsoDateFields = dateAddWithOverflow(
-    calendarId,
+    calendar,
     isoDateFields,
     durationSlots,
     overflow,
@@ -212,7 +211,7 @@ timeZoneImpl must be derived from zonedEpochSlots.timeZoneId
 */
 export function moveZonedEpochs(
   timeZoneImpl: TimeZoneImpl,
-  calendarId: string,
+  calendar: InternalCalendar,
   slots: ZonedEpochSlots,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -226,7 +225,7 @@ export function moveZonedEpochs(
   } else {
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZoneImpl)
     const movedIsoDateFields = moveDate(
-      calendarId,
+      calendar,
       isoDateTime,
       {
         ...durationFields, // date parts
@@ -249,7 +248,7 @@ export function moveZonedEpochs(
 }
 
 export function moveDateTime(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateTimeFields: CalendarDateTimeFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
@@ -261,7 +260,7 @@ export function moveDateTime(
   )
 
   const movedIsoDateFields = moveDate(
-    calendarId,
+    calendar,
     isoDateTimeFields,
     {
       ...durationFields, // date parts
@@ -283,13 +282,13 @@ export function moveDateTime(
 Skips calendar if moving days only
 */
 export function moveDate(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): CalendarDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return dateAdd(calendarId, isoDateFields, durationFields, options)
+    return dateAdd(calendar, isoDateFields, durationFields, options)
   }
 
   refineOverflowOptions(options) // for validation only
@@ -345,13 +344,13 @@ export function moveByDays(
 }
 
 export function dateAdd(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): CalendarDateFields {
   return dateAddWithOverflow(
-    calendarId,
+    calendar,
     isoDateFields,
     durationFields,
     refineOverflowOptions(options),
@@ -359,14 +358,11 @@ export function dateAdd(
 }
 
 export function dateAddWithOverflow(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
   overflow: Overflow,
 ): CalendarDateFields {
-  const externalCalendar = isCoreCalendarId(calendarId)
-    ? undefined
-    : getExternalCalendar(calendarId)
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
@@ -377,14 +373,7 @@ export function dateAddWithOverflow(
   )[0]
 
   if (years || months) {
-    epochMilli = addDateMonths(
-      calendarId,
-      isoDateFields,
-      years,
-      months,
-      overflow,
-      externalCalendar,
-    )
+    epochMilli = addDateMonths(calendar, isoDateFields, years, months, overflow)
   } else if (weeks || days) {
     epochMilli = isoDateToEpochMilli(isoDateFields)
   } else {
@@ -410,67 +399,62 @@ function pickDateFields(isoDate: CalendarDateFields): CalendarDateFields {
 }
 
 export function addCalendarMonths(
-  calendarId: string,
+  calendar: InternalCalendar,
   year: number,
   month: number,
   monthDelta: number,
 ): CalendarYearMonthFields {
-  return isCoreCalendarId(calendarId)
-    ? addIsoMonths(year, month, monthDelta)
-    : getExternalCalendar(calendarId).addMonths(year, month, monthDelta)
+  return calendar
+    ? calendar.addMonths(year, month, monthDelta)
+    : addIsoMonths(year, month, monthDelta)
 }
 
 export function addCalendarDateMonths(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: Parameters<typeof addDateMonths>[1],
   years: Parameters<typeof addDateMonths>[2],
   months: Parameters<typeof addDateMonths>[3],
   overflow: Parameters<typeof addDateMonths>[4],
 ): ReturnType<typeof addDateMonths> {
-  return addDateMonths(calendarId, isoDate, years, months, overflow)
+  return addDateMonths(calendar, isoDate, years, months, overflow)
 }
 
 export function addDateMonths(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateFields: CalendarDateFields,
   years: number,
   months: number,
   overflow: Overflow,
-  externalCalendar = isCoreCalendarId(calendarId)
-    ? undefined
-    : getExternalCalendar(calendarId),
 ): number {
-  const dateParts = externalCalendar
-    ? externalCalendar.computeDateFields(isoDateFields)
-    : computeIsoDateFields(isoDateFields)
+  const dateParts = computeCalendarDateFields(calendar, isoDateFields)
   let { year, month, day } = dateParts
 
   if (years) {
-    const [monthCodeNumber, isLeapMonth] = externalCalendar
-      ? externalCalendar.computeMonthCodeParts(year, month)
-      : computeIsoMonthCodeParts(month)
+    const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+      calendar,
+      year,
+      month,
+    )
     year += years
     month = computeYearMovedMonth(
-      externalCalendar,
+      calendar,
       monthCodeNumber,
       isLeapMonth,
-      externalCalendar ? externalCalendar.computeLeapMonth(year) : undefined,
+      calendar ? calendar.computeLeapMonth(year) : undefined,
       overflow,
     )
     month = clampEntity(
       'month',
       month,
       1,
-      externalCalendar
-        ? externalCalendar.computeMonthsInYear(year)
-        : isoMonthsInYear,
+      computeCalendarMonthsInYearForYear(calendar, year),
       overflow,
     )
   }
 
   if (months) {
-    const yearMonthParts = externalCalendar
-      ? externalCalendar.addMonths(year, month, months)
+    const yearMonthParts = calendar
+      ? calendar.addMonths(year, month, months)
       : addIsoMonths(year, month, months)
     ;({ year, month } = yearMonthParts)
   }
@@ -479,28 +463,22 @@ export function addDateMonths(
     'day',
     day,
     1,
-    externalCalendar
-      ? externalCalendar.computeDaysInMonth(year, month)
-      : computeIsoDaysInMonth(year, month),
+    computeCalendarDaysInMonthForYearMonth(calendar, year, month),
     overflow,
   )
 
-  return externalCalendar
-    ? externalCalendar.computeEpochMilli(year, month, day)
-    : isoArgsToEpochMilli(year, month, day)!
+  return computeCalendarEpochMilli(calendar, year, month, day)
 }
 
 export function computeYearMovedMonth(
-  externalCalendar: ExternalCalendar | undefined,
+  calendar: InternalCalendar,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   targetLeapMonth: number | undefined,
   overflow: Overflow,
 ): number {
   if (isLeapMonth) {
-    const leapMonthMeta = externalCalendar
-      ? getCalendarLeapMonthMeta(externalCalendar.id)
-      : undefined
+    const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
 
     // Year arithmetic preserves the source monthCode. If the exact leap-month
     // code exists in the target year, use that ordinal month directly.

@@ -20,7 +20,7 @@ import {
 } from '../internal/isoMath'
 import { isoArgsToEpochMilli, isoDateToEpochMilli } from '../internal/timeMath'
 import { memoize } from '../internal/utils'
-import { queryIntlCalendar } from './intlCalendar'
+import { getIntlCalendar } from './intlCalendar'
 import {
   eraOriginsByCalendarId,
   eraRemapsByCalendarId,
@@ -39,7 +39,7 @@ export function isIsoDerivedCalendarId(id: string): boolean {
   return Boolean(isoDerivedCalendarIds[id])
 }
 
-export const queryIsoDerivedCalendar = memoize(createIsoDerivedCalendar)
+export const getIsoDerivedCalendar = memoize(createIsoDerivedCalendar)
 
 function createIsoDerivedCalendar(id: string): ExternalCalendar {
   const isoYearOffset = isoYearOffsetsByCalendarId[id] || 0
@@ -63,9 +63,6 @@ function createIsoDerivedCalendar(id: string): ExternalCalendar {
         ...dateFields,
         year: isoYearToCalendarYear(dateFields.year),
       }
-    },
-    computeDay(isoDate) {
-      return isoDate.day
     },
     computeIsoFieldsFromParts(year, month, day) {
       return computeIsoFieldsFromParts(calendarYearToIsoYear(year), month, day)
@@ -155,7 +152,7 @@ function computeIsoDerivedEraFields(
     // exposing ICU's historical Japanese era labels.
     return epochMilli < primaryJapaneseEraMilli
       ? computeGregoryEraFields(isoDate)
-      : queryIntlCalendar(japaneseCalendarId).computeEraFields(isoDate)
+      : getIntlCalendar(japaneseCalendarId).computeEraFields(isoDate)
   }
 
   return {}

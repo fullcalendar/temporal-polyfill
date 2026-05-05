@@ -1,12 +1,12 @@
 import {
-  queryCalendarDay,
-  queryCalendarDayOfYear,
-  queryCalendarDaysInMonth,
-  queryCalendarDaysInYear,
-  queryCalendarWeekFields,
-} from '../internal/calendarQuery'
+  computeCalendarDateFields,
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+} from '../internal/calendarDerived'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
@@ -14,7 +14,8 @@ import {
   weekOfYearFieldName,
 } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
+import { isoCalendarId } from '../internal/intlCalendarConfig'
+import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
 import {
   addCalendarDateMonths,
   moveByDays,
@@ -44,12 +45,13 @@ export function moveByYears(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
+  const calendar = getInternalCalendar(calendarId)
   if (!years) {
     return isoDate
   }
   return epochMilliToIsoDateTime(
     addCalendarDateMonths(
-      calendarId,
+      calendar,
       isoDate,
       toStrictInteger(years),
       0,
@@ -65,12 +67,13 @@ export function moveByMonths(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
+  const calendar = getInternalCalendar(calendarId)
   if (!months) {
     return isoDate
   }
   return epochMilliToIsoDateTime(
     addCalendarDateMonths(
-      calendarId,
+      calendar,
       isoDate,
       0,
       toStrictInteger(months),
@@ -105,7 +108,8 @@ export function moveToDayOfYear(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const daysInYear = queryCalendarDaysInYear(calendarId, isoDate)
+  const calendar = getInternalCalendar(calendarId)
+  const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
     dayOfMonthName,
     toInteger(dayOfYear, dayOfMonthName),
@@ -114,7 +118,7 @@ export function moveToDayOfYear(
     overflow,
   )
 
-  const currentDayOfYear = queryCalendarDayOfYear(calendarId, isoDate)
+  const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
   return moveByDays(isoDate, normDayOfYear - currentDayOfYear)
 }
 
@@ -125,7 +129,8 @@ export function moveToDayOfMonth(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const daysInMonth = queryCalendarDaysInMonth(calendarId, isoDate)
+  const calendar = getInternalCalendar(calendarId)
+  const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
     dayFieldName,
     toInteger(day, dayFieldName),
@@ -135,7 +140,7 @@ export function moveToDayOfMonth(
   )
 
   return moveToDayOfMonthUnsafe(
-    (isoDate) => queryCalendarDay(calendarId, isoDate),
+    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
     isoDate,
     normDayOfMonth,
   )
@@ -166,8 +171,10 @@ export function slotsWithWeekOfYear(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const { weekOfYear: currentWeekOfYear, weeksInYear } =
-    queryCalendarWeekFields(calendarId, isoDate)
+  const weekFields =
+    calendarId === isoCalendarId ? computeIsoWeekFields(isoDate) : {}
+  const currentWeekOfYear = weekFields.weekOfYear
+  const weeksInYear = weekFields.weeksInYear
 
   if (currentWeekOfYear === undefined) {
     throw new RangeError(errorMessages.unsupportedWeekNumbers)

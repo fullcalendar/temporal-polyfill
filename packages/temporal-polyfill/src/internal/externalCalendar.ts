@@ -7,6 +7,17 @@ import type {
 } from './fieldTypes'
 import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
 
+export const gregoryCalendar = 0 as const
+
+// Calendar ids remain the public/storage shape. Dense internal paths use this
+// compact discriminant so repeated calendar operations can branch on a tiny
+// local value: undefined for ISO, a falsy sentinel for gregory, or an external
+// calendar object for non-core implementations.
+export type InternalCalendar =
+  | undefined
+  | typeof gregoryCalendar
+  | ExternalCalendar
+
 export interface ExternalCalendar {
   id: string
   eraOrigins?: Record<string, number>
@@ -17,7 +28,6 @@ export interface ExternalCalendar {
   monthDayReferenceYear?: number
 
   computeDateFields(isoDate: CalendarDateFields): CalendarDateFields
-  computeDay(isoDate: CalendarDateFields): number
   computeIsoFieldsFromParts(
     year: number,
     month: number,
@@ -67,7 +77,7 @@ const externalCalendarRegistryKey = Symbol.for(
   'temporal-polyfill.externalCalendarRegistry',
 )
 
-function queryExternalCalendarProvider(): ExternalCalendarProvider | undefined {
+function getExternalCalendarProvider(): ExternalCalendarProvider | undefined {
   const globalRecord = globalThis as unknown as Record<symbol, unknown>
   return globalRecord[externalCalendarRegistryKey] as
     | ExternalCalendarProvider
@@ -82,11 +92,11 @@ export function registerExternalCalendarProvider(
 }
 
 export function resolveExternalCalendarId(id: string): string | undefined {
-  return queryExternalCalendarProvider()?.resolveCalendarId(id)
+  return getExternalCalendarProvider()?.resolveCalendarId(id)
 }
 
 export function getExternalCalendar(id: string): ExternalCalendar {
-  const calendar = queryExternalCalendarProvider()?.getCalendar(id)
+  const calendar = getExternalCalendarProvider()?.getCalendar(id)
 
   if (!calendar) {
     throwExternalCalendarError()
@@ -99,6 +109,10 @@ export function throwExternalCalendarError(): never {
   throw new RangeError(errorMessages.externalCalendarRequired)
 }
 
-export function isCoreCalendarId(calendarId: string): boolean {
-  return calendarId === isoCalendarId || calendarId === gregoryCalendarId
+export function getInternalCalendar(calendarId: string): InternalCalendar {
+  return calendarId === isoCalendarId
+    ? undefined
+    : calendarId === gregoryCalendarId
+      ? gregoryCalendar
+      : getExternalCalendar(calendarId)
 }

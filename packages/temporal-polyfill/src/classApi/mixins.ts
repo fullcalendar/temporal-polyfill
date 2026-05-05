@@ -1,25 +1,24 @@
 import {
-  queryCalendarDateFields,
-  queryCalendarDay,
-  queryCalendarDayOfYear,
-  queryCalendarDaysInMonth,
-  queryCalendarDaysInYear,
-  queryCalendarEraFields,
-  queryCalendarInLeapYear,
-  queryCalendarMonthCode,
-  queryCalendarMonthsInYear,
-  queryCalendarWeekOfYear,
-  queryCalendarYearOfWeek,
-} from '../internal/calendarQuery'
+  computeCalendarDateFields,
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarEraFields,
+  computeCalendarInLeapYear,
+  computeCalendarMonthCode,
+  computeCalendarMonthsInYear,
+} from '../internal/calendarDerived'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import {
   dateGetterFieldNamesAsc,
   monthDayGetterFieldNamesAsc,
   timeFieldNamesAsc,
   yearMonthGetterFieldNamesAsc,
 } from '../internal/fieldNames'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
+import { isoCalendarId } from '../internal/intlCalendarConfig'
+import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
 
@@ -27,24 +26,48 @@ import { mapPropNames } from '../internal/utils'
 // -----------------------------------------------------------------------------
 
 const calendarGetterQueries = {
-  era: (slots: any) => queryCalendarEraFields(slots.calendarId, slots).era,
-  eraYear: (slots: any) =>
-    queryCalendarEraFields(slots.calendarId, slots).eraYear,
-  year: (slots: any) => queryCalendarDateFields(slots.calendarId, slots).year,
-  month: (slots: any) => queryCalendarDateFields(slots.calendarId, slots).month,
-  day: (slots: any) => queryCalendarDay(slots.calendarId, slots),
-  monthCode: (slots: any) => queryCalendarMonthCode(slots.calendarId, slots),
-  inLeapYear: (slots: any) => queryCalendarInLeapYear(slots.calendarId, slots),
+  era: (slots: any) => {
+    const calendar = getInternalCalendar(slots.calendarId)
+    return computeCalendarEraFields(calendar, slots.calendarId, slots).era
+  },
+  eraYear: (slots: any) => {
+    const calendar = getInternalCalendar(slots.calendarId)
+    return computeCalendarEraFields(calendar, slots.calendarId, slots).eraYear
+  },
+  year: (slots: any) => {
+    const calendar = getInternalCalendar(slots.calendarId)
+    return computeCalendarDateFields(calendar, slots).year
+  },
+  month: (slots: any) => {
+    const calendar = getInternalCalendar(slots.calendarId)
+    return computeCalendarDateFields(calendar, slots).month
+  },
+  day: (slots: any) => {
+    const calendar = getInternalCalendar(slots.calendarId)
+    return computeCalendarDateFields(calendar, slots).day
+  },
+  monthCode: (slots: any) =>
+    computeCalendarMonthCode(getInternalCalendar(slots.calendarId), slots),
+  inLeapYear: (slots: any) =>
+    computeCalendarInLeapYear(getInternalCalendar(slots.calendarId), slots),
   monthsInYear: (slots: any) =>
-    queryCalendarMonthsInYear(slots.calendarId, slots),
+    computeCalendarMonthsInYear(getInternalCalendar(slots.calendarId), slots),
   daysInMonth: (slots: any) =>
-    queryCalendarDaysInMonth(slots.calendarId, slots),
-  daysInYear: (slots: any) => queryCalendarDaysInYear(slots.calendarId, slots),
+    computeCalendarDaysInMonth(getInternalCalendar(slots.calendarId), slots),
+  daysInYear: (slots: any) =>
+    computeCalendarDaysInYear(getInternalCalendar(slots.calendarId), slots),
   dayOfWeek: (slots: any) => computeIsoDayOfWeek(slots),
   daysInWeek: () => 7,
-  dayOfYear: (slots: any) => queryCalendarDayOfYear(slots.calendarId, slots),
-  weekOfYear: (slots: any) => queryCalendarWeekOfYear(slots.calendarId, slots),
-  yearOfWeek: (slots: any) => queryCalendarYearOfWeek(slots.calendarId, slots),
+  dayOfYear: (slots: any) =>
+    computeCalendarDayOfYear(getInternalCalendar(slots.calendarId), slots),
+  weekOfYear: (slots: any) =>
+    slots.calendarId === isoCalendarId
+      ? computeIsoWeekFields(slots).weekOfYear
+      : undefined,
+  yearOfWeek: (slots: any) =>
+    slots.calendarId === isoCalendarId
+      ? computeIsoWeekFields(slots).yearOfWeek
+      : undefined,
 }
 
 function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(

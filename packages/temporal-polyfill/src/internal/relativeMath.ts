@@ -1,6 +1,7 @@
 import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
+import { getInternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -78,7 +79,11 @@ export function createMoveMarker(
   calendarId: string,
 ): MoveMarker {
   if (timeZoneImpl) {
-    return bindArgs(moveZonedEpochs, timeZoneImpl, calendarId) as Callable
+    return bindArgs(
+      moveZonedEpochs,
+      timeZoneImpl,
+      getInternalCalendar(calendarId),
+    ) as Callable
   }
   return bindArgs(moveDateTimeMarker, calendarId) as Callable
 }
@@ -108,7 +113,11 @@ function moveDateTimeMarker(
   isoDateTime: CalendarDateTimeFields,
   durationFields: DurationFields,
 ): CalendarDateTimeFields {
-  return moveDateTime(calendarId, isoDateTime, durationFields)
+  return moveDateTime(
+    getInternalCalendar(calendarId),
+    isoDateTime,
+    durationFields,
+  )
 }
 
 export function isoMarkerToEpochNano(marker: Marker): BigNano {

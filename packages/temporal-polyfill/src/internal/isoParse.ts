@@ -1,16 +1,15 @@
 import { BigNano } from './bigNano'
-import { resolveCalendarId } from './calendarId'
 import {
-  queryCalendarDateFields,
-  queryCalendarDay,
-  queryCalendarIsoFieldsFromParts,
-  queryCalendarMonthCodeParts,
-  queryCalendarYearMonthForMonthDay,
-} from './calendarQuery'
+  computeCalendarDateFields,
+  computeCalendarIsoFieldsFromParts,
+  computeCalendarMonthCodeParts,
+} from './calendarDerived'
+import { resolveCalendarId } from './calendarId'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { getInternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -19,6 +18,7 @@ import {
   checkIsoDateFields,
   checkIsoDateTimeFields,
   checkTimeFields,
+  computeIsoYearMonthFieldsForMonthDay,
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
@@ -226,8 +226,9 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
   }
 
   const isoSlots = parsePlainDate(s, true)
+  const calendar = getInternalCalendar(isoSlots.calendarId)
   const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoDate) => queryCalendarDay(isoSlots.calendarId, isoDate),
+    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
     isoSlots,
   )
 
@@ -254,26 +255,30 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
 
   const dateSlots = parsePlainDate(s, false, /* isPlainMonthDay = */ true)
   const { calendarId } = dateSlots
+  const calendar = getInternalCalendar(calendarId)
 
   // normalize year&month to be as close as possible to epoch
   const {
     year: origYear,
     month: origMonth,
     day,
-  } = queryCalendarDateFields(calendarId, dateSlots)
-  const [monthCodeNumber, isLeapMonth] = queryCalendarMonthCodeParts(
-    calendarId,
+  } = computeCalendarDateFields(calendar, dateSlots)
+  const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
+    calendar,
     origYear,
     origMonth,
   )
-  const { year, month } = queryCalendarYearMonthForMonthDay(
-    calendarId,
-    monthCodeNumber,
-    isLeapMonth,
-    day,
+  const { year, month } = (
+    calendar
+      ? calendar.computeYearMonthFieldsForMonthDay(
+          monthCodeNumber,
+          isLeapMonth,
+          day,
+        )
+      : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
   )! // !HACK
   const isoDate = checkIsoDateInBounds(
-    queryCalendarIsoFieldsFromParts(calendarId, year, month, day),
+    computeCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
   return createPlainMonthDaySlots(isoDate, calendarId)
