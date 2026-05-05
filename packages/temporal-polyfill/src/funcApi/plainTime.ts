@@ -25,7 +25,7 @@ import {
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { TimeUnitName } from '../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity } from '../internal/utils'
 import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -72,9 +72,7 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = memoize((record: Record) => record, WeakMap) as (
-  record: Record,
-) => Fields
+export const getFields = ((record: Record) => record) as (record: Record) => Fields
 
 // Setters
 // -----------------------------------------------------------------------------

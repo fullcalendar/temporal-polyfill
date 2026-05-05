@@ -184,9 +184,7 @@ export const getFields = memoize((record: Record): Fields => {
   }
 }, WeakMap)
 
-export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
-  record: Record,
-) => number
+export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 

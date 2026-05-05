@@ -40,7 +40,7 @@ import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefin
 import { checkIsoDateInBounds } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { DateUnitName, Unit } from '../internal/units'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -138,9 +138,7 @@ export const getFields = memoize(computeDateFields, WeakMap) as (
   record: Record,
 ) => Fields
 
-export const dayOfWeek = ((record: Record) => computeIsoDayOfWeek(record)) as (
-  record: Record,
-) => number
+export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
@@ -226,7 +224,7 @@ export function toZonedDateTime(
 
   return plainDateToZonedDateTime(
     refineTimeZoneId,
-    (plainTime) => plainTime,
+    identity,
     record,
     optionsObj,
   )

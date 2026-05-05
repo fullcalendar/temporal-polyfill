@@ -21,6 +21,9 @@ export function normalizeEraName(era: string): string {
   if (normalized === 'ad' || normalized === 'a') {
     return 'ce'
   }
+
+  // Not related to iso8601 or gregory, but easier to keep in core than make
+  // a plugin system
   if (normalized === 'beforeroc') {
     return 'broc'
   }
