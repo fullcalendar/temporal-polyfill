@@ -4,7 +4,10 @@ import { computeDurationSign } from '../internal/durationMath'
 import { TimeFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
-import { isoDateTimeToEpochNano, isoToEpochNano } from '../internal/timeMath'
+import {
+  isoDateTimeToEpochNano,
+  isoDateToEpochNano,
+} from '../internal/timeMath'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
@@ -260,8 +263,8 @@ export function expectPlainDatesSimilar(
   expect(pd1.branding).toBe('PlainDate')
   expect(pd0.calendarId).toBe(pd1.calendarId)
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoToEpochNano(pd0)!),
-    bigNanoToBigInt(isoToEpochNano(pd1)!),
+    bigNanoToBigInt(isoDateToEpochNano(pd0)!),
+    bigNanoToBigInt(isoDateToEpochNano(pd1)!),
   )
 }
 

@@ -19,7 +19,6 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import type { InternalCalendar } from './externalCalendar'
-import { timeFieldDefaults } from './fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -38,12 +37,7 @@ import {
 } from './move'
 import { DiffOptions, Overflow, RoundingMode } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
-import {
-  MarkerToEpochNano,
-  MoveMarker,
-  createMarkerMath,
-  isoMarkerToEpochNano,
-} from './relativeMath'
+import { MarkerToEpochNano, MoveMarker, createMarkerMath } from './relativeMath'
 import {
   computeNanoInc,
   roundBigNano,
@@ -67,7 +61,7 @@ import {
   epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
   isoDateToEpochMilli,
-  isoToEpochNano,
+  isoDateToEpochNano,
   timeFieldsToNano,
 } from './timeMath'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
@@ -213,7 +207,7 @@ export function diffPlainDateTimes(
       roundingMode,
       createMarkerMath(
         plainDateTimeSlots0,
-        isoMarkerToEpochNano as MarkerToEpochNano,
+        isoDateTimeToEpochNano as MarkerToEpochNano,
         bindArgs(moveDateTime, calendar) as MoveMarker,
       ),
     )
@@ -293,8 +287,8 @@ function diffDateLike(
   roundingMode: RoundingMode,
   smallestPrecision: Unit = Unit.Day,
 ): DurationSlots {
-  const startEpochNano = isoToEpochNano(startIsoDate)
-  const endEpochNano = isoToEpochNano(endIsoDate)
+  const startEpochNano = isoDateToEpochNano(startIsoDate)
+  const endEpochNano = isoDateToEpochNano(endIsoDate)
 
   // TODO: best place to check range?
   if (startEpochNano === undefined || endEpochNano === undefined) {
@@ -332,8 +326,8 @@ function diffDateLike(
         roundingInc,
         roundingMode,
         createMarkerMath(
-          combineDateAndTime(startIsoDate, timeFieldDefaults),
-          isoMarkerToEpochNano as MarkerToEpochNano,
+          startIsoDate,
+          isoDateToEpochNano as MarkerToEpochNano,
           bindArgs(moveDate, calendar) as MoveMarker,
         ),
       )

@@ -250,7 +250,7 @@ export function isoDateTimeToEpochMilli(
 For converting to fake epochNano values for math
 If out-of-bounds, returns undefined
 */
-export function isoToEpochNano(
+export function isoDateToEpochNano(
   isoDate: CalendarDateFields,
 ): BigNano | undefined {
   const epochMilli = isoDateToEpochMilli(isoDate)
