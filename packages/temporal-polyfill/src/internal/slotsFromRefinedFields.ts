@@ -71,10 +71,19 @@ export function createPlainDateFromFields(
   fields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  return createPlainDateFromFieldsWithOverflowOptions(
+  const calendar = getInternalCalendar(calendarId)
+  const prepared = prepareDateFields(calendarId, calendar, fields)
+
+  // The normal overflow path reads options at the same phase as the callback
+  // path below: after observable date field syntax/year resolution and
+  // immediately before month/day validation needs the overflow behavior.
+  const overflow = refineOverflowOptions(options)
+  return createPlainDateFromPreparedFields(
     calendarId,
+    calendar,
     fields,
-    options,
+    prepared,
+    overflow,
   )
 }
 
@@ -94,7 +103,7 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   const refinedOptions = refineOptions()
 
   return [
-    createPlainDateFromResolvedFields(
+    createPlainDateFromPreparedFields(
       calendarId,
       calendar,
       fields,
@@ -105,28 +114,7 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   ]
 }
 
-function createPlainDateFromFieldsWithOverflowOptions(
-  calendarId: string,
-  fields: Partial<DateFields>,
-  options: OverflowOptions | undefined,
-): PlainDateSlots {
-  const calendar = getInternalCalendar(calendarId)
-  const prepared = prepareDateFields(calendarId, calendar, fields)
-
-  // This wrapper no longer needs the generic callback machinery, but it still
-  // reads overflow at the same phase: after date field syntax/year resolution
-  // and immediately before month/day validation need the overflow behavior.
-  const overflow = refineOverflowOptions(options)
-  return createPlainDateFromResolvedFields(
-    calendarId,
-    calendar,
-    fields,
-    prepared,
-    overflow,
-  )
-}
-
-function createPlainDateFromResolvedFields(
+function createPlainDateFromPreparedFields(
   calendarId: string,
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
@@ -205,18 +193,6 @@ export function createPlainYearMonthFromFields(
   fields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  return createPlainYearMonthFromFieldsWithOverflowOptions(
-    calendarId,
-    fields,
-    options,
-  )
-}
-
-function createPlainYearMonthFromFieldsWithOverflowOptions(
-  calendarId: string,
-  fields: Partial<YearMonthFields>,
-  options: OverflowOptions | undefined,
-): PlainYearMonthSlots {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const calendar = getInternalCalendar(calendarId)
@@ -257,18 +233,6 @@ export function createPlainMonthDayFromFields(
   calendarId: string,
   fields: Partial<DateFields>, // guaranteed `day`
   options?: OverflowOptions,
-): PlainMonthDaySlots {
-  return createPlainMonthDayFromFieldsWithOverflowOptions(
-    calendarId,
-    fields,
-    options,
-  )
-}
-
-function createPlainMonthDayFromFieldsWithOverflowOptions(
-  calendarId: string,
-  fields: Partial<DateFields>, // guaranteed `day`
-  options: OverflowOptions | undefined,
 ): PlainMonthDaySlots {
   const calendar = getInternalCalendar(calendarId)
   const eraOrigins = getCalendarEraOrigins(calendar)
