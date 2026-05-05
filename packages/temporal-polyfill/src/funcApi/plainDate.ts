@@ -8,6 +8,7 @@ import {
 } from '../internal/convert'
 import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates } from '../internal/diff'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { DateLikeObject } from '../internal/fieldTypes'
@@ -318,8 +319,9 @@ export function withDayOfYear(
   dayOfYear: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveToDayOfYear(record.calendarId, record, dayOfYear, options),
+    moveToDayOfYear(calendar, record, dayOfYear, options),
     record.calendarId,
   )
 }
@@ -329,8 +331,9 @@ export function withDayOfMonth(
   dayOfMonth: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveToDayOfMonth(record.calendarId, record, dayOfMonth, options),
+    moveToDayOfMonth(calendar, record, dayOfMonth, options),
     record.calendarId,
   )
 }
@@ -340,8 +343,9 @@ export function withDayOfWeek(
   dayOfWeek: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveToDayOfWeek(record.calendarId, record, dayOfWeek, options),
+    moveToDayOfWeek(calendar, record, dayOfWeek, options),
     record.calendarId,
   )
 }
@@ -351,8 +355,9 @@ export function withWeekOfYear(
   weekOfYear: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    slotsWithWeekOfYear(record.calendarId, record, weekOfYear, options),
+    slotsWithWeekOfYear(calendar, record, weekOfYear, options),
     record.calendarId,
   )
 }
@@ -365,8 +370,9 @@ export function addYears(
   years: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveByYears(record.calendarId, record, years, options),
+    moveByYears(calendar, record, years, options),
     record.calendarId,
   )
 }
@@ -376,22 +382,25 @@ export function addMonths(
   months: number,
   options?: OverflowOptions,
 ): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveByMonths(record.calendarId, record, months, options),
+    moveByMonths(calendar, record, months, options),
     record.calendarId,
   )
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveByIsoWeeks(record.calendarId, record, weeks),
+    moveByIsoWeeks(calendar, record, weeks),
     record.calendarId,
   )
 }
 
 export function addDays(record: Record, days: number): Record {
+  const calendar = getInternalCalendar(record.calendarId)
   return createRecordFromDateFields(
-    moveByDaysStrict(record.calendarId, record, days),
+    moveByDaysStrict(calendar, record, days),
     record.calendarId,
   )
 }

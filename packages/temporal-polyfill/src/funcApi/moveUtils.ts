@@ -6,7 +6,7 @@ import {
 } from '../internal/calendarDerived'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import type { InternalCalendar } from '../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
@@ -14,7 +14,6 @@ import {
   weekOfYearFieldName,
 } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
 import {
   addDateMonths,
@@ -39,13 +38,12 @@ export function reversedMove<S>(
 // These functions validate input
 
 export function moveByYears(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   years: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const calendar = getInternalCalendar(calendarId)
   if (!years) {
     return isoDate
   }
@@ -55,13 +53,12 @@ export function moveByYears(
 }
 
 export function moveByMonths(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   months: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const calendar = getInternalCalendar(calendarId)
   if (!months) {
     return isoDate
   }
@@ -71,7 +68,7 @@ export function moveByMonths(
 }
 
 export function moveByIsoWeeks(
-  _calendar: string,
+  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   weeks: number,
 ): CalendarDateFields {
@@ -79,7 +76,7 @@ export function moveByIsoWeeks(
 }
 
 export function moveByDaysStrict(
-  _calendar: string,
+  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   weeks: number,
 ): CalendarDateFields {
@@ -90,13 +87,12 @@ export function moveByDaysStrict(
 // -----------------------------------------------------------------------------
 
 export function moveToDayOfYear(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   dayOfYear: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const calendar = getInternalCalendar(calendarId)
   const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
     dayOfMonthName,
@@ -111,13 +107,12 @@ export function moveToDayOfYear(
 }
 
 export function moveToDayOfMonth(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   day: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const calendar = getInternalCalendar(calendarId)
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
     dayFieldName,
@@ -135,7 +130,7 @@ export function moveToDayOfMonth(
 }
 
 export function moveToDayOfWeek(
-  _calendar: string,
+  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   options?: OverflowOptions,
@@ -153,14 +148,15 @@ export function moveToDayOfWeek(
 
 // TODO: fix weird "slots" name
 export function slotsWithWeekOfYear(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   weekOfYear: number,
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  const weekFields =
-    calendarId === isoCalendarId ? computeIsoWeekFields(isoDate) : {}
+  // Week-numbered years are only supported for ISO. The internal calendar
+  // discriminant uses undefined for ISO, so no string calendar ID is needed.
+  const weekFields = calendar === undefined ? computeIsoWeekFields(isoDate) : {}
   const currentWeekOfYear = weekFields.weekOfYear
   const weeksInYear = weekFields.weeksInYear
 
@@ -176,5 +172,5 @@ export function slotsWithWeekOfYear(
     overflow,
   )
 
-  return moveByIsoWeeks(calendarId, isoDate, normWeekOfYear - currentWeekOfYear)
+  return moveByIsoWeeks(calendar, isoDate, normWeekOfYear - currentWeekOfYear)
 }

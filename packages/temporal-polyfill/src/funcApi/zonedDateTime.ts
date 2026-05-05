@@ -18,6 +18,8 @@ import {
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes } from '../internal/diff'
+import { getInternalCalendar } from '../internal/externalCalendar'
+import type { InternalCalendar } from '../internal/externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -633,15 +635,16 @@ function alignedTime(
 
 function zonedTransform<A extends any[]>(
   transformIsoDate: (
-    calendarId: string,
+    calendar: InternalCalendar,
     isoDate: CalendarDateFields,
     ...args: A
   ) => CalendarDateFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
     const timeZoneImpl = queryTimeZone(record.timeZoneId)
+    const calendar = getInternalCalendar(record.calendarId)
     const isoDateTime = zonedEpochSlotsToIso(record, timeZoneImpl)
-    const isoDate = transformIsoDate(record.calendarId, isoDateTime, ...args)
+    const isoDate = transformIsoDate(calendar, isoDateTime, ...args)
     // zonedTransform is used by date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
     const epochNano1 = getSingleInstantFor(
