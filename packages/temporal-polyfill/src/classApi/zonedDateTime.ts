@@ -245,10 +245,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       slots: ZonedDateTimeSlots,
       options: DirectionOptions | DirectionName,
     ): ZonedDateTime | null {
-      const newEpochNano = getTimeZoneTransitionEpochNanoseconds(
-        slots,
-        options,
-      )
+      const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
 
       if (newEpochNano) {
         return createZonedDateTime({

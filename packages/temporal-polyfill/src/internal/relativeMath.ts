@@ -24,12 +24,10 @@ export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 // the relative-to "origin", returned from bag refining
 export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
-export type IsoMarker = CalendarDateFields | CalendarDateTimeFields
-
 // A date/time marker that can be moved away from the relative-to origin and
 // then compared back against it. Zoned relative math carries the time zone and
 // calendar in RelativeMath, so moved zoned markers only need epoch nanoseconds.
-export type Marker = IsoMarker | EpochSlots
+export type Marker = CalendarDateFields | CalendarDateTimeFields | EpochSlots
 
 // The normalized marker stored on RelativeMath. Plain relative-to values are
 // promoted to date-times at midnight, while zoned relative-to values stay as
@@ -81,7 +79,8 @@ export function createMarkerMath(
 // Only ever used within roundDuration and totalDuration,
 // where a "window" is created (just like MarkerMath), but then the start/end
 // of that window is diffed to produce a Duration, for "balancing"
-// The lone `relativeToSlots` argument always comes from a .relativeTo option
+// The lone `relativeToSlots` argument always comes from a .relativeTo option,
+// which for the classApi comes from `refinePublicRelativeTo()`
 export function createRelativeMath(
   relativeToSlots: RelativeToSlots,
 ): RelativeMath {
@@ -169,12 +168,18 @@ export function checkRelativeMarkersInBounds(
   // Zoned math is already bounded by Instant conversion. Plain relative math
   // must explicitly validate the origin and destination as ISO date-times.
   if (!isZonedEpochSlots(relativeMath.marker)) {
-    checkIsoMarkerInBounds(relativeMath.marker as IsoMarker)
-    checkIsoMarkerInBounds(endMarker as IsoMarker)
+    checkIsoMarkerInBounds(
+      relativeMath.marker as CalendarDateFields | CalendarDateTimeFields,
+    )
+    checkIsoMarkerInBounds(
+      endMarker as CalendarDateFields | CalendarDateTimeFields,
+    )
   }
 }
 
-function checkIsoMarkerInBounds(marker: IsoMarker): void {
+function checkIsoMarkerInBounds(
+  marker: CalendarDateFields | CalendarDateTimeFields,
+): void {
   checkIsoDateTimeInBounds(
     combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
   )

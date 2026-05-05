@@ -55,10 +55,7 @@ const offsetFieldNames = ['offset']
 export const timeZoneFieldNames = ['timeZone']
 
 // TODO: try inline these for size
-const timeAndOffsetFieldNames = [
-  ...timeFieldNamesAsc,
-  ...offsetFieldNames,
-]
+const timeAndOffsetFieldNames = [...timeFieldNamesAsc, ...offsetFieldNames]
 const timeAndZoneFieldNames = [
   ...timeAndOffsetFieldNames,
   ...timeZoneFieldNames,
@@ -110,10 +107,7 @@ export const dateGetterFieldNames = [
   ...dateStatsFieldNames,
 ] as CalendarGetterFieldName[]
 
-export const monthDayFieldNames = [
-  ...dayFieldNamesAsc,
-  ...monthFieldNames,
-]
+export const monthDayFieldNames = [...dayFieldNamesAsc, ...monthFieldNames]
 
 // Alpha Field Name Lists
 // -----------------------------------------------------------------------------
@@ -170,29 +164,37 @@ export const dateTimeFieldNamesAlpha = sortStrings([
   ...dateFieldNamesAlpha,
   ...timeFieldNamesAsc,
 ])
-export const dateTimeFieldNamesWithEraAlpha = sortStrings(
-  [...dateFieldNamesWithEraAlpha, ...timeFieldNamesAsc],
-)
-export const dateTimeAndOffsetFieldNamesAlpha = sortStrings(
-  [...dateFieldNamesAlpha, ...timeAndOffsetFieldNames],
-)
-export const dateTimeAndOffsetFieldNamesWithEraAlpha = sortStrings(
-  [...dateFieldNamesWithEraAlpha, ...timeAndOffsetFieldNames],
-)
-export const dateTimeAndZoneFieldNamesAlpha = sortStrings(
-  [...dateFieldNamesAlpha, ...timeAndZoneFieldNames],
-)
-export const dateTimeAndZoneFieldNamesWithEraAlpha = sortStrings(
-  [...dateFieldNamesWithEraAlpha, ...timeAndZoneFieldNames],
-)
+export const dateTimeFieldNamesWithEraAlpha = sortStrings([
+  ...dateFieldNamesWithEraAlpha,
+  ...timeFieldNamesAsc,
+])
+export const dateTimeAndOffsetFieldNamesAlpha = sortStrings([
+  ...dateFieldNamesAlpha,
+  ...timeAndOffsetFieldNames,
+])
+export const dateTimeAndOffsetFieldNamesWithEraAlpha = sortStrings([
+  ...dateFieldNamesWithEraAlpha,
+  ...timeAndOffsetFieldNames,
+])
+export const dateTimeAndZoneFieldNamesAlpha = sortStrings([
+  ...dateFieldNamesAlpha,
+  ...timeAndZoneFieldNames,
+])
+export const dateTimeAndZoneFieldNamesWithEraAlpha = sortStrings([
+  ...dateFieldNamesWithEraAlpha,
+  ...timeAndZoneFieldNames,
+])
 // FYI, happens to be in alphabetical order
-export const yearMonthCodeDayFieldNamesAlpha = sortStrings(
-  [...dayFieldNamesAsc, ...yearMonthCodeFieldNamesAlpha],
-)
+export const yearMonthCodeDayFieldNamesAlpha = sortStrings([
+  ...dayFieldNamesAsc,
+  ...yearMonthCodeFieldNamesAlpha,
+])
 // FYI, happens to be in alphabetical order
-export const yearMonthCodeDayFieldNamesWithEraAlpha = sortStrings(
-  [...dayFieldNamesAsc, ...eraYearFieldNames, ...yearMonthCodeFieldNamesAlpha],
-)
+export const yearMonthCodeDayFieldNamesWithEraAlpha = sortStrings([
+  ...dayFieldNamesAsc,
+  ...eraYearFieldNames,
+  ...yearMonthCodeFieldNamesAlpha,
+])
 
 // Defaults
 // -----------------------------------------------------------------------------

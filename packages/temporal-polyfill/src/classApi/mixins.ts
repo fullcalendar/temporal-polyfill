@@ -89,12 +89,8 @@ function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
 }
 
 export const dateGetters = createCalendarGetters(dateGetterFieldNames)
-export const yearMonthGetters = createCalendarGetters(
-  yearMonthGetterFieldNames,
-)
-export const monthDayGetters = createCalendarGetters(
-  monthDayGetterFieldNames,
-)
+export const yearMonthGetters = createCalendarGetters(yearMonthGetterFieldNames)
+export const monthDayGetters = createCalendarGetters(monthDayGetterFieldNames)
 export const calendarIdGetters = {
   calendarId(slots: any): string {
     return slots.calendarId // TODO: make smarter getter based on prop-name?

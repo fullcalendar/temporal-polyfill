@@ -72,7 +72,9 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = ((record: Record) => record) as (record: Record) => Fields
+export const getFields = ((record: Record) => record) as (
+  record: Record,
+) => Fields
 
 // Setters
 // -----------------------------------------------------------------------------

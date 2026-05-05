@@ -74,8 +74,8 @@ import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   ZonedDateTimeFields,
-  getTimeZoneTransitionEpochNanoseconds,
   getSingleInstantFor,
+  getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
 import {
