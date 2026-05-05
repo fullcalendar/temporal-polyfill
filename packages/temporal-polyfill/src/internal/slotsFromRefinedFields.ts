@@ -94,7 +94,7 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   const refinedOptions = refineOptions()
 
   return [
-    createPlainDateFromPreparedFields(
+    createPlainDateFromResolvedFields(
       calendarId,
       calendar,
       fields,
@@ -117,7 +117,7 @@ function createPlainDateFromFieldsWithOverflowOptions(
   // reads overflow at the same phase: after date field syntax/year resolution
   // and immediately before month/day validation need the overflow behavior.
   const overflow = refineOverflowOptions(options)
-  return createPlainDateFromPreparedFields(
+  return createPlainDateFromResolvedFields(
     calendarId,
     calendar,
     fields,
@@ -126,41 +126,40 @@ function createPlainDateFromFieldsWithOverflowOptions(
   )
 }
 
-function createPlainDateFromPreparedFields(
+function createPlainDateFromResolvedFields(
   calendarId: string,
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
 ): PlainDateSlots {
+  // The tuple is private plumbing. Index reads keep the built output from
+  // carrying internal-only property names while preserving the field-read phase
+  // that happens before overflow options are observed.
+  const year = prepared[1]
   const month = resolveCalendarMonth(
     calendar,
     fields,
-    prepared.year,
+    year,
     overflow,
-    prepared.monthCodeParts,
+    prepared[0],
   )
   const day = resolveCalendarDay(
     calendar,
     fields as DayFields,
     month,
-    prepared.year,
+    year,
     overflow,
   )
-  const isoDate = computeCalendarIsoFieldsFromParts(
-    calendar,
-    prepared.year,
-    month,
-    day,
-  )
+  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, day)
 
   return createPlainDateSlots(checkIsoDateInBounds(isoDate), calendarId)
 }
 
-interface PreparedDateFields {
-  monthCodeParts: MonthCodeParts | undefined
-  year: number
-}
+type PreparedDateFields = [
+  monthCodeParts: MonthCodeParts | undefined,
+  year: number,
+]
 
 function parseMonthCodeField(
   fields: Partial<DateFields>,
@@ -195,10 +194,10 @@ function prepareDateFields(
     throw new TypeError(errorMessages.missingField('day'))
   }
 
-  const monthCodeParts = parseMonthCodeField(fields)
-  const year = resolveCalendarYear(calendarId, calendar, fields)
-
-  return { monthCodeParts, year }
+  return [
+    parseMonthCodeField(fields),
+    resolveCalendarYear(calendarId, calendar, fields),
+  ]
 }
 
 export function createPlainYearMonthFromFields(
