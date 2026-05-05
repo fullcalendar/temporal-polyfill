@@ -3,6 +3,7 @@ import {
   FormatPrepper,
   createFormatForPrep,
   createFormatPrepper,
+  resolveDateTimeFormatResolvedOptions,
 } from '../internal/intlFormatPrep'
 import {
   LocalesArg,
@@ -46,17 +47,6 @@ export type DateTimeFormat = Intl.DateTimeFormat
 export const DateTimeFormat = createDateTimeFormatClass()
 
 const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
-const islamicCalendarFallbackIds = [
-  'islamic-civil',
-  'islamic-tbla',
-  'islamic-umalqura',
-] as const
-const islamicFallbackProbeEpochMillis = [
-  Date.UTC(2024, 0, 1),
-  Date.UTC(2024, 5, 15),
-  Date.UTC(2025, 2, 30),
-]
-const resolvedCalendarFallbackCache = new Map<string, string>()
 
 function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   // The Intl.DateTimeFormat object
@@ -136,11 +126,12 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
 }
 
 function createFormatMethod(methodName: string) {
+  const isRange = methodName.includes('Range')
   const func = function (this: DateTimeFormat, ...formattables: Formattable[]) {
-    const prepFormat = internalsMap.get(this)!
-    const [format, ...rawFormattables] = prepFormat(
-      methodName.includes('Range'), // HACK for deterining if range method
-      ...formattables,
+    const [format, ...rawFormattables] = prepDateTimeFormatCall(
+      getDateTimeFormatInternals(this),
+      isRange,
+      formattables,
     )
     return (format as any)[methodName](...rawFormattables)
   }
@@ -150,18 +141,9 @@ function createFormatMethod(methodName: string) {
 
 function createProxiedMethod(methodName: string) {
   const func = function (this: DateTimeFormat, ...args: any[]) {
-    const prepFormat = internalsMap.get(this)!
-    const res = (prepFormat.rawFormat as any)[methodName](...args)
-
-    if (methodName === 'resolvedOptions' && prepFormat.timeZone) {
-      // ECMA-402 now preserves the matched input time-zone identifier here.
-      // Native Intl in older engines may still canonicalize links like
-      // Australia/Canberra -> Australia/Sydney, so keep the validated public
-      // identifier separately and repair only the user-visible options object.
-      res.timeZone = prepFormat.timeZone
-    }
-
-    return res
+    return (getDateTimeFormatInternals(this).rawFormat as any)[methodName](
+      ...args,
+    )
   }
 
   return Object.defineProperties(func, createNameDescriptors(methodName))
@@ -169,15 +151,15 @@ function createProxiedMethod(methodName: string) {
 
 function createResolvedOptionsMethod() {
   const func = function (this: DateTimeFormat) {
-    const prepFormat = internalsMap.get(this)!
-    const resolvedOptions = prepFormat.rawFormat.resolvedOptions()
-    const calendar = normalizeResolvedCalendarId(resolvedOptions)
-    const timeZone = prepFormat.timeZone || resolvedOptions.timeZone
+    const internals = getDateTimeFormatInternals(this)
+    const resolvedOptions = resolveDateTimeFormatResolvedOptions(
+      internals.rawFormat,
+    )
+    const timeZone = internals.timeZone || resolvedOptions.timeZone
 
-    return calendar === resolvedOptions.calendar &&
-      timeZone === resolvedOptions.timeZone
+    return timeZone === resolvedOptions.timeZone
       ? resolvedOptions
-      : { ...resolvedOptions, calendar, timeZone }
+      : { ...resolvedOptions, timeZone }
   }
 
   return Object.defineProperties(func, createNameDescriptors('resolvedOptions'))
@@ -186,13 +168,13 @@ function createResolvedOptionsMethod() {
 // Internals
 // -----------------------------------------------------------------------------
 
-type DateTimeFormatInternalPrepper = (
-  isRange: boolean,
-  ...formattables: Formattable[]
-) => [Intl.DateTimeFormat, ...RawFormattable[]]
-
-type DateTimeFormatInternals = DateTimeFormatInternalPrepper & {
+type DateTimeFormatInternals = {
   rawFormat: Intl.DateTimeFormat
+  resolvedLocale: string
+  copiedOptions: Intl.DateTimeFormatOptions
+  queryFormatPrepperForBranding: <S extends BrandingSlots>(
+    branding: S['branding'],
+  ) => FormatPrepper<S>
 
   // Only set for public Intl.DateTimeFormat wrapper instances that received a
   // timeZone option. Internal time-zone probes use RawDateTimeFormat directly,
@@ -200,14 +182,23 @@ type DateTimeFormatInternals = DateTimeFormatInternalPrepper & {
   timeZone?: string
 }
 
+function getDateTimeFormatInternals(
+  format: DateTimeFormat,
+): DateTimeFormatInternals {
+  const internals = internalsMap.get(format)
+  if (!internals) {
+    throw new TypeError(errorMessages.invalidCallingContext)
+  }
+  return internals
+}
+
 function createDateTimeFormatInternals(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
-  const resolveOptions = rawFormat.resolvedOptions()
+  const resolvedOptions = resolveDateTimeFormatResolvedOptions(rawFormat)
   const timeZone = readOwnDataTimeZoneOption(options)
-  const resolvedLocale = resolveOptions.locale
 
   // Copy original options in an unobservable way, using resolveOptions' data
   // Necessary because options will be reaccessed later when making brand-specific
@@ -216,76 +207,75 @@ function createDateTimeFormatInternals(
   // view Object.create(null)
   const copiedOptions = pluckProps(
     Object.keys(options) as OptionNames,
-    resolveOptions as Intl.DateTimeFormatOptions,
+    resolvedOptions as Intl.DateTimeFormatOptions,
   )
 
-  const queryFormatPrepperForBranding = memoize(createFormatPrepperForBranding)
-
-  /*
-  TODO: this is overarchitected. done to accommodate format() and formatRange()
-  */
-  const prepFormat: DateTimeFormatInternalPrepper = (
-    isRange: boolean, // HACK
-    ...formattables: Formattable[]
-  ) => {
-    if (isRange) {
-      if (formattables.length !== 2) {
-        // TODO: better error messages about both args need defined
-        throw new TypeError(errorMessages.mismatchingFormatTypes)
-      }
-      // check for any undefined arguments first
-      for (const formattable of formattables) {
-        if (formattable === undefined) {
-          // TODO: better error messages about both args need defined
-          throw new TypeError(errorMessages.mismatchingFormatTypes)
-        }
-      }
-    }
-
-    // HACK for .format(undefined), which should be same as .format()
-    if (!isRange && formattables[0] === undefined) {
-      formattables = []
-    }
-
-    const formattableEssences = formattables.map((formattable) => {
-      return getSlots(formattable) || Number(formattable)
-    })
-
-    let overallBranding: string | undefined
-    let i = 0
-
-    for (const formattableEssence of formattableEssences) {
-      const slotsBranding =
-        typeof formattableEssence === 'object'
-          ? formattableEssence.branding
-          : undefined
-
-      if (i++ && slotsBranding !== overallBranding) {
-        throw new TypeError(errorMessages.mismatchingFormatTypes)
-      }
-
-      overallBranding = slotsBranding
-    }
-
-    if (overallBranding) {
-      return queryFormatPrepperForBranding(overallBranding)(
-        resolvedLocale,
-        copiedOptions,
-        ...(formattableEssences as BrandingSlots[]),
-      )
-    }
-
-    return [rawFormat, ...(formattableEssences as number[])]
+  return {
+    rawFormat,
+    resolvedLocale: resolvedOptions.locale,
+    copiedOptions,
+    queryFormatPrepperForBranding: memoize(createFormatPrepperForBranding),
+    timeZone,
   }
-  ;(prepFormat as DateTimeFormatInternals).rawFormat = rawFormat
-  // Object.prototype can be tainted by Intl tests. Define the optional cache
-  // slot directly so a polluted `timeZone` setter cannot observe construction.
-  Object.defineProperty(prepFormat, 'timeZone', {
-    value: timeZone,
-    configurable: true,
-    writable: true,
-  })
-  return prepFormat as DateTimeFormatInternals
+}
+
+function prepDateTimeFormatCall(
+  internals: DateTimeFormatInternals,
+  isRange: boolean,
+  formattables: Formattable[],
+): [Intl.DateTimeFormat, ...RawFormattable[]] {
+  const formattableCnt = isRange ? 2 : 1
+
+  if (isRange) {
+    if (formattables[0] === undefined || formattables[1] === undefined) {
+      // ECMA-402 requires both range endpoints before it can check type
+      // compatibility. Use the same error as mixed Temporal/non-Temporal input.
+      throw new TypeError(errorMessages.mismatchingFormatTypes)
+    }
+  } else if (formattables[0] === undefined) {
+    // .format(undefined) and .formatToParts(undefined) match native Intl and
+    // format the current time, so there is no Temporal adaptation to perform.
+    return [internals.rawFormat]
+  }
+
+  let branding: string | undefined
+  let hasMismatchingBranding = false
+  let hasTemporalFormattable = false
+  let hasRawFormattable = false
+  const rawFormattables: RawFormattable[] = []
+  const slotsList: BrandingSlots[] = []
+
+  for (let i = 0; i < formattableCnt; i++) {
+    const slots = getSlots(formattables[i])
+
+    if (slots) {
+      if (branding !== undefined && slots.branding !== branding) {
+        hasMismatchingBranding = true
+      }
+      branding = slots.branding
+      hasTemporalFormattable = true
+      slotsList[i] = slots
+    } else {
+      hasRawFormattable = true
+      rawFormattables[i] = Number(formattables[i])
+    }
+  }
+
+  if (hasMismatchingBranding || (hasTemporalFormattable && hasRawFormattable)) {
+    // ToDateTimeFormattable first converts all non-Temporal values. Only after
+    // that can range formatting reject mixed or mismatched Temporal types.
+    throw new TypeError(errorMessages.mismatchingFormatTypes)
+  }
+
+  if (branding !== undefined) {
+    return internals.queryFormatPrepperForBranding(branding)(
+      internals.resolvedLocale,
+      internals.copiedOptions,
+      ...slotsList,
+    )
+  }
+
+  return [internals.rawFormat, ...rawFormattables]
 }
 
 function readOwnDataTimeZoneOption(
@@ -322,77 +312,4 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
     memoize(createFormatForPrep),
     /* strictOptions = */ true,
   )
-}
-
-function normalizeResolvedCalendarId(
-  resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-): string {
-  const { calendar } = resolvedOptions
-
-  if (calendar !== 'islamic' && calendar !== 'islamic-rgsa') {
-    return calendar
-  }
-
-  const cacheKey = `${resolvedOptions.locale}\u0000${calendar}`
-  let fallbackCalendar = resolvedCalendarFallbackCache.get(cacheKey)
-
-  if (!fallbackCalendar) {
-    fallbackCalendar = detectIslamicCalendarFallback(
-      resolvedOptions.locale,
-      calendar,
-    )
-    resolvedCalendarFallbackCache.set(cacheKey, fallbackCalendar)
-  }
-
-  return fallbackCalendar
-}
-
-function detectIslamicCalendarFallback(
-  locale: string,
-  calendarId: string,
-): string {
-  const expectedOutputs = computeCalendarProbeOutputs(locale, calendarId)
-
-  for (let i = 0; i < islamicCalendarFallbackIds.length; i++) {
-    const candidateCalendar = islamicCalendarFallbackIds[i]
-    const candidateOutputs = computeCalendarProbeOutputs(
-      locale,
-      candidateCalendar,
-    )
-    let matches = true
-
-    for (let j = 0; j < expectedOutputs.length; j++) {
-      if (candidateOutputs[j] !== expectedOutputs[j]) {
-        matches = false
-        break
-      }
-    }
-
-    if (matches) {
-      return candidateCalendar
-    }
-  }
-
-  return islamicCalendarFallbackIds[0]
-}
-
-function computeCalendarProbeOutputs(
-  locale: string,
-  calendarId: string,
-): string[] {
-  const format = new RawDateTimeFormat(locale, {
-    calendar: calendarId,
-    timeZone: 'UTC',
-    era: 'short',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-  const outputs: string[] = []
-
-  for (let i = 0; i < islamicFallbackProbeEpochMillis.length; i++) {
-    outputs[i] = format.format(islamicFallbackProbeEpochMillis[i])
-  }
-
-  return outputs
 }

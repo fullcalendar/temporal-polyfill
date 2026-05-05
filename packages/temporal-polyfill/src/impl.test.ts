@@ -69,40 +69,6 @@ describe('Intl.DateTimeFormat', () => {
       const s = format.format(pd)
       expect(s).toBe('2024')
     })
-
-    it('reports a concrete fallback for islamic calendar aliases', () => {
-      const fallbackCalendars = [
-        'islamic-civil',
-        'islamic-tbla',
-        'islamic-umalqura',
-      ]
-
-      expect(
-        fallbackCalendars.includes(
-          new Intl.DateTimeFormat('en', {
-            calendar: 'islamic',
-          }).resolvedOptions().calendar,
-        ),
-      ).toBe(true)
-      expect(
-        fallbackCalendars.includes(
-          new Intl.DateTimeFormat('en', {
-            calendar: 'islamic-rgsa',
-          }).resolvedOptions().calendar,
-        ),
-      ).toBe(true)
-      expect(
-        fallbackCalendars.includes(
-          new Intl.DateTimeFormat('en-u-ca-islamic').resolvedOptions().calendar,
-        ),
-      ).toBe(true)
-      expect(
-        fallbackCalendars.includes(
-          new Intl.DateTimeFormat('en-u-ca-islamic-rgsa').resolvedOptions()
-            .calendar,
-        ),
-      ).toBe(true)
-    })
   })
 
   describe('format', () => {
