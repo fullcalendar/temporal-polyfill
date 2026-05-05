@@ -2,6 +2,7 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { MonthDayLikeObject } from '../internal/fieldTypes'
 import { EraYearOrYear, MonthDayFields } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
@@ -19,7 +20,6 @@ import { memoize } from '../internal/utils'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
-  getCalendarId,
 } from './calendarUtils'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
@@ -49,7 +49,8 @@ export function fromFields(
   options?: AssignmentOptions,
 ): Record {
   const calendarMaybe = extractCalendarIdFromBag(fields)
-  const calendar = calendarMaybe || isoCalendarId
+  const calendarId = calendarMaybe || isoCalendarId
+  const calendar = getInternalCalendar(calendarId)
 
   return refinePlainMonthDayObjectLike(
     calendar,
@@ -80,7 +81,12 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergePlainMonthDayFields(record, fields, options)
+  return mergePlainMonthDayFields(
+    getInternalCalendar(record.calendarId),
+    record,
+    fields,
+    options,
+  )
 }
 
 // Math
@@ -99,7 +105,7 @@ export function toPlainDate(
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
   return convertPlainMonthDayToDate(
-    getCalendarId(record),
+    getInternalCalendar(record.calendarId),
     getFields(record),
     fields,
   )

@@ -5,7 +5,10 @@ import {
   durationFieldNamesAlpha,
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import { getInternalCalendar } from './externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+} from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
   dateFieldNamesAlpha,
@@ -76,11 +79,11 @@ through the built-in calendar/time-zone implementation, and return slots.
 // Input could be ZonedDateTime OR PlainDate fields (for relativeTo).
 export function refineMaybeZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
-  calendarId: string,
+  calendar: InternalCalendar,
   bag: ZonedDateTimeLikeObject, // i think this needs type change
 ): RelativeToSlotsNoCalendar {
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesWithEraAlpha,
   )
@@ -91,7 +94,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   ) as ZonedDateTimeRefinedObject
 
   if (fields.timeZone !== undefined) {
-    const isoDateFields = createPlainDateFromFields(calendarId, fields as any)
+    const isoDateFields = createPlainDateFromFields(calendar, fields as any)
     const timeFields = resolveTimeFields(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
@@ -108,17 +111,18 @@ export function refineMaybeZonedDateTimeObjectLike(
     return { epochNanoseconds, timeZoneId: timeZoneId }
   }
 
-  return createPlainDateFromFields(calendarId, fields as any)
+  return createPlainDateFromFields(calendar, fields as any)
 }
 
 export function refineZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
-  calendarId: string,
+  calendar: InternalCalendar,
   bag: ZonedDateTimeLikeObject,
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
+  const calendarId = getInternalCalendarId(calendar)
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     dateTimeAndZoneFieldNamesAlpha,
     dateTimeAndZoneFieldNamesWithEraAlpha,
   )
@@ -131,7 +135,7 @@ export function refineZonedDateTimeObjectLike(
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
   const [isoDateFields, overflow, offsetDisambig, epochDisambig] =
-    createPlainDateFromFieldsWithOptionsRefiner(calendarId, fields as any, () =>
+    createPlainDateFromFieldsWithOptionsRefiner(calendar, fields as any, () =>
       refineZonedFieldOptions(options),
     )
   const timeFields = resolveTimeFields(fields, overflow)
@@ -151,12 +155,13 @@ export function refineZonedDateTimeObjectLike(
 }
 
 export function refinePlainDateTimeObjectLike(
-  calendarId: string,
+  calendar: InternalCalendar,
   bag: Partial<DateTimeFields>,
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
+  const calendarId = getInternalCalendarId(calendar)
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     dateTimeFieldNamesAlpha,
     dateTimeFieldNamesWithEraAlpha,
   )
@@ -167,11 +172,9 @@ export function refinePlainDateTimeObjectLike(
   ) as Partial<DateTimeFields>
 
   const [isoDateInternals, overflow] =
-    createPlainDateFromFieldsWithOptionsRefiner(
-      calendarId,
-      fields as any,
-      () => [refineOverflowOptions(options)],
-    )
+    createPlainDateFromFieldsWithOptionsRefiner(calendar, fields as any, () => [
+      refineOverflowOptions(options),
+    ])
   const timeFields = resolveTimeFields(fields, overflow)
 
   return createPlainDateTimeFromRefinedFields(
@@ -182,13 +185,13 @@ export function refinePlainDateTimeObjectLike(
 }
 
 export function refinePlainDateObjectLike(
-  calendarId: string,
+  calendar: InternalCalendar,
   bag: Partial<DateFields>,
   options: OverflowOptions | undefined,
   requireFields: string[] = [],
 ): PlainDateSlots {
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
@@ -198,17 +201,17 @@ export function refinePlainDateObjectLike(
     /* requiredFieldNames */ requireFields,
   )
 
-  return createPlainDateFromFields(calendarId, fields as any, options)
+  return createPlainDateFromFields(calendar, fields as any, options)
 }
 
 export function refinePlainYearMonthObjectLike(
-  calendarId: string,
+  calendar: InternalCalendar,
   bag: Partial<YearMonthFields>,
   options: OverflowOptions | undefined,
   requireFields?: string[],
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     yearMonthFieldNamesAsc,
     yearMonthFieldNamesWithEraAsc,
   )
@@ -218,17 +221,17 @@ export function refinePlainYearMonthObjectLike(
     /* requiredFieldNames */ requireFields,
   )
 
-  return createPlainYearMonthFromFields(calendarId, fields as any, options)
+  return createPlainYearMonthFromFields(calendar, fields as any, options)
 }
 
 export function refinePlainMonthDayObjectLike(
-  calendarId: string,
+  calendar: InternalCalendar,
   calendarAbsent: boolean,
   bag: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
@@ -247,7 +250,7 @@ export function refinePlainMonthDayObjectLike(
     fields.year = isoEpochFirstLeapYear
   }
 
-  return createPlainMonthDayFromFields(calendarId, fields, options)
+  return createPlainMonthDayFromFields(calendar, fields, options)
 }
 
 export function refinePlainTimeObjectLike(

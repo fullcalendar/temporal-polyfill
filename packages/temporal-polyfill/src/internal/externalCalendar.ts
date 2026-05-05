@@ -140,3 +140,11 @@ export function getInternalCalendar(calendarId: string): InternalCalendar {
       ? gregoryCalendar
       : getExternalCalendar(calendarId)
 }
+
+export function getInternalCalendarId(calendar: InternalCalendar): string {
+  return calendar === undefined
+    ? isoCalendarId
+    : calendar === gregoryCalendar
+      ? gregoryCalendarId
+      : calendar.id
+}

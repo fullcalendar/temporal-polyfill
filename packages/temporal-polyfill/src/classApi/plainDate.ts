@@ -7,7 +7,8 @@ import {
   zonedDateTimeToPlainDate,
 } from '../internal/convert'
 import { refinePlainDateObjectLike } from '../internal/createFromFields'
-import { diffPlainDates } from '../internal/diff'
+import { diffPlainDates, getCommonCalendarId } from '../internal/diff'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { DateLikeObject } from '../internal/fieldTypes'
 import { DateFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -75,7 +76,12 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: OverflowOptions,
     ) {
       return createPlainDate(
-        mergePlainDateFields(slots, rejectInvalidBag(mod), options),
+        mergePlainDateFields(
+          getInternalCalendar(slots.calendarId),
+          slots,
+          rejectInvalidBag(mod),
+          options,
+        ),
       )
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
@@ -106,8 +112,12 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       otherArg: PlainDateArg,
       options?: DiffOptions<DateUnitName>,
     ): Duration {
+      const other = toPlainDateSlots(otherArg)
+      const calendar = getInternalCalendar(
+        getCommonCalendarId(slots.calendarId, other.calendarId),
+      )
       return createDuration(
-        diffPlainDates(false, slots, toPlainDateSlots(otherArg), options),
+        diffPlainDates(false, calendar, slots, other, options),
       )
     },
     since(
@@ -115,8 +125,12 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       otherArg: PlainDateArg,
       options?: DiffOptions<DateUnitName>,
     ): Duration {
+      const other = toPlainDateSlots(otherArg)
+      const calendar = getInternalCalendar(
+        getCommonCalendarId(slots.calendarId, other.calendarId),
+      )
       return createDuration(
-        diffPlainDates(true, slots, toPlainDateSlots(otherArg), options),
+        diffPlainDates(true, calendar, slots, other, options),
       )
     },
     equals(slots: PlainDateSlots, otherArg: PlainDateArg): boolean {
@@ -158,11 +172,13 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
     },
     toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
       return createPlainYearMonth(
-        convertToPlainYearMonth(slots.calendarId, this),
+        convertToPlainYearMonth(getInternalCalendar(slots.calendarId), this),
       )
     },
     toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
-      return createPlainMonthDay(convertToPlainMonthDay(slots.calendarId, this))
+      return createPlainMonthDay(
+        convertToPlainMonthDay(getInternalCalendar(slots.calendarId), this),
+      )
     },
     toLocaleString(
       slots: PlainDateSlots,
@@ -219,11 +235,9 @@ export function toPlainDateSlots(
         return zonedDateTimeToPlainDate(slots as ZonedDateTimeSlots)
     }
 
-    return refinePlainDateObjectLike(
-      getCalendarIdFromBag(arg as DateLikeObject),
-      arg as DateLikeObject,
-      options,
-    )
+    const calendarId = getCalendarIdFromBag(arg as DateLikeObject)
+    const calendar = getInternalCalendar(calendarId)
+    return refinePlainDateObjectLike(calendar, arg as DateLikeObject, options)
   }
 
   const res = parsePlainDate(arg)

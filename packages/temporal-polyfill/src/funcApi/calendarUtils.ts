@@ -22,13 +22,6 @@ import { AbstractDateSlots } from '../internal/slots'
 
 // these utils used directly by func-api-based slots
 
-// Calendar ID
-// -----------------------------------------------------------------------------
-
-export function getCalendarId(slots: { calendarId: string }): string {
-  return slots.calendarId
-}
-
 export function getCalendarIdFromBag(bag: { calendar?: string }): string {
   return extractCalendarIdFromBag(bag) || isoCalendarId
 }
@@ -48,11 +41,7 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
 export function computeDateFields(slots: AbstractDateSlots): DateFields {
   const calendar = getInternalCalendar(slots.calendarId)
   const { year, month, day } = computeCalendarDateFields(calendar, slots)
-  const { era, eraYear } = computeCalendarEraFields(
-    calendar,
-    slots.calendarId,
-    slots,
-  )
+  const { era, eraYear } = computeCalendarEraFields(calendar, slots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,
@@ -67,11 +56,7 @@ export function computeYearMonthFields(
 ): YearMonthFields {
   const calendar = getInternalCalendar(slots.calendarId)
   const { year, month } = computeCalendarDateFields(calendar, slots)
-  const { era, eraYear } = computeCalendarEraFields(
-    calendar,
-    slots.calendarId,
-    slots,
-  )
+  const { era, eraYear } = computeCalendarEraFields(calendar, slots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,

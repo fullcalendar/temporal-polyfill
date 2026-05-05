@@ -7,6 +7,18 @@ If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
 Don't bother running bare `pnpm run size` ever
 
 
+## Linting
+
+After any code change, always check linting from `packages/temporal-polyfill`:
+
+```
+pnpm run lint
+```
+
+If you intentionally limit linting to touched files during iteration, run the
+full `pnpm run lint` before handing work back.
+
+
 ## IMPORTANT: Repo Setup (ESPECIALLY right after creating a worktree)
 
 FIRST, install all submodules after cloning a repo:

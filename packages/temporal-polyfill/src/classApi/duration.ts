@@ -12,6 +12,7 @@ import {
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
@@ -182,9 +183,10 @@ function refinePublicRelativeTo(
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
+      const calendar = getInternalCalendar(calendarId)
       const res = refineMaybeZonedDateTimeObjectLike(
         refineTimeZoneArg,
-        calendarId,
+        calendar,
         relativeTo as unknown as ZonedDateTimeLikeObject, // !!!
       )
 

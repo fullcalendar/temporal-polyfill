@@ -7,8 +7,11 @@ import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
-import { gregoryCalendar } from './externalCalendar'
-import type { InternalCalendar } from './externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+  gregoryCalendar,
+} from './externalCalendar'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
@@ -42,10 +45,10 @@ happen before those deferred coercions.
 */
 
 export function resolveCalendarYear(
-  calendarId: string,
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
 ): number {
+  const calendarId = getInternalCalendarId(calendar)
   const eraOrigins = getCalendarEraOrigins(calendar)
   const eraRemaps = (calendar && calendar.eraRemaps) || {}
   let { era, eraYear, year } = fields

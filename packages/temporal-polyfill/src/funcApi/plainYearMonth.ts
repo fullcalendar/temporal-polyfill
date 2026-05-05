@@ -2,7 +2,8 @@ import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
-import { diffPlainYearMonth } from '../internal/diff'
+import { diffPlainYearMonth, getCommonCalendarId } from '../internal/diff'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { YearMonthLikeObject } from '../internal/fieldTypes'
 import { YearMonthFields } from '../internal/fieldTypes'
 import {
@@ -28,7 +29,6 @@ import {
   computeInLeapYear,
   computeMonthsInYear,
   computeYearMonthFields,
-  getCalendarId,
   getCalendarIdFromBag,
 } from './calendarUtils'
 import * as DurationFns from './duration'
@@ -61,11 +61,9 @@ export function fromFields(
   fields: FromFields,
   options?: AssignmentOptions,
 ): Record {
-  return refinePlainYearMonthObjectLike(
-    getCalendarIdFromBag(fields),
-    fields,
-    options,
-  )
+  const calendarId = getCalendarIdFromBag(fields)
+  const calendar = getInternalCalendar(calendarId)
+  return refinePlainYearMonthObjectLike(calendar, fields, options)
 }
 
 export const fromString = parsePlainYearMonth as (s: string) => Record
@@ -97,7 +95,12 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergePlainYearMonthFields(record, fields, options)
+  return mergePlainYearMonthFields(
+    getInternalCalendar(record.calendarId),
+    record,
+    fields,
+    options,
+  )
 }
 
 // Math
@@ -115,17 +118,27 @@ export const subtract = bindArgs(movePlainYearMonth, true) as (
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(diffPlainYearMonth, false) as (
+export function until(
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
-) => DurationFns.Record
+): DurationFns.Record {
+  const calendar = getInternalCalendar(
+    getCommonCalendarId(record0.calendarId, record1.calendarId),
+  )
+  return diffPlainYearMonth(false, calendar, record0, record1, options)
+}
 
-export const since = bindArgs(diffPlainYearMonth, true) as (
+export function since(
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
-) => DurationFns.Record
+): DurationFns.Record {
+  const calendar = getInternalCalendar(
+    getCommonCalendarId(record0.calendarId, record1.calendarId),
+  )
+  return diffPlainYearMonth(true, calendar, record0, record1, options)
+}
 
 export const equals = plainYearMonthsEqual as (
   record0: Record,
@@ -145,7 +158,7 @@ export function toPlainDate(
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
   return convertPlainYearMonthToDate(
-    getCalendarId(record),
+    getInternalCalendar(record.calendarId),
     getFields(record),
     fields,
   )

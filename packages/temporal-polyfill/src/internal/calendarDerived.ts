@@ -1,5 +1,8 @@
 import { formatMonthCode } from './calendarMonthCode'
-import type { InternalCalendar } from './externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+} from './externalCalendar'
 import { CalendarDateFields } from './fieldTypes'
 import {
   computeIsoDateFields,
@@ -39,12 +42,11 @@ export function computeCalendarMonthCodeParts(
 
 export function computeCalendarEraFields(
   calendar: InternalCalendar,
-  calendarId: string,
   isoDate: CalendarDateFields,
 ): ReturnType<typeof computeIsoEraFields> {
   return calendar
     ? calendar.computeEraFields(isoDate)
-    : computeIsoEraFields(calendarId, isoDate)
+    : computeIsoEraFields(getInternalCalendarId(calendar), isoDate)
 }
 
 export function computeCalendarIsoFieldsFromParts(

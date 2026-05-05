@@ -2,6 +2,7 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { MonthDayLikeObject } from '../internal/fieldTypes'
 import { MonthDayFields, YearFields } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
@@ -37,7 +38,12 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         options?: OverflowOptions,
       ): PlainMonthDay {
         return createPlainMonthDay(
-          mergePlainMonthDayFields(slots, rejectInvalidBag(mod), options),
+          mergePlainMonthDayFields(
+            getInternalCalendar(slots.calendarId),
+            slots,
+            rejectInvalidBag(mod),
+            options,
+          ),
         )
       },
       equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {
@@ -45,7 +51,11 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       },
       toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
         return createPlainDate(
-          convertPlainMonthDayToDate(slots.calendarId, this, bag),
+          convertPlainMonthDayToDate(
+            getInternalCalendar(slots.calendarId),
+            this,
+            bag,
+          ),
         )
       },
       toLocaleString(
@@ -91,9 +101,10 @@ export function toPlainMonthDaySlots(
 
     const calendarIdMaybe = extractCalendarIdFromBag(arg as { calendar?: any })
     const calendarId = calendarIdMaybe || isoCalendarId
+    const calendar = getInternalCalendar(calendarId)
 
     return refinePlainMonthDayObjectLike(
-      calendarId,
+      calendar,
       !calendarIdMaybe,
       arg as Partial<MonthDayFields>,
       options,

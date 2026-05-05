@@ -17,7 +17,7 @@ import {
   zonedDateTimeToPlainTime,
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
-import { diffZonedDateTimes } from '../internal/diff'
+import { diffZonedDateTimes, getCommonCalendarId } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import type { InternalCalendar } from '../internal/externalCalendar'
 import {
@@ -95,7 +95,6 @@ import {
   computeMonthsInYear,
   computeWeekOfYear,
   computeYearOfWeek,
-  getCalendarId,
   getCalendarIdFromBag,
 } from './calendarUtils'
 import {
@@ -181,9 +180,10 @@ export function fromFields(
   options?: AssignmentOptions,
 ): Record {
   const calendarId = getCalendarIdFromBag(fields)
+  const calendar = getInternalCalendar(calendarId)
   return refineZonedDateTimeObjectLike(
     refineTimeZoneId,
-    calendarId,
+    calendar,
     fields,
     options,
   )
@@ -285,7 +285,12 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergeZonedDateTimeFields(record, fields, options)
+  return mergeZonedDateTimeFields(
+    getInternalCalendar(record.calendarId),
+    record,
+    fields,
+    options,
+  )
 }
 
 export function withCalendar(record: Record, calendarId: string): Record {
@@ -323,17 +328,27 @@ export const subtract = bindArgs(moveZonedDateTime, true) as (
   options?: ArithmeticOptions,
 ) => Record
 
-export const until = bindArgs(diffZonedDateTimes, false) as (
+export function until(
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
-) => DurationFns.Record
+): DurationFns.Record {
+  const calendar = getInternalCalendar(
+    getCommonCalendarId(record0.calendarId, record1.calendarId),
+  )
+  return diffZonedDateTimes(false, calendar, record0, record1, options)
+}
 
-export const since = bindArgs(diffZonedDateTimes, true) as (
+export function since(
   record0: Record,
   record1: Record,
   options?: DifferenceOptions,
-) => DurationFns.Record
+): DurationFns.Record {
+  const calendar = getInternalCalendar(
+    getCommonCalendarId(record0.calendarId, record1.calendarId),
+  )
+  return diffZonedDateTimes(true, calendar, record0, record1, options)
+}
 
 export const round = bindArgs(roundZonedDateTime) as (
   record: Record,
@@ -374,11 +389,17 @@ export const toPlainTime = bindArgs(zonedDateTimeToPlainTime) as (
 ) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return convertToPlainYearMonth(getCalendarId(record), getFields(record))
+  return convertToPlainYearMonth(
+    getInternalCalendar(record.calendarId),
+    getFields(record),
+  )
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertToPlainMonthDay(getCalendarId(record), getFields(record))
+  return convertToPlainMonthDay(
+    getInternalCalendar(record.calendarId),
+    getFields(record),
+  )
 }
 
 // Formatting

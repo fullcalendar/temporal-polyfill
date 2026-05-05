@@ -12,8 +12,10 @@ import { computeCalendarIdBase } from './calendarId'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { parseMonthCode } from './calendarMonthCode'
 import * as errorMessages from './errorMessages'
-import { getInternalCalendar } from './externalCalendar'
-import type { InternalCalendar } from './externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+} from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
 import {
@@ -67,35 +69,27 @@ export function createPlainDateTimeFromRefinedFields(
 }
 
 export function createPlainDateFromFields(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  const calendar = getInternalCalendar(calendarId)
-  const prepared = prepareDateFields(calendarId, calendar, fields)
+  const prepared = prepareDateFields(calendar, fields)
 
   // The normal overflow path reads options at the same phase as the callback
   // path below: after observable date field syntax/year resolution and
   // immediately before month/day validation needs the overflow behavior.
   const overflow = refineOverflowOptions(options)
-  return createPlainDateFromPreparedFields(
-    calendarId,
-    calendar,
-    fields,
-    prepared,
-    overflow,
-  )
+  return createPlainDateFromPreparedFields(calendar, fields, prepared, overflow)
 }
 
 export function createPlainDateFromFieldsWithOptionsRefiner<
   T extends DateOptionsTuple,
 >(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>,
   refineOptions: DateOptionsRefiner<T>,
 ): [slots: PlainDateSlots, ...options: T] {
-  const calendar = getInternalCalendar(calendarId)
-  const prepared = prepareDateFields(calendarId, calendar, fields)
+  const prepared = prepareDateFields(calendar, fields)
 
   // Options are deliberately read after all observable calendar fields,
   // including numeric year coercion. Month/day validation needs overflow, so
@@ -104,7 +98,6 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
 
   return [
     createPlainDateFromPreparedFields(
-      calendarId,
       calendar,
       fields,
       prepared,
@@ -115,12 +108,13 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
 }
 
 function createPlainDateFromPreparedFields(
-  calendarId: string,
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
 ): PlainDateSlots {
+  const calendarId = getInternalCalendarId(calendar)
+
   // The tuple is private plumbing. Index reads keep the built output from
   // carrying internal-only property names while preserving the field-read phase
   // that happens before overflow options are observed.
@@ -161,7 +155,6 @@ function parseMonthCodeField(
 }
 
 function prepareDateFields(
-  calendarId: string,
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
 ): PreparedDateFields {
@@ -182,20 +175,18 @@ function prepareDateFields(
     throw new TypeError(errorMessages.missingField('day'))
   }
 
-  return [
-    parseMonthCodeField(fields),
-    resolveCalendarYear(calendarId, calendar, fields),
-  ]
+  return [parseMonthCodeField(fields), resolveCalendarYear(calendar, fields)]
 }
 
 export function createPlainYearMonthFromFields(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
+  const calendarId = getInternalCalendarId(calendar)
+
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
-  const calendar = getInternalCalendar(calendarId)
   const eraOrigins = getCalendarEraOrigins(calendar)
   if (
     fields.year === undefined &&
@@ -209,7 +200,7 @@ export function createPlainYearMonthFromFields(
 
   const monthCodeParts = parseMonthCodeField(fields)
 
-  const year = resolveCalendarYear(calendarId, calendar, fields)
+  const year = resolveCalendarYear(calendar, fields)
 
   // Keep option coercion after year coercion; month resolution is the first
   // step that needs overflow.
@@ -230,11 +221,11 @@ export function createPlainYearMonthFromFields(
 }
 
 export function createPlainMonthDayFromFields(
-  calendarId: string,
+  calendar: InternalCalendar,
   fields: Partial<DateFields>, // guaranteed `day`
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
-  const calendar = getInternalCalendar(calendarId)
+  const calendarId = getInternalCalendarId(calendar)
   const eraOrigins = getCalendarEraOrigins(calendar)
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
@@ -255,7 +246,7 @@ export function createPlainMonthDayFromFields(
 
   let yearMaybe =
     fields.eraYear !== undefined || fields.year !== undefined // HACK
-      ? resolveCalendarYear(calendarId, calendar, fields)
+      ? resolveCalendarYear(calendar, fields)
       : undefined
 
   // PlainMonthDay may not have a year, but if it does, that year is part of the

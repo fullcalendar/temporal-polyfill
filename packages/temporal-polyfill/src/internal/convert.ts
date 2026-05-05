@@ -1,7 +1,7 @@
 import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
-import { getInternalCalendar } from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import {
   dayFieldNamesAsc,
@@ -175,12 +175,12 @@ field-pipeline boundary.
 // -----------------------------------------------------------------------------
 
 export function convertPlainYearMonthToDate(
-  calendarId: string,
+  calendar: InternalCalendar,
   input: YearMonthFields,
   bag: DayFields,
 ): PlainDateSlots {
   const inputFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     yearMonthCodeFieldNamesAsc,
     yearMonthCodeFieldNamesWithEraAsc,
   )
@@ -194,19 +194,19 @@ export function convertPlainYearMonthToDate(
     [],
   )
 
-  return createPlainDateFromMergedFields(calendarId, inputFields, extraFields)
+  return createPlainDateFromMergedFields(calendar, inputFields, extraFields)
 }
 
 // PlainMonthDay -> *
 // -----------------------------------------------------------------------------
 
 export function convertPlainMonthDayToDate(
-  calendarId: string,
+  calendar: InternalCalendar,
   input: { monthCode: string; day: number },
   bag: EraYearOrYear,
 ): PlainDateSlots {
   const extraFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     yearFieldNamesAsc,
     yearFieldNamesWithEraAsc,
   )
@@ -220,30 +220,27 @@ export function convertPlainMonthDayToDate(
     [],
   )
 
-  return createPlainDateFromMergedFields(calendarId, inputFields, extraFields)
+  return createPlainDateFromMergedFields(calendar, inputFields, extraFields)
 }
 
 export function convertToPlainMonthDay(
-  calendarId: string,
+  calendar: InternalCalendar,
   input: { monthCode: string; day: number }, // TODO: better type for this?
 ): PlainMonthDaySlots {
   const fields = readAndRefineBagFields(
     /* bag */ input,
     /* validFieldNames */ monthCodeDayFieldNamesAsc,
   )
-  return createPlainMonthDayFromFields(
-    calendarId,
-    fields as Partial<DateFields>,
-  )
+  return createPlainMonthDayFromFields(calendar, fields as Partial<DateFields>)
 }
 
 export function convertToPlainYearMonth(
-  calendarId: string,
+  calendar: InternalCalendar,
   input: { year: number; monthCode: string },
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     yearMonthCodeFieldNamesAsc,
     yearMonthCodeFieldNamesWithEraAsc,
   )
@@ -252,27 +249,27 @@ export function convertToPlainYearMonth(
     /* validFieldNames */ validFieldNames,
   )
   return createPlainYearMonthFromFields(
-    calendarId,
+    calendar,
     fields as Partial<YearMonthFields>,
     options,
   )
 }
 
 function createPlainDateFromMergedFields(
-  calendarId: string,
+  calendar: InternalCalendar,
   inputFields: Record<string, unknown>,
   extraFields: Record<string, unknown>,
 ): PlainDateSlots {
   const mergedFieldNames = getCalendarFieldNames(
-    getInternalCalendar(calendarId),
+    calendar,
     yearMonthCodeDayFieldNamesAlpha,
     yearMonthCodeDayFieldNamesWithEraAlpha,
   )
 
-  let mergedFields = mergeCalendarFields(calendarId, inputFields, extraFields)
+  let mergedFields = mergeCalendarFields(calendar, inputFields, extraFields)
   mergedFields = readAndRefineBagFields(mergedFields, mergedFieldNames, [])
 
-  return createPlainDateFromFields(calendarId, mergedFields as any)
+  return createPlainDateFromFields(calendar, mergedFields as any)
 }
 
 // PlainTime -> *

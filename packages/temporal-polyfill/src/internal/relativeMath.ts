@@ -94,7 +94,7 @@ export function createRelativeMath(
       diffMarkers: bindArgs(
         diffZonedEpochsExact,
         timeZoneImpl,
-        calendarId,
+        calendar,
       ) as Callable,
       isZoned: true,
     }
@@ -106,7 +106,7 @@ export function createRelativeMath(
     marker,
     markerToEpochNano: isoMarkerToEpochNano as MarkerToEpochNano,
     moveMarker: bindArgs(moveDateTime, calendar) as Callable,
-    diffMarkers: bindArgs(diffDateTimesExact, calendarId) as Callable,
+    diffMarkers: bindArgs(diffDateTimesExact, calendar) as Callable,
     isZoned: false,
   }
 }

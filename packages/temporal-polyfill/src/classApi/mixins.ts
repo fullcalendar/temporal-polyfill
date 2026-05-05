@@ -28,11 +28,11 @@ import { mapPropNames } from '../internal/utils'
 const calendarGetterQueries = {
   era: (slots: any) => {
     const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarEraFields(calendar, slots.calendarId, slots).era
+    return computeCalendarEraFields(calendar, slots).era
   },
   eraYear: (slots: any) => {
     const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarEraFields(calendar, slots.calendarId, slots).eraYear
+    return computeCalendarEraFields(calendar, slots).eraYear
   },
   year: (slots: any) => {
     const calendar = getInternalCalendar(slots.calendarId)
