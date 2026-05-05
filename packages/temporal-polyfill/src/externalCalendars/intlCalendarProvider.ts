@@ -1,6 +1,7 @@
 import * as errorMessages from '../internal/errorMessages'
 import type { ExternalCalendarProvider } from '../internal/externalCalendar'
 import { getCalendarIntlFormat, getIntlCalendar } from './intlCalendar'
+import { resolveDateTimeFormatCalendarId } from './intlDateTimeFormat'
 import {
   getIsoDerivedCalendar,
   isIsoDerivedCalendarId,
@@ -14,6 +15,8 @@ const deprecatedCalendarIdMap = {
 } as const
 
 export const intlCalendarProvider: ExternalCalendarProvider = {
+  resolveDateTimeFormatCalendarId,
+
   resolveCalendarId(id) {
     // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
     // true aliases like `islamicc`, but rejects broad Intl fallbacks.
