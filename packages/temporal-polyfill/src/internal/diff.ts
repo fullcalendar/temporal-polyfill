@@ -37,7 +37,11 @@ import {
 } from './move'
 import { DiffOptions, Overflow, RoundingMode } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
-import { MarkerToEpochNano, MoveMarker, createMarkerMath } from './relativeMath'
+import {
+  MarkerToEpochNano,
+  MoveMarker,
+  createMarkerMoveOps,
+} from './relativeMath'
 import {
   computeNanoInc,
   roundBigNano,
@@ -152,7 +156,7 @@ export function diffZonedDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      createMarkerMath(
+      createMarkerMoveOps(
         slots0,
         extractEpochNano as MarkerToEpochNano,
         bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as MoveMarker,
@@ -205,7 +209,7 @@ export function diffPlainDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      createMarkerMath(
+      createMarkerMoveOps(
         plainDateTimeSlots0,
         isoDateTimeToEpochNano as MarkerToEpochNano,
         bindArgs(moveDateTime, calendar) as MoveMarker,
@@ -325,7 +329,7 @@ function diffDateLike(
         smallestUnit,
         roundingInc,
         roundingMode,
-        createMarkerMath(
+        createMarkerMoveOps(
           startIsoDate,
           isoDateToEpochNano as MarkerToEpochNano,
           bindArgs(moveDate, calendar) as MoveMarker,

@@ -22,7 +22,7 @@ import {
   MarkerToEpochNano,
   MovableMarker,
   MoveMarker,
-  createMarkerMath,
+  createMarkerMoveOps,
   isoMarkerToEpochNano,
 } from '../internal/relativeMath'
 import { roundBigNanoByInc, roundByInc } from '../internal/round'
@@ -166,7 +166,7 @@ function diffDateUnits(
     durationFields,
     endEpochNano,
     unit,
-    createMarkerMath(marker0, markerToEpochNano, moveMarker),
+    createMarkerMoveOps(marker0, markerToEpochNano, moveMarker),
   )
 
   if (roundingInc) {

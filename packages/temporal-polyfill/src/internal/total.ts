@@ -22,7 +22,7 @@ import {
   MarkerMoveOps,
   RelativeToSlots,
   checkRelativeMarkersInBounds,
-  createRelativeMath,
+  createMarkerSpanOps,
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
@@ -57,7 +57,7 @@ export function totalDuration<RA>(
     return 0
   }
 
-  const relativeMath = createRelativeMath(relativeToSlots)
+  const relativeMath = createMarkerSpanOps(relativeToSlots)
   const endMarker = relativeMath.moveMarker(relativeMath.marker, slots)
 
   // sanitize start/end markers

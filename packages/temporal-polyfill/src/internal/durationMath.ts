@@ -15,7 +15,7 @@ import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
   checkRelativeMarkersInBounds,
-  createRelativeMath,
+  createMarkerSpanOps,
   isUniformUnit,
   isZonedEpochSlots,
 } from './relativeMath'
@@ -126,7 +126,7 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const relativeMath = createRelativeMath(relativeToSlots)
+  const relativeMath = createMarkerSpanOps(relativeToSlots)
   const midMarker = relativeMath.moveMarker(relativeMath.marker, slots)
   const endMarker = relativeMath.moveMarker(midMarker, otherSlots)
   const balancedDuration = relativeMath.diffMarkers(
@@ -211,7 +211,7 @@ export function roundDuration<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const relativeMath = createRelativeMath(relativeToSlots)
+  const relativeMath = createMarkerSpanOps(relativeToSlots)
   const endMarker = relativeMath.moveMarker(relativeMath.marker, slots)
 
   // sanitize start/end markers

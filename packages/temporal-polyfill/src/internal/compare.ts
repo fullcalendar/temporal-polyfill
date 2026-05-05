@@ -11,7 +11,7 @@ import { RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
-  createRelativeMath,
+  createMarkerSpanOps,
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
@@ -82,7 +82,7 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const relativeMath = createRelativeMath(relativeToSlots)
+  const relativeMath = createMarkerSpanOps(relativeToSlots)
 
   return compareBigNanos(
     moveMarkerToEpochNano(relativeMath, durationSlots0),

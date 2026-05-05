@@ -43,7 +43,7 @@ export type DiffMarkers = (
 // Marker Systems
 // -----------------------------------------------------------------------------
 
-// See comments for `createMarkerMath`
+// See comments for `createMarkerMoveOps`
 export type MovableMarker =
   | CalendarDateFields
   | CalendarDateTimeFields
@@ -54,7 +54,7 @@ export interface MarkerMoveOps {
   moveMarker: MoveMarker
 }
 
-// See comments for `createRelativeMath`
+// See comments for `createMarkerSpanOps`
 export type SpannableMarker = CalendarDateTimeFields | EpochSlots
 export interface MarkerSpanOps extends MarkerMoveOps {
   marker: SpannableMarker
@@ -66,7 +66,7 @@ export interface MarkerSpanOps extends MarkerMoveOps {
 // Just compares other EpochNano values to the start/end of the window
 // The `marker` is the starting-point of the until/since,
 // so an already-resolved ZonedDateTime, PlainDateTime, or DateLike slots
-export function createMarkerMath(
+export function createMarkerMoveOps(
   marker: MovableMarker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
@@ -79,7 +79,7 @@ export function createMarkerMath(
 // of that window is diffed to produce a Duration, for "balancing"
 // The lone `relativeToSlots` argument always comes from a .relativeTo option,
 // which for the classApi comes from `refinePublicRelativeTo()`
-export function createRelativeMath(
+export function createMarkerSpanOps(
   relativeToSlots: RelativeToSlots,
 ): MarkerSpanOps {
   const calendarId = relativeToSlots.calendarId
