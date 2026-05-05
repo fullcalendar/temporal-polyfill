@@ -19,8 +19,8 @@ import { moveDate, moveDateTime, moveZonedEpochs } from '../internal/move'
 import { RoundingMathOptions, RoundingModeName } from '../internal/optionsModel'
 import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
 import {
-  Marker,
   MarkerToEpochNano,
+  MovableMarker,
   MoveMarker,
   createMarkerMath,
   isoMarkerToEpochNano,
@@ -125,8 +125,8 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
 // -----------------------------------------------------------------------------
 
 type MarkersToIsoFields = (
-  m0: Marker,
-  m1: Marker,
+  m0: MovableMarker,
+  m1: MovableMarker,
   sign: NumberSign,
 ) => [CalendarDateFields, CalendarDateFields, ...any[]]
 
@@ -146,8 +146,8 @@ function diffDateUnits(
     f1: CalendarDateFields,
   ) => DurationFields,
   unit: Unit, // guaranteed Y/M/W
-  marker0: Marker,
-  marker1: Marker,
+  marker0: MovableMarker,
+  marker1: MovableMarker,
   options: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
@@ -218,8 +218,8 @@ function diffPlainDayLikeUnit(
   markerToEpochNano: MarkerToEpochNano,
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: Marker,
-  record1: Marker,
+  record0: MovableMarker,
+  record1: MovableMarker,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
@@ -244,8 +244,8 @@ function diffTimeUnit(
   markerToEpochNano: MarkerToEpochNano,
   unit: TimeUnit,
   nanoInUnit: number,
-  record0: Marker,
-  record1: Marker,
+  record0: MovableMarker,
+  record1: MovableMarker,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)

@@ -37,7 +37,7 @@ import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
 import { RoundingOptions } from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
-  MarkerMath,
+  MarkerMoveOps,
   isUniformUnit,
   isZonedEpochSlots,
   moveMarkerToEpochNano,
@@ -384,7 +384,7 @@ export function roundRelativeDuration(
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingMode,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
@@ -564,7 +564,7 @@ function nudgeZonedTimeDuration(
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number, // always >=Day
   roundingMode: RoundingMode,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: BigNano,
@@ -621,7 +621,7 @@ function nudgeRelativeDuration(
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingMode,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ): [
   durationFields: DurationFields,
   movedEpochNano: BigNano,
@@ -685,7 +685,7 @@ function bubbleRelativeDuration(
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
   sign: NumberSign,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ): DurationFields {
   for (
     let currentUnit: Unit = smallestUnit + 1;

@@ -19,7 +19,7 @@ import * as errorMessages from './errorMessages'
 import { DurationTotalOptions } from './optionsModel'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
-  MarkerMath,
+  MarkerMoveOps,
   RelativeToSlots,
   checkRelativeMarkersInBounds,
   createRelativeMath,
@@ -86,7 +86,7 @@ export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: BigNano,
   totalUnit: Unit, // always >=Day
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ): number {
   // The spec treats zero relative durations as positive when probing the
   // surrounding unit window. That matters at the upper Instant boundary:
@@ -133,7 +133,7 @@ export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit, // always >=Day
   clampDistance: number,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
   epochNanoProgress?: BigNano,
 ) {
   const unitName = durationFieldNamesAsc[clampUnit]
@@ -194,7 +194,7 @@ function computeRelativeDurationWindow(
   startDurationFields: DurationFields,
   unitName: DurationFieldName,
   clampDistance: number,
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
 ) {
   const endDurationFields = {
     ...startDurationFields,

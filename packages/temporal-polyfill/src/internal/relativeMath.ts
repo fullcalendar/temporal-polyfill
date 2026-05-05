@@ -24,42 +24,40 @@ export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 // the relative-to "origin", returned from bag refining
 export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
-// A date/time marker that can be moved away from the relative-to origin and
-// then compared back against it. Zoned relative math carries the time zone and
-// calendar in RelativeMath, so moved zoned markers only need epoch nanoseconds.
-export type Marker = CalendarDateFields | CalendarDateTimeFields | EpochSlots
-
-// The normalized marker stored on RelativeMath. Plain relative-to values are
-// promoted to date-times at midnight, while zoned relative-to values stay as
-// epoch nanoseconds and use bound time-zone/calendar operations for movement.
-export type RelativeMarker = CalendarDateTimeFields | EpochSlots
-
-// Atomic Operations
+// Individual Op types
 // -----------------------------------------------------------------------------
 
-export type MarkerToEpochNano = (marker: Marker) => BigNano
+export type MarkerToEpochNano = (marker: MovableMarker) => BigNano
 
 export type MoveMarker = (
-  marker: Marker,
+  marker: MovableMarker,
   durationFields: DurationFields,
-) => Marker
+) => MovableMarker
 
 export type DiffMarkers = (
-  marker0: Marker,
-  marker1: Marker,
+  marker0: MovableMarker,
+  marker1: MovableMarker,
   largestUnit: Unit,
 ) => DurationFields
 
+// Marker Systems
+// -----------------------------------------------------------------------------
+
 // See comments for `createMarkerMath`
-export interface MarkerMath {
-  marker: Marker
+export type MovableMarker =
+  | CalendarDateFields
+  | CalendarDateTimeFields
+  | EpochSlots
+export interface MarkerMoveOps {
+  marker: MovableMarker
   markerToEpochNano: MarkerToEpochNano
   moveMarker: MoveMarker
 }
 
 // See comments for `createRelativeMath`
-export interface RelativeMath extends MarkerMath {
-  marker: RelativeMarker
+export type SpannableMarker = CalendarDateTimeFields | EpochSlots
+export interface MarkerSpanOps extends MarkerMoveOps {
+  marker: SpannableMarker
   diffMarkers: DiffMarkers
 }
 
@@ -69,21 +67,21 @@ export interface RelativeMath extends MarkerMath {
 // The `marker` is the starting-point of the until/since,
 // so an already-resolved ZonedDateTime, PlainDateTime, or DateLike slots
 export function createMarkerMath(
-  marker: Marker,
+  marker: MovableMarker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
-): MarkerMath {
+): MarkerMoveOps {
   return { marker, markerToEpochNano, moveMarker }
 }
 
 // Only ever used within roundDuration and totalDuration,
-// where a "window" is created (just like MarkerMath), but then the start/end
+// where a "window" is created (just like MarkerMoveOps), but then the start/end
 // of that window is diffed to produce a Duration, for "balancing"
 // The lone `relativeToSlots` argument always comes from a .relativeTo option,
 // which for the classApi comes from `refinePublicRelativeTo()`
 export function createRelativeMath(
   relativeToSlots: RelativeToSlots,
-): RelativeMath {
+): MarkerSpanOps {
   const calendarId = relativeToSlots.calendarId
   const calendar = getInternalCalendar(calendarId)
 
@@ -117,7 +115,7 @@ export function createRelativeMath(
 
 // NOTE: bad name. it moves the marker and RETURNS the epoch-nanoseconds
 export function moveMarkerToEpochNano(
-  markerMath: MarkerMath,
+  markerMath: MarkerMoveOps,
   durationFields: DurationFields,
 ): BigNano {
   return markerMath.markerToEpochNano(
@@ -129,13 +127,13 @@ export function isZonedEpochSlots(
   marker: RelativeToSlots | undefined,
 ): marker is ZonedEpochSlots
 export function isZonedEpochSlots(
-  marker: Marker | undefined,
+  marker: MovableMarker | undefined,
 ): marker is EpochSlots
 export function isZonedEpochSlots(
-  marker: Marker | RelativeToSlots | undefined,
+  marker: MovableMarker | RelativeToSlots | undefined,
 ): marker is EpochSlots | ZonedEpochSlots
 export function isZonedEpochSlots(
-  marker: Marker | RelativeToSlots | undefined,
+  marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {
   return (marker &&
     (marker as EpochSlots).epochNanoseconds) as unknown as boolean
@@ -152,7 +150,7 @@ function createPlainDateTimeMarker(
   )
 }
 
-export function isoMarkerToEpochNano(marker: Marker): BigNano {
+export function isoMarkerToEpochNano(marker: MovableMarker): BigNano {
   if (!isZonedEpochSlots(marker)) {
     return isoDateTimeToEpochNano(
       combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
@@ -162,8 +160,8 @@ export function isoMarkerToEpochNano(marker: Marker): BigNano {
 }
 
 export function checkRelativeMarkersInBounds(
-  relativeMath: RelativeMath,
-  endMarker: Marker,
+  relativeMath: MarkerSpanOps,
+  endMarker: MovableMarker,
 ): void {
   // Zoned math is already bounded by Instant conversion. Plain relative math
   // must explicitly validate the origin and destination as ISO date-times.
@@ -191,7 +189,7 @@ For ZonedDateTime markers, only time is uniform (days can vary in length)
 */
 export function isUniformUnit(
   unit: Unit,
-  marker: Marker | RelativeToSlots | undefined,
+  marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {
   return unit <= Unit.Day - (isZonedEpochSlots(marker) ? 1 : 0)
 }
