@@ -11,10 +11,9 @@ import { RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
-  createMarkerToEpochNano,
-  createMoveMarker,
-  createRelativeOrigin,
+  createRelativeMath,
   isUniformUnit,
+  moveMarkerToEpochNano,
 } from './relativeMath'
 import {
   DurationSlots,
@@ -83,13 +82,11 @@ export function compareDurations<RA>(
     throw new RangeError(errorMessages.missingRelativeTo)
   }
 
-  const [marker, timeZoneImpl] = createRelativeOrigin(relativeToSlots)
-  const markerToEpochNano = createMarkerToEpochNano(timeZoneImpl)
-  const moveMarker = createMoveMarker(timeZoneImpl, relativeToSlots.calendarId)
+  const relativeMath = createRelativeMath(relativeToSlots)
 
   return compareBigNanos(
-    markerToEpochNano(moveMarker(marker, durationSlots0)),
-    markerToEpochNano(moveMarker(marker, durationSlots1)),
+    moveMarkerToEpochNano(relativeMath, durationSlots0),
+    moveMarkerToEpochNano(relativeMath, durationSlots1),
   )
 }
 
