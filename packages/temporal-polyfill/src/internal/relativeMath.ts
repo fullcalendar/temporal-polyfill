@@ -104,7 +104,7 @@ export function createMarkerSpanOps(
 
   return {
     marker,
-    markerToEpochNano: isoMarkerToEpochNano as MarkerToEpochNano,
+    markerToEpochNano: isoDateTimeToEpochNano as MarkerToEpochNano,
     moveMarker: bindArgs(moveDateTime, calendar) as Callable,
     diffMarkers: bindArgs(diffDateTimesExact, calendar) as Callable,
   }
@@ -139,6 +139,7 @@ export function isZonedEpochSlots(
     (marker as EpochSlots).epochNanoseconds) as unknown as boolean
 }
 
+// Will coerce Date -> DateTime
 function createPlainDateTimeMarker(
   relativeToSlots: AbstractDateSlots,
 ): CalendarDateTimeFields {
@@ -148,15 +149,6 @@ function createPlainDateTimeMarker(
       ? (relativeToSlots as unknown as CalendarDateTimeFields)
       : timeFieldDefaults,
   )
-}
-
-export function isoMarkerToEpochNano(marker: MovableMarker): BigNano {
-  if (!isZonedEpochSlots(marker)) {
-    return isoDateTimeToEpochNano(
-      combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
-    )!
-  }
-  return marker.epochNanoseconds
 }
 
 export function checkRelativeMarkersInBounds(

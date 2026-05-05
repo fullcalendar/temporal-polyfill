@@ -1,4 +1,5 @@
 import {
+  BigNano,
   bigNanoToExactDays,
   bigNanoToNumber,
   compareBigNanos,
@@ -13,6 +14,7 @@ import {
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { getInternalCalendar } from '../internal/externalCalendar'
+import { timeFieldDefaults } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { moveDate, moveDateTime, moveZonedEpochs } from '../internal/move'
@@ -23,7 +25,7 @@ import {
   MovableMarker,
   MoveMarker,
   createMarkerMoveOps,
-  isoMarkerToEpochNano,
+  isZonedEpochSlots,
 } from '../internal/relativeMath'
 import { roundBigNanoByInc, roundByInc } from '../internal/round'
 import {
@@ -36,6 +38,17 @@ import { queryTimeZone } from '../internal/timeZoneImpl'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
+
+// TODO: Split the plain callers so each one passes a type-specific converter
+// instead of branching here between date-only, date-time, and epoch markers.
+function isoMarkerToEpochNano(marker: MovableMarker): BigNano {
+  if (!isZonedEpochSlots(marker)) {
+    return isoDateTimeToEpochNano(
+      combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
+    )!
+  }
+  return marker.epochNanoseconds
+}
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
