@@ -10,8 +10,12 @@ import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { getInternalCalendar } from './externalCalendar'
-import { timeFieldDefaults } from './fieldNames'
-import { CalendarDateFields, TimeFields } from './fieldTypes'
+import type { InternalCalendar } from './externalCalendar'
+import {
+  CalendarDateFields,
+  CalendarYearMonthFields,
+  TimeFields,
+} from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
 import {
@@ -31,8 +35,7 @@ import {
   validateOffsetSeparators,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
-import { EpochDisambig, OffsetDisambig } from './optionsModel'
-import { ZonedFieldOptions } from './optionsModel'
+import type { ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
   AbstractDateSlots,
@@ -123,10 +126,7 @@ export function parseRelativeToSlots(s: string): RelativeToSlots {
     throw new RangeError(errorMessages.failedParse(s))
   }
   if (organized.timeZoneId) {
-    return finalizeZonedDateTime(
-      organized as ZonedDateTimeOrganized,
-      organized.offset ? parseOffsetNano(organized.offset) : undefined,
-    )
+    return finalizeZonedDateTime(organized as ZonedDateTimeOrganized)
   }
   if (organized.hasZ) {
     // PlainDate doesn't support Z
@@ -146,16 +146,7 @@ export function parseZonedDateTime(
     throw new RangeError(errorMessages.failedParse(s))
   }
 
-  const { offset } = organized
-  const offsetNano = offset ? parseOffsetNano(offset) : undefined
-  const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
-
-  return finalizeZonedDateTime(
-    organized as ZonedDateTimeOrganized,
-    offsetNano, // HACK
-    offsetDisambig,
-    epochDisambig,
-  )
+  return finalizeZonedDateTime(organized as ZonedDateTimeOrganized, options)
 }
 
 export function parsePlainDateTime(s: string): PlainDateTimeSlots {
@@ -169,48 +160,8 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   return createPlainDateTimeSlots(slots, slots.calendarId)
 }
 
-export function parsePlainDate(
-  s: string,
-  isPlainYearMonth?: boolean,
-  isPlainMonthDay?: boolean,
-): PlainDateSlots {
-  let organized = parseDateTimeLike(requireString(s))
-
-  if (!organized || organized.hasZ) {
-    throw new RangeError(errorMessages.failedParse(s))
-  }
-
-  // ISO HACKS
-  if (isPlainYearMonth) {
-    // HACK to not limit the D in the YMD string because it'll get thrown away
-    if (organized.calendarId === isoCalendarId) {
-      if (organized.year === -271821 && organized.month === 4) {
-        organized = {
-          ...organized,
-          day: 20,
-          ...timeFieldDefaults,
-        }
-      } else {
-        organized = {
-          ...organized,
-          day: 1,
-          ...timeFieldDefaults,
-        }
-      }
-    }
-  } else if (isPlainMonthDay) {
-    // HACK
-    if (organized.calendarId === isoCalendarId) {
-      organized = {
-        ...organized,
-        year: isoEpochFirstLeapYear,
-      }
-    }
-  }
-
-  const slots = organized.hasTime
-    ? finalizeDateTime(organized)
-    : finalizeDate(organized)
+export function parsePlainDate(s: string): PlainDateSlots {
+  const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
   return createPlainDateSlots(slots, slots.calendarId)
 }
 
@@ -225,14 +176,17 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
     )
   }
 
-  const isoSlots = parsePlainDate(s, true)
-  const calendar = getInternalCalendar(isoSlots.calendarId)
+  const dateSlots = finalizeDateLike(
+    parsePlainDateLike(s),
+    projectIsoYearMonthDate,
+  )
+  const calendar = getInternalCalendar(dateSlots.calendarId)
   const moveIsoSlots = moveToDayOfMonthUnsafe(
     (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
-    isoSlots,
+    dateSlots,
   )
 
-  return createPlainYearMonthSlots(moveIsoSlots, isoSlots.calendarId)
+  return createPlainYearMonthSlots(moveIsoSlots, dateSlots.calendarId)
 }
 
 function requireIsoCalendar(organized: { calendarId: string }): void {
@@ -253,7 +207,10 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     )
   }
 
-  const dateSlots = parsePlainDate(s, false, /* isPlainMonthDay = */ true)
+  const dateSlots = finalizeDateLike(
+    parsePlainDateLike(s),
+    projectIsoMonthDayDate,
+  )
   const { calendarId } = dateSlots
   const calendar = getInternalCalendar(calendarId)
 
@@ -268,15 +225,12 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     origYear,
     origMonth,
   )
-  const { year, month } = (
-    calendar
-      ? calendar.computeYearMonthFieldsForMonthDay(
-          monthCodeNumber,
-          isLeapMonth,
-          day,
-        )
-      : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
-  )! // !HACK
+  const { year, month } = computeMonthDayReferenceYearMonth(
+    calendar,
+    monthCodeNumber,
+    isLeapMonth,
+    day,
+  )
   const isoDate = checkIsoDateInBounds(
     computeCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
@@ -349,6 +303,80 @@ export function parseTimeZoneId(s: string): string {
   )
 }
 
+function parsePlainDateLike(s: string): DateTimeLikeOrganized {
+  const organized = parseDateTimeLike(s)
+
+  if (!organized || organized.hasZ) {
+    throw new RangeError(errorMessages.failedParse(s))
+  }
+
+  return organized
+}
+
+function finalizeDateLike(
+  organized: DateTimeLikeOrganized,
+  isoDateProjector?: (organized: DateTimeLikeOrganized) => DateOrganized,
+): AbstractDateSlots {
+  if (isoDateProjector && organized.calendarId === isoCalendarId) {
+    // Full-date strings still go through the normal ParseISODateTime-style
+    // validation. Only after that do PlainYearMonth/PlainMonthDay project the
+    // parsed date onto the representative ISO date stored in their slots.
+    checkIsoDateFields(organized)
+    if (organized.hasTime) {
+      checkTimeFields(organized)
+    }
+    return finalizeDate(isoDateProjector(organized))
+  }
+
+  return organized.hasTime
+    ? finalizeDateTime(organized)
+    : finalizeDate(organized)
+}
+
+function projectIsoYearMonthDate(
+  organized: DateTimeLikeOrganized,
+): DateOrganized {
+  // The final YearMonth slot drops the day, but its range check still needs a
+  // valid representative ISO date. The minimum ISO year-month starts on day 20.
+  const day = organized.year === -271821 && organized.month === 4 ? 20 : 1
+  return {
+    ...organized,
+    day,
+  }
+}
+
+function projectIsoMonthDayDate(
+  organized: DateTimeLikeOrganized,
+): DateOrganized {
+  // The stored PlainMonthDay reference year is a post-epoch leap year, matching
+  // the ISO short form so 02-29 can be represented.
+  return {
+    ...organized,
+    year: isoEpochFirstLeapYear,
+  }
+}
+
+function computeMonthDayReferenceYearMonth(
+  calendar: InternalCalendar,
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  day: number,
+): CalendarYearMonthFields {
+  const yearMonthFields = calendar
+    ? calendar.computeYearMonthFieldsForMonthDay(
+        monthCodeNumber,
+        isLeapMonth,
+        day,
+      )
+    : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
+
+  if (!yearMonthFields) {
+    throw new RangeError(errorMessages.failedYearGuess)
+  }
+
+  return yearMonthFields
+}
+
 // Finalizing 'organized' structs to slots
 // -----------------------------------------------------------------------------
 
@@ -357,9 +385,7 @@ Unlike others, return slots
 */
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
-  offsetNano: number | undefined,
-  offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
-  epochDisambig: EpochDisambig = EpochDisambig.Compat,
+  options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
   const timeZoneImpl = queryTimeZone(timeZoneId)
@@ -369,6 +395,10 @@ function finalizeZonedDateTime(
   let epochNano: BigNano
 
   if (organized.hasTime) {
+    const offsetNano = organized.offset
+      ? parseOffsetNano(organized.offset)
+      : undefined
+    const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
     epochNano = getMatchingInstantFor(
       timeZoneImpl,
       organized,
@@ -381,7 +411,8 @@ function finalizeZonedDateTime(
       organized.hasZ,
     )
   } else {
-    epochNano = getStartOfDayInstantFor(timeZoneImpl as any, organized) // !!!
+    refineZonedFieldOptions(options)
+    epochNano = getStartOfDayInstantFor(timeZoneImpl, organized)
   }
 
   // Validate the computed epochNanoseconds is within the representable range

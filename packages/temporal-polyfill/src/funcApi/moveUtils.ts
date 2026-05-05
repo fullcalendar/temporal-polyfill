@@ -17,7 +17,7 @@ import { CalendarDateFields } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
 import {
-  addCalendarDateMonths,
+  addDateMonths,
   moveByDays,
   moveToDayOfMonthUnsafe,
 } from '../internal/move'
@@ -50,13 +50,7 @@ export function moveByYears(
     return isoDate
   }
   return epochMilliToIsoDateTime(
-    addCalendarDateMonths(
-      calendar,
-      isoDate,
-      toStrictInteger(years),
-      0,
-      overflow,
-    ),
+    addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
   )
 }
 
@@ -72,13 +66,7 @@ export function moveByMonths(
     return isoDate
   }
   return epochMilliToIsoDateTime(
-    addCalendarDateMonths(
-      calendar,
-      isoDate,
-      0,
-      toStrictInteger(months),
-      overflow,
-    ),
+    addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
   )
 }
 

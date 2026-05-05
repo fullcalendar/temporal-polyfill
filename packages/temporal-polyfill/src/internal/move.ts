@@ -17,7 +17,6 @@ import {
   durationHasDateParts,
   durationTimeFieldsToBigNanoStrict,
   getMaxDurationUnit,
-  negateDuration,
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -75,7 +74,7 @@ export function moveInstant(
   return createInstantSlots(
     moveEpochNano(
       instantSlots.epochNanoseconds,
-      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+      signedDurationFields(doSubtract, durationSlots),
     ),
   )
 }
@@ -94,7 +93,7 @@ export function moveZonedDateTime(
       timeZoneImpl,
       getInternalCalendar(zonedDateTimeSlots.calendarId),
       zonedDateTimeSlots,
-      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+      signedDurationFields(doSubtract, durationSlots),
       options,
     ),
   }
@@ -111,7 +110,7 @@ export function movePlainDateTime(
   const isoDateTime = moveDateTime(
     calendar,
     plainDateTimeSlots,
-    doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+    signedDurationFields(doSubtract, durationSlots),
     options,
   )
   return createPlainDateTimeSlots(isoDateTime, calendarId)
@@ -129,7 +128,7 @@ export function movePlainDate(
     moveDate(
       calendar,
       plainDateSlots,
-      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
+      signedDurationFields(doSubtract, durationSlots),
       options,
     ),
     calendarId,
@@ -145,7 +144,7 @@ export function movePlainYearMonth(
   /*
   PlainYearMonth has one awkward ordering rule: overflow must be read before
   rejecting units below months. Date arithmetic normally reads overflow inside
-  dateAdd(), so use the pre-refined entry point below to avoid reading the
+  moveDate(), so use the pre-refined entry point below to avoid reading the
   caller's options twice or fabricating an internal options bag.
   */
   const overflow = refineOverflowOptions(options)
@@ -164,14 +163,10 @@ export function movePlainYearMonth(
     moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots),
   )
 
-  if (doSubtract) {
-    durationSlots = negateDuration(durationSlots)
-  }
-
   const movedIsoDateFields = dateAddWithOverflow(
     calendar,
     isoDateFields,
-    durationSlots,
+    signedDurationFields(doSubtract, durationSlots),
     overflow,
   )
 
@@ -187,11 +182,15 @@ export function movePlainTime(
   durationSlots: DurationFields,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
-    moveTime(
-      slots,
-      doSubtract ? negateDurationFields(durationSlots) : durationSlots,
-    )[0],
+    moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0],
   )
+}
+
+function signedDurationFields(
+  doSubtract: boolean,
+  durationFields: DurationFields,
+): DurationFields {
+  return doSubtract ? negateDurationFields(durationFields) : durationFields
 }
 
 // Low-Level
@@ -288,7 +287,12 @@ export function moveDate(
   options?: OverflowOptions,
 ): CalendarDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return dateAdd(calendar, isoDateFields, durationFields, options)
+    return dateAddWithOverflow(
+      calendar,
+      isoDateFields,
+      durationFields,
+      refineOverflowOptions(options),
+    )
   }
 
   refineOverflowOptions(options) // for validation only
@@ -343,21 +347,7 @@ export function moveByDays(
   return pickDateFields(isoDate)
 }
 
-export function dateAdd(
-  calendar: InternalCalendar,
-  isoDateFields: CalendarDateFields,
-  durationFields: DurationFields,
-  options?: OverflowOptions,
-): CalendarDateFields {
-  return dateAddWithOverflow(
-    calendar,
-    isoDateFields,
-    durationFields,
-    refineOverflowOptions(options),
-  )
-}
-
-export function dateAddWithOverflow(
+function dateAddWithOverflow(
   calendar: InternalCalendar,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
@@ -407,16 +397,6 @@ export function addCalendarMonths(
   return calendar
     ? calendar.addMonths(year, month, monthDelta)
     : addIsoMonths(year, month, monthDelta)
-}
-
-export function addCalendarDateMonths(
-  calendar: InternalCalendar,
-  isoDate: Parameters<typeof addDateMonths>[1],
-  years: Parameters<typeof addDateMonths>[2],
-  months: Parameters<typeof addDateMonths>[3],
-  overflow: Parameters<typeof addDateMonths>[4],
-): ReturnType<typeof addDateMonths> {
-  return addDateMonths(calendar, isoDate, years, months, overflow)
 }
 
 export function addDateMonths(

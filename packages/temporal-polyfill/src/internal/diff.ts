@@ -111,9 +111,7 @@ export function diffInstants(
     ...optionsTuple,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffZonedDateTimes(
@@ -145,57 +143,32 @@ export function diffZonedDateTimes(
   } else {
     const timeZoneId = getCommonTimeZoneId(slots0.timeZoneId, slots1.timeZoneId)
     const timeZoneImpl = queryTimeZone(timeZoneId)
-    const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZoneImpl)
-    const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZoneImpl)
+    durationFields = diffZonedEpochsExact(
+      timeZoneImpl,
+      calendarId,
+      slots0,
+      slots1,
+      largestUnit,
+    )
 
-    // During a fall-back transition, same-date wall-clock times can move in
-    // the opposite direction from epoch time. Treat that as a pure time diff
-    // to avoid mixed-sign calendar/time duration fields.
-    if (
-      isoDateTime0.year === isoDateTime1.year &&
-      isoDateTime0.month === isoDateTime1.month &&
-      isoDateTime0.day === isoDateTime1.day &&
-      Math.sign(diffTimes(isoDateTime0, isoDateTime1)) === -sign
-    ) {
-      durationFields = diffEpochNanos(
-        epochNano0,
-        epochNano1,
-        Unit.Hour,
-        smallestUnit as TimeUnit,
-        roundingInc,
-        roundingMode,
-      )
-    } else {
-      durationFields = diffZonedEpochsBig(
-        calendarId,
+    durationFields = roundRelativeDuration(
+      durationFields,
+      epochNano1,
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      slots0,
+      extractEpochNano as MarkerToEpochNano,
+      bindArgs(
+        moveZonedEpochs,
         timeZoneImpl,
-        slots0,
-        slots1,
-        sign,
-        largestUnit,
-      )
-
-      durationFields = roundRelativeDuration(
-        durationFields,
-        epochNano1,
-        largestUnit,
-        smallestUnit,
-        roundingInc,
-        roundingMode,
-        slots0,
-        extractEpochNano as MarkerToEpochNano,
-        bindArgs(
-          moveZonedEpochs,
-          timeZoneImpl,
-          getInternalCalendar(calendarId),
-        ) as MoveMarker,
-      )
-    }
+        getInternalCalendar(calendarId),
+      ) as MoveMarker,
+    )
   }
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainDateTimes(
@@ -249,9 +222,7 @@ export function diffPlainDateTimes(
     )
   }
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainDates(
@@ -305,13 +276,8 @@ export function diffPlainYearMonth(
   const firstOfMonth0 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots0)
   const firstOfMonth1 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots1)
 
-  // Short-circuit if exactly the same (no in-bounds checking later)
-  // HACK: not using compareIsoDateFields because choked when epochMillis out-of-bounds
-  if (
-    firstOfMonth0.year === firstOfMonth1.year &&
-    firstOfMonth0.month === firstOfMonth1.month &&
-    firstOfMonth0.day === firstOfMonth1.day
-  ) {
+  // Short-circuit if exactly the same, before the in-bounds check below.
+  if (!compareIsoDate(firstOfMonth0, firstOfMonth1)) {
     return createDurationSlots(durationFieldDefaults)
   }
 
@@ -360,8 +326,9 @@ function diffDateLike(
       roundingMode,
     )
   } else {
+    const calendar = getInternalCalendar(calendarId)
     durationFields = diffCalendarDates(
-      getInternalCalendar(calendarId),
+      calendar,
       startIsoDate,
       endIsoDate,
       largestUnit,
@@ -377,14 +344,12 @@ function diffDateLike(
         roundingMode,
         combineDateAndTime(startIsoDate, timeFieldDefaults),
         isoMarkerToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDate, getInternalCalendar(calendarId)) as MoveMarker,
+        bindArgs(moveDate, calendar) as MoveMarker,
       )
     }
   }
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainTimes(
@@ -407,6 +372,13 @@ export function diffPlainTimes(
     ...nanoToDurationTimeFields(timeDiffNano, largestUnit as TimeUnit),
   }
 
+  return createDiffDurationSlots(invert, durationFields)
+}
+
+function createDiffDurationSlots(
+  invert: boolean,
+  durationFields: DurationFields,
+): DurationSlots {
   return createDurationSlots(
     invert ? negateDurationFields(durationFields) : durationFields,
   )
@@ -435,20 +407,12 @@ export function diffZonedEpochsExact(
     )
   }
 
-  // During a fall-back transition, same-date wall-clock times can move in
-  // the opposite direction from epoch time. Treat that as a pure time diff
-  // to avoid mixed-sign calendar/time duration fields.
-  //
-  // TODO: make DRY with diffZonedDateTimes
-  //
+  // Same-date zoned diffs have no calendar date part. Keeping them as instant
+  // diffs also avoids re-resolving an ambiguous repeated wall-clock time while
+  // deriving the intermediate marker.
   const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZoneImpl)
   const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZoneImpl)
-  if (
-    isoDateTime0.year === isoDateTime1.year &&
-    isoDateTime0.month === isoDateTime1.month &&
-    isoDateTime0.day === isoDateTime1.day &&
-    Math.sign(diffTimes(isoDateTime0, isoDateTime1)) === -sign
-  ) {
+  if (!compareIsoDate(isoDateTime0, isoDateTime1)) {
     return diffEpochNanosExact(
       slots0.epochNanoseconds,
       slots1.epochNanoseconds,
@@ -523,9 +487,7 @@ function diffZonedEpochsBig(
           largestUnit,
         )
 
-  const timeDiff = nanoToDurationTimeFields(remainderNano)
-  const dateTimeDiff = { ...dateDiff, ...timeDiff }
-  return dateTimeDiff
+  return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
 }
 
 function diffDateTimesBig(
@@ -546,9 +508,7 @@ function diffDateTimesBig(
     diffEndDate,
     largestUnit,
   )
-  const timeDiff = nanoToDurationTimeFields(timeNano)
-  const dateTimeDiff = { ...dateDiff, ...timeDiff }
-  return dateTimeDiff
+  return { ...dateDiff, ...nanoToDurationTimeFields(timeNano) }
 }
 
 export function diffCalendarDates(
@@ -601,7 +561,8 @@ function diffCalendarMonthDay(
   const { year: year0, month: month0, day: day0 } = startCalendarDateFields
   const { year: year1, month: month1, day: day1 } = endCalendarDateFields
   const sign = Math.sign(
-    compareYearMonth(year1, month1, year0, month0) ||
+    compareNumbers(year1, year0) ||
+      compareNumbers(month1, month0) ||
       diffDays(startIsoDate, endIsoDate),
   )
 
@@ -624,14 +585,10 @@ function diffCalendarMonthDay(
   // month. This deliberately uses the full date comparison, which avoids
   // treating a constrained 30th -> 29th move as a complete calendar month.
   const anchorCompare = compareIsoDate(anchorIsoDate, endIsoDate)
-  const anchorCalendarDateFields = computeCalendarDateFields(
-    calendar,
-    anchorIsoDate,
-  )
   if (
     anchorCompare === sign ||
     (anchorCompare === 0 &&
-      anchorCalendarDateFields.day !== day0 &&
+      computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
       !(
         calendar &&
         calendar.isConstrainedFinalIntercalaryMonthDiff(
@@ -654,17 +611,7 @@ function diffCalendarMonthDay(
   return [months, diffDays(anchorIsoDate, endIsoDate)]
 }
 
-// comparison util used ONLY in this file
-function compareYearMonth(
-  year0: number,
-  month0: number,
-  year1: number,
-  month1: number,
-): number {
-  return compareNumbers(year0, year1) || compareNumbers(month0, month1)
-}
-
-// comparison util used ONLY in this file
+// Local field comparison avoids converting edge-of-range dates to epoch time.
 function compareIsoDate(
   isoDate0: CalendarDateFields,
   isoDate1: CalendarDateFields,
@@ -847,40 +794,31 @@ export function prepareZonedEpochDiff(
     dayCorrection++
   }
 
-  // The intermediate datetime after adding date-only units
-  let midIsoDate: CalendarDateFields
-  let midEpochNano: BigNano
+  // Date-only units land on the end date with the
+  // start time. Around a compatible DST push-forward, forward differences can
+  // overshoot once more after the plain wall-clock correction above, so only
+  // that direction gets a single extra retry.
+  const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
 
-  // Computes intermediate zdt after date-unit add
-  // Returns `true` if the date-only adding overshot the end-point
-  // Increments dayCorrection for next run
-  function updateMid(): boolean {
-    midIsoDate = moveByDays(endIsoDate, dayCorrection++ * -sign)
-    midEpochNano = getSingleInstantFor(
+  for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
+    const midIsoDate = moveByDays(endIsoDate, dayCorrection * -sign)
+    const midEpochNano = getSingleInstantFor(
       timeZoneImpl,
       combineDateAndTime(midIsoDate, startIsoDate),
     )
-    return compareBigNanos(endEpochNano, midEpochNano) === -sign
-  }
 
-  if (updateMid()) {
-    // Inconsistent date/time diffs
-    // If moving forwards in time, DST might have shifted wall-clock time forward,
-    // so try backing off one day.
-    // If moving backwards in time, DST never shifts wall-clock backwards,
-    // so we know for sure there's an error without backing off.
-    if (sign === -1 || updateMid()) {
-      throw new RangeError(errorMessages.invalidProtocolResults)
+    if (compareBigNanos(endEpochNano, midEpochNano) !== -sign) {
+      const remainderNano = bigNanoToNumber(
+        diffBigNanos(midEpochNano, endEpochNano),
+      )
+      return [startIsoDate, midIsoDate, remainderNano, startIsoDate]
     }
   }
 
-  const remainderNano = bigNanoToNumber(
-    diffBigNanos(midEpochNano!, endEpochNano),
-  )
-  return [startIsoDate, midIsoDate!, remainderNano, startIsoDate]
+  throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
-export function prepareDateTimeDiff(
+function prepareDateTimeDiff(
   startIsoDateTime: CalendarDateTimeFields,
   endIsoDateTime: CalendarDateTimeFields,
   sign: NumberSign, // guaranteed non-zero
@@ -939,7 +877,7 @@ function diffEpochNanosExact(
 /*
 Partial days are trunc()'d
 */
-export function diffByDay(
+function diffByDay(
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
 ): DurationFields {
@@ -952,7 +890,7 @@ export function diffByDay(
 /*
 Partial days are trunc()'d
 */
-export function diffDays(
+function diffDays(
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
 ): number {
