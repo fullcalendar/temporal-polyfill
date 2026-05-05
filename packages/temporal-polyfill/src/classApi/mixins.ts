@@ -12,10 +12,10 @@ import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import {
-  dateGetterFieldNamesAsc,
-  monthDayGetterFieldNamesAsc,
+  dateGetterFieldNames,
+  monthDayGetterFieldNames,
   timeFieldNamesAsc,
-  yearMonthGetterFieldNamesAsc,
+  yearMonthGetterFieldNames,
 } from '../internal/fieldNames'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
@@ -88,12 +88,12 @@ function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
   return methods
 }
 
-export const dateGetters = createCalendarGetters(dateGetterFieldNamesAsc)
+export const dateGetters = createCalendarGetters(dateGetterFieldNames)
 export const yearMonthGetters = createCalendarGetters(
-  yearMonthGetterFieldNamesAsc,
+  yearMonthGetterFieldNames,
 )
 export const monthDayGetters = createCalendarGetters(
-  monthDayGetterFieldNamesAsc,
+  monthDayGetterFieldNames,
 )
 export const calendarIdGetters = {
   calendarId(slots: any): string {

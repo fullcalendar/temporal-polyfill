@@ -19,9 +19,9 @@ import {
   dateTimeFieldNamesWithEraAlpha,
   dayFieldNamesAsc,
   timeFieldNamesAlpha,
-  timeZoneFieldNamesAsc,
-  yearMonthFieldNamesAsc,
-  yearMonthFieldNamesWithEraAsc,
+  timeZoneFieldNames,
+  yearMonthFieldNamesAlpha,
+  yearMonthFieldNamesWithEraAlpha,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
 import type {
@@ -129,7 +129,7 @@ export function refineZonedDateTimeObjectLike(
   const fields = readAndRefineBagFields(
     /* bag */ bag,
     /* validFieldNames */ validFieldNames,
-    /* requiredFieldNames */ timeZoneFieldNamesAsc,
+    /* requiredFieldNames */ timeZoneFieldNames,
   ) as ZonedDateTimeRefinedObject
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
@@ -212,8 +212,8 @@ export function refinePlainYearMonthObjectLike(
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
     calendar,
-    yearMonthFieldNamesAsc,
-    yearMonthFieldNamesWithEraAsc,
+    yearMonthFieldNamesAlpha,
+    yearMonthFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ bag,

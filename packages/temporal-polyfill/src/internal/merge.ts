@@ -12,19 +12,19 @@ import {
 } from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
-  allYearFieldNamesAsc,
+  allYearFieldNames,
   dateFieldNamesAlpha,
   dateFieldNamesWithEraAlpha,
   dateTimeAndOffsetFieldNamesAlpha,
   dateTimeAndOffsetFieldNamesWithEraAlpha,
   dateTimeFieldNamesAlpha,
   dateTimeFieldNamesWithEraAlpha,
-  eraYearFieldNamesAsc,
-  monthDayFieldNamesAsc,
-  monthFieldNamesAsc,
+  eraYearFieldNames,
+  monthDayFieldNames,
+  monthFieldNames,
   timeFieldNamesAlpha,
-  yearMonthFieldNamesAsc,
-  yearMonthFieldNamesWithEraAsc,
+  yearMonthFieldNamesAlpha,
+  yearMonthFieldNamesWithEraAlpha,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
 import {
@@ -74,12 +74,12 @@ export function mergeCalendarFields(
   const calendarId = getInternalCalendarId(calendar)
   const merged = Object.assign(Object.create(null), baseFields)
 
-  spliceFields(merged, additionalFields, monthFieldNamesAsc)
+  spliceFields(merged, additionalFields, monthFieldNames)
 
   const eraOrigins = getCalendarEraOrigins(calendar)
 
   if (eraOrigins) {
-    spliceFields(merged, additionalFields, allYearFieldNamesAsc)
+    spliceFields(merged, additionalFields, allYearFieldNames)
 
     // Japanese eras can begin mid-year. When month/day are supplied, era fields
     // from the original object can become stale, so the replacement year path
@@ -88,8 +88,8 @@ export function mergeCalendarFields(
       spliceFields(
         merged,
         additionalFields,
-        monthDayFieldNamesAsc, // any found?
-        eraYearFieldNamesAsc, // then, delete these
+        monthDayFieldNames, // any found?
+        eraYearFieldNames, // then, delete these
       )
     }
   }
@@ -311,8 +311,8 @@ export function mergePlainYearMonthFields(
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
     calendar,
-    yearMonthFieldNamesAsc,
-    yearMonthFieldNamesWithEraAsc,
+    yearMonthFieldNamesAlpha,
+    yearMonthFieldNamesWithEraAlpha,
   )
 
   const { year, month } = computeCalendarDateFields(

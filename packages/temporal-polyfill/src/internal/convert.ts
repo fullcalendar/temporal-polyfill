@@ -5,13 +5,13 @@ import type { InternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import {
   dayFieldNamesAsc,
-  monthCodeDayFieldNamesAsc,
+  monthCodeDayFieldNamesAlpha,
   yearFieldNamesAsc,
-  yearFieldNamesWithEraAsc,
+  yearFieldNamesWithEraAlpha,
   yearMonthCodeDayFieldNamesAlpha,
   yearMonthCodeDayFieldNamesWithEraAlpha,
-  yearMonthCodeFieldNamesAsc,
-  yearMonthCodeFieldNamesWithEraAsc,
+  yearMonthCodeFieldNamesAlpha,
+  yearMonthCodeFieldNamesWithEraAlpha,
 } from './fieldNames'
 import { readAndRefineBagFields } from './fieldRefine'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
@@ -181,8 +181,8 @@ export function convertPlainYearMonthToDate(
 ): PlainDateSlots {
   const inputFieldNames = getCalendarFieldNames(
     calendar,
-    yearMonthCodeFieldNamesAsc,
-    yearMonthCodeFieldNamesWithEraAsc,
+    yearMonthCodeFieldNamesAlpha,
+    yearMonthCodeFieldNamesWithEraAlpha,
   )
   const inputFields = pluckProps(
     inputFieldNames,
@@ -208,10 +208,10 @@ export function convertPlainMonthDayToDate(
   const extraFieldNames = getCalendarFieldNames(
     calendar,
     yearFieldNamesAsc,
-    yearFieldNamesWithEraAsc,
+    yearFieldNamesWithEraAlpha,
   )
   const inputFields = pluckProps(
-    monthCodeDayFieldNamesAsc,
+    monthCodeDayFieldNamesAlpha,
     input as Record<string, unknown>,
   )
   const extraFields = readAndRefineBagFields(
@@ -229,7 +229,7 @@ export function convertToPlainMonthDay(
 ): PlainMonthDaySlots {
   const fields = readAndRefineBagFields(
     /* bag */ input,
-    /* validFieldNames */ monthCodeDayFieldNamesAsc,
+    /* validFieldNames */ monthCodeDayFieldNamesAlpha,
   )
   return createPlainMonthDayFromFields(calendar, fields as Partial<DateFields>)
 }
@@ -241,8 +241,8 @@ export function convertToPlainYearMonth(
 ): PlainYearMonthSlots {
   const validFieldNames = getCalendarFieldNames(
     calendar,
-    yearMonthCodeFieldNamesAsc,
-    yearMonthCodeFieldNamesWithEraAsc,
+    yearMonthCodeFieldNamesAlpha,
+    yearMonthCodeFieldNamesWithEraAlpha,
   )
   const fields = readAndRefineBagFields(
     /* bag */ input,
