@@ -90,13 +90,11 @@ export const inLeapYear = computeInLeapYear as (record: Record) => boolean
 // Setters
 // -----------------------------------------------------------------------------
 
-export function withFields(
+export const withFields = mergePlainYearMonthFields as (
   record: Record,
   fields: WithFields,
   options?: AssignmentOptions,
-): Record {
-  return mergePlainYearMonthFields(record.calendar, record, fields, options)
-}
+) => Record
 
 // Math
 // -----------------------------------------------------------------------------

@@ -38,12 +38,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         options?: OverflowOptions,
       ): PlainMonthDay {
         return createPlainMonthDay(
-          mergePlainMonthDayFields(
-            slots.calendar,
-            slots,
-            rejectInvalidBag(mod),
-            options,
-          ),
+          mergePlainMonthDayFields(slots, rejectInvalidBag(mod), options),
         )
       },
       equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {

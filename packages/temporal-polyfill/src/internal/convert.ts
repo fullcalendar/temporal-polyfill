@@ -81,17 +81,13 @@ export function zonedDateTimeToInstant(
 export function zonedDateTimeToPlainDateTime(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateTimeSlots {
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots0)
-  return createPlainDateTimeSlots(isoDateTime, zonedDateTimeSlots0.calendar)
+  return createPlainDateTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 export function zonedDateTimeToPlainDate(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
 ): PlainDateSlots {
-  return createPlainDateSlots(
-    zonedEpochSlotsToIso(zonedDateTimeSlots0),
-    zonedDateTimeSlots0.calendar,
-  )
+  return createPlainDateSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 export function zonedDateTimeToPlainTime(

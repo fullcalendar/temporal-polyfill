@@ -111,12 +111,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
-        mergeZonedDateTimeFields(
-          slots.calendar,
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
+        mergeZonedDateTimeFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(

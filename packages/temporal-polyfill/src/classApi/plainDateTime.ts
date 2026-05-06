@@ -18,7 +18,6 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { mergePlainDateTimeFields } from '../internal/merge'
-import { slotsWithCalendar } from '../internal/modify'
 import { movePlainDateTime } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import {
@@ -91,12 +90,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       options?: OverflowOptions,
     ): PlainDateTime {
       return createPlainDateTime(
-        mergePlainDateTimeFields(
-          slots.calendar,
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
+        mergePlainDateTimeFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
@@ -104,7 +98,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       calendarArg: CalendarArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        slotsWithCalendar(
+        createPlainDateTimeSlots(
           slots,
           getInternalCalendar(refineCalendarArg(calendarArg)),
         ),
@@ -185,7 +179,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     toPlainDate(slots: PlainDateTimeSlots): PlainDate {
-      return createPlainDate(createPlainDateSlots(slots, slots.calendar))
+      return createPlainDate(createPlainDateSlots(slots))
     },
     toPlainTime(slots: PlainDateTimeSlots): PlainTime {
       return createPlainTime(createPlainTimeSlots(slots))

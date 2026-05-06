@@ -98,6 +98,7 @@ export function constructPlainDateSlots(
   isoDay: number,
   calendarId = isoCalendarId,
 ): PlainDateSlots {
+  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   return createPlainDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields(
@@ -108,7 +109,7 @@ export function constructPlainDateSlots(
         }),
       ),
     ),
-    getInternalCalendar(refineCalendarId(calendarId)),
+    calendar,
   )
 }
 

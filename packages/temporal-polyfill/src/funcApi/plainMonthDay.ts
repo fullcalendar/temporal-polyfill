@@ -76,13 +76,11 @@ export const getFields = memoize(computeMonthDayFields, WeakMap) as (
 // Setters
 // -----------------------------------------------------------------------------
 
-export function withFields(
+export const withFields = mergePlainMonthDayFields as (
   record: Record,
   fields: WithFields,
   options?: AssignmentOptions,
-): Record {
-  return mergePlainMonthDayFields(record.calendar, record, fields, options)
-}
+) => Record
 
 // Math
 // -----------------------------------------------------------------------------

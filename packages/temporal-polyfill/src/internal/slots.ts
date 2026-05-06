@@ -46,9 +46,10 @@ export function createZonedDateTimeSlots(
 }
 
 export function createPlainDateTimeSlots(
-  isoDateTime: CalendarDateTimeFields,
-  calendar: InternalCalendar,
+  isoDateTime: CalendarDateTimeFields & { calendar?: InternalCalendar },
+  ...calendarArgs: [InternalCalendar?]
 ): PlainDateTimeSlots {
+  const calendar = calendarArgs.length ? calendarArgs[0] : isoDateTime.calendar
   return {
     branding: PlainDateTimeBranding,
     calendar,
@@ -58,35 +59,38 @@ export function createPlainDateTimeSlots(
 }
 
 export function createPlainDateSlots(
-  isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
+  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
+  ...calendarArgs: [InternalCalendar?]
 ): PlainDateSlots {
+  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainDateBranding,
     calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
 export function createPlainYearMonthSlots(
-  isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
+  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
+  ...calendarArgs: [InternalCalendar?]
 ): PlainYearMonthSlots {
+  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainYearMonthBranding,
     calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
 export function createPlainMonthDaySlots(
-  isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
+  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
+  ...calendarArgs: [InternalCalendar?]
 ): PlainMonthDaySlots {
+  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainMonthDayBranding,
     calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 

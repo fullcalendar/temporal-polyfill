@@ -14,7 +14,6 @@ import {
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
-import type { InternalCalendar } from '../internal/externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -60,6 +59,7 @@ import {
   AbstractDateTimeSlots,
   ZonedDateTimeBranding,
   ZonedDateTimeSlots,
+  createZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -114,8 +114,8 @@ import {
   moveToDayOfMonth,
   moveToDayOfWeek,
   moveToDayOfYear,
+  moveToWeekOfYear,
   reversedMove,
-  slotsWithWeekOfYear,
 } from './moveUtils'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -265,17 +265,16 @@ export const hoursInDay = bindArgs(computeZonedHoursInDay) as (
 // Setters
 // -----------------------------------------------------------------------------
 
-export function withFields(
+export const withFields = mergeZonedDateTimeFields as (
   record: Record,
   fields: WithFields,
   options?: AssignmentOptions,
-): Record {
-  return mergeZonedDateTimeFields(record.calendar, record, fields, options)
-}
+) => Record
 
 export function withCalendar(record: Record, calendarId: string): Record {
-  return slotsWithCalendar(
-    record,
+  return createZonedDateTimeSlots(
+    record.epochNanoseconds,
+    record.timeZone,
     getInternalCalendar(refineCalendarId(calendarId)),
   )
 }
@@ -455,7 +454,7 @@ function adaptDateFunc<R>(
 ): (record: Record) => R {
   return (record: Record) => {
     const isoDate = zonedEpochSlotsToIso(record)
-    return dateFunc({ ...isoDate, calendar: record.calendar })
+    return dateFunc(slotsWithCalendar(isoDate, record.calendar))
   }
 }
 
@@ -465,7 +464,7 @@ function adaptDateFunc<R>(
 export const withDayOfYear = zonedTransform(moveToDayOfYear)
 export const withDayOfMonth = zonedTransform(moveToDayOfMonth)
 export const withDayOfWeek = zonedTransform(moveToDayOfWeek)
-export const withWeekOfYear = zonedTransform(slotsWithWeekOfYear)
+export const withWeekOfYear = zonedTransform(moveToWeekOfYear)
 
 // Non-standard: Move
 // -----------------------------------------------------------------------------
@@ -637,17 +636,13 @@ function alignedTime(
 }
 
 function zonedTransform<A extends any[]>(
-  transformIsoDate: (
-    calendar: InternalCalendar,
-    isoDate: CalendarDateFields,
-    ...args: A
-  ) => CalendarDateFields,
+  transformIsoDate: (isoDate: any, ...args: A) => CalendarDateFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
-    const { calendar, timeZone } = record
+    const { timeZone } = record
     const isoDateTime = zonedEpochSlotsToIso(record, timeZone)
-    const isoDate = transformIsoDate(calendar, isoDateTime, ...args)
-    // zonedTransform is used by date-only operations. Preserve the original
+    const isoDate = transformIsoDate(isoDateTime, ...args)
+    // These transforms are date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
     const epochNano1 = getSingleInstantFor(
       timeZone,

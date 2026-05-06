@@ -40,8 +40,8 @@ export function extractCalendarIdFromBag(bag: { calendar?: string }):
 
 export function computeDateFields(slots: AbstractDateSlots): DateFields {
   const { calendar } = slots
-  const { year, month, day } = computeCalendarDateFields(calendar, slots)
-  const { era, eraYear } = computeCalendarEraFields(calendar, slots)
+  const { year, month, day } = computeCalendarDateFields(slots)
+  const { era, eraYear } = computeCalendarEraFields(slots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,
@@ -55,8 +55,8 @@ export function computeYearMonthFields(
   slots: AbstractDateSlots,
 ): YearMonthFields {
   const { calendar } = slots
-  const { year, month } = computeCalendarDateFields(calendar, slots)
-  const { era, eraYear } = computeCalendarEraFields(calendar, slots)
+  const { year, month } = computeCalendarDateFields(slots)
+  const { era, eraYear } = computeCalendarEraFields(slots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,
@@ -70,7 +70,7 @@ export function computeMonthDayFields(
   slots: AbstractDateSlots,
 ): MonthDayFields {
   const { calendar } = slots
-  const { year, month, day } = computeCalendarDateFields(calendar, slots)
+  const { year, month, day } = computeCalendarDateFields(slots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,
@@ -84,23 +84,23 @@ export function computeMonthDayFields(
 // -----------------------------------------------------------------------------
 
 export function computeInLeapYear(slots: AbstractDateSlots): boolean {
-  return computeCalendarInLeapYear(slots.calendar, slots)
+  return computeCalendarInLeapYear(slots)
 }
 
 export function computeMonthsInYear(slots: AbstractDateSlots): number {
-  return computeCalendarMonthsInYear(slots.calendar, slots)
+  return computeCalendarMonthsInYear(slots)
 }
 
 export function computeDaysInMonth(slots: AbstractDateSlots): number {
-  return computeCalendarDaysInMonth(slots.calendar, slots)
+  return computeCalendarDaysInMonth(slots)
 }
 
 export function computeDaysInYear(slots: AbstractDateSlots): number {
-  return computeCalendarDaysInYear(slots.calendar, slots)
+  return computeCalendarDaysInYear(slots)
 }
 
 export function computeDayOfYear(slots: AbstractDateSlots): number {
-  return computeCalendarDayOfYear(slots.calendar, slots)
+  return computeCalendarDayOfYear(slots)
 }
 
 export function computeWeekOfYear(

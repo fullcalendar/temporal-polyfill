@@ -46,12 +46,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         options?: OverflowOptions,
       ): PlainYearMonth {
         return createPlainYearMonth(
-          mergePlainYearMonthFields(
-            slots.calendar,
-            slots,
-            rejectInvalidBag(mod),
-            options,
-          ),
+          mergePlainYearMonthFields(slots, rejectInvalidBag(mod), options),
         )
       },
       add(

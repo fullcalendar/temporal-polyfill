@@ -79,13 +79,11 @@ export const getFields = ((record: Record) => record) as (
 // Setters
 // -----------------------------------------------------------------------------
 
-export function withFields(
+export const withFields = mergePlainTimeFields as (
   record: Record,
   fields: WithFields,
   options?: AssignmentOptions,
-): Record {
-  return mergePlainTimeFields(getFields(record), fields, options)
-}
+) => Record
 
 // Math
 // -----------------------------------------------------------------------------

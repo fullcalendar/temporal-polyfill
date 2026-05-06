@@ -113,10 +113,7 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
   return diffDateUnits(
     isoMarkerToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(
-      'hour' in record0 ? moveDateTime : moveDate,
-      calendar,
-    ) as MoveMarker,
+    ('hour' in record0 ? moveDateTime : moveDate) as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
     unit,

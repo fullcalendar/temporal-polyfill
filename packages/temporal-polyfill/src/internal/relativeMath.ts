@@ -4,9 +4,11 @@ import { DurationFields } from './durationFields'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
+import { slotsWithCalendar } from './modify'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
+  AbstractDateTimeSlots,
   EpochAndZoneSlots,
   EpochSlots,
   ZonedEpochSlots,
@@ -43,8 +45,8 @@ export type DiffMarkers = (
 
 // See comments for `createMarkerMoveOps`
 export type MovableMarker =
-  | CalendarDateFields
-  | CalendarDateTimeFields
+  | AbstractDateSlots
+  | AbstractDateTimeSlots
   | EpochSlots
 export interface MarkerMoveOps {
   marker: MovableMarker
@@ -53,7 +55,7 @@ export interface MarkerMoveOps {
 }
 
 // See comments for `createMarkerSpanOps`
-export type SpannableMarker = CalendarDateTimeFields | EpochSlots
+export type SpannableMarker = AbstractDateTimeSlots | EpochSlots
 export interface MarkerSpanOps extends MarkerMoveOps {
   marker: SpannableMarker
   diffMarkers: DiffMarkers
@@ -103,12 +105,15 @@ export function createMarkerSpanOps(
     }
   }
 
-  const marker = normalizeDateTimeMarker(relativeToSlots)
+  const marker = slotsWithCalendar(
+    normalizeDateTimeMarker(relativeToSlots),
+    calendar,
+  )
 
   return {
     marker,
     markerToEpochNano: isoDateTimeToEpochNano as MarkerToEpochNano,
-    moveMarker: bindArgs(moveDateTime, calendar) as Callable,
+    moveMarker: moveDateTime as Callable,
     diffMarkers: bindArgs(diffDateTimesExact, calendar) as Callable,
   }
 }
@@ -167,9 +172,6 @@ export function checkMarkerSpanInBounds(
 function normalizeDateTimeMarker(
   marker: CalendarDateFields | CalendarDateTimeFields,
 ): CalendarDateTimeFields {
-  // Date-only relativeTo values are treated as starting at midnight. Date-time
-  // values keep their own time fields, which avoids fabricating a second object
-  // just to pass time fields alongside the same date fields.
   return combineDateAndTime(
     marker,
     'hour' in marker ? marker : timeFieldDefaults,

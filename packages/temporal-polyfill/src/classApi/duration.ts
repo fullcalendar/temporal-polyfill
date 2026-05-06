@@ -18,6 +18,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
 import { mergeDurationFields } from '../internal/merge'
+import { slotsWithCalendar } from '../internal/modify'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,
@@ -176,10 +177,7 @@ function refinePublicRelativeTo(
           return slots as ZonedDateTimeSlots | PlainDateSlots
 
         case PlainDateTimeBranding:
-          return createPlainDateSlots(
-            slots as PlainDateTimeSlots,
-            (slots as PlainDateTimeSlots).calendar,
-          )
+          return createPlainDateSlots(slots as PlainDateTimeSlots)
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
@@ -190,7 +188,7 @@ function refinePublicRelativeTo(
         relativeTo as unknown as ZonedDateTimeLikeObject, // !!!
       )
 
-      return { ...res, calendar }
+      return slotsWithCalendar(res, calendar)
     }
 
     return parseRelativeToSlots(relativeTo)

@@ -98,10 +98,10 @@ export function plainDateTimeWithPlainDate(
 // Anything with calendar/timeZone
 // -----------------------------------------------------------------------------
 
-export function slotsWithCalendar<S extends { calendar: InternalCalendar }>(
+export function slotsWithCalendar<S extends object>(
   slots: S,
   calendar: InternalCalendar,
-): S {
+): S & { calendar: InternalCalendar } {
   return { ...slots, calendar }
 }
 

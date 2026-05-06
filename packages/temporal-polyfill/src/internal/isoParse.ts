@@ -26,6 +26,7 @@ import {
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
+import { slotsWithCalendar } from './modify'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
   offsetHasSeconds,
@@ -157,12 +158,12 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   }
 
   const slots = finalizeDateTime(organized)
-  return createPlainDateTimeSlots(slots, slots.calendar)
+  return createPlainDateTimeSlots(slots)
 }
 
 export function parsePlainDate(s: string): PlainDateSlots {
   const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
-  return createPlainDateSlots(slots, slots.calendar)
+  return createPlainDateSlots(slots)
 }
 
 export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
@@ -182,7 +183,8 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
   )
   const { calendar } = dateSlots
   const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
+    (isoDate) =>
+      computeCalendarDateFields(slotsWithCalendar(isoDate, calendar)).day,
     dateSlots,
   )
 
@@ -218,7 +220,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     year: origYear,
     month: origMonth,
     day,
-  } = computeCalendarDateFields(calendar, dateSlots)
+  } = computeCalendarDateFields(dateSlots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     origYear,
@@ -429,10 +431,10 @@ function finalizeDateTime(
 ): AbstractDateTimeSlots {
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
-  return {
-    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
-    ...combineDateAndTime(organized, organized),
-  }
+  return slotsWithCalendar(
+    combineDateAndTime(organized, organized),
+    getInternalCalendar(resolveCalendarId(organized.calendarId)),
+  )
 }
 
 function finalizeDate(organized: DateOrganized): AbstractDateSlots {

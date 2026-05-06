@@ -44,6 +44,7 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { japaneseCalendarId } from './intlCalendarConfig'
 import { constrainTimeFields } from './isoMath'
+import { slotsWithCalendar } from './modify'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -138,12 +139,11 @@ function spliceFields(
 // -----------------------------------------------------------------------------
 
 export function mergeZonedDateTimeFields(
-  calendar: InternalCalendar,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   modFields: Partial<DateTimeFields>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  const { timeZone } = zonedDateTimeSlots
+  const { calendar, timeZone } = zonedDateTimeSlots
 
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -151,7 +151,10 @@ export function mergeZonedDateTimeFields(
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
+  const isoDateTime = slotsWithCalendar(
+    zonedEpochSlotsToIso(zonedDateTimeSlots),
+    calendar,
+  )
   const {
     offsetNanoseconds,
     hour,
@@ -164,7 +167,7 @@ export function mergeZonedDateTimeFields(
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.
-  const { year, month, day } = computeCalendarDateFields(calendar, isoDateTime)
+  const { year, month, day } = computeCalendarDateFields(isoDateTime)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -221,21 +224,18 @@ export function mergeZonedDateTimeFields(
 }
 
 export function mergePlainDateTimeFields(
-  calendar: InternalCalendar,
   plainDateTimeSlots: PlainDateTimeSlots,
   modFields: Partial<DateTimeFields>,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
+  const { calendar } = plainDateTimeSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
     dateTimeFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(
-    calendar,
-    plainDateTimeSlots,
-  )
+  const { year, month, day } = computeCalendarDateFields(plainDateTimeSlots)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -283,21 +283,18 @@ export function mergePlainDateTimeFields(
 }
 
 export function mergePlainDateFields(
-  calendar: InternalCalendar,
   plainDateSlots: PlainDateSlots,
   modFields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
+  const { calendar } = plainDateSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(
-    calendar,
-    plainDateSlots,
-  )
+  const { year, month, day } = computeCalendarDateFields(plainDateSlots)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -318,21 +315,18 @@ export function mergePlainDateFields(
 }
 
 export function mergePlainYearMonthFields(
-  calendar: InternalCalendar,
   plainYearMonthSlots: PlainYearMonthSlots,
   modFields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
+  const { calendar } = plainYearMonthSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthFieldNamesAlpha,
     yearMonthFieldNamesWithEraAlpha,
   )
 
-  const { year, month } = computeCalendarDateFields(
-    calendar,
-    plainYearMonthSlots,
-  )
+  const { year, month } = computeCalendarDateFields(plainYearMonthSlots)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -352,21 +346,18 @@ export function mergePlainYearMonthFields(
 }
 
 export function mergePlainMonthDayFields(
-  calendar: InternalCalendar,
   plainMonthDaySlots: PlainMonthDaySlots,
   modFields: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
+  const { calendar } = plainMonthDaySlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(
-    calendar,
-    plainMonthDaySlots,
-  )
+  const { year, month, day } = computeCalendarDateFields(plainMonthDaySlots)
   const origFields = {
     monthCode: computeMonthCode(calendar, year, month),
     day,

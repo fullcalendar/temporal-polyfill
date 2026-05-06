@@ -28,6 +28,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths, diffIsoMonthSlots } from './isoMath'
+import { slotsWithCalendar } from './modify'
 import {
   addDateMonths,
   computeYearMovedMonth,
@@ -213,7 +214,7 @@ export function diffPlainDateTimes(
       createMarkerMoveOps(
         plainDateTimeSlots0,
         isoDateTimeToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDateTime, calendar) as MoveMarker,
+        moveDateTime as MoveMarker,
       ),
     )
   }
@@ -260,7 +261,7 @@ export function diffPlainYearMonth(
     Unit.Month,
   )
   const getDay = (isoDate: CalendarDateFields) =>
-    computeCalendarDateFields(calendar, isoDate).day
+    computeCalendarDateFields(slotsWithCalendar(isoDate, calendar)).day
 
   const firstOfMonth0 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots0)
   const firstOfMonth1 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots1)
@@ -331,9 +332,9 @@ function diffDateLike(
         roundingInc,
         roundingMode,
         createMarkerMoveOps(
-          startIsoDate,
+          slotsWithCalendar(startIsoDate, calendar),
           isoDateToEpochNano as MarkerToEpochNano,
-          bindArgs(moveDate, calendar) as MoveMarker,
+          moveDate as MoveMarker,
         ),
       )
     }
@@ -513,8 +514,14 @@ export function diffCalendarDates(
     return { ...durationFieldDefaults, weeks, days }
   }
 
-  const yearMonthDayStart = computeCalendarDateFields(calendar, startIsoDate)
-  const yearMonthDayEnd = computeCalendarDateFields(calendar, endIsoDate)
+  const yearMonthDayStart = computeCalendarDateFields({
+    ...startIsoDate,
+    calendar,
+  })
+  const yearMonthDayEnd = computeCalendarDateFields({
+    ...endIsoDate,
+    calendar,
+  })
 
   if (largestUnit === Unit.Month) {
     const [months, days] = diffCalendarMonthDay(
@@ -563,7 +570,12 @@ function diffCalendarMonthDay(
     : diffIsoMonthSlots(year0, month0, year1, month1)
 
   let anchorIsoDate = epochMilliToIsoDateTime(
-    addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+    addDateMonths(
+      slotsWithCalendar(startIsoDate, calendar),
+      0,
+      months,
+      Overflow.Constrain,
+    ),
   )
 
   // If moving by the raw month-slot distance passes the end date, back off one
@@ -573,7 +585,8 @@ function diffCalendarMonthDay(
   if (
     anchorCompare === sign ||
     (anchorCompare === 0 &&
-      computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
+      computeCalendarDateFields(slotsWithCalendar(anchorIsoDate, calendar))
+        .day !== day0 &&
       !(
         calendar &&
         calendar.isConstrainedFinalIntercalaryMonthDiff(
@@ -589,7 +602,12 @@ function diffCalendarMonthDay(
   ) {
     months -= sign
     anchorIsoDate = epochMilliToIsoDateTime(
-      addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+      addDateMonths(
+        slotsWithCalendar(startIsoDate, calendar),
+        0,
+        months,
+        Overflow.Constrain,
+      ),
     )
   }
 

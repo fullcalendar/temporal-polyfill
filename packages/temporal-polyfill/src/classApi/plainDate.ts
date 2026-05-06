@@ -15,7 +15,6 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainDateIso } from '../internal/isoFormat'
 import { parsePlainDate } from '../internal/isoParse'
 import { mergePlainDateFields } from '../internal/merge'
-import { slotsWithCalendar } from '../internal/modify'
 import { movePlainDate } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
@@ -76,17 +75,12 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       options?: OverflowOptions,
     ) {
       return createPlainDate(
-        mergePlainDateFields(
-          slots.calendar,
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
+        mergePlainDateFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(slots: PlainDateSlots, calendarArg: CalendarArg): PlainDate {
       return createPlainDate(
-        slotsWithCalendar(
+        createPlainDateSlots(
           slots,
           getInternalCalendar(refineCalendarArg(calendarArg)),
         ),
@@ -220,10 +214,7 @@ export function toPlainDateSlots(
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainDateSlots(
-          slots as PlainDateTimeSlots,
-          (slots as PlainDateTimeSlots).calendar,
-        )
+        return createPlainDateSlots(slots as PlainDateTimeSlots)
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
