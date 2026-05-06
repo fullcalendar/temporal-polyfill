@@ -255,8 +255,7 @@ describe('rangeToLocaleString', () => {
   })
 })
 
-// TODO: revive
-describe.only('rangeToLocaleStringParts', () => {
+describe('rangeToLocaleStringParts', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)

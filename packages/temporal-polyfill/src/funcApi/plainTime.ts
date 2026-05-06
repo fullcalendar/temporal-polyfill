@@ -72,9 +72,19 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = ((record: Record) => record) as (
-  record: Record,
-) => Fields
+export function getFields(record: Record): Fields {
+  // PlainTime slots currently share the same time-field property names as the
+  // public field bag, but the slot record also carries internal branding.
+  // Return a fresh public bag so callers never observe slot-only metadata.
+  return {
+    hour: record.hour,
+    minute: record.minute,
+    second: record.second,
+    millisecond: record.millisecond,
+    microsecond: record.microsecond,
+    nanosecond: record.nanosecond,
+  }
+}
 
 // Setters
 // -----------------------------------------------------------------------------
