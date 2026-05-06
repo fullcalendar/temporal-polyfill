@@ -81,14 +81,12 @@ export interface ExternalCalendar {
   ): boolean
 }
 
-export interface ExternalCalendarProvider {
-  // Lowercased user-supplied Temporal calendar IDs. This validates and
-  // normalizes Temporal-recognized aliases, and may reject broad Intl fallback
-  // IDs.
-  resolveCalendarId(lowerRawCalendarId: string): string | undefined
-
-  getCalendar(normCalendarId: string): ExternalCalendar | undefined
-}
+// Lowercased user-supplied Temporal calendar IDs. The returned calendar's `id`
+// is the normalized public/storage ID, so this is both the validation hook and
+// the calendar-object lookup for non-core calendars.
+export type ExternalCalendarProvider = (
+  lowerRawCalendarId: string,
+) => ExternalCalendar | undefined
 
 const externalCalendarRegistryKey = Symbol.for(
   'temporal-polyfill.externalCalendarRegistry',
@@ -111,11 +109,14 @@ export function registerExternalCalendarProvider(
 export function resolveExternalCalendarId(
   lowerRawCalendarId: string,
 ): string | undefined {
-  return getExternalCalendarProvider()?.resolveCalendarId(lowerRawCalendarId)
+  const provider = getExternalCalendarProvider()
+  const calendar = provider && provider(lowerRawCalendarId)
+  return calendar && calendar.id
 }
 
 export function getExternalCalendar(normCalendarId: string): ExternalCalendar {
-  const calendar = getExternalCalendarProvider()?.getCalendar(normCalendarId)
+  const provider = getExternalCalendarProvider()
+  const calendar = provider && provider(normCalendarId)
 
   if (!calendar) {
     throwExternalCalendarError()

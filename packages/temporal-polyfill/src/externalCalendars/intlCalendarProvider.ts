@@ -13,35 +13,32 @@ const deprecatedCalendarIdMap = {
   'islamicc': 'islamic-civil',
 } as const
 
-export const intlCalendarProvider: ExternalCalendarProvider = {
-  resolveCalendarId(lowerRawCalendarId) {
-    // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
-    // true aliases like `islamicc`, but rejects broad Intl fallbacks.
-    if (
-      lowerRawCalendarId === 'islamic' ||
-      lowerRawCalendarId === 'islamic-rgsa'
-    ) {
-      throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
-    }
+export const intlCalendarProvider: ExternalCalendarProvider = (
+  lowerRawCalendarId,
+) => {
+  // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
+  // true aliases like `islamicc`, but rejects broad Intl fallbacks.
+  if (
+    lowerRawCalendarId === 'islamic' ||
+    lowerRawCalendarId === 'islamic-rgsa'
+  ) {
+    throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
+  }
 
-    const deprecatedNormCalendarId =
-      deprecatedCalendarIdMap[
-        lowerRawCalendarId as keyof typeof deprecatedCalendarIdMap
-      ]
-    if (deprecatedNormCalendarId) {
-      return deprecatedNormCalendarId
-    }
+  const deprecatedNormCalendarId =
+    deprecatedCalendarIdMap[
+      lowerRawCalendarId as keyof typeof deprecatedCalendarIdMap
+    ]
 
-    if (!queryCalendarIntlFormat(lowerRawCalendarId, true)) {
-      throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
-    }
+  if (
+    !deprecatedNormCalendarId &&
+    !queryCalendarIntlFormat(lowerRawCalendarId, true)
+  ) {
+    throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
+  }
 
-    return lowerRawCalendarId
-  },
-
-  getCalendar(normCalendarId) {
-    return isIsoDerivedCalendarId(normCalendarId)
-      ? getIsoDerivedCalendar(normCalendarId)
-      : getIntlCalendar(normCalendarId)
-  },
+  const normCalendarId = deprecatedNormCalendarId || lowerRawCalendarId
+  return isIsoDerivedCalendarId(normCalendarId)
+    ? getIsoDerivedCalendar(normCalendarId)
+    : getIntlCalendar(normCalendarId)
 }
