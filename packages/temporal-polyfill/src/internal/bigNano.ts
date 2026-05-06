@@ -92,6 +92,8 @@ export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
 export function bigNanoToBigInt(bigNano: BigNano, divisorNano = 1): bigint {
   const days = bigNano[0]
   const timeNano = bigNano[1]
+  // do floor because callers care about epoch-nano,
+  // which requires floor rounding
   const whole = Math.floor(timeNano / divisorNano)
   const wholeInDay = nanoInUtcDay / divisorNano
   return BigInt(days) * BigInt(wholeInDay) + BigInt(whole)
@@ -108,6 +110,23 @@ export function bigNanoToNumber(
   const wholeInDay = nanoInUtcDay / divisorNano
   // adding fraction to whole first results in better precision
   return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
+}
+
+export function SAFE_bigNanoToNumber(
+  bigNano: BigNano,
+  divisorNano = 1,
+): number {
+  const days = bigNano[0]
+  const timeNano = bigNano[1]
+  // do trunc because callers care about duration-unit rounding,
+  // which requires trunc rounding
+  const whole = Math.trunc(timeNano / divisorNano)
+  const wholeInDay = nanoInUtcDay / divisorNano
+
+  // Convert the exact integer total into a Number only after composing the
+  // day-sized and within-day parts. This preserves the spec-visible float64
+  // rounding point for huge Duration fields.
+  return Number(BigInt(days) * BigInt(wholeInDay) + BigInt(whole))
 }
 
 export function bigNanoToExactDays(bigNano: BigNano): number {
