@@ -1,7 +1,4 @@
-import {
-  gregoryEraOrigins,
-  japaneseCalendarId,
-} from '../internal/intlCalendarConfig'
+import { gregoryEraOrigins } from '../internal/intlCalendarConfig'
 
 /*
 for converting from [era,eraYear] -> year
@@ -14,7 +11,7 @@ if origin is <0, consider the era to be 'reverse' direction
 export const eraOriginsByCalendarId: {
   [calendarId: string]: Record<string, number>
 } = {
-  [japaneseCalendarId]: {
+  'japanese': {
     ...gregoryEraOrigins,
     'meiji': 1867,
     'taisho': 1911,
@@ -74,6 +71,7 @@ export const eraRemapsByCalendarId: {
     'coptic': 'am',
   },
   'roc': {
+    'beforeroc': 'broc',
     'minguo': 'roc',
   },
   'indian': {

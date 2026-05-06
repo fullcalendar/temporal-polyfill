@@ -3,7 +3,6 @@ import type {
   CalendarDateFields,
   CalendarEraFields,
 } from '../internal/fieldTypes'
-import { japaneseCalendarId } from '../internal/intlCalendarConfig'
 import {
   addIsoMonths,
   computeGregoryEraFields,
@@ -30,7 +29,7 @@ import {
 const isoDerivedCalendarIds: Record<string, true> = {
   'buddhist': true,
   'roc': true,
-  [japaneseCalendarId]: true,
+  'japanese': true,
 }
 
 const primaryJapaneseEraMilli = isoArgsToEpochMilli(1873, 1, 1)!
@@ -57,6 +56,7 @@ function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
     eraOrigins: eraOriginsByCalendarId[normCalendarId],
     eraRemaps: eraRemapsByCalendarId[normCalendarId],
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,
+    removeEraFieldsOnMonthDayReplace: normCalendarId === 'japanese',
     computeDateFields(isoDate) {
       const dateFields = computeIsoDateFields(isoDate)
       return {
@@ -144,7 +144,7 @@ function computeIsoDerivedEraFields(
       : { era: 'roc', eraYear: year }
   }
 
-  if (normCalendarId === japaneseCalendarId) {
+  if (normCalendarId === 'japanese') {
     const epochMilli = isoDateToEpochMilli(isoDate)!
 
     // Temporal's Japanese era round-tripping follows the Gregorian-aligned era
@@ -152,7 +152,7 @@ function computeIsoDerivedEraFields(
     // exposing ICU's historical Japanese era labels.
     return epochMilli < primaryJapaneseEraMilli
       ? computeGregoryEraFields(isoDate)
-      : getIntlCalendar(japaneseCalendarId).computeEraFields(isoDate)
+      : getIntlCalendar('japanese').computeEraFields(isoDate)
   }
 
   return {}

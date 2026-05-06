@@ -1,6 +1,5 @@
 export const isoCalendarId = 'iso8601'
 export const gregoryCalendarId = 'gregory'
-export const japaneseCalendarId = 'japanese'
 
 // Gregorian CE/BCE input resolves relative to ISO year 0:
 // CE 1 -> ISO 1, BCE 1 -> ISO 0, BCE 2 -> ISO -1, etc.
@@ -20,12 +19,6 @@ export function normalizeEraName(era: string): string {
   }
   if (normalized === 'ad' || normalized === 'a') {
     return 'ce'
-  }
-
-  // Not related to iso8601 or gregory, but easier to keep in core than make
-  // a plugin system
-  if (normalized === 'beforeroc') {
-    return 'broc'
   }
 
   return normalized

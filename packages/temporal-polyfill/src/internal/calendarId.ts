@@ -26,11 +26,3 @@ export function resolveCalendarId(rawCalendarId: string): string {
 
   throwExternalCalendarError()
 }
-
-// Probably not worth putting into externalCalendars
-export function computeCalendarIdBase(normCalendarId: string): string {
-  if (normCalendarId === 'islamicc') {
-    normCalendarId = 'islamic'
-  }
-  return normCalendarId.split('-')[0]
-}

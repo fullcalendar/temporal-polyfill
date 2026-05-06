@@ -28,6 +28,7 @@ export interface ExternalCalendar {
   plainMonthDayLeapMonthMaxDays?: Record<number, number>
   plainMonthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
+  removeEraFieldsOnMonthDayReplace?: boolean
 
   computeYearFromEra?(
     eraYear: number,

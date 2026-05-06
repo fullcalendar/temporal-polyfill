@@ -1,5 +1,4 @@
 import { eraYearToYear } from '../internal/calendarFields'
-import { computeCalendarIdBase } from '../internal/calendarId'
 import type { MonthCodeParts } from '../internal/calendarMonthCode'
 import {
   monthCodeNumberToMonth,
@@ -74,6 +73,12 @@ export interface IntlCalendar extends ExternalCalendar {
 }
 
 const hebrewEpochYearKislevDay30EpochMilli = isoArgsToEpochMilli(-3761, 11, 17)!
+
+function computeCalendarIdBase(normCalendarId: string): string {
+  return (normCalendarId === 'islamicc' ? 'islamic' : normCalendarId).split(
+    '-',
+  )[0]
+}
 
 const hebrewEpochYearOneStartEpochMilli = isoArgsToEpochMilli(-3760, 9, 7)!
 

@@ -6,10 +6,7 @@ import { getCalendarEraOrigins, getCalendarFieldNames } from './calendarFields'
 import { formatMonthCode } from './calendarMonthCode'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-} from './externalCalendar'
+import { type InternalCalendar } from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
   allYearFieldNames,
@@ -42,7 +39,6 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { japaneseCalendarId } from './intlCalendarConfig'
 import { constrainTimeFields } from './isoMath'
 import {
   refineOverflowOptions,
@@ -77,7 +73,6 @@ export function mergeCalendarFields(
   baseFields: Record<string, unknown>,
   additionalFields: Record<string, unknown>,
 ): Record<string, unknown> {
-  const calendarId = getInternalCalendarId(calendar)
   const merged = Object.assign(Object.create(null), baseFields)
 
   spliceFields(merged, additionalFields, monthFieldNames)
@@ -87,10 +82,10 @@ export function mergeCalendarFields(
   if (eraOrigins) {
     spliceFields(merged, additionalFields, allYearFieldNames)
 
-    // Japanese eras can begin mid-year. When month/day are supplied, era fields
-    // from the original object can become stale, so the replacement year path
-    // must be resolved without them.
-    if (calendarId === japaneseCalendarId) {
+    // Some external era systems can begin mid-year. When month/day are
+    // supplied, era fields from the original object can become stale, so the
+    // replacement year path must be resolved without them.
+    if (calendar && calendar.removeEraFieldsOnMonthDayReplace) {
       spliceFields(
         merged,
         additionalFields,

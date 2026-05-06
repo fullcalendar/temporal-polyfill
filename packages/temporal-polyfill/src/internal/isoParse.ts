@@ -544,7 +544,7 @@ function extractDateTimeTimePortion(
       timePortion = timePortion.slice(0, offsetIndex)
     }
   } else {
-    // Calendar annotations like `[u-ca=hebrew]` are allowed immediately after
+    // Calendar annotations like `[u-ca=calendar-id]` are allowed immediately after
     // the time. Strip them before validating `HH:mm[:ss[.fff]]` separators, or
     // strings like `2000-01-01T12:34[u-ca=gregory]` get rejected as malformed
     // time text even though the main datetime regexp already accepted them.
