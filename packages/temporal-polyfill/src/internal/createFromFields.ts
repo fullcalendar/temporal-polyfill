@@ -5,10 +5,7 @@ import {
   durationFieldNamesAlpha,
 } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-} from './externalCalendar'
+import type { InternalCalendar } from './externalCalendar'
 import { resolveTimeFields } from './fieldConvert'
 import {
   dateFieldNamesAlpha,
@@ -117,7 +114,7 @@ export function refineMaybeZonedDateTimeObjectLike(
       fields.offset,
     )
 
-    return { epochNanoseconds, timeZoneId: timeZoneId }
+    return { epochNanoseconds, timeZone: timeZoneImpl }
   }
 
   return createPlainDateFromFields(calendar, fields as any)
@@ -129,7 +126,6 @@ export function refineZonedDateTimeObjectLike(
   bag: ZonedDateTimeLikeObject,
   options: ZonedFieldOptions | undefined,
 ): ZonedDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeAndZoneFieldNamesAlpha,
@@ -162,7 +158,7 @@ export function refineZonedDateTimeObjectLike(
     epochDisambig,
   )
 
-  return createZonedDateTimeSlots(epochNanoseconds, timeZoneId, calendarId)
+  return createZonedDateTimeSlots(epochNanoseconds, timeZoneImpl, calendar)
 }
 
 export function refinePlainDateTimeObjectLike(
@@ -170,7 +166,6 @@ export function refinePlainDateTimeObjectLike(
   bag: Partial<DateTimeFields>,
   options: OverflowOptions | undefined,
 ): PlainDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
@@ -193,7 +188,7 @@ export function refinePlainDateTimeObjectLike(
   return createPlainDateTimeFromRefinedFields(
     isoDateInternals,
     timeFields,
-    calendarId,
+    calendar,
   )
 }
 

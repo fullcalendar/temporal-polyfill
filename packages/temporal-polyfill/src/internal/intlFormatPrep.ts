@@ -1,5 +1,10 @@
 import * as errorMessages from './errorMessages'
 import {
+  type InternalCalendar,
+  getInternalCalendarId,
+  isoCalendar,
+} from './externalCalendar'
+import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
@@ -397,14 +402,14 @@ export function createFormatForPrep(
 }
 
 function getForcedCommonTimeZone(
-  slots0?: { timeZoneId: string }, // actually needed
-  slots1?: { timeZoneId: string }, // optional!
+  slots0?: EpochAndZoneSlots, // actually needed
+  slots1?: EpochAndZoneSlots, // optional!
 ): string {
-  const timeZoneId = slots0!.timeZoneId
-  if (slots1 && slots1.timeZoneId !== timeZoneId) {
+  const timeZone = slots0!.timeZone
+  if (slots1 && slots1.timeZone.compareKey !== timeZone.compareKey) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
-  return timeZoneId
+  return timeZone.id
 }
 
 // Config Data
@@ -496,9 +501,10 @@ function toEpochMillis<S>(
   const { slotsToEpochMilli, strictCalendarChecks } = config
 
   return slotsList.map((slots: S) => {
-    if ((slots as any).calendarId) {
+    const calendar = (slots as any).calendar
+    if ('calendar' in (slots as any)) {
       checkCalendarsCompatible(
-        (slots as any).calendarId, // !!!
+        calendar,
         resolvedOptions.calendar,
         strictCalendarChecks,
       )
@@ -509,13 +515,13 @@ function toEpochMillis<S>(
 }
 
 function checkCalendarsCompatible(
-  internalCalendarId: string,
+  internalCalendar: InternalCalendar,
   resolvedCalendarId: string,
   strictCalendarCheck: boolean | undefined,
 ): void {
   if (
-    (strictCalendarCheck || internalCalendarId !== isoCalendarId) &&
-    internalCalendarId !== resolvedCalendarId
+    (strictCalendarCheck || internalCalendar !== isoCalendar) &&
+    getInternalCalendarId(internalCalendar) !== resolvedCalendarId
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }

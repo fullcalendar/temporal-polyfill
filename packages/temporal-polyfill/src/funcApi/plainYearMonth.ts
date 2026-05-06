@@ -2,7 +2,7 @@ import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { constructPlainYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
-import { diffPlainYearMonth, getCommonCalendarId } from '../internal/diff'
+import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import { YearMonthLikeObject } from '../internal/fieldTypes'
 import { YearMonthFields } from '../internal/fieldTypes'
@@ -95,12 +95,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergePlainYearMonthFields(
-    getInternalCalendar(record.calendarId),
-    record,
-    fields,
-    options,
-  )
+  return mergePlainYearMonthFields(record.calendar, record, fields, options)
 }
 
 // Math
@@ -123,9 +118,7 @@ export function until(
   record1: Record,
   options?: DifferenceOptions,
 ): DurationFns.Record {
-  const calendar = getInternalCalendar(
-    getCommonCalendarId(record0.calendarId, record1.calendarId),
-  )
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
   return diffPlainYearMonth(false, calendar, record0, record1, options)
 }
 
@@ -134,9 +127,7 @@ export function since(
   record1: Record,
   options?: DifferenceOptions,
 ): DurationFns.Record {
-  const calendar = getInternalCalendar(
-    getCommonCalendarId(record0.calendarId, record1.calendarId),
-  )
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
   return diffPlainYearMonth(true, calendar, record0, record1, options)
 }
 
@@ -157,11 +148,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertPlainYearMonthToDate(
-    getInternalCalendar(record.calendarId),
-    getFields(record),
-    fields,
-  )
+  return convertPlainYearMonthToDate(record.calendar, getFields(record), fields)
 }
 
 // Formatting

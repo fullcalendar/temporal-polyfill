@@ -6,7 +6,10 @@ import {
 } from '../internal/calendarDerived'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
-import type { InternalCalendar } from '../internal/externalCalendar'
+import {
+  type InternalCalendar,
+  isoCalendar,
+} from '../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
@@ -154,9 +157,8 @@ export function slotsWithWeekOfYear(
   options?: OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  // Week-numbered years are only supported for ISO. The internal calendar
-  // discriminant uses undefined for ISO, so no string calendar ID is needed.
-  const weekFields = calendar === undefined ? computeIsoWeekFields(isoDate) : {}
+  const weekFields =
+    calendar === isoCalendar ? computeIsoWeekFields(isoDate) : {}
   const currentWeekOfYear = weekFields.weekOfYear
   const weeksInYear = weekFields.weeksInYear
 

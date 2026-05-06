@@ -1,5 +1,6 @@
 import { BigNano, bigNanoToNumber, diffBigNanos, moveBigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
+import type { InternalCalendar } from './externalCalendar'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
 import {
   DirectionName,
@@ -16,7 +17,7 @@ import {
   isoDateTimeToEpochNano,
   isoDateTimeToEpochNanoWithOffset,
 } from './timeMath'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { TimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { memoize } from './utils'
 
@@ -26,7 +27,7 @@ export type PossibleInstantsOp = (
 ) => BigNano[]
 
 export type FixedIsoZonedFields = CalendarDateTimeFields & {
-  calendarId: string
+  calendar: InternalCalendar
   offsetNanoseconds: number
 }
 
@@ -39,8 +40,7 @@ export function getTimeZoneTransitionEpochNanoseconds(
   slots: ZonedEpochSlots,
   options: DirectionOptions | DirectionName,
 ): BigNano | undefined {
-  const timeZoneImpl = queryTimeZone(slots.timeZoneId)
-  return timeZoneImpl.getTransition(
+  return slots.timeZone.getTransition(
     slots.epochNanoseconds,
     refineDirectionOptions(options),
   )
@@ -56,7 +56,7 @@ export const zonedEpochSlotsToIso = memoize(
 
 function _zonedEpochSlotsToIso(
   slots: ZonedEpochSlots,
-  timeZoneImpl: TimeZoneImpl = queryTimeZone(slots.timeZoneId),
+  timeZoneImpl: TimeZoneImpl = slots.timeZone,
 ): FixedIsoZonedFields {
   const { epochNanoseconds } = slots
 
@@ -65,7 +65,7 @@ function _zonedEpochSlotsToIso(
   const isoDateTime = epochNanoToIso(epochNanoseconds, offsetNanoseconds)
 
   return {
-    calendarId: slots.calendarId,
+    calendar: slots.calendar,
     ...isoDateTime,
     offsetNanoseconds,
   }

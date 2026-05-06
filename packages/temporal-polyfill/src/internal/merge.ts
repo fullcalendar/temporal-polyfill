@@ -69,7 +69,6 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { pluckProps } from './utils'
 
@@ -144,9 +143,7 @@ export function mergeZonedDateTimeFields(
   modFields: Partial<DateTimeFields>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
-  const { timeZoneId } = zonedDateTimeSlots
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const { timeZone } = zonedDateTimeSlots
 
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -210,7 +207,7 @@ export function mergeZonedDateTimeFields(
 
   return createZonedDateTimeSlots(
     getMatchingInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(isoDateFields, timeFields),
       // Existing fields and user .with() fields are both past the first bag
       // refinement phase, so "offset" is the offset in nanoseconds here.
@@ -218,8 +215,8 @@ export function mergeZonedDateTimeFields(
       offsetDisambig,
       epochDisambig,
     ),
-    timeZoneId,
-    calendarId,
+    timeZone,
+    calendar,
   )
 }
 
@@ -229,8 +226,6 @@ export function mergePlainDateTimeFields(
   modFields: Partial<DateTimeFields>,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
-
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
@@ -283,7 +278,7 @@ export function mergePlainDateTimeFields(
   return createPlainDateTimeFromRefinedFields(
     isoDateFields,
     timeFields,
-    calendarId,
+    calendar,
   )
 }
 

@@ -2,7 +2,6 @@ import {
   computeCalendarDateFields,
   computeCalendarEpochMilli,
 } from '../internal/calendarDerived'
-import { getInternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults, timeFieldNamesAsc } from '../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -34,8 +33,7 @@ const clearTimeFields = bindArgs(
 export function computeYearFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number } {
-  const { calendarId } = slots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = slots
   const { year: year0 } = computeCalendarDateFields(calendar, slots)
   return {
     ...epochMilliToIsoDateTime(computeCalendarEpochMilli(calendar, year0)),
@@ -46,8 +44,7 @@ export function computeYearFloor(
 export function computeMonthFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number; month: number } {
-  const { calendarId } = slots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = slots
   const { year: year0, month: month0 } = computeCalendarDateFields(
     calendar,
     slots,
@@ -110,8 +107,7 @@ export function computeDayCeil(
 export function computeYearInterval(
   slots: AbstractDateSlots,
 ): IsoDateTimeInterval {
-  const { calendarId } = slots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = slots
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
   return [
@@ -123,8 +119,7 @@ export function computeYearInterval(
 export function computeMonthInterval(
   slots: AbstractDateSlots,
 ): IsoDateTimeInterval {
-  const { calendarId } = slots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = slots
   const isoFields0 = computeMonthFloor(slots)
   const { year: year1, month: month1 } = addCalendarMonths(
     calendar,

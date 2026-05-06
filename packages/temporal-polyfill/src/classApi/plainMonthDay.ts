@@ -39,7 +39,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       ): PlainMonthDay {
         return createPlainMonthDay(
           mergePlainMonthDayFields(
-            getInternalCalendar(slots.calendarId),
+            slots.calendar,
             slots,
             rejectInvalidBag(mod),
             options,
@@ -51,11 +51,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
       },
       toPlainDate(slots: PlainMonthDaySlots, bag: YearFields): PlainDate {
         return createPlainDate(
-          convertPlainMonthDayToDate(
-            getInternalCalendar(slots.calendarId),
-            this,
-            bag,
-          ),
+          convertPlainMonthDayToDate(slots.calendar, this, bag),
         )
       },
       toLocaleString(

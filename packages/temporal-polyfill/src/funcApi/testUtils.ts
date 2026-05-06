@@ -1,6 +1,10 @@
 import { expect } from 'vitest'
 import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
+import {
+  getInternalCalendarId,
+  isoCalendar,
+} from '../internal/externalCalendar'
 import { TimeFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
@@ -59,22 +63,22 @@ const timeDefaults = {
 
 const plainDateDefaults = {
   branding: 'PlainDate',
-  calendarId: 'iso8601',
+  calendar: isoCalendar,
 }
 
 const plainYearMonthDefaults = {
   branding: 'PlainYearMonth',
-  calendarId: 'iso8601',
+  calendar: isoCalendar,
 }
 
 const plainMonthDayDefaults = {
   branding: 'PlainMonthDay',
-  calendarId: 'iso8601',
+  calendar: isoCalendar,
 }
 
 const plainDateTimeDefaults = {
   branding: 'PlainDateTime',
-  calendarId: 'iso8601',
+  calendar: isoCalendar,
 }
 
 const plainTimeDefaults = {
@@ -83,9 +87,6 @@ const plainTimeDefaults = {
 
 const zonedDateTimeDefaults = {
   branding: 'ZonedDateTime',
-  calendarId: 'iso8601',
-  timeZoneId: '',
-  epochNanoseconds: 0n,
 }
 
 const instantSlotDefaults = {
@@ -110,48 +111,52 @@ const durationSlotDefaults = {
 
 export function expectPlainDateEquals(
   pd: PlainDateFns.Record,
-  slots: Partial<AbstractDateSlots>,
+  slots: Partial<AbstractDateSlots> & { calendarId?: string },
 ): void {
+  assertCalendarId(pd.calendar, slots)
   expectPropsEqualStrict(pd, {
     ...plainDateDefaults,
     ...dateDefaults,
-    ...slots,
+    ...normalizeCalendarSlots(pd.calendar, slots),
   })
 }
 
 export function expectPlainYearMonthEquals(
   pym: PlainYearMonthFns.Record,
-  slots: Partial<AbstractDateSlots>,
+  slots: Partial<AbstractDateSlots> & { calendarId?: string },
 ): void {
+  assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
     ...plainYearMonthDefaults,
     ...dateDefaults,
     day: 1,
-    ...slots,
+    ...normalizeCalendarSlots(pym.calendar, slots),
   })
 }
 
 export function expectPlainMonthDayEquals(
   pym: PlainMonthDayFns.Record,
-  slots: Partial<AbstractDateSlots>,
+  slots: Partial<AbstractDateSlots> & { calendarId?: string },
 ): void {
+  assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
     ...plainMonthDayDefaults,
     ...dateDefaults,
     year: 1972,
-    ...slots,
+    ...normalizeCalendarSlots(pym.calendar, slots),
   })
 }
 
 export function expectPlainDateTimeEquals(
   pdt: PlainDateTimeFns.Record,
-  slots: Partial<AbstractDateTimeSlots>,
+  slots: Partial<AbstractDateTimeSlots> & { calendarId?: string },
 ): void {
+  assertCalendarId(pdt.calendar, slots)
   expectPropsEqualStrict(pdt, {
     ...plainDateTimeDefaults,
     ...timeDefaults,
     ...dateDefaults,
-    ...slots,
+    ...normalizeCalendarSlots(pdt.calendar, slots),
   })
 }
 
@@ -159,18 +164,73 @@ export function expectZonedDateTimeEquals(
   zdt: ZonedDateTimeFns.Record,
   slots: {
     epochNanoseconds: bigint | BigNano
-    timeZoneId: string
+    timeZoneId?: string
     calendarId?: string
   },
 ): void {
+  assertCalendarId(zdt.calendar, slots)
+  assertTimeZoneId(zdt.timeZone, slots)
+  const normalizedSlots = normalizeZonedSlots(zdt, slots)
   expectPropsEqualStrict(zdt, {
     ...zonedDateTimeDefaults,
-    ...slots,
-    epochNanoseconds:
-      typeof slots.epochNanoseconds === 'bigint'
-        ? bigIntToBigNano(slots.epochNanoseconds)
-        : slots.epochNanoseconds,
+    ...normalizedSlots,
   })
+}
+
+function normalizeCalendarSlots<T extends { calendarId?: string }>(
+  calendar: AbstractDateSlots['calendar'],
+  slots: T,
+): Omit<T, 'calendarId'> & { calendar: AbstractDateSlots['calendar'] } {
+  const { calendarId: _, ...rest } = slots
+  return {
+    ...rest,
+    calendar,
+  }
+}
+
+function normalizeZonedSlots(
+  zdt: ZonedDateTimeFns.Record,
+  slots: {
+    epochNanoseconds: bigint | BigNano
+    timeZoneId?: string
+    calendarId?: string
+  },
+) {
+  const {
+    calendarId: _calendarId,
+    timeZoneId: _timeZoneId,
+    epochNanoseconds,
+  } = slots
+  return {
+    calendar: zdt.calendar,
+    timeZone: zdt.timeZone,
+    epochNanoseconds:
+      typeof epochNanoseconds === 'bigint'
+        ? bigIntToBigNano(epochNanoseconds)
+        : epochNanoseconds,
+  }
+}
+
+function assertCalendarId(
+  calendar: AbstractDateSlots['calendar'],
+  slots: { calendar?: AbstractDateSlots['calendar']; calendarId?: string },
+): void {
+  const expectedCalendarId =
+    slots.calendarId ||
+    ('calendar' in slots ? getInternalCalendarId(slots.calendar) : 'iso8601')
+  expect(getInternalCalendarId(calendar)).toBe(expectedCalendarId)
+}
+
+function assertTimeZoneId(
+  timeZone: ZonedDateTimeFns.Record['timeZone'],
+  slots: {
+    timeZone?: ZonedDateTimeFns.Record['timeZone']
+    timeZoneId?: string
+  },
+): void {
+  const expectedTimeZoneId =
+    slots.timeZoneId || ('timeZone' in slots ? slots.timeZone.id : timeZone.id)
+  expect(timeZone.id).toBe(expectedTimeZoneId)
 }
 
 export function expectPlainTimeEquals(
@@ -234,8 +294,10 @@ export function expectZonedDateTimesSimilar(
 ): void {
   expect(zdt0.branding).toBe('ZonedDateTime')
   expect(zdt1.branding).toBe('ZonedDateTime')
-  expect(zdt0.calendarId).toBe(zdt1.calendarId)
-  expect(zdt0.timeZoneId).toBe(zdt1.timeZoneId)
+  expect(getInternalCalendarId(zdt0.calendar)).toBe(
+    getInternalCalendarId(zdt1.calendar),
+  )
+  expect(zdt0.timeZone.id).toBe(zdt1.timeZone.id)
   expectEpochNanosSimilar(
     ZonedDateTimeFns.epochNanoseconds(zdt0),
     ZonedDateTimeFns.epochNanoseconds(zdt1),
@@ -248,7 +310,9 @@ export function expectPlainDateTimesSimilar(
 ): void {
   expect(pdt0.branding).toBe('PlainDateTime')
   expect(pdt1.branding).toBe('PlainDateTime')
-  expect(pdt0.calendarId).toBe(pdt1.calendarId)
+  expect(getInternalCalendarId(pdt0.calendar)).toBe(
+    getInternalCalendarId(pdt1.calendar),
+  )
   expectEpochNanosSimilar(
     bigNanoToBigInt(isoDateTimeToEpochNano(pdt0)!),
     bigNanoToBigInt(isoDateTimeToEpochNano(pdt1)!),
@@ -261,7 +325,9 @@ export function expectPlainDatesSimilar(
 ): void {
   expect(pd0.branding).toBe('PlainDate')
   expect(pd1.branding).toBe('PlainDate')
-  expect(pd0.calendarId).toBe(pd1.calendarId)
+  expect(getInternalCalendarId(pd0.calendar)).toBe(
+    getInternalCalendarId(pd1.calendar),
+  )
   expectEpochNanosSimilar(
     bigNanoToBigInt(isoDateToEpochNano(pd0)!),
     bigNanoToBigInt(isoDateToEpochNano(pd1)!),

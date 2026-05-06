@@ -15,6 +15,7 @@ import * as errorMessages from './errorMessages'
 import {
   type InternalCalendar,
   getInternalCalendarId,
+  isoCalendar,
 } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
@@ -26,7 +27,6 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { isoCalendarId } from './intlCalendarConfig'
 import {
   computeIsoYearMonthFieldsForMonthDay,
   isoEpochFirstLeapYear,
@@ -58,14 +58,14 @@ export function createPlainDateTimeFromRefinedFields(
   isoDate: CalendarDateFields,
   // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
   time: TimeFields | undefined = timeFieldDefaults,
-  calendarId: string,
+  calendar: InternalCalendar,
 ): PlainDateTimeSlots {
   // Calendar/date pipelines and time pipelines resolve their own fields before
   // reaching this point. The only cross-field validation left is whether the
   // combined PlainDateTime is inside Temporal's supported ISO range.
   const isoDateTime = combineDateAndTime(isoDate, time)
   checkIsoDateTimeInBounds(isoDateTime)
-  return createPlainDateTimeSlots(isoDateTime, calendarId)
+  return createPlainDateTimeSlots(isoDateTime, calendar)
 }
 
 export function createPlainDateFromFields(
@@ -113,8 +113,6 @@ function createPlainDateFromPreparedFields(
   prepared: PreparedDateFields,
   overflow: Overflow,
 ): PlainDateSlots {
-  const calendarId = getInternalCalendarId(calendar)
-
   // The tuple is private plumbing. Index reads keep the built output from
   // carrying internal-only property names while preserving the field-read phase
   // that happens before overflow options are observed.
@@ -135,7 +133,7 @@ function createPlainDateFromPreparedFields(
   )
   const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, day)
 
-  return createPlainDateSlots(checkIsoDateInBounds(isoDate), calendarId)
+  return createPlainDateSlots(checkIsoDateInBounds(isoDate), calendar)
 }
 
 type PreparedDateFields = [
@@ -183,8 +181,6 @@ export function createPlainYearMonthFromFields(
   fields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
-  const calendarId = getInternalCalendarId(calendar)
-
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const eraOrigins = getCalendarEraOrigins(calendar)
@@ -214,10 +210,7 @@ export function createPlainYearMonthFromFields(
   )
   const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
 
-  return createPlainYearMonthSlots(
-    checkIsoYearMonthInBounds(isoDate),
-    calendarId,
-  )
+  return createPlainYearMonthSlots(checkIsoYearMonthInBounds(isoDate), calendar)
 }
 
 export function createPlainMonthDayFromFields(
@@ -225,6 +218,7 @@ export function createPlainMonthDayFromFields(
   fields: Partial<DateFields>, // guaranteed `day`
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
+  const isIso = calendar === isoCalendar
   const calendarId = getInternalCalendarId(calendar)
   const eraOrigins = getCalendarEraOrigins(calendar)
 
@@ -234,7 +228,7 @@ export function createPlainMonthDayFromFields(
     throw new TypeError(errorMessages.missingField('day'))
   }
   if (
-    calendarId !== isoCalendarId &&
+    !isIso &&
     fields.month !== undefined &&
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
@@ -257,7 +251,6 @@ export function createPlainMonthDayFromFields(
   let isLeapMonth: boolean
 
   // TODO: make this DRY the HACK in refinePlainMonthDayObjectLike?
-  const isIso = calendarId === isoCalendarId
   if (yearMaybe === undefined && isIso) {
     yearMaybe = isoEpochFirstLeapYear
   }
@@ -418,6 +411,6 @@ export function createPlainMonthDayFromFields(
     checkIsoDateInBounds(
       computeCalendarIsoFieldsFromParts(calendar, finalYear, finalMonth, day),
     ),
-    calendarId,
+    calendar,
   )
 }

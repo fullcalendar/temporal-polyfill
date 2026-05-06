@@ -1,9 +1,4 @@
-import {
-  BigNano,
-  addBigNanos,
-  moveBigNano,
-  numberToBigNano,
-} from '../internal/bigNano'
+import { addBigNanos, moveBigNano, numberToBigNano } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
@@ -17,7 +12,7 @@ import {
   zonedDateTimeToPlainTime,
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
-import { diffZonedDateTimes, getCommonCalendarId } from '../internal/diff'
+import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import type { InternalCalendar } from '../internal/externalCalendar'
 import {
@@ -35,8 +30,8 @@ import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
-  slotsWithCalendarId,
-  slotsWithTimeZoneId,
+  slotsWithCalendar,
+  slotsWithTimeZone,
   zonedDateTimeWithPlainDate,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
@@ -64,6 +59,7 @@ import {
 import {
   AbstractDateTimeSlots,
   ZonedDateTimeBranding,
+  ZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -144,21 +140,7 @@ import {
   computeYearInterval,
 } from './roundUtils'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof ZonedDateTimeBranding
-
-  readonly calendarId: string
-
-  readonly timeZoneId: string
-
-  /**
-   * @deprecated Use the epochNanoseconds() function instead.
-   */
-  readonly epochNanoseconds: BigNano
-}
+export type Record = ZonedDateTimeSlots
 
 export type Fields = ZonedDateTimeFields
 export type FromFields = ZonedDateTimeLikeObject
@@ -216,7 +198,7 @@ export const getFields = memoize((record: Record): Fields => {
 
   return {
     ...computeDateFields({
-      calendarId: record.calendarId,
+      calendar: record.calendar,
       year,
       month,
       day,
@@ -288,20 +270,18 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergeZonedDateTimeFields(
-    getInternalCalendar(record.calendarId),
-    record,
-    fields,
-    options,
-  )
+  return mergeZonedDateTimeFields(record.calendar, record, fields, options)
 }
 
 export function withCalendar(record: Record, calendarId: string): Record {
-  return slotsWithCalendarId(record, refineCalendarId(calendarId))
+  return slotsWithCalendar(
+    record,
+    getInternalCalendar(refineCalendarId(calendarId)),
+  )
 }
 
 export function withTimeZone(record: Record, timeZoneId: string): Record {
-  return slotsWithTimeZoneId(record, refineTimeZoneId(timeZoneId))
+  return slotsWithTimeZone(record, queryTimeZone(refineTimeZoneId(timeZoneId)))
 }
 
 export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
@@ -336,9 +316,7 @@ export function until(
   record1: Record,
   options?: DifferenceOptions,
 ): DurationFns.Record {
-  const calendar = getInternalCalendar(
-    getCommonCalendarId(record0.calendarId, record1.calendarId),
-  )
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
   return diffZonedDateTimes(false, calendar, record0, record1, options)
 }
 
@@ -347,9 +325,7 @@ export function since(
   record1: Record,
   options?: DifferenceOptions,
 ): DurationFns.Record {
-  const calendar = getInternalCalendar(
-    getCommonCalendarId(record0.calendarId, record1.calendarId),
-  )
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
   return diffZonedDateTimes(true, calendar, record0, record1, options)
 }
 
@@ -403,17 +379,11 @@ export const toPlainTime = bindArgs(zonedDateTimeToPlainTime) as (
 ) => PlainTimeFns.Record
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return convertToPlainYearMonth(
-    getInternalCalendar(record.calendarId),
-    getFields(record),
-  )
+  return convertToPlainYearMonth(record.calendar, getFields(record))
 }
 
 export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertToPlainMonthDay(
-    getInternalCalendar(record.calendarId),
-    getFields(record),
-  )
+  return convertToPlainMonthDay(record.calendar, getFields(record))
 }
 
 // Formatting
@@ -485,7 +455,7 @@ function adaptDateFunc<R>(
 ): (record: Record) => R {
   return (record: Record) => {
     const isoDate = zonedEpochSlotsToIso(record)
-    return dateFunc({ ...isoDate, calendarId: record.calendarId })
+    return dateFunc({ ...isoDate, calendar: record.calendar })
   }
 }
 
@@ -632,10 +602,9 @@ function roundToInterval(
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
   const [, roundingMode] = refineUnitRoundOptions(unit, options)
-  const timeZoneImpl = queryTimeZone(record.timeZoneId)
   const epochNano1 = roundZonedEpochToInterval(
     computeInterval,
-    timeZoneImpl,
+    record.timeZone,
     record,
     roundingMode,
   )
@@ -650,9 +619,8 @@ function aligned(
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
-    const timeZoneImpl = queryTimeZone(record.timeZoneId)
     const epochNano1 = moveBigNano(
-      alignZonedEpoch(computeAlignment, timeZoneImpl, record),
+      alignZonedEpoch(computeAlignment, record.timeZone, record),
       nanoDelta,
     )
     return {
@@ -676,14 +644,13 @@ function zonedTransform<A extends any[]>(
   ) => CalendarDateFields,
 ): (record: Record, ...args: A) => Record {
   return (record, ...args) => {
-    const timeZoneImpl = queryTimeZone(record.timeZoneId)
-    const calendar = getInternalCalendar(record.calendarId)
-    const isoDateTime = zonedEpochSlotsToIso(record, timeZoneImpl)
+    const { calendar, timeZone } = record
+    const isoDateTime = zonedEpochSlotsToIso(record, timeZone)
     const isoDate = transformIsoDate(calendar, isoDateTime, ...args)
     // zonedTransform is used by date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
     const epochNano1 = getSingleInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(isoDate, isoDateTime),
     )
     return {

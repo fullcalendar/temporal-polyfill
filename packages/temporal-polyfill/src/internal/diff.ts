@@ -10,7 +10,6 @@ import {
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
-import { isTimeZoneIdsEqual } from './compare'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
   nanoToDurationDayTimeFields,
@@ -18,7 +17,10 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import type { InternalCalendar } from './externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+} from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -68,7 +70,7 @@ import {
   isoDateToEpochNano,
   timeFieldsToNano,
 } from './timeMath'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { TimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import {
   DateUnitName,
@@ -139,10 +141,9 @@ export function diffZonedDateTimes(
       roundingMode,
     )
   } else {
-    const timeZoneId = getCommonTimeZoneId(slots0.timeZoneId, slots1.timeZoneId)
-    const timeZoneImpl = queryTimeZone(timeZoneId)
+    const timeZone = getCommonTimeZone(slots0.timeZone, slots1.timeZone)
     durationFields = diffZonedEpochsExact(
-      timeZoneImpl,
+      timeZone,
       calendar,
       slots0,
       slots1,
@@ -159,7 +160,7 @@ export function diffZonedDateTimes(
       createMarkerMoveOps(
         slots0,
         extractEpochNano as MarkerToEpochNano,
-        bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as MoveMarker,
+        bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
       ),
     )
   }
@@ -889,16 +890,22 @@ function diffTimes(time0: TimeFields, time1: TimeFields): number {
 }
 // -----------------------------------------------------------------------------
 
-export function getCommonCalendarId(a: string, b: string): string {
-  if (a !== b) {
+export function getCommonCalendar(
+  a: InternalCalendar,
+  b: InternalCalendar,
+): InternalCalendar {
+  if (getInternalCalendarId(a) !== getInternalCalendarId(b)) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
 
   return a
 }
 
-export function getCommonTimeZoneId(a: string, b: string): string {
-  if (!isTimeZoneIdsEqual(a, b)) {
+export function getCommonTimeZone(
+  a: TimeZoneImpl,
+  b: TimeZoneImpl,
+): TimeZoneImpl {
+  if (a.compareKey !== b.compareKey) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }
 

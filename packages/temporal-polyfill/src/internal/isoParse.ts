@@ -157,12 +157,12 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   }
 
   const slots = finalizeDateTime(organized)
-  return createPlainDateTimeSlots(slots, slots.calendarId)
+  return createPlainDateTimeSlots(slots, slots.calendar)
 }
 
 export function parsePlainDate(s: string): PlainDateSlots {
   const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
-  return createPlainDateSlots(slots, slots.calendarId)
+  return createPlainDateSlots(slots, slots.calendar)
 }
 
 export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
@@ -172,7 +172,7 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
     requireIsoCalendar(organized)
     return createPlainYearMonthSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
-      resolveCalendarId(organized.calendarId),
+      getInternalCalendar(resolveCalendarId(organized.calendarId)),
     )
   }
 
@@ -180,13 +180,13 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
     parsePlainDateLike(s),
     projectIsoYearMonthDate,
   )
-  const calendar = getInternalCalendar(dateSlots.calendarId)
+  const { calendar } = dateSlots
   const moveIsoSlots = moveToDayOfMonthUnsafe(
     (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
     dateSlots,
   )
 
-  return createPlainYearMonthSlots(moveIsoSlots, dateSlots.calendarId)
+  return createPlainYearMonthSlots(moveIsoSlots, calendar)
 }
 
 function requireIsoCalendar(organized: { calendarId: string }): void {
@@ -203,7 +203,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
 
     return createPlainMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
-      resolveCalendarId(organized.calendarId),
+      getInternalCalendar(resolveCalendarId(organized.calendarId)),
     )
   }
 
@@ -211,8 +211,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     parsePlainDateLike(s),
     projectIsoMonthDayDate,
   )
-  const { calendarId } = dateSlots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = dateSlots
 
   // normalize year&month to be as close as possible to epoch
   const {
@@ -235,7 +234,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     computeCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
-  return createPlainMonthDaySlots(isoDate, calendarId)
+  return createPlainMonthDaySlots(isoDate, calendar)
 }
 
 export function parsePlainTime(s: string): PlainTimeSlots {
@@ -420,8 +419,8 @@ function finalizeZonedDateTime(
 
   return createZonedDateTimeSlots(
     epochNano,
-    timeZoneId,
-    resolveCalendarId(organized.calendarId),
+    timeZoneImpl,
+    getInternalCalendar(resolveCalendarId(organized.calendarId)),
   )
 }
 
@@ -431,7 +430,7 @@ function finalizeDateTime(
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
-    calendarId: resolveCalendarId(organized.calendarId),
+    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
     ...combineDateAndTime(organized, organized),
   }
 }
@@ -440,7 +439,7 @@ function finalizeDate(organized: DateOrganized): AbstractDateSlots {
   checkIsoDateFields(organized)
   checkIsoDateInBounds(organized)
   return {
-    calendarId: resolveCalendarId(organized.calendarId),
+    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
     year: organized.year,
     month: organized.month,
     day: organized.day,

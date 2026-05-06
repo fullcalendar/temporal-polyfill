@@ -1,9 +1,13 @@
 import { BigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
+import {
+  type InternalCalendar,
+  getInternalCalendarId,
+  isoCalendar,
+} from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { isoCalendarId } from './intlCalendarConfig'
 import { OffsetDisambig } from './optionsModel'
 import {
   PlainDateSlots,
@@ -12,7 +16,7 @@ import {
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
-import { queryTimeZone } from './timeZoneImpl'
+import type { TimeZoneImpl } from './timeZoneImpl'
 import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
@@ -26,9 +30,8 @@ export function zonedDateTimeWithPlainTime(
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainTimeFields: TimeFields | undefined,
 ): ZonedDateTimeSlots {
-  const timeZoneId = zonedDateTimeSlots.timeZoneId
-  const timeZoneImpl = queryTimeZone(timeZoneId)
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
+  const { timeZone } = zonedDateTimeSlots
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
 
   const time = plainTimeFields || timeFieldDefaults
@@ -37,22 +40,22 @@ export function zonedDateTimeWithPlainTime(
 
   if (plainTimeFields) {
     epochNano = getMatchingInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(isoDateTime, time),
       offsetNanoseconds,
       OffsetDisambig.Prefer, // OffsetDisambig
     )
   } else {
     epochNano = getStartOfDayInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(isoDateTime, time),
     )
   }
 
   return createZonedDateTimeSlots(
     epochNano,
-    timeZoneId,
-    zonedDateTimeSlots.calendarId,
+    timeZone,
+    zonedDateTimeSlots.calendar,
   )
 }
 
@@ -60,24 +63,23 @@ export function zonedDateTimeWithPlainDate(
   zonedDateTimeSlots: ZonedDateTimeSlots,
   plainDateSlots: PlainDateSlots,
 ): ZonedDateTimeSlots {
-  const timeZoneId = zonedDateTimeSlots.timeZoneId
-  const timeZoneImpl = queryTimeZone(timeZoneId)
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZoneImpl)
+  const { timeZone } = zonedDateTimeSlots
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
 
-  const calendar = getPreferredCalendarId(
-    zonedDateTimeSlots.calendarId,
-    plainDateSlots.calendarId,
+  const calendar = getPreferredCalendar(
+    zonedDateTimeSlots.calendar,
+    plainDateSlots.calendar,
   )
 
   const epochNano = getMatchingInstantFor(
-    timeZoneImpl,
+    timeZone,
     combineDateAndTime(plainDateSlots, isoDateTime),
     offsetNanoseconds,
     OffsetDisambig.Prefer, // OffsetDisambig
   )
 
-  return createZonedDateTimeSlots(epochNano, timeZoneId, calendar)
+  return createZonedDateTimeSlots(epochNano, timeZone, calendar)
 }
 
 /*
@@ -89,42 +91,46 @@ export function plainDateTimeWithPlainDate(
 ) {
   return createPlainDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
-    getPreferredCalendarId(
-      plainDateTimeSlots.calendarId,
-      plainDateSlots.calendarId,
-    ),
+    getPreferredCalendar(plainDateTimeSlots.calendar, plainDateSlots.calendar),
   )
 }
 
 // Anything with calendar/timeZone
 // -----------------------------------------------------------------------------
 
-export function slotsWithCalendarId<S extends { calendarId: string }>(
+export function slotsWithCalendar<S extends { calendar: InternalCalendar }>(
   slots: S,
-  calendarId: string,
+  calendar: InternalCalendar,
 ): S {
-  return { ...slots, calendarId: calendarId }
+  return { ...slots, calendar }
 }
 
-export function slotsWithTimeZoneId<S extends { timeZoneId: string }>(
+export function slotsWithTimeZone<S extends { timeZone: TimeZoneImpl }>(
   slots: S,
-  timeZoneId: string,
+  timeZone: TimeZoneImpl,
 ): S {
-  return { ...slots, timeZoneId: timeZoneId }
+  return { ...slots, timeZone }
 }
 
 // -----------------------------------------------------------------------------
 
-function getPreferredCalendarId(a: string, b: string): string {
+function getPreferredCalendar(
+  a: InternalCalendar,
+  b: InternalCalendar,
+): InternalCalendar {
   if (a === b) {
     return a
   }
 
-  if (a === b || a === isoCalendarId) {
+  if (a === isoCalendar) {
     return b
   }
-  if (b === isoCalendarId) {
+  if (b === isoCalendar) {
     return a
+  }
+
+  if (getInternalCalendarId(a) === getInternalCalendarId(b)) {
+    return b
   }
 
   throw new RangeError(errorMessages.mismatchingCalendars)

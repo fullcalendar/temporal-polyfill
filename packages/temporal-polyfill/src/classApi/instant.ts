@@ -25,6 +25,7 @@ import {
   ZonedDateTimeSlots,
   createInstantSlots,
 } from '../internal/slots'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName, nanoInMilli } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {
@@ -89,7 +90,10 @@ export const [Instant, createInstant, getInstantSlots] = createSlotClass(
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
       return createZonedDateTime(
-        instantToZonedDateTime(slots, refineTimeZoneArg(timeZoneArg)),
+        instantToZonedDateTime(
+          slots,
+          queryTimeZone(refineTimeZoneArg(timeZoneArg)),
+        ),
       )
     },
     toLocaleString(

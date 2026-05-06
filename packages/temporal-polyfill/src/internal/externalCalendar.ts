@@ -7,14 +7,16 @@ import type {
 } from './fieldTypes'
 import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
 
+export const isoCalendar = undefined
 export const gregoryCalendar = 0 as const
 
 // Calendar ids remain the public/storage shape. Dense internal paths use this
 // compact discriminant so repeated calendar operations can branch on a tiny
 // local value: undefined for ISO, a falsy sentinel for gregory, or an external
-// calendar object for non-core implementations.
+// calendar object for non-core implementations. The `isoCalendar` alias keeps
+// callers from passing a bare `undefined` when they intentionally mean ISO.
 export type InternalCalendar =
-  | undefined
+  | typeof isoCalendar
   | typeof gregoryCalendar
   | ExternalCalendar
 
@@ -114,14 +116,14 @@ export function throwExternalCalendarError(): never {
 
 export function getInternalCalendar(calendarId: string): InternalCalendar {
   return calendarId === isoCalendarId
-    ? undefined
+    ? isoCalendar
     : calendarId === gregoryCalendarId
       ? gregoryCalendar
       : getExternalCalendar(calendarId)
 }
 
 export function getInternalCalendarId(calendar: InternalCalendar): string {
-  return calendar === undefined
+  return calendar === isoCalendar
     ? isoCalendarId
     : calendar === gregoryCalendar
       ? gregoryCalendarId

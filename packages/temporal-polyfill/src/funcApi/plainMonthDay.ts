@@ -81,12 +81,7 @@ export function withFields(
   fields: WithFields,
   options?: AssignmentOptions,
 ): Record {
-  return mergePlainMonthDayFields(
-    getInternalCalendar(record.calendarId),
-    record,
-    fields,
-    options,
-  )
+  return mergePlainMonthDayFields(record.calendar, record, fields, options)
 }
 
 // Math
@@ -104,11 +99,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertPlainMonthDayToDate(
-    getInternalCalendar(record.calendarId),
-    getFields(record),
-    fields,
-  )
+  return convertPlainMonthDayToDate(record.calendar, getFields(record), fields)
 }
 
 // Formatting

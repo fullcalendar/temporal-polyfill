@@ -1,7 +1,6 @@
 import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
-import { getInternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -14,7 +13,6 @@ import {
   extractEpochNano,
 } from './slots'
 import { checkIsoDateTimeInBounds, isoDateTimeToEpochNano } from './timeMath'
-import { queryTimeZone } from './timeZoneImpl'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
@@ -88,19 +86,18 @@ export function createMarkerMoveOps(
 export function createMarkerSpanOps(
   relativeToSlots: RelativeToSlots,
 ): MarkerSpanOps {
-  const calendarId = relativeToSlots.calendarId
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = relativeToSlots
 
   if (isZonedEpochSlots(relativeToSlots)) {
-    const timeZoneImpl = queryTimeZone(relativeToSlots.timeZoneId)
+    const { timeZone } = relativeToSlots
 
     return {
       marker: relativeToSlots,
       markerToEpochNano: extractEpochNano as MarkerToEpochNano,
-      moveMarker: bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as Callable,
+      moveMarker: bindArgs(moveZonedEpochs, timeZone, calendar) as Callable,
       diffMarkers: bindArgs(
         diffZonedEpochsExact,
-        timeZoneImpl,
+        timeZone,
         calendar,
       ) as Callable,
     }

@@ -3,6 +3,7 @@ import { refineCalendarId } from './calendarId'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
+import { getInternalCalendar } from './externalCalendar'
 import { timeFieldNamesAsc } from './fieldNames'
 import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
@@ -33,6 +34,7 @@ import {
   checkIsoYearMonthInBounds,
 } from './timeMath'
 import { refineTimeZoneId } from './timeZoneId'
+import { queryTimeZone } from './timeZoneImpl'
 import { mapProps, zipProps } from './utils'
 
 export function constructInstantSlots(epochNano: bigint): InstantSlots {
@@ -48,8 +50,8 @@ export function constructZonedDateTimeSlots(
 ): ZonedDateTimeSlots {
   return createZonedDateTimeSlots(
     checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
-    refineTimeZoneId(timeZoneId),
-    refineCalendarId(calendarId),
+    queryTimeZone(refineTimeZoneId(timeZoneId)),
+    getInternalCalendar(refineCalendarId(calendarId)),
   )
 }
 
@@ -84,7 +86,10 @@ export function constructPlainDateTimeSlots(
   )
   const isoDateTime = combineDateAndTime(isoDate, time)
   checkIsoDateTimeInBounds(isoDateTime)
-  return createPlainDateTimeSlots(isoDateTime, refineCalendarId(calendarId))
+  return createPlainDateTimeSlots(
+    isoDateTime,
+    getInternalCalendar(refineCalendarId(calendarId)),
+  )
 }
 
 export function constructPlainDateSlots(
@@ -103,7 +108,7 @@ export function constructPlainDateSlots(
         }),
       ),
     ),
-    refineCalendarId(calendarId),
+    getInternalCalendar(refineCalendarId(calendarId)),
   )
 }
 
@@ -115,7 +120,7 @@ export function constructPlainYearMonthSlots(
 ): PlainYearMonthSlots {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
-  const refinedCalendarId = refineCalendarId(calendarId)
+  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   const isoDayInt = toInteger(referenceIsoDay)
 
   return createPlainYearMonthSlots(
@@ -126,7 +131,7 @@ export function constructPlainYearMonthSlots(
         day: isoDayInt,
       }),
     ),
-    refinedCalendarId,
+    calendar,
   )
 }
 
@@ -138,7 +143,7 @@ export function constructPlainMonthDaySlots(
 ): PlainMonthDaySlots {
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
-  const refinedCalendarId = refineCalendarId(calendarId)
+  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   const isoYearInt = toInteger(referenceIsoYear)
 
   return createPlainMonthDaySlots(
@@ -149,7 +154,7 @@ export function constructPlainMonthDaySlots(
         day: isoDayInt,
       }),
     ),
-    refinedCalendarId,
+    calendar,
   )
 }
 

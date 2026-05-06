@@ -6,11 +6,15 @@ import {
   negateDurationFields,
 } from './durationMath'
 import {
+  type InternalCalendar,
+  getInternalCalendarId,
+  isoCalendar,
+} from './externalCalendar'
+import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import { isoCalendarId } from './intlCalendarConfig'
 import {
   refineDateDisplayOptions,
   refineDateTimeDisplayOptions,
@@ -96,8 +100,9 @@ export function formatZonedDateTimeIso(
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
-    zonedDateTimeSlots0.calendarId,
-    zonedDateTimeSlots0.timeZoneId,
+    zonedDateTimeSlots0.calendar,
+    zonedDateTimeSlots0.timeZone.id,
+    zonedDateTimeSlots0.timeZone,
     zonedDateTimeSlots0.epochNanoseconds,
     ...displayOptions,
   )
@@ -109,7 +114,7 @@ export function formatPlainDateTimeIso(
 ): string {
   const displayOptions = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
-    plainDateTimeSlots0.calendarId,
+    plainDateTimeSlots0.calendar,
     plainDateTimeSlots0,
     ...displayOptions,
   )
@@ -120,7 +125,7 @@ export function formatPlainDateIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateIso(
-    plainDateSlots.calendarId,
+    plainDateSlots.calendar,
     plainDateSlots,
     refineDateDisplayOptions(options),
   )
@@ -131,7 +136,7 @@ export function formatPlainYearMonthIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
-    plainYearMonthSlots.calendarId,
+    plainYearMonthSlots.calendar,
     formatIsoYearMonthFields,
     plainYearMonthSlots,
     refineDateDisplayOptions(options),
@@ -143,7 +148,7 @@ export function formatPlainMonthDayIso(
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
-    plainMonthDaySlots.calendarId,
+    plainMonthDaySlots.calendar,
     formatIsoMonthDayFields,
     plainMonthDaySlots,
     refineDateDisplayOptions(options),
@@ -212,8 +217,9 @@ function formatEpochNanoIso(
 }
 
 function formatZonedEpochNanoIso(
-  calendarId: string,
+  calendar: InternalCalendar,
   timeZoneId: string,
+  timeZoneImpl: TimeZoneImpl,
   epochNano: BigNano,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
@@ -223,7 +229,6 @@ function formatZonedEpochNanoIso(
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   epochNano = roundBigNanoByInc(epochNano, nanoInc, roundingMode, true)
-  const timeZoneImpl = queryTimeZone(timeZoneId)
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
   const isoDateTime = epochNanoToIso(epochNano, offsetNano)
 
@@ -231,12 +236,12 @@ function formatZonedEpochNanoIso(
     formatIsoDateTimeFields(isoDateTime, subsecDigits) +
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
     formatTimeZone(timeZoneId, timeZoneDisplay) +
-    formatCalendar(calendarId, calendarDisplay)
+    formatCalendar(calendar, calendarDisplay)
   )
 }
 
 function formatDateTimeIso(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDateTime: CalendarDateTimeFields,
   calendarDisplay: CalendarDisplay,
   roundingMode: RoundingMode,
@@ -254,32 +259,32 @@ function formatDateTimeIso(
 
   return (
     formatIsoDateTimeFields(roundedIsoFields, subsecDigits) +
-    formatCalendar(calendarId, calendarDisplay)
+    formatCalendar(calendar, calendarDisplay)
   )
 }
 
 function formatDateIso(
-  calendarId: string,
+  calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
 ): string {
   return (
-    formatIsoDateFields(isoDate) + formatCalendar(calendarId, calendarDisplay)
+    formatIsoDateFields(isoDate) + formatCalendar(calendar, calendarDisplay)
   )
 }
 
 function formatDateLikeIso(
-  calendarId: string,
+  calendar: InternalCalendar,
   formatSimple: (isoDate: CalendarDateFields) => string,
   isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
 ) {
   const showCalendar =
     calendarDisplay > CalendarDisplay.Never || // critical or always
-    (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
+    (calendarDisplay === CalendarDisplay.Auto && calendar !== isoCalendar)
 
   if (calendarDisplay === CalendarDisplay.Never) {
-    if (calendarId === isoCalendarId) {
+    if (calendar === isoCalendar) {
       return formatSimple(isoDate)
     }
     return formatIsoDateFields(isoDate)
@@ -288,7 +293,10 @@ function formatDateLikeIso(
   if (showCalendar) {
     return (
       formatIsoDateFields(isoDate) +
-      formatCalendarId(calendarId, calendarDisplay === CalendarDisplay.Critical)
+      formatCalendarId(
+        getInternalCalendarId(calendar),
+        calendarDisplay === CalendarDisplay.Critical,
+      )
     )
   }
 
@@ -470,16 +478,16 @@ function formatTimeZone(
 }
 
 function formatCalendar(
-  calendarId: string,
+  calendar: InternalCalendar,
   calendarDisplay: CalendarDisplay,
 ): string {
   if (calendarDisplay !== CalendarDisplay.Never) {
     if (
       calendarDisplay > CalendarDisplay.Never || // critical or always
-      (calendarDisplay === CalendarDisplay.Auto && calendarId !== isoCalendarId)
+      (calendarDisplay === CalendarDisplay.Auto && calendar !== isoCalendar)
     ) {
       return formatCalendarId(
-        calendarId,
+        getInternalCalendarId(calendar),
         calendarDisplay === CalendarDisplay.Critical,
       )
     }
