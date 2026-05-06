@@ -81,7 +81,8 @@ import {
   bindArgs,
   compareBigInts,
   compareNumbers,
-  divModTrunc,
+  divTrunc,
+  modTrunc,
 } from './utils'
 
 /*
@@ -507,7 +508,8 @@ export function diffCalendarDates(
     let days = diffDays(startIsoDate, endIsoDate)
 
     if (largestUnit === Unit.Week) {
-      ;[weeks, days] = divModTrunc(days, 7)
+      weeks = divTrunc(days, 7)
+      days = modTrunc(days, 7)
     }
 
     return { ...durationFieldDefaults, weeks, days }

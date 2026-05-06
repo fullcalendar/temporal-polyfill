@@ -7,7 +7,7 @@ import {
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { isoYearMax, isoYearMin, maxMilli } from './temporalConstants'
 import { milliInDay, milliInSec, nanoInMicro, nanoInMilli } from './units'
-import { divModFloor, divFloorBigInt } from './utils'
+import { divFloorBigInt, divModFloor } from './utils'
 
 // Epoch Unit Conversion
 // -----------------------------------------------------------------------------

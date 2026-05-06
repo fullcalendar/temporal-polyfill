@@ -398,10 +398,6 @@ export function modFloor(num: number, divisor: number): number {
   return ((num % divisor) + divisor) % divisor
 }
 
-export function divModTrunc(num: number, divisor: number): [number, number] {
-  return [divTrunc(num, divisor), modTrunc(num, divisor)]
-}
-
 /*
 FIX-FOR: using Math.trunc often results in -0
 Only useful for Numbers. BigInts don't have this problem
