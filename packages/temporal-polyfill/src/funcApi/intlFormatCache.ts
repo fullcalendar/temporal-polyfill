@@ -7,7 +7,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { memoize } from '../internal/utils'
 
 /*
-Keyed by forcedTimeZoneId+locales+options
+Keyed by forcedTimeZoneId+locales+options identity. See func-api-notes.md.
 */
 export function createFormatCache(): FormatQuerier {
   const queryFormatFactory = memoize((options: Intl.DateTimeFormatOptions) => {

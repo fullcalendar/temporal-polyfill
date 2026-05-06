@@ -44,4 +44,11 @@ describe('resolveTimeZoneRecord', () => {
       resolveTimeZoneRecord('Etc/GMT'),
     )
   })
+
+  it('normalizes named-zone cache keys before resolving records and impls', () => {
+    expect(resolveTimeZoneRecord('etc/gmt')).toBe(
+      resolveTimeZoneRecord('Etc/GMT'),
+    )
+    expect(queryTimeZone('etc/gmt')).toBe(queryTimeZone('Etc/GMT'))
+  })
 })

@@ -732,6 +732,36 @@ describe('toLocaleString', () => {
       'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
     )
   })
+
+  it('does not write the forced time zone into caller options', () => {
+    const zdt0 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const zdt1 = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/Los_Angeles',
+    })
+    const options: Intl.DateTimeFormatOptions = {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    }
+
+    ZonedDateTimeFns.toLocaleString(zdt0, 'en', options)
+
+    expect(options.timeZone).toBe(undefined)
+    expect(() =>
+      ZonedDateTimeFns.toLocaleString(zdt1, 'en', options),
+    ).not.toThrow()
+  })
 })
 
 describe('toLocaleStringParts', () => {

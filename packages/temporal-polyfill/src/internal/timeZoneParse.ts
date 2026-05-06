@@ -3,14 +3,14 @@ import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './offsetParse'
 import { capitalize } from './utils'
 
-export function parseTimeZoneOffsetId(id: string):
+export function parseTimeZoneOffsetId(upperRawId: string):
   | {
       id: string
       offsetNano: number
       compareKey: number
     }
   | undefined {
-  const offsetNano = parseOffsetNanoMaybe(id.toUpperCase(), true)
+  const offsetNano = parseOffsetNanoMaybe(upperRawId, true)
 
   if (offsetNano === undefined) {
     return undefined
@@ -28,17 +28,17 @@ const icuRegExp =
 
 const badCharactersRegExp = /[^\w\/:+-]+/
 
-export function normalizeNamedTimeZoneId(id: string): string {
-  if (badCharactersRegExp.test(id)) {
-    throw new RangeError(errorMessages.invalidTimeZone(id))
+export function normalizeNamedTimeZoneId(rawId: string): string {
+  if (badCharactersRegExp.test(rawId)) {
+    throw new RangeError(errorMessages.invalidTimeZone(rawId))
   }
 
-  if (icuRegExp.test(id)) {
+  if (icuRegExp.test(rawId)) {
     // TODO: give identifier
     throw new RangeError(errorMessages.forbiddenIcuTimeZone)
   }
 
-  return id
+  return rawId
     .toLowerCase()
     .split('/')
     .map((part, partI) => {

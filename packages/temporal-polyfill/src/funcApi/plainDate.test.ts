@@ -431,6 +431,17 @@ describe('toLocaleString', () => {
     )
     expect(s).toBe('Sunday, December 31, 2023')
   })
+
+  it('treats reused options objects as immutable cache keys', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const locale = 'en'
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric' }
+
+    expect(PlainDateFns.toLocaleString(pd, locale, options)).toBe('2023')
+
+    options.year = '2-digit'
+    expect(PlainDateFns.toLocaleString(pd, locale, options)).toBe('2023')
+  })
 })
 
 describe('toLocaleStringParts', () => {

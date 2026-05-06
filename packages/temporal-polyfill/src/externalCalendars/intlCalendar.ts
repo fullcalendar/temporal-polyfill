@@ -120,28 +120,28 @@ const chineseFirstMonthStartCorrections: Record<
 // -----------------------------------------------------------------------------
 
 /*
-Expects an already-normalized calendarId
+Expects an already-normalized calendar ID.
 */
 export const getIntlCalendar = memoize(createIntlCalendar)
 
-function createIntlCalendar(calendarId: string): IntlCalendar {
-  const intlFormat = getCalendarIntlFormat(calendarId)
-  const calendarIdBase = computeCalendarIdBase(calendarId)
+function createIntlCalendar(normCalendarId: string): IntlCalendar {
+  const intlFormat = queryCalendarIntlFormat(normCalendarId)
+  const baseCalendarId = computeCalendarIdBase(normCalendarId)
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
     const intlParts = formatEpochMilliToPartsRecord(intlFormat, epochMilli)
-    const intlFields = parseIntlDateFields(intlParts, calendarIdBase)
-    return correctIntlDateFields(calendarIdBase, epochMilli, intlFields)
+    const intlFields = parseIntlDateFields(intlParts, baseCalendarId)
+    return correctIntlDateFields(baseCalendarId, epochMilli, intlFields)
   }
 
   const queryYearData = createIntlYearDataCache(
-    calendarIdBase,
+    baseCalendarId,
     rawEpochMilliToIntlFields,
   )
 
   function epochMilliToIntlFields(epochMilli: number) {
     return computeIntlFieldsFromCorrectedYearData(
-      calendarIdBase,
+      baseCalendarId,
       queryYearData,
       epochMilli,
       rawEpochMilliToIntlFields(epochMilli),
@@ -149,16 +149,16 @@ function createIntlCalendar(calendarId: string): IntlCalendar {
   }
 
   const calendar: IntlCalendar = {
-    id: calendarId,
+    id: normCalendarId,
     queryFields: createIntlFieldCache(epochMilliToIntlFields, queryYearData),
     queryYearData,
-    eraOrigins: eraOriginsByCalendarId[calendarIdBase],
-    eraRemaps: eraRemapsByCalendarId[calendarIdBase],
-    leapMonthMeta: getIntlCalendarLeapMonthMeta(calendarId),
+    eraOrigins: eraOriginsByCalendarId[baseCalendarId],
+    eraRemaps: eraRemapsByCalendarId[baseCalendarId],
+    leapMonthMeta: getIntlCalendarLeapMonthMeta(normCalendarId),
     plainMonthDayLeapMonthMaxDays:
-      plainMonthDayLeapMonthMaxDaysByCalendarIdBase[calendarIdBase],
+      plainMonthDayLeapMonthMaxDaysByCalendarIdBase[baseCalendarId],
     plainMonthDayCommonMonthMaxDay:
-      plainMonthDayCommonMonthMaxDayByCalendarIdBase[calendarIdBase],
+      plainMonthDayCommonMonthMaxDayByCalendarIdBase[baseCalendarId],
     computeDateFields(isoDate) {
       return calendar.queryFields(isoDate)
     },
@@ -235,6 +235,9 @@ function createIntlFieldCache(
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
   queryYearData: IntlYearDataCache,
 ) {
+  // Key by the internal ISO-date field object, not by caller text. This sits
+  // above queryYearData: repeated property access can skip the full Intl scrape,
+  // while year data remains the shared source for month-boundary lookups.
   return memoize((isoDateFields: CalendarDateFields) => {
     const epochMilli = isoDateToEpochMilli(isoDateFields)!
     const intlFields = epochMilliToIntlFields(epochMilli)
@@ -246,9 +249,11 @@ function createIntlFieldCache(
 }
 
 function createIntlYearDataCache(
-  calendarIdBase: string,
+  baseCalendarId: string,
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
 ): IntlYearDataCache {
+  // Per-normalized-calendar cache, keyed only by numeric calendar year. This is
+  // the expensive Intl-derived year-shape table used by both directions.
   const yearAtEpoch = epochMilliToIntlFields(0).year
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
@@ -317,7 +322,7 @@ function createIntlYearDataCache(
       monthStrings: monthStringsReversed.reverse(),
     }
 
-    return correctIntlYearData(calendarIdBase, year, scrapedYearData)
+    return correctIntlYearData(baseCalendarId, year, scrapedYearData)
   }
 
   return memoize(buildYear)
@@ -332,14 +337,14 @@ function createIntlYearDataCache(
 // then used for both calendar->ISO construction and ISO->calendar field access.
 
 function correctIntlYearData(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
   scrapedYearData: IntlYearData,
 ): IntlYearData {
   // Keep Intl scraping as the first step for every calendar. Known corrections
   // are applied afterward so future host data can pass through unchanged when
   // it already matches the canonical shape.
-  if (hasHebrewYearDataCorrectionCandidate(calendarIdBase, year)) {
+  if (hasHebrewYearDataCorrectionCandidate(baseCalendarId, year)) {
     const canonicalMonthEpochMillis = buildCanonicalHebrewMonthEpochMillis(year)
 
     if (
@@ -359,7 +364,7 @@ function correctIntlYearData(
   }
 
   const chineseStartOffset = queryChineseFirstMonthStartCorrection(
-    calendarIdBase,
+    baseCalendarId,
     year,
     scrapedYearData,
   )
@@ -389,41 +394,41 @@ function correctIntlYearData(
 // canonical Hebrew table.
 
 function hasCorrectedIntlYearInterval(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
 ): boolean {
   // A corrected year start changes both the starting year and the previous
   // year's closing interval, so either side of the candidate interval can make
   // field derivation necessary.
   return (
-    hasCanonicalIntlYearDataCandidate(calendarIdBase, year) ||
-    hasCanonicalIntlYearDataCandidate(calendarIdBase, year + 1)
+    hasCanonicalIntlYearDataCandidate(baseCalendarId, year) ||
+    hasCanonicalIntlYearDataCandidate(baseCalendarId, year + 1)
   )
 }
 
 function hasCanonicalIntlYearDataCandidate(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
 ): boolean {
   // This is intentionally a list of years with canonical replacement data, not
   // every year whose interval may be affected. Neighboring interval checks are
   // handled by hasCorrectedIntlYearInterval.
   return (
-    hasHebrewYearDataCorrectionCandidate(calendarIdBase, year) ||
-    (calendarIdBase === 'chinese' &&
+    hasHebrewYearDataCorrectionCandidate(baseCalendarId, year) ||
+    (baseCalendarId === 'chinese' &&
       chineseFirstMonthStartCorrections[year] !== undefined)
   )
 }
 
 function hasHebrewYearDataCorrectionCandidate(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
 ): boolean {
   // A single-year correction is used as-is. A bad-year-shape correction also
   // covers the following year, whose first month start moves when the bad year
   // is shortened by one day.
   return (
-    calendarIdBase === 'hebrew' &&
+    baseCalendarId === 'hebrew' &&
     Boolean(
       hebrewSingleYearDataCorrectionCandidates[year] ||
         hebrewYearShapeCorrectionCandidates[year] ||
@@ -454,14 +459,14 @@ function shouldCanonicalizeHebrewYearData(
 }
 
 function queryChineseFirstMonthStartCorrection(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
   scrapedYearData: IntlYearData,
 ): number | undefined {
   const chineseStartCorrection = chineseFirstMonthStartCorrections[year]
 
   if (
-    calendarIdBase === 'chinese' &&
+    baseCalendarId === 'chinese' &&
     chineseStartCorrection !== undefined &&
     scrapedYearData.monthEpochMillis[0] === chineseStartCorrection[0]
   ) {
@@ -591,7 +596,7 @@ function computeHebrewDelay2(year: number): number {
 // -----------------------------------------------------------------------------
 
 function computeIntlFieldsFromCorrectedYearData(
-  calendarIdBase: string,
+  baseCalendarId: string,
   queryYearData: IntlYearDataCache,
   epochMilli: number,
   rawIntlFields: IntlDateFields,
@@ -609,7 +614,7 @@ function computeIntlFieldsFromCorrectedYearData(
 
     // Most years have no override table nearby. Skip those before querying
     // extra year data so the normal raw-Intl path stays cheap.
-    if (!hasCorrectedIntlYearInterval(calendarIdBase, year)) {
+    if (!hasCorrectedIntlYearInterval(baseCalendarId, year)) {
       continue
     }
 
@@ -625,7 +630,7 @@ function computeIntlFieldsFromCorrectedYearData(
       const monthStart = yearData.monthEpochMillis[monthIndex]
 
       return {
-        ...computeCorrectedIntlYearParts(calendarIdBase, year, rawIntlFields),
+        ...computeCorrectedIntlYearParts(baseCalendarId, year, rawIntlFields),
         month: monthIndex + 1,
         monthString: yearData.monthStrings[monthIndex],
         day: diffEpochMilliDays(monthStart, epochMilli) + 1,
@@ -637,13 +642,13 @@ function computeIntlFieldsFromCorrectedYearData(
 }
 
 function computeCorrectedIntlYearParts(
-  calendarIdBase: string,
+  baseCalendarId: string,
   year: number,
   rawIntlFields: IntlDateFields,
 ): Pick<IntlDateFields, 'era' | 'eraYear' | 'year'> {
   // Month/day can come entirely from corrected year data, but era labels still
   // need to follow the normal Intl parsing path and calendar fallback rules.
-  const era = rawIntlFields.era || defaultEraByCalendarIdBase[calendarIdBase]
+  const era = rawIntlFields.era || defaultEraByCalendarIdBase[baseCalendarId]
 
   return {
     era,
@@ -673,12 +678,12 @@ function computeIntlYearDataMonthIndex(
 // -----------------------------------------------------------------------------
 
 function correctIntlDateFields(
-  calendarIdBase: string,
+  baseCalendarId: string,
   epochMilli: number,
   intlFields: IntlDateFields,
 ): IntlDateFields {
   if (
-    calendarIdBase === 'hebrew' &&
+    baseCalendarId === 'hebrew' &&
     epochMilli === hebrewEpochYearKislevDay30EpochMilli
   ) {
     // ICU4C reports this as Hebrew year 0 Tevet 1. Temporal/test262 expects
@@ -694,10 +699,10 @@ function correctIntlDateFields(
 
 function parseIntlDateFields(
   intlParts: Record<string, string>,
-  calendarIdBase: string,
+  baseCalendarId: string,
 ): IntlDateFields {
   return {
-    ...parseIntlYear(intlParts, calendarIdBase),
+    ...parseIntlYear(intlParts, baseCalendarId),
     month: 0,
     monthString: intlParts.month,
     day: parseInt(intlParts.day),
@@ -706,7 +711,7 @@ function parseIntlDateFields(
 
 export function parseIntlYear(
   intlParts: Record<string, string>,
-  calendarIdBase: string,
+  baseCalendarId: string,
 ): {
   era: string | undefined
   eraYear: number | undefined
@@ -716,8 +721,8 @@ export function parseIntlYear(
   let year = parseIntlPartsYear(intlParts)
   let era: string | undefined
   let eraYear: number | undefined
-  const eraOrigins = eraOriginsByCalendarId[calendarIdBase]
-  const eraRemaps = eraRemapsByCalendarId[calendarIdBase] || {}
+  const eraOrigins = eraOriginsByCalendarId[baseCalendarId]
+  const eraRemaps = eraRemapsByCalendarId[baseCalendarId] || {}
 
   if (eraOrigins !== undefined) {
     if (intlParts.era) {
@@ -727,7 +732,7 @@ export function parseIntlYear(
       // Some calendars expose raw ICU era labels that Temporal should surface as
       // stable public era codes, and a few of them need year interpretation that
       // doesn't fit the simple origin table below.
-      if (calendarIdBase === 'coptic') {
+      if (baseCalendarId === 'coptic') {
         if (rawEra === 'era0') {
           year = 1 - rawYear
         } else {
@@ -735,11 +740,11 @@ export function parseIntlYear(
         }
         era = 'am'
         eraYear = year
-      } else if (calendarIdBase === 'ethioaa') {
+      } else if (baseCalendarId === 'ethioaa') {
         year = rawYear
         era = 'aa'
         eraYear = rawYear
-      } else if (calendarIdBase === 'ethiopic') {
+      } else if (baseCalendarId === 'ethiopic') {
         era = normalizedEra
         if (normalizedEra === 'aa') {
           year = rawYear - 5500
@@ -748,7 +753,7 @@ export function parseIntlYear(
           year = rawYear
           eraYear = rawYear
         }
-      } else if (calendarIdBase === 'islamic') {
+      } else if (baseCalendarId === 'islamic') {
         year = rawYear
         if (year <= 0) {
           era = 'bh'
@@ -758,10 +763,10 @@ export function parseIntlYear(
           eraYear = year
         }
       } else if (
-        calendarIdBase === 'buddhist' ||
-        calendarIdBase === 'hebrew' ||
-        calendarIdBase === 'indian' ||
-        calendarIdBase === 'persian'
+        baseCalendarId === 'buddhist' ||
+        baseCalendarId === 'hebrew' ||
+        baseCalendarId === 'indian' ||
+        baseCalendarId === 'persian'
       ) {
         year = rawYear
         era = normalizedEra
@@ -780,7 +785,7 @@ export function parseIntlYear(
     } else {
       // Some Intl implementations omit `era` for single-era calendars. Tests
       // still expect Temporal objects to expose the canonical era code.
-      era = defaultEraByCalendarIdBase[calendarIdBase]
+      era = defaultEraByCalendarIdBase[baseCalendarId]
 
       if (era !== undefined) {
         const normalizedEra = eraRemaps[era] || era
@@ -798,21 +803,56 @@ export function parseIntlYear(
   return { era, eraYear, year }
 }
 
+const calendarIntlFormatByNormId = new Map<string, Intl.DateTimeFormat>()
+
 /**
- * @param id Expects already-normalized
+ * Shared Intl.DateTimeFormat cache for calendar math and validation. Pass a
+ * normalized ID after calendar resolution. During resolution, pass the
+ * lowercased raw ID with validateNoFallback=true so invalid/fallback-only input
+ * returns undefined instead of populating the normalized-ID cache.
  */
-export const getCalendarIntlFormat = memoize(
-  (id: string): Intl.DateTimeFormat =>
-    new RawDateTimeFormat('en', {
-      calendar: id,
-      timeZone: utcTimeZoneId,
-      era: 'short', // 'narrow' is too terse for japanese months
-      year: 'numeric',
-      month: 'short', // easier to identify monthCodes
-      day: 'numeric',
-      hour12: false,
-    }),
-)
+export function queryCalendarIntlFormat(
+  normCalendarId: string,
+): Intl.DateTimeFormat
+export function queryCalendarIntlFormat(
+  lowerRawCalendarId: string,
+  validateNoFallback: true,
+): Intl.DateTimeFormat | undefined
+export function queryCalendarIntlFormat(
+  calendarId: string,
+  validateNoFallback = false,
+): Intl.DateTimeFormat | undefined {
+  const format = calendarIntlFormatByNormId.get(calendarId)
+  if (format) {
+    return format
+  }
+
+  const newFormat = createCalendarIntlFormat(calendarId)
+  if (
+    validateNoFallback &&
+    newFormat.resolvedOptions().calendar !== calendarId
+  ) {
+    return undefined
+  }
+
+  // Validation only reaches this point when Intl echoed the lowercased ID, so
+  // that raw ID is also the normalized cache key. The ordinary resolved-ID path
+  // skips the resolvedOptions() check to avoid paying it during calendar math.
+  calendarIntlFormatByNormId.set(calendarId, newFormat)
+  return newFormat
+}
+
+function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
+  return new RawDateTimeFormat('en', {
+    calendar: normCalendarId,
+    timeZone: utcTimeZoneId,
+    era: 'short', // 'narrow' is too terse for japanese months
+    year: 'numeric',
+    month: 'short', // easier to identify monthCodes
+    day: 'numeric',
+    hour12: false,
+  })
+}
 
 // Intl-Calendar methods
 // -----------------------------------------------------------------------------
@@ -981,8 +1021,9 @@ export function computeIntlYearMonthFieldsForMonthDay(
   isLeapMonth: boolean,
   day: number,
 ): CalendarYearMonthFields | undefined {
-  const calendarBase = computeCalendarIdBase(intlCalendar.id)
-  const isChineseLike = calendarBase === 'chinese' || calendarBase === 'dangi'
+  const baseCalendarId = computeCalendarIdBase(intlCalendar.id)
+  const isChineseLike =
+    baseCalendarId === 'chinese' || baseCalendarId === 'dangi'
   const startIsoYear = isChineseLike
     ? chineseMonthDaySearchStartYear(monthCodeNumber, isLeapMonth, day)
     : isoEpochFirstLeapYear
@@ -1187,6 +1228,8 @@ function computeIntlMonthIndex(
   throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
-function getIntlCalendarLeapMonthMeta(calendarId: string): number | undefined {
-  return leapMonthMetas[computeCalendarIdBase(calendarId)]
+function getIntlCalendarLeapMonthMeta(
+  normCalendarId: string,
+): number | undefined {
+  return leapMonthMetas[computeCalendarIdBase(normCalendarId)]
 }

@@ -15,6 +15,7 @@ import {
   maxPossibleTransition,
   minPossibleTransition,
 } from './timeZoneConfig'
+import type { ResolvedTimeZone } from './timeZoneId'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
@@ -25,13 +26,19 @@ export interface TimeZoneImpl {
   getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
 }
 
-export const queryTimeZone = memoize((timeZoneId: string): TimeZoneImpl => {
-  const record = resolveTimeZoneRecord(timeZoneId)
+export function queryTimeZone(rawTimeZoneId: string): TimeZoneImpl {
+  const record = resolveTimeZoneRecord(rawTimeZoneId)
+  return queryTimeZoneRecord(record.id, record)
+}
 
-  return record.kind === 'named'
-    ? new IntlTimeZone(record.id, record.format)
-    : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
-})
+// Cache by normalized ID after resolveTimeZoneRecord.
+const queryTimeZoneRecord = memoize(
+  (normTimeZoneId: string, record: ResolvedTimeZone): TimeZoneImpl => {
+    return record.kind === 'named'
+      ? new IntlTimeZone(normTimeZoneId, record.format)
+      : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
+  },
+)
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -67,10 +74,10 @@ interface IntlTimeZoneStore {
 export class IntlTimeZone implements TimeZoneImpl {
   tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
-  constructor(timeZoneId: string, format: Intl.DateTimeFormat) {
+  constructor(normTimeZoneId: string, format: Intl.DateTimeFormat) {
     this.tzStore = createIntlTimeZoneStore(
       createComputeOffsetSec(format),
-      getTimeZonePeriodDays(timeZoneId),
+      getTimeZonePeriodDays(normTimeZoneId),
     )
   }
 

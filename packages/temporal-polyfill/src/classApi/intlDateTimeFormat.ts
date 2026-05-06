@@ -211,6 +211,8 @@ function createDateTimeFormatInternals(
     rawFormat,
     resolvedLocale: resolvedOptions.locale,
     copiedOptions,
+    // Reuse each Temporal-brand-specific prepper so this formatter's copied DTF
+    // options are transformed into a subformat at most once per Temporal type.
     queryFormatPrepperForBranding: memoize(createFormatPrepperForBranding),
     timeZone,
   }

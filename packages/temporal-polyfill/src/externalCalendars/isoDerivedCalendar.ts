@@ -35,14 +35,14 @@ const isoDerivedCalendarIds: Record<string, true> = {
 
 const primaryJapaneseEraMilli = isoArgsToEpochMilli(1873, 1, 1)!
 
-export function isIsoDerivedCalendarId(id: string): boolean {
-  return Boolean(isoDerivedCalendarIds[id])
+export function isIsoDerivedCalendarId(normCalendarId: string): boolean {
+  return Boolean(isoDerivedCalendarIds[normCalendarId])
 }
 
 export const getIsoDerivedCalendar = memoize(createIsoDerivedCalendar)
 
-function createIsoDerivedCalendar(id: string): ExternalCalendar {
-  const isoYearOffset = isoYearOffsetsByCalendarId[id] || 0
+function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
+  const isoYearOffset = isoYearOffsetsByCalendarId[normCalendarId] || 0
 
   function calendarYearToIsoYear(year: number) {
     return year - isoYearOffset
@@ -53,9 +53,9 @@ function createIsoDerivedCalendar(id: string): ExternalCalendar {
   }
 
   return {
-    id,
-    eraOrigins: eraOriginsByCalendarId[id],
-    eraRemaps: eraRemapsByCalendarId[id],
+    id: normCalendarId,
+    eraOrigins: eraOriginsByCalendarId[normCalendarId],
+    eraRemaps: eraRemapsByCalendarId[normCalendarId],
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,
     computeDateFields(isoDate) {
       const dateFields = computeIsoDateFields(isoDate)
@@ -101,7 +101,7 @@ function createIsoDerivedCalendar(id: string): ExternalCalendar {
       return undefined
     },
     computeEraFields(isoDate) {
-      return computeIsoDerivedEraFields(id, isoDate)
+      return computeIsoDerivedEraFields(normCalendarId, isoDate)
     },
     addMonths(year, month, monthDelta) {
       const yearMonth = addIsoMonths(
@@ -129,22 +129,22 @@ function createIsoDerivedCalendar(id: string): ExternalCalendar {
 }
 
 function computeIsoDerivedEraFields(
-  calendarId: string,
+  normCalendarId: string,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
-  const year = isoDate.year + (isoYearOffsetsByCalendarId[calendarId] || 0)
+  const year = isoDate.year + (isoYearOffsetsByCalendarId[normCalendarId] || 0)
 
-  if (calendarId === 'buddhist') {
+  if (normCalendarId === 'buddhist') {
     return { era: 'be', eraYear: year }
   }
 
-  if (calendarId === 'roc') {
+  if (normCalendarId === 'roc') {
     return year < 1
       ? { era: 'broc', eraYear: 1 - year }
       : { era: 'roc', eraYear: year }
   }
 
-  if (calendarId === japaneseCalendarId) {
+  if (normCalendarId === japaneseCalendarId) {
     const epochMilli = isoDateToEpochMilli(isoDate)!
 
     // Temporal's Japanese era round-tripping follows the Gregorian-aligned era

@@ -69,11 +69,12 @@ export interface ExternalCalendar {
 }
 
 export interface ExternalCalendarProvider {
-  // User-supplied Temporal calendar IDs. This validates and normalizes
-  // Temporal-recognized aliases, and may reject broad Intl fallback IDs.
-  resolveCalendarId(id: string): string | undefined
+  // Lowercased user-supplied Temporal calendar IDs. This validates and
+  // normalizes Temporal-recognized aliases, and may reject broad Intl fallback
+  // IDs.
+  resolveCalendarId(lowerRawCalendarId: string): string | undefined
 
-  getCalendar(id: string): ExternalCalendar | undefined
+  getCalendar(normCalendarId: string): ExternalCalendar | undefined
 }
 
 const externalCalendarRegistryKey = Symbol.for(
@@ -94,12 +95,14 @@ export function registerExternalCalendarProvider(
   globalRecord[externalCalendarRegistryKey] = provider
 }
 
-export function resolveExternalCalendarId(id: string): string | undefined {
-  return getExternalCalendarProvider()?.resolveCalendarId(id)
+export function resolveExternalCalendarId(
+  lowerRawCalendarId: string,
+): string | undefined {
+  return getExternalCalendarProvider()?.resolveCalendarId(lowerRawCalendarId)
 }
 
-export function getExternalCalendar(id: string): ExternalCalendar {
-  const calendar = getExternalCalendarProvider()?.getCalendar(id)
+export function getExternalCalendar(normCalendarId: string): ExternalCalendar {
+  const calendar = getExternalCalendarProvider()?.getCalendar(normCalendarId)
 
   if (!calendar) {
     throwExternalCalendarError()
@@ -112,12 +115,12 @@ export function throwExternalCalendarError(): never {
   throw new RangeError(errorMessages.externalCalendarRequired)
 }
 
-export function getInternalCalendar(calendarId: string): InternalCalendar {
-  return calendarId === isoCalendarId
+export function getInternalCalendar(normCalendarId: string): InternalCalendar {
+  return normCalendarId === isoCalendarId
     ? undefined
-    : calendarId === gregoryCalendarId
+    : normCalendarId === gregoryCalendarId
       ? gregoryCalendar
-      : getExternalCalendar(calendarId)
+      : getExternalCalendar(normCalendarId)
 }
 
 export function getInternalCalendarId(calendar: InternalCalendar): string {

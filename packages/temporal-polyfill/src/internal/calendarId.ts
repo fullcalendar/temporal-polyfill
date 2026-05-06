@@ -5,28 +5,32 @@ import {
 } from './externalCalendar'
 import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
 
-export function refineCalendarId(id: string): string {
-  return resolveCalendarId(requireString(id))
+export function refineCalendarId(rawCalendarId: string): string {
+  return resolveCalendarId(requireString(rawCalendarId))
 }
 
-export function resolveCalendarId(id: string): string {
-  id = id.toLowerCase() // normalize
+export function resolveCalendarId(rawCalendarId: string): string {
+  const lowerRawCalendarId = rawCalendarId.toLowerCase()
 
-  if (id === isoCalendarId || id === gregoryCalendarId) {
-    return id
+  if (
+    lowerRawCalendarId === isoCalendarId ||
+    lowerRawCalendarId === gregoryCalendarId
+  ) {
+    return lowerRawCalendarId
   }
 
-  const externalId = resolveExternalCalendarId(id)
-  if (externalId !== undefined) {
-    return externalId
+  const normCalendarId = resolveExternalCalendarId(lowerRawCalendarId)
+  if (normCalendarId !== undefined) {
+    return normCalendarId
   }
 
   throwExternalCalendarError()
 }
 
-export function computeCalendarIdBase(id: string): string {
-  if (id === 'islamicc') {
-    id = 'islamic'
+// Probably not worth putting into externalCalendars
+export function computeCalendarIdBase(normCalendarId: string): string {
+  if (normCalendarId === 'islamicc') {
+    normCalendarId = 'islamic'
   }
-  return id.split('-')[0]
+  return normCalendarId.split('-')[0]
 }

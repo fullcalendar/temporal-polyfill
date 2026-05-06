@@ -1,6 +1,6 @@
 import * as errorMessages from '../internal/errorMessages'
 import type { ExternalCalendarProvider } from '../internal/externalCalendar'
-import { getCalendarIntlFormat, getIntlCalendar } from './intlCalendar'
+import { getIntlCalendar, queryCalendarIntlFormat } from './intlCalendar'
 import {
   getIsoDerivedCalendar,
   isIsoDerivedCalendarId,
@@ -14,29 +14,34 @@ const deprecatedCalendarIdMap = {
 } as const
 
 export const intlCalendarProvider: ExternalCalendarProvider = {
-  resolveCalendarId(id) {
+  resolveCalendarId(lowerRawCalendarId) {
     // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
     // true aliases like `islamicc`, but rejects broad Intl fallbacks.
-    if (id === 'islamic' || id === 'islamic-rgsa') {
-      throw new RangeError(errorMessages.invalidCalendar(id))
+    if (
+      lowerRawCalendarId === 'islamic' ||
+      lowerRawCalendarId === 'islamic-rgsa'
+    ) {
+      throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
     }
 
-    const deprecatedId =
-      deprecatedCalendarIdMap[id as keyof typeof deprecatedCalendarIdMap]
-    if (deprecatedId) {
-      return deprecatedId
+    const deprecatedNormCalendarId =
+      deprecatedCalendarIdMap[
+        lowerRawCalendarId as keyof typeof deprecatedCalendarIdMap
+      ]
+    if (deprecatedNormCalendarId) {
+      return deprecatedNormCalendarId
     }
 
-    if (getCalendarIntlFormat(id).resolvedOptions().calendar !== id) {
-      throw new RangeError(errorMessages.invalidCalendar(id))
+    if (!queryCalendarIntlFormat(lowerRawCalendarId, true)) {
+      throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
     }
 
-    return id
+    return lowerRawCalendarId
   },
 
-  getCalendar(id) {
-    return isIsoDerivedCalendarId(id)
-      ? getIsoDerivedCalendar(id)
-      : getIntlCalendar(id)
+  getCalendar(normCalendarId) {
+    return isIsoDerivedCalendarId(normCalendarId)
+      ? getIsoDerivedCalendar(normCalendarId)
+      : getIntlCalendar(normCalendarId)
   },
 }

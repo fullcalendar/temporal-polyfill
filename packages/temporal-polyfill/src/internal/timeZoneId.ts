@@ -8,16 +8,16 @@ import {
 } from './timeZoneParse'
 import { memoize } from './utils'
 
-export function refineTimeZoneId(id: string): string {
-  return resolveTimeZoneId(requireString(id))
+export function refineTimeZoneId(rawId: string): string {
+  return resolveTimeZoneId(requireString(rawId))
 }
 
-export function resolveTimeZoneId(id: string): string {
-  return resolveTimeZoneRecord(id).id
+export function resolveTimeZoneId(rawId: string): string {
+  return resolveTimeZoneRecord(rawId).id
 }
 
-export function getTimeZoneAtomic(id: string): string | number {
-  return resolveTimeZoneRecord(id).compareKey
+export function getTimeZoneAtomic(rawId: string): string | number {
+  return resolveTimeZoneRecord(rawId).compareKey
 }
 
 export type ResolvedTimeZone =
@@ -39,10 +39,10 @@ export type ResolvedTimeZone =
       compareKey: string
     }
 
-export const resolveTimeZoneRecord = memoize((id: string): ResolvedTimeZone => {
-  const upperId = id.toUpperCase()
+export function resolveTimeZoneRecord(rawId: string): ResolvedTimeZone {
+  const upperRawId = rawId.toUpperCase()
 
-  const offsetRecord = parseTimeZoneOffsetId(upperId)
+  const offsetRecord = parseTimeZoneOffsetId(upperRawId)
   if (offsetRecord) {
     return {
       kind: 'fixed',
@@ -52,38 +52,50 @@ export const resolveTimeZoneRecord = memoize((id: string): ResolvedTimeZone => {
 
   // Keep UTC distinct from +00:00. They both perform fixed-zero math, but
   // Temporal equality compares UTC by name and offset zones by offset number.
-  if (upperId === utcTimeZoneId) {
+  const normId =
+    upperRawId === utcTimeZoneId
+      ? utcTimeZoneId
+      : normalizeNamedTimeZoneId(rawId)
+
+  return queryNamedTimeZoneRecord(normId)
+}
+
+const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
+  if (normId === utcTimeZoneId) {
     return {
       kind: 'utc',
-      id: utcTimeZoneId,
-      compareKey: utcTimeZoneId,
+      id: normId,
+      compareKey: normId,
     }
   }
 
-  const format = queryTimeZoneIntlFormat(upperId)
+  const upperNormId = normId.toUpperCase()
+  const format = queryTimeZoneIntlFormat(upperNormId)
   return {
     kind: 'named',
-    id: normalizeNamedTimeZoneId(id),
+    id: normId,
     format,
     compareKey: format.resolvedOptions().timeZone,
   }
 })
 
 /**
- * @param id Expects uppercase
+ * @param upperNormId Expects normalized + uppercase
  */
-const queryTimeZoneIntlFormat = memoize((id: string): Intl.DateTimeFormat => {
-  const options = {
-    calendar: isoCalendarId,
-    timeZone: id,
-    era: 'short',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: false,
-  } as Intl.DateTimeFormatOptions
-  return new RawDateTimeFormat('en', options)
-})
+const queryTimeZoneIntlFormat = memoize(
+  (upperNormId: string): Intl.DateTimeFormat => {
+    const options = {
+      calendar: isoCalendarId,
+      timeZone: upperNormId,
+      era: 'short',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false,
+    } as Intl.DateTimeFormatOptions
+    return new RawDateTimeFormat('en', options)
+  },
+)
