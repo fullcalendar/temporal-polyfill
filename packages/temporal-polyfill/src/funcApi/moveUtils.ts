@@ -15,7 +15,6 @@ import {
 } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
-import { slotsWithCalendar } from '../internal/modify'
 import {
   addDateMonths,
   moveByDays,
@@ -52,12 +51,12 @@ export function moveByYears(
   if (!years) {
     return isoDate
   }
-  return slotsWithCalendar(
-    epochMilliToIsoDateTime(
+  return {
+    ...epochMilliToIsoDateTime(
       addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
     ),
     calendar,
-  )
+  }
 }
 
 export function moveByMonths(
@@ -70,12 +69,12 @@ export function moveByMonths(
   if (!months) {
     return isoDate
   }
-  return slotsWithCalendar(
-    epochMilliToIsoDateTime(
+  return {
+    ...epochMilliToIsoDateTime(
       addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
     ),
     calendar,
-  )
+  }
 }
 
 export function moveByIsoWeeks(
@@ -112,10 +111,10 @@ export function moveToDayOfYear(
   )
 
   const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
-  return slotsWithCalendar(
-    moveByDays(isoDate, normDayOfYear - currentDayOfYear),
+  return {
+    ...moveByDays(isoDate, normDayOfYear - currentDayOfYear),
     calendar,
-  )
+  }
 }
 
 export function moveToDayOfMonth(
@@ -134,14 +133,14 @@ export function moveToDayOfMonth(
     overflow,
   )
 
-  return slotsWithCalendar(
-    moveToDayOfMonthUnsafe(
+  return {
+    ...moveToDayOfMonthUnsafe(
       (dateFields) => computeCalendarDateFields(calendar, dateFields).day,
       isoDate,
       normDayOfMonth,
     ),
     calendar,
-  )
+  }
 }
 
 export function moveToDayOfWeek(
@@ -183,8 +182,8 @@ export function moveToWeekOfYear(
     overflow,
   )
 
-  return slotsWithCalendar(
-    moveByIsoWeeks(isoDate, normWeekOfYear - currentWeekOfYear),
-    isoDate.calendar,
-  )
+  return {
+    ...moveByIsoWeeks(isoDate, normWeekOfYear - currentWeekOfYear),
+    calendar: isoDate.calendar,
+  }
 }

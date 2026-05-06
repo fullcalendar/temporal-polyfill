@@ -26,7 +26,6 @@ import {
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
 } from './isoMath'
-import { slotsWithCalendar } from './modify'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
   offsetHasSeconds,
@@ -430,10 +429,10 @@ function finalizeDateTime(
 ): AbstractDateTimeSlots {
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
-  return slotsWithCalendar(
-    combineDateAndTime(organized, organized),
-    getInternalCalendar(resolveCalendarId(organized.calendarId)),
-  )
+  return {
+    ...combineDateAndTime(organized, organized),
+    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
+  }
 }
 
 function finalizeDate(organized: DateOrganized): AbstractDateSlots {

@@ -29,8 +29,6 @@ import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
-  slotsWithCalendar,
-  slotsWithTimeZone,
   zonedDateTimeWithPlainDate,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
@@ -280,7 +278,10 @@ export function withCalendar(record: Record, calendarId: string): Record {
 }
 
 export function withTimeZone(record: Record, timeZoneId: string): Record {
-  return slotsWithTimeZone(record, queryTimeZone(refineTimeZoneId(timeZoneId)))
+  return {
+    ...record,
+    timeZone: queryTimeZone(refineTimeZoneId(timeZoneId)),
+  }
 }
 
 export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
@@ -454,7 +455,7 @@ function adaptDateFunc<R>(
 ): (record: Record) => R {
   return (record: Record) => {
     const isoDate = zonedEpochSlotsToIso(record)
-    return dateFunc(slotsWithCalendar(isoDate, record.calendar))
+    return dateFunc({ ...isoDate, calendar: record.calendar })
   }
 }
 

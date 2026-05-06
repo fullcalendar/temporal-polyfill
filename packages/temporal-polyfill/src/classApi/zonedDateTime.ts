@@ -15,11 +15,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../internal/merge'
-import {
-  slotsWithCalendar,
-  slotsWithTimeZone,
-  zonedDateTimeWithPlainTime,
-} from '../internal/modify'
+import { zonedDateTimeWithPlainTime } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
 import { refineZonedFieldOptions } from '../internal/optionsFieldRefine'
 import {
@@ -118,20 +114,19 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       slots: ZonedDateTimeSlots,
       calendarArg: CalendarArg,
     ): ZonedDateTime {
-      return createZonedDateTime(
-        slotsWithCalendar(
-          slots,
-          getInternalCalendar(refineCalendarArg(calendarArg)),
-        ),
-      )
+      return createZonedDateTime({
+        ...slots,
+        calendar: getInternalCalendar(refineCalendarArg(calendarArg)),
+      })
     },
     withTimeZone(
       slots: ZonedDateTimeSlots,
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
-      return createZonedDateTime(
-        slotsWithTimeZone(slots, queryTimeZone(refineTimeZoneArg(timeZoneArg))),
-      )
+      return createZonedDateTime({
+        ...slots,
+        timeZone: queryTimeZone(refineTimeZoneArg(timeZoneArg)),
+      })
     },
     withPlainTime(
       slots: ZonedDateTimeSlots,

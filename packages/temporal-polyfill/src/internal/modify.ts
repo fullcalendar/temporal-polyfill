@@ -16,7 +16,6 @@ import {
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
-import type { TimeZoneImpl } from './timeZoneImpl'
 import {
   getMatchingInstantFor,
   getStartOfDayInstantFor,
@@ -93,23 +92,6 @@ export function plainDateTimeWithPlainDate(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
     getPreferredCalendar(plainDateTimeSlots.calendar, plainDateSlots.calendar),
   )
-}
-
-// Anything with calendar/timeZone
-// -----------------------------------------------------------------------------
-
-export function slotsWithCalendar<S extends object>(
-  slots: S,
-  calendar: InternalCalendar,
-): S & { calendar: InternalCalendar } {
-  return { ...slots, calendar }
-}
-
-export function slotsWithTimeZone<S extends { timeZone: TimeZoneImpl }>(
-  slots: S,
-  timeZone: TimeZoneImpl,
-): S {
-  return { ...slots, timeZone }
 }
 
 // -----------------------------------------------------------------------------

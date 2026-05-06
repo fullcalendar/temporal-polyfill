@@ -44,7 +44,6 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { japaneseCalendarId } from './intlCalendarConfig'
 import { constrainTimeFields } from './isoMath'
-import { slotsWithCalendar } from './modify'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -151,10 +150,7 @@ export function mergeZonedDateTimeFields(
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
-  const isoDateTime = slotsWithCalendar(
-    zonedEpochSlotsToIso(zonedDateTimeSlots),
-    calendar,
-  )
+  const isoDateTime = { ...zonedEpochSlotsToIso(zonedDateTimeSlots), calendar }
   const {
     offsetNanoseconds,
     hour,

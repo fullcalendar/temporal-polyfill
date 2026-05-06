@@ -20,7 +20,6 @@ import { formatPlainDateIso } from '../internal/isoFormat'
 import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { mergePlainDateFields } from '../internal/merge'
-import { slotsWithCalendar } from '../internal/modify'
 import { moveByDays, movePlainDate } from '../internal/move'
 import {
   CalendarDisplayOptions,
@@ -341,12 +340,10 @@ export function withDayOfWeek(
   dayOfWeek: number,
   options?: OverflowOptions,
 ): Record {
-  return createRecordFromDateFields(
-    slotsWithCalendar(
-      moveToDayOfWeek(record, dayOfWeek, options),
-      record.calendar,
-    ),
-  )
+  return createRecordFromDateFields({
+    ...moveToDayOfWeek(record, dayOfWeek, options),
+    calendar: record.calendar,
+  })
 }
 
 export function withWeekOfYear(
@@ -379,15 +376,17 @@ export function addMonths(
 }
 
 export function addWeeks(record: Record, weeks: number): Record {
-  return createRecordFromDateFields(
-    slotsWithCalendar(moveByIsoWeeks(record, weeks), record.calendar),
-  )
+  return createRecordFromDateFields({
+    ...moveByIsoWeeks(record, weeks),
+    calendar: record.calendar,
+  })
 }
 
 export function addDays(record: Record, days: number): Record {
-  return createRecordFromDateFields(
-    slotsWithCalendar(moveByDaysStrict(record, days), record.calendar),
-  )
+  return createRecordFromDateFields({
+    ...moveByDaysStrict(record, days),
+    calendar: record.calendar,
+  })
 }
 
 // Non-standard: Subtract
@@ -475,9 +474,10 @@ function roundToInterval(
     record0,
     roundingMode,
   )
-  return createRecordFromDateFields(
-    slotsWithCalendar(roundedIsoDateTime, record0.calendar),
-  )
+  return createRecordFromDateFields({
+    ...roundedIsoDateTime,
+    calendar: record0.calendar,
+  })
 }
 
 function aligned(
@@ -486,9 +486,10 @@ function aligned(
 ): (record: Record) => Record {
   return (record0) => {
     const isoDate = moveByDays(computeAlignment(record0), dayDelta)
-    return createRecordFromDateFields(
-      slotsWithCalendar(isoDate, record0.calendar),
-    )
+    return createRecordFromDateFields({
+      ...isoDate,
+      calendar: record0.calendar,
+    })
   }
 }
 
