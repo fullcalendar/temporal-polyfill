@@ -35,8 +35,9 @@ export function createInstantSlots(epochNano: BigNano): InstantSlots {
 export function createZonedDateTimeSlots(
   epochNano: BigNano,
   timeZone: TimeZoneImpl,
-  calendar: InternalCalendar,
+  calendar?: InternalCalendar,
 ): ZonedDateTimeSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: ZonedDateTimeBranding,
     calendar,
@@ -47,8 +48,9 @@ export function createZonedDateTimeSlots(
 
 export function createPlainDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
-  calendar: InternalCalendar,
+  calendar?: InternalCalendar,
 ): PlainDateTimeSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: PlainDateTimeBranding,
     calendar,
@@ -59,8 +61,9 @@ export function createPlainDateTimeSlots(
 
 export function createPlainDateSlots(
   isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
+  calendar?: InternalCalendar,
 ): PlainDateSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: PlainDateBranding,
     calendar,

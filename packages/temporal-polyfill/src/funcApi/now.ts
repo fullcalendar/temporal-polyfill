@@ -4,7 +4,7 @@ import {
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
 } from '../internal/current'
-import { getInternalCalendar, isoCalendar } from '../internal/externalCalendar'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import {
   createInstantSlots,
   createPlainDateSlots,
@@ -40,10 +40,10 @@ export function zonedDateTime(
 export function zonedDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
 ): ZonedDateTimeFns.Record {
+  // Omitting calendar constructs ISO-calendar slots.
   return createZonedDateTimeSlots(
     getCurrentEpochNano(),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
-    isoCalendar,
   )
 }
 
@@ -66,7 +66,8 @@ export function plainDateTimeISO(
   const isoDateTime = getCurrentIsoDateTime(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createPlainDateTimeSlots(isoDateTime, isoCalendar)
+  // Omitting calendar constructs ISO-calendar slots.
+  return createPlainDateTimeSlots(isoDateTime)
 }
 
 export function plainDate(
@@ -88,7 +89,8 @@ export function plainDateISO(
   const isoDateTime = getCurrentIsoDateTime(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createPlainDateSlots(isoDateTime, isoCalendar)
+  // Omitting calendar constructs ISO-calendar slots.
+  return createPlainDateSlots(isoDateTime)
 }
 
 export function plainTimeISO(
