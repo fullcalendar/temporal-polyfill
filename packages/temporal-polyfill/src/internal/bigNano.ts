@@ -1,146 +1,33 @@
-import { nanoInUtcDay } from './units'
-import { NumberSign, compareNumbers, divModFloor, divModTrunc } from './utils'
+import { nanoInMicro, nanoInMilli, nanoInSec, nanoInUtcDay } from './units'
 
 /*
-Given a raw nanoseconds value,
-`days` is truncated (towards 0)
-`timeNano` is the remainder (sign agrees with days)
+Given a raw nanoseconds value.
+
+This used to be a `[days, timeNano]` tuple to keep large epoch values inside
+Number's safe integer range. Using bigint makes the representation simpler and
+keeps the exact nanosecond total available until a caller explicitly asks for a
+Number conversion.
 */
-export type BigNano = [days: number, timeNano: number]
+export const bigNanoInUtcDay = BigInt(nanoInUtcDay)
+export const bigNanoInSec = BigInt(nanoInSec)
+export const bigNanoInMilli = BigInt(nanoInMilli)
+export const bigNanoInMicro = BigInt(nanoInMicro)
 
-/*
-does balancing
-*/
-export function createBigNano(days: number, timeNano: number): BigNano {
-  const [extraDays, timeNanoRemainder] = divModTrunc(timeNano, nanoInUtcDay)
-  let newTimeNano = timeNanoRemainder
-  let newDays = days + extraDays
-  const newDaysSign = Math.sign(newDays)
-
-  // ensure nonconflicting signs
-  if (newDaysSign && newDaysSign === -Math.sign(newTimeNano)) {
-    newDays -= newDaysSign
-    newTimeNano += newDaysSign * nanoInUtcDay
-  }
-
-  return [newDays, newTimeNano]
-}
-
-// Math
-// -----------------------------------------------------------------------------
-
-export function addBigNanos(
-  a: BigNano,
-  b: BigNano,
-  sign: NumberSign = 1,
-): BigNano {
-  return createBigNano(a[0] + b[0] * sign, a[1] + b[1] * sign)
-}
-
-export function moveBigNano(a: BigNano, b: number): BigNano {
-  return createBigNano(a[0], a[1] + b)
-}
-
-export function diffBigNanos(a: BigNano, b: BigNano): BigNano {
-  return addBigNanos(b, a, -1)
-}
-
-// Compare
-// -----------------------------------------------------------------------------
-
-export function compareBigNanos(a: BigNano, b: BigNano): NumberSign {
-  return compareNumbers(a[0], b[0]) || compareNumbers(a[1], b[1])
-}
-
-export function isBigNanoOutside(
-  subject: BigNano,
-  rangeStart: BigNano,
-  rangeEndExcl: BigNano,
-): boolean {
-  return (
-    compareBigNanos(subject, rangeStart) === -1 ||
-    compareBigNanos(subject, rangeEndExcl) === 1
-  )
-}
-
-// Conversion
-// -----------------------------------------------------------------------------
-
-// other -> BigNano
-// (BigNano needs trunc)
-
-export function bigIntToBigNano(num: bigint, multiplierNano = 1): BigNano {
-  const wholeInDay = BigInt(nanoInUtcDay / multiplierNano)
-  const days = Number(num / wholeInDay) // does trunc
-  const remainder = Number(num % wholeInDay) // does trunc
-  return [days, remainder * multiplierNano] // scaled. doesn't need balancing
-}
-
-/*
-Expects a proper integer. For user input, call toStrictInteger
-*/
-export function numberToBigNano(num: number, multiplierNano = 1): BigNano {
-  const wholeInDay = nanoInUtcDay / multiplierNano
-  const [days, remainder] = divModTrunc(num, wholeInDay)
-  return [days, remainder * multiplierNano] // scaled. doesn't need balancing
-}
-
-// BigNano -> other
-// (other units need floor)
-// (divisorNano always a denominator of day-nanoseconds, always positive)
-
-export function bigNanoToBigInt(bigNano: BigNano, divisorNano = 1): bigint {
-  const days = bigNano[0]
-  const timeNano = bigNano[1]
-  // do floor because callers care about epoch-nano,
-  // which requires floor rounding
-  const whole = Math.floor(timeNano / divisorNano)
-  const wholeInDay = nanoInUtcDay / divisorNano
-  return BigInt(days) * BigInt(wholeInDay) + BigInt(whole)
-}
-
-export function bigNanoToNumber(
-  bigNano: BigNano,
-  divisorNano = 1,
-  exact?: boolean,
-): number {
-  const days = bigNano[0]
-  const timeNano = bigNano[1]
-  const [whole, remainderNano] = divModTrunc(timeNano, divisorNano)
-  const wholeInDay = nanoInUtcDay / divisorNano
-  // adding fraction to whole first results in better precision
-  return days * wholeInDay + (whole + (exact ? remainderNano / divisorNano : 0))
-}
-
-export function SAFE_bigNanoToNumber(
-  bigNano: BigNano,
-  divisorNano = 1,
-): number {
-  const days = bigNano[0]
-  const timeNano = bigNano[1]
-  // do trunc because callers care about duration-unit rounding,
-  // which requires trunc rounding
-  const whole = Math.trunc(timeNano / divisorNano)
-  const wholeInDay = nanoInUtcDay / divisorNano
-
-  // Convert the exact integer total into a Number only after composing the
-  // day-sized and within-day parts. This preserves the spec-visible float64
-  // rounding point for huge Duration fields.
-  return Number(BigInt(days) * BigInt(wholeInDay) + BigInt(whole))
-}
-
-export function bigNanoToExactDays(bigNano: BigNano): number {
-  return bigNano[0] + bigNano[1] / nanoInUtcDay
-}
-
-export function divModBigNano(
-  bigNano: BigNano,
+export function divideBigNanoToExactNumber(
+  bigNano: bigint,
   divisorNano: number,
-  divModFunc = divModFloor,
-): [whole: number, remainderNano: number] {
-  const days = bigNano[0]
-  const timeNano = bigNano[1]
-  const [whole, remainderNano] = divModFunc(timeNano, divisorNano)
+): number {
+  const days = Number(bigNano / bigNanoInUtcDay)
+  const timeNano = Number(bigNano % bigNanoInUtcDay)
+  const whole = Math.trunc(timeNano / divisorNano)
+  const remainderNano = timeNano % divisorNano
   const wholeInDay = nanoInUtcDay / divisorNano
-  return [days * wholeInDay + whole, remainderNano]
+
+  // This is not calendar-day math. `nanoInUtcDay` is a convenient chunk size
+  // because it is exactly divisible by all built-in time-unit nanosecond
+  // divisors, while the within-day piece stays safely representable as Number.
+  // Combining `whole + fraction` before adding the large day contribution avoids
+  // prematurely rounding a huge bigint quotient and losing the fractional part's
+  // ability to affect the final float64 rounding.
+  return days * wholeInDay + (whole + remainderNano / divisorNano)
 }

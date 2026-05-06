@@ -1,10 +1,4 @@
 import {
-  BigNano,
-  bigNanoToNumber,
-  compareBigNanos,
-  diffBigNanos,
-} from './bigNano'
-import {
   computeCalendarDateFields,
   computeCalendarDaysInMonthForYearMonth,
   computeCalendarMonthCodeParts,
@@ -82,7 +76,13 @@ import {
   YearMonthUnitName,
   nanoInUtcDay,
 } from './units'
-import { NumberSign, bindArgs, compareNumbers, divModTrunc } from './utils'
+import {
+  NumberSign,
+  bindArgs,
+  compareBigInts,
+  compareNumbers,
+  divModTrunc,
+} from './utils'
 
 /*
 TODO: In many places, diffs are just meant to get sign, which can mostly be done canonically!
@@ -126,7 +126,7 @@ export function diffZonedDateTimes(
 
   const epochNano0 = slots0.epochNanoseconds
   const epochNano1 = slots1.epochNanoseconds
-  const sign = compareBigNanos(epochNano1, epochNano0)
+  const sign = compareBigInts(epochNano1, epochNano0)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -180,7 +180,7 @@ export function diffPlainDateTimes(
 
   const startEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots0)!
   const endEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots1)!
-  const sign = compareBigNanos(endEpochNano, startEpochNano)
+  const sign = compareBigInts(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -300,7 +300,7 @@ function diffDateLike(
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
-  const sign = compareBigNanos(endEpochNano, startEpochNano)
+  const sign = compareBigInts(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
   if (!sign) {
@@ -384,7 +384,7 @@ export function diffZonedEpochsExact(
   slots1: ZonedEpochSlots,
   largestUnit: Unit,
 ): DurationFields {
-  const sign = compareBigNanos(slots1.epochNanoseconds, slots0.epochNanoseconds)
+  const sign = compareBigInts(slots1.epochNanoseconds, slots0.epochNanoseconds)
 
   if (!sign) {
     return durationFieldDefaults
@@ -428,7 +428,7 @@ export function diffDateTimesExact(
 ): DurationFields {
   const startEpochNano = isoDateTimeToEpochNano(startIsoDateTime)!
   const endEpochNano = isoDateTimeToEpochNano(endIsoDateTime)!
-  const sign = compareBigNanos(endEpochNano, startEpochNano)
+  const sign = compareBigInts(endEpochNano, startEpochNano)
 
   if (!sign) {
     return durationFieldDefaults
@@ -792,10 +792,8 @@ export function prepareZonedEpochDiff(
       combineDateAndTime(midIsoDate, startIsoDate),
     )
 
-    if (compareBigNanos(endEpochNano, midEpochNano) !== -sign) {
-      const remainderNano = bigNanoToNumber(
-        diffBigNanos(midEpochNano, endEpochNano),
-      )
+    if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
+      const remainderNano = Number(endEpochNano - midEpochNano)
       return [startIsoDate, midIsoDate, remainderNano, startIsoDate]
     }
   }
@@ -824,8 +822,8 @@ function prepareDateTimeDiff(
 // -----------------------------------------------------------------------------
 
 function diffEpochNanos(
-  startEpochNano: BigNano,
-  endEpochNano: BigNano,
+  startEpochNano: bigint,
+  endEpochNano: bigint,
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
@@ -835,7 +833,7 @@ function diffEpochNanos(
     ...durationFieldDefaults,
     ...nanoToDurationDayTimeFields(
       roundBigNano(
-        diffBigNanos(startEpochNano, endEpochNano),
+        endEpochNano - startEpochNano,
         smallestUnit,
         roundingInc,
         roundingMode,
@@ -846,14 +844,14 @@ function diffEpochNanos(
 }
 
 function diffEpochNanosExact(
-  startEpochNano: BigNano,
-  endEpochNano: BigNano,
+  startEpochNano: bigint,
+  endEpochNano: bigint,
   largestUnit: DayTimeUnit,
 ): DurationFields {
   return {
     ...durationFieldDefaults,
     ...nanoToDurationDayTimeFields(
-      diffBigNanos(startEpochNano, endEpochNano),
+      endEpochNano - startEpochNano,
       largestUnit as DayTimeUnit,
     ),
   }

@@ -1,4 +1,4 @@
-import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
+import { bigNanoInMicro, bigNanoInMilli, bigNanoInSec } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import { type InternalCalendar, isoCalendar } from './externalCalendar'
@@ -52,7 +52,6 @@ import {
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
-import { nanoInMicro, nanoInMilli, nanoInSec } from './units'
 import { pluckProps } from './utils'
 
 // Instant -> *
@@ -123,7 +122,7 @@ function dateToEpochNano(
   timeZoneImpl: TimeZoneImpl,
   isoDateTime: CalendarDateTimeFields,
   options?: EpochDisambigOptions,
-): BigNano | undefined {
+): bigint | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
   return getSingleInstantFor(timeZoneImpl, isoDateTime, epochDisambig)
 }
@@ -143,7 +142,7 @@ export function plainDateToZonedDateTime<PA>(
     plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
 
   const timeZoneImpl = queryTimeZone(timeZoneId)
-  let epochNano: BigNano
+  let epochNano: bigint
 
   if (timeFields) {
     epochNano = getSingleInstantFor(
@@ -318,9 +317,7 @@ Almost public-facing, does input validation
 */
 export function epochSecToInstant(epochSec: number): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(
-      numberToBigNano(toStrictInteger(epochSec), nanoInSec),
-    ),
+    checkEpochNanoInBounds(BigInt(toStrictInteger(epochSec)) * bigNanoInSec),
   )
 }
 
@@ -330,7 +327,7 @@ Almost public-facing, does input validation
 export function epochMilliToInstant(epochMilli: number): InstantSlots {
   return createInstantSlots(
     checkEpochNanoInBounds(
-      numberToBigNano(toStrictInteger(epochMilli), nanoInMilli),
+      BigInt(toStrictInteger(epochMilli)) * bigNanoInMilli,
     ),
   )
 }
@@ -341,7 +338,7 @@ Almost public-facing, does input validation
 */
 export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
   return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochMicro), nanoInMicro)),
+    checkEpochNanoInBounds(toBigInt(epochMicro) * bigNanoInMicro),
   )
 }
 
@@ -349,7 +346,5 @@ export function epochMicroToInstant(epochMicro: bigint): InstantSlots {
 Almost public-facing, does input validation
 */
 export function epochNanoToInstant(epochNano: bigint): InstantSlots {
-  return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
-  )
+  return createInstantSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
 }

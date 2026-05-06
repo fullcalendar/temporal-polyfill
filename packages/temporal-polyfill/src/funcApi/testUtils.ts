@@ -1,5 +1,4 @@
 import { expect } from 'vitest'
-import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import {
   isoDateTimeToEpochNano,
@@ -163,7 +162,7 @@ export function expectPlainDateTimeEquals(
 export function expectZonedDateTimeEquals(
   zdt: ZonedDateTimeFns.Record,
   slots: {
-    epochNanoseconds: bigint | BigNano
+    epochNanoseconds: bigint
     timeZoneId?: string
     calendarId?: string
   },
@@ -191,7 +190,7 @@ function normalizeCalendarSlots<T extends { calendarId?: string }>(
 function normalizeZonedSlots(
   zdt: ZonedDateTimeFns.Record,
   slots: {
-    epochNanoseconds: bigint | BigNano
+    epochNanoseconds: bigint
     timeZoneId?: string
     calendarId?: string
   },
@@ -204,10 +203,7 @@ function normalizeZonedSlots(
   return {
     calendar: zdt.calendar,
     timeZone: zdt.timeZone,
-    epochNanoseconds:
-      typeof epochNanoseconds === 'bigint'
-        ? bigIntToBigNano(epochNanoseconds)
-        : epochNanoseconds,
+    epochNanoseconds,
   }
 }
 
@@ -250,7 +246,7 @@ export function expectInstantEquals(
 ): void {
   expectPropsEqualStrict(inst, {
     ...instantSlotDefaults,
-    epochNanoseconds: bigIntToBigNano(epochNanoseconds),
+    epochNanoseconds,
   })
 }
 
@@ -314,8 +310,8 @@ export function expectPlainDateTimesSimilar(
     getInternalCalendarId(pdt1.calendar),
   )
   expectEpochNanosSimilar(
-    bigNanoToBigInt(isoDateTimeToEpochNano(pdt0)!),
-    bigNanoToBigInt(isoDateTimeToEpochNano(pdt1)!),
+    isoDateTimeToEpochNano(pdt0)!,
+    isoDateTimeToEpochNano(pdt1)!,
   )
 }
 
@@ -328,10 +324,7 @@ export function expectPlainDatesSimilar(
   expect(getInternalCalendarId(pd0.calendar)).toBe(
     getInternalCalendarId(pd1.calendar),
   )
-  expectEpochNanosSimilar(
-    bigNanoToBigInt(isoDateToEpochNano(pd0)!),
-    bigNanoToBigInt(isoDateToEpochNano(pd1)!),
-  )
+  expectEpochNanosSimilar(isoDateToEpochNano(pd0)!, isoDateToEpochNano(pd1)!)
 }
 
 export function expectPlainTimesSimilar(
@@ -341,12 +334,8 @@ export function expectPlainTimesSimilar(
   expect(pt0.branding).toBe('PlainTime')
   expect(pt1.branding).toBe('PlainTime')
   expectEpochNanosSimilar(
-    bigNanoToBigInt(
-      isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt0))!,
-    ),
-    bigNanoToBigInt(
-      isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt1))!,
-    ),
+    isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt0))!,
+    isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt1))!,
   )
 }
 

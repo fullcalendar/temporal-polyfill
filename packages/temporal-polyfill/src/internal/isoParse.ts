@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -390,7 +389,7 @@ function finalizeZonedDateTime(
 
   checkIsoDateTimeFields(organized)
 
-  let epochNano: BigNano
+  let epochNano: bigint
 
   if (organized.hasTime) {
     const offsetNano = organized.offset

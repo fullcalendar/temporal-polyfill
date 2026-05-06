@@ -1,39 +1,33 @@
 import {
-  BigNano,
-  bigNanoToBigInt,
-  divModBigNano,
-  moveBigNano,
-  numberToBigNano,
+  bigNanoInMicro,
+  bigNanoInMilli,
+  bigNanoInSec,
+  bigNanoInUtcDay,
 } from './bigNano'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { isoYearMax, isoYearMin, maxMilli } from './temporalConstants'
-import {
-  milliInDay,
-  milliInSec,
-  nanoInMicro,
-  nanoInMilli,
-  nanoInSec,
-} from './units'
-import { divModFloor, divModTrunc } from './utils'
+import { milliInDay, milliInSec, nanoInMicro, nanoInMilli } from './units'
+import { divModFloor, divFloorBigInt } from './utils'
 
 // Epoch Unit Conversion
 // -----------------------------------------------------------------------------
 // nano -> [micro/milli/sec]
 
-export function epochNanoToSec(epochNano: BigNano): number {
+export function epochNanoToSec(epochNano: bigint): number {
   return epochNanoToSecMod(epochNano)[0]
 }
 
-export function epochNanoToSecMod(epochNano: BigNano): [number, number] {
-  return divModBigNano(epochNano, nanoInSec)
+export function epochNanoToSecMod(epochNano: bigint): [number, number] {
+  const epochSec = divFloorBigInt(epochNano, bigNanoInSec)
+  return [Number(epochSec), Number(epochNano - epochSec * bigNanoInSec)]
 }
 
-export function epochNanoToMilli(epochNano: BigNano): number {
-  return divModBigNano(epochNano, nanoInMilli)[0]
+export function epochNanoToMilli(epochNano: bigint): number {
+  return Number(divFloorBigInt(epochNano, bigNanoInMilli))
 }
 
-export function epochNanoToMicro(epochNano: BigNano): bigint {
-  return bigNanoToBigInt(epochNano, nanoInMicro)
+export function epochNanoToMicro(epochNano: bigint): bigint {
+  return divFloorBigInt(epochNano, bigNanoInMicro)
 }
 
 // [micro/milli/sec] -> nano
@@ -41,8 +35,8 @@ export function epochNanoToMicro(epochNano: BigNano): bigint {
 /*
 Expects a proper integer
 */
-export function epochMilliToNano(epochMilli: number): BigNano {
-  return numberToBigNano(epochMilli, nanoInMilli)
+export function epochMilliToNano(epochMilli: number): bigint {
+  return BigInt(epochMilli) * bigNanoInMilli
 }
 
 // ISO <-> Epoch Conversion
@@ -101,28 +95,24 @@ If out-of-bounds, returns undefined
 */
 export function isoDateToEpochNano(
   isoDate: CalendarDateFields,
-): BigNano | undefined {
+): bigint | undefined {
   const epochMilli = isoDateToEpochMilli(isoDate)
 
   if (epochMilli !== undefined) {
-    const [days, milliRemainder] = divModTrunc(epochMilli, milliInDay)
-    return [days, milliRemainder * nanoInMilli]
+    return BigInt(epochMilli) * bigNanoInMilli
   }
 }
 
 export function isoDateTimeToEpochNano(
   isoDateTime: CalendarDateTimeFields,
-): BigNano | undefined {
+): bigint | undefined {
   const epochMilli = isoDateTimeToEpochMilli(isoDateTime)
 
   if (epochMilli !== undefined) {
-    const [days, milliRemainder] = divModTrunc(epochMilli, milliInDay)
-    return [
-      days,
-      milliRemainder * nanoInMilli +
-        isoDateTime.microsecond * nanoInMicro +
-        isoDateTime.nanosecond,
-    ]
+    return (
+      BigInt(epochMilli) * bigNanoInMilli +
+      BigInt(isoDateTime.microsecond * nanoInMicro + isoDateTime.nanosecond)
+    )
   }
 }
 
@@ -193,17 +183,13 @@ export function isoToLegacyDate(
 // Epoch -> ISO Fields
 
 export function epochNanoToIso(
-  epochNano: BigNano,
+  epochNano: bigint,
   offsetNano: number,
 ): CalendarDateTimeFields {
-  let [days, timeNano] = moveBigNano(epochNano, offsetNano)
-
-  // Convert to start-of-day and time-of-day. `moveBigNano` can leave the
-  // nanosecond remainder negative when a negative offset crosses midnight.
-  if (timeNano < 0) {
-    timeNano += milliInDay * nanoInMilli
-    days -= 1
-  }
+  const zonedEpochNano = epochNano + BigInt(offsetNano)
+  const wholeDays = divFloorBigInt(zonedEpochNano, bigNanoInUtcDay)
+  const days = Number(wholeDays)
+  const timeNano = Number(zonedEpochNano - wholeDays * bigNanoInUtcDay)
 
   const [timeMilli, nanoRemainder] = divModFloor(timeNano, nanoInMilli)
   const microParts = divModFloor(nanoRemainder, nanoInMicro)

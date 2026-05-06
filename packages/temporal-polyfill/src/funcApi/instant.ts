@@ -1,4 +1,3 @@
-import { BigNano } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
@@ -47,7 +46,7 @@ export type Record = {
   /**
    * @deprecated Use the epochNanoseconds() function instead.
    */
-  readonly epochNanoseconds: BigNano
+  readonly epochNanoseconds: bigint
 }
 
 export type DifferenceOptions = DiffOptions<TimeUnitName>

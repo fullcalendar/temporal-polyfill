@@ -31,7 +31,7 @@ export function constrainTimeFields(
 // -----------------------------------------------------------------------------
 
 export function timeFieldsToNano(timeFields: TimeFields): number {
-  return givenFieldsToBigNano(timeFields, Unit.Hour, timeFieldNamesAsc)[1]
+  return Number(givenFieldsToBigNano(timeFields, Unit.Hour, timeFieldNamesAsc))
 }
 
 export function nanoToTimeAndDay(nano: number): [TimeFields, number] {

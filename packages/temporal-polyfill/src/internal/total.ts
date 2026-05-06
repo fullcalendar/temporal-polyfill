@@ -1,9 +1,4 @@
-import {
-  BigNano,
-  bigNanoToNumber,
-  compareBigNanos,
-  diffBigNanos,
-} from './bigNano'
+import { divideBigNanoToExactNumber } from './bigNano'
 import {
   DurationFieldName,
   DurationFields,
@@ -28,6 +23,7 @@ import {
 } from './relativeMath'
 import { DurationSlots } from './slots'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
+import { compareBigInts } from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -84,7 +80,7 @@ export function totalDuration<RA>(
 
 export function totalRelativeDuration(
   durationFields: DurationFields,
-  endEpochNano: BigNano,
+  endEpochNano: bigint,
   totalUnit: Unit, // always >=Day
   markerMoveOps: MarkerMoveOps,
 ): number {
@@ -101,11 +97,11 @@ export function totalRelativeDuration(
   )
   const epochNano0 = nudgeWindow.epochNano0
   const epochNano1 = nudgeWindow.epochNano1
-  const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
+  const denom = Number(epochNano1 - epochNano0)
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numerator = bigNanoToNumber(diffBigNanos(epochNano0, endEpochNano))
+  const numerator = Number(endEpochNano - epochNano0)
   const integerPart =
     nudgeWindow.startDurationFields[durationFieldNamesAsc[totalUnit]]
 
@@ -119,10 +115,9 @@ function totalDayTimeDuration(
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
-  return bigNanoToNumber(
+  return divideBigNanoToExactNumber(
     durationFieldsToBigNano(durationFields),
     unitNanoMap[totalUnit],
-    true, // exact
   )
 }
 
@@ -134,7 +129,7 @@ export function clampRelativeDuration(
   clampUnit: Unit, // always >=Day
   clampDistance: number,
   markerMoveOps: MarkerMoveOps,
-  epochNanoProgress?: BigNano,
+  epochNanoProgress?: bigint,
 ) {
   const unitName = durationFieldNamesAsc[clampUnit]
   let startDurationFields = durationFields
@@ -207,33 +202,33 @@ function computeRelativeDurationWindow(
 }
 
 function epochNanoIsWithinWindow(
-  epochNanoProgress: BigNano,
-  epochNano0: BigNano,
-  epochNano1: BigNano,
+  epochNanoProgress: bigint,
+  epochNano0: bigint,
+  epochNano1: bigint,
   sign: number,
 ): boolean {
   if (sign > 0) {
     return (
-      compareBigNanos(epochNano0, epochNanoProgress) <= 0 &&
-      compareBigNanos(epochNanoProgress, epochNano1) <= 0
+      compareBigInts(epochNano0, epochNanoProgress) <= 0 &&
+      compareBigInts(epochNanoProgress, epochNano1) <= 0
     )
   }
 
   return (
-    compareBigNanos(epochNano1, epochNanoProgress) <= 0 &&
-    compareBigNanos(epochNanoProgress, epochNano0) <= 0
+    compareBigInts(epochNano1, epochNanoProgress) <= 0 &&
+    compareBigInts(epochNanoProgress, epochNano0) <= 0
   )
 }
 
 export function computeEpochNanoFrac(
-  epochNanoProgress: BigNano,
-  epochNano0: BigNano,
-  epochNano1: BigNano,
+  epochNanoProgress: bigint,
+  epochNano0: bigint,
+  epochNano1: bigint,
 ): number {
-  const denom = bigNanoToNumber(diffBigNanos(epochNano0, epochNano1))
+  const denom = Number(epochNano1 - epochNano0)
   if (!denom) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const number = bigNanoToNumber(diffBigNanos(epochNano0, epochNanoProgress))
+  const number = Number(epochNanoProgress - epochNano0)
   return number / denom
 }

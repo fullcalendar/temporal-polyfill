@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { bigNanoToNumber, numberToBigNano } from './bigNano'
+import { bigNanoInSec } from './bigNano'
 import { queryTimeZone } from './timeZoneImpl'
-import { nanoInSec } from './units'
 
 describe('queryTimeZone', () => {
   it('finds close-together transitions without hiding the in-between offset', () => {
@@ -14,28 +13,20 @@ describe('queryTimeZone', () => {
     // feeds ordinary Temporal wall-clock/DST-gap math, not only public
     // transition queries.
     expect(
-      timeZoneImpl.getOffsetNanosecondsFor(
-        numberToBigNano(-842_916_600, nanoInSec),
-      ),
+      timeZoneImpl.getOffsetNanosecondsFor(BigInt(-842_916_600) * bigNanoInSec),
     ).toBe(3_600_000_000_000)
 
     expect(
-      bigNanoToNumber(
-        timeZoneImpl.getTransition(
-          numberToBigNano(-842_920_200, nanoInSec),
-          1,
-        )!,
-        nanoInSec,
+      Number(
+        timeZoneImpl.getTransition(BigInt(-842_920_200) * bigNanoInSec, 1)! /
+          bigNanoInSec,
       ),
     ).toBe(-842_918_400)
 
     expect(
-      bigNanoToNumber(
-        timeZoneImpl.getTransition(
-          numberToBigNano(-842_916_600, nanoInSec),
-          -1,
-        )!,
-        nanoInSec,
+      Number(
+        timeZoneImpl.getTransition(BigInt(-842_916_600) * bigNanoInSec, -1)! /
+          bigNanoInSec,
       ),
     ).toBe(-842_918_400)
   })

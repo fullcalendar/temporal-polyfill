@@ -1,4 +1,4 @@
-import { BigNano, isBigNanoOutside } from './bigNano'
+import { bigNanoInUtcDay } from './bigNano'
 import { isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
@@ -18,8 +18,8 @@ TODO: move all check* calls as late as possible, right before record-creation,
 even for moving!
 */
 
-const epochNanoMax: BigNano = [epochNanoDayMax, 0]
-const epochNanoMin: BigNano = [-epochNanoDayMax, 0]
+const epochNanoMax = BigInt(epochNanoDayMax) * bigNanoInUtcDay
+const epochNanoMin = BigInt(-epochNanoDayMax) * bigNanoInUtcDay
 const isoNoonFieldDefaults: TimeFields = {
   ...timeFieldDefaults,
   hour: 12,
@@ -63,7 +63,10 @@ export function checkIsoDateInBoundsStrict(
   )
 
   // TODO: better way to do this besides hardcoding limit
-  if (!bigNano || Math.abs(bigNano[0]) > epochNanoDayMax) {
+  if (
+    bigNano === undefined ||
+    Math.abs(Number(bigNano / bigNanoInUtcDay)) > epochNanoDayMax
+  ) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
@@ -102,10 +105,12 @@ export function checkIsoDateTimeInBounds(
   }
 }
 
-export function checkEpochNanoInBounds(
-  epochNano: BigNano | undefined,
-): BigNano {
-  if (!epochNano || isBigNanoOutside(epochNano, epochNanoMin, epochNanoMax)) {
+export function checkEpochNanoInBounds(epochNano: bigint | undefined): bigint {
+  if (
+    epochNano === undefined ||
+    epochNano < epochNanoMin ||
+    epochNano > epochNanoMax
+  ) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
   return epochNano
@@ -119,7 +124,7 @@ CALLERS DO NOT NEED TO CHECK in-bounds!
 export function isoDateTimeToEpochNanoWithOffset(
   isoDateTime: CalendarDateTimeFields,
   offsetNano: number,
-): BigNano {
+): bigint {
   const [newTimeFields, dayDelta] = nanoToTimeAndDay(
     timeFieldsToNano(isoDateTime) - offsetNano,
   )

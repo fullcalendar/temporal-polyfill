@@ -1,4 +1,3 @@
-import { addBigNanos, moveBigNano, numberToBigNano } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
@@ -585,10 +584,9 @@ function moveByTimeUnit(
   record: Record,
   units: number,
 ): Record {
-  const epochNano1 = addBigNanos(
-    record.epochNanoseconds,
-    numberToBigNano(toStrictInteger(units), nanoInUnit),
-  )
+  const epochNano1 =
+    record.epochNanoseconds +
+    BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
   return {
     ...record,
     epochNanoseconds: checkEpochNanoInBounds(epochNano1),
@@ -619,10 +617,9 @@ function aligned(
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
-    const epochNano1 = moveBigNano(
-      alignZonedEpoch(computeAlignment, record.timeZone, record),
-      nanoDelta,
-    )
+    const epochNano1 =
+      alignZonedEpoch(computeAlignment, record.timeZone, record) +
+      BigInt(nanoDelta)
     return {
       ...record,
       epochNanoseconds: checkEpochNanoInBounds(epochNano1),

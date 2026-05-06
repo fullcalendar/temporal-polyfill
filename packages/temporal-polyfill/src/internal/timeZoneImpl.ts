@@ -1,4 +1,4 @@
-import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
+import { bigNanoInSec } from './bigNano'
 import {
   epochNanoToSec,
   epochNanoToSecMod,
@@ -24,9 +24,9 @@ import { clampNumber, compareNumbers, memoize } from './utils'
 export interface TimeZoneImpl {
   id: string
   compareKey: string | number
-  getOffsetNanosecondsFor(epochNano: BigNano): number
-  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): BigNano[]
-  getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
+  getOffsetNanosecondsFor(epochNano: bigint): number
+  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[]
+  getTransition(epochNano: bigint, direction: -1 | 1): bigint | undefined
 }
 
 export function queryTimeZone(rawTimeZoneId: string): TimeZoneImpl {
@@ -64,11 +64,11 @@ export class FixedTimeZone implements TimeZoneImpl {
   // Strict ISO date bounds checking is intentionally NOT done here.
   // It is conditionally performed in getMatchingInstantFor based on offsetDisambig.
   // This allows offset: "use"/"ignore" to accept epoch-boundary dates.
-  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): BigNano[] {
+  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
     return [isoDateTimeToEpochNanoWithOffset(isoDateTime, this.offsetNano)]
   }
 
-  getTransition(): BigNano | undefined {
+  getTransition(): bigint | undefined {
     return undefined // hopefully minifier will remove
   }
 }
@@ -96,16 +96,16 @@ export class IntlTimeZone implements TimeZoneImpl {
     )
   }
 
-  getOffsetNanosecondsFor(epochNano: BigNano): number {
+  getOffsetNanosecondsFor(epochNano: bigint): number {
     return this.tzStore.getOffsetSec(epochNanoToSec(epochNano)) * nanoInSec
   }
 
-  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): BigNano[] {
+  getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
     const [zonedEpochSec, subsecNano] = isoDateTimeToEpochSec(isoDateTime)
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(
-        moveBigNano(numberToBigNano(epochSec, nanoInSec), subsecNano),
+        BigInt(epochSec) * bigNanoInSec + BigInt(subsecNano),
       )
     })
   }
@@ -113,7 +113,7 @@ export class IntlTimeZone implements TimeZoneImpl {
   /*
   exclusive for both directions
   */
-  getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined {
+  getTransition(epochNano: bigint, direction: -1 | 1): bigint | undefined {
     const [epochSec, subsecNano] = epochNanoToSecMod(epochNano)
     const resEpochSec = this.tzStore.getTransition(
       epochSec + (direction > 0 || subsecNano ? 1 : 0),
@@ -121,7 +121,7 @@ export class IntlTimeZone implements TimeZoneImpl {
     )
 
     if (resEpochSec !== undefined) {
-      return numberToBigNano(resEpochSec, nanoInSec)
+      return BigInt(resEpochSec) * bigNanoInSec
     }
   }
 }

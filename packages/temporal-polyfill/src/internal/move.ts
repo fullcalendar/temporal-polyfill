@@ -1,4 +1,4 @@
-import { BigNano, addBigNanos } from './bigNano'
+import { bigNanoInUtcDay } from './bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonthForYearMonth,
@@ -191,11 +191,11 @@ function signedDurationFields(
 // -----------------------------------------------------------------------------
 
 function moveEpochNano(
-  epochNano: BigNano,
+  epochNano: bigint,
   durationFields: DurationFields,
-): BigNano {
+): bigint {
   return checkEpochNanoInBounds(
-    addBigNanos(epochNano, durationTimeFieldsToBigNanoStrict(durationFields)),
+    epochNano + durationTimeFieldsToBigNanoStrict(durationFields),
   )
 }
 
@@ -214,7 +214,7 @@ export function moveZonedEpochs(
   let epochNano = slots.epochNanoseconds
 
   if (!durationHasDateParts(durationFields)) {
-    epochNano = addBigNanos(epochNano, timeOnlyNano)
+    epochNano += timeOnlyNano
     refineOverflowOptions(options) // for validation only
   } else {
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZoneImpl)
@@ -227,13 +227,11 @@ export function moveZonedEpochs(
       },
       options,
     )
-    epochNano = addBigNanos(
+    epochNano =
       getSingleInstantFor(
         timeZoneImpl,
         combineDateAndTime(movedIsoDateFields, isoDateTime),
-      ),
-      timeOnlyNano,
-    )
+      ) + timeOnlyNano
   }
 
   return {
@@ -293,7 +291,8 @@ export function moveDate(
   refineOverflowOptions(options) // for validation only
 
   const days =
-    durationFields.days + durationFieldsToBigNano(durationFields, Unit.Hour)[0]
+    durationFields.days +
+    Number(durationFieldsToBigNano(durationFields, Unit.Hour) / bigNanoInUtcDay)
 
   if (days) {
     return checkIsoDateInBounds(moveByDays(isoDateFields, days))
@@ -317,10 +316,9 @@ function moveTime(
   timeFields: TimeFields,
   durationFields: DurationFields,
 ): [TimeFields, number] {
-  const [durDays, durTimeNano] = durationFieldsToBigNano(
-    durationFields,
-    Unit.Hour,
-  )
+  const durationBigNano = durationFieldsToBigNano(durationFields, Unit.Hour)
+  const durDays = Number(durationBigNano / bigNanoInUtcDay)
+  const durTimeNano = Number(durationBigNano % bigNanoInUtcDay)
   const [newTimeFields, overflowDays] = nanoToTimeAndDay(
     timeFieldsToNano(timeFields) + durTimeNano,
   )
@@ -349,11 +347,10 @@ function dateAddWithOverflow(
   let { years, months, weeks, days } = durationFields
   let epochMilli: number | undefined
 
-  days += givenFieldsToBigNano(
-    durationFields,
-    Unit.Hour,
-    durationFieldNamesAsc,
-  )[0]
+  days += Number(
+    givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc) /
+      bigNanoInUtcDay,
+  )
 
   if (years || months) {
     epochMilli = addDateMonths(calendar, isoDateFields, years, months, overflow)

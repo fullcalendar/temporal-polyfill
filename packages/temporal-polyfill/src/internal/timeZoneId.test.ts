@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { numberToBigNano } from './bigNano'
 import { resolveTimeZoneId, resolveTimeZoneRecord } from './timeZoneId'
 import { queryTimeZone } from './timeZoneImpl'
 
@@ -14,9 +13,7 @@ describe('resolveTimeZoneRecord', () => {
       offsetNano: 19_800_000_000_000,
       compareKey: 19_800_000_000_000,
     })
-    expect(timeZoneImpl.getOffsetNanosecondsFor(numberToBigNano(0))).toBe(
-      19_800_000_000_000,
-    )
+    expect(timeZoneImpl.getOffsetNanosecondsFor(0n)).toBe(19_800_000_000_000)
   })
 
   it('keeps UTC distinct from an equivalent zero-offset zone', () => {

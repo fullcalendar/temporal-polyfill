@@ -370,6 +370,17 @@ export function compareNumbers(a: number, b: number): NumberSign {
   return Math.sign(a - b) as NumberSign
 }
 
+export function compareBigInts(a: bigint, b: bigint): NumberSign {
+  return (a < b ? -1 : a > b ? 1 : 0) as NumberSign
+}
+
+// FYI, bigint division does trunc by default
+export function divFloorBigInt(num: bigint, denom: bigint): bigint {
+  const whole = num / denom
+  const remainder = num % denom
+  return remainder < BigInt(0) ? whole - BigInt(1) : whole
+}
+
 /*
 min/max are inclusive
 */

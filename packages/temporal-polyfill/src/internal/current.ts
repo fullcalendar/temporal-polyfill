@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import { epochMilliToNano, epochNanoToIso } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { RawDateTimeFormat } from './intlFormatUtils'
@@ -12,7 +11,7 @@ export function getCurrentIsoDateTime(
   return epochNanoToIso(epochNano, offsetNano)
 }
 
-export function getCurrentEpochNano(): BigNano {
+export function getCurrentEpochNano(): bigint {
   return epochMilliToNano(Date.now())
 }
 

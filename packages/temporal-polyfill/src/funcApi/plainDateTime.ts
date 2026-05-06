@@ -1,4 +1,3 @@
-import { addBigNanos, numberToBigNano } from '../internal/bigNano'
 import { refineCalendarId } from '../internal/calendarId'
 import { toStrictInteger } from '../internal/cast'
 import {
@@ -608,10 +607,8 @@ function moveByTimeUnit(
   units: number,
 ): Record {
   const epochNano0 = isoDateTimeToEpochNano(record)!
-  const epochNano1 = addBigNanos(
-    epochNano0,
-    numberToBigNano(toStrictInteger(units), nanoInUnit),
-  )
+  const epochNano1 =
+    epochNano0 + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
   const isoDateTime1 = epochNanoToIso(epochNano1, 0)
 
   return createPlainDateTimeFromRefinedFields(

@@ -1,4 +1,3 @@
-import { compareBigNanos } from './bigNano'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import { isoDateToEpochMilli } from './epochMath'
@@ -33,7 +32,12 @@ import {
 import { timeFieldsToNano } from './timeFieldMath'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
-import { NumberSign, allPropsEqual, compareNumbers } from './utils'
+import {
+  NumberSign,
+  allPropsEqual,
+  compareBigInts,
+  compareNumbers,
+} from './utils'
 
 // High-Level Compare
 // -----------------------------------------------------------------------------
@@ -42,7 +46,7 @@ export function compareInstants(
   instantSlots0: InstantSlots,
   instantSlots1: InstantSlots,
 ): NumberSign {
-  return compareBigNanos(
+  return compareBigInts(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
   )
@@ -52,7 +56,7 @@ export function compareZonedDateTimes(
   zonedDateTimeSlots0: ZonedDateTimeSlots,
   zonedDateTimeSlots1: ZonedDateTimeSlots,
 ): NumberSign {
-  return compareBigNanos(
+  return compareBigInts(
     zonedDateTimeSlots0.epochNanoseconds,
     zonedDateTimeSlots1.epochNanoseconds,
   )
@@ -77,7 +81,7 @@ export function compareDurations<RA>(
   }
 
   if (isUniformUnit(maxUnit, relativeToSlots)) {
-    return compareBigNanos(
+    return compareBigInts(
       durationFieldsToBigNano(durationSlots0),
       durationFieldsToBigNano(durationSlots1),
     )
@@ -89,7 +93,7 @@ export function compareDurations<RA>(
 
   const markerSpanOps = createMarkerSpanOps(relativeToSlots)
 
-  return compareBigNanos(
+  return compareBigInts(
     moveMarkerToEpochNano(markerSpanOps, durationSlots0),
     moveMarkerToEpochNano(markerSpanOps, durationSlots1),
   )

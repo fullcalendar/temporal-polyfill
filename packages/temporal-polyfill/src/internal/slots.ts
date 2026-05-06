@@ -1,4 +1,3 @@
-import { BigNano, bigNanoToBigInt } from './bigNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './epochMath'
@@ -25,7 +24,7 @@ export const DurationBranding = 'Duration' as const
 // Slot-creation helpers
 // -----------------------------------------------------------------------------
 
-export function createInstantSlots(epochNano: BigNano): InstantSlots {
+export function createInstantSlots(epochNano: bigint): InstantSlots {
   return {
     branding: InstantBranding,
     epochNanoseconds: epochNano,
@@ -33,7 +32,7 @@ export function createInstantSlots(epochNano: BigNano): InstantSlots {
 }
 
 export function createZonedDateTimeSlots(
-  epochNano: BigNano,
+  epochNano: bigint,
   timeZone: TimeZoneImpl,
   calendar?: InternalCalendar,
 ): ZonedDateTimeSlots {
@@ -114,7 +113,7 @@ export function createDurationSlots(
 
 export type BrandingSlots = { branding: string }
 
-export type EpochSlots = { epochNanoseconds: BigNano }
+export type EpochSlots = { epochNanoseconds: bigint }
 export type EpochAndZoneSlots = EpochSlots & { timeZone: TimeZoneImpl }
 export type ZonedEpochSlots = EpochAndZoneSlots & {
   calendar: InternalCalendar
@@ -163,7 +162,7 @@ export type DurationSlots = DurationFields & {
 
 export type InstantSlots = {
   branding: typeof InstantBranding
-  epochNanoseconds: BigNano
+  epochNanoseconds: bigint
 }
 
 // Epoch Slot Getters
@@ -188,9 +187,9 @@ export function getEpochMicro(slots: EpochSlots): bigint {
 }
 
 export function getEpochNano(slots: EpochSlots): bigint {
-  return bigNanoToBigInt(slots.epochNanoseconds)
+  return slots.epochNanoseconds
 }
 
-export function extractEpochNano(slots: EpochSlots): BigNano {
+export function extractEpochNano(slots: EpochSlots): bigint {
   return slots.epochNanoseconds
 }

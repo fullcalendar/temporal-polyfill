@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
 import { isoDateTimeToEpochNano } from './epochMath'
@@ -22,7 +21,7 @@ export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
 // Individual Op types
 // -----------------------------------------------------------------------------
 
-export type MarkerToEpochNano = (marker: MovableMarker) => BigNano
+export type MarkerToEpochNano = (marker: MovableMarker) => bigint
 
 export type MoveMarker = (
   marker: MovableMarker,
@@ -117,7 +116,7 @@ export function createMarkerSpanOps(
 export function moveMarkerToEpochNano(
   markerMoveOps: MarkerMoveOps,
   durationFields: DurationFields,
-): BigNano {
+): bigint {
   return markerMoveOps.markerToEpochNano(
     markerMoveOps.moveMarker(markerMoveOps.marker, durationFields),
   )
@@ -138,8 +137,7 @@ export function isZonedEpochSlots(
 export function isZonedEpochSlots(
   marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {
-  return (marker &&
-    (marker as EpochSlots).epochNanoseconds) as unknown as boolean
+  return Boolean(marker && 'epochNanoseconds' in marker)
 }
 
 // Done with MarkerSpanOps, which has a forked flow because .relativeTo in the

@@ -1,4 +1,3 @@
-import { bigIntToBigNano } from './bigNano'
 import { refineCalendarId } from './calendarId'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { durationFieldNamesAsc } from './durationFields'
@@ -38,9 +37,7 @@ import { queryTimeZone } from './timeZoneImpl'
 import { mapProps, zipProps } from './utils'
 
 export function constructInstantSlots(epochNano: bigint): InstantSlots {
-  return createInstantSlots(
-    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
-  )
+  return createInstantSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
 }
 
 export function constructZonedDateTimeSlots(
@@ -49,7 +46,7 @@ export function constructZonedDateTimeSlots(
   calendarId = isoCalendarId,
 ): ZonedDateTimeSlots {
   return createZonedDateTimeSlots(
-    checkEpochNanoInBounds(bigIntToBigNano(toBigInt(epochNano))),
+    checkEpochNanoInBounds(toBigInt(epochNano)),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
     getInternalCalendar(refineCalendarId(calendarId)),
   )

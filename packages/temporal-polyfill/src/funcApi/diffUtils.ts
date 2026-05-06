@@ -1,11 +1,4 @@
-import {
-  BigNano,
-  bigNanoToExactDays,
-  bigNanoToNumber,
-  compareBigNanos,
-  diffBigNanos,
-  moveBigNano,
-} from '../internal/bigNano'
+import { divideBigNanoToExactNumber } from '../internal/bigNano'
 import {
   diffCalendarDates,
   getCommonCalendar,
@@ -34,12 +27,12 @@ import {
   extractEpochNano,
 } from '../internal/slots'
 import { totalRelativeDuration } from '../internal/total'
-import { TimeUnit, Unit } from '../internal/units'
-import { NumberSign, bindArgs } from '../internal/utils'
+import { TimeUnit, Unit, nanoInUtcDay } from '../internal/units'
+import { NumberSign, bindArgs, compareBigInts } from '../internal/utils'
 
 // TODO: Split the plain callers so each one passes a type-specific converter
 // instead of branching here between date-only, date-time, and epoch markers.
-function isoMarkerToEpochNano(marker: MovableMarker): BigNano {
+function isoMarkerToEpochNano(marker: MovableMarker): bigint {
   if (!isZonedEpochSlots(marker)) {
     return isoDateTimeToEpochNano(
       combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
@@ -160,7 +153,7 @@ function diffDateUnits(
   const startEpochNano = markerToEpochNano(marker0)
   const endEpochNano = markerToEpochNano(marker1)
 
-  const sign = compareBigNanos(endEpochNano, startEpochNano)
+  const sign = compareBigInts(endEpochNano, startEpochNano)
   if (!sign) {
     return 0
   }
@@ -196,21 +189,18 @@ function diffZonedDayLikeUnits(
 
   const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
 
-  const sign = compareBigNanos(
+  const sign = compareBigInts(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
   const [isoFields0, isoFields1, remainderNano, startTime] =
     prepareZonedEpochDiff(timeZone, record0, record1, sign)
-  const nanoDiff = moveBigNano(
-    diffBigNanos(
-      isoDateTimeToEpochNano(combineDateAndTime(isoFields0, startTime))!,
-      isoDateTimeToEpochNano(combineDateAndTime(isoFields1, startTime))!,
-    ),
-    remainderNano,
-  )
+  const nanoDiff =
+    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, startTime))! -
+    isoDateTimeToEpochNano(combineDateAndTime(isoFields0, startTime))! +
+    BigInt(remainderNano)
 
-  let res = bigNanoToExactDays(nanoDiff) / daysInUnit
+  let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
 
   if (roundingInc) {
     res = roundByInc(res, roundingInc, roundingMode!)
@@ -228,12 +218,9 @@ function diffPlainDayLikeUnit(
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-  const nanoDiff = diffBigNanos(
-    markerToEpochNano(record0),
-    markerToEpochNano(record1),
-  )
+  const nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
 
-  let res = bigNanoToExactDays(nanoDiff) / daysInUnit
+  let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
 
   if (roundingInc) {
     res = roundByInc(res, roundingInc, roundingMode!)
@@ -255,10 +242,7 @@ function diffTimeUnit(
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
-  let nanoDiff = diffBigNanos(
-    markerToEpochNano(record0),
-    markerToEpochNano(record1),
-  )
+  let nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
 
   if (roundingInc) {
     nanoDiff = roundBigNanoByInc(
@@ -268,5 +252,7 @@ function diffTimeUnit(
     )
   }
 
-  return bigNanoToNumber(nanoDiff, nanoInUnit, !roundingInc)
+  return roundingInc
+    ? Number(nanoDiff / BigInt(nanoInUnit))
+    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
 }

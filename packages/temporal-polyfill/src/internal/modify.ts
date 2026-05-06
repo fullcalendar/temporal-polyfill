@@ -1,4 +1,3 @@
-import { BigNano } from './bigNano'
 import * as errorMessages from './errorMessages'
 import {
   type InternalCalendar,
@@ -35,7 +34,7 @@ export function zonedDateTimeWithPlainTime(
 
   const time = plainTimeFields || timeFieldDefaults
 
-  let epochNano: BigNano
+  let epochNano: bigint
 
   if (plainTimeFields) {
     epochNano = getMatchingInstantFor(

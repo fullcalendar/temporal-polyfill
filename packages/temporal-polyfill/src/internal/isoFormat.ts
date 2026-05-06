@@ -1,4 +1,4 @@
-import { BigNano, divModBigNano } from './bigNano'
+import { bigNanoInSec } from './bigNano'
 import {
   checkDurationTimeUnit,
   checkDurationUnits,
@@ -62,7 +62,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from './units'
-import { divModFloor, divModTrunc, padNumber, padNumber2 } from './utils'
+import { divModFloor, padNumber, padNumber2 } from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
@@ -193,7 +193,7 @@ export function formatDurationIso(
 function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZoneImpl: TimeZoneImpl,
-  epochNano: BigNano,
+  epochNano: bigint,
   roundingMode: RoundingMode,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
@@ -218,7 +218,7 @@ function formatZonedEpochNanoIso(
   calendar: InternalCalendar,
   timeZoneId: string,
   timeZoneImpl: TimeZoneImpl,
-  epochNano: BigNano,
+  epochNano: bigint,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
   offsetDisplay: OffsetDisplay,
@@ -321,12 +321,9 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const secondParts = divModBigNano(
-    durationFieldsToBigNano(abs, Unit.Second),
-    nanoInSec,
-    divModTrunc,
-  )
-  const [wholeSec, subsecNano] = secondParts
+  const bigNano = durationFieldsToBigNano(abs, Unit.Second)
+  const wholeSec = Number(bigNano / bigNanoInSec)
+  const subsecNano = Number(bigNano % bigNanoInSec)
   checkDurationTimeUnit(wholeSec)
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)

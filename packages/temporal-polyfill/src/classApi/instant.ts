@@ -1,4 +1,4 @@
-import { numberToBigNano } from '../internal/bigNano'
+import { bigNanoInMilli } from '../internal/bigNano'
 import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
 import { constructInstantSlots } from '../internal/construct'
@@ -26,7 +26,7 @@ import {
   createInstantSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
-import { TimeUnitName, nanoInMilli } from '../internal/units'
+import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   Duration,
@@ -160,7 +160,7 @@ export function toTemporalInstant(this: Date): Instant {
 
   return createInstant(
     createInstantSlots(
-      numberToBigNano(requireNumberIsInteger(epochMilli), nanoInMilli),
+      BigInt(requireNumberIsInteger(epochMilli)) * bigNanoInMilli,
     ),
   )
 }

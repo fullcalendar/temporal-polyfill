@@ -1,9 +1,4 @@
-import {
-  BigNano,
-  SAFE_bigNanoToNumber,
-  addBigNanos,
-  bigNanoToNumber,
-} from './bigNano'
+import { bigNanoInSec, bigNanoInUtcDay } from './bigNano'
 import {
   DurationFields,
   DurationTimeFields,
@@ -98,9 +93,9 @@ function addDayTimeDurations(
 ): DurationFields {
   const bigNano0 = durationFieldsToBigNano(a)
   const bigNano1 = durationFieldsToBigNano(b)
-  const combined = addBigNanos(bigNano0, bigNano1, doSubtract ? -1 : 1)
+  const combined = bigNano0 + bigNano1 * BigInt(doSubtract ? -1 : 1)
 
-  if (!Number.isFinite(combined[0])) {
+  if (!Number.isFinite(Number(combined / bigNanoInUtcDay))) {
     throw new RangeError(errorMessages.outOfBoundsDate)
   }
 
@@ -255,7 +250,7 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
   }
 
   const bigNano = durationFieldsToBigNano(fields)
-  checkDurationTimeUnit(bigNanoToNumber(bigNano, nanoInSec))
+  checkDurationTimeUnit(Number(bigNano / bigNanoInSec))
 
   return fields
 }
@@ -271,7 +266,7 @@ export function checkDurationTimeUnit(n: number): void {
 
 export function durationTimeFieldsToBigNanoStrict(
   fields: DurationFields,
-): BigNano {
+): bigint {
   if (durationHasDateParts(fields)) {
     throw new RangeError(errorMessages.invalidLargeUnits)
   }
@@ -282,22 +277,23 @@ export function durationTimeFieldsToBigNanoStrict(
 export function durationFieldsToBigNano(
   fields: DurationFields,
   largestUnit: DayTimeUnit = Unit.Day,
-): BigNano {
+): bigint {
   return givenFieldsToBigNano(fields, largestUnit, durationFieldNamesAsc)
 }
 
 export function nanoToDurationDayTimeFields(
-  largeNano: BigNano,
+  largeNano: bigint,
 ): { days: number } & DurationTimeFields
 export function nanoToDurationDayTimeFields(
-  largeNano: BigNano,
+  largeNano: bigint,
   largestUnit?: DayTimeUnit,
 ): Partial<DurationFields>
 export function nanoToDurationDayTimeFields(
-  bigNano: BigNano,
+  bigNano: bigint,
   largestUnit: DayTimeUnit = Unit.Day,
 ): Partial<DurationFields> {
-  const [days, timeNano] = bigNano
+  const days = Number(bigNano / bigNanoInUtcDay)
+  const timeNano = Number(bigNano % bigNanoInUtcDay)
   const dayTimeFields = nanoToGivenFields(
     timeNano,
     largestUnit,
@@ -306,11 +302,10 @@ export function nanoToDurationDayTimeFields(
 
   if (largestUnit <= Unit.Second) {
     // For sub-minute largest units, the public largest field can be far larger
-    // than Number.MAX_SAFE_INTEGER, so convert from the full BigNano tuple
+    // than Number.MAX_SAFE_INTEGER, so convert from the full bigint tuple
     // instead of adding a day contribution to an already-decomposed field.
-    dayTimeFields[durationFieldNamesAsc[largestUnit]] = SAFE_bigNanoToNumber(
-      bigNano,
-      unitNanoMap[largestUnit],
+    dayTimeFields[durationFieldNamesAsc[largestUnit]] = Number(
+      bigNano / BigInt(unitNanoMap[largestUnit]),
     )
   } else {
     // Hour/minute/day outputs stay well within safe integer arithmetic for the
