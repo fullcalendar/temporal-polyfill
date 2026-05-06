@@ -1,3 +1,4 @@
+import { isoDateTimeToEpochMilli, isoDateToEpochMilli } from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
   type InternalCalendar,
@@ -12,11 +13,7 @@ import {
 import { isoCalendarId } from './intlCalendarConfig'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
-import {
-  isoDateTimeToEpochMilli,
-  isoDateToEpochMilli,
-  timeFieldsToNano,
-} from './timeMath'
+import { timeFieldsToNano } from './timeFieldMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { nanoInMilli } from './units'
 import { excludePropsByName } from './utils'

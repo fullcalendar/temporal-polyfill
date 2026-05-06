@@ -1,6 +1,7 @@
 import { compareBigNanos } from './bigNano'
 import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
+import { isoDateToEpochMilli } from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
   type InternalCalendar,
@@ -29,7 +30,7 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
 } from './slots'
-import { isoDateToEpochMilli, timeFieldsToNano } from './timeMath'
+import { timeFieldsToNano } from './timeFieldMath'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'

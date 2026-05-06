@@ -1,15 +1,21 @@
 import { eraYearToYear } from '../internal/calendarFields'
-import type { MonthCodeParts } from '../internal/calendarMonthCode'
 import {
+  type MonthCodeParts,
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from '../internal/calendarMonthCode'
+import {
+  diffEpochMilliDays,
+  epochMilliToIsoDateTime,
+  isoArgsToEpochMilli,
+  isoDateToEpochMilli,
+} from '../internal/epochMath'
 import * as errorMessages from '../internal/errorMessages'
-import type { ExternalCalendar } from '../internal/externalCalendar'
-import type {
-  CalendarDateFields,
-  CalendarEraFields,
-  CalendarYearMonthFields,
+import { type ExternalCalendar } from '../internal/externalCalendar'
+import {
+  type CalendarDateFields,
+  type CalendarEraFields,
+  type CalendarYearMonthFields,
 } from '../internal/fieldTypes'
 import { normalizeEraName } from '../internal/intlCalendarConfig'
 import {
@@ -21,14 +27,8 @@ import {
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
   isoMonthsInYear,
-} from '../internal/isoMath'
-import {
-  diffEpochMilliDays,
-  epochMilliToIsoDateTime,
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-  maxMilli,
-} from '../internal/timeMath'
+} from '../internal/isoCalendarMath'
+import { maxMilli } from '../internal/temporalConstants'
 import { utcTimeZoneId } from '../internal/timeZoneConfig'
 import { milliInDay } from '../internal/units'
 import {

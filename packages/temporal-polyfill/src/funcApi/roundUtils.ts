@@ -2,6 +2,10 @@ import {
   computeCalendarDateFields,
   computeCalendarEpochMilli,
 } from '../internal/calendarDerived'
+import {
+  epochMilliToIsoDateTime,
+  isoDateTimeToEpochNano,
+} from '../internal/epochMath'
 import { timeFieldDefaults, timeFieldNamesAsc } from '../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -9,15 +13,11 @@ import {
   TimeFields,
 } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
+import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import { addCalendarMonths, moveByDays } from '../internal/move'
 import { RoundingMode } from '../internal/optionsModel'
 import { IsoDateTimeInterval, roundWithMode } from '../internal/round'
 import { AbstractDateSlots } from '../internal/slots'
-import {
-  epochMilliToIsoDateTime,
-  isoDateTimeToEpochNano,
-} from '../internal/timeMath'
 import { computeEpochNanoFrac } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
 import { bindArgs, zeroOutProps } from '../internal/utils'

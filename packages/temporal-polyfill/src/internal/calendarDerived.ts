@@ -1,9 +1,14 @@
 import { formatMonthCode } from './calendarMonthCode'
 import {
+  diffEpochMilliDays,
+  isoArgsToEpochMilli,
+  isoDateToEpochMilli,
+} from './epochMath'
+import {
   type InternalCalendar,
   getInternalCalendarId,
 } from './externalCalendar'
-import type { CalendarDateFields } from './fieldTypes'
+import { type CalendarDateFields } from './fieldTypes'
 import {
   computeIsoDateFields,
   computeIsoDayOfYear,
@@ -14,12 +19,7 @@ import {
   computeIsoInLeapYear,
   computeIsoMonthCodeParts,
   isoMonthsInYear,
-} from './isoMath'
-import {
-  diffEpochMilliDays,
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-} from './timeMath'
+} from './isoCalendarMath'
 
 export function computeCalendarDateFields(
   calendar: InternalCalendar,

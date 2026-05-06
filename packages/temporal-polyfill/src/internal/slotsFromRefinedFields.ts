@@ -8,12 +8,11 @@ import {
   resolveCalendarMonth,
   resolveCalendarYear,
 } from './calendarFields'
-import type { MonthCodeParts } from './calendarMonthCode'
-import { parseMonthCode } from './calendarMonthCode'
+import { type MonthCodeParts, parseMonthCode } from './calendarMonthCode'
 import * as errorMessages from './errorMessages'
 import { type InternalCalendar, isoCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
-import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
+import { type DateOptionsRefiner, type DateOptionsTuple } from './fieldRefine'
 import {
   CalendarDateFields,
   DateFields,
@@ -25,10 +24,9 @@ import { combineDateAndTime } from './fieldUtils'
 import {
   computeIsoYearMonthFieldsForMonthDay,
   isoEpochFirstLeapYear,
-} from './isoMath'
+} from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
-import { Overflow } from './optionsModel'
-import { OverflowOptions } from './optionsModel'
+import { Overflow, OverflowOptions } from './optionsModel'
 import {
   PlainDateSlots,
   PlainDateTimeSlots,
@@ -43,7 +41,7 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
-} from './timeMath'
+} from './temporalLimits'
 import { clampNumber } from './utils'
 
 // Built-in *-from-fields

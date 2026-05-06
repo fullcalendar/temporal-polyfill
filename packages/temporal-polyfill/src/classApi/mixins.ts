@@ -20,7 +20,10 @@ import {
   timeFieldNamesAsc,
   yearMonthGetterFieldNames,
 } from '../internal/fieldNames'
-import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
+import {
+  computeIsoDayOfWeek,
+  computeIsoWeekFields,
+} from '../internal/isoCalendarMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
 

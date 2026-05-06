@@ -13,6 +13,7 @@ import {
   prepareZonedEpochDiff,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
+import { isoDateTimeToEpochNano } from '../internal/epochMath'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
@@ -32,7 +33,6 @@ import {
   ZonedDateTimeSlots,
   extractEpochNano,
 } from '../internal/slots'
-import { isoDateTimeToEpochNano } from '../internal/timeMath'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'

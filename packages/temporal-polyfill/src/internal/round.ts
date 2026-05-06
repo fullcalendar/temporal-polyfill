@@ -33,8 +33,12 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
-import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
-import { RoundingOptions } from './optionsModel'
+import {
+  EpochDisambig,
+  OffsetDisambig,
+  RoundingMode,
+  RoundingOptions,
+} from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,
@@ -54,11 +58,8 @@ import {
   createPlainTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
-import {
-  checkIsoDateTimeInBounds,
-  nanoToTimeAndDay,
-  timeFieldsToNano,
-} from './timeMath'
+import { checkIsoDateTimeInBounds } from './temporalLimits'
+import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZoneImpl } from './timeZoneImpl'
 import {
   getMatchingInstantFor,

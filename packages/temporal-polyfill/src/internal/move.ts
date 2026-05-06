@@ -19,16 +19,17 @@ import {
   getMaxDurationUnit,
   negateDurationFields,
 } from './durationMath'
+import { epochMilliToIsoDateTime, isoDateToEpochMilli } from './epochMath'
 import * as errorMessages from './errorMessages'
-import type { InternalCalendar } from './externalCalendar'
+import { type InternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
+  type CalendarYearMonthFields,
   TimeFields,
 } from './fieldTypes'
-import type { CalendarYearMonthFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { addIsoMonths } from './isoMath'
+import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
@@ -51,11 +52,8 @@ import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
-  epochMilliToIsoDateTime,
-  isoDateToEpochMilli,
-  nanoToTimeAndDay,
-  timeFieldsToNano,
-} from './timeMath'
+} from './temporalLimits'
+import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'

@@ -1,7 +1,8 @@
 import { BigNano, bigNanoToBigInt } from './bigNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
-import type { InternalCalendar } from './externalCalendar'
+import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './epochMath'
+import { type InternalCalendar } from './externalCalendar'
 import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -9,8 +10,7 @@ import {
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
-import type { TimeZoneImpl } from './timeZoneImpl'
+import { type TimeZoneImpl } from './timeZoneImpl'
 import { NumberSign, pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const

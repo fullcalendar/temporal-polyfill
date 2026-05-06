@@ -1,6 +1,7 @@
 import { BigNano, bigNanoToNumber, diffBigNanos, moveBigNano } from './bigNano'
+import { epochNanoToIso, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
-import type { InternalCalendar } from './externalCalendar'
+import { type InternalCalendar } from './externalCalendar'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
 import {
   DirectionName,
@@ -13,10 +14,8 @@ import { roundToMinute } from './round'
 import { ZonedEpochSlots } from './slots'
 import {
   checkIsoDateInBoundsStrict,
-  epochNanoToIso,
-  isoDateTimeToEpochNano,
   isoDateTimeToEpochNanoWithOffset,
-} from './timeMath'
+} from './temporalLimits'
 import { TimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
 import { memoize } from './utils'

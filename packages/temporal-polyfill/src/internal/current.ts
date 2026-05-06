@@ -1,7 +1,7 @@
 import { BigNano } from './bigNano'
+import { epochMilliToNano, epochNanoToIso } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { RawDateTimeFormat } from './intlFormatUtils'
-import { epochMilliToNano, epochNanoToIso } from './timeMath'
 import { TimeZoneImpl } from './timeZoneImpl'
 
 export function getCurrentIsoDateTime(

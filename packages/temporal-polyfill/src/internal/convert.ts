@@ -2,10 +2,10 @@ import { BigNano, bigIntToBigNano, numberToBigNano } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import { type InternalCalendar, isoCalendar } from './externalCalendar'
-import { timeFieldDefaults } from './fieldNames'
 import {
   dayFieldNamesAsc,
   monthCodeDayFieldNamesAlpha,
+  timeFieldDefaults,
   yearFieldNamesAsc,
   yearFieldNamesWithEraAlpha,
   yearMonthCodeDayFieldNamesAlpha,
@@ -14,11 +14,12 @@ import {
   yearMonthCodeFieldNamesWithEraAlpha,
 } from './fieldNames'
 import { dateFieldRefiners, readAndRefineBagFields } from './fieldRefine'
-import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import {
+  CalendarDateTimeFields,
   DateFields,
   DayFields,
   EraYearOrYear,
+  TimeFields,
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -44,7 +45,7 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { checkEpochNanoInBounds } from './timeMath'
+import { checkEpochNanoInBounds } from './temporalLimits'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
   getSingleInstantFor,

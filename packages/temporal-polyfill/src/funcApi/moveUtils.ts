@@ -5,6 +5,7 @@ import {
   computeCalendarDaysInYear,
 } from '../internal/calendarDerived'
 import { toInteger, toStrictInteger } from '../internal/cast'
+import { epochMilliToIsoDateTime } from '../internal/epochMath'
 import * as errorMessages from '../internal/errorMessages'
 import { isoCalendar } from '../internal/externalCalendar'
 import {
@@ -14,7 +15,10 @@ import {
   weekOfYearFieldName,
 } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
+import {
+  computeIsoDayOfWeek,
+  computeIsoWeekFields,
+} from '../internal/isoCalendarMath'
 import {
   addDateMonths,
   moveByDays,
@@ -23,7 +27,6 @@ import {
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
 import { AbstractDateSlots } from '../internal/slots'
-import { epochMilliToIsoDateTime } from '../internal/timeMath'
 import { clampEntity } from '../internal/utils'
 
 export function reversedMove<S>(

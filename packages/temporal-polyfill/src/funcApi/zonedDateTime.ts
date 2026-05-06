@@ -24,8 +24,8 @@ import {
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { createFormatPrepper, zonedConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
@@ -63,7 +63,7 @@ import {
   getEpochNano,
   getEpochSec,
 } from '../internal/slots'
-import { checkEpochNanoInBounds } from '../internal/timeMath'
+import { checkEpochNanoInBounds } from '../internal/temporalLimits'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {

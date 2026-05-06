@@ -1,5 +1,5 @@
 import * as errorMessages from './errorMessages'
-import { maxMilli } from './timeMath'
+import { maxMilli } from './temporalConstants'
 
 export type LocalesArg = string | string[]
 export type OptionNames = (keyof Intl.DateTimeFormatOptions)[]

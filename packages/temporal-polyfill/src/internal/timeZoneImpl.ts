@@ -1,22 +1,23 @@
 import { BigNano, moveBigNano, numberToBigNano } from './bigNano'
+import {
+  epochNanoToSec,
+  epochNanoToSecMod,
+  isoArgsToEpochSec,
+  isoDateTimeToEpochSec,
+} from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
 import { parseIntlPartsYear } from './intlParts'
 import {
   checkEpochNanoInBounds,
-  epochNanoToSec,
-  epochNanoToSecMod,
-  isoArgsToEpochSec,
-  isoDateAndTimeToEpochSec,
   isoDateTimeToEpochNanoWithOffset,
-} from './timeMath'
+} from './temporalLimits'
 import {
   getTimeZonePeriodDays,
   maxPossibleTransition,
   minPossibleTransition,
 } from './timeZoneConfig'
-import type { ResolvedTimeZone } from './timeZoneId'
-import { resolveTimeZoneRecord } from './timeZoneId'
+import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
 
@@ -100,7 +101,7 @@ export class IntlTimeZone implements TimeZoneImpl {
   }
 
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): BigNano[] {
-    const [zonedEpochSec, subsecNano] = isoDateAndTimeToEpochSec(isoDateTime)
+    const [zonedEpochSec, subsecNano] = isoDateTimeToEpochSec(isoDateTime)
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(

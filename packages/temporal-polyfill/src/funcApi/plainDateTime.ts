@@ -13,6 +13,7 @@ import {
 } from '../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes, getCommonCalendar } from '../internal/diff'
+import { epochNanoToIso, isoDateTimeToEpochNano } from '../internal/epochMath'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import {
@@ -24,8 +25,8 @@ import {
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { createFormatPrepper, dateTimeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDateTime } from '../internal/isoParse'
 import { mergePlainDateTimeFields } from '../internal/merge'
 import { plainDateTimeWithPlainDate } from '../internal/modify'
@@ -54,7 +55,6 @@ import {
   createPlainTimeSlots,
 } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
-import { epochNanoToIso, isoDateTimeToEpochNano } from '../internal/timeMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {

@@ -9,8 +9,7 @@ import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { getInternalCalendar } from './externalCalendar'
-import type { InternalCalendar } from './externalCalendar'
+import { type InternalCalendar, getInternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarYearMonthFields,
@@ -21,11 +20,10 @@ import { isoCalendarId } from './intlCalendarConfig'
 import {
   checkIsoDateFields,
   checkIsoDateTimeFields,
-  checkTimeFields,
   computeIsoYearMonthFieldsForMonthDay,
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
-} from './isoMath'
+} from './isoCalendarMath'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
   offsetHasSeconds,
@@ -35,7 +33,7 @@ import {
   validateOffsetSeparators,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
-import type { ZonedFieldOptions } from './optionsModel'
+import { type ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
   AbstractDateSlots,
@@ -63,7 +61,8 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoDateTimeToEpochNanoWithOffset,
-} from './timeMath'
+} from './temporalLimits'
+import { checkTimeFields } from './timeFieldMath'
 import { organizeTimeParts, timeRegExpStr } from './timeParse'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'

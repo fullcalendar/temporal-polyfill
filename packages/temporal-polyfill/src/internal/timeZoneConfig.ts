@@ -1,4 +1,5 @@
-import { isoArgsToEpochSec } from './timeMath'
+import { isoArgsToEpochSec } from './epochMath'
+
 export const utcTimeZoneId = 'UTC'
 
 // Time-zone transition search works by sampling the offset at both ends

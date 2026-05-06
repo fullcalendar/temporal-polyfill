@@ -2,16 +2,16 @@ import { expect } from 'vitest'
 import { BigNano, bigIntToBigNano, bigNanoToBigInt } from '../internal/bigNano'
 import { computeDurationSign } from '../internal/durationMath'
 import {
+  isoDateTimeToEpochNano,
+  isoDateToEpochNano,
+} from '../internal/epochMath'
+import {
   getInternalCalendarId,
   isoCalendar,
 } from '../internal/externalCalendar'
 import { TimeFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
-import {
-  isoDateTimeToEpochNano,
-  isoDateToEpochNano,
-} from '../internal/timeMath'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'

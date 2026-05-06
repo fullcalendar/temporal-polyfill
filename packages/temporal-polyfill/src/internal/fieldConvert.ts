@@ -1,7 +1,7 @@
 import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
-import { constrainTimeFields } from './isoMath'
 import { Overflow } from './optionsModel'
+import { constrainTimeFields } from './timeFieldMath'
 import { pluckProps } from './utils'
 
 export function resolveTimeFields(

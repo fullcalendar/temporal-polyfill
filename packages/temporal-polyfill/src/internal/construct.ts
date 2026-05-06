@@ -7,8 +7,7 @@ import { getInternalCalendar } from './externalCalendar'
 import { timeFieldNamesAsc } from './fieldNames'
 import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
-import { isoEpochFirstLeapYear } from './isoMath'
-import { checkIsoDateFields, checkTimeFields } from './isoMath'
+import { checkIsoDateFields, isoEpochFirstLeapYear } from './isoCalendarMath'
 import {
   DurationSlots,
   InstantSlots,
@@ -32,7 +31,8 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
-} from './timeMath'
+} from './temporalLimits'
+import { checkTimeFields } from './timeFieldMath'
 import { refineTimeZoneId } from './timeZoneId'
 import { queryTimeZone } from './timeZoneImpl'
 import { mapProps, zipProps } from './utils'

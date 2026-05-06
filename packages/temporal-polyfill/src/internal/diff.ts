@@ -16,6 +16,13 @@ import {
   nanoToDurationTimeFields,
   negateDurationFields,
 } from './durationMath'
+import {
+  diffEpochMilliDays,
+  epochMilliToIsoDateTime,
+  isoDateTimeToEpochNano,
+  isoDateToEpochMilli,
+  isoDateToEpochNano,
+} from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
   type InternalCalendar,
@@ -27,7 +34,7 @@ import {
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { addIsoMonths, diffIsoMonthSlots } from './isoMath'
+import { addIsoMonths, diffIsoMonthSlots } from './isoCalendarMath'
 import {
   addDateMonths,
   computeYearMovedMonth,
@@ -61,15 +68,8 @@ import {
   createDurationSlots,
   extractEpochNano,
 } from './slots'
-import {
-  checkIsoDateInBounds,
-  diffEpochMilliDays,
-  epochMilliToIsoDateTime,
-  isoDateTimeToEpochNano,
-  isoDateToEpochMilli,
-  isoDateToEpochNano,
-  timeFieldsToNano,
-} from './timeMath'
+import { checkIsoDateInBounds } from './temporalLimits'
+import { timeFieldsToNano } from './timeFieldMath'
 import { TimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import {

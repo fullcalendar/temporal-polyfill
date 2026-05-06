@@ -1,10 +1,12 @@
 import type { MonthCodeParts } from './calendarMonthCode'
-import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+  diffEpochMilliDays,
+  isoArgsToEpochMilli,
+  isoDateToEpochMilli,
+  isoToLegacyDate,
+} from './epochMath'
+import { calendarDateFieldNamesAsc } from './fieldNames'
+import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import type {
   CalendarEraFields,
   CalendarWeekFields,
@@ -12,20 +14,8 @@ import type {
 } from './fieldTypes'
 import { gregoryCalendarId } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
-import {
-  diffEpochMilliDays,
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-  isoToLegacyDate,
-} from './timeMath'
-import {
-  allPropsEqual,
-  clampProp,
-  divTrunc,
-  modFloor,
-  modTrunc,
-  zipProps,
-} from './utils'
+import { checkTimeFields } from './timeFieldMath'
+import { allPropsEqual, clampProp, divTrunc, modFloor, modTrunc } from './utils'
 
 export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
@@ -80,7 +70,7 @@ export function computeIsoDaysInYear(year: number): number {
 }
 
 export function computeIsoInLeapYear(year: number): boolean {
-  // % is dangerous, but comparing 0 with -0 is fine
+  // % is dangerous, but comparing 0 with -0 is fine.
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
 }
 
@@ -192,7 +182,7 @@ export function computeGregoryEraFields({
 
 // Checking Fields
 // -----------------------------------------------------------------------------
-// Checks validity of month/day, but does NOT do bounds checking
+// Checks validity of month/day/time fields, but does NOT do bounds checking.
 
 export function checkIsoDateTimeFields(
   isoDateTime: CalendarDateTimeFields,
@@ -216,9 +206,6 @@ export function isIsoDateFieldsValid(isoDate: CalendarDateFields): boolean {
   )
 }
 
-// Constraining
-// -----------------------------------------------------------------------------
-
 function constrainIsoDateFields(
   isoDate: CalendarDateFields,
   overflow?: Overflow,
@@ -233,23 +220,4 @@ function constrainIsoDateFields(
     overflow,
   )
   return { year, month, day }
-}
-
-export function checkTimeFields<P extends TimeFields>(timeFields: P): P {
-  constrainTimeFields(timeFields, Overflow.Reject)
-  return timeFields
-}
-
-export function constrainTimeFields(
-  timeFields: TimeFields,
-  overflow?: Overflow,
-): TimeFields {
-  return zipProps(timeFieldNamesAsc, [
-    clampProp(timeFields, 'hour', 0, 23, overflow),
-    clampProp(timeFields, 'minute', 0, 59, overflow),
-    clampProp(timeFields, 'second', 0, 59, overflow),
-    clampProp(timeFields, 'millisecond', 0, 999, overflow),
-    clampProp(timeFields, 'microsecond', 0, 999, overflow),
-    clampProp(timeFields, 'nanosecond', 0, 999, overflow),
-  ])
 }

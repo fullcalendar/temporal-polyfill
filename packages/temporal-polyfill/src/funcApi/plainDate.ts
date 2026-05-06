@@ -10,14 +10,16 @@ import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
-import { CalendarDateFields } from '../internal/fieldTypes'
-import { DateLikeObject } from '../internal/fieldTypes'
-import { DateFields } from '../internal/fieldTypes'
-import { TimeFields } from '../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  DateFields,
+  DateLikeObject,
+  TimeFields,
+} from '../internal/fieldTypes'
 import { createFormatPrepper, dateConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
+import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../internal/isoFormat'
-import { computeIsoDayOfWeek } from '../internal/isoMath'
 import { parsePlainDate } from '../internal/isoParse'
 import { mergePlainDateFields } from '../internal/merge'
 import { moveByDays, movePlainDate } from '../internal/move'
@@ -37,7 +39,7 @@ import {
   createPlainDateSlots,
 } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
-import { checkIsoDateInBounds } from '../internal/timeMath'
+import { checkIsoDateInBounds } from '../internal/temporalLimits'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { DateUnitName, Unit } from '../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'

@@ -39,13 +39,15 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { constrainTimeFields } from './isoMath'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsFieldRefine'
-import { OffsetDisambig } from './optionsModel'
-import { OverflowOptions, ZonedFieldOptions } from './optionsModel'
+import {
+  OffsetDisambig,
+  OverflowOptions,
+  ZonedFieldOptions,
+} from './optionsModel'
 import {
   DurationSlots,
   PlainDateSlots,
@@ -65,6 +67,7 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
+import { constrainTimeFields } from './timeFieldMath'
 import { getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { pluckProps } from './utils'
 

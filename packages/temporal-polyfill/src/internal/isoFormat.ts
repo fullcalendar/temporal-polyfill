@@ -5,6 +5,7 @@ import {
   durationFieldsToBigNano,
   negateDurationFields,
 } from './durationMath'
+import { epochNanoToIso } from './epochMath'
 import {
   type InternalCalendar,
   getInternalCalendarId,
@@ -24,16 +25,14 @@ import {
 } from './optionsDisplayRefine'
 import {
   CalendarDisplay,
-  OffsetDisplay,
-  RoundingMode,
-  SubsecDigits,
-  TimeZoneDisplay,
-} from './optionsModel'
-import {
   CalendarDisplayOptions,
   DateTimeDisplayOptions,
   InstantDisplayOptions,
+  OffsetDisplay,
+  RoundingMode,
+  SubsecDigits,
   TimeDisplayOptions,
+  TimeZoneDisplay,
   ZonedDateTimeDisplayOptions,
 } from './optionsModel'
 import {
@@ -53,7 +52,6 @@ import {
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
 } from './slots'
-import { epochNanoToIso } from './timeMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {

@@ -1,7 +1,8 @@
-import type { ExternalCalendar } from '../internal/externalCalendar'
-import type {
-  CalendarDateFields,
-  CalendarEraFields,
+import { isoArgsToEpochMilli, isoDateToEpochMilli } from '../internal/epochMath'
+import { type ExternalCalendar } from '../internal/externalCalendar'
+import {
+  type CalendarDateFields,
+  type CalendarEraFields,
 } from '../internal/fieldTypes'
 import {
   addIsoMonths,
@@ -16,8 +17,7 @@ import {
   diffIsoMonthSlots,
   isoEpochFirstLeapYear,
   isoMonthsInYear,
-} from '../internal/isoMath'
-import { isoArgsToEpochMilli, isoDateToEpochMilli } from '../internal/timeMath'
+} from '../internal/isoCalendarMath'
 import { memoize } from '../internal/utils'
 import { getIntlCalendar } from './intlCalendar'
 import {

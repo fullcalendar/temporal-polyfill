@@ -17,7 +17,7 @@ import {
   YearMonthFields,
 } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
-import { computeIsoWeekFields } from '../internal/isoMath'
+import { computeIsoWeekFields } from '../internal/isoCalendarMath'
 import { AbstractDateSlots } from '../internal/slots'
 
 // these utils used directly by func-api-based slots

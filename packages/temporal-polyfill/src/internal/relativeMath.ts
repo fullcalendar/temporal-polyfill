@@ -1,6 +1,7 @@
 import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
+import { isoDateTimeToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -11,7 +12,7 @@ import {
   ZonedEpochSlots,
   extractEpochNano,
 } from './slots'
-import { checkIsoDateTimeInBounds, isoDateTimeToEpochNano } from './timeMath'
+import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 

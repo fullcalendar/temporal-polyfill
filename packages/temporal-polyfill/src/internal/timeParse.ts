@@ -1,5 +1,5 @@
 import { TimeFields } from './fieldTypes'
-import { nanoToTimeAndDay } from './timeMath'
+import { nanoToTimeAndDay } from './timeFieldMath'
 import { fractionRegExpStr, parseInt0, parseSubsecNano } from './utils'
 
 export const timeRegExpStr =
