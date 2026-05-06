@@ -134,57 +134,37 @@ export function computeIsoDayOfYear(isoDateFields: CalendarDateFields): number {
 export function computeIsoWeekFields(
   isoDateFields: CalendarDateFields,
 ): CalendarWeekFields {
-  // ISO weeks always start on Monday, and week 1 is the first week with at
-  // least four days in the calendar year. Non-ISO calendars report undefined
-  // before reaching this helper.
-  const startOfWeek = 1
-  const minDaysInWeek = 4
-
-  const isoDayOfWeek = computeIsoDayOfWeek(isoDateFields)
-  const isoDayOfYear = computeIsoDayOfYear(isoDateFields)
-
-  // 0-based
-  // analyze current date, relative to calendar-decided start-of-week
-  const dayOfWeek = modFloor(isoDayOfWeek - startOfWeek, 7)
-  const dayOfYear = isoDayOfYear - 1
-
-  // 0-based
-  // analyze current year-start
-  const y0DayOfWeek = modFloor(dayOfWeek - dayOfYear, 7)
-  const y0WeekShift = computeWeekShift(y0DayOfWeek)
-
-  // 1-based
-  // tentative result
-  let weekOfYear = Math.floor((dayOfYear - y0WeekShift) / 7) + 1
   let yearOfWeek = isoDateFields.year
-  let weeksInYear: number
+  // ISO week 1 is the week containing Jan 4, equivalently the week containing
+  // the year's first Thursday. With Monday=1..Sunday=7, this gives the
+  // tentative ISO week number directly for most dates.
+  let weekOfYear = Math.floor(
+    (computeIsoDayOfYear(isoDateFields) -
+      computeIsoDayOfWeek(isoDateFields) +
+      10) /
+      7,
+  )
+  let weeksInYear = computeIsoWeeksInYear(yearOfWeek)
 
-  // Compute the day-of-year (0-based) where first week begins
-  // Results can be negative indicating the first week begins in the prev year
-  function computeWeekShift(yDayOfWeek: number): number {
-    return (7 - yDayOfWeek < minDaysInWeek ? 7 : 0) - yDayOfWeek
-  }
-
-  // For a given year relative to `yearOfWeek`, compute the total # of weeks
-  function computeWeeksInYear(delta: 0 | -1): number {
-    const daysInYear = computeIsoDaysInYear(yearOfWeek + delta)
-    const sign = delta || 1
-    const y1DayOfWeek = modFloor(y0DayOfWeek + daysInYear * sign, 7)
-    const y1WeekShift = computeWeekShift(y1DayOfWeek)
-    return (weeksInYear = (daysInYear + (y1WeekShift - y0WeekShift) * sign) / 7)
-  }
-
-  if (!weekOfYear) {
-    // in previous year's last week
-    weekOfYear = computeWeeksInYear(-1)
-    yearOfWeek--
-  } else if (weekOfYear > computeWeeksInYear(0)) {
-    // in next year's first week
+  if (weekOfYear < 1) {
+    // Early January can still belong to the previous ISO week-year.
+    weekOfYear = weeksInYear = computeIsoWeeksInYear(--yearOfWeek)
+  } else if (weekOfYear > weeksInYear) {
+    // Late December can already belong to the next ISO week-year.
     weekOfYear = 1
-    yearOfWeek++
+    weeksInYear = computeIsoWeeksInYear(++yearOfWeek)
   }
 
-  return { weekOfYear, yearOfWeek, weeksInYear: weeksInYear! }
+  return { weekOfYear, yearOfWeek, weeksInYear }
+}
+
+function computeIsoWeeksInYear(year: number): number {
+  const y0DayOfWeek = computeIsoDayOfWeek({ year, month: 1, day: 1 })
+  // An ISO year has 53 weeks exactly when Jan 1 is Thursday, or when Jan 1 is
+  // Wednesday in a leap year. All other ISO years have 52 weeks.
+  return y0DayOfWeek === 4 || (y0DayOfWeek === 3 && computeIsoInLeapYear(year))
+    ? 53
+    : 52
 }
 
 // Era (complicated stuff)
