@@ -34,6 +34,7 @@ import { utcTimeZoneId } from '../internal/timeZoneConfig'
 import { milliInDay } from '../internal/units'
 import {
   areNumberArraysEqual,
+  clampNumber,
   compareNumbers,
   memoize,
   modFloor,
@@ -159,6 +160,22 @@ function createIntlCalendar(normCalendarId: string): IntlCalendar {
       plainMonthDayLeapMonthMaxDaysByCalendarIdBase[baseCalendarId],
     plainMonthDayCommonMonthMaxDay:
       plainMonthDayCommonMonthMaxDayByCalendarIdBase[baseCalendarId],
+    computeYearFromEra(eraYear, normalizedEra, eraOrigin) {
+      return computeIntlYearFromEra(
+        baseCalendarId,
+        eraYear,
+        normalizedEra,
+        eraOrigin,
+      )
+    },
+    constrainPlainMonthDay(monthCodeNumber, isLeapMonth, day) {
+      return constrainIntlPlainMonthDay(
+        baseCalendarId,
+        monthCodeNumber,
+        isLeapMonth,
+        day,
+      )
+    },
     computeDateFields(isoDate) {
       return calendar.queryFields(isoDate)
     },
@@ -226,6 +243,44 @@ function createIntlCalendar(normCalendarId: string): IntlCalendar {
   }
 
   return calendar
+}
+
+function computeIntlYearFromEra(
+  baseCalendarId: string,
+  eraYear: number,
+  normalizedEra: string,
+  eraOrigin: number,
+): number {
+  // Ethiopic's AA era counts from an offset epoch instead of using the
+  // forward/reverse year scheme used by Gregorian/ROC/Japanese eras.
+  return baseCalendarId === 'ethiopic' && normalizedEra === 'aa'
+    ? eraYear - 5500
+    : eraYearToYear(eraYear, eraOrigin)
+}
+
+function constrainIntlPlainMonthDay(
+  baseCalendarId: string,
+  monthCodeNumber: number,
+  isLeapMonth: boolean,
+  day: number,
+): number | undefined {
+  let maxDay: number | undefined
+
+  if (baseCalendarId === 'coptic') {
+    maxDay = !isLeapMonth && monthCodeNumber === 13 ? 6 : 30
+  } else if (baseCalendarId === 'chinese') {
+    maxDay =
+      isLeapMonth &&
+      (monthCodeNumber === 1 ||
+        monthCodeNumber === 9 ||
+        monthCodeNumber === 10 ||
+        monthCodeNumber === 11 ||
+        monthCodeNumber === 12)
+        ? 29
+        : 30
+  }
+
+  return maxDay === undefined ? undefined : clampNumber(day, 1, maxDay)
 }
 
 // Caches

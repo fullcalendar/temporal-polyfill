@@ -29,6 +29,16 @@ export interface ExternalCalendar {
   plainMonthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
 
+  computeYearFromEra?(
+    eraYear: number,
+    normalizedEra: string,
+    eraOrigin: number,
+  ): number
+  constrainPlainMonthDay?(
+    monthCodeNumber: number,
+    isLeapMonth: boolean,
+    day: number,
+  ): number | undefined
   computeDateFields(isoDate: CalendarDateFields): CalendarDateFields
   computeIsoFieldsFromParts(
     year: number,

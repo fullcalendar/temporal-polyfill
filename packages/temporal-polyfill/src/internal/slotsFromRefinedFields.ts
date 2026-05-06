@@ -8,15 +8,10 @@ import {
   resolveCalendarMonth,
   resolveCalendarYear,
 } from './calendarFields'
-import { computeCalendarIdBase } from './calendarId'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { parseMonthCode } from './calendarMonthCode'
 import * as errorMessages from './errorMessages'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-  isoCalendar,
-} from './externalCalendar'
+import { type InternalCalendar, isoCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import type { DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
 import {
@@ -219,7 +214,6 @@ export function createPlainMonthDayFromFields(
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
   const isIso = calendar === isoCalendar
-  const calendarId = getInternalCalendarId(calendar)
   const eraOrigins = getCalendarEraOrigins(calendar)
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
@@ -323,32 +317,27 @@ export function createPlainMonthDayFromFields(
         referenceYear,
         overflow,
       )
-    } else if (
-      computeCalendarIdBase(calendarId) === 'coptic' &&
-      overflow === Overflow.Constrain
-    ) {
-      const maxLengthOfMonthCodeInAnyYear =
-        !isLeapMonth && monthCodeNumber === 13 ? 6 : 30
-      day = fields.day!
-      day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
-    } else if (
-      computeCalendarIdBase(calendarId) === 'chinese' &&
-      overflow === Overflow.Constrain
-    ) {
-      const maxLengthOfMonthCodeInAnyYear =
-        isLeapMonth &&
-        (monthCodeNumber === 1 ||
-          monthCodeNumber === 9 ||
-          monthCodeNumber === 10 ||
-          monthCodeNumber === 11 ||
-          monthCodeNumber === 12)
-          ? 29
-          : 30
-      day = fields.day!
-      day = clampNumber(day, 1, maxLengthOfMonthCodeInAnyYear)
     } else {
-      // NORMAL CASE
-      day = fields.day! // guaranteed by caller
+      // Calendar-specific yearless PlainMonthDay constraints live with the
+      // external calendar. Most calendars return undefined and defer to the
+      // later reference-year search.
+      const constrainedDay =
+        overflow === Overflow.Constrain
+          ? calendar
+            ? calendar.constrainPlainMonthDay?.(
+                monthCodeNumber,
+                isLeapMonth,
+                fields.day!,
+              )
+            : undefined
+          : undefined
+
+      if (constrainedDay !== undefined) {
+        day = constrainedDay
+      } else {
+        // NORMAL CASE
+        day = fields.day! // guaranteed by caller
+      }
     }
   }
 

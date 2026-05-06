@@ -2,16 +2,11 @@ import {
   computeCalendarDaysInMonthForYearMonth,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
-import { computeCalendarIdBase } from './calendarId'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-  gregoryCalendar,
-} from './externalCalendar'
+import { type InternalCalendar, gregoryCalendar } from './externalCalendar'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
@@ -48,9 +43,9 @@ export function resolveCalendarYear(
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
 ): number {
-  const calendarId = getInternalCalendarId(calendar)
+  const externalCalendar = calendar || undefined
   const eraOrigins = getCalendarEraOrigins(calendar)
-  const eraRemaps = (calendar && calendar.eraRemaps) || {}
+  const eraRemaps = externalCalendar?.eraRemaps || {}
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {
@@ -73,30 +68,21 @@ export function resolveCalendarYear(
       eraRemaps[normalizeEraName(era)] || normalizeEraName(era)
     const eraOrigin = eraOrigins[normalizedEra]
 
-    // Ethiopic's AA era counts from an offset epoch instead of using the
-    // forward/reverse year scheme used by Gregorian/ROC/Japanese eras.
-    if (
-      computeCalendarIdBase(calendarId) === 'ethiopic' &&
-      normalizedEra === 'aa'
-    ) {
-      const yearByEra = eraYear - 5500
-      if (year !== undefined && year !== yearByEra) {
-        throw new RangeError(errorMessages.mismatchingYearAndEra)
-      }
-
-      year = yearByEra
-    } else {
-      if (eraOrigin === undefined) {
-        throw new RangeError(errorMessages.invalidEra(era))
-      }
-
-      const yearByEra = eraYearToYear(eraYear, eraOrigin)
-      if (year !== undefined && year !== yearByEra) {
-        throw new RangeError(errorMessages.mismatchingYearAndEra)
-      }
-
-      year = yearByEra
+    if (eraOrigin === undefined) {
+      throw new RangeError(errorMessages.invalidEra(era))
     }
+
+    // ISO/Gregory use the compact era-origin convention directly. External
+    // calendars get the last word because a few era systems count from an
+    // offset epoch instead of the usual forward/reverse origin.
+    const yearByEra = externalCalendar?.computeYearFromEra
+      ? externalCalendar.computeYearFromEra(eraYear, normalizedEra, eraOrigin)
+      : eraYearToYear(eraYear, eraOrigin)
+    if (year !== undefined && year !== yearByEra) {
+      throw new RangeError(errorMessages.mismatchingYearAndEra)
+    }
+
+    year = yearByEra
   } else if (year === undefined) {
     throw new TypeError(errorMessages.missingYear(eraOrigins))
   }
