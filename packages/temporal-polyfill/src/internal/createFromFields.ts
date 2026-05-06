@@ -46,7 +46,7 @@ import {
   refineZonedFieldOptions,
 } from './optionsFieldRefine'
 import { OverflowOptions, ZonedFieldOptions } from './optionsModel'
-import { RelativeToSlotsNoCalendar } from './relativeMath'
+import { RelativeToSlots } from './relativeMath'
 import {
   DurationSlots,
   PlainDateSlots,
@@ -85,7 +85,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
   calendar: InternalCalendar,
   bag: ZonedDateTimeLikeObject, // i think this needs type change
-): RelativeToSlotsNoCalendar {
+): RelativeToSlots {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeAndZoneFieldNamesAlpha,
@@ -114,7 +114,7 @@ export function refineMaybeZonedDateTimeObjectLike(
       fields.offset,
     )
 
-    return { epochNanoseconds, timeZone: timeZoneImpl }
+    return { epochNanoseconds, timeZone: timeZoneImpl, calendar }
   }
 
   return createPlainDateFromFields(calendar, fields as any)

@@ -9,7 +9,6 @@ import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
   AbstractDateTimeSlots,
-  EpochAndZoneSlots,
   EpochSlots,
   ZonedEpochSlots,
   extractEpochNano,
@@ -20,9 +19,6 @@ import { Callable, bindArgs } from './utils'
 
 // the relative-to "origin"
 export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
-
-// the relative-to "origin", returned from bag refining
-export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
 // Individual Op types
 // -----------------------------------------------------------------------------

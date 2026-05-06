@@ -188,7 +188,7 @@ function refinePublicRelativeTo(
         relativeTo as unknown as ZonedDateTimeLikeObject, // !!!
       )
 
-      return slotsWithCalendar(res, calendar)
+      return res
     }
 
     return parseRelativeToSlots(relativeTo)
