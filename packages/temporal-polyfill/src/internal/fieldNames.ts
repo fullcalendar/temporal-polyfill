@@ -74,8 +74,8 @@ const yearMonthStatsFieldNames = [
 ] as (keyof YearMonthStats)[]
 
 const dateStatsFieldNames = [
-  dayOfWeekFieldName,
   weekOfYearFieldName,
+  dayOfWeekFieldName,
   'dayOfYear',
   'yearOfWeek',
   'daysInWeek',
@@ -107,43 +107,30 @@ export const monthDayFieldNames = [...dayFieldNamesAsc, ...monthFieldNames]
 // `Alpha` lists are derived separately for observable bag-read order.
 
 export const timeFieldNamesAlpha = sortStrings(timeFieldNamesAsc)
-
-// FYI, happens to be in alphabetical order
-export const yearFieldNamesWithEraAlpha = [
-  ...eraYearFieldNames,
-  ...yearFieldNamesAsc,
-]
-
-// FYI, happens to be in alphabetical order
-export const yearMonthFieldNamesAlpha = [
-  ...monthFieldNames,
-  ...yearFieldNamesAsc,
-]
-
-// FYI, happens to be in alphabetical order
-export const yearMonthFieldNamesWithEraAlpha = [
-  ...eraYearFieldNames,
-  ...yearMonthFieldNamesAlpha,
-]
-
-// FYI, happens to be in alphabetical order
-export const yearMonthCodeFieldNamesAlpha = [
-  ...monthCodeFieldNames,
-  ...yearFieldNamesAsc,
-]
-
-// FYI, happens to be in alphabetical order
-export const yearMonthCodeFieldNamesWithEraAlpha = [
-  ...eraYearFieldNames,
-  ...yearMonthCodeFieldNamesAlpha,
-]
-
-// FYI, happens to be in alphabetical order
-export const monthCodeDayFieldNamesAlpha = [
-  ...dayFieldNamesAsc,
-  ...monthCodeFieldNames,
-]
-
+export const yearFieldNamesWithEraAlpha = sortStrings(
+  eraYearFieldNames,
+  yearFieldNamesAsc,
+)
+export const yearMonthFieldNamesAlpha = sortStrings(
+  monthFieldNames,
+  yearFieldNamesAsc,
+)
+export const yearMonthFieldNamesWithEraAlpha = sortStrings(
+  eraYearFieldNames,
+  yearMonthFieldNamesAlpha,
+)
+export const yearMonthCodeFieldNamesAlpha = sortStrings(
+  monthCodeFieldNames,
+  yearFieldNamesAsc,
+)
+export const yearMonthCodeFieldNamesWithEraAlpha = sortStrings(
+  eraYearFieldNames,
+  yearMonthCodeFieldNamesAlpha,
+)
+export const monthCodeDayFieldNamesAlpha = sortStrings(
+  dayFieldNamesAsc,
+  monthCodeFieldNames,
+)
 export const dateFieldNamesAlpha = sortStrings(
   dayFieldNamesAsc,
   yearMonthFieldNamesAlpha,
