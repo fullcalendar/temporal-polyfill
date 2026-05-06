@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { numberToBigNano } from './bigNano'
-import {
-  getTimeZoneAtomic,
-  resolveTimeZoneId,
-  resolveTimeZoneRecord,
-} from './timeZoneId'
+import { resolveTimeZoneId, resolveTimeZoneRecord } from './timeZoneId'
 import { queryTimeZone } from './timeZoneImpl'
 
 describe('resolveTimeZoneRecord', () => {
@@ -26,8 +22,8 @@ describe('resolveTimeZoneRecord', () => {
   it('keeps UTC distinct from an equivalent zero-offset zone', () => {
     expect(resolveTimeZoneId('utc')).toBe('UTC')
     expect(resolveTimeZoneId('+00:00')).toBe('+00:00')
-    expect(getTimeZoneAtomic('UTC')).toBe('UTC')
-    expect(getTimeZoneAtomic('+00:00')).toBe(0)
+    expect(resolveTimeZoneRecord('UTC').compareKey).toBe('UTC')
+    expect(resolveTimeZoneRecord('+00:00').compareKey).toBe(0)
   })
 
   it('preserves public IANA link IDs while comparing by host canonical ID', () => {

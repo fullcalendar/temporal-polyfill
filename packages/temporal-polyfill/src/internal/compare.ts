@@ -30,7 +30,7 @@ import {
   ZonedDateTimeSlots,
 } from './slots'
 import { isoDateToEpochMilli, timeFieldsToNano } from './timeMath'
-import { getTimeZoneAtomic } from './timeZoneId'
+import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
 import { NumberSign, allPropsEqual, compareNumbers } from './utils'
 
@@ -227,7 +227,10 @@ export function isTimeZoneIdsEqual(
   // If either is an unresolvable, return false
   // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
   try {
-    return getTimeZoneAtomic(a) === getTimeZoneAtomic(b)
+    return (
+      resolveTimeZoneRecord(a).compareKey ===
+      resolveTimeZoneRecord(b).compareKey
+    )
   } catch {}
 
   // If reaching here, there was an error, so NOT equal

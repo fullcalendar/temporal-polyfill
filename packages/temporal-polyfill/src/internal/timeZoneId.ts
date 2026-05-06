@@ -8,16 +8,13 @@ import {
 } from './timeZoneParse'
 import { memoize } from './utils'
 
+// coerce + resolve
 export function refineTimeZoneId(rawId: string): string {
   return resolveTimeZoneId(requireString(rawId))
 }
 
 export function resolveTimeZoneId(rawId: string): string {
   return resolveTimeZoneRecord(rawId).id
-}
-
-export function getTimeZoneAtomic(rawId: string): string | number {
-  return resolveTimeZoneRecord(rawId).compareKey
 }
 
 export type ResolvedTimeZone =
