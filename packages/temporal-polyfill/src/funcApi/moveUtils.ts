@@ -47,15 +47,16 @@ export function moveByYears(
   years: number,
   options?: OverflowOptions,
 ): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!years) {
     return isoDate
   }
   return slotsWithCalendar(
     epochMilliToIsoDateTime(
-      addDateMonths(isoDate, toStrictInteger(years), 0, overflow),
+      addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
     ),
-    isoDate.calendar,
+    calendar,
   )
 }
 
@@ -64,15 +65,16 @@ export function moveByMonths(
   months: number,
   options?: OverflowOptions,
 ): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!months) {
     return isoDate
   }
   return slotsWithCalendar(
     epochMilliToIsoDateTime(
-      addDateMonths(isoDate, 0, toStrictInteger(months), overflow),
+      addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
     ),
-    isoDate.calendar,
+    calendar,
   )
 }
 

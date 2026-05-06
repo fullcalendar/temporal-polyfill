@@ -28,7 +28,6 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths, diffIsoMonthSlots } from './isoMath'
-import { slotsWithCalendar } from './modify'
 import {
   addDateMonths,
   computeYearMovedMonth,
@@ -214,7 +213,7 @@ export function diffPlainDateTimes(
       createMarkerMoveOps(
         plainDateTimeSlots0,
         isoDateTimeToEpochNano as MarkerToEpochNano,
-        moveDateTime as MoveMarker,
+        bindArgs(moveDateTime, calendar) as MoveMarker,
       ),
     )
   }
@@ -332,9 +331,9 @@ function diffDateLike(
         roundingInc,
         roundingMode,
         createMarkerMoveOps(
-          slotsWithCalendar(startIsoDate, calendar),
+          startIsoDate,
           isoDateToEpochNano as MarkerToEpochNano,
-          moveDate as MoveMarker,
+          bindArgs(moveDate, calendar) as MoveMarker,
         ),
       )
     }
@@ -501,7 +500,7 @@ export function diffCalendarDates(
   calendar: InternalCalendar,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
-  largestUnit: Unit,
+  largestUnit: Unit, // TODO: put this arg after calendar to allow for bindArgs?
 ): DurationFields {
   if (largestUnit <= Unit.Week) {
     let weeks = 0
@@ -564,12 +563,7 @@ function diffCalendarMonthDay(
     : diffIsoMonthSlots(year0, month0, year1, month1)
 
   let anchorIsoDate = epochMilliToIsoDateTime(
-    addDateMonths(
-      slotsWithCalendar(startIsoDate, calendar),
-      0,
-      months,
-      Overflow.Constrain,
-    ),
+    addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
   )
 
   // If moving by the raw month-slot distance passes the end date, back off one
@@ -595,12 +589,7 @@ function diffCalendarMonthDay(
   ) {
     months -= sign
     anchorIsoDate = epochMilliToIsoDateTime(
-      addDateMonths(
-        slotsWithCalendar(startIsoDate, calendar),
-        0,
-        months,
-        Overflow.Constrain,
-      ),
+      addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
     )
   }
 

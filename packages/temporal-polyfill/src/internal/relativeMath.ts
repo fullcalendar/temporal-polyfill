@@ -4,11 +4,9 @@ import { DurationFields } from './durationFields'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { slotsWithCalendar } from './modify'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
-  AbstractDateTimeSlots,
   EpochSlots,
   ZonedEpochSlots,
   extractEpochNano,
@@ -41,8 +39,8 @@ export type DiffMarkers = (
 
 // See comments for `createMarkerMoveOps`
 export type MovableMarker =
-  | AbstractDateSlots
-  | AbstractDateTimeSlots
+  | CalendarDateFields
+  | CalendarDateTimeFields
   | EpochSlots
 export interface MarkerMoveOps {
   marker: MovableMarker
@@ -51,7 +49,7 @@ export interface MarkerMoveOps {
 }
 
 // See comments for `createMarkerSpanOps`
-export type SpannableMarker = AbstractDateTimeSlots | EpochSlots
+export type SpannableMarker = CalendarDateTimeFields | EpochSlots
 export interface MarkerSpanOps extends MarkerMoveOps {
   marker: SpannableMarker
   diffMarkers: DiffMarkers
@@ -101,15 +99,12 @@ export function createMarkerSpanOps(
     }
   }
 
-  const marker = slotsWithCalendar(
-    normalizeDateTimeMarker(relativeToSlots),
-    calendar,
-  )
+  const marker = normalizeDateTimeMarker(relativeToSlots)
 
   return {
     marker,
     markerToEpochNano: isoDateTimeToEpochNano as MarkerToEpochNano,
-    moveMarker: moveDateTime as Callable,
+    moveMarker: bindArgs(moveDateTime, calendar) as Callable,
     diffMarkers: bindArgs(diffDateTimesExact, calendar) as Callable,
   }
 }
