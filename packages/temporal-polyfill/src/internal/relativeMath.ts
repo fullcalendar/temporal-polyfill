@@ -1,28 +1,22 @@
 import { BigNano } from './bigNano'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
-import { getInternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateTime, moveZonedEpochs } from './move'
 import {
   AbstractDateSlots,
-  EpochAndZoneSlots,
   EpochSlots,
   ZonedEpochSlots,
   extractEpochNano,
 } from './slots'
 import { checkIsoDateTimeInBounds, isoDateTimeToEpochNano } from './timeMath'
-import { queryTimeZone } from './timeZoneImpl'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
 // the relative-to "origin"
 export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
-
-// the relative-to "origin", returned from bag refining
-export type RelativeToSlotsNoCalendar = CalendarDateFields | EpochAndZoneSlots
 
 // Individual Op types
 // -----------------------------------------------------------------------------
@@ -88,19 +82,18 @@ export function createMarkerMoveOps(
 export function createMarkerSpanOps(
   relativeToSlots: RelativeToSlots,
 ): MarkerSpanOps {
-  const calendarId = relativeToSlots.calendarId
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = relativeToSlots
 
   if (isZonedEpochSlots(relativeToSlots)) {
-    const timeZoneImpl = queryTimeZone(relativeToSlots.timeZoneId)
+    const { timeZone } = relativeToSlots
 
     return {
       marker: relativeToSlots,
       markerToEpochNano: extractEpochNano as MarkerToEpochNano,
-      moveMarker: bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as Callable,
+      moveMarker: bindArgs(moveZonedEpochs, timeZone, calendar) as Callable,
       diffMarkers: bindArgs(
         diffZonedEpochsExact,
-        timeZoneImpl,
+        timeZone,
         calendar,
       ) as Callable,
     }
@@ -170,9 +163,6 @@ export function checkMarkerSpanInBounds(
 function normalizeDateTimeMarker(
   marker: CalendarDateFields | CalendarDateTimeFields,
 ): CalendarDateTimeFields {
-  // Date-only relativeTo values are treated as starting at midnight. Date-time
-  // values keep their own time fields, which avoids fabricating a second object
-  // just to pass time fields alongside the same date fields.
   return combineDateAndTime(
     marker,
     'hour' in marker ? marker : timeFieldDefaults,

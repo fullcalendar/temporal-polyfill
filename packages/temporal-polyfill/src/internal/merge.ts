@@ -44,6 +44,7 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { japaneseCalendarId } from './intlCalendarConfig'
 import { constrainTimeFields } from './isoMath'
+import { slotsWithCalendar } from './modify'
 import {
   refineOverflowOptions,
   refineZonedFieldOptions,
@@ -69,7 +70,6 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
-import { queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { pluckProps } from './utils'
 
@@ -139,14 +139,11 @@ function spliceFields(
 // -----------------------------------------------------------------------------
 
 export function mergeZonedDateTimeFields(
-  calendar: InternalCalendar,
   zonedDateTimeSlots: ZonedDateTimeSlots,
   modFields: Partial<DateTimeFields>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
-  const { timeZoneId } = zonedDateTimeSlots
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const { calendar, timeZone } = zonedDateTimeSlots
 
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -154,7 +151,10 @@ export function mergeZonedDateTimeFields(
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
+  const isoDateTime = slotsWithCalendar(
+    zonedEpochSlotsToIso(zonedDateTimeSlots),
+    calendar,
+  )
   const {
     offsetNanoseconds,
     hour,
@@ -210,7 +210,7 @@ export function mergeZonedDateTimeFields(
 
   return createZonedDateTimeSlots(
     getMatchingInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(isoDateFields, timeFields),
       // Existing fields and user .with() fields are both past the first bag
       // refinement phase, so "offset" is the offset in nanoseconds here.
@@ -218,19 +218,17 @@ export function mergeZonedDateTimeFields(
       offsetDisambig,
       epochDisambig,
     ),
-    timeZoneId,
-    calendarId,
+    timeZone,
+    calendar,
   )
 }
 
 export function mergePlainDateTimeFields(
-  calendar: InternalCalendar,
   plainDateTimeSlots: PlainDateTimeSlots,
   modFields: Partial<DateTimeFields>,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
-  const calendarId = getInternalCalendarId(calendar)
-
+  const { calendar } = plainDateTimeSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
@@ -283,16 +281,16 @@ export function mergePlainDateTimeFields(
   return createPlainDateTimeFromRefinedFields(
     isoDateFields,
     timeFields,
-    calendarId,
+    calendar,
   )
 }
 
 export function mergePlainDateFields(
-  calendar: InternalCalendar,
   plainDateSlots: PlainDateSlots,
   modFields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
+  const { calendar } = plainDateSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,
@@ -323,11 +321,11 @@ export function mergePlainDateFields(
 }
 
 export function mergePlainYearMonthFields(
-  calendar: InternalCalendar,
   plainYearMonthSlots: PlainYearMonthSlots,
   modFields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
+  const { calendar } = plainYearMonthSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthFieldNamesAlpha,
@@ -357,11 +355,11 @@ export function mergePlainYearMonthFields(
 }
 
 export function mergePlainMonthDayFields(
-  calendar: InternalCalendar,
   plainMonthDaySlots: PlainMonthDaySlots,
   modFields: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
+  const { calendar } = plainMonthDaySlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,

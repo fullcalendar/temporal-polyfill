@@ -10,14 +10,16 @@ import {
 } from '../internal/calendarDerived'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import * as errorMessages from '../internal/errorMessages'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  getInternalCalendarId,
+  isoCalendar,
+} from '../internal/externalCalendar'
 import {
   dateGetterFieldNames,
   monthDayGetterFieldNames,
   timeFieldNamesAsc,
   yearMonthGetterFieldNames,
 } from '../internal/fieldNames'
-import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
 import { mapPropNames } from '../internal/utils'
@@ -27,45 +29,36 @@ import { mapPropNames } from '../internal/utils'
 
 const calendarGetterQueries = {
   era: (slots: any) => {
-    const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarEraFields(calendar, slots).era
+    return computeCalendarEraFields(slots.calendar, slots).era
   },
   eraYear: (slots: any) => {
-    const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarEraFields(calendar, slots).eraYear
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
   },
   year: (slots: any) => {
-    const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarDateFields(calendar, slots).year
+    return computeCalendarDateFields(slots.calendar, slots).year
   },
   month: (slots: any) => {
-    const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarDateFields(calendar, slots).month
+    return computeCalendarDateFields(slots.calendar, slots).month
   },
   day: (slots: any) => {
-    const calendar = getInternalCalendar(slots.calendarId)
-    return computeCalendarDateFields(calendar, slots).day
+    return computeCalendarDateFields(slots.calendar, slots).day
   },
-  monthCode: (slots: any) =>
-    computeCalendarMonthCode(getInternalCalendar(slots.calendarId), slots),
-  inLeapYear: (slots: any) =>
-    computeCalendarInLeapYear(getInternalCalendar(slots.calendarId), slots),
+  monthCode: (slots: any) => computeCalendarMonthCode(slots.calendar, slots),
+  inLeapYear: (slots: any) => computeCalendarInLeapYear(slots.calendar, slots),
   monthsInYear: (slots: any) =>
-    computeCalendarMonthsInYear(getInternalCalendar(slots.calendarId), slots),
+    computeCalendarMonthsInYear(slots.calendar, slots),
   daysInMonth: (slots: any) =>
-    computeCalendarDaysInMonth(getInternalCalendar(slots.calendarId), slots),
-  daysInYear: (slots: any) =>
-    computeCalendarDaysInYear(getInternalCalendar(slots.calendarId), slots),
-  dayOfWeek: (slots: any) => computeIsoDayOfWeek(slots),
+    computeCalendarDaysInMonth(slots.calendar, slots),
+  daysInYear: (slots: any) => computeCalendarDaysInYear(slots.calendar, slots),
+  dayOfWeek: computeIsoDayOfWeek,
   daysInWeek: () => 7,
-  dayOfYear: (slots: any) =>
-    computeCalendarDayOfYear(getInternalCalendar(slots.calendarId), slots),
+  dayOfYear: (slots: any) => computeCalendarDayOfYear(slots.calendar, slots),
   weekOfYear: (slots: any) =>
-    slots.calendarId === isoCalendarId
+    slots.calendar === isoCalendar
       ? computeIsoWeekFields(slots).weekOfYear
       : undefined,
   yearOfWeek: (slots: any) =>
-    slots.calendarId === isoCalendarId
+    slots.calendar === isoCalendar
       ? computeIsoWeekFields(slots).yearOfWeek
       : undefined,
 }
@@ -93,7 +86,7 @@ export const yearMonthGetters = createCalendarGetters(yearMonthGetterFieldNames)
 export const monthDayGetters = createCalendarGetters(monthDayGetterFieldNames)
 export const calendarIdGetters = {
   calendarId(slots: any): string {
-    return slots.calendarId // TODO: make smarter getter based on prop-name?
+    return getInternalCalendarId(slots.calendar)
   },
 }
 

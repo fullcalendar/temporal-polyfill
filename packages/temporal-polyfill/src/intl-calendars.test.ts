@@ -60,7 +60,7 @@ describe('intl calendar addon', () => {
 
       console.log(JSON.stringify([
         classDate.calendarId,
-        functionDate.calendarId,
+        functionDate.calendar?.id || 'iso8601',
         functionDate.year,
       ]))
     `)

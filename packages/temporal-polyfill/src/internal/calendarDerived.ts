@@ -3,7 +3,7 @@ import {
   type InternalCalendar,
   getInternalCalendarId,
 } from './externalCalendar'
-import { CalendarDateFields } from './fieldTypes'
+import type { CalendarDateFields } from './fieldTypes'
 import {
   computeIsoDateFields,
   computeIsoDayOfYear,

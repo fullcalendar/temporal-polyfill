@@ -1,6 +1,7 @@
 import { BigNano, bigNanoToBigInt } from './bigNano'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
+import type { InternalCalendar } from './externalCalendar'
 import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -9,6 +10,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './timeMath'
+import type { TimeZoneImpl } from './timeZoneImpl'
 import { NumberSign, pluckProps } from './utils'
 
 export const PlainYearMonthBranding = 'PlainYearMonth' as const
@@ -32,59 +34,62 @@ export function createInstantSlots(epochNano: BigNano): InstantSlots {
 
 export function createZonedDateTimeSlots(
   epochNano: BigNano,
-  timeZoneId: string,
-  calendarId: string,
+  timeZone: TimeZoneImpl,
+  calendar?: InternalCalendar,
 ): ZonedDateTimeSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: ZonedDateTimeBranding,
-    calendarId,
-    timeZoneId,
+    calendar,
+    timeZone,
     epochNanoseconds: epochNano,
   }
 }
 
 export function createPlainDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
-  calendarId: string,
+  calendar?: InternalCalendar,
 ): PlainDateTimeSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: PlainDateTimeBranding,
-    calendarId,
-    // misused util, but for ascending order
+    calendar,
+    // strange to use this, but does plucking in ascending order
     ...combineDateAndTime(isoDateTime, isoDateTime),
   }
 }
 
 export function createPlainDateSlots(
   isoDate: CalendarDateFields,
-  calendarId: string,
+  calendar?: InternalCalendar,
 ): PlainDateSlots {
+  // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     branding: PlainDateBranding,
-    calendarId,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    calendar,
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
 export function createPlainYearMonthSlots(
   isoDate: CalendarDateFields,
-  calendarId: string,
+  calendar: InternalCalendar,
 ): PlainYearMonthSlots {
   return {
     branding: PlainYearMonthBranding,
-    calendarId,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    calendar,
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
 export function createPlainMonthDaySlots(
   isoDate: CalendarDateFields,
-  calendarId: string,
+  calendar: InternalCalendar,
 ): PlainMonthDaySlots {
   return {
     branding: PlainMonthDayBranding,
-    calendarId,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
+    calendar,
+    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
@@ -110,19 +115,21 @@ export function createDurationSlots(
 export type BrandingSlots = { branding: string }
 
 export type EpochSlots = { epochNanoseconds: BigNano }
-export type EpochAndZoneSlots = EpochSlots & { timeZoneId: string }
+export type EpochAndZoneSlots = EpochSlots & { timeZone: TimeZoneImpl }
 export type ZonedEpochSlots = EpochAndZoneSlots & {
-  calendarId: string
+  calendar: InternalCalendar
 }
 
 // without branding
-export type AbstractDateSlots = CalendarDateFields & { calendarId: string }
+export type AbstractDateSlots = CalendarDateFields & {
+  calendar: InternalCalendar
+}
 export type AbstractDateTimeSlots = CalendarDateTimeFields & {
-  calendarId: string
+  calendar: InternalCalendar
 }
 
 export type PlainDateSlots = CalendarDateFields & {
-  calendarId: string
+  calendar: InternalCalendar
   branding: typeof PlainDateBranding
 }
 
@@ -131,7 +138,7 @@ export type PlainTimeSlots = TimeFields & {
 }
 
 export type PlainDateTimeSlots = CalendarDateTimeFields & {
-  calendarId: string
+  calendar: InternalCalendar
   branding: typeof PlainDateTimeBranding
 }
 
@@ -140,12 +147,12 @@ export type ZonedDateTimeSlots = ZonedEpochSlots & {
 }
 
 export type PlainMonthDaySlots = CalendarDateFields & {
-  calendarId: string
+  calendar: InternalCalendar
   branding: typeof PlainMonthDayBranding
 }
 
 export type PlainYearMonthSlots = CalendarDateFields & {
-  calendarId: string
+  calendar: InternalCalendar
   branding: typeof PlainYearMonthBranding
 }
 

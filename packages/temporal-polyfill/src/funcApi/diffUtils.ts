@@ -8,12 +8,11 @@ import {
 } from '../internal/bigNano'
 import {
   diffCalendarDates,
-  getCommonCalendarId,
-  getCommonTimeZoneId,
+  getCommonCalendar,
+  getCommonTimeZone,
   prepareZonedEpochDiff,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
-import { getInternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
@@ -34,7 +33,6 @@ import {
   extractEpochNano,
 } from '../internal/slots'
 import { isoDateTimeToEpochNano } from '../internal/timeMath'
-import { queryTimeZone } from '../internal/timeZoneImpl'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
@@ -87,19 +85,13 @@ function diffZonedLargeUnits(
   record1: ZonedDateTimeSlots,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const timeZoneId = getCommonTimeZoneId(record0.timeZoneId, record1.timeZoneId)
-  const timeZoneImpl = queryTimeZone(timeZoneId)
-
-  const calendarId = getCommonCalendarId(record0.calendarId, record1.calendarId)
-  const calendar = getInternalCalendar(calendarId)
+  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
   return diffDateUnits(
     extractEpochNano as MarkerToEpochNano,
-    bindArgs(
-      prepareZonedEpochDiff,
-      timeZoneImpl,
-    ) as unknown as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, timeZoneImpl, calendar) as MoveMarker,
+    bindArgs(prepareZonedEpochDiff, timeZone) as unknown as MarkersToIsoFields,
+    bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
     unit,
@@ -116,8 +108,7 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
   record1: S,
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
-  const calendarId = getCommonCalendarId(record0.calendarId, record1.calendarId)
-  const calendar = getInternalCalendar(calendarId)
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
   return diffDateUnits(
     isoMarkerToEpochNano as MarkerToEpochNano,
@@ -126,6 +117,7 @@ function diffPlainLargeUnits<S extends AbstractDateSlots>(
       'hour' in record0 ? moveDateTime : moveDate,
       calendar,
     ) as MoveMarker,
+    // TODO: use bindArgs here too?
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
     unit,
@@ -202,15 +194,14 @@ function diffZonedDayLikeUnits(
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
-  const timeZoneId = getCommonTimeZoneId(record0.timeZoneId, record1.timeZoneId)
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
 
   const sign = compareBigNanos(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
   const [isoFields0, isoFields1, remainderNano, startTime] =
-    prepareZonedEpochDiff(timeZoneImpl, record0, record1, sign)
+    prepareZonedEpochDiff(timeZone, record0, record1, sign)
   const nanoDiff = moveBigNano(
     diffBigNanos(
       isoDateTimeToEpochNano(combineDateAndTime(isoFields0, startTime))!,

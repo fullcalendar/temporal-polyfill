@@ -7,7 +7,7 @@ import {
   zonedDateTimeToPlainTime,
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
-import { diffZonedDateTimes, getCommonCalendarId } from '../internal/diff'
+import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
 import { getInternalCalendar } from '../internal/externalCalendar'
 import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
@@ -16,8 +16,8 @@ import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
 import { parseZonedDateTime } from '../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../internal/merge'
 import {
-  slotsWithCalendarId,
-  slotsWithTimeZoneId,
+  slotsWithCalendar,
+  slotsWithTimeZone,
   zonedDateTimeWithPlainTime,
 } from '../internal/modify'
 import { moveZonedDateTime } from '../internal/move'
@@ -41,6 +41,7 @@ import {
   ZonedDateTimeSlots,
   createDurationSlots,
 } from '../internal/slots'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   FixedIsoZonedFields,
   getTimeZoneTransitionEpochNanoseconds,
@@ -97,7 +98,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return slotsToIso(slots).offsetNanoseconds
     },
     timeZoneId(slots: ZonedDateTimeSlots): string {
-      return slots.timeZoneId // TODO: smarter getter?
+      return slots.timeZone.id
     },
     hoursInDay(slots: ZonedDateTimeSlots): number {
       return computeZonedHoursInDay(slots)
@@ -110,12 +111,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
       return createZonedDateTime(
-        mergeZonedDateTimeFields(
-          getInternalCalendar(slots.calendarId),
-          slots,
-          rejectInvalidBag(mod),
-          options,
-        ),
+        mergeZonedDateTimeFields(slots, rejectInvalidBag(mod), options),
       )
     },
     withCalendar(
@@ -123,7 +119,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       calendarArg: CalendarArg,
     ): ZonedDateTime {
       return createZonedDateTime(
-        slotsWithCalendarId(slots, refineCalendarArg(calendarArg)),
+        slotsWithCalendar(
+          slots,
+          getInternalCalendar(refineCalendarArg(calendarArg)),
+        ),
       )
     },
     withTimeZone(
@@ -131,7 +130,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
       return createZonedDateTime(
-        slotsWithTimeZoneId(slots, refineTimeZoneArg(timeZoneArg)),
+        slotsWithTimeZone(slots, queryTimeZone(refineTimeZoneArg(timeZoneArg))),
       )
     },
     withPlainTime(
@@ -169,9 +168,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: DiffOptions<UnitName>,
     ): Duration {
       const other = toZonedDateTimeSlots(otherArg)
-      const calendar = getInternalCalendar(
-        getCommonCalendarId(slots.calendarId, other.calendarId),
-      )
+      const calendar = getCommonCalendar(slots.calendar, other.calendar)
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(false, calendar, slots, other, options),
@@ -184,9 +181,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       options?: DiffOptions<UnitName>,
     ): Duration {
       const other = toZonedDateTimeSlots(otherArg)
-      const calendar = getInternalCalendar(
-        getCommonCalendarId(slots.calendarId, other.calendarId),
-      )
+      const calendar = getCommonCalendar(slots.calendar, other.calendar)
       return createDuration(
         createDurationSlots(
           diffZonedDateTimes(true, calendar, slots, other, options),

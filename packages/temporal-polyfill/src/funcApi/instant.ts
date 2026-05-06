@@ -11,6 +11,7 @@ import {
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
+import { getInternalCalendar } from '../internal/externalCalendar'
 import { createFormatPrepper, instantConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
@@ -30,6 +31,7 @@ import {
   getEpochSec,
 } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
+import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, bindArgs } from '../internal/utils'
 import * as DurationFns from './duration'
@@ -147,8 +149,8 @@ export function toZonedDateTime(
 
   return instantToZonedDateTime(
     record,
-    refineTimeZoneId(refinedObj.timeZone),
-    refineCalendarId(refinedObj.calendar),
+    queryTimeZone(refineTimeZoneId(refinedObj.timeZone)),
+    getInternalCalendar(refineCalendarId(refinedObj.calendar)),
   )
 }
 
@@ -156,7 +158,10 @@ export function toZonedDateTimeISO(
   record: Record,
   timeZoneId: string,
 ): ZonedDateTimeFns.Record {
-  return instantToZonedDateTime(record, refineTimeZoneId(timeZoneId))
+  return instantToZonedDateTime(
+    record,
+    queryTimeZone(refineTimeZoneId(timeZoneId)),
+  )
 }
 
 // Formatting

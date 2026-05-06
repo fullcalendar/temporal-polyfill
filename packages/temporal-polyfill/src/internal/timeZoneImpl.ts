@@ -21,6 +21,8 @@ import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
 
 export interface TimeZoneImpl {
+  id: string
+  compareKey: string | number
   getOffsetNanosecondsFor(epochNano: BigNano): number
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): BigNano[]
   getTransition(epochNano: BigNano, direction: -1 | 1): BigNano | undefined
@@ -35,8 +37,12 @@ export function queryTimeZone(rawTimeZoneId: string): TimeZoneImpl {
 const queryTimeZoneRecord = memoize(
   (normTimeZoneId: string, record: ResolvedTimeZone): TimeZoneImpl => {
     return record.kind === 'named'
-      ? new IntlTimeZone(normTimeZoneId, record.format)
-      : new FixedTimeZone(record.kind === 'fixed' ? record.offsetNano : 0)
+      ? new IntlTimeZone(normTimeZoneId, record.compareKey, record.format)
+      : new FixedTimeZone(
+          normTimeZoneId,
+          record.compareKey,
+          record.kind === 'fixed' ? record.offsetNano : 0,
+        )
   },
 )
 
@@ -44,7 +50,11 @@ const queryTimeZoneRecord = memoize(
 // -----------------------------------------------------------------------------
 
 export class FixedTimeZone implements TimeZoneImpl {
-  constructor(public offsetNano: number) {}
+  constructor(
+    public id: string,
+    public compareKey: string | number,
+    public offsetNano: number,
+  ) {}
 
   getOffsetNanosecondsFor(): number {
     return this.offsetNano
@@ -74,10 +84,14 @@ interface IntlTimeZoneStore {
 export class IntlTimeZone implements TimeZoneImpl {
   tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
-  constructor(normTimeZoneId: string, format: Intl.DateTimeFormat) {
+  constructor(
+    public id: string,
+    public compareKey: string | number,
+    format: Intl.DateTimeFormat,
+  ) {
     this.tzStore = createIntlTimeZoneStore(
       createComputeOffsetSec(format),
-      getTimeZonePeriodDays(normTimeZoneId),
+      getTimeZonePeriodDays(id),
     )
   }
 

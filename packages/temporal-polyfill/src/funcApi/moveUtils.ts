@@ -6,7 +6,7 @@ import {
 } from '../internal/calendarDerived'
 import { toInteger, toStrictInteger } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
-import type { InternalCalendar } from '../internal/externalCalendar'
+import { isoCalendar } from '../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
@@ -15,6 +15,7 @@ import {
 } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from '../internal/isoMath'
+import { slotsWithCalendar } from '../internal/modify'
 import {
   addDateMonths,
   moveByDays,
@@ -22,6 +23,7 @@ import {
 } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
+import { AbstractDateSlots } from '../internal/slots'
 import { epochMilliToIsoDateTime } from '../internal/timeMath'
 import { clampEntity } from '../internal/utils'
 
@@ -36,39 +38,47 @@ export function reversedMove<S>(
 // Move-by-Unit
 // -----------------------------------------------------------------------------
 // These functions validate input
+// Month/year movement is calendar-aware. ISO day/week movement is not, so those
+// helpers deliberately return plain ISO date fields and let callers reattach
+// their calendar only when building record/slot outputs.
 
 export function moveByYears(
-  calendar: InternalCalendar,
-  isoDate: CalendarDateFields,
+  isoDate: AbstractDateSlots,
   years: number,
   options?: OverflowOptions,
-): CalendarDateFields {
+): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!years) {
     return isoDate
   }
-  return epochMilliToIsoDateTime(
-    addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
+  return slotsWithCalendar(
+    epochMilliToIsoDateTime(
+      addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
+    ),
+    calendar,
   )
 }
 
 export function moveByMonths(
-  calendar: InternalCalendar,
-  isoDate: CalendarDateFields,
+  isoDate: AbstractDateSlots,
   months: number,
   options?: OverflowOptions,
-): CalendarDateFields {
+): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!months) {
     return isoDate
   }
-  return epochMilliToIsoDateTime(
-    addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
+  return slotsWithCalendar(
+    epochMilliToIsoDateTime(
+      addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
+    ),
+    calendar,
   )
 }
 
 export function moveByIsoWeeks(
-  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   weeks: number,
 ): CalendarDateFields {
@@ -76,22 +86,21 @@ export function moveByIsoWeeks(
 }
 
 export function moveByDaysStrict(
-  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
-  weeks: number,
+  days: number,
 ): CalendarDateFields {
-  return moveByDays(isoDate, toStrictInteger(weeks))
+  return moveByDays(isoDate, toStrictInteger(days))
 }
 
 // Day-of-Unit / Week
 // -----------------------------------------------------------------------------
 
 export function moveToDayOfYear(
-  calendar: InternalCalendar,
-  isoDate: CalendarDateFields,
+  isoDate: AbstractDateSlots,
   dayOfYear: number,
   options?: OverflowOptions,
-): CalendarDateFields {
+): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
@@ -103,15 +112,18 @@ export function moveToDayOfYear(
   )
 
   const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
-  return moveByDays(isoDate, normDayOfYear - currentDayOfYear)
+  return slotsWithCalendar(
+    moveByDays(isoDate, normDayOfYear - currentDayOfYear),
+    calendar,
+  )
 }
 
 export function moveToDayOfMonth(
-  calendar: InternalCalendar,
-  isoDate: CalendarDateFields,
+  isoDate: AbstractDateSlots,
   day: number,
   options?: OverflowOptions,
-): CalendarDateFields {
+): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
@@ -122,15 +134,17 @@ export function moveToDayOfMonth(
     overflow,
   )
 
-  return moveToDayOfMonthUnsafe(
-    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
-    isoDate,
-    normDayOfMonth,
+  return slotsWithCalendar(
+    moveToDayOfMonthUnsafe(
+      (dateFields) => computeCalendarDateFields(calendar, dateFields).day,
+      isoDate,
+      normDayOfMonth,
+    ),
+    calendar,
   )
 }
 
 export function moveToDayOfWeek(
-  _calendar: InternalCalendar,
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   options?: OverflowOptions,
@@ -146,17 +160,14 @@ export function moveToDayOfWeek(
   return moveByDays(isoDate, normDayOfWeek - computeIsoDayOfWeek(isoDate))
 }
 
-// TODO: fix weird "slots" name
-export function slotsWithWeekOfYear(
-  calendar: InternalCalendar,
-  isoDate: CalendarDateFields,
+export function moveToWeekOfYear(
+  isoDate: AbstractDateSlots,
   weekOfYear: number,
   options?: OverflowOptions,
-): CalendarDateFields {
+): AbstractDateSlots {
   const overflow = refineOverflowOptions(options)
-  // Week-numbered years are only supported for ISO. The internal calendar
-  // discriminant uses undefined for ISO, so no string calendar ID is needed.
-  const weekFields = calendar === undefined ? computeIsoWeekFields(isoDate) : {}
+  const weekFields =
+    isoDate.calendar === isoCalendar ? computeIsoWeekFields(isoDate) : {}
   const currentWeekOfYear = weekFields.weekOfYear
   const weeksInYear = weekFields.weeksInYear
 
@@ -172,5 +183,8 @@ export function slotsWithWeekOfYear(
     overflow,
   )
 
-  return moveByIsoWeeks(calendar, isoDate, normWeekOfYear - currentWeekOfYear)
+  return slotsWithCalendar(
+    moveByIsoWeeks(isoDate, normWeekOfYear - currentWeekOfYear),
+    isoDate.calendar,
+  )
 }

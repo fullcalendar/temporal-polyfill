@@ -3,6 +3,10 @@ import { durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
+  type InternalCalendar,
+  getInternalCalendarId,
+} from './externalCalendar'
+import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
@@ -139,11 +143,9 @@ export function zonedDateTimesEqual(
 ): boolean {
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
-    !!isTimeZoneIdsEqual(
-      zonedDateTimeSlots0.timeZoneId,
-      zonedDateTimeSlots1.timeZoneId,
-    ) &&
-    zonedDateTimeSlots0.calendarId === zonedDateTimeSlots1.calendarId
+    zonedDateTimeSlots0.timeZone.compareKey ===
+      zonedDateTimeSlots1.timeZone.compareKey &&
+    calendarsEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
   )
 }
 
@@ -153,7 +155,7 @@ export function plainDateTimesEqual(
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    plainDateTimeSlots0.calendarId === plainDateTimeSlots1.calendarId
+    calendarsEqual(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
   )
 }
 
@@ -163,7 +165,7 @@ export function plainDatesEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
-    plainDateSlots0.calendarId === plainDateSlots1.calendarId
+    calendarsEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
   )
 }
 
@@ -173,7 +175,7 @@ export function plainYearMonthsEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    plainYearMonthSlots0.calendarId === plainYearMonthSlots1.calendarId
+    calendarsEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
   )
 }
 
@@ -183,7 +185,19 @@ export function plainMonthDaysEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    plainMonthDaySlots0.calendarId === plainMonthDaySlots1.calendarId
+    calendarsEqual(plainMonthDaySlots0.calendar, plainMonthDaySlots1.calendar)
+  )
+}
+
+function calendarsEqual(
+  calendar0: InternalCalendar,
+  calendar1: InternalCalendar,
+): boolean {
+  return (
+    calendar0 === calendar1 ||
+    (!!calendar0 &&
+      !!calendar1 &&
+      getInternalCalendarId(calendar0) === getInternalCalendarId(calendar1))
   )
 }
 

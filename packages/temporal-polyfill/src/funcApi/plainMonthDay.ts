@@ -76,18 +76,11 @@ export const getFields = memoize(computeMonthDayFields, WeakMap) as (
 // Setters
 // -----------------------------------------------------------------------------
 
-export function withFields(
+export const withFields = mergePlainMonthDayFields as (
   record: Record,
   fields: WithFields,
   options?: AssignmentOptions,
-): Record {
-  return mergePlainMonthDayFields(
-    getInternalCalendar(record.calendarId),
-    record,
-    fields,
-    options,
-  )
-}
+) => Record
 
 // Math
 // -----------------------------------------------------------------------------
@@ -104,11 +97,7 @@ export function toPlainDate(
   record: Record,
   fields: ToPlainDateFields,
 ): PlainDateFns.Record {
-  return convertPlainMonthDayToDate(
-    getInternalCalendar(record.calendarId),
-    getFields(record),
-    fields,
-  )
+  return convertPlainMonthDayToDate(record.calendar, getFields(record), fields)
 }
 
 // Formatting

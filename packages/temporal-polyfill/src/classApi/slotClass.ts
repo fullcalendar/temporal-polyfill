@@ -75,7 +75,8 @@ export function rejectInvalidBag<B>(bag: B): B {
     getSlots(bag) ||
     // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.
     // It deliberately observes the spec field names even though internal
-    // slots store the corresponding strings as calendarId/timeZoneId.
+    // slots store internal calendar/time-zone objects, but public bags still
+    // use the spec property names.
     (bag as any).calendar !== undefined ||
     (bag as any).timeZone !== undefined
   ) {

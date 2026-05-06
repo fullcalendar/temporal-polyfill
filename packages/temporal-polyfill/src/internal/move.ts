@@ -20,7 +20,6 @@ import {
   negateDurationFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { getInternalCalendar } from './externalCalendar'
 import type { InternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
@@ -57,7 +56,7 @@ import {
   nanoToTimeAndDay,
   timeFieldsToNano,
 } from './timeMath'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { TimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'
 import { Unit, milliInDay } from './units'
@@ -85,13 +84,11 @@ export function moveZonedDateTime(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
-  const timeZoneImpl = queryTimeZone(zonedDateTimeSlots.timeZoneId)
-
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
-      timeZoneImpl,
-      getInternalCalendar(zonedDateTimeSlots.calendarId),
+      zonedDateTimeSlots.timeZone,
+      zonedDateTimeSlots.calendar,
       zonedDateTimeSlots,
       signedDurationFields(doSubtract, durationSlots),
       options,
@@ -105,15 +102,16 @@ export function movePlainDateTime(
   durationSlots: DurationSlots,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots {
-  const { calendarId } = plainDateTimeSlots
-  const calendar = getInternalCalendar(calendarId)
-  const isoDateTime = moveDateTime(
+  const { calendar } = plainDateTimeSlots
+  return createPlainDateTimeSlots(
+    moveDateTime(
+      calendar,
+      plainDateTimeSlots,
+      signedDurationFields(doSubtract, durationSlots),
+      options,
+    ),
     calendar,
-    plainDateTimeSlots,
-    signedDurationFields(doSubtract, durationSlots),
-    options,
   )
-  return createPlainDateTimeSlots(isoDateTime, calendarId)
 }
 
 export function movePlainDate(
@@ -122,8 +120,7 @@ export function movePlainDate(
   durationSlots: DurationSlots,
   options?: OverflowOptions,
 ): PlainDateSlots {
-  const { calendarId } = plainDateSlots
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = plainDateSlots
   return createPlainDateSlots(
     moveDate(
       calendar,
@@ -131,7 +128,7 @@ export function movePlainDate(
       signedDurationFields(doSubtract, durationSlots),
       options,
     ),
-    calendarId,
+    calendar,
   )
 }
 
@@ -153,8 +150,7 @@ export function movePlainYearMonth(
     throw new RangeError(errorMessages.invalidSmallUnits)
   }
 
-  const calendarId = plainYearMonthSlots.calendarId
-  const calendar = getInternalCalendar(calendarId)
+  const { calendar } = plainYearMonthSlots
   const getDay = (isoDate: CalendarDateFields) =>
     computeCalendarDateFields(calendar, isoDate).day
 
@@ -172,7 +168,7 @@ export function movePlainYearMonth(
 
   return createPlainYearMonthSlots(
     moveToDayOfMonthUnsafe(getDay, movedIsoDateFields),
-    calendarId,
+    calendar,
   )
 }
 
@@ -206,7 +202,8 @@ function moveEpochNano(
 }
 
 /*
-timeZoneImpl must be derived from zonedEpochSlots.timeZoneId
+timeZoneImpl must be the same object carried by the zoned slots. Passing it
+through keeps repeated offset/transition work on one memoized implementation.
 */
 export function moveZonedEpochs(
   timeZoneImpl: TimeZoneImpl,
@@ -338,13 +335,11 @@ export function moveByDays(
   days: number,
 ): CalendarDateFields {
   if (days) {
-    return pickDateFields(
-      epochMilliToIsoDateTime(
-        isoDateToEpochMilli(isoDate)! + days * milliInDay,
-      ),
+    return epochMilliToIsoDateTime(
+      isoDateToEpochMilli(isoDate)! + days * milliInDay,
     )
   }
-  return pickDateFields(isoDate)
+  return isoDate
 }
 
 function dateAddWithOverflow(
@@ -377,15 +372,7 @@ function dateAddWithOverflow(
   epochMilli += (weeks * 7 + days) * milliInDay
 
   const isoDate = epochMilliToIsoDateTime(epochMilli)
-  return pickDateFields(checkIsoDateInBounds(isoDate))
-}
-
-function pickDateFields(isoDate: CalendarDateFields): CalendarDateFields {
-  return {
-    year: isoDate.year,
-    month: isoDate.month,
-    day: isoDate.day,
-  }
+  return checkIsoDateInBounds(isoDate)
 }
 
 export function addCalendarMonths(

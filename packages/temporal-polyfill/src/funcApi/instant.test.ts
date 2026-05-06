@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import * as DurationFns from '../../dist/fns/duration'
 import * as InstantFns from '../../dist/fns/instant'
 import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
+import { getInternalCalendarId } from '../internal/externalCalendar'
 import '../intl-calendars'
 import {
   expectDurationEquals,
@@ -196,8 +197,8 @@ describe('toZonedDateTimeISO', () => {
     const zdt = InstantFns.toZonedDateTimeISO(inst, 'America/New_York')
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
     expect(zdt.branding).toBe('ZonedDateTime')
-    expect(zdt.timeZoneId).toBe('America/New_York')
-    expect(zdt.calendarId).toBe('iso8601')
+    expect(zdt.timeZone.id).toBe('America/New_York')
+    expect(getInternalCalendarId(zdt.calendar)).toBe('iso8601')
   })
 })
 
@@ -210,8 +211,8 @@ describe('toZonedDateTime', () => {
     })
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
     expect(zdt.branding).toBe('ZonedDateTime')
-    expect(zdt.timeZoneId).toBe('America/New_York')
-    expect(zdt.calendarId).toBe('hebrew')
+    expect(zdt.timeZone.id).toBe('America/New_York')
+    expect(getInternalCalendarId(zdt.calendar)).toBe('hebrew')
   })
 })
 
