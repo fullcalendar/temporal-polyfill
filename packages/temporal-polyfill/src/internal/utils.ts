@@ -302,10 +302,12 @@ export function capitalize(s: string): string {
 }
 
 /*
-Easier to mark pure than calling .slice().sort() directly, which has 2 calls
+Easier to mark pure than calling .slice().sort() directly, which has 2 calls.
+Accepts multiple field-name lists so callers can avoid fabricating temporary
+combined arrays before sorting.
 */
-export function sortStrings<T extends string>(strs: T[]): T[] {
-  return strs.slice().sort()
+export function sortStrings<T extends string>(...strss: T[][]): T[] {
+  return ([] as T[]).concat(...strss).sort()
 }
 
 export const signRegExpStr = '([+-])' // outer captures
