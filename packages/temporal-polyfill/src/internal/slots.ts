@@ -46,23 +46,21 @@ export function createZonedDateTimeSlots(
 }
 
 export function createPlainDateTimeSlots(
-  isoDateTime: CalendarDateTimeFields & { calendar?: InternalCalendar },
-  ...calendarArgs: [InternalCalendar?]
+  isoDateTime: CalendarDateTimeFields,
+  calendar: InternalCalendar,
 ): PlainDateTimeSlots {
-  const calendar = calendarArgs.length ? calendarArgs[0] : isoDateTime.calendar
   return {
     branding: PlainDateTimeBranding,
     calendar,
-    // misused util, but for ascending order
+    // strange to use this, but does plucking in ascending order
     ...combineDateAndTime(isoDateTime, isoDateTime),
   }
 }
 
 export function createPlainDateSlots(
-  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
-  ...calendarArgs: [InternalCalendar?]
+  isoDate: CalendarDateFields,
+  calendar: InternalCalendar,
 ): PlainDateSlots {
-  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainDateBranding,
     calendar,
@@ -71,10 +69,9 @@ export function createPlainDateSlots(
 }
 
 export function createPlainYearMonthSlots(
-  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
-  ...calendarArgs: [InternalCalendar?]
+  isoDate: CalendarDateFields,
+  calendar: InternalCalendar,
 ): PlainYearMonthSlots {
-  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainYearMonthBranding,
     calendar,
@@ -83,10 +80,9 @@ export function createPlainYearMonthSlots(
 }
 
 export function createPlainMonthDaySlots(
-  isoDate: CalendarDateFields & { calendar?: InternalCalendar },
-  ...calendarArgs: [InternalCalendar?]
+  isoDate: CalendarDateFields,
+  calendar: InternalCalendar,
 ): PlainMonthDaySlots {
-  const calendar = calendarArgs.length ? calendarArgs[0] : isoDate.calendar
   return {
     branding: PlainMonthDayBranding,
     calendar,

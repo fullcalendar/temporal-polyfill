@@ -158,12 +158,12 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   }
 
   const slots = finalizeDateTime(organized)
-  return createPlainDateTimeSlots(slots)
+  return createPlainDateTimeSlots(slots, slots.calendar)
 }
 
 export function parsePlainDate(s: string): PlainDateSlots {
   const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
-  return createPlainDateSlots(slots)
+  return createPlainDateSlots(slots, slots.calendar)
 }
 
 export function parsePlainYearMonth(s: string): PlainYearMonthSlots {

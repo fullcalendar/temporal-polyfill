@@ -494,5 +494,5 @@ function aligned(
 
 function createRecordFromDateFields(isoDate: AbstractDateSlots): Record {
   checkIsoDateInBounds(isoDate)
-  return createPlainDateSlots(isoDate)
+  return createPlainDateSlots(isoDate, isoDate.calendar)
 }

@@ -300,7 +300,7 @@ export function toZonedDateTime(
 }
 
 export function toPlainDate(record: Record): PlainDateFns.Record {
-  return createPlainDateSlots(record)
+  return createPlainDateSlots(record, record.calendar)
 }
 
 export function toPlainTime(record: Record): PlainTimeFns.Record {

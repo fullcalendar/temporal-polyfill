@@ -214,7 +214,10 @@ export function toPlainDateSlots(
 
       case PlainDateTimeBranding:
         refineOverflowOptions(options) // parse unused options
-        return createPlainDateSlots(slots as PlainDateTimeSlots)
+        return createPlainDateSlots(
+          slots as PlainDateTimeSlots,
+          (slots as PlainDateTimeSlots).calendar,
+        )
 
       case ZonedDateTimeBranding:
         refineOverflowOptions(options) // parse unused options

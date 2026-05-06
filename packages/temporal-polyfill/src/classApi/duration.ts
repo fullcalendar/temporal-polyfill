@@ -176,7 +176,10 @@ function refinePublicRelativeTo(
           return slots as ZonedDateTimeSlots | PlainDateSlots
 
         case PlainDateTimeBranding:
-          return createPlainDateSlots(slots as PlainDateTimeSlots)
+          return createPlainDateSlots(
+            slots as PlainDateTimeSlots,
+            (slots as PlainDateTimeSlots).calendar,
+          )
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!
