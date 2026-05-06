@@ -8,42 +8,40 @@ export const utcTimeZoneId = 'UTC'
 // both transition search and direct offset lookup, so these day counts protect
 // ordinary DST-gap math too, not only getTimeZoneTransition().
 //
-// TODO: maybe change this to 19 like @js-temporal/polyfill
+// TODO: maybe change this to 19 like proposal-temporal's polyfill
 //
 export const defaultTimeZonePeriodDays = 60
 
+// These values mirror known close-transition cases in test262. They are not a
+// general proof that no closer pair can ever appear in future tzdb releases;
+// they are a local performance/correctness tradeoff until the native Intl path
+// grows a transition search that can discover multiple changes inside a large
+// scan range.
+//
+// Borrowed from
+// https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/ecmascript.mjs#L2397
+//
+const timeZonePeriodDaysByName: Record<string, number> = {
+  El_Aaiun: 17,
+  Tucuman: 12,
+  Tirane: 11,
+  Riga: 10,
+  Simferopol: 9,
+  Vienna: 9,
+  Tunis: 8,
+  Boa_Vista: 6,
+  Fortaleza: 6,
+  Maceio: 6,
+  Noronha: 6,
+  Recife: 6,
+  Gaza: 6,
+  Hebron: 6,
+  DeNoronha: 6,
+}
+
 export function getTimeZonePeriodDays(timeZoneId: string): number {
-  // These values mirror known close-transition cases in test262. They are not a
-  // general proof that no closer pair can ever appear in future tzdb releases;
-  // they are a local performance/correctness tradeoff until the native Intl path
-  // grows a transition search that can discover multiple changes inside a large
-  // scan range.
-  switch (timeZoneId) {
-    case 'Africa/El_Aaiun':
-      return 17
-    case 'America/Argentina/Tucuman':
-      return 12
-    case 'Europe/Tirane':
-      return 11
-    case 'Europe/Riga':
-      return 10
-    case 'Europe/Simferopol':
-    case 'Europe/Vienna':
-      return 9
-    case 'Africa/Tunis':
-      return 8
-    case 'America/Boa_Vista':
-    case 'America/Fortaleza':
-    case 'America/Maceio':
-    case 'America/Noronha':
-    case 'America/Recife':
-    case 'Asia/Gaza':
-    case 'Asia/Hebron':
-    case 'Brazil/DeNoronha':
-      return 6
-    default:
-      return defaultTimeZonePeriodDays
-  }
+  const timeZoneName = timeZoneId.split('/').pop()!
+  return timeZonePeriodDaysByName[timeZoneName] || defaultTimeZonePeriodDays
 }
 
 export const minPossibleTransition = isoArgsToEpochSec(1847)
