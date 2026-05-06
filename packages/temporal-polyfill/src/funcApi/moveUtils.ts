@@ -98,8 +98,9 @@ export function moveToDayOfYear(
   dayOfYear: number,
   options?: OverflowOptions,
 ): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
-  const daysInYear = computeCalendarDaysInYear(isoDate)
+  const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
     dayOfMonthName,
     toInteger(dayOfYear, dayOfMonthName),
@@ -108,10 +109,10 @@ export function moveToDayOfYear(
     overflow,
   )
 
-  const currentDayOfYear = computeCalendarDayOfYear(isoDate)
+  const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
   return slotsWithCalendar(
     moveByDays(isoDate, normDayOfYear - currentDayOfYear),
-    isoDate.calendar,
+    calendar,
   )
 }
 
@@ -120,8 +121,9 @@ export function moveToDayOfMonth(
   day: number,
   options?: OverflowOptions,
 ): AbstractDateSlots {
+  const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
-  const daysInMonth = computeCalendarDaysInMonth(isoDate)
+  const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
     dayFieldName,
     toInteger(day, dayFieldName),
@@ -132,14 +134,11 @@ export function moveToDayOfMonth(
 
   return slotsWithCalendar(
     moveToDayOfMonthUnsafe(
-      (dateFields) =>
-        computeCalendarDateFields(
-          slotsWithCalendar(dateFields, isoDate.calendar),
-        ).day,
+      (dateFields) => computeCalendarDateFields(calendar, dateFields).day,
       isoDate,
       normDayOfMonth,
     ),
-    isoDate.calendar,
+    calendar,
   )
 }
 

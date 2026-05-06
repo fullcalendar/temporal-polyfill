@@ -145,7 +145,7 @@ export function movePlainYearMonth(
 
   const { calendar } = plainYearMonthSlots
   const getDay = (isoDate: CalendarDateFields) =>
-    computeCalendarDateFields(slotsWithCalendar(isoDate, calendar)).day
+    computeCalendarDateFields(calendar, isoDate).day
 
   // The first-of-month must be representable, this check in-bounds
   const isoDateFields: CalendarDateFields = checkIsoDateInBounds(
@@ -387,7 +387,7 @@ export function addDateMonths(
   overflow: Overflow,
 ): number {
   const { calendar } = isoDateFields
-  const dateParts = computeCalendarDateFields(isoDateFields)
+  const dateParts = computeCalendarDateFields(calendar, isoDateFields)
   let { year, month, day } = dateParts
 
   if (years) {

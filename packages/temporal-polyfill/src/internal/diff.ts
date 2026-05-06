@@ -261,7 +261,7 @@ export function diffPlainYearMonth(
     Unit.Month,
   )
   const getDay = (isoDate: CalendarDateFields) =>
-    computeCalendarDateFields(slotsWithCalendar(isoDate, calendar)).day
+    computeCalendarDateFields(calendar, isoDate).day
 
   const firstOfMonth0 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots0)
   const firstOfMonth1 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots1)
@@ -514,14 +514,8 @@ export function diffCalendarDates(
     return { ...durationFieldDefaults, weeks, days }
   }
 
-  const yearMonthDayStart = computeCalendarDateFields({
-    ...startIsoDate,
-    calendar,
-  })
-  const yearMonthDayEnd = computeCalendarDateFields({
-    ...endIsoDate,
-    calendar,
-  })
+  const yearMonthDayStart = computeCalendarDateFields(calendar, startIsoDate)
+  const yearMonthDayEnd = computeCalendarDateFields(calendar, endIsoDate)
 
   if (largestUnit === Unit.Month) {
     const [months, days] = diffCalendarMonthDay(
@@ -585,8 +579,7 @@ function diffCalendarMonthDay(
   if (
     anchorCompare === sign ||
     (anchorCompare === 0 &&
-      computeCalendarDateFields(slotsWithCalendar(anchorIsoDate, calendar))
-        .day !== day0 &&
+      computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
       !(
         calendar &&
         calendar.isConstrainedFinalIntercalaryMonthDiff(

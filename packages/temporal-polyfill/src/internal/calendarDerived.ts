@@ -3,6 +3,7 @@ import {
   type InternalCalendar,
   getInternalCalendarId,
 } from './externalCalendar'
+import type { CalendarDateFields } from './fieldTypes'
 import {
   computeIsoDateFields,
   computeIsoDayOfYear,
@@ -14,7 +15,6 @@ import {
   computeIsoMonthCodeParts,
   isoMonthsInYear,
 } from './isoMath'
-import type { AbstractDateSlots } from './slots'
 import {
   diffEpochMilliDays,
   isoArgsToEpochMilli,
@@ -22,9 +22,9 @@ import {
 } from './timeMath'
 
 export function computeCalendarDateFields(
-  isoDate: AbstractDateSlots,
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
 ): ReturnType<typeof computeIsoDateFields> {
-  const { calendar } = isoDate
   return calendar
     ? calendar.computeDateFields(isoDate)
     : computeIsoDateFields(isoDate)
@@ -41,9 +41,9 @@ export function computeCalendarMonthCodeParts(
 }
 
 export function computeCalendarEraFields(
-  isoDate: AbstractDateSlots,
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
 ): ReturnType<typeof computeIsoEraFields> {
-  const { calendar } = isoDate
   return calendar
     ? calendar.computeEraFields(isoDate)
     : computeIsoEraFields(getInternalCalendarId(calendar), isoDate)
@@ -88,9 +88,11 @@ export function computeCalendarDaysInMonthForYearMonth(
     : computeIsoDaysInMonth(year, month)
 }
 
-export function computeCalendarMonthCode(isoDate: AbstractDateSlots): string {
-  const { calendar } = isoDate
-  const { year, month } = computeCalendarDateFields(isoDate)
+export function computeCalendarMonthCode(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): string {
+  const { year, month } = computeCalendarDateFields(calendar, isoDate)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     year,
@@ -99,40 +101,50 @@ export function computeCalendarMonthCode(isoDate: AbstractDateSlots): string {
   return formatMonthCode(monthCodeNumber, isLeapMonth)
 }
 
-export function computeCalendarInLeapYear(isoDate: AbstractDateSlots): boolean {
-  const { calendar } = isoDate
-  const { year } = computeCalendarDateFields(isoDate)
+export function computeCalendarInLeapYear(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): boolean {
+  const { year } = computeCalendarDateFields(calendar, isoDate)
   return calendar
     ? calendar.computeInLeapYear(year)
     : computeIsoInLeapYear(year)
 }
 
 export function computeCalendarMonthsInYear(
-  isoDate: AbstractDateSlots,
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
 ): number {
-  const { year } = computeCalendarDateFields(isoDate)
-  return computeCalendarMonthsInYearForYear(isoDate.calendar, year)
+  const { year } = computeCalendarDateFields(calendar, isoDate)
+  return computeCalendarMonthsInYearForYear(calendar, year)
 }
 
-export function computeCalendarDaysInMonth(isoDate: AbstractDateSlots): number {
-  const { year, month } = computeCalendarDateFields(isoDate)
-  return computeCalendarDaysInMonthForYearMonth(isoDate.calendar, year, month)
+export function computeCalendarDaysInMonth(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): number {
+  const { year, month } = computeCalendarDateFields(calendar, isoDate)
+  return computeCalendarDaysInMonthForYearMonth(calendar, year, month)
 }
 
-export function computeCalendarDaysInYear(isoDate: AbstractDateSlots): number {
-  const { calendar } = isoDate
-  const { year } = computeCalendarDateFields(isoDate)
+export function computeCalendarDaysInYear(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): number {
+  const { year } = computeCalendarDateFields(calendar, isoDate)
   return calendar
     ? calendar.computeDaysInYear(year)
     : computeIsoDaysInYear(year)
 }
 
-export function computeCalendarDayOfYear(isoDate: AbstractDateSlots): number {
-  const { calendar } = isoDate
+export function computeCalendarDayOfYear(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): number {
   if (!calendar) {
     return computeIsoDayOfYear(isoDate)
   }
-  const { year } = computeCalendarDateFields(isoDate)
+  const { year } = computeCalendarDateFields(calendar, isoDate)
   const milli0 = computeCalendarEpochMilli(calendar, year)
   return diffEpochMilliDays(milli0!, isoDateToEpochMilli(isoDate)!) + 1
 }

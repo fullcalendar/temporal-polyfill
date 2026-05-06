@@ -183,8 +183,7 @@ export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
   )
   const { calendar } = dateSlots
   const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoDate) =>
-      computeCalendarDateFields(slotsWithCalendar(isoDate, calendar)).day,
+    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
     dateSlots,
   )
 
@@ -220,7 +219,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
     year: origYear,
     month: origMonth,
     day,
-  } = computeCalendarDateFields(dateSlots)
+  } = computeCalendarDateFields(calendar, dateSlots)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     origYear,

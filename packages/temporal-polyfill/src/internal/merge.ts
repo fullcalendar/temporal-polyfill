@@ -167,7 +167,7 @@ export function mergeZonedDateTimeFields(
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.
-  const { year, month, day } = computeCalendarDateFields(isoDateTime)
+  const { year, month, day } = computeCalendarDateFields(calendar, isoDateTime)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -235,7 +235,10 @@ export function mergePlainDateTimeFields(
     dateTimeFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(plainDateTimeSlots)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
+    plainDateTimeSlots,
+  )
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -294,7 +297,10 @@ export function mergePlainDateFields(
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(plainDateSlots)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
+    plainDateSlots,
+  )
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -326,7 +332,10 @@ export function mergePlainYearMonthFields(
     yearMonthFieldNamesWithEraAlpha,
   )
 
-  const { year, month } = computeCalendarDateFields(plainYearMonthSlots)
+  const { year, month } = computeCalendarDateFields(
+    calendar,
+    plainYearMonthSlots,
+  )
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
@@ -357,7 +366,10 @@ export function mergePlainMonthDayFields(
     dateFieldNamesWithEraAlpha,
   )
 
-  const { year, month, day } = computeCalendarDateFields(plainMonthDaySlots)
+  const { year, month, day } = computeCalendarDateFields(
+    calendar,
+    plainMonthDaySlots,
+  )
   const origFields = {
     monthCode: computeMonthCode(calendar, year, month),
     day,

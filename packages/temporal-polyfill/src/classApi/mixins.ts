@@ -29,28 +29,30 @@ import { mapPropNames } from '../internal/utils'
 
 const calendarGetterQueries = {
   era: (slots: any) => {
-    return computeCalendarEraFields(slots).era
+    return computeCalendarEraFields(slots.calendar, slots).era
   },
   eraYear: (slots: any) => {
-    return computeCalendarEraFields(slots).eraYear
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
   },
   year: (slots: any) => {
-    return computeCalendarDateFields(slots).year
+    return computeCalendarDateFields(slots.calendar, slots).year
   },
   month: (slots: any) => {
-    return computeCalendarDateFields(slots).month
+    return computeCalendarDateFields(slots.calendar, slots).month
   },
   day: (slots: any) => {
-    return computeCalendarDateFields(slots).day
+    return computeCalendarDateFields(slots.calendar, slots).day
   },
-  monthCode: computeCalendarMonthCode,
-  inLeapYear: computeCalendarInLeapYear,
-  monthsInYear: computeCalendarMonthsInYear,
-  daysInMonth: computeCalendarDaysInMonth,
-  daysInYear: computeCalendarDaysInYear,
+  monthCode: (slots: any) => computeCalendarMonthCode(slots.calendar, slots),
+  inLeapYear: (slots: any) => computeCalendarInLeapYear(slots.calendar, slots),
+  monthsInYear: (slots: any) =>
+    computeCalendarMonthsInYear(slots.calendar, slots),
+  daysInMonth: (slots: any) =>
+    computeCalendarDaysInMonth(slots.calendar, slots),
+  daysInYear: (slots: any) => computeCalendarDaysInYear(slots.calendar, slots),
   dayOfWeek: computeIsoDayOfWeek,
   daysInWeek: () => 7,
-  dayOfYear: computeCalendarDayOfYear,
+  dayOfYear: (slots: any) => computeCalendarDayOfYear(slots.calendar, slots),
   weekOfYear: (slots: any) =>
     slots.calendar === isoCalendar
       ? computeIsoWeekFields(slots).weekOfYear

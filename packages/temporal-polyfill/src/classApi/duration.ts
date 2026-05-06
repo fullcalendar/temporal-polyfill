@@ -18,7 +18,6 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
 import { mergeDurationFields } from '../internal/merge'
-import { slotsWithCalendar } from '../internal/modify'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,

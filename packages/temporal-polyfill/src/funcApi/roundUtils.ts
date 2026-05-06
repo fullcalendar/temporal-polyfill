@@ -34,7 +34,7 @@ export function computeYearFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number } {
   const { calendar } = slots
-  const { year: year0 } = computeCalendarDateFields(slots)
+  const { year: year0 } = computeCalendarDateFields(calendar, slots)
   return {
     ...epochMilliToIsoDateTime(computeCalendarEpochMilli(calendar, year0)),
     year: year0,
@@ -45,7 +45,10 @@ export function computeMonthFloor(
   slots: AbstractDateSlots,
 ): CalendarDateTimeFields & { year: number; month: number } {
   const { calendar } = slots
-  const { year: year0, month: month0 } = computeCalendarDateFields(slots)
+  const { year: year0, month: month0 } = computeCalendarDateFields(
+    calendar,
+    slots,
+  )
   return {
     ...epochMilliToIsoDateTime(
       computeCalendarEpochMilli(calendar, year0, month0),
