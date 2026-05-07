@@ -14,12 +14,7 @@ import {
   getInternalCalendarId,
   isoCalendar,
 } from '../internal/externalCalendar'
-import {
-  dateGetterFieldNames,
-  monthDayGetterFieldNames,
-  timeFieldNamesAsc,
-  yearMonthGetterFieldNames,
-} from '../internal/fieldNames'
+import { timeFieldNamesAsc } from '../internal/fieldNames'
 import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
@@ -30,52 +25,85 @@ import { mapPropNames } from '../internal/utils'
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
 
-const calendarGetterQueries = {
-  era: (slots: any) => {
-    return computeCalendarEraFields(slots.calendar, slots).era
-  },
-  eraYear: (slots: any) => {
-    return computeCalendarEraFields(slots.calendar, slots).eraYear
-  },
-  year: (slots: any) => {
-    return computeCalendarDateFields(slots.calendar, slots).year
-  },
-  month: (slots: any) => {
-    return computeCalendarDateFields(slots.calendar, slots).month
-  },
-  day: (slots: any) => {
-    return computeCalendarDateFields(slots.calendar, slots).day
-  },
-  monthCode: (slots: any) => computeCalendarMonthCode(slots.calendar, slots),
-  inLeapYear: (slots: any) => computeCalendarInLeapYear(slots.calendar, slots),
-  monthsInYear: (slots: any) =>
-    computeCalendarMonthsInYear(slots.calendar, slots),
-  daysInMonth: (slots: any) =>
-    computeCalendarDaysInMonth(slots.calendar, slots),
-  daysInYear: (slots: any) => computeCalendarDaysInYear(slots.calendar, slots),
-  dayOfWeek: computeIsoDayOfWeek,
-  daysInWeek: () => 7,
-  dayOfYear: (slots: any) => computeCalendarDayOfYear(slots.calendar, slots),
-  weekOfYear: (slots: any) =>
-    slots.calendar === isoCalendar
-      ? computeIsoWeekFields(slots).weekOfYear
-      : undefined,
-  yearOfWeek: (slots: any) =>
-    slots.calendar === isoCalendar
-      ? computeIsoWeekFields(slots).yearOfWeek
-      : undefined,
+type CalendarGetterQuery = (slots: any) => any
+
+const era = (slots: any) => {
+  return computeCalendarEraFields(slots.calendar, slots).era
+}
+const eraYear = (slots: any) => {
+  return computeCalendarEraFields(slots.calendar, slots).eraYear
+}
+const year = (slots: any) => {
+  return computeCalendarDateFields(slots.calendar, slots).year
+}
+const month = (slots: any) => {
+  return computeCalendarDateFields(slots.calendar, slots).month
+}
+const day = (slots: any) => {
+  return computeCalendarDateFields(slots.calendar, slots).day
+}
+const monthCode = (slots: any) =>
+  computeCalendarMonthCode(slots.calendar, slots)
+const daysInMonth = (slots: any) =>
+  computeCalendarDaysInMonth(slots.calendar, slots)
+const daysInYear = (slots: any) =>
+  computeCalendarDaysInYear(slots.calendar, slots)
+const inLeapYear = (slots: any) =>
+  computeCalendarInLeapYear(slots.calendar, slots)
+const monthsInYear = (slots: any) =>
+  computeCalendarMonthsInYear(slots.calendar, slots)
+const weekOfYear = (slots: any) =>
+  slots.calendar === isoCalendar
+    ? computeIsoWeekFields(slots).weekOfYear
+    : undefined
+const dayOfWeek = computeIsoDayOfWeek
+const dayOfYear = (slots: any) =>
+  computeCalendarDayOfYear(slots.calendar, slots)
+const yearOfWeek = (slots: any) =>
+  slots.calendar === isoCalendar
+    ? computeIsoWeekFields(slots).yearOfWeek
+    : undefined
+const daysInWeek = () => 7
+
+// Keep these query maps scoped to the Temporal classes that need them. A single
+// master lookup object would make every getter implementation reachable through
+// dynamic property access, which works against package consumers' tree-shaking.
+const yearMonthGetterQueries = {
+  era,
+  eraYear,
+  year,
+  daysInMonth,
+  daysInYear,
+  inLeapYear,
+  monthsInYear,
+  monthCode,
+  month,
 }
 
-function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
-  methodNames: K[],
+const monthDayGetterQueries = {
+  monthCode,
+  day,
+}
+
+const dateGetterQueries = {
+  ...yearMonthGetterQueries,
+  day,
+  weekOfYear,
+  dayOfWeek,
+  dayOfYear,
+  yearOfWeek,
+  daysInWeek,
+}
+
+function createCalendarGetters<Q extends Record<string, CalendarGetterQuery>>(
+  queries: Q,
 ): {
-  [P in K]: () => any
+  [P in keyof Q]: () => any
 } {
   const methods = {} as any
 
-  for (let i = 0; i < methodNames.length; i++) {
-    const methodName = methodNames[i]
-    const getter = calendarGetterQueries[methodName]
+  for (const methodName in queries) {
+    const getter = queries[methodName]
     methods[methodName] = function (this: any, slots: any) {
       return getter(slots)
     }
@@ -84,9 +112,9 @@ function createCalendarGetters<K extends keyof typeof calendarGetterQueries>(
   return methods
 }
 
-export const dateGetters = createCalendarGetters(dateGetterFieldNames)
-export const yearMonthGetters = createCalendarGetters(yearMonthGetterFieldNames)
-export const monthDayGetters = createCalendarGetters(monthDayGetterFieldNames)
+export const dateGetters = createCalendarGetters(dateGetterQueries)
+export const yearMonthGetters = createCalendarGetters(yearMonthGetterQueries)
+export const monthDayGetters = createCalendarGetters(monthDayGetterQueries)
 export const calendarIdGetters = {
   calendarId(slots: any): string {
     return getInternalCalendarId(slots.calendar)
