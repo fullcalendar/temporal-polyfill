@@ -43,7 +43,7 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 export type Instant = any
 export type InstantArg = Instant | string
 
-export const [Instant, createInstant, getInstantSlots] = createSlotClass(
+export const [Instant, createInstant] = createSlotClass(
   InstantBranding,
   constructInstantSlots,
   epochGetters,
