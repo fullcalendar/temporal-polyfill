@@ -476,16 +476,14 @@ function formatCalendar(
   calendar: InternalCalendar,
   calendarDisplay: CalendarDisplay,
 ): string {
-  if (calendarDisplay !== CalendarDisplay.Never) {
-    if (
-      calendarDisplay > CalendarDisplay.Never || // critical or always
-      (calendarDisplay === CalendarDisplay.Auto && calendar !== isoCalendar)
-    ) {
-      return formatCalendarId(
-        getInternalCalendarId(calendar),
-        calendarDisplay === CalendarDisplay.Critical,
-      )
-    }
+  if (
+    calendarDisplay > CalendarDisplay.Never || // critical or always
+    (calendarDisplay === CalendarDisplay.Auto && calendar !== isoCalendar)
+  ) {
+    return formatCalendarId(
+      getInternalCalendarId(calendar),
+      calendarDisplay === CalendarDisplay.Critical,
+    )
   }
 
   return ''
