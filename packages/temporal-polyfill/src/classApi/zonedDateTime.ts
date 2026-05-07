@@ -44,7 +44,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarIdFromBag,
@@ -82,6 +82,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
   constructZonedDateTimeSlots,
+  formatZonedDateTimeIso,
   {
     ...epochGetters,
     ...calendarIdGetters,
@@ -258,7 +259,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
   },
-  (slots: ZonedDateTimeSlots) => formatZonedDateTimeIso(slots),
 )
 
 // Utils

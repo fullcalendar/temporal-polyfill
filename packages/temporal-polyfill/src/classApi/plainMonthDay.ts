@@ -27,6 +27,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
     constructPlainMonthDaySlots,
+    formatPlainMonthDayIso,
     {
       ...calendarIdGetters,
       ...monthDayGetters,
@@ -72,7 +73,6 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
       },
     },
-    formatPlainMonthDayIso,
   )
 
 // Utils

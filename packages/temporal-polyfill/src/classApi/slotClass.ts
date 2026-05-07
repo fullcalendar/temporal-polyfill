@@ -17,10 +17,10 @@ const setSlots = slotsMap.set.bind(slotsMap)
 export function createSlotClass(
   branding: string,
   construct: any,
+  formatFunc: (slots: any) => string,
   getters: any,
   methods: any,
   staticMethods: any,
-  formatFunc: (slots: any) => string,
 ): any {
   function Class(this: any, ...args: any[]) {
     if (this instanceof Class) {

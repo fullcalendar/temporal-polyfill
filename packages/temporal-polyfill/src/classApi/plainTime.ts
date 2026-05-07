@@ -44,6 +44,7 @@ export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 export const [PlainTime, createPlainTime] = createSlotClass(
   PlainTimeBranding,
   constructPlainTimeSlots,
+  formatPlainTimeIso,
   timeGetters,
   {
     with(
@@ -114,7 +115,6 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
     },
   },
-  formatPlainTimeIso,
 )
 
 // Utils

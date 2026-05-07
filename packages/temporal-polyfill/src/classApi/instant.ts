@@ -46,6 +46,7 @@ export type InstantArg = Instant | string
 export const [Instant, createInstant] = createSlotClass(
   InstantBranding,
   constructInstantSlots,
+  (slots: InstantSlots) => formatInstantIso(refineTimeZoneArg, slots),
   epochGetters,
   {
     add(slots: InstantSlots, durationArg: DurationArg): Instant {
@@ -126,7 +127,6 @@ export const [Instant, createInstant] = createSlotClass(
       return compareInstants(toInstantSlots(a), toInstantSlots(b))
     },
   },
-  (slots: InstantSlots) => formatInstantIso(refineTimeZoneArg, slots),
 )
 
 // Utils

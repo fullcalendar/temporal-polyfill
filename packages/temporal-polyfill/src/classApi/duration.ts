@@ -53,6 +53,7 @@ export type DurationArg = Duration | Partial<DurationFields> | string
 export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   DurationBranding,
   constructDurationSlots,
+  formatDurationIso,
   {
     ...durationGetters,
     blank: getDurationBlank,
@@ -143,7 +144,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       )
     },
   },
-  formatDurationIso,
 )
 
 // Utils

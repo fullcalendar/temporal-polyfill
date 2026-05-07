@@ -78,6 +78,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
   constructPlainDateTimeSlots,
+  formatPlainDateTimeIso,
   {
     ...calendarIdGetters,
     ...dateGetters,
@@ -212,7 +213,6 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       return compareIsoDateTimeFields(slots0, slots1)
     },
   },
-  formatPlainDateTimeIso,
 )
 
 // Utils

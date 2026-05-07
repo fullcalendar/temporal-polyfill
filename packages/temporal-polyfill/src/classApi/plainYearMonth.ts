@@ -35,6 +35,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
     constructPlainYearMonthSlots,
+    formatPlainYearMonthIso,
     {
       ...calendarIdGetters,
       ...yearMonthGetters,
@@ -136,7 +137,6 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
     },
-    formatPlainYearMonthIso,
   )
 
 // Utils
