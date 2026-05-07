@@ -338,7 +338,7 @@ export type ClassFormatConfig<S> = {
 export type EpochNanoConverter<S> = (
   slots: S,
   resolvedOptions: Intl.ResolvedDateTimeFormatOptions,
-) => number
+) => number | undefined
 
 // stable reference for caching
 const emptyOptions: Intl.DateTimeFormatOptions = {}
@@ -448,26 +448,18 @@ export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = {
   getForcedTimeZoneId: getForcedCommonTimeZone,
 }
 
-function formatDateTimeToEpochMilli(fields: CalendarDateTimeFields): number {
-  return isoDateTimeToEpochMilli(fields)!
-}
-
-function formatDateToEpochMilli(fields: CalendarDateFields): number {
-  return isoDateToEpochMilli(fields)!
-}
-
 function formatTimeToEpochMilli(fields: TimeFields): number {
   return timeFieldsToNano(fields) / nanoInMilli
 }
 
 export const dateTimeConfig: ClassFormatConfig<CalendarDateTimeFields> = {
   transformOptions: transformDateTimeOptions,
-  slotsToEpochMilli: formatDateTimeToEpochMilli,
+  slotsToEpochMilli: isoDateTimeToEpochMilli,
 }
 
 export const dateConfig: ClassFormatConfig<CalendarDateFields> = {
   transformOptions: transformDateOptions,
-  slotsToEpochMilli: formatDateToEpochMilli,
+  slotsToEpochMilli: isoDateToEpochMilli,
 }
 
 export const timeConfig: ClassFormatConfig<TimeFields> = {
@@ -477,13 +469,13 @@ export const timeConfig: ClassFormatConfig<TimeFields> = {
 
 export const yearMonthConfig: ClassFormatConfig<CalendarDateFields> = {
   transformOptions: transformYearMonthOptions,
-  slotsToEpochMilli: formatDateToEpochMilli,
+  slotsToEpochMilli: isoDateToEpochMilli,
   strictCalendarChecks: nonBuggyIsoResolve,
 }
 
 export const monthDayConfig: ClassFormatConfig<CalendarDateFields> = {
   transformOptions: transformMonthDayOptions,
-  slotsToEpochMilli: formatDateToEpochMilli,
+  slotsToEpochMilli: isoDateToEpochMilli,
   strictCalendarChecks: nonBuggyIsoResolve,
 }
 
@@ -507,7 +499,10 @@ function toEpochMillis<S>(
       )
     }
 
-    return slotsToEpochMilli(slots, resolvedOptions)
+    // Formatting only passes already-valid Temporal slots here. The ISO epoch
+    // helpers can return undefined for out-of-bounds plain data, but those
+    // bounds have been enforced before a Temporal object reaches this point.
+    return slotsToEpochMilli(slots, resolvedOptions)!
   })
 }
 
