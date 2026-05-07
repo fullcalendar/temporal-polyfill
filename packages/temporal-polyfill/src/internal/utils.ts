@@ -197,20 +197,6 @@ export const mapPropNamesToConstant = bindArgs(
   (_propVal: unknown, _i: number, constant: unknown) => constant,
 ) as <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
 
-export function remapProps<O, N>(
-  oldNames: (keyof O)[],
-  newNames: (keyof N)[],
-  oldProps: O,
-): N {
-  const newProps = {} as N
-
-  for (const [i] of oldNames.entries()) {
-    newProps[newNames[i]] = oldProps[oldNames[i]] as any
-  }
-
-  return newProps
-}
-
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
   // Avoid inherited fields from Object.prototype pollution.
   const res = Object.create(null) as P
