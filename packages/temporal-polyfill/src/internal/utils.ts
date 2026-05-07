@@ -88,16 +88,16 @@ export function memoize<K, V, A extends any[]>(
 
 // Descriptor
 // -----------------------------------------------------------------------------
+// Using const arrow functions is good for min+gzip for some reason. Not always
 
-export function createNameDescriptors(name: string) {
-  return createPropDescriptors({ name }, true)
-}
+export const createNameDescriptors = (name: string) =>
+  createPropDescriptors({ name }, true)
 
-export function createPropDescriptors(
+export const createPropDescriptors = (
   propVals: { [propName: string]: unknown },
   readonly?: boolean,
-): PropertyDescriptorMap {
-  return mapProps(
+): PropertyDescriptorMap =>
+  mapProps(
     (value) => ({
       value,
       configurable: true,
@@ -105,34 +105,32 @@ export function createPropDescriptors(
     }),
     propVals,
   )
-}
 
-export function createGetterDescriptors(getters: {
+export const createGetterDescriptors = (getters: {
   [propName: string]: () => unknown
-}): PropertyDescriptorMap {
-  return mapProps(
+}): PropertyDescriptorMap =>
+  mapProps(
     (getter) => ({
       get: getter,
       configurable: true,
     }),
     getters,
   )
-}
 
-export function createStringTagDescriptors(value: string): {
+export const createStringTagDescriptors = (
+  value: string,
+): {
   // crazy
   [Symbol.toStringTag]: {
     value: string
     configurable: true
   }
-} {
-  return {
-    [Symbol.toStringTag]: {
-      value,
-      configurable: true,
-    },
-  }
-}
+} => ({
+  [Symbol.toStringTag]: {
+    value,
+    configurable: true,
+  },
+})
 
 // Props
 // -----------------------------------------------------------------------------
