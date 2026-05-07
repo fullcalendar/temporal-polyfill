@@ -74,43 +74,24 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   }
 
   const members = RawDateTimeFormat.prototype
-  const memberDescriptors = Object.getOwnPropertyDescriptors(members)
+  const memberDescriptors: Record<string, PropertyDescriptor> =
+    Object.getOwnPropertyDescriptors(members)
   const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
 
-  for (const memberName in memberDescriptors) {
-    const memberDescriptor = memberDescriptors[memberName]
-    const formatLikeMethod =
-      memberName.startsWith('format') && createFormatMethod(memberName)
-    const proxiedMethod =
-      memberName === 'resolvedOptions'
-        ? createResolvedOptionsMethod()
-        : createProxiedMethod(memberName)
+  // Start from the host's descriptors so ordinary property attributes and
+  // Symbol.toStringTag continue to look like native Intl.DateTimeFormat. Only
+  // the members that need Temporal-aware behavior are swapped out below.
+  memberDescriptors['constructor'].value = DateTimeFormatFunc // expose more versatile
+  memberDescriptors.format.get = createFormatGetter('format')
+  memberDescriptors.resolvedOptions.value = createResolvedOptionsMethod()
 
-    if (typeof memberDescriptor.value === 'function') {
-      memberDescriptor.value =
-        memberName === 'constructor'
-          ? DateTimeFormatFunc // expose more versatile
-          : formatLikeMethod || proxiedMethod
-    } else if (formatLikeMethod) {
-      // .format() is always bound to the instance. It's a getter
-      // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.format
-      memberDescriptor.get = function (this: DateTimeFormat) {
-        /*
-        Protects against querying .format on non-DateTimeFormats AND
-        fake DateTimeFormats via `Object.create(Intl.DateTimeFormat.prototype)`
-        */
-        if (!internalsMap.has(this)) {
-          throw new TypeError(errorMessages.invalidCallingContext)
-        }
-
-        // don't do Function::bind, because gives weird .name
-        return (...args: any[]) => formatLikeMethod.apply(this, args)
-      }
-
-      Object.defineProperties(
-        memberDescriptor.get,
-        createNameDescriptors(`get ${memberName}`),
-      )
+  for (const memberName of [
+    'formatRange',
+    'formatToParts',
+    'formatRangeToParts',
+  ]) {
+    if (memberDescriptors[memberName]) {
+      memberDescriptors[memberName].value = createFormatMethod(memberName)
     }
   }
 
@@ -124,6 +105,25 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   return DateTimeFormatFunc as Classlike
 }
 
+function createFormatGetter(methodName: string) {
+  const formatMethod = createFormatMethod(methodName)
+
+  // .format is a getter whose returned function is bound to this instance.
+  // Querying it must reject fake instances such as
+  // Object.create(Intl.DateTimeFormat.prototype) before returning a callable.
+  const getter = function (this: DateTimeFormat) {
+    if (!internalsMap.has(this)) {
+      throw new TypeError(errorMessages.invalidCallingContext)
+    }
+
+    // Don't use Function::bind, because it gives a different .name shape from
+    // the anonymous bound function expected here.
+    return (...args: any[]) => formatMethod.apply(this, args)
+  }
+
+  return Object.defineProperties(getter, createNameDescriptors('get format'))
+}
+
 function createFormatMethod(methodName: string) {
   const isRange = methodName.includes('Range')
   const func = function (this: DateTimeFormat, ...formattables: Formattable[]) {
@@ -133,16 +133,6 @@ function createFormatMethod(methodName: string) {
       formattables,
     )
     return (format as any)[methodName](...rawFormattables)
-  }
-
-  return Object.defineProperties(func, createNameDescriptors(methodName))
-}
-
-function createProxiedMethod(methodName: string) {
-  const func = function (this: DateTimeFormat, ...args: any[]) {
-    return (getDateTimeFormatInternals(this).rawFormat as any)[methodName](
-      ...args,
-    )
   }
 
   return Object.defineProperties(func, createNameDescriptors(methodName))
