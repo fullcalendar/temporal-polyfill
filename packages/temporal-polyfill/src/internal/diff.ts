@@ -45,12 +45,7 @@ import {
   MoveMarker,
   createMarkerMoveOps,
 } from './relativeMath'
-import {
-  computeNanoInc,
-  roundBigNano,
-  roundByInc,
-  roundRelativeDuration,
-} from './round'
+import { roundBigNano, roundRelativeDuration } from './round'
 import {
   DurationSlots,
   InstantSlots,
@@ -99,20 +94,26 @@ export function diffInstants(
   instantSlots1: InstantSlots,
   options?: DiffOptions<TimeUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Second,
-    Unit.Hour,
-  ) as [TimeUnit, TimeUnit, number, RoundingMode]
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as [
+      TimeUnit,
+      TimeUnit,
+      number,
+      RoundingMode,
+    ]
 
   const durationFields = diffEpochNanos(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
   )
 
-  return createDiffDurationSlots(invert, durationFields)
+  return createDurationSlots(
+    invert ? negateDurationFields(durationFields) : durationFields,
+  )
 }
 
 export function diffZonedDateTimes(
@@ -166,7 +167,9 @@ export function diffZonedDateTimes(
     )
   }
 
-  return createDiffDurationSlots(invert, durationFields)
+  return createDurationSlots(
+    invert ? negateDurationFields(durationFields) : durationFields,
+  )
 }
 
 export function diffPlainDateTimes(
@@ -219,7 +222,9 @@ export function diffPlainDateTimes(
     )
   }
 
-  return createDiffDurationSlots(invert, durationFields)
+  return createDurationSlots(
+    invert ? negateDurationFields(durationFields) : durationFields,
+  )
 }
 
 export function diffPlainDates(
@@ -229,20 +234,18 @@ export function diffPlainDates(
   plainDateSlots1: PlainDateSlots,
   options?: DiffOptions<DateUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Day,
-    Unit.Year,
-    Unit.Day,
-  )
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
 
   return diffDateLike(
     invert,
     calendar,
     plainDateSlots0,
     plainDateSlots1,
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
   )
 }
 
@@ -253,13 +256,8 @@ export function diffPlainYearMonth(
   plainYearMonthSlots1: PlainYearMonthSlots,
   options?: DiffOptions<YearMonthUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Year,
-    Unit.Year,
-    Unit.Month,
-  )
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
   const getDay = (isoDate: CalendarDateFields) =>
     computeCalendarDateFields(calendar, isoDate).day
 
@@ -277,7 +275,10 @@ export function diffPlainYearMonth(
     // The first-of-month must be representable, this check in-bounds
     checkIsoDateInBounds(firstOfMonth0),
     checkIsoDateInBounds(firstOfMonth1),
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
     /* smallestPrecision = */ Unit.Month,
   )
 }
@@ -340,7 +341,9 @@ function diffDateLike(
     }
   }
 
-  return createDiffDurationSlots(invert, durationFields)
+  return createDurationSlots(
+    invert ? negateDurationFields(durationFields) : durationFields,
+  )
 }
 
 export function diffPlainTimes(
@@ -352,10 +355,15 @@ export function diffPlainTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
-  const timeDiffNano = roundByInc(
-    diffTimes(plainTimeSlots0, plainTimeSlots1),
-    computeNanoInc(smallestUnit as TimeUnit, roundingInc),
-    roundingMode,
+  const timeDiffNano = Number(
+    roundBigNano(
+      BigInt(
+        timeFieldsToNano(plainTimeSlots1) - timeFieldsToNano(plainTimeSlots0),
+      ),
+      smallestUnit as TimeUnit,
+      roundingInc,
+      roundingMode,
+    ),
   )
 
   const durationFields = {
@@ -363,13 +371,6 @@ export function diffPlainTimes(
     ...nanoToDurationTimeFields(timeDiffNano, largestUnit as TimeUnit),
   }
 
-  return createDiffDurationSlots(invert, durationFields)
-}
-
-function createDiffDurationSlots(
-  invert: boolean,
-  durationFields: DurationFields,
-): DurationSlots {
   return createDurationSlots(
     invert ? negateDurationFields(durationFields) : durationFields,
   )
@@ -391,11 +392,13 @@ export function diffZonedEpochsExact(
     return durationFieldDefaults
   }
   if (largestUnit < Unit.Day) {
-    return diffEpochNanosExact(
-      slots0.epochNanoseconds,
-      slots1.epochNanoseconds,
-      largestUnit as DayTimeUnit,
-    )
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        slots1.epochNanoseconds - slots0.epochNanoseconds,
+        largestUnit as DayTimeUnit,
+      ),
+    }
   }
 
   // Same-date zoned diffs have no calendar date part. Keeping them as instant
@@ -404,21 +407,27 @@ export function diffZonedEpochsExact(
   const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZoneImpl)
   const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZoneImpl)
   if (!compareIsoDate(isoDateTime0, isoDateTime1)) {
-    return diffEpochNanosExact(
-      slots0.epochNanoseconds,
-      slots1.epochNanoseconds,
-      Unit.Hour,
-    )
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        slots1.epochNanoseconds - slots0.epochNanoseconds,
+        Unit.Hour,
+      ),
+    }
   }
 
-  return diffZonedEpochsBig(
-    calendar,
+  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
     timeZoneImpl,
     slots0,
     slots1,
     sign,
-    largestUnit,
   )
+  const dateDiff =
+    largestUnit === Unit.Day // TODO: use this optimization elsewhere too
+      ? { ...durationFieldDefaults, days: diffDays(isoFields0, isoFields1) }
+      : diffCalendarDates(calendar, isoFields0, isoFields1, largestUnit)
+
+  return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
 }
 
 export function diffDateTimesExact(
@@ -435,11 +444,13 @@ export function diffDateTimesExact(
     return durationFieldDefaults
   }
   if (largestUnit <= Unit.Day) {
-    return diffEpochNanosExact(
-      startEpochNano,
-      endEpochNano,
-      largestUnit as DayTimeUnit,
-    )
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        endEpochNano - startEpochNano,
+        largestUnit as DayTimeUnit,
+      ),
+    }
   }
 
   return diffDateTimesBig(
@@ -454,28 +465,6 @@ export function diffDateTimesExact(
 // Exact Diffing (no rounding): Big units (years/weeks/months/days?)
 // -----------------------------------------------------------------------------
 
-function diffZonedEpochsBig(
-  calendar: InternalCalendar,
-  timeZoneImpl: TimeZoneImpl,
-  slots0: ZonedEpochSlots,
-  slots1: ZonedEpochSlots,
-  sign: NumberSign, // guaranteed non-zero
-  largestUnit: Unit, // year/month/week/day
-): DurationFields {
-  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZoneImpl,
-    slots0,
-    slots1,
-    sign,
-  )
-  const dateDiff =
-    largestUnit === Unit.Day // TODO: use this optimization elsewhere too
-      ? diffByDay(isoFields0, isoFields1)
-      : diffCalendarDates(calendar, isoFields0, isoFields1, largestUnit)
-
-  return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
-}
-
 function diffDateTimesBig(
   calendar: InternalCalendar,
   startIsoDateTime: CalendarDateTimeFields,
@@ -483,14 +472,19 @@ function diffDateTimesBig(
   sign: NumberSign, // guaranteed non-zero
   largestUnit: Unit, // year/month/week
 ): DurationFields {
-  const [diffStartDate, diffEndDate, timeNano] = prepareDateTimeDiff(
-    startIsoDateTime,
-    endIsoDateTime,
-    sign,
-  )
+  let diffEndDate: CalendarDateFields = endIsoDateTime
+
+  // If date/time diffs conflict, move intermediate date one day forward.
+  let timeNano =
+    timeFieldsToNano(endIsoDateTime) - timeFieldsToNano(startIsoDateTime)
+  if (Math.sign(timeNano) === -sign) {
+    diffEndDate = moveByDays(endIsoDateTime, -sign)
+    timeNano += nanoInUtcDay * sign
+  }
+
   const dateDiff = diffCalendarDates(
     calendar,
-    diffStartDate,
+    startIsoDateTime,
     diffEndDate,
     largestUnit,
   )
@@ -504,119 +498,76 @@ export function diffCalendarDates(
   largestUnit: Unit, // TODO: put this arg after calendar to allow for bindArgs?
 ): DurationFields {
   if (largestUnit <= Unit.Week) {
-    let weeks = 0
-    let days = diffDays(startIsoDate, endIsoDate)
+    const days = diffDays(startIsoDate, endIsoDate)
 
     if (largestUnit === Unit.Week) {
-      weeks = divTrunc(days, 7)
-      days = modTrunc(days, 7)
+      return {
+        ...durationFieldDefaults,
+        weeks: divTrunc(days, 7),
+        days: modTrunc(days, 7),
+      }
     }
 
-    return { ...durationFieldDefaults, weeks, days }
+    return { ...durationFieldDefaults, days }
   }
 
   const yearMonthDayStart = computeCalendarDateFields(calendar, startIsoDate)
   const yearMonthDayEnd = computeCalendarDateFields(calendar, endIsoDate)
 
   if (largestUnit === Unit.Month) {
-    const [months, days] = diffCalendarMonthDay(
-      calendar,
-      startIsoDate,
-      endIsoDate,
-      yearMonthDayStart,
-      yearMonthDayEnd,
+    const { year: year0, month: month0, day: day0 } = yearMonthDayStart
+    const { year: year1, month: month1, day: day1 } = yearMonthDayEnd
+    const sign = Math.sign(
+      compareNumbers(year1, year0) ||
+        compareNumbers(month1, month0) ||
+        diffDays(startIsoDate, endIsoDate),
     )
+
+    let months = 0
+    let days = 0
+    if (sign) {
+      // Temporal counts concrete calendar month slots here, which matters for
+      // lunisolar calendars with inserted leap months.
+      months = calendar
+        ? calendar.diffMonthSlots(year0, month0, year1, month1)
+        : diffIsoMonthSlots(year0, month0, year1, month1)
+
+      let anchorIsoDate = epochMilliToIsoDateTime(
+        addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+      )
+
+      const anchorCompare = compareIsoDate(anchorIsoDate, endIsoDate)
+      if (
+        anchorCompare === sign ||
+        (anchorCompare === 0 &&
+          computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
+          !(
+            calendar &&
+            calendar.isConstrainedFinalIntercalaryMonthDiff(
+              sign,
+              year0,
+              month0,
+              day0,
+              year1,
+              month1,
+              day1,
+            )
+          ))
+      ) {
+        months -= sign
+        anchorIsoDate = epochMilliToIsoDateTime(
+          addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+        )
+      }
+
+      days = diffDays(anchorIsoDate, endIsoDate)
+    }
+
     return { ...durationFieldDefaults, months, days }
   }
 
-  const [years, months, days] = diffCalendarYearMonthDay(
-    calendar,
-    yearMonthDayStart,
-    yearMonthDayEnd,
-  )
-
-  return { ...durationFieldDefaults, years, months, days }
-}
-
-function diffCalendarMonthDay(
-  calendar: InternalCalendar,
-  startIsoDate: CalendarDateFields,
-  endIsoDate: CalendarDateFields,
-  startCalendarDateFields: CalendarDateFields,
-  endCalendarDateFields: CalendarDateFields,
-): [monthDiff: number, dayDiff: number] {
-  const { year: year0, month: month0, day: day0 } = startCalendarDateFields
-  const { year: year1, month: month1, day: day1 } = endCalendarDateFields
-  const sign = Math.sign(
-    compareNumbers(year1, year0) ||
-      compareNumbers(month1, month0) ||
-      diffDays(startIsoDate, endIsoDate),
-  )
-
-  if (!sign) {
-    return [0, 0]
-  }
-
-  // For largestUnit: "months", Temporal counts concrete calendar month slots.
-  // In lunisolar calendars this must include inserted leap months instead of
-  // collapsing everything to 12 month-code numbers per calendar year.
-  let months = calendar
-    ? calendar.diffMonthSlots(year0, month0, year1, month1)
-    : diffIsoMonthSlots(year0, month0, year1, month1)
-
-  let anchorIsoDate = epochMilliToIsoDateTime(
-    addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
-  )
-
-  // If moving by the raw month-slot distance passes the end date, back off one
-  // month. This deliberately uses the full date comparison, which avoids
-  // treating a constrained 30th -> 29th move as a complete calendar month.
-  const anchorCompare = compareIsoDate(anchorIsoDate, endIsoDate)
-  if (
-    anchorCompare === sign ||
-    (anchorCompare === 0 &&
-      computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
-      !(
-        calendar &&
-        calendar.isConstrainedFinalIntercalaryMonthDiff(
-          sign,
-          year0,
-          month0,
-          day0,
-          year1,
-          month1,
-          day1,
-        )
-      ))
-  ) {
-    months -= sign
-    anchorIsoDate = epochMilliToIsoDateTime(
-      addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
-    )
-  }
-
-  return [months, diffDays(anchorIsoDate, endIsoDate)]
-}
-
-// Local field comparison avoids converting edge-of-range dates to epoch time.
-function compareIsoDate(
-  isoDate0: CalendarDateFields,
-  isoDate1: CalendarDateFields,
-): number {
-  return (
-    compareNumbers(isoDate0.year, isoDate1.year) ||
-    compareNumbers(isoDate0.month, isoDate1.month) ||
-    compareNumbers(isoDate0.day, isoDate1.day)
-  )
-}
-
-function diffCalendarYearMonthDay(
-  calendar: InternalCalendar,
-  startCalendarDateFields: CalendarDateFields,
-  endCalendarDateFields: CalendarDateFields,
-): [yearDiff: number, monthDiff: number, dayDiff: number] {
-  const { year: year0, month: month0, day: day0 } = startCalendarDateFields
-  let { year: year1, month: month1, day: day1 } = endCalendarDateFields
+  const { year: year0, month: month0, day: day0 } = yearMonthDayStart
+  let { year: year1, month: month1, day: day1 } = yearMonthDayEnd
   let yearDiff = year1 - year0
   let monthDiff = month1 - month0
   let dayDiff = day1 - day0
@@ -664,14 +615,19 @@ function diffCalendarYearMonthDay(
         year1,
         month1,
       )
-      monthDiff = diffBalancedYearMonths(
-        calendar,
-        sign,
-        monthCodeNumber0,
-        isLeapMonth0,
-        monthCodeNumber1,
-        isLeapMonth1,
-      )
+      const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
+      // Leap-month sources can constrain to common counterparts across a year
+      // boundary; those asymmetric cases keep a zero month remainder here.
+      monthDiff =
+        leapMonthMeta !== undefined &&
+        isLeapMonth0 &&
+        !isLeapMonth1 &&
+        (leapMonthMeta < 0
+          ? sign > 0 && monthCodeNumber1 === -leapMonthMeta
+          : sign < 0 && monthCodeNumber1 === monthCodeNumber0)
+          ? 0
+          : monthCodeNumber1 - monthCodeNumber0 ||
+            Number(isLeapMonth1) - Number(isLeapMonth0)
 
       if (Math.sign(monthDiff) === -sign) {
         const monthCorrect =
@@ -716,47 +672,23 @@ function diffCalendarYearMonthDay(
     }
   }
 
-  return [yearDiff, monthDiff, dayDiff]
+  return {
+    ...durationFieldDefaults,
+    years: yearDiff,
+    months: monthDiff,
+    days: dayDiff,
+  }
 }
 
-function diffBalancedYearMonths(
-  calendar: InternalCalendar,
-  sign: number,
-  monthCodeNumber0: number,
-  isLeapMonth0: boolean,
-  monthCodeNumber1: number,
-  isLeapMonth1: boolean,
+// Local field comparison avoids converting edge-of-range dates to epoch time.
+function compareIsoDate(
+  isoDate0: CalendarDateFields,
+  isoDate1: CalendarDateFields,
 ): number {
-  const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
-
-  if (leapMonthMeta !== undefined && leapMonthMeta < 0) {
-    const fixedLeapMonth = -leapMonthMeta
-
-    // Hebrew-style calendars have a fixed leap month before a common-month
-    // counterpart. A leap-month source constrains to that common counterpart
-    // across a year boundary, but the reverse direction remains a month short.
-    if (
-      sign > 0 &&
-      isLeapMonth0 &&
-      !isLeapMonth1 &&
-      monthCodeNumber1 === fixedLeapMonth
-    ) {
-      return 0
-    }
-  } else if (leapMonthMeta !== undefined) {
-    if (
-      sign < 0 &&
-      isLeapMonth0 &&
-      !isLeapMonth1 &&
-      monthCodeNumber1 === monthCodeNumber0
-    ) {
-      return 0
-    }
-  }
-
   return (
-    monthCodeNumber1 - monthCodeNumber0 ||
-    Number(isLeapMonth1) - Number(isLeapMonth0)
+    compareNumbers(isoDate0.year, isoDate1.year) ||
+    compareNumbers(isoDate0.month, isoDate1.month) ||
+    compareNumbers(isoDate0.day, isoDate1.day)
   )
 }
 
@@ -768,14 +700,15 @@ export function prepareZonedEpochDiff(
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   sign: NumberSign, // guaranteed non-zero
-): [CalendarDateFields, CalendarDateFields, number, TimeFields] {
+): [CalendarDateTimeFields, CalendarDateFields, number] {
   const startIsoDate = zonedEpochSlotsToIso(slots0, timeZoneImpl)
   const endIsoDate = zonedEpochSlotsToIso(slots1, timeZoneImpl)
   const endEpochNano = slots1.epochNanoseconds
   let dayCorrection = 0
 
   // If wall-clock will be overshot, guaranteed 1-day correction
-  const timeDiffNano = diffTimes(startIsoDate, endIsoDate)
+  const timeDiffNano =
+    timeFieldsToNano(endIsoDate) - timeFieldsToNano(startIsoDate)
   const timeSign = Math.sign(timeDiffNano)
   if (timeSign === -sign) {
     dayCorrection++
@@ -796,28 +729,11 @@ export function prepareZonedEpochDiff(
 
     if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
       const remainderNano = Number(endEpochNano - midEpochNano)
-      return [startIsoDate, midIsoDate, remainderNano, startIsoDate]
+      return [startIsoDate, midIsoDate, remainderNano]
     }
   }
 
   throw new RangeError(errorMessages.invalidProtocolResults)
-}
-
-function prepareDateTimeDiff(
-  startIsoDateTime: CalendarDateTimeFields,
-  endIsoDateTime: CalendarDateTimeFields,
-  sign: NumberSign, // guaranteed non-zero
-): [CalendarDateFields, CalendarDateFields, number] {
-  let adjustedEndIsoDate: CalendarDateFields = endIsoDateTime
-
-  // If date/time diffs conflict, move intermediate date one day forward
-  let timeDiffNano = diffTimes(startIsoDateTime, endIsoDateTime)
-  if (Math.sign(timeDiffNano) === -sign) {
-    adjustedEndIsoDate = moveByDays(endIsoDateTime, -sign)
-    timeDiffNano += nanoInUtcDay * sign
-  }
-
-  return [startIsoDateTime, adjustedEndIsoDate, timeDiffNano]
 }
 
 // Diffing Via Epoch Nanoseconds
@@ -845,33 +761,6 @@ function diffEpochNanos(
   }
 }
 
-function diffEpochNanosExact(
-  startEpochNano: bigint,
-  endEpochNano: bigint,
-  largestUnit: DayTimeUnit,
-): DurationFields {
-  return {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(
-      endEpochNano - startEpochNano,
-      largestUnit as DayTimeUnit,
-    ),
-  }
-}
-
-/*
-Partial days are trunc()'d
-*/
-function diffByDay(
-  startIsoDate: CalendarDateFields,
-  endIsoDate: CalendarDateFields,
-): DurationFields {
-  return {
-    ...durationFieldDefaults,
-    days: diffDays(startIsoDate, endIsoDate),
-  }
-}
-
 /*
 Partial days are trunc()'d
 */
@@ -885,9 +774,6 @@ function diffDays(
   )
 }
 
-function diffTimes(time0: TimeFields, time1: TimeFields): number {
-  return timeFieldsToNano(time1) - timeFieldsToNano(time0)
-}
 // -----------------------------------------------------------------------------
 
 export function getCommonCalendar(

@@ -193,11 +193,17 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
-  const [isoFields0, isoFields1, remainderNano, startTime] =
-    prepareZonedEpochDiff(timeZone, record0, record1, sign)
+  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
+    timeZone,
+    record0,
+    record1,
+    sign,
+  )
+  // `isoFields0` is the start date-time, so it supplies the original wall-clock
+  // time for the adjusted end date. The start side already has that time.
   const nanoDiff =
-    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, startTime))! -
-    isoDateTimeToEpochNano(combineDateAndTime(isoFields0, startTime))! +
+    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, isoFields0))! -
+    isoDateTimeToEpochNano(isoFields0)! +
     BigInt(remainderNano)
 
   let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
