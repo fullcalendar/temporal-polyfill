@@ -27,57 +27,39 @@ import { mapPropNames } from '../internal/utils'
 
 type CalendarGetterQuery = (slots: any) => any
 
-const era = (slots: any) => {
-  return computeCalendarEraFields(slots.calendar, slots).era
-}
-const eraYear = (slots: any) => {
-  return computeCalendarEraFields(slots.calendar, slots).eraYear
-}
-const year = (slots: any) => {
-  return computeCalendarDateFields(slots.calendar, slots).year
-}
-const month = (slots: any) => {
-  return computeCalendarDateFields(slots.calendar, slots).month
-}
-const day = (slots: any) => {
-  return computeCalendarDateFields(slots.calendar, slots).day
-}
+const day = (slots: any) => computeCalendarDateFields(slots.calendar, slots).day
 const monthCode = (slots: any) =>
   computeCalendarMonthCode(slots.calendar, slots)
-const daysInMonth = (slots: any) =>
-  computeCalendarDaysInMonth(slots.calendar, slots)
-const daysInYear = (slots: any) =>
-  computeCalendarDaysInYear(slots.calendar, slots)
-const inLeapYear = (slots: any) =>
-  computeCalendarInLeapYear(slots.calendar, slots)
-const monthsInYear = (slots: any) =>
-  computeCalendarMonthsInYear(slots.calendar, slots)
-const weekOfYear = (slots: any) =>
-  slots.calendar === isoCalendar
-    ? computeIsoWeekFields(slots).weekOfYear
-    : undefined
-const dayOfWeek = computeIsoDayOfWeek
-const dayOfYear = (slots: any) =>
-  computeCalendarDayOfYear(slots.calendar, slots)
-const yearOfWeek = (slots: any) =>
-  slots.calendar === isoCalendar
-    ? computeIsoWeekFields(slots).yearOfWeek
-    : undefined
-const daysInWeek = () => 7
 
 // Keep these query maps scoped to the Temporal classes that need them. A single
 // master lookup object would make every getter implementation reachable through
 // dynamic property access, which works against package consumers' tree-shaking.
 const yearMonthGetterQueries = {
-  era,
-  eraYear,
-  year,
-  daysInMonth,
-  daysInYear,
-  inLeapYear,
-  monthsInYear,
+  era(slots: any) {
+    return computeCalendarEraFields(slots.calendar, slots).era
+  },
+  eraYear(slots: any) {
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  },
+  year(slots: any) {
+    return computeCalendarDateFields(slots.calendar, slots).year
+  },
+  daysInMonth(slots: any) {
+    return computeCalendarDaysInMonth(slots.calendar, slots)
+  },
+  daysInYear(slots: any) {
+    return computeCalendarDaysInYear(slots.calendar, slots)
+  },
+  inLeapYear(slots: any) {
+    return computeCalendarInLeapYear(slots.calendar, slots)
+  },
+  monthsInYear(slots: any) {
+    return computeCalendarMonthsInYear(slots.calendar, slots)
+  },
   monthCode,
-  month,
+  month(slots: any) {
+    return computeCalendarDateFields(slots.calendar, slots).month
+  },
 }
 
 const monthDayGetterQueries = {
@@ -88,11 +70,23 @@ const monthDayGetterQueries = {
 const dateGetterQueries = {
   ...yearMonthGetterQueries,
   day,
-  weekOfYear,
-  dayOfWeek,
-  dayOfYear,
-  yearOfWeek,
-  daysInWeek,
+  weekOfYear(slots: any) {
+    return slots.calendar === isoCalendar
+      ? computeIsoWeekFields(slots).weekOfYear
+      : undefined
+  },
+  dayOfWeek: computeIsoDayOfWeek,
+  dayOfYear(slots: any) {
+    return computeCalendarDayOfYear(slots.calendar, slots)
+  },
+  yearOfWeek(slots: any) {
+    return slots.calendar === isoCalendar
+      ? computeIsoWeekFields(slots).yearOfWeek
+      : undefined
+  },
+  daysInWeek() {
+    return 7
+  },
 }
 
 function createCalendarGetters<Q extends Record<string, CalendarGetterQuery>>(
