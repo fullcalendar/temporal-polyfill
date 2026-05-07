@@ -10,7 +10,7 @@ import * as errorMessages from './errorMessages'
 import { timeFieldNamesAsc } from './fieldNames'
 import { parseOffsetNano } from './offsetParse'
 import { Overflow } from './optionsModel'
-import { mapPropNamesToConstant } from './utils'
+import { zipPropsConst } from './utils'
 
 export type DateOptionsTuple = [overflow: Overflow, ...extraOptions: unknown[]]
 export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
@@ -54,12 +54,9 @@ export const dateFieldRefiners = {
   day: toPositiveInteger,
 }
 
-export const timeFieldRefiners = mapPropNamesToConstant(
-  timeFieldNamesAsc,
-  toInteger,
-)
+export const timeFieldRefiners = zipPropsConst(timeFieldNamesAsc, toInteger)
 
-export const durationFieldRefiners = mapPropNamesToConstant(
+export const durationFieldRefiners = zipPropsConst(
   durationFieldNamesAsc,
   toStrictInteger,
 )

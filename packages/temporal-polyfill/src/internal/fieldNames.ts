@@ -1,6 +1,6 @@
 import type { CalendarDateFields, TimeFields } from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
-import { mapPropNamesToConstant, sortStrings } from './utils'
+import { sortStrings, zipPropsConst } from './utils'
 
 // Atomic Field Names
 // -----------------------------------------------------------------------------
@@ -124,4 +124,4 @@ export const yearMonthCodeDayFieldNamesWithEraAlpha = sortStrings(
 
 // NOTE: bad place for this!
 // TODO: rename to zero-time?
-export const timeFieldDefaults = mapPropNamesToConstant(timeFieldNamesAsc, 0)
+export const timeFieldDefaults = zipPropsConst(timeFieldNamesAsc, 0)

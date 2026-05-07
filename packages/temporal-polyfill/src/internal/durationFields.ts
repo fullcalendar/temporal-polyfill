@@ -1,10 +1,10 @@
 import { Unit, unitNamesAsc } from './units'
 import {
   bindArgs,
-  mapPropNamesToConstant,
-  mapPropNamesToIndex,
   sortStrings,
   zeroOutProps,
+  zipPropsConst,
+  zipPropsGenerator,
 } from './utils'
 
 export interface DurationDateFields {
@@ -57,16 +57,16 @@ export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
 export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
 
-export const durationFieldIndexes = mapPropNamesToIndex(durationFieldNamesAsc)
+export const durationFieldIndexes = zipPropsGenerator(
+  durationFieldNamesAsc,
+  (_propName: DurationFieldName, i: number) => i,
+)
 
 // Field Defaults
 // -----------------------------------------------------------------------------
 
-export const durationFieldDefaults = mapPropNamesToConstant(
-  durationFieldNamesAsc,
-  0,
-)
-export const durationTimeFieldDefaults = mapPropNamesToConstant(
+export const durationFieldDefaults = zipPropsConst(durationFieldNamesAsc, 0)
+export const durationTimeFieldDefaults = zipPropsConst(
   durationTimeFieldNamesAsc,
   0,
 )

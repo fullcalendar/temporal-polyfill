@@ -20,7 +20,7 @@ import {
   computeIsoWeekFields,
 } from '../internal/isoCalendarMath'
 import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
-import { mapPropNames } from '../internal/utils'
+import { zipPropsGenerator } from '../internal/utils'
 
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
@@ -118,23 +118,23 @@ export const calendarIdGetters = {
 // Duration
 // -----------------------------------------------------------------------------
 
-export const durationGetters = mapPropNames(
+export const durationGetters = zipPropsGenerator(
+  (durationFieldNamesAsc as (keyof DurationSlots)[]).concat('sign'),
   (propName: keyof DurationSlots) => {
     return function (this: any, slots: any) {
       return slots[propName]
     }
   },
-  (durationFieldNamesAsc as (keyof DurationSlots)[]).concat('sign'),
 )
 
 // Time
 // -----------------------------------------------------------------------------
 
-export const timeGetters = mapPropNames((propName) => {
+export const timeGetters = zipPropsGenerator(timeFieldNamesAsc, (propName) => {
   return function (this: any, slots: any) {
     return slots[propName]
   }
-}, timeFieldNamesAsc)
+})
 
 // Epoch
 // -----------------------------------------------------------------------------

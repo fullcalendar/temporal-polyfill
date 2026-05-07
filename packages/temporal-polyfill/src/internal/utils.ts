@@ -141,22 +141,7 @@ export type FilterPropValues<P, F> = {
   [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
 
-// TODO: abandon this?
-export function zipPropsRev<P>(
-  propNamesRev: (keyof P)[],
-  args: P[keyof P][],
-): P {
-  const res = {} as any
-  let i = propNamesRev.length
-
-  for (const arg of args) {
-    res[propNamesRev[--i]] = arg
-  }
-
-  return res
-}
-
-// useful
+// transformer goes first because usually constant and minifies better
 export function mapProps<P, R>(
   transformer: (propVal: P[keyof P], propName: keyof P) => R,
   props: P,
@@ -170,35 +155,53 @@ export function mapProps<P, R>(
   return res
 }
 
-// TODO: audit uses of this contributing to HIGHER bundle size
-export function mapPropNames<P, R, E = undefined>(
-  generator: (propName: keyof P, i: number, extraArg?: E) => R,
+// zips key-array AND value-generator into an object
+export function zipPropsGenerator<P, R>(
   propNames: (keyof P)[],
-  extraArg?: E,
+  propValGenerator: (propName: keyof P, i: number) => R,
 ): { [K in keyof P]: R } {
+  let i = 0
   const props = {} as { [K in keyof P]: R }
 
-  for (const [i, propName] of propNames.entries()) {
-    props[propName] = generator(propName, i, extraArg)
+  for (const propName of propNames) {
+    props[propName] = propValGenerator(propName, i++)
   }
 
   return props
 }
 
-// duration-only. can probably kill
-export const mapPropNamesToIndex = bindArgs(
-  mapPropNames,
-  (_propVal: any, i: number) => i,
-) as <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
+// zips key-array AND value-constant into an object
+export function zipPropsConst<P, C>(
+  propNames: (keyof P)[],
+  propVal: C,
+): { [K in keyof P]: C } {
+  const res = {} as any
 
-// TODO: rename to something "zip" related?
-export const mapPropNamesToConstant = bindArgs(
-  mapPropNames,
-  (_propVal: unknown, _i: number, constant: unknown) => constant,
-) as <P, C>(propNames: (keyof P)[], c: C) => { [K in keyof P]: C }
+  for (const propName of propNames) {
+    res[propName] = propVal
+  }
+
+  return res
+}
+
+// zips key-array AND reverse-value-array into an object
+export function zipPropsRev<P>(
+  propNames: (keyof P)[],
+  propValsRev: P[keyof P][],
+): P {
+  let i = propNames.length
+  const res = {} as any
+
+  for (const propName of propNames) {
+    res[propName] = propValsRev[--i]
+  }
+
+  return res
+}
 
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
   // Avoid inherited fields from Object.prototype pollution.
+  // We give the resulting object to Intl.DateTimeFormat
   const res = Object.create(null) as P
 
   for (const propName of propNames) {
