@@ -38,7 +38,6 @@ import {
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
-  FixedIsoZonedFields,
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
@@ -87,10 +86,10 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     ...adaptDateMethods(dateGetters),
     ...adaptDateMethods(timeGetters),
     offset(slots: ZonedDateTimeSlots): string {
-      return formatOffsetNano(slotsToIso(slots).offsetNanoseconds)
+      return formatOffsetNano(zonedEpochSlotsToIso(slots).offsetNanoseconds)
     },
     offsetNanoseconds(slots: ZonedDateTimeSlots) {
-      return slotsToIso(slots).offsetNanoseconds
+      return zonedEpochSlotsToIso(slots).offsetNanoseconds
     },
     timeZoneId(slots: ZonedDateTimeSlots): string {
       return slots.timeZone.id
@@ -279,11 +278,7 @@ export function toZonedDateTimeSlots(
 function adaptDateMethods(methods: any) {
   return mapProps((method: any) => {
     return (slots: ZonedDateTimeSlots) => {
-      return method(slotsToIso(slots))
+      return method(zonedEpochSlotsToIso(slots))
     }
   }, methods)
-}
-
-function slotsToIso(slots: ZonedDateTimeSlots): FixedIsoZonedFields {
-  return zonedEpochSlotsToIso(slots)
 }
