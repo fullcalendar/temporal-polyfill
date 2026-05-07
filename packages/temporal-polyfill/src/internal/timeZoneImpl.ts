@@ -10,7 +10,7 @@ import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
 import { parseIntlPartsYear } from './intlParts'
 import {
   checkEpochNanoInBounds,
-  isoDateTimeToEpochNanoWithOffset,
+  isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
 import {
   getTimeZonePeriodDays,
@@ -65,7 +65,7 @@ export class FixedTimeZone implements TimeZoneImpl {
   // It is conditionally performed in getMatchingInstantFor based on offsetDisambig.
   // This allows offset: "use"/"ignore" to accept epoch-boundary dates.
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
-    return [isoDateTimeToEpochNanoWithOffset(isoDateTime, this.offsetNano)]
+    return [isoDateTimeAndOffsetToEpochNano(isoDateTime, this.offsetNano)]
   }
 
   getTransition(): bigint | undefined {

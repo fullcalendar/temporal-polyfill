@@ -121,7 +121,7 @@ For converting to proper epochNano values
 CALLERS DO NOT NEED TO CHECK in-bounds!
 (Result should be considered a finalized "Instant")
 */
-export function isoDateTimeToEpochNanoWithOffset(
+export function isoDateTimeAndOffsetToEpochNano(
   isoDateTime: CalendarDateTimeFields,
   offsetNano: number,
 ): bigint {

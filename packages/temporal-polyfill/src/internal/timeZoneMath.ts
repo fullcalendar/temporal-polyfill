@@ -14,7 +14,7 @@ import { roundToMinute } from './round'
 import { ZonedEpochSlots } from './slots'
 import {
   checkIsoDateInBoundsStrict,
-  isoDateTimeToEpochNanoWithOffset,
+  isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
 import { TimeZoneImpl } from './timeZoneImpl'
 import { nanoInUtcDay } from './units'
@@ -82,7 +82,7 @@ export function getMatchingInstantFor(
   if (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use) {
     // we ALWAYS use Z as a zero offset
     if (offsetDisambig === OffsetDisambig.Use || hasZ) {
-      return isoDateTimeToEpochNanoWithOffset(isoDateTime, offsetNano)
+      return isoDateTimeAndOffsetToEpochNano(isoDateTime, offsetNano)
     }
   }
 

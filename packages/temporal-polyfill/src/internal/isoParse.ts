@@ -57,7 +57,7 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
-  isoDateTimeToEpochNanoWithOffset,
+  isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
 import { checkTimeFields, nanoToTimeAndDay } from './timeFieldMath'
 import { utcTimeZoneId } from './timeZoneConfig'
@@ -110,7 +110,7 @@ export function parseInstant(s: string): InstantSlots {
   }
 
   checkIsoDateTimeFields(organized)
-  const epochNanoseconds = isoDateTimeToEpochNanoWithOffset(
+  const epochNanoseconds = isoDateTimeAndOffsetToEpochNano(
     organized,
     offsetNano,
   )
