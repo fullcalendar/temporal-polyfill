@@ -1,42 +1,25 @@
-import type {
-  CalendarDateFields,
-  DateStats,
-  TimeFields,
-  YearMonthStats,
-} from './fieldTypes'
+import type { CalendarDateFields, TimeFields } from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
 import { mapPropNamesToConstant, sortStrings } from './utils'
-
-// Types
-// -----------------------------------------------------------------------------
-
-type CalendarGetterFieldName =
-  | keyof DateStats
-  | keyof YearMonthStats
-  | 'era'
-  | 'eraYear'
-  | 'year'
-  | 'month'
-  | 'monthCode'
-  | 'day'
 
 // Atomic Field Names
 // -----------------------------------------------------------------------------
 
-export const dayFieldName = 'day'
 // Used as a public-facing entity label for move-to-day-of-month helpers. It is
 // intentionally distinct from the actual Temporal field name, which is "day".
+export const dayFieldName = 'day'
 export const dayOfMonthName = 'dayOfMonth'
 export const dayOfWeekFieldName = 'dayOfWeek'
 export const weekOfYearFieldName = 'weekOfYear'
 
-// Unit-Orderable Field Name Lists
+// Unit-Ordered Field Name Lists
 // -----------------------------------------------------------------------------
 
 export const timeFieldNamesAsc = unitNamesAsc.slice(
   0,
   Unit.Day,
 ) as (keyof TimeFields)[]
+
 export const yearFieldNamesAsc = ['year']
 export const dayFieldNamesAsc = [dayFieldName]
 export const calendarDateFieldNamesAsc = [
@@ -45,61 +28,17 @@ export const calendarDateFieldNamesAsc = [
   ...yearFieldNamesAsc,
 ] as (keyof CalendarDateFields)[]
 
-// Non-Orderable Field Name Lists
+// Unordered Field Name Lists
 // -----------------------------------------------------------------------------
 // These lists include fields outside the numeric date/time core, and their
 // order is not numeric unit significance.
 
 const offsetFieldNames = ['offset']
-
 export const timeZoneFieldNames = ['timeZone']
-
 export const eraYearFieldNames = ['era', 'eraYear']
-
-export const allYearFieldNames = [...eraYearFieldNames, 'year']
-
+export const allYearFieldNames = [...eraYearFieldNames, ...yearFieldNamesAsc]
 const monthCodeFieldNames = ['monthCode']
-
 export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
-
-// Getter surfaces for PlainDate/PlainYearMonth include both structural calendar
-// fields and derived calendar stats. Keep these names independent from
-// calendarRefiners so class API mixins can enumerate methods without importing
-// the validation functions behind those refiner maps.
-const yearMonthStatsFieldNames = [
-  'daysInMonth',
-  'daysInYear',
-  'inLeapYear',
-  'monthsInYear',
-] as (keyof YearMonthStats)[]
-
-const dateStatsFieldNames = [
-  weekOfYearFieldName,
-  dayOfWeekFieldName,
-  'dayOfYear',
-  'yearOfWeek',
-  'daysInWeek',
-] as (keyof DateStats)[]
-
-export const yearMonthGetterFieldNames = [
-  ...eraYearFieldNames,
-  ...yearFieldNamesAsc,
-  ...yearMonthStatsFieldNames,
-  ...monthCodeFieldNames,
-  'month',
-] as CalendarGetterFieldName[]
-
-export const monthDayGetterFieldNames = [
-  ...monthCodeFieldNames,
-  ...dayFieldNamesAsc,
-] as CalendarGetterFieldName[]
-
-export const dateGetterFieldNames = [
-  ...yearMonthGetterFieldNames,
-  ...dayFieldNamesAsc,
-  ...dateStatsFieldNames,
-] as CalendarGetterFieldName[]
-
 export const monthDayFieldNames = [...dayFieldNamesAsc, ...monthFieldNames]
 
 // Alpha Field Name Lists
