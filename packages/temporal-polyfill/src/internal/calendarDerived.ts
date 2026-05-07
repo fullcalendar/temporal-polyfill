@@ -1,4 +1,4 @@
-import { formatMonthCode } from './calendarMonthCode'
+import { MonthCodeParts, formatMonthCode } from './calendarMonthCode'
 import {
   diffEpochMilliDays,
   isoArgsToEpochMilli,
@@ -8,7 +8,7 @@ import {
   type InternalCalendar,
   getInternalCalendarId,
 } from './externalCalendar'
-import { type CalendarDateFields } from './fieldTypes'
+import { type CalendarDateFields, CalendarEraFields } from './fieldTypes'
 import {
   computeIsoDayOfYear,
   computeIsoDaysInMonth,
@@ -31,7 +31,7 @@ export function computeCalendarMonthCodeParts(
   calendar: InternalCalendar,
   year: number,
   month: number,
-): ReturnType<typeof computeIsoMonthCodeParts> {
+): MonthCodeParts {
   return calendar
     ? calendar.computeMonthCodeParts(year, month)
     : computeIsoMonthCodeParts(month)
@@ -40,7 +40,7 @@ export function computeCalendarMonthCodeParts(
 export function computeCalendarEraFields(
   calendar: InternalCalendar,
   isoDate: CalendarDateFields,
-): ReturnType<typeof computeIsoEraFields> {
+): CalendarEraFields {
   return calendar
     ? calendar.computeEraFields(isoDate)
     : computeIsoEraFields(getInternalCalendarId(calendar), isoDate)
@@ -51,7 +51,7 @@ export function computeCalendarIsoFieldsFromParts(
   year: number,
   month: number,
   day: number,
-): ReturnType<typeof computeIsoFieldsFromParts> {
+): CalendarDateFields {
   return calendar
     ? calendar.computeIsoFieldsFromParts(year, month, day)
     : computeIsoFieldsFromParts(year, month, day)
