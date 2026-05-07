@@ -26,10 +26,8 @@ import {
 import { moveToDayOfMonthUnsafe } from './move'
 import {
   offsetHasSeconds,
-  offsetRegExpStr,
   parseOffsetNano,
   parseOffsetNanoMaybe,
-  validateOffsetSeparators,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
 import { type ZonedFieldOptions } from './optionsModel'
@@ -61,8 +59,7 @@ import {
   checkIsoYearMonthInBounds,
   isoDateTimeToEpochNanoWithOffset,
 } from './temporalLimits'
-import { checkTimeFields } from './timeFieldMath'
-import { organizeTimeParts, timeRegExpStr } from './timeParse'
+import { checkTimeFields, nanoToTimeAndDay } from './timeFieldMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
 import { FixedTimeZone, queryTimeZone } from './timeZoneImpl'
@@ -73,15 +70,19 @@ import {
   createRegExp,
   divModFloor,
   fractionRegExpStr,
+  parseInt0,
   parseSign,
   parseSubsecNano,
   signRegExpStr,
-  validateTimeSeparators,
   zipProps,
 } from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
+
+function throwFailedParse(s: string): never {
+  throw new RangeError(errorMessages.failedParse(s))
+}
 
 export function parseInstant(s: string): InstantSlots {
   // instead of 'requiring' like other types,
@@ -90,7 +91,7 @@ export function parseInstant(s: string): InstantSlots {
 
   const organized = parseDateTimeLike(s)
   if (!organized) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   let offsetNano: number
@@ -100,7 +101,7 @@ export function parseInstant(s: string): InstantSlots {
   } else if (organized.offset) {
     offsetNano = parseOffsetNano(organized.offset)
   } else {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   // validate timezone
@@ -121,14 +122,14 @@ export function parseRelativeToSlots(s: string): RelativeToSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
   if (organized.timeZoneId) {
     return finalizeZonedDateTime(organized as ZonedDateTimeOrganized)
   }
   if (organized.hasZ) {
     // PlainDate doesn't support Z
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   return finalizeDate(organized)
@@ -141,7 +142,7 @@ export function parseZonedDateTime(
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || !organized.timeZoneId) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   return finalizeZonedDateTime(organized as ZonedDateTimeOrganized, options)
@@ -151,7 +152,7 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   const slots = finalizeDateTime(organized)
@@ -246,23 +247,23 @@ export function parsePlainTime(s: string): PlainTimeSlots {
 
     if (organized) {
       if (!(organized as DateTimeLikeOrganized).hasTime) {
-        throw new RangeError(errorMessages.failedParse(s)) // Must have time for PlainTime
+        throwFailedParse(s) // Must have time for PlainTime
       }
       if ((organized as DateTimeLikeOrganized).hasZ) {
         throw new RangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
       }
       requireIsoCalendar(organized as DateTimeLikeOrganized)
     } else {
-      throw new RangeError(errorMessages.failedParse(s))
+      throwFailedParse(s)
     }
   }
 
   let altParsed: DateOrganized | undefined
   if ((altParsed = parseYearMonthOnly(s)) && isIsoDateFieldsValid(altParsed)) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
   if ((altParsed = parseMonthDayOnly(s)) && isIsoDateFieldsValid(altParsed)) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   return createPlainTimeSlots(checkTimeFields(organized))
@@ -271,7 +272,7 @@ export function parsePlainTime(s: string): PlainTimeSlots {
 export function parseDuration(s: string): DurationSlots {
   const parsed = parseDurationFields(requireString(s))
   if (!parsed) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
   return createDurationSlots(checkDurationUnits(parsed))
 }
@@ -286,7 +287,7 @@ export function parseCalendarId(s: string): string {
   }
   const timeParts = parseTimeOnlyParts(s)
   if (timeParts) {
-    return organizeAnnotationParts(timeParts[10]).calendarId
+    return organizeAnnotationParts(timeParts[13]).calendarId
   }
   return s
 }
@@ -304,7 +305,7 @@ function parsePlainDateLike(s: string): DateTimeLikeOrganized {
   const organized = parseDateTimeLike(s)
 
   if (!organized || organized.hasZ) {
-    throw new RangeError(errorMessages.failedParse(s))
+    throwFailedParse(s)
   }
 
   return organized
@@ -452,19 +453,40 @@ const yearMonthRegExpStr =
   '-?(\\d{2})' // 4:month
 
 const dateRegExpStr =
-  yearMonthRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:month
-  '-?(\\d{2})' // 5:day
+  `(?:(?:${signRegExpStr}(\\d{6}))|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
+  '(-?)(\\d{2})' + // 4:separator, 5:month
+  '\\4(\\d{2})' // 6:day
 
 const monthDayRegExpStr =
   '(?:--)?(\\d{2})' + // 1:month
   '-?(\\d{2})' // 2:day
 
+// The number is the capture index for this fragment's optional separator. We
+// emit it as a backreference so a component stays consistently extended or
+// basic: `12:34:56` and `123456` pass, but `12:3456` and `1234:56` fail.
+// The index is global to the whole regexp, so callers must pass the final
+// capture position after embedding this fragment.
+function timeRegExpStr(separatorIndex: number): string {
+  return (
+    '(\\d{2})' + // hour
+    `(?:(:?)(\\d{2})(?:\\${separatorIndex}(\\d{2})` + // minute, second
+    fractionRegExpStr + // afterDecimal
+    ')?)?'
+  )
+}
+
+// Offsets reuse the same separator consistency rule as times, just after the
+// sign: `+05:30:45` and `+053045` pass, but `+05:3045` and `+0530:45` fail.
+function offsetRegExpStr(separatorIndex: number): string {
+  return signRegExpStr + timeRegExpStr(separatorIndex)
+}
+
 const dateTimeRegExpStr =
-  dateRegExpStr + // // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:month, 5:day
+  dateRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:dateSep, 5:month, 6:day
   '(?:[T ]' +
-  timeRegExpStr + // 6:hour, 7:minute, 8:second, 9:afterDecimal
-  '(Z|' + // 10:zOrOffset
-  offsetRegExpStr + // 11:offsetSign, 12:hour, 13:minute, 14:second, 15:afterDecimal
+  timeRegExpStr(8) + // 7:hour, 8:timeSep, 9:minute, 10:second, 11:afterDecimal
+  '(Z|' + // 12:zOrOffset
+  offsetRegExpStr(15) + // 13:offsetSign, 14:hour, 15:sep, 16:minute, 17:second, 18:afterDecimal
   ')?' +
   ')?'
 
@@ -482,11 +504,9 @@ const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
 const timeRegExp = createRegExp(
   'T?' +
-    timeRegExpStr + // 1-4
-    '(?:' +
-    offsetRegExpStr +
-    ')?' + // 5-9
-    annotationsRegExpStr, // 10
+    timeRegExpStr(2) + // 1:hour, 2:sep, 3:minute, 4:second, 5:afterDecimal
+    `(${offsetRegExpStr(9)})?` + // 6:offset, 7:sign, 8:hour, 9:sep, 10:minute, 11:second, 12:afterDecimal
+    annotationsRegExpStr, // 13
 )
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
@@ -519,88 +539,9 @@ const durationRegExp = createRegExp(
 // Maybe-parsing
 // -----------------------------------------------------------------------------
 
-// Separator consistency: if one separator is present in a component, all must match.
-// e.g. "2020-0101" is invalid because date uses both '-' and no separator.
-function validateDateSeparators(s: string): boolean {
-  const m = s.match(/^[+-]?(?:\d{6}|\d{4})(-?)(\d{2})(-?)(\d{2})/)
-  if (!m) return true
-  return m[1] === m[3]
-}
-
-function extractDateTimeTimePortion(
-  s: string,
-  offset: string | undefined,
-): string {
-  const tIndex = s.search(/[T ]/i)
-  let timePortion = tIndex >= 0 ? s.slice(tIndex + 1) : ''
-
-  if (offset !== undefined) {
-    // When an explicit offset is present, separator validation should only see
-    // the wall-clock time portion before that offset.
-    const offsetIndex = timePortion.indexOf(offset)
-    if (offsetIndex >= 0) {
-      timePortion = timePortion.slice(0, offsetIndex)
-    }
-  } else {
-    // Calendar annotations like `[u-ca=calendar-id]` are allowed immediately after
-    // the time. Strip them before validating `HH:mm[:ss[.fff]]` separators, or
-    // strings like `2000-01-01T12:34[u-ca=gregory]` get rejected as malformed
-    // time text even though the main datetime regexp already accepted them.
-    const annotationIndex = timePortion.indexOf('[')
-    if (annotationIndex >= 0) {
-      timePortion = timePortion.slice(0, annotationIndex)
-    }
-  }
-
-  return timePortion
-}
-
-function extractTimeOnlyPortion(s: string, offset: string | undefined): string {
-  let timeEnd = s.length
-
-  if (offset !== undefined) {
-    timeEnd = s.indexOf(offset)
-  } else {
-    const annotationIndex = s.indexOf('[')
-    if (annotationIndex >= 0) {
-      timeEnd = annotationIndex
-    }
-  }
-
-  return s.slice(0, timeEnd)
-}
-
-function extractTimeOnlyOffset(
-  s: string,
-  offsetSign: string | undefined,
-): string | undefined {
-  if (offsetSign === undefined) {
-    return undefined
-  }
-
-  const offsetStart = s.indexOf(offsetSign)
-  const annotationStart = s.indexOf('[', offsetStart)
-
-  return s.slice(offsetStart, annotationStart < 0 ? undefined : annotationStart)
-}
-
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)
-  if (!parts) return undefined
-  if (!validateDateSeparators(parts[0])) return undefined
-
-  // Validate time portion separator consistency (e.g. reject "00:0000")
-  if (parts[6]) {
-    const timePortion = extractDateTimeTimePortion(parts[0], parts[10])
-    if (!validateTimeSeparators(timePortion)) return undefined
-  }
-
-  // Validate offset portion separator consistency (e.g. reject "+00:0000")
-  if (parts[10] && (parts[10] || '').toUpperCase() !== 'Z') {
-    if (!validateOffsetSeparators(parts[10])) return undefined
-  }
-
-  return organizeDateTimeLikeParts(parts)
+  return parts ? organizeDateTimeLikeParts(parts) : undefined
 }
 
 function parseYearMonthOnly(s: string): DateOrganized | undefined {
@@ -623,23 +564,16 @@ function parseMonthDayOnly(s: string): DateOrganized | undefined {
 function parseTimeOnly(s: string): TimeFields | undefined {
   const parts = parseTimeOnlyParts(s)
   if (!parts) return undefined
-  organizeAnnotationParts(parts[10]) // validate annotations
-  return organizeTimeParts(parts)
+  organizeAnnotationParts(parts[13]) // validate annotations
+  return organizeTimeParts(parts, 1)
 }
 
 function parseTimeOnlyParts(s: string): string[] | undefined {
   const parts = timeRegExp.exec(s)
   if (!parts) return undefined
 
-  const offset = extractTimeOnlyOffset(parts[0], parts[5])
-  const timePortion = extractTimeOnlyPortion(parts[0], offset)
-  if (!validateTimeSeparators(timePortion)) return undefined
-
-  // Validate the whole offset. `parts[5]` is only the sign capture from
-  // offsetRegExpStr, so compact forms like "152330-08" need the substring from
-  // the sign through the start of any annotation.
-  if (offset) {
-    parseOffsetNano(offset)
+  if (parts[6]) {
+    parseOffsetNano(parts[6])
   }
 
   return parts
@@ -669,16 +603,16 @@ type WithCalendarStr = { calendarId: string }
 type DateOrganized = CalendarDateFields & WithCalendarStr
 
 function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
-  const zOrOffset = parts[10]
+  const zOrOffset = parts[12]
   const hasZ = (zOrOffset || '').toUpperCase() === 'Z'
 
   return {
     year: organizeIsoYearParts(parts),
-    month: parseInt(parts[4]),
-    day: parseInt(parts[5]),
-    ...organizeTimeParts(parts.slice(5)), // slice one index before, to similate 0 being whole-match
-    ...organizeAnnotationParts(parts[16]),
-    hasTime: Boolean(parts[6]),
+    month: parseInt(parts[5]),
+    day: parseInt(parts[6]),
+    ...organizeTimeParts(parts, 7),
+    ...organizeAnnotationParts(parts[19]),
+    hasTime: Boolean(parts[7]),
     hasZ,
     // TODO: figure out a way to pre-process into a number
     // (problems with TimeZone needing the full string?)
@@ -704,6 +638,17 @@ function organizeMonthDayParts(parts: string[]): DateOrganized {
     month: parseInt(parts[1]),
     day: parseInt(parts[2]),
     ...organizeAnnotationParts(parts[3]),
+  }
+}
+
+function organizeTimeParts(parts: string[], hourIndex: number): TimeFields {
+  const second = parseInt0(parts[hourIndex + 3])
+
+  return {
+    ...nanoToTimeAndDay(parseSubsecNano(parts[hourIndex + 4] || ''))[0],
+    hour: parseInt0(parts[hourIndex]),
+    minute: parseInt0(parts[hourIndex + 2]),
+    second: second === 60 ? 59 : second, // massage leap-second
   }
 }
 
