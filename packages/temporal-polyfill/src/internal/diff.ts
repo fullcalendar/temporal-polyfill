@@ -45,12 +45,7 @@ import {
   MoveMarker,
   createMarkerMoveOps,
 } from './relativeMath'
-import {
-  computeNanoInc,
-  roundBigNano,
-  roundByInc,
-  roundRelativeDuration,
-} from './round'
+import { roundBigNano, roundRelativeDuration } from './round'
 import {
   DurationSlots,
   InstantSlots,
@@ -99,17 +94,21 @@ export function diffInstants(
   instantSlots1: InstantSlots,
   options?: DiffOptions<TimeUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Second,
-    Unit.Hour,
-  ) as [TimeUnit, TimeUnit, number, RoundingMode]
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as [
+      TimeUnit,
+      TimeUnit,
+      number,
+      RoundingMode,
+    ]
 
   const durationFields = diffEpochNanos(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
   )
 
   return createDiffDurationSlots(invert, durationFields)
@@ -229,20 +228,18 @@ export function diffPlainDates(
   plainDateSlots1: PlainDateSlots,
   options?: DiffOptions<DateUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Day,
-    Unit.Year,
-    Unit.Day,
-  )
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
 
   return diffDateLike(
     invert,
     calendar,
     plainDateSlots0,
     plainDateSlots1,
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
   )
 }
 
@@ -253,13 +250,8 @@ export function diffPlainYearMonth(
   plainYearMonthSlots1: PlainYearMonthSlots,
   options?: DiffOptions<YearMonthUnitName>,
 ): DurationSlots {
-  const optionsTuple = refineDiffOptions(
-    invert,
-    options,
-    Unit.Year,
-    Unit.Year,
-    Unit.Month,
-  )
+  const [largestUnit, smallestUnit, roundingInc, roundingMode] =
+    refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
   const getDay = (isoDate: CalendarDateFields) =>
     computeCalendarDateFields(calendar, isoDate).day
 
@@ -277,7 +269,10 @@ export function diffPlainYearMonth(
     // The first-of-month must be representable, this check in-bounds
     checkIsoDateInBounds(firstOfMonth0),
     checkIsoDateInBounds(firstOfMonth1),
-    ...optionsTuple,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
     /* smallestPrecision = */ Unit.Month,
   )
 }
@@ -352,10 +347,15 @@ export function diffPlainTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
-  const timeDiffNano = roundByInc(
-    diffTimes(plainTimeSlots0, plainTimeSlots1),
-    computeNanoInc(smallestUnit as TimeUnit, roundingInc),
-    roundingMode,
+  const timeDiffNano = Number(
+    roundBigNano(
+      BigInt(
+        timeFieldsToNano(plainTimeSlots1) - timeFieldsToNano(plainTimeSlots0),
+      ),
+      smallestUnit as TimeUnit,
+      roundingInc,
+      roundingMode,
+    ),
   )
 
   const durationFields = {
@@ -366,6 +366,8 @@ export function diffPlainTimes(
   return createDiffDurationSlots(invert, durationFields)
 }
 
+// IF WE INLINED: 2 bytes. Prototype was essentially a literal inline of this
+// wrapper into each caller.
 function createDiffDurationSlots(
   invert: boolean,
   durationFields: DurationFields,
@@ -454,6 +456,8 @@ export function diffDateTimesExact(
 // Exact Diffing (no rounding): Big units (years/weeks/months/days?)
 // -----------------------------------------------------------------------------
 
+// IF WE INLINED: 8 bytes. Prototype mostly inlined this helper as-is into the
+// non-small-unit ZonedDateTime exact-diff path.
 function diffZonedEpochsBig(
   calendar: InternalCalendar,
   timeZoneImpl: TimeZoneImpl,
@@ -504,15 +508,17 @@ export function diffCalendarDates(
   largestUnit: Unit, // TODO: put this arg after calendar to allow for bindArgs?
 ): DurationFields {
   if (largestUnit <= Unit.Week) {
-    let weeks = 0
-    let days = diffDays(startIsoDate, endIsoDate)
+    const days = diffDays(startIsoDate, endIsoDate)
 
     if (largestUnit === Unit.Week) {
-      weeks = divTrunc(days, 7)
-      days = modTrunc(days, 7)
+      return {
+        ...durationFieldDefaults,
+        weeks: divTrunc(days, 7),
+        days: modTrunc(days, 7),
+      }
     }
 
-    return { ...durationFieldDefaults, weeks, days }
+    return { ...durationFieldDefaults, days }
   }
 
   const yearMonthDayStart = computeCalendarDateFields(calendar, startIsoDate)
@@ -538,6 +544,9 @@ export function diffCalendarDates(
   return { ...durationFieldDefaults, years, months, days }
 }
 
+// IF WE INLINED: 13 bytes. Prototype was inline plus local simplification: the
+// zero-sign early return became zero-initialized month/day locals guarded by an
+// `if (sign)` body in the month branch of diffCalendarDates.
 function diffCalendarMonthDay(
   calendar: InternalCalendar,
   startIsoDate: CalendarDateFields,
@@ -610,6 +619,8 @@ function compareIsoDate(
   )
 }
 
+// IF WE INLINED: 12 bytes. Prototype mostly inlined this helper as-is, but
+// integrated its result locals directly into diffCalendarDates' year path.
 function diffCalendarYearMonthDay(
   calendar: InternalCalendar,
   startCalendarDateFields: CalendarDateFields,
@@ -719,6 +730,9 @@ function diffCalendarYearMonthDay(
   return [yearDiff, monthDiff, dayDiff]
 }
 
+// IF WE INLINED: 13 bytes. Prototype was inline plus local simplification: the
+// leap-month special cases collapsed into the `monthDiff = condition ? 0 : ...`
+// assignment in diffCalendarYearMonthDay.
 function diffBalancedYearMonths(
   calendar: InternalCalendar,
   sign: number,
@@ -768,7 +782,7 @@ export function prepareZonedEpochDiff(
   slots0: ZonedEpochSlots,
   slots1: ZonedEpochSlots,
   sign: NumberSign, // guaranteed non-zero
-): [CalendarDateFields, CalendarDateFields, number, TimeFields] {
+): [CalendarDateTimeFields, CalendarDateFields, number] {
   const startIsoDate = zonedEpochSlotsToIso(slots0, timeZoneImpl)
   const endIsoDate = zonedEpochSlotsToIso(slots1, timeZoneImpl)
   const endEpochNano = slots1.epochNanoseconds
@@ -796,13 +810,15 @@ export function prepareZonedEpochDiff(
 
     if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
       const remainderNano = Number(endEpochNano - midEpochNano)
-      return [startIsoDate, midIsoDate, remainderNano, startIsoDate]
+      return [startIsoDate, midIsoDate, remainderNano]
     }
   }
 
   throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
+// IF WE INLINED: 18 bytes. Prototype inlined this helper as-is into
+// diffDateTimesBig.
 function prepareDateTimeDiff(
   startIsoDateTime: CalendarDateTimeFields,
   endIsoDateTime: CalendarDateTimeFields,
@@ -845,6 +861,8 @@ function diffEpochNanos(
   }
 }
 
+// IF WE INLINED: 7 bytes. Prototype inlined this exact nanosecond duration
+// conversion as-is at its call sites.
 function diffEpochNanosExact(
   startEpochNano: bigint,
   endEpochNano: bigint,
@@ -862,6 +880,8 @@ function diffEpochNanosExact(
 /*
 Partial days are trunc()'d
 */
+// IF WE INLINED: 9 bytes. Prototype inlined this day-only duration wrapper
+// as-is at its call site.
 function diffByDay(
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
@@ -885,6 +905,8 @@ function diffDays(
   )
 }
 
+// IF WE INLINED: 3 bytes. Prototype inlined this as the direct
+// `timeFieldsToNano(time1) - timeFieldsToNano(time0)` expression.
 function diffTimes(time0: TimeFields, time1: TimeFields): number {
   return timeFieldsToNano(time1) - timeFieldsToNano(time0)
 }

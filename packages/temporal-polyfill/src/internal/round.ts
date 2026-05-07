@@ -15,11 +15,7 @@ import {
 } from './durationMath'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  TimeFields,
-} from './fieldTypes'
+import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
@@ -111,13 +107,22 @@ export function roundZonedDateTime(
   }
 
   if (smallestUnit === Unit.Day) {
-    // no need for checking in-bounds. entire day of valid zdt is valid
-    epochNanoseconds = roundZonedEpochToInterval(
-      computeDayInterval,
-      timeZone,
-      slots,
+    // No Temporal-bounds check is needed: the whole ISO day around a valid ZDT
+    // is representable. Still verify custom time-zone protocol results below.
+    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+    const isoFields0 = combineDateAndTime(isoDateTime, timeFieldDefaults)
+    const isoFields1 = moveByDays(isoFields0, 1) as CalendarDateTimeFields
+    const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
+    const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
+    if (epochNanoseconds < epochNano0 || epochNanoseconds > epochNano1) {
+      throw new RangeError(errorMessages.invalidProtocolResults)
+    }
+    epochNanoseconds = roundWithMode(
+      computeEpochNanoFrac(epochNanoseconds, epochNano0, epochNano1),
       roundingMode,
     )
+      ? epochNano1
+      : epochNano0
   } else {
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
     const offsetNano = isoDateTime.offsetNanoseconds
@@ -180,7 +185,8 @@ export function roundPlainTime(
 export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots, timeZone)
-  const [isoFields0, isoFields1] = computeDayInterval(isoDate)
+  const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
+  const isoFields1 = moveByDays(isoFields0, 1) as CalendarDateTimeFields
 
   const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
@@ -201,7 +207,11 @@ export function computeZonedStartOfDay(
   slots: ZonedDateTimeSlots,
 ): ZonedDateTimeSlots {
   const { timeZone, calendar } = slots
-  const epochNano1 = alignZonedEpoch(computeDayFloor, timeZone, slots)
+  const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+  const epochNano1 = getStartOfDayInstantFor(
+    timeZone,
+    combineDateAndTime(isoDateTime, timeFieldDefaults),
+  )
   // nudging within-day guarantees in-bounds
   return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
 }
@@ -304,15 +314,6 @@ export type IsoDateTimeInterval = [
   CalendarDateTimeFields,
   CalendarDateTimeFields,
 ]
-
-function computeDayInterval(isoDate: CalendarDateFields): IsoDateTimeInterval {
-  const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
-  const isoFields1 = combineDateAndTime(
-    moveByDays(isoFields0, 1),
-    timeFieldDefaults,
-  )
-  return [isoFields0, isoFields1]
-}
 
 // for date-times
 // to convert date -> date-time, merge the date fields with timeFieldDefaults.
