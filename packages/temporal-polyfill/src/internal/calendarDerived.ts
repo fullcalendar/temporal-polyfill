@@ -10,7 +10,6 @@ import {
 } from './externalCalendar'
 import { type CalendarDateFields } from './fieldTypes'
 import {
-  computeIsoDateFields,
   computeIsoDayOfYear,
   computeIsoDaysInMonth,
   computeIsoDaysInYear,
@@ -24,10 +23,8 @@ import {
 export function computeCalendarDateFields(
   calendar: InternalCalendar,
   isoDate: CalendarDateFields,
-): ReturnType<typeof computeIsoDateFields> {
-  return calendar
-    ? calendar.computeDateFields(isoDate)
-    : computeIsoDateFields(isoDate)
+): CalendarDateFields {
+  return calendar ? calendar.computeDateFields(isoDate) : isoDate
 }
 
 export function computeCalendarMonthCodeParts(

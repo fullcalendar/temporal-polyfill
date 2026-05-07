@@ -7,7 +7,6 @@ import {
 import {
   addIsoMonths,
   computeGregoryEraFields,
-  computeIsoDateFields,
   computeIsoDaysInMonth,
   computeIsoDaysInYear,
   computeIsoFieldsFromParts,
@@ -58,10 +57,9 @@ function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,
     removeEraFieldsOnMonthDayReplace: normCalendarId === 'japanese',
     computeDateFields(isoDate) {
-      const dateFields = computeIsoDateFields(isoDate)
       return {
-        ...dateFields,
-        year: isoYearToCalendarYear(dateFields.year),
+        ...isoDate,
+        year: isoYearToCalendarYear(isoDate.year),
       }
     },
     computeIsoFieldsFromParts(year, month, day) {

@@ -21,16 +21,6 @@ export const isoEpochOriginYear = 1970
 export const isoEpochFirstLeapYear = 1972
 export const isoMonthsInYear = 12
 
-export function computeIsoDateFields(
-  isoDate: CalendarDateFields,
-): CalendarDateFields {
-  return {
-    year: isoDate.year,
-    month: isoDate.month,
-    day: isoDate.day,
-  }
-}
-
 export function computeIsoMonthCodeParts(month: number): MonthCodeParts {
   return [month, false]
 }
