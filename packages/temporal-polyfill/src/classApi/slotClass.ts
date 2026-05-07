@@ -7,6 +7,7 @@ import {
   createStringTagDescriptors,
   mapProps,
 } from '../internal/utils'
+import { neverValueOf } from './mixins'
 
 const slotsMap = new WeakMap<any, BrandingSlots>()
 
@@ -17,7 +18,7 @@ const setSlots = slotsMap.set.bind(slotsMap)
 export function createSlotClass(
   branding: string,
   construct: any,
-  formatFunc: (slots: any) => string,
+  formatFunc: (slots: any, options?: any) => string,
   getters: any,
   methods: any,
   staticMethods: any,
@@ -34,7 +35,14 @@ export function createSlotClass(
 
   Object.defineProperties(Class.prototype, {
     ...createGetterDescriptors(mapProps(bindMethod as any, getters) as any), // !!!
-    ...createPropDescriptors(mapProps(bindMethod as any, methods)),
+    ...createPropDescriptors(
+      mapProps(bindMethod as any, {
+        ...methods,
+        toString: formatFunc,
+        toJSON: (slots: any) => formatFunc(slots), // should not forward args
+        valueOf: neverValueOf,
+      }),
+    ),
     ...createStringTagDescriptors('Temporal.' + branding),
   })
 

@@ -12,11 +12,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
 import { parseInstant } from '../internal/isoParse'
 import { moveInstant } from '../internal/move'
-import {
-  DiffOptions,
-  InstantDisplayOptions,
-  RoundingOptions,
-} from '../internal/optionsModel'
+import { DiffOptions, RoundingOptions } from '../internal/optionsModel'
 import { roundInstant } from '../internal/round'
 import {
   InstantBranding,
@@ -27,7 +23,7 @@ import {
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -35,7 +31,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepInstantFormat } from './intlFormatConfig'
-import { epochGetters, neverValueOf } from './mixins'
+import { epochGetters } from './mixins'
 import { createSlotClass, getSlots } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
@@ -46,7 +42,7 @@ export type InstantArg = Instant | string
 export const [Instant, createInstant] = createSlotClass(
   InstantBranding,
   constructInstantSlots,
-  (slots: InstantSlots) => formatInstantIso(refineTimeZoneArg, slots),
+  bindArgs(formatInstantIso, refineTimeZoneArg),
   epochGetters,
   {
     add(slots: InstantSlots, durationArg: DurationArg): Instant {
@@ -105,13 +101,6 @@ export const [Instant, createInstant] = createSlotClass(
       const [format, epochMilli] = prepInstantFormat(locales, options, slots)
       return format.format(epochMilli)
     },
-    toString(slots: InstantSlots, options?: InstantDisplayOptions): string {
-      return formatInstantIso(refineTimeZoneArg, slots, options)
-    },
-    toJSON(slots: InstantSlots): string {
-      return formatInstantIso(refineTimeZoneArg, slots)
-    },
-    valueOf: neverValueOf,
   },
   {
     from(arg: InstantArg) {

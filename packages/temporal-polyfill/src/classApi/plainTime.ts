@@ -35,7 +35,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepPlainTimeFormat } from './intlFormatConfig'
-import { neverValueOf, timeGetters } from './mixins'
+import { timeGetters } from './mixins'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
 export type PlainTime = any & TimeFields
@@ -101,11 +101,6 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
       return format.format(epochMilli)
     },
-    toString: formatPlainTimeIso,
-    toJSON(slots: PlainTimeSlots): string {
-      return formatPlainTimeIso(slots)
-    },
-    valueOf: neverValueOf,
   },
   {
     from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {

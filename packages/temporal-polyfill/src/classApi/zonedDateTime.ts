@@ -24,7 +24,6 @@ import {
   DirectionOptions,
   OverflowOptions,
   RoundingOptions,
-  ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../internal/optionsModel'
 import {
@@ -44,7 +43,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
+import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarIdFromBag,
@@ -62,7 +61,6 @@ import {
   calendarIdGetters,
   dateGetters,
   epochGetters,
-  neverValueOf,
   timeGetters,
 } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -220,18 +218,6 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
       return format.format(epochMilli)
     },
-    toString(
-      slots: ZonedDateTimeSlots,
-      options?: ZonedDateTimeDisplayOptions,
-    ): string {
-      return formatZonedDateTimeIso(slots, options)
-    },
-    toJSON(slots: ZonedDateTimeSlots): string {
-      return formatZonedDateTimeIso(slots)
-    },
-    valueOf: neverValueOf,
-
-    // TODO: optimize minification of this method
     getTimeZoneTransition(
       slots: ZonedDateTimeSlots,
       options: DirectionOptions | DirectionName,

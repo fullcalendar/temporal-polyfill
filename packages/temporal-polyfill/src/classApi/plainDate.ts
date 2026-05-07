@@ -43,7 +43,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepPlainDateFormat } from './intlFormatConfig'
-import { calendarIdGetters, dateGetters, neverValueOf } from './mixins'
+import { calendarIdGetters, dateGetters } from './mixins'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import {
@@ -178,11 +178,6 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       const [format, epochMilli] = prepPlainDateFormat(locales, options, slots)
       return format.format(epochMilli)
     },
-    toString: formatPlainDateIso,
-    toJSON(slots: PlainDateSlots): string {
-      return formatPlainDateIso(slots)
-    },
-    valueOf: neverValueOf,
   },
   {
     from(arg: any, options?: OverflowOptions): PlainDate {

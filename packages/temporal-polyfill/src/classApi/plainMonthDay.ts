@@ -16,7 +16,7 @@ import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { isObjectLike } from '../internal/utils'
 import { extractCalendarIdFromBag } from './calendarArg'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
-import { calendarIdGetters, monthDayGetters, neverValueOf } from './mixins'
+import { calendarIdGetters, monthDayGetters } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
@@ -62,11 +62,6 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         )
         return format.format(epochMilli)
       },
-      toString: formatPlainMonthDayIso,
-      toJSON(slots: PlainMonthDaySlots): string {
-        return formatPlainMonthDayIso(slots)
-      },
-      valueOf: neverValueOf,
     },
     {
       from(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDay {

@@ -40,7 +40,7 @@ import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { getCalendarIdFromBag } from './calendarArg'
-import { durationGetters, neverValueOf } from './mixins'
+import { durationGetters } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { createSlotClass, getSlots } from './slotClass'
@@ -121,11 +121,6 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
         ? new (Intl as any).DurationFormat(locales, options).format(this)
         : formatDurationIso(slots)
     },
-    toString: formatDurationIso,
-    toJSON(slots: DurationSlots): string {
-      return formatDurationIso(slots)
-    },
-    valueOf: neverValueOf,
   },
   {
     from(arg: DurationArg): Duration {
