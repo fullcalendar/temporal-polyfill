@@ -184,16 +184,17 @@ export function zipPropsConst<P, C>(
   return res
 }
 
-// zips key-array AND reverse-value-array into an object
-export function zipPropsRev<P>(
-  propNames: (keyof P)[],
-  propValsRev: P[keyof P][],
+// zips descending-order-key-array AND value-array into an object
+// outputted object's keys are in reverse order from propNamesDesc
+export function zipPropsDesc<P>(
+  propNamesDesc: (keyof P)[],
+  propVals: P[keyof P][],
 ): P {
-  let i = propNames.length
+  let i = propNamesDesc.length
   const res = {} as any
 
-  for (const propName of propNames) {
-    res[propName] = propValsRev[--i]
+  for (const propVal of propVals) {
+    res[propNamesDesc[--i]] = propVal
   }
 
   return res

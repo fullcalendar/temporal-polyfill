@@ -3,7 +3,7 @@ import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import { Unit, nanoInUtcDay } from './units'
-import { clampProp, divModFloor, zipPropsRev } from './utils'
+import { clampProp, divModFloor, zipPropsDesc } from './utils'
 
 // Time Field Validation
 // -----------------------------------------------------------------------------
@@ -17,7 +17,7 @@ export function constrainTimeFields(
   timeFields: TimeFields,
   overflow?: Overflow,
 ): TimeFields {
-  return zipPropsRev(timeFieldNamesAsc, [
+  return zipPropsDesc(timeFieldNamesAsc, [
     clampProp(timeFields, 'hour', 0, 23, overflow),
     clampProp(timeFields, 'minute', 0, 59, overflow),
     clampProp(timeFields, 'second', 0, 59, overflow),
