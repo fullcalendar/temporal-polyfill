@@ -130,9 +130,9 @@ export const durationGetters = mapPropNames(
 // Time
 // -----------------------------------------------------------------------------
 
-export const timeGetters = mapPropNames((_name, i) => {
+export const timeGetters = mapPropNames((propName) => {
   return function (this: any, slots: any) {
-    return slots[timeFieldNamesAsc[i]]
+    return slots[propName]
   }
 }, timeFieldNamesAsc)
 

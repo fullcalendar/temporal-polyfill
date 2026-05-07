@@ -141,7 +141,11 @@ export type FilterPropValues<P, F> = {
   [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
 
-export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
+// TODO: abandon this?
+export function zipPropsRev<P>(
+  propNamesRev: (keyof P)[],
+  args: P[keyof P][],
+): P {
   const res = {} as any
   let i = propNamesRev.length
 
@@ -152,27 +156,21 @@ export function zipProps<P>(propNamesRev: (keyof P)[], args: P[keyof P][]): P {
   return res
 }
 
-/*
-TODO: abandon this? See mapPropNames note.
-*/
-export function mapProps<P, R, E = undefined>(
-  transformer: (propVal: P[keyof P], propName: keyof P, extraArg?: E) => R,
+// useful
+export function mapProps<P, R>(
+  transformer: (propVal: P[keyof P], propName: keyof P) => R,
   props: P,
-  extraArg?: E,
 ): { [K in keyof P]: R } {
   const res = {} as { [K in keyof P]: R }
 
   for (const propName in props) {
-    res[propName] = transformer(props[propName], propName, extraArg)
+    res[propName] = transformer(props[propName], propName)
   }
 
   return res
 }
 
-/*
-TODO: audit uses of this contributing to HIGHER bundle size. Just inline? Often more readable.
-See createAdapterCompoundOps/createAdapterOps. Bigger after using mapPropNames.
-*/
+// TODO: audit uses of this contributing to HIGHER bundle size
 export function mapPropNames<P, R, E = undefined>(
   generator: (propName: keyof P, i: number, extraArg?: E) => R,
   propNames: (keyof P)[],
@@ -187,11 +185,13 @@ export function mapPropNames<P, R, E = undefined>(
   return props
 }
 
+// duration-only. can probably kill
 export const mapPropNamesToIndex = bindArgs(
   mapPropNames,
   (_propVal: any, i: number) => i,
 ) as <P>(propNames: (keyof P)[]) => { [K in keyof P]: number }
 
+// TODO: rename to something "zip" related?
 export const mapPropNamesToConstant = bindArgs(
   mapPropNames,
   (_propVal: unknown, _i: number, constant: unknown) => constant,

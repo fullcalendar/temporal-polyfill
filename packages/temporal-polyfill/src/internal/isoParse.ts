@@ -74,7 +74,7 @@ import {
   parseSign,
   parseSubsecNano,
   signRegExpStr,
-  zipProps,
+  zipPropsRev,
 } from './utils'
 
 // High-level
@@ -670,7 +670,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
   let hasAnyFrac = false
   let leftoverNano = 0
   let durationFields = {
-    ...zipProps(durationFieldNamesAsc, [
+    ...zipPropsRev(durationFieldNamesAsc, [
       parseUnit(parts[2]),
       parseUnit(parts[3]),
       parseUnit(parts[4]),

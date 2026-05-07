@@ -34,7 +34,7 @@ import {
 import { checkTimeFields } from './timeFieldMath'
 import { refineTimeZoneId } from './timeZoneId'
 import { queryTimeZone } from './timeZoneImpl'
-import { mapProps, zipProps } from './utils'
+import { mapProps, zipPropsRev } from './utils'
 
 export function constructInstantSlots(epochNano: bigint): InstantSlots {
   return createInstantSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
@@ -164,7 +164,7 @@ export function constructPlainTimeSlots(
   microsecond = 0,
   nanosecond = 0,
 ): PlainTimeSlots {
-  const timeFields = zipProps(timeFieldNamesAsc, [
+  const timeFields = zipPropsRev(timeFieldNamesAsc, [
     hour,
     minute,
     second,
@@ -187,7 +187,7 @@ export function constructDurationSlots(
   microseconds = 0,
   nanoseconds = 0,
 ): DurationSlots {
-  const durationFields = zipProps(durationFieldNamesAsc, [
+  const durationFields = zipPropsRev(durationFieldNamesAsc, [
     years,
     months,
     weeks,
