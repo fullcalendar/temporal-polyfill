@@ -22,7 +22,6 @@ import {
   RawDateTimeFormat,
   formatEpochMilliToPartsRecord,
 } from '../internal/intlFormatUtils'
-import { parseIntlPartsYear } from '../internal/intlParts'
 import {
   isoEpochFirstLeapYear,
   isoEpochOriginYear,
@@ -778,7 +777,7 @@ export function parseIntlYear(
   year: number
 } {
   const rawYear = parseInt(intlParts.year)
-  let year = parseIntlPartsYear(intlParts)
+  let year = parseInt(intlParts.relatedYear || intlParts.year)
   let era: string | undefined
   let eraYear: number | undefined
   const eraOrigins = eraOriginsByCalendarId[baseCalendarId]

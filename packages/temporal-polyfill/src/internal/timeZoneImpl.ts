@@ -6,8 +6,8 @@ import {
   isoDateTimeToEpochSec,
 } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
+import { normalizeEraName } from './intlCalendarConfig'
 import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
-import { parseIntlPartsYear } from './intlParts'
 import {
   checkEpochNanoInBounds,
   isoDateTimeAndOffsetToEpochNano,
@@ -313,6 +313,11 @@ function computePeriod(epochSec: number, periodSec: number): [number, number] {
   return [startEpochSec, endEpochSec]
 }
 
+/*
+The formatter comes from queryTimeZoneIntlFormat(), which always requests the
+ISO calendar. Some hosts may resolve that as gregory, but either way the parts
+below are interpreted as ISO/Gregorian fields, not as user-calendar fields.
+*/
 function createComputeOffsetSec(
   format: Intl.DateTimeFormat,
 ): (epochSec: number) => number {
@@ -331,4 +336,21 @@ function createComputeOffsetSec(
     )
     return zonedEpochSec - epochSec
   }
+}
+
+function parseIntlPartsYear(intlParts: Record<string, string>): number {
+  const relatedYear = intlParts.relatedYear
+
+  if (relatedYear !== undefined) {
+    return parseInt(relatedYear)
+  }
+
+  const year = parseInt(intlParts.year)
+
+  // Intl formats BCE years as positive era-years. Convert them back into the
+  // proleptic ISO year expected by epoch conversion helpers.
+  return intlParts.era !== undefined &&
+    normalizeEraName(intlParts.era) === 'bce'
+    ? 1 - year
+    : year
 }
