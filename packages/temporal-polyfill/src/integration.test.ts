@@ -26,6 +26,9 @@ describe('integration recreations', () => {
     })
   })
 
+  // TODO: Report these large day-rounding precision cases to the test262
+  // maintainers. Existing test262 coverage has similar Duration exactness
+  // cases, but not this PlainDateTime difference repro.
   describe('issue #84: day rounding floating-point precision', () => {
     it('ceil-rounds a large duration with fractional seconds to the next day', () => {
       const rounded = Temporal.Duration.from('P100016DT0.0000001S').round({

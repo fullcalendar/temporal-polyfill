@@ -20,7 +20,7 @@ import {
   createMarkerMoveOps,
   isZonedEpochSlots,
 } from '../internal/relativeMath'
-import { roundBigNanoByInc, roundByInc } from '../internal/round'
+import { roundBigNanoToInc, roundNumberToInc } from '../internal/round'
 import {
   AbstractDateSlots,
   ZonedDateTimeSlots,
@@ -169,7 +169,7 @@ function diffDateUnits(
   )
 
   if (roundingInc) {
-    res = roundByInc(res, roundingInc, roundingMode!)
+    res = roundNumberToInc(res, roundingInc, roundingMode!)
   }
 
   return res
@@ -209,7 +209,7 @@ function diffZonedDayLikeUnits(
   let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
 
   if (roundingInc) {
-    res = roundByInc(res, roundingInc, roundingMode!)
+    res = roundNumberToInc(res, roundingInc, roundingMode!)
   }
 
   return res
@@ -229,7 +229,7 @@ function diffPlainDayLikeUnit(
   let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
 
   if (roundingInc) {
-    res = roundByInc(res, roundingInc, roundingMode!)
+    res = roundNumberToInc(res, roundingInc, roundingMode!)
   }
 
   return res
@@ -251,9 +251,9 @@ function diffTimeUnit(
   let nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
 
   if (roundingInc) {
-    nanoDiff = roundBigNanoByInc(
+    nanoDiff = roundBigNanoToInc(
       nanoDiff,
-      nanoInUnit * roundingInc,
+      BigInt(nanoInUnit * roundingInc),
       roundingMode!,
     )
   }

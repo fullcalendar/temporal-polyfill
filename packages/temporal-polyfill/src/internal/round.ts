@@ -61,10 +61,9 @@ import {
   Unit,
   nanoInHour,
   nanoInMinute,
-  nanoInUtcDay,
   unitNanoMap,
 } from './units'
-import { NumberSign, compareBigInts, divModFloor, divTrunc } from './utils'
+import { NumberSign, compareBigInts, divFloorBigInt, divTrunc } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -80,7 +79,7 @@ export function roundInstant(
   )
 
   return createInstantSlots(
-    roundBigNano(
+    roundBigNanoToUnit(
       instantSlots.epochNanoseconds,
       smallestUnit as TimeUnit,
       roundingInc,
@@ -288,7 +287,7 @@ export function roundTimeToNano(
   roundingMode: RoundingMode,
 ): [TimeFields, number] {
   return nanoToTimeAndDay(
-    roundByInc(timeFieldsToNano(timeFields), nanoInc, roundingMode),
+    roundNumberToInc(timeFieldsToNano(timeFields), nanoInc, roundingMode),
   )
 }
 
@@ -297,7 +296,7 @@ Common operation
 Always uses halfExpand
 */
 export function roundToMinute(offsetNano: number): number {
-  return roundByInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
+  return roundNumberToInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
 }
 
 export function computeNanoInc(
@@ -337,7 +336,11 @@ export function roundDayTimeDurationByInc(
 ): Partial<DurationFields> {
   const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day) // force <= Day
   const bigNano = durationFieldsToBigNano(durationFields, maxUnit)
-  const roundedBigNano = roundBigNanoByInc(bigNano, nanoInc, roundingMode)
+  const roundedBigNano = roundBigNanoToInc(
+    bigNano,
+    BigInt(nanoInc),
+    roundingMode,
+  )
   return nanoToDurationDayTimeFields(roundedBigNano, maxUnit)
 }
 
@@ -353,7 +356,7 @@ export function roundDayTimeDuration(
   roundingMode: RoundingMode,
 ): DurationFields {
   const bigNano = durationFieldsToBigNano(durationFields)
-  const roundedBigNano = roundBigNano(
+  const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
     roundingInc,
@@ -422,70 +425,98 @@ export function roundRelativeDuration(
 // Rounding Numbers
 // -----------------------------------------------------------------------------
 
-export function roundBigNano(
+export function roundBigNanoToUnit(
   bigNano: bigint,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingMode,
   useDayOrigin?: boolean,
 ): bigint {
-  if (smallestUnit === Unit.Day) {
-    const daysExact = divideBigNanoToExactNumber(bigNano, nanoInUtcDay)
-    const daysRounded = roundByInc(daysExact, roundingInc, roundingMode)
-    return BigInt(daysRounded) * bigNanoInUtcDay
-  }
+  const bigNanoInc = BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
+  const roundFunc = useDayOrigin
+    ? roundBigNanoToDayOriginInc
+    : roundBigNanoToInc
 
-  return roundBigNanoByInc(
+  return roundFunc(bigNano, bigNanoInc, roundingMode)
+}
+
+/*
+Rounds an exact nanosecond bigint to an exact bigint increment. The quotient is
+truncated toward zero by BigInt division, and the signed remainder decides
+whether rounding should move to the adjacent increment. Keeping this in bigint
+space avoids losing sub-increment remainders for large durations/epoch values.
+*/
+export function roundBigNanoToInc(
+  bigNano: bigint,
+  bigNanoInc: bigint,
+  roundingMode: RoundingMode,
+): bigint {
+  return roundBigNanoToIncWithTail(
     bigNano,
-    computeNanoInc(smallestUnit, roundingInc),
+    bigNanoInc,
     roundingMode,
-    useDayOrigin,
+    (bigNano / bigNanoInc) % 2n,
   )
 }
 
-export function roundBigNanoByInc(
+export function roundBigNanoToDayOriginInc(
   bigNano: bigint,
-  nanoInc: number, // REQUIRED: a single day must be divisible by this!
+  bigNanoInc: bigint,
   roundingMode: RoundingMode,
-  useDayOrigin?: boolean,
 ): bigint {
-  let days = Number(bigNano / bigNanoInUtcDay)
-  let timeNano = Number(bigNano % bigNanoInUtcDay)
+  const day = divFloorBigInt(bigNano, bigNanoInUtcDay)
+  const dayOriginNano = day * bigNanoInUtcDay
+  const timeNano = bigNano - dayOriginNano
+  const quotientTail = (dayOriginNano / bigNanoInc + timeNano / bigNanoInc) % 2n
 
-  // consider the start-of-day the origin?
-  // convert to start-of-day and time-of-day
-  if (useDayOrigin && timeNano < 0) {
-    timeNano += nanoInUtcDay
-    days -= 1
+  return (
+    dayOriginNano +
+    roundBigNanoToIncWithTail(timeNano, bigNanoInc, roundingMode, quotientTail)
+  )
+}
+
+// quotientTail is the small, Number-safe part of the full quotient that gets
+// fed to roundWithMode. Callers compute it before shifting bigNano relative
+// to an origin, so halfEven still sees the original quotient parity.
+function roundBigNanoToIncWithTail(
+  bigNano: bigint,
+  bigNanoInc: bigint,
+  roundingMode: RoundingMode,
+  quotientTail: bigint,
+): bigint {
+  const quotient = bigNano / bigNanoInc
+  const remainder = bigNano % bigNanoInc
+  let fraction = 0
+
+  if (remainder) {
+    const absRemainder = remainder < 0n ? -remainder : remainder
+
+    // Precise way of determining before/on/after half
+    const halfCompare = compareBigInts(absRemainder * 2n, bigNanoInc)
+
+    // Fabricate a fraction safely away from 0.5 while preserving the exact
+    // before/on/after-half comparison.
+
+    fraction = Math.sign(Number(remainder)) * (halfCompare * 0.2 + 0.5)
   }
 
-  // Official proposal-temporal's TimeDuration.round() keeps one totalNs BigInt
-  // and tests quotient parity for half-even ties. In this split [days, timeNano]
-  // representation, fold only an odd day into the rounded remainder so quotient
-  // parity sees total duration, while other modes preserve the day-origin
-  // behavior used by Instant rounding.
-  let baseDays = days
-  if (roundingMode === RoundingMode.HalfEven) {
-    baseDays = divTrunc(days, 2) * 2
-    timeNano += (days - baseDays) * nanoInUtcDay
-  }
-
-  const roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
-
-  const [dayDelta, finalTimeNano] = divModFloor(roundedTimeNano, nanoInUtcDay)
-  return BigInt(baseDays + dayDelta) * bigNanoInUtcDay + BigInt(finalTimeNano)
+  const roundedTail = roundWithMode(
+    Number(quotientTail) + fraction,
+    roundingMode,
+  )
+  return (quotient - quotientTail + BigInt(roundedTail)) * bigNanoInc
 }
 
 /*
 Never receives smallestUnit/roundingIncrement
 Use computeNanoInc for that
 */
-export function roundByInc(
+export function roundNumberToInc(
   num: number,
-  inc: number,
+  roundingInc: number,
   roundingMode: RoundingMode,
 ): number {
-  return roundWithMode(num / inc, roundingMode) * inc
+  return roundWithMode(num / roundingInc, roundingMode) * roundingInc
 }
 
 export function roundWithMode(num: number, roundingMode: RoundingMode): number {
@@ -513,7 +544,7 @@ function nudgeDayTimeDuration(
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const bigNano = durationFieldsToBigNano(durationFields)
-  const roundedBigNano = roundBigNano(
+  const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
     roundingInc,
@@ -561,7 +592,7 @@ function nudgeZonedTimeDuration(
 ] {
   const timeNano = Number(durationFieldsToBigNano(durationFields, Unit.Hour))
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
-  let roundedTimeNano = roundByInc(timeNano, nanoInc, roundingMode)
+  let roundedTimeNano = roundNumberToInc(timeNano, nanoInc, roundingMode)
 
   const dayWindow = clampRelativeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
@@ -581,7 +612,7 @@ function nudgeZonedTimeDuration(
   // if so, rerun rounding with origin as next day
   if (!beyondDayNano || Math.sign(beyondDayNano) === sign) {
     dayDelta += sign
-    roundedTimeNano = roundByInc(beyondDayNano, nanoInc, roundingMode)
+    roundedTimeNano = roundNumberToInc(beyondDayNano, nanoInc, roundingMode)
     endEpochNano = dayEpochNano1 + BigInt(roundedTimeNano)
   } else {
     endEpochNano = dayEpochNano0 + BigInt(roundedTimeNano)
@@ -648,7 +679,7 @@ function nudgeRelativeDuration(
   const windowStartVal = nudgeWindow.startDurationFields[smallestUnitFieldName]
   const windowEndVal = nudgeWindow.endDurationFields[smallestUnitFieldName]
   const exactVal = windowStartVal + frac * sign * roundingInc
-  const roundedVal = roundByInc(exactVal, roundingInc, roundingMode)
+  const roundedVal = roundNumberToInc(exactVal, roundingInc, roundingMode)
   const roundedToEnd = roundedVal === windowEndVal
 
   baseDurationFields[smallestUnitFieldName] = roundedVal

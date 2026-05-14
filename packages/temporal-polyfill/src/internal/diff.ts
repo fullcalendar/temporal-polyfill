@@ -45,7 +45,7 @@ import {
   MoveMarker,
   createMarkerMoveOps,
 } from './relativeMath'
-import { roundBigNano, roundRelativeDuration } from './round'
+import { roundBigNanoToUnit, roundRelativeDuration } from './round'
 import {
   DurationSlots,
   InstantSlots,
@@ -356,7 +356,7 @@ export function diffPlainTimes(
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
   const timeDiffNano = Number(
-    roundBigNano(
+    roundBigNanoToUnit(
       BigInt(
         timeFieldsToNano(plainTimeSlots1) - timeFieldsToNano(plainTimeSlots0),
       ),
@@ -750,7 +750,7 @@ function diffEpochNanos(
   return {
     ...durationFieldDefaults,
     ...nanoToDurationDayTimeFields(
-      roundBigNano(
+      roundBigNanoToUnit(
         endEpochNano - startEpochNano,
         smallestUnit,
         roundingInc,

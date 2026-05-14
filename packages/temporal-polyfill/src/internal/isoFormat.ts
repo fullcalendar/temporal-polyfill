@@ -36,7 +36,7 @@ import {
   ZonedDateTimeDisplayOptions,
 } from './optionsModel'
 import {
-  roundBigNanoByInc,
+  roundBigNanoToDayOriginInc,
   roundDateTimeToNano,
   roundDayTimeDurationByInc,
   roundTimeToNano,
@@ -198,11 +198,10 @@ function formatEpochNanoIso(
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  epochNano = roundBigNanoByInc(
+  epochNano = roundBigNanoToDayOriginInc(
     epochNano,
-    nanoInc,
+    BigInt(nanoInc),
     roundingMode,
-    true, // useDayOrigin
   )
 
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
@@ -226,7 +225,11 @@ function formatZonedEpochNanoIso(
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
-  epochNano = roundBigNanoByInc(epochNano, nanoInc, roundingMode, true)
+  epochNano = roundBigNanoToDayOriginInc(
+    epochNano,
+    BigInt(nanoInc),
+    roundingMode,
+  )
   const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
   const isoDateTime = epochNanoToIso(epochNano, offsetNano)
 
