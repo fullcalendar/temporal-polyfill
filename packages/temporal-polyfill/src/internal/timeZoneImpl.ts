@@ -12,14 +12,10 @@ import {
   checkEpochNanoInBounds,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
-import {
-  getTimeZonePeriodDays,
-  maxPossibleTransition,
-  minPossibleTransition,
-} from './timeZoneConfig'
+import { getTimeZonePeriodDays, minPossibleTransition } from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clampNumber, compareNumbers, memoize } from './utils'
+import { compareNumbers, memoize } from './utils'
 
 export interface TimeZoneImpl {
   id: string
@@ -46,6 +42,11 @@ const queryTimeZoneRecord = memoize(
         )
   },
 )
+
+// Match proposal-temporal's transition-search horizon. Offset lookup itself
+// must remain unbounded: distant-future dates still need their actual Intl
+// offset, even when public transition search would give up after this horizon.
+const transitionSearchSec = secInDay * 366 * 3
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -134,8 +135,6 @@ function createIntlTimeZoneStore(
   const getSample = memoize(computeOffsetSec)
   const getSplit = memoize(createSplitTuple)
   const periodSec = periodDays * secInDay
-  let minTransition = minPossibleTransition
-  let maxTransition = maxPossibleTransition
 
   function getPossibleEpochSec(zonedEpochSec: number): number[] {
     const wideOffsetSec0 = getOffsetSec(zonedEpochSec - secInDay)
@@ -164,11 +163,7 @@ function createIntlTimeZoneStore(
   }
 
   function getOffsetSec(epochSec: number): number {
-    const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
-    const [startEpochSec, endEpochSec] = computePeriod(
-      clampedEpochSec,
-      periodSec,
-    )
+    const [startEpochSec, endEpochSec] = computePeriod(epochSec, periodSec)
     const startOffsetSec = getSample(startEpochSec)
     const endOffsetSec = getSample(endEpochSec)
 
@@ -187,18 +182,48 @@ function createIntlTimeZoneStore(
     epochSec: number,
     direction: -1 | 1,
   ): number | undefined {
-    const clampedEpochSec = clampNumber(epochSec, minTransition, maxTransition)
-    let [startEpochSec, endEpochSec] = computePeriod(clampedEpochSec, periodSec)
+    // Traveling backwards for a transition
+    if (direction < 0) {
+      // Starting in the past, before minimum possible transition
+      if (epochSec <= minPossibleTransition) {
+        return undefined
+      }
+
+      const currentEpochSec = getCurrentEpochSec()
+      const lookaheadEpochSec = currentEpochSec + transitionSearchSec
+
+      // Starting in the future, after maximum possible transition.
+      // Do analytics on the currentEpochSec->lookaheadEpochSec period.
+      // TODO: try to eliminate recursion
+      if (epochSec > lookaheadEpochSec) {
+        const transitionBeforeLookahead = getTransition(lookaheadEpochSec, -1)
+
+        // If the near future has no transitions, or the latest transition
+        // before the lookahead window is already in the past, assume that the
+        // far future has no additional transitions to discover.
+        if (
+          transitionBeforeLookahead === undefined ||
+          transitionBeforeLookahead < currentEpochSec
+        ) {
+          return transitionBeforeLookahead
+        }
+      }
+    }
+
+    const searchEpochSec =
+      direction > 0
+        ? // if moving forward from far past, fast-forward search to lower bound
+          Math.max(epochSec, minPossibleTransition)
+        : epochSec
+    let [startEpochSec, endEpochSec] = computePeriod(searchEpochSec, periodSec)
 
     const inc = periodSec * direction
-    const inBounds =
-      direction < 0
-        ? () =>
-            endEpochSec > minTransition ||
-            ((minTransition = clampedEpochSec), false)
-        : () =>
-            startEpochSec < maxTransition ||
-            ((maxTransition = clampedEpochSec), false)
+    const searchLimit =
+      direction > 0
+        ? Math.max(epochSec, getCurrentEpochSec()) + transitionSearchSec
+        : minPossibleTransition
+    const inBounds = () =>
+      direction < 0 ? endEpochSec > searchLimit : startEpochSec < searchLimit
 
     while (inBounds()) {
       const startOffsetSec = getSample(startEpochSec)
@@ -269,6 +294,10 @@ function createIntlTimeZoneStore(
   }
 
   return { getPossibleEpochSec, getOffsetSec, getTransition }
+}
+
+function getCurrentEpochSec(): number {
+  return Math.floor(Date.now() / milliInSec)
 }
 
 function createSplitTuple(
