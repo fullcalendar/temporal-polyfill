@@ -385,7 +385,28 @@ async function readTemporalReservedWords(pkgDir) {
       'useGrouping',
       'relatedYear',
 
-      // Intl.DateTimeFormat options
+      // Public Intl.DateTimeFormat option keys must survive property mangling.
+      // The Temporal formatters copy, transform, and fabricate option bags
+      // before handing them back to native Intl, so mangling these keys changes
+      // observable locale-formatting behavior.
+      'calendar',
+      'dateStyle',
+      'day',
+      'dayPeriod',
+      'era',
+      'fractionalSecondDigits',
+      'hour',
       'hour12',
+      'hourCycle',
+      'localeMatcher',
+      'minute',
+      'month',
+      'numberingSystem',
+      'second',
+      'timeStyle',
+      'timeZone',
+      'timeZoneName',
+      'weekday',
+      'year',
     ])
 }
