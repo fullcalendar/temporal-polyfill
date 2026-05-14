@@ -251,7 +251,7 @@ describe('rangeToLocaleString', () => {
     const s = testHotCache(() =>
       PlainTimeFns.rangeToLocaleString(pt0, pt1, locale, options),
     )
-    expect(s).toBe('12:30:00 PM UTC – 2:45:00 PM UTC')
+    expect(s).toBe('12:30:00 PM – 2:45:00 PM')
   })
 })
 
@@ -272,8 +272,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'startRange', type: 'second', value: '00' },
       { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'dayPeriod', value: 'PM' },
-      { source: 'startRange', type: 'literal', value: ' ' },
-      { source: 'startRange', type: 'timeZoneName', value: 'UTC' },
       { source: 'shared', type: 'literal', value: ' – ' },
       { source: 'endRange', type: 'hour', value: '2' },
       { source: 'endRange', type: 'literal', value: ':' },
@@ -282,8 +280,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'second', value: '00' },
       { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'dayPeriod', value: 'PM' },
-      { source: 'endRange', type: 'literal', value: ' ' },
-      { source: 'endRange', type: 'timeZoneName', value: 'UTC' },
     ])
   })
 })

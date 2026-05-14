@@ -512,9 +512,7 @@ describe('toLocaleString', () => {
     const s = testHotCache(() =>
       PlainDateTimeFns.toLocaleString(pdt, locale, options),
     )
-    expect(s).toBe(
-      'Sunday, December 31, 2023 at 12:30:00 PM Coordinated Universal Time',
-    )
+    expect(s).toBe('Sunday, December 31, 2023 at 12:30:00 PM')
   })
 })
 
@@ -546,8 +544,6 @@ describe('toLocaleStringParts', () => {
       { type: 'second', value: '00' },
       { type: 'literal', value: ' ' },
       { type: 'dayPeriod', value: 'PM' },
-      { type: 'literal', value: ' ' },
-      { type: 'timeZoneName', value: 'Coordinated Universal Time' },
     ])
   })
 })
@@ -565,9 +561,7 @@ describe('rangeToLocaleString', () => {
     const s = testHotCache(() =>
       PlainDateTimeFns.rangeToLocaleString(pdt0, pdt1, locale, options),
     )
-    expect(s).toBe(
-      'Sunday, December 31, 2023, 12:30:00 PM UTC – 2:59:00 PM UTC',
-    )
+    expect(s).toBe('Sunday, December 31, 2023, 12:30:00 PM – 2:59:00 PM')
   })
 })
 
@@ -600,8 +594,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'startRange', type: 'second', value: '00' },
       { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'dayPeriod', value: 'PM' },
-      { source: 'startRange', type: 'literal', value: ' ' },
-      { source: 'startRange', type: 'timeZoneName', value: 'UTC' },
       { source: 'shared', type: 'literal', value: ' – ' },
       { source: 'endRange', type: 'hour', value: '2' },
       { source: 'endRange', type: 'literal', value: ':' },
@@ -610,8 +602,6 @@ describe('rangeToLocaleStringParts', () => {
       { source: 'endRange', type: 'second', value: '00' },
       { source: 'endRange', type: 'literal', value: ' ' },
       { source: 'endRange', type: 'dayPeriod', value: 'PM' },
-      { source: 'endRange', type: 'literal', value: ' ' },
-      { source: 'endRange', type: 'timeZoneName', value: 'UTC' },
     ])
   })
 })
