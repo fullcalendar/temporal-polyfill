@@ -8,6 +8,7 @@ import {
 import { CalendarDateTimeFields } from './fieldTypes'
 import { normalizeEraName } from './intlCalendarConfig'
 import { formatEpochMilliToPartsRecord } from './intlFormatUtils'
+import { maxMilli } from './temporalConstants'
 import {
   checkEpochNanoInBounds,
   isoDateTimeAndOffsetToEpochNano,
@@ -15,7 +16,7 @@ import {
 import { getTimeZonePeriodDays, minPossibleTransition } from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { compareNumbers, memoize } from './utils'
+import { clampNumber, compareNumbers, memoize } from './utils'
 
 export interface TimeZoneImpl {
   id: string
@@ -47,6 +48,7 @@ const queryTimeZoneRecord = memoize(
 // must remain unbounded: distant-future dates still need their actual Intl
 // offset, even when public transition search would give up after this horizon.
 const transitionSearchSec = secInDay * 366 * 3
+const maxIntlSampleSec = maxMilli / milliInSec
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -164,14 +166,16 @@ function createIntlTimeZoneStore(
 
   function getOffsetSec(epochSec: number): number {
     const [startEpochSec, endEpochSec] = computePeriod(epochSec, periodSec)
-    const startOffsetSec = getSample(startEpochSec)
-    const endOffsetSec = getSample(endEpochSec)
+    const clampedStartEpochSec = clampIntlSampleEpochSec(startEpochSec)
+    const clampedEndEpochSec = clampIntlSampleEpochSec(endEpochSec)
+    const startOffsetSec = getSample(clampedStartEpochSec)
+    const endOffsetSec = getSample(clampedEndEpochSec)
 
     if (startOffsetSec === endOffsetSec) {
       return startOffsetSec
     }
 
-    const split = getSplit(startEpochSec, endEpochSec)
+    const split = getSplit(clampedStartEpochSec, clampedEndEpochSec)
     return pinch(split, startOffsetSec, endOffsetSec, epochSec)
   }
 
@@ -182,6 +186,13 @@ function createIntlTimeZoneStore(
     epochSec: number,
     direction: -1 | 1,
   ): number | undefined {
+    // There cannot be a discoverable transition after Temporal's maximum
+    // supported instant. Bail out before the first Intl sample would exceed
+    // native Date's TimeClip range.
+    if (direction > 0 && epochSec >= maxIntlSampleSec) {
+      return undefined
+    }
+
     // Traveling backwards for a transition
     if (direction < 0) {
       // Starting in the past, before minimum possible transition
@@ -196,17 +207,7 @@ function createIntlTimeZoneStore(
       // Do analytics on the currentEpochSec->lookaheadEpochSec period.
       // TODO: try to eliminate recursion
       if (epochSec > lookaheadEpochSec) {
-        const transitionBeforeLookahead = getTransition(lookaheadEpochSec, -1)
-
-        // If the near future has no transitions, or the latest transition
-        // before the lookahead window is already in the past, assume that the
-        // far future has no additional transitions to discover.
-        if (
-          transitionBeforeLookahead === undefined ||
-          transitionBeforeLookahead < currentEpochSec
-        ) {
-          return transitionBeforeLookahead
-        }
+        return getTransition(lookaheadEpochSec, -1)
       }
     }
 
@@ -226,11 +227,13 @@ function createIntlTimeZoneStore(
       direction < 0 ? endEpochSec > searchLimit : startEpochSec < searchLimit
 
     while (inBounds()) {
-      const startOffsetSec = getSample(startEpochSec)
-      const endOffsetSec = getSample(endEpochSec)
+      const clampedStartEpochSec = clampIntlSampleEpochSec(startEpochSec)
+      const clampedEndEpochSec = clampIntlSampleEpochSec(endEpochSec)
+      const startOffsetSec = getSample(clampedStartEpochSec)
+      const endOffsetSec = getSample(clampedEndEpochSec)
 
       if (startOffsetSec !== endOffsetSec) {
-        const split = getSplit(startEpochSec, endEpochSec)
+        const split = getSplit(clampedStartEpochSec, clampedEndEpochSec)
         pinch(split, startOffsetSec, endOffsetSec)
         const transitionEpochSec = split[0]
 
@@ -311,6 +314,10 @@ function computePeriod(epochSec: number, periodSec: number): [number, number] {
   const startEpochSec = Math.floor(epochSec / periodSec) * periodSec
   const endEpochSec = startEpochSec + periodSec
   return [startEpochSec, endEpochSec]
+}
+
+function clampIntlSampleEpochSec(epochSec: number): number {
+  return clampNumber(epochSec, -maxIntlSampleSec, maxIntlSampleSec)
 }
 
 /*

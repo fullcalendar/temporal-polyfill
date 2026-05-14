@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { bigNanoInSec } from './bigNano'
+import { maxMilli } from './temporalConstants'
 import { queryTimeZone } from './timeZoneImpl'
 
 describe('queryTimeZone', () => {
@@ -29,5 +30,20 @@ describe('queryTimeZone', () => {
           bigNanoInSec,
       ),
     ).toBe(-842_918_400)
+  })
+
+  it('samples offsets near TimeClip boundaries without asking Intl for out-of-range dates', () => {
+    const timeZoneImpl = queryTimeZone('America/Vancouver')
+    const maxEpochNano = BigInt(maxMilli) * 1_000_000n
+
+    // Offset lookup samples both ends of a search period. At the Temporal
+    // instant limits, one endpoint can sit outside native Intl's Date range
+    // even though the requested instant itself is valid.
+    expect(() => {
+      timeZoneImpl.getOffsetNanosecondsFor(-maxEpochNano)
+      timeZoneImpl.getOffsetNanosecondsFor(maxEpochNano)
+      timeZoneImpl.getTransition(maxEpochNano, 1)
+      timeZoneImpl.getTransition(maxEpochNano, -1)
+    }).not.toThrow()
   })
 })
