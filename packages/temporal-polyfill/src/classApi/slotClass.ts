@@ -94,15 +94,12 @@ export function rejectInvalidBag<B>(bag: B): B {
 }
 
 // Attaches debugging to the given instance
-// Intentionally short function name because shortens 'dbg' string
+// Intentionally short function name for minification
 function dbg(instance: any, slots: any, formatSlots: (slots: any) => string) {
-  // NOT minified ?
+  // NOT minified?
   if (dbg.name === 'dbg') {
     Object.defineProperty(instance, '_str_', {
       value: formatSlots(slots),
-      writable: false,
-      enumerable: false,
-      configurable: false,
     })
   }
 }
