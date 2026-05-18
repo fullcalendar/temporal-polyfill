@@ -1,0 +1,9 @@
+export const PlainYearMonthRecordBranding = 'PlainYearMonthRecord' as const
+export const PlainMonthDayRecordBranding = 'PlainMonthDayRecord' as const
+export const PlainDateRecordBranding = 'PlainDateRecord' as const
+export const PlainDateTimeRecordBranding = 'PlainDateTimeRecord' as const
+export const PlainTimeRecordBranding = 'PlainTimeRecord' as const
+export const ZonedDateTimeRecordBranding = 'ZonedDateTimeRecord' as const
+export const InstantRecordBranding = 'InstantRecord' as const
+export const DurationRecordBranding = 'DurationRecord' as const
+export const CalendarRecordBranding = 'CalendarRecord' as const

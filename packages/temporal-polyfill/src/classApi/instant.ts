@@ -17,14 +17,13 @@ import { DiffOptions, RoundingOptions } from '../internal/optionsModel'
 import { roundInstant } from '../internal/round'
 import {
   EpochNanoFields,
-  InstantBranding,
-  ZonedDateTimeBranding,
   ZonedEpochNanoFields,
   createEpochNanoSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+import { InstantBranding, ZonedDateTimeBranding } from './branding'
 import {
   Duration,
   DurationArg,

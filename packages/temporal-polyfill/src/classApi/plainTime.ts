@@ -17,15 +17,14 @@ import {
   RoundingOptions,
 } from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
+import { ZonedEpochNanoFields, createTimeSlots } from '../internal/slots'
+import { TimeUnitName } from '../internal/units'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   PlainDateTimeBranding,
   PlainTimeBranding,
   ZonedDateTimeBranding,
-  ZonedEpochNanoFields,
-  createTimeSlots,
-} from '../internal/slots'
-import { TimeUnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+} from './branding'
 import {
   Duration,
   DurationArg,

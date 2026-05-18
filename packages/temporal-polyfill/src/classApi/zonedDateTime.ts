@@ -34,11 +34,7 @@ import {
   computeZonedStartOfDay,
   roundZonedDateTime,
 } from '../internal/round'
-import {
-  ZonedDateTimeBranding,
-  ZonedEpochNanoFields,
-  createDurationSlots,
-} from '../internal/slots'
+import { ZonedEpochNanoFields, createDurationSlots } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
   getTimeZoneTransitionEpochNanoseconds,
@@ -46,6 +42,7 @@ import {
 } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
+import { ZonedDateTimeBranding } from './branding'
 import {
   CalendarArg,
   getCalendarIdFromBag,

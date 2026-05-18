@@ -36,9 +36,6 @@ import {
 } from '../internal/optionsModel'
 import { roundPlainDateTime } from '../internal/round'
 import {
-  PlainDateBranding,
-  PlainDateTimeBranding,
-  ZonedDateTimeBranding,
   ZonedEpochNanoFields,
   createDateSlots,
   createDateTimeSlots,
@@ -48,6 +45,11 @@ import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefin
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
+import {
+  PlainDateBranding,
+  PlainDateTimeBranding,
+  ZonedDateTimeBranding,
+} from './branding'
 import {
   CalendarArg,
   getCalendarIdFromBag,

@@ -16,9 +16,9 @@ import { mergePlainYearMonthFields } from '../internal/merge'
 import { movePlainYearMonth } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
-import { PlainYearMonthBranding } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
+import { PlainYearMonthBranding } from './branding'
 import { getCalendarIdFromBag } from './calendarArg'
 import {
   Duration,

@@ -30,17 +30,16 @@ import {
   RelativeToOptions,
 } from '../internal/optionsModel'
 import { RelativeToSlots } from '../internal/relativeMath'
+import { ZonedEpochNanoFields, createDateSlots } from '../internal/slots'
+import { totalDuration } from '../internal/total'
+import { UnitName } from '../internal/units'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   DurationBranding,
   PlainDateBranding,
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
-  ZonedEpochNanoFields,
-  createDateSlots,
-} from '../internal/slots'
-import { totalDuration } from '../internal/total'
-import { UnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+} from './branding'
 import { getCalendarIdFromBag } from './calendarArg'
 import { durationFieldGetters } from './mixins'
 import { PlainDateArg } from './plainDate'

@@ -25,16 +25,15 @@ import { mergePlainDateFields } from '../internal/merge'
 import { movePlainDate } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
+import { ZonedEpochNanoFields, createDateSlots } from '../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
+import { DateUnitName } from '../internal/units'
+import { NumberSign, isObjectLike } from '../internal/utils'
 import {
   PlainDateBranding,
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
-  ZonedEpochNanoFields,
-  createDateSlots,
-} from '../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
-import { DateUnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+} from './branding'
 import {
   CalendarArg,
   getCalendarIdFromBag,
