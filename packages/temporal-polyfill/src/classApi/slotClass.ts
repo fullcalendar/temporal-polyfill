@@ -7,7 +7,6 @@ import {
   createStringTagDescriptors,
   mapProps,
 } from '../internal/utils'
-import { neverValueOf } from './mixins'
 
 const slotsMap = new WeakMap<any, BrandingSlots>()
 
@@ -102,4 +101,8 @@ function dbg(instance: any, slots: any, formatSlots: (slots: any) => string) {
       value: formatSlots(slots),
     })
   }
+}
+
+function neverValueOf() {
+  throw new TypeError(errorMessages.forbiddenValueOf)
 }

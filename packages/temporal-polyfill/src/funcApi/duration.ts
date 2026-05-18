@@ -5,7 +5,6 @@ import { DurationFields } from '../internal/durationFields'
 import {
   absDuration,
   addDurations,
-  getDurationBlank,
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
@@ -78,7 +77,9 @@ export function isInstance(record: any): record is Record {
 // Getters
 // -----------------------------------------------------------------------------
 
-export const blank = getDurationBlank as (record: Record) => boolean
+export function blank(record: Record): boolean {
+  return !record.sign
+}
 
 // Setters
 // -----------------------------------------------------------------------------

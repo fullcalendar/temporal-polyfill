@@ -9,7 +9,6 @@ import {
   computeCalendarMonthsInYear,
 } from '../internal/calendarDerived'
 import { durationFieldNamesAsc } from '../internal/durationFields'
-import * as errorMessages from '../internal/errorMessages'
 import {
   getInternalCalendarId,
   isoCalendar,
@@ -21,7 +20,6 @@ import {
 } from '../internal/isoCalendarMath'
 import {
   AbstractDateSlots,
-  DurationSlots,
   getEpochMilli,
   getEpochNano,
 } from '../internal/slots'
@@ -32,6 +30,7 @@ import { zipPropsGenerator } from '../internal/utils'
 
 const day = (slots: AbstractDateSlots) =>
   computeCalendarDateFields(slots.calendar, slots).day
+
 const monthCode = (slots: AbstractDateSlots) =>
   computeCalendarMonthCode(slots.calendar, slots)
 
@@ -109,38 +108,19 @@ export const calendarIdGetters = {
   },
 }
 
-// Duration
-// -----------------------------------------------------------------------------
+const createSlotGetter = (propName: string) => (slots: any) => slots[propName]
 
-export const durationGetters = zipPropsGenerator(
-  (durationFieldNamesAsc as (keyof DurationSlots)[]).concat('sign'),
-  (propName: keyof DurationSlots) => {
-    return function (this: any, slots: any) {
-      return slots[propName]
-    }
-  },
+export const durationFieldGetters = zipPropsGenerator(
+  durationFieldNamesAsc,
+  createSlotGetter,
 )
 
-// Time
-// -----------------------------------------------------------------------------
-
-export const timeGetters = zipPropsGenerator(timeFieldNamesAsc, (propName) => {
-  return function (this: any, slots: any) {
-    return slots[propName]
-  }
-})
-
-// Epoch
-// -----------------------------------------------------------------------------
+export const timeGetters = zipPropsGenerator(
+  timeFieldNamesAsc,
+  createSlotGetter,
+)
 
 export const epochGetters = {
   epochMilliseconds: getEpochMilli,
   epochNanoseconds: getEpochNano,
-}
-
-// Misc
-// -----------------------------------------------------------------------------
-
-export function neverValueOf() {
-  throw new TypeError(errorMessages.forbiddenValueOf)
 }

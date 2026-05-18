@@ -8,7 +8,6 @@ import { DurationFields } from '../internal/durationFields'
 import {
   absDuration,
   addDurations,
-  getDurationBlank,
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
@@ -40,7 +39,7 @@ import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { getCalendarIdFromBag } from './calendarArg'
-import { durationGetters } from './mixins'
+import { durationFieldGetters } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { createSlotClass, getSlots } from './slotClass'
@@ -55,8 +54,13 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   constructDurationSlots,
   formatDurationIso,
   {
-    ...durationGetters,
-    blank: getDurationBlank,
+    ...durationFieldGetters,
+    sign(slots: DurationSlots) {
+      return slots.sign
+    },
+    blank(slots: DurationSlots) {
+      return !slots.sign
+    },
   },
   {
     with(slots: DurationSlots, mod: Partial<DurationFields>): Duration {
