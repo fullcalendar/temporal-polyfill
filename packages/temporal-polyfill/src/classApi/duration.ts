@@ -46,7 +46,7 @@ import { createSlotClass, getSlots } from './slotClass'
 import { refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTimeArg } from './zonedDateTime'
 
-export type Duration = any & DurationFields
+export type Duration = DurationFields // and other getters/methods
 export type DurationArg = Duration | Partial<DurationFields> | string
 
 export const [Duration, createDuration, getDurationSlots] = createSlotClass(
@@ -117,6 +117,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       return totalDuration(refinePublicRelativeTo, slots, options)
     },
     toLocaleString(
+      this: Duration,
       slots: DurationSlots,
       locales?: LocalesArg,
       options?: any,

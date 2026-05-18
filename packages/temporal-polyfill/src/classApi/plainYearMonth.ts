@@ -28,7 +28,7 @@ import { calendarIdGetters, yearMonthGetters } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
-export type PlainYearMonth = any & YearMonthFields
+export type PlainYearMonth = YearMonthFields // and other getters/methods
 export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
@@ -103,7 +103,11 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
       equals(slots: PlainYearMonthSlots, otherArg: PlainYearMonthArg): boolean {
         return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
       },
-      toPlainDate(slots: PlainYearMonthSlots, bag: { day: number }): PlainDate {
+      toPlainDate(
+        this: PlainYearMonth,
+        slots: PlainYearMonthSlots,
+        bag: { day: number },
+      ): PlainDate {
         return createPlainDate(
           convertPlainYearMonthToDate(slots.calendar, this, bag),
         )

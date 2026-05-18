@@ -56,7 +56,7 @@ import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
-export type PlainDate = any & DateFields
+export type PlainDate = DateFields // and other getters/methods
 export type PlainDateArg = PlainDate | DateLikeObject | string
 
 // TODO: give `this` a type
@@ -164,10 +164,10 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
         ),
       )
     },
-    toPlainYearMonth(slots: PlainDateSlots): PlainYearMonth {
+    toPlainYearMonth(this: PlainDate, slots: PlainDateSlots): PlainYearMonth {
       return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
     },
-    toPlainMonthDay(slots: PlainDateSlots): PlainMonthDay {
+    toPlainMonthDay(this: PlainDate, slots: PlainDateSlots): PlainMonthDay {
       return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
     },
     toLocaleString(

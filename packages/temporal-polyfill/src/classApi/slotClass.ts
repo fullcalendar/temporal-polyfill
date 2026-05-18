@@ -8,21 +8,65 @@ import {
   mapProps,
 } from '../internal/utils'
 
-const slotsMap = new WeakMap<any, BrandingSlots>()
+const slotsMap = new WeakMap<any, object>()
 
-// TODO: allow type-input, so caller doesn't need to cast so much
-export const getSlots = slotsMap.get.bind(slotsMap)
+export const getSlots = slotsMap.get.bind(slotsMap) as <
+  D extends object = BrandingSlots,
+>(
+  obj: any,
+) => D | undefined
 const setSlots = slotsMap.set.bind(slotsMap)
 
-export function createSlotClass(
+type SlotGetter<D extends object> = (slots: D) => unknown
+type SlotGetterMap<D extends object, G extends object> = {
+  [K in keyof G]: SlotGetter<D>
+}
+type GetterProps<G extends object> = {
+  readonly [K in keyof G]: G[K] extends (...args: any[]) => infer R ? R : never
+}
+
+type MethodProps<M extends object> = {
+  [K in keyof M]: M[K] extends (this: any, slots: any, ...args: infer A) => any
+    ? (...args: A) => any
+    : never
+}
+
+type ExtraMethods = {
+  toString(options?: any): string
+  toJSON(): string
+  valueOf(): never
+}
+
+type SlotInstance<G extends object, M extends object> = GetterProps<G> &
+  MethodProps<M> &
+  Omit<ExtraMethods, keyof M>
+
+type StaticMethods = Record<string, unknown>
+
+type SlotClass<I, CA extends any[], SM extends StaticMethods> = {
+  new (...args: CA): I
+} & SM
+
+export function createSlotClass<
+  D extends object,
+  CA extends any[],
+  G extends SlotGetterMap<D, G>,
+  M extends object,
+  SM extends StaticMethods,
+  I extends SlotInstance<G, M> = SlotInstance<G, M>,
+>(
   branding: string,
-  construct: any,
-  formatFunc: (slots: any, options?: any) => string,
-  getters: any,
-  methods: any,
-  staticMethods: any,
-): any {
-  function Class(this: any, ...args: any[]) {
+  construct: (...args: CA) => D,
+  formatFunc: (slots: D, options?: any) => string,
+  getters: G,
+  methods: M,
+  staticMethods: SM,
+): [
+  SlotClass<I, CA, SM>,
+  (slots: D | (D & BrandingSlots)) => I,
+  (obj: unknown) => D,
+] {
+  function Class(this: any, ...args: CA) {
     if (this instanceof Class) {
       const slots = construct(...args)
       setSlots(this, slots)
@@ -33,9 +77,9 @@ export function createSlotClass(
   }
 
   Object.defineProperties(Class.prototype, {
-    ...createGetterDescriptors(mapProps(bindMethod as any, getters) as any), // !!!
+    ...createGetterDescriptors(mapProps(bindMethod, getters)),
     ...createPropDescriptors(
-      mapProps(bindMethod as any, {
+      mapProps(bindMethod, {
         ...methods,
         toString: formatFunc,
         toJSON: (slots: any) => formatFunc(slots), // should not forward args
@@ -50,28 +94,35 @@ export function createSlotClass(
     ...createNameDescriptors(branding),
   })
 
-  function bindMethod(method: any, methodName: string) {
-    return Object.defineProperties(function (this: any, ...args: any[]) {
-      return method.call(this, getSpecificSlots(this), ...args)
-    }, createNameDescriptors(methodName))
+  function bindMethod(method: any, methodName: PropertyKey) {
+    return Object.defineProperties(
+      function (this: any, ...args: any[]) {
+        return method.call(this, getSpecificSlots(this), ...args)
+      },
+      createNameDescriptors(String(methodName)),
+    )
   }
 
-  function getSpecificSlots(obj: any): any {
+  function getSpecificSlots(obj: any): D {
     const slots = getSlots(obj)
-    if (!slots || slots.branding !== branding) {
+    if (!slots || (slots as Partial<BrandingSlots>).branding !== branding) {
       throw new TypeError(errorMessages.invalidCallingContext)
     }
-    return slots
+    return slots as D
   }
 
-  function createViaSlots(slots: BrandingSlots) {
+  function createViaSlots(slots: D | (D & BrandingSlots)): I {
     const instance = Object.create(Class.prototype)
     setSlots(instance, slots)
     dbg(instance, slots, formatFunc)
     return instance
   }
 
-  return [Class, createViaSlots, getSpecificSlots]
+  return [
+    Class as unknown as SlotClass<I, CA, SM>,
+    createViaSlots,
+    getSpecificSlots,
+  ]
 }
 
 // Utils

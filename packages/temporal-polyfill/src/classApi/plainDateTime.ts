@@ -67,7 +67,7 @@ import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
-export type PlainDateTime = any & DateTimeFields
+export type PlainDateTime = DateTimeFields // and other getters/methods
 export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(

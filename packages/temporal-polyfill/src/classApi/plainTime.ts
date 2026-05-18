@@ -38,7 +38,7 @@ import { prepPlainTimeFormat } from './intlFormatConfig'
 import { timeGetters } from './mixins'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
-export type PlainTime = any & TimeFields
+export type PlainTime = TimeFields // and other getters/methods
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 
 export const [PlainTime, createPlainTime] = createSlotClass(
@@ -48,6 +48,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
   timeGetters,
   {
     with(
+      this: PlainTime,
       _slots: PlainTimeSlots,
       mod: Partial<TimeFields>,
       options?: OverflowOptions,
