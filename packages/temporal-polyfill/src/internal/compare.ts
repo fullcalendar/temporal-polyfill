@@ -1,4 +1,4 @@
-import { durationFieldNamesAsc } from './durationFields'
+import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import { isoDateToEpochMilli } from './epochMath'
 import * as errorMessages from './errorMessages'
@@ -19,16 +19,7 @@ import {
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
-import {
-  DurationSlots,
-  InstantSlots,
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainMonthDaySlots,
-  PlainTimeSlots,
-  PlainYearMonthSlots,
-  ZonedDateTimeSlots,
-} from './slots'
+import { EpochAndZoneSlots } from './slots'
 import { timeFieldsToNano } from './timeFieldMath'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
@@ -43,8 +34,8 @@ import {
 // -----------------------------------------------------------------------------
 
 export function compareInstants(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
+  instantSlots0: { epochNanoseconds: bigint },
+  instantSlots1: { epochNanoseconds: bigint },
 ): NumberSign {
   return compareBigInts(
     instantSlots0.epochNanoseconds,
@@ -53,8 +44,8 @@ export function compareInstants(
 }
 
 export function compareZonedDateTimes(
-  zonedDateTimeSlots0: ZonedDateTimeSlots,
-  zonedDateTimeSlots1: ZonedDateTimeSlots,
+  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots1: EpochAndZoneSlots & { calendar: InternalCalendar },
 ): NumberSign {
   return compareBigInts(
     zonedDateTimeSlots0.epochNanoseconds,
@@ -64,8 +55,8 @@ export function compareZonedDateTimes(
 
 export function compareDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  durationSlots0: DurationSlots,
-  durationSlots1: DurationSlots,
+  durationSlots0: DurationFields,
+  durationSlots1: DurationFields,
   options?: RelativeToOptions<RA>,
 ): NumberSign {
   const normalOptions = normalizeOptions(options)
@@ -136,15 +127,15 @@ export function compareTimeFields(
 // -----------------------------------------------------------------------------
 
 export function instantsEqual(
-  instantSlots0: InstantSlots,
-  instantSlots1: InstantSlots,
+  instantSlots0: { epochNanoseconds: bigint },
+  instantSlots1: { epochNanoseconds: bigint },
 ): boolean {
   return !compareInstants(instantSlots0, instantSlots1)
 }
 
 export function zonedDateTimesEqual(
-  zonedDateTimeSlots0: ZonedDateTimeSlots,
-  zonedDateTimeSlots1: ZonedDateTimeSlots,
+  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots1: EpochAndZoneSlots & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
@@ -155,8 +146,8 @@ export function zonedDateTimesEqual(
 }
 
 export function plainDateTimesEqual(
-  plainDateTimeSlots0: PlainDateTimeSlots,
-  plainDateTimeSlots1: PlainDateTimeSlots,
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: InternalCalendar },
+  plainDateTimeSlots1: CalendarDateTimeFields & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
@@ -165,8 +156,8 @@ export function plainDateTimesEqual(
 }
 
 export function plainDatesEqual(
-  plainDateSlots0: PlainDateSlots,
-  plainDateSlots1: PlainDateSlots,
+  plainDateSlots0: CalendarDateFields & { calendar: InternalCalendar },
+  plainDateSlots1: CalendarDateFields & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
@@ -175,8 +166,8 @@ export function plainDatesEqual(
 }
 
 export function plainYearMonthsEqual(
-  plainYearMonthSlots0: PlainYearMonthSlots,
-  plainYearMonthSlots1: PlainYearMonthSlots,
+  plainYearMonthSlots0: CalendarDateFields & { calendar: InternalCalendar },
+  plainYearMonthSlots1: CalendarDateFields & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
@@ -185,8 +176,8 @@ export function plainYearMonthsEqual(
 }
 
 export function plainMonthDaysEqual(
-  plainMonthDaySlots0: PlainMonthDaySlots,
-  plainMonthDaySlots1: PlainMonthDaySlots,
+  plainMonthDaySlots0: CalendarDateFields & { calendar: InternalCalendar },
+  plainMonthDaySlots1: CalendarDateFields & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
@@ -207,8 +198,8 @@ function calendarsEqual(
 }
 
 export function plainTimesEqual(
-  plainTimeSlots0: PlainTimeSlots,
-  plainTimeSlots1: PlainTimeSlots,
+  plainTimeSlots0: TimeFields,
+  plainTimeSlots1: TimeFields,
 ): boolean {
   return !compareTimeFields(plainTimeSlots0, plainTimeSlots1)
 }

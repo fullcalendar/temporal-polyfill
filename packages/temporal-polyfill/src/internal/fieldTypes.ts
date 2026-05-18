@@ -82,12 +82,14 @@ export type MonthDayLikeObject = Partial<MonthDayFields> & { calendar?: string }
 // Misc. Poor names.
 // -----------------------------------------------------------------------------
 
+// just numeric fields, no era/eraYear/monthCode
 export interface CalendarDateFields {
   day: number
   month: number
   year: number
 }
 
+// just numeric fields, no era/eraYear/monthCode
 export type CalendarDateTimeFields = CalendarDateFields & TimeFields
 
 export interface CalendarEraFields {

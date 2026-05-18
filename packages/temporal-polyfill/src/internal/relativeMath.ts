@@ -1,22 +1,20 @@
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields } from './durationFields'
 import { isoDateTimeToEpochNano } from './epochMath'
+import { type InternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateTime, moveZonedEpochs } from './move'
-import {
-  AbstractDateSlots,
-  EpochSlots,
-  ZonedEpochSlots,
-  extractEpochNano,
-} from './slots'
+import { EpochAndZoneSlots, EpochSlots, extractEpochNano } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
 
 // the relative-to "origin"
-export type RelativeToSlots = AbstractDateSlots | ZonedEpochSlots
+export type RelativeToSlots =
+  | (CalendarDateFields & { calendar: InternalCalendar })
+  | (EpochAndZoneSlots & { calendar: InternalCalendar })
 
 // Individual Op types
 // -----------------------------------------------------------------------------
@@ -127,13 +125,13 @@ export function moveMarkerToEpochNano(
 // See note in createMarkerSpanOps about short-circuiting.
 export function isZonedEpochSlots(
   marker: RelativeToSlots | undefined,
-): marker is ZonedEpochSlots
+): marker is EpochAndZoneSlots & { calendar: InternalCalendar }
 export function isZonedEpochSlots(
   marker: MovableMarker | undefined,
 ): marker is EpochSlots
 export function isZonedEpochSlots(
   marker: MovableMarker | RelativeToSlots | undefined,
-): marker is EpochSlots | ZonedEpochSlots
+): marker is EpochSlots | (EpochAndZoneSlots & { calendar: InternalCalendar })
 export function isZonedEpochSlots(
   marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {

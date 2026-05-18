@@ -8,7 +8,10 @@ import {
 } from '../internal/convert'
 import { refinePlainDateObjectLike } from '../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../internal/diff'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -33,7 +36,6 @@ import {
 import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import { IsoDateTimeInterval } from '../internal/round'
 import {
-  AbstractDateSlots,
   PlainDateBranding,
   PlainDateSlots,
   createPlainDateSlots,
@@ -466,7 +468,9 @@ export const diffDays = diffPlainDays as (
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (slots: AbstractDateSlots) => IsoDateTimeInterval,
+  computeInterval: (
+    slots: CalendarDateFields & { calendar: InternalCalendar },
+  ) => IsoDateTimeInterval,
   record0: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {
@@ -483,7 +487,9 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: AbstractDateSlots) => CalendarDateFields,
+  computeAlignment: (
+    slots: CalendarDateFields & { calendar: InternalCalendar },
+  ) => CalendarDateFields,
   dayDelta = 0,
 ): (record: Record) => Record {
   return (record0) => {
@@ -495,7 +501,9 @@ function aligned(
   }
 }
 
-function createRecordFromDateFields(isoDate: AbstractDateSlots): Record {
+function createRecordFromDateFields(
+  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+): Record {
   checkIsoDateInBounds(isoDate)
   return createPlainDateSlots(isoDate, isoDate.calendar)
 }

@@ -7,6 +7,7 @@ import {
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { isoDateTimeToEpochNano } from '../internal/epochMath'
+import { type InternalCalendar } from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
@@ -21,11 +22,7 @@ import {
   isZonedEpochSlots,
 } from '../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../internal/round'
-import {
-  AbstractDateSlots,
-  ZonedDateTimeSlots,
-  extractEpochNano,
-} from '../internal/slots'
+import { ZonedDateTimeSlots, extractEpochNano } from '../internal/slots'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../internal/utils'
@@ -95,7 +92,9 @@ function diffZonedLargeUnits(
 }
 
 // TODO: split this instead of using 'hour' conditional
-function diffPlainLargeUnits<S extends AbstractDateSlots>(
+function diffPlainLargeUnits<
+  S extends CalendarDateFields & { calendar: InternalCalendar },
+>(
   unit: Unit,
   record0: S,
   record1: S,

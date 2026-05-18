@@ -5,12 +5,16 @@ import {
   isoDateToEpochNano,
 } from '../internal/epochMath'
 import {
+  type InternalCalendar,
   getInternalCalendarId,
   isoCalendar,
 } from '../internal/externalCalendar'
-import { TimeFields } from '../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
-import { AbstractDateSlots, AbstractDateTimeSlots } from '../internal/slots'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
@@ -110,7 +114,9 @@ const durationSlotDefaults = {
 
 export function expectPlainDateEquals(
   pd: PlainDateFns.Record,
-  slots: Partial<AbstractDateSlots> & { calendarId?: string },
+  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
+    calendarId?: string
+  },
 ): void {
   assertCalendarId(pd.calendar, slots)
   expectPropsEqualStrict(pd, {
@@ -122,7 +128,9 @@ export function expectPlainDateEquals(
 
 export function expectPlainYearMonthEquals(
   pym: PlainYearMonthFns.Record,
-  slots: Partial<AbstractDateSlots> & { calendarId?: string },
+  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
+    calendarId?: string
+  },
 ): void {
   assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
@@ -135,7 +143,9 @@ export function expectPlainYearMonthEquals(
 
 export function expectPlainMonthDayEquals(
   pym: PlainMonthDayFns.Record,
-  slots: Partial<AbstractDateSlots> & { calendarId?: string },
+  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
+    calendarId?: string
+  },
 ): void {
   assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
@@ -148,7 +158,9 @@ export function expectPlainMonthDayEquals(
 
 export function expectPlainDateTimeEquals(
   pdt: PlainDateTimeFns.Record,
-  slots: Partial<AbstractDateTimeSlots> & { calendarId?: string },
+  slots: Partial<CalendarDateTimeFields & { calendar: InternalCalendar }> & {
+    calendarId?: string
+  },
 ): void {
   assertCalendarId(pdt.calendar, slots)
   expectPropsEqualStrict(pdt, {
@@ -177,9 +189,9 @@ export function expectZonedDateTimeEquals(
 }
 
 function normalizeCalendarSlots<T extends { calendarId?: string }>(
-  calendar: AbstractDateSlots['calendar'],
+  calendar: InternalCalendar,
   slots: T,
-): Omit<T, 'calendarId'> & { calendar: AbstractDateSlots['calendar'] } {
+): Omit<T, 'calendarId'> & { calendar: InternalCalendar } {
   const { calendarId: _, ...rest } = slots
   return {
     ...rest,
@@ -208,8 +220,8 @@ function normalizeZonedSlots(
 }
 
 function assertCalendarId(
-  calendar: AbstractDateSlots['calendar'],
-  slots: { calendar?: AbstractDateSlots['calendar']; calendarId?: string },
+  calendar: InternalCalendar,
+  slots: { calendar?: InternalCalendar; calendarId?: string },
 ): void {
   const expectedCalendarId =
     slots.calendarId ||

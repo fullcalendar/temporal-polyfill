@@ -11,6 +11,7 @@ import * as errorMessages from './errorMessages'
 import { type InternalCalendar, getInternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
+  CalendarDateTimeFields,
   CalendarYearMonthFields,
   TimeFields,
 } from './fieldTypes'
@@ -33,8 +34,6 @@ import { refineZonedFieldOptions } from './optionsFieldRefine'
 import { type ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
-  AbstractDateSlots,
-  AbstractDateTimeSlots,
   DurationSlots,
   InstantSlots,
   PlainDateSlots,
@@ -314,7 +313,7 @@ function parsePlainDateLike(s: string): DateTimeLikeOrganized {
 function finalizeDateLike(
   organized: DateTimeLikeOrganized,
   isoDateProjector?: (organized: DateTimeLikeOrganized) => DateOrganized,
-): AbstractDateSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   if (isoDateProjector && organized.calendarId === isoCalendarId) {
     // Full-date strings still go through the normal ParseISODateTime-style
     // validation. Only after that do PlainYearMonth/PlainMonthDay project the
@@ -425,7 +424,7 @@ function finalizeZonedDateTime(
 
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
-): AbstractDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
@@ -434,7 +433,9 @@ function finalizeDateTime(
   }
 }
 
-function finalizeDate(organized: DateOrganized): AbstractDateSlots {
+function finalizeDate(
+  organized: DateOrganized,
+): CalendarDateFields & { calendar: InternalCalendar } {
   checkIsoDateFields(organized)
   checkIsoDateInBounds(organized)
   return {

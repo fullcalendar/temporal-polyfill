@@ -21,13 +21,12 @@ import {
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
-import { DurationSlots } from './slots'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
-import { compareBigInts } from './utils'
+import { NumberSign, compareBigInts } from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  slots: DurationSlots,
+  slots: DurationFields & { sign: NumberSign },
   options: UnitName | DurationTotalOptions<RA>,
 ): number {
   const maxDurationUnit = getMaxDurationUnit(slots)

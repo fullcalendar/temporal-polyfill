@@ -1,4 +1,5 @@
 import { bigNanoInSec } from './bigNano'
+import { DurationFields } from './durationFields'
 import {
   checkDurationTimeUnit,
   checkDurationUnits,
@@ -42,16 +43,7 @@ import {
   roundTimeToNano,
   roundToMinute,
 } from './round'
-import {
-  DurationSlots,
-  InstantSlots,
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainMonthDaySlots,
-  PlainTimeSlots,
-  PlainYearMonthSlots,
-  ZonedDateTimeSlots,
-} from './slots'
+import { EpochAndZoneSlots } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
@@ -62,14 +54,14 @@ import {
   nanoInMinute,
   nanoInSec,
 } from './units'
-import { divModFloor, padNumber, padNumber2 } from './utils'
+import { NumberSign, divModFloor, padNumber, padNumber2 } from './utils'
 
 // High-level
 // -----------------------------------------------------------------------------
 
 export function formatInstantIso(
   refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
-  instantSlots: InstantSlots,
+  instantSlots: { epochNanoseconds: bigint },
   options?: InstantDisplayOptions,
 ): string {
   const [timeZoneArg, roundingMode, nanoInc, subsecDigits] =
@@ -93,7 +85,7 @@ export function formatInstantIso(
 }
 
 export function formatZonedDateTimeIso(
-  zonedDateTimeSlots0: ZonedDateTimeSlots,
+  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)
@@ -107,7 +99,7 @@ export function formatZonedDateTimeIso(
 }
 
 export function formatPlainDateTimeIso(
-  plainDateTimeSlots0: PlainDateTimeSlots,
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: InternalCalendar },
   options?: DateTimeDisplayOptions,
 ): string {
   const displayOptions = refineDateTimeDisplayOptions(options)
@@ -119,7 +111,7 @@ export function formatPlainDateTimeIso(
 }
 
 export function formatPlainDateIso(
-  plainDateSlots: PlainDateSlots,
+  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateIso(
@@ -130,7 +122,7 @@ export function formatPlainDateIso(
 }
 
 export function formatPlainYearMonthIso(
-  plainYearMonthSlots: PlainYearMonthSlots,
+  plainYearMonthSlots: CalendarDateFields & { calendar: InternalCalendar },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
@@ -142,7 +134,7 @@ export function formatPlainYearMonthIso(
 }
 
 export function formatPlainMonthDayIso(
-  plainMonthDaySlots: PlainMonthDaySlots,
+  plainMonthDaySlots: CalendarDateFields & { calendar: InternalCalendar },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
@@ -154,7 +146,7 @@ export function formatPlainMonthDayIso(
 }
 
 export function formatPlainTimeIso(
-  slots: PlainTimeSlots,
+  slots: TimeFields,
   options?: TimeDisplayOptions,
 ): string {
   const displayOptions = refineTimeDisplayOptions(options)
@@ -162,7 +154,7 @@ export function formatPlainTimeIso(
 }
 
 export function formatDurationIso(
-  slots: DurationSlots,
+  slots: DurationFields & { sign: NumberSign },
   options?: TimeDisplayOptions,
 ): string {
   const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(
@@ -317,7 +309,7 @@ function formatTimeIso(
 }
 
 function formatDurationSlots(
-  durationSlots: DurationSlots,
+  durationSlots: DurationFields & { sign: NumberSign },
   subsecDigits: SubsecDigits | undefined,
 ): string {
   const { sign } = durationSlots

@@ -97,6 +97,7 @@ export function constructPlainDateSlots(
 ): PlainDateSlots {
   const calendar = getInternalCalendar(refineCalendarId(calendarId))
   return createPlainDateSlots(
+    // TODO: break out into own function?
     checkIsoDateInBounds(
       checkIsoDateFields(
         mapProps(toInteger, {

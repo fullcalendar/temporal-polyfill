@@ -5,12 +5,15 @@ import {
   isoCalendar,
 } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
-import { TimeFields } from './fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { OffsetDisambig } from './optionsModel'
 import {
-  PlainDateSlots,
-  PlainDateTimeSlots,
+  EpochAndZoneSlots,
   ZonedDateTimeSlots,
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
@@ -25,7 +28,7 @@ import {
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime(
-  zonedDateTimeSlots: ZonedDateTimeSlots,
+  zonedDateTimeSlots: EpochAndZoneSlots & { calendar: InternalCalendar },
   plainTimeFields: TimeFields | undefined,
 ): ZonedDateTimeSlots {
   const { timeZone } = zonedDateTimeSlots
@@ -58,8 +61,8 @@ export function zonedDateTimeWithPlainTime(
 }
 
 export function zonedDateTimeWithPlainDate(
-  zonedDateTimeSlots: ZonedDateTimeSlots,
-  plainDateSlots: PlainDateSlots,
+  zonedDateTimeSlots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
 ): ZonedDateTimeSlots {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
@@ -84,8 +87,8 @@ export function zonedDateTimeWithPlainDate(
 Only used by funcApi
 */
 export function plainDateTimeWithPlainDate(
-  plainDateTimeSlots: PlainDateTimeSlots,
-  plainDateSlots: PlainDateSlots,
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
+  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
 ) {
   return createPlainDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),

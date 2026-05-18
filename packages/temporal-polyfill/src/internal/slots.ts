@@ -111,21 +111,10 @@ export function createDurationSlots(
 
 // -----------------------------------------------------------------------------
 
-export type BrandingSlots = { branding: string }
-
 export type EpochSlots = { epochNanoseconds: bigint }
 export type EpochAndZoneSlots = EpochSlots & { timeZone: TimeZoneImpl }
-export type ZonedEpochSlots = EpochAndZoneSlots & {
-  calendar: InternalCalendar
-}
 
-// without branding
-export type AbstractDateSlots = CalendarDateFields & {
-  calendar: InternalCalendar
-}
-export type AbstractDateTimeSlots = CalendarDateTimeFields & {
-  calendar: InternalCalendar
-}
+export type BrandingSlots = { branding: string }
 
 export type PlainDateSlots = CalendarDateFields & {
   calendar: InternalCalendar
@@ -141,7 +130,8 @@ export type PlainDateTimeSlots = CalendarDateTimeFields & {
   branding: typeof PlainDateTimeBranding
 }
 
-export type ZonedDateTimeSlots = ZonedEpochSlots & {
+export type ZonedDateTimeSlots = EpochAndZoneSlots & {
+  calendar: InternalCalendar
   branding: typeof ZonedDateTimeBranding
 }
 
@@ -167,6 +157,7 @@ export type InstantSlots = {
 
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------
+// TODO: move to mixins?
 
 /*
 Only used by funcApi

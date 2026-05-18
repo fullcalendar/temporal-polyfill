@@ -77,6 +77,7 @@ export function createSlotClass(
 // Utils
 // -----------------------------------------------------------------------------
 
+// TODO: best place for this?
 export function rejectInvalidBag<B>(bag: B): B {
   if (
     getSlots(bag) ||
@@ -96,6 +97,7 @@ export function rejectInvalidBag<B>(bag: B): B {
 // Intentionally short function name for minification
 function dbg(instance: any, slots: any, formatSlots: (slots: any) => string) {
   // NOT minified?
+  // TODO: do this once at top-level?
   if (dbg.name === 'dbg') {
     Object.defineProperty(instance, '_str_', {
       value: formatSlots(slots),

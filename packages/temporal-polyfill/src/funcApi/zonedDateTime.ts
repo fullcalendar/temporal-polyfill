@@ -12,7 +12,10 @@ import {
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -53,7 +56,6 @@ import {
   roundZonedEpochToInterval,
 } from '../internal/round'
 import {
-  AbstractDateTimeSlots,
   ZonedDateTimeBranding,
   ZonedDateTimeSlots,
   createZonedDateTimeSlots,
@@ -613,7 +615,9 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (record: AbstractDateTimeSlots) => CalendarDateTimeFields,
+  computeAlignment: (
+    record: CalendarDateTimeFields & { calendar: InternalCalendar },
+  ) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: Record) => Record {
   return (record) => {
@@ -629,7 +633,9 @@ function aligned(
 
 function alignedTime(
   computeAlignment: (time: TimeFields) => TimeFields,
-): (slots: AbstractDateTimeSlots) => CalendarDateTimeFields {
+): (
+  slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+) => CalendarDateTimeFields {
   return (slots) => combineDateAndTime(slots, computeAlignment(slots))
 }
 

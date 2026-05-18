@@ -14,6 +14,7 @@ import {
   nanoToDurationTimeFields,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { type InternalCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -33,12 +34,11 @@ import {
   moveMarkerToEpochNano,
 } from './relativeMath'
 import {
-  AbstractDateTimeSlots,
+  EpochAndZoneSlots,
   InstantSlots,
   PlainDateTimeSlots,
   PlainTimeSlots,
   ZonedDateTimeSlots,
-  ZonedEpochSlots,
   createInstantSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
@@ -69,7 +69,7 @@ import { NumberSign, compareBigInts, divFloorBigInt, divTrunc } from './utils'
 // -----------------------------------------------------------------------------
 
 export function roundInstant(
-  instantSlots: InstantSlots,
+  instantSlots: { epochNanoseconds: bigint },
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): InstantSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
@@ -93,7 +93,7 @@ export function roundInstant(
 ONLY day & time
 */
 export function roundZonedDateTime(
-  slots: ZonedDateTimeSlots,
+  slots: ZonedDateTimeSlots, // might get returned :(
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeSlots {
   let { epochNanoseconds } = slots
@@ -148,7 +148,7 @@ export function roundZonedDateTime(
 ONLY day & time
 */
 export function roundPlainDateTime(
-  slots: PlainDateTimeSlots,
+  slots: CalendarDateTimeFields & { calendar: InternalCalendar },
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
@@ -163,7 +163,7 @@ export function roundPlainDateTime(
 }
 
 export function roundPlainTime(
-  slots: PlainTimeSlots,
+  slots: TimeFields,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeSlots {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
@@ -181,7 +181,9 @@ export function roundPlainTime(
 // Zoned Utils
 // -----------------------------------------------------------------------------
 
-export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
+export function computeZonedHoursInDay(
+  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+): number {
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots, timeZone)
   const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
@@ -203,7 +205,7 @@ export function computeZonedHoursInDay(slots: ZonedDateTimeSlots): number {
 }
 
 export function computeZonedStartOfDay(
-  slots: ZonedDateTimeSlots,
+  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
 ): ZonedDateTimeSlots {
   const { timeZone, calendar } = slots
   const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
@@ -219,9 +221,11 @@ export function computeZonedStartOfDay(
 For year/month/week/day only
 */
 export function alignZonedEpoch(
-  computeAlignment: (slots: AbstractDateTimeSlots) => CalendarDateTimeFields,
+  computeAlignment: (
+    slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+  ) => CalendarDateTimeFields,
   timeZoneImpl: TimeZoneImpl,
-  slots: ZonedDateTimeSlots,
+  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
 ): bigint {
   const isoDateTime = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const isoFields1 = computeAlignment(isoDateTime)
@@ -233,9 +237,11 @@ export function alignZonedEpoch(
 For year/month/week/day only
 */
 export function roundZonedEpochToInterval(
-  computeInterval: (slots: AbstractDateTimeSlots) => IsoDateTimeInterval,
+  computeInterval: (
+    slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+  ) => IsoDateTimeInterval,
   timeZoneImpl: TimeZoneImpl,
-  slots: ZonedEpochSlots,
+  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
   roundingMode: RoundingMode,
 ): bigint {
   const isoSlots = zonedEpochSlotsToIso(slots, timeZoneImpl)

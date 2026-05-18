@@ -10,29 +10,28 @@ import {
 } from '../internal/calendarDerived'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import {
+  type InternalCalendar,
   getInternalCalendarId,
   isoCalendar,
 } from '../internal/externalCalendar'
 import { timeFieldNamesAsc } from '../internal/fieldNames'
+import { CalendarDateFields } from '../internal/fieldTypes'
 import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
 } from '../internal/isoCalendarMath'
-import {
-  AbstractDateSlots,
-  getEpochMilli,
-  getEpochNano,
-} from '../internal/slots'
+import { getEpochMilli, getEpochNano } from '../internal/slots'
 import { zipPropsGenerator } from '../internal/utils'
 
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
 
-const day = (slots: AbstractDateSlots) =>
+const day = (slots: CalendarDateFields & { calendar: InternalCalendar }) =>
   computeCalendarDateFields(slots.calendar, slots).day
 
-const monthCode = (slots: AbstractDateSlots) =>
-  computeCalendarMonthCode(slots.calendar, slots)
+const monthCode = (
+  slots: CalendarDateFields & { calendar: InternalCalendar },
+) => computeCalendarMonthCode(slots.calendar, slots)
 
 const yearMonthFieldGetters = {
   era(slots: any) {

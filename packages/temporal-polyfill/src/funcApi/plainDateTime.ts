@@ -13,9 +13,13 @@ import {
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes, getCommonCalendar } from '../internal/diff'
 import { epochNanoToIso, isoDateTimeToEpochNano } from '../internal/epochMath'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  type InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
 import {
+  CalendarDateFields,
   CalendarDateTimeFields,
   DateTimeFields,
   DateTimeLikeObject,
@@ -46,7 +50,6 @@ import {
   roundPlainDateTime,
 } from '../internal/round'
 import {
-  AbstractDateSlots,
   PlainDateTimeBranding,
   PlainDateTimeSlots,
   createPlainDateSlots,
@@ -620,7 +623,9 @@ function moveByTimeUnit(
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (slots: AbstractDateSlots) => IsoDateTimeInterval,
+  computeInterval: (
+    slots: CalendarDateFields & { calendar: InternalCalendar },
+  ) => IsoDateTimeInterval,
   record: Record,
   options?: RoundingModeName | RoundingMathOptions,
 ): Record {

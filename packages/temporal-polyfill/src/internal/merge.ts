@@ -32,6 +32,8 @@ import {
   zonedDateTimeFieldRefiners,
 } from './fieldRefine'
 import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
   DateFields,
   DateTimeFields,
   MonthDayFields,
@@ -50,6 +52,7 @@ import {
 } from './optionsModel'
 import {
   DurationSlots,
+  EpochAndZoneSlots,
   PlainDateSlots,
   PlainDateTimeSlots,
   PlainMonthDaySlots,
@@ -136,7 +139,7 @@ function spliceFields(
 // -----------------------------------------------------------------------------
 
 export function mergeZonedDateTimeFields(
-  zonedDateTimeSlots: ZonedDateTimeSlots,
+  zonedDateTimeSlots: EpochAndZoneSlots & { calendar: InternalCalendar },
   modFields: Partial<DateTimeFields>,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeSlots {
@@ -218,7 +221,7 @@ export function mergeZonedDateTimeFields(
 }
 
 export function mergePlainDateTimeFields(
-  plainDateTimeSlots: PlainDateTimeSlots,
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
   modFields: Partial<DateTimeFields>,
   options?: OverflowOptions,
 ): PlainDateTimeSlots {
@@ -280,7 +283,7 @@ export function mergePlainDateTimeFields(
 }
 
 export function mergePlainDateFields(
-  plainDateSlots: PlainDateSlots,
+  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
   modFields: Partial<DateFields>,
   options?: OverflowOptions,
 ): PlainDateSlots {
@@ -315,7 +318,7 @@ export function mergePlainDateFields(
 }
 
 export function mergePlainYearMonthFields(
-  plainYearMonthSlots: PlainYearMonthSlots,
+  plainYearMonthSlots: CalendarDateFields & { calendar: InternalCalendar },
   modFields: Partial<YearMonthFields>,
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
@@ -349,7 +352,7 @@ export function mergePlainYearMonthFields(
 }
 
 export function mergePlainMonthDayFields(
-  plainMonthDaySlots: PlainMonthDaySlots,
+  plainMonthDaySlots: CalendarDateFields & { calendar: InternalCalendar },
   modFields: Partial<MonthDayFields>,
   options?: OverflowOptions,
 ): PlainMonthDaySlots {
@@ -391,7 +394,7 @@ export function mergePlainTimeFields(
 }
 
 export function mergeDurationFields(
-  slots: DurationSlots,
+  slots: DurationFields,
   fields: Partial<DurationFields>,
 ): DurationSlots {
   return createDurationSlots(mergeDurationBag(slots, fields))

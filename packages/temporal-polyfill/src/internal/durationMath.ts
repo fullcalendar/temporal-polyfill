@@ -41,8 +41,8 @@ const maxDurationSeconds = 2 ** 53
 export function addDurations<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
   doSubtract: boolean,
-  slots: DurationSlots,
-  otherSlots: DurationSlots,
+  slots: DurationFields,
+  otherSlots: DurationFields,
   options?: RelativeToOptions<RA>,
 ): DurationSlots {
   const normalOptions = normalizeOptions(options)
@@ -110,7 +110,7 @@ function addDayTimeDurations(
 
 export function roundDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  slots: DurationSlots,
+  slots: DurationSlots, // could get returned :(
   options: DurationRoundingOptions<RA>,
 ): DurationSlots {
   const durationLargestUnit = getMaxDurationUnit(slots)
@@ -193,14 +193,16 @@ export function roundDuration<RA>(
 // Sign / Abs / Blank
 // -----------------------------------------------------------------------------
 
-export function absDuration(slots: DurationSlots): DurationSlots {
+export function absDuration(
+  slots: DurationSlots, // could get returned :(
+): DurationSlots {
   if (slots.sign === -1) {
     return negateDuration(slots)
   }
   return slots
 }
 
-export function negateDuration(slots: DurationSlots): DurationSlots {
+export function negateDuration(slots: DurationFields): DurationSlots {
   return createDurationSlots(negateDurationFields(slots))
 }
 

@@ -33,7 +33,7 @@ import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
-  DurationSlots,
+  EpochAndZoneSlots,
   EpochSlots,
   InstantSlots,
   PlainDateSlots,
@@ -41,7 +41,6 @@ import {
   PlainTimeSlots,
   PlainYearMonthSlots,
   ZonedDateTimeSlots,
-  ZonedEpochSlots,
   createInstantSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
@@ -58,15 +57,15 @@ import { TimeZoneImpl } from './timeZoneImpl'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'
 import { Unit, milliInDay } from './units'
-import { clampEntity } from './utils'
+import { NumberSign, clampEntity } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
 
 export function moveInstant(
   doSubtract: boolean,
-  instantSlots: InstantSlots,
-  durationSlots: DurationSlots,
+  instantSlots: { epochNanoseconds: bigint },
+  durationSlots: DurationFields,
 ): InstantSlots {
   return createInstantSlots(
     moveEpochNano(
@@ -78,8 +77,8 @@ export function moveInstant(
 
 export function moveZonedDateTime(
   doSubtract: boolean,
-  zonedDateTimeSlots: ZonedDateTimeSlots,
-  durationSlots: DurationSlots,
+  zonedDateTimeSlots: ZonedDateTimeSlots, // could be returned :(
+  durationSlots: DurationFields,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedDateTimeSlots {
   return {
@@ -96,8 +95,8 @@ export function moveZonedDateTime(
 
 export function movePlainDateTime(
   doSubtract: boolean,
-  plainDateTimeSlots: PlainDateTimeSlots,
-  durationSlots: DurationSlots,
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
+  durationSlots: DurationFields,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): PlainDateTimeSlots {
   const { calendar } = plainDateTimeSlots
@@ -114,8 +113,8 @@ export function movePlainDateTime(
 
 export function movePlainDate(
   doSubtract: boolean,
-  plainDateSlots: PlainDateSlots,
-  durationSlots: DurationSlots,
+  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
+  durationSlots: DurationFields,
   options?: OverflowOptions,
 ): PlainDateSlots {
   const { calendar } = plainDateSlots
@@ -132,8 +131,8 @@ export function movePlainDate(
 
 export function movePlainYearMonth(
   doSubtract: boolean,
-  plainYearMonthSlots: PlainYearMonthSlots,
-  durationSlots: DurationSlots,
+  plainYearMonthSlots: CalendarDateFields & { calendar: InternalCalendar },
+  durationSlots: DurationFields & { sign: NumberSign },
   options?: OverflowOptions,
 ): PlainYearMonthSlots {
   /*
@@ -172,7 +171,7 @@ export function movePlainYearMonth(
 
 export function movePlainTime(
   doSubtract: boolean,
-  slots: PlainTimeSlots,
+  slots: TimeFields,
   durationSlots: DurationFields,
 ): PlainTimeSlots {
   return createPlainTimeSlots(
@@ -206,7 +205,7 @@ through keeps repeated offset/transition work on one memoized implementation.
 export function moveZonedEpochs(
   timeZoneImpl: TimeZoneImpl,
   calendar: InternalCalendar,
-  slots: ZonedEpochSlots,
+  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
   durationFields: DurationFields,
   options?: OverflowOptions,
 ): EpochSlots {
