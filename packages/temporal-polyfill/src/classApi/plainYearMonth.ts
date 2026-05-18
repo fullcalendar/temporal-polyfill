@@ -1,5 +1,5 @@
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
-import { constructPlainYearMonthSlots } from '../internal/construct'
+import { constructYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
@@ -41,7 +41,7 @@ export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    constructPlainYearMonthSlots,
+    constructYearMonthSlots,
     formatPlainYearMonthIso,
     {
       ...calendarIdGetters,

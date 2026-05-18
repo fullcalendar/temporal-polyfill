@@ -1,6 +1,6 @@
 import { refineCalendarId } from '../internal/calendarId'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
-import { constructPlainDateSlots } from '../internal/construct'
+import { constructDateSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -106,7 +106,7 @@ export type ToZonedDateTimeOptions = {
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructPlainDateSlots as (
+export const create = constructDateSlots as (
   isoYear: number,
   isoMonth: number,
   isoDay: number,

@@ -1,5 +1,5 @@
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
-import { constructPlainDateSlots } from '../internal/construct'
+import { constructDateSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -70,7 +70,7 @@ export type PlainDateArg = PlainDate | DateLikeObject | string
 
 export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
-  constructPlainDateSlots,
+  constructDateSlots,
   formatPlainDateIso,
   {
     ...calendarIdGetters,

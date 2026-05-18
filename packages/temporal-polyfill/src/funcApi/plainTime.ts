@@ -1,5 +1,5 @@
 import { compareTimeFields, plainTimesEqual } from '../internal/compare'
-import { constructPlainTimeSlots } from '../internal/construct'
+import { constructTimeSlots } from '../internal/construct'
 import { plainTimeToZonedDateTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
@@ -45,7 +45,7 @@ export type ToZonedDateTimeOptions = {
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructPlainTimeSlots as (
+export const create = constructTimeSlots as (
   hour?: number,
   minute?: number,
   second?: number,

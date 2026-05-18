@@ -1,5 +1,5 @@
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
-import { constructPlainYearMonthSlots } from '../internal/construct'
+import { constructYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
@@ -52,7 +52,7 @@ export type ToStringOptions = CalendarDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructPlainYearMonthSlots as (
+export const create = constructYearMonthSlots as (
   isoYear: number,
   isoMonth: number,
   calendar?: string,

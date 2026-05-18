@@ -1,7 +1,7 @@
 import { refineCalendarId } from '../internal/calendarId'
 import { toStrictInteger } from '../internal/cast'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
-import { constructZonedDateTimeSlots } from '../internal/construct'
+import { constructZonedEpochNanoSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -152,7 +152,7 @@ export type ToStringOptions = ZonedDateTimeDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructZonedDateTimeSlots as (
+export const create = constructZonedEpochNanoSlots as (
   epochNanoseconds: bigint,
   timeZoneId: string,
   calendar?: string,

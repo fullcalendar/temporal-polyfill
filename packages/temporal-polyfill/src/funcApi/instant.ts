@@ -1,7 +1,7 @@
 import { refineCalendarId } from '../internal/calendarId'
 import { requireObjectLike } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
-import { constructInstantSlots } from '../internal/construct'
+import { constructEpochNanoSlots } from '../internal/construct'
 import {
   epochMicroToInstant,
   epochMilliToInstant,
@@ -50,7 +50,7 @@ export type ToZonedDateTimeOptions = {
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructInstantSlots as (
+export const create = constructEpochNanoSlots as (
   epochNanoseconds: bigint,
 ) => Record
 

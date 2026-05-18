@@ -1,5 +1,5 @@
 import { plainMonthDaysEqual } from '../internal/compare'
-import { constructPlainMonthDaySlots } from '../internal/construct'
+import { constructMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
 import {
@@ -39,7 +39,7 @@ export type ToStringOptions = CalendarDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructPlainMonthDaySlots as (
+export const create = constructMonthDaySlots as (
   isoMonth: number,
   isoDay: number,
   calendar?: string,

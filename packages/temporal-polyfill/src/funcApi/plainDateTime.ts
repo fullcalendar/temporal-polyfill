@@ -4,7 +4,7 @@ import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../internal/compare'
-import { constructPlainDateTimeSlots } from '../internal/construct'
+import { constructDateTimeSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -138,7 +138,7 @@ export type ToStringOptions = DateTimeDisplayOptions
 // Creation / Parsing
 // -----------------------------------------------------------------------------
 
-export const create = constructPlainDateTimeSlots as (
+export const create = constructDateTimeSlots as (
   isoYear: number,
   isoMonth: number,
   isoDay: number,

@@ -35,11 +35,11 @@ import { refineTimeZoneId } from './timeZoneId'
 import { queryTimeZone } from './timeZoneImpl'
 import { NumberSign, mapProps, zipPropsDesc } from './utils'
 
-export function constructInstantSlots(epochNano: bigint): EpochNanoFields {
+export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
   return createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
 }
 
-export function constructZonedDateTimeSlots(
+export function constructZonedEpochNanoSlots(
   epochNano: bigint,
   timeZoneId: string,
   calendarId = isoCalendarId,
@@ -51,7 +51,7 @@ export function constructZonedDateTimeSlots(
   )
 }
 
-export function constructPlainDateTimeSlots(
+export function constructDateTimeSlots(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
@@ -88,7 +88,7 @@ export function constructPlainDateTimeSlots(
   )
 }
 
-export function constructPlainDateSlots(
+export function constructDateSlots(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
@@ -96,7 +96,6 @@ export function constructPlainDateSlots(
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const calendar = getInternalCalendar(refineCalendarId(calendarId))
   return createDateSlots(
-    // TODO: break out into own function?
     checkIsoDateInBounds(
       checkIsoDateFields(
         mapProps(toInteger, {
@@ -110,7 +109,7 @@ export function constructPlainDateSlots(
   )
 }
 
-export function constructPlainYearMonthSlots(
+export function constructYearMonthSlots(
   isoYear: number,
   isoMonth: number,
   calendarId = isoCalendarId,
@@ -133,7 +132,7 @@ export function constructPlainYearMonthSlots(
   )
 }
 
-export function constructPlainMonthDaySlots(
+export function constructMonthDaySlots(
   isoMonth: number,
   isoDay: number,
   calendarId = isoCalendarId,
@@ -156,7 +155,7 @@ export function constructPlainMonthDaySlots(
   )
 }
 
-export function constructPlainTimeSlots(
+export function constructTimeSlots(
   hour = 0,
   minute = 0,
   second = 0,

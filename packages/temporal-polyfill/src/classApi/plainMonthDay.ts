@@ -1,5 +1,5 @@
 import { plainMonthDaysEqual } from '../internal/compare'
-import { constructPlainMonthDaySlots } from '../internal/construct'
+import { constructMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
 import {
@@ -33,7 +33,7 @@ export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
-    constructPlainMonthDaySlots,
+    constructMonthDaySlots,
     formatPlainMonthDayIso,
     {
       ...calendarIdGetters,

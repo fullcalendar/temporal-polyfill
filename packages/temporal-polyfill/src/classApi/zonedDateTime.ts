@@ -1,5 +1,5 @@
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
-import { constructZonedDateTimeSlots } from '../internal/construct'
+import { constructZonedEpochNanoSlots } from '../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -82,7 +82,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
-  constructZonedDateTimeSlots,
+  constructZonedEpochNanoSlots,
   formatZonedDateTimeIso,
   {
     ...epochGetters,

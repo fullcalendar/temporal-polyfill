@@ -1,5 +1,5 @@
 import { compareTimeFields, plainTimesEqual } from '../internal/compare'
-import { constructPlainTimeSlots } from '../internal/construct'
+import { constructTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
@@ -44,7 +44,7 @@ export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 
 export const [PlainTime, createPlainTime] = createSlotClass(
   PlainTimeBranding,
-  constructPlainTimeSlots,
+  constructTimeSlots,
   formatPlainTimeIso,
   timeGetters,
   {

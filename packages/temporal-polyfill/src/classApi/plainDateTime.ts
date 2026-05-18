@@ -2,7 +2,7 @@ import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../internal/compare'
-import { constructPlainDateTimeSlots } from '../internal/construct'
+import { constructDateTimeSlots } from '../internal/construct'
 import {
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
@@ -83,7 +83,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  constructPlainDateTimeSlots,
+  constructDateTimeSlots,
   formatPlainDateTimeIso,
   {
     ...calendarIdGetters,

@@ -1,7 +1,7 @@
 import { bigNanoInMilli } from '../internal/bigNano'
 import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
-import { constructInstantSlots } from '../internal/construct'
+import { constructEpochNanoSlots } from '../internal/construct'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -41,7 +41,7 @@ export type InstantArg = Instant | string
 
 export const [Instant, createInstant] = createSlotClass(
   InstantBranding,
-  constructInstantSlots,
+  constructEpochNanoSlots,
   bindArgs(formatInstantIso, refineTimeZoneArg),
   epochGetters,
   {
