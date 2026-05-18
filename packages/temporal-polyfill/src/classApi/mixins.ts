@@ -19,22 +19,23 @@ import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
 } from '../internal/isoCalendarMath'
-import { DurationSlots, getEpochMilli, getEpochNano } from '../internal/slots'
+import {
+  AbstractDateSlots,
+  DurationSlots,
+  getEpochMilli,
+  getEpochNano,
+} from '../internal/slots'
 import { zipPropsGenerator } from '../internal/utils'
 
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
 
-type CalendarGetterQuery = (slots: any) => any
-
-const day = (slots: any) => computeCalendarDateFields(slots.calendar, slots).day
-const monthCode = (slots: any) =>
+const day = (slots: AbstractDateSlots) =>
+  computeCalendarDateFields(slots.calendar, slots).day
+const monthCode = (slots: AbstractDateSlots) =>
   computeCalendarMonthCode(slots.calendar, slots)
 
-// Keep these query maps scoped to the Temporal classes that need them. A single
-// master lookup object would make every getter implementation reachable through
-// dynamic property access, which works against package consumers' tree-shaking.
-const yearMonthGetterQueries = {
+const yearMonthFieldGetters = {
   era(slots: any) {
     return computeCalendarEraFields(slots.calendar, slots).era
   },
@@ -44,6 +45,23 @@ const yearMonthGetterQueries = {
   year(slots: any) {
     return computeCalendarDateFields(slots.calendar, slots).year
   },
+  monthCode,
+  month(slots: any) {
+    return computeCalendarDateFields(slots.calendar, slots).month
+  },
+}
+
+export const dateFieldGetters = {
+  ...yearMonthFieldGetters,
+  day,
+}
+
+export const monthDayFieldGetters = {
+  monthCode,
+  day,
+}
+
+const yearMonthStatsGetters = {
   daysInMonth(slots: any) {
     return computeCalendarDaysInMonth(slots.calendar, slots)
   },
@@ -56,20 +74,10 @@ const yearMonthGetterQueries = {
   monthsInYear(slots: any) {
     return computeCalendarMonthsInYear(slots.calendar, slots)
   },
-  monthCode,
-  month(slots: any) {
-    return computeCalendarDateFields(slots.calendar, slots).month
-  },
 }
 
-const monthDayGetterQueries = {
-  monthCode,
-  day,
-}
-
-const dateGetterQueries = {
-  ...yearMonthGetterQueries,
-  day,
+const dateStatsGetters = {
+  ...yearMonthStatsGetters,
   weekOfYear(slots: any) {
     return slots.calendar === isoCalendar
       ? computeIsoWeekFields(slots).weekOfYear
@@ -89,26 +97,11 @@ const dateGetterQueries = {
   },
 }
 
-function createCalendarGetters<Q extends Record<string, CalendarGetterQuery>>(
-  queries: Q,
-): {
-  [P in keyof Q]: () => any
-} {
-  const methods = {} as any
-
-  for (const methodName in queries) {
-    const getter = queries[methodName]
-    methods[methodName] = function (this: any, slots: any) {
-      return getter(slots)
-    }
-  }
-
-  return methods
+export const dateGetters = { ...dateFieldGetters, ...dateStatsGetters }
+export const yearMonthGetters = {
+  ...yearMonthFieldGetters,
+  ...yearMonthStatsGetters,
 }
-
-export const dateGetters = createCalendarGetters(dateGetterQueries)
-export const yearMonthGetters = createCalendarGetters(yearMonthGetterQueries)
-export const monthDayGetters = createCalendarGetters(monthDayGetterQueries)
 export const calendarIdGetters = {
   calendarId(slots: any): string {
     return getInternalCalendarId(slots.calendar)

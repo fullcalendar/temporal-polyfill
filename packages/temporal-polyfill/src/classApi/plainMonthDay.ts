@@ -16,7 +16,7 @@ import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
 import { isObjectLike } from '../internal/utils'
 import { extractCalendarIdFromBag } from './calendarArg'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
-import { calendarIdGetters, monthDayGetters } from './mixins'
+import { calendarIdGetters, monthDayFieldGetters } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
 import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
 
@@ -30,7 +30,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
     formatPlainMonthDayIso,
     {
       ...calendarIdGetters,
-      ...monthDayGetters,
+      ...monthDayFieldGetters,
     },
     {
       with(

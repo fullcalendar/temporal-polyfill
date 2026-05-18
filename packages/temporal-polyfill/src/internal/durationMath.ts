@@ -214,6 +214,7 @@ export function negateDurationFields(fields: DurationFields): DurationFields {
   return res
 }
 
+// TODO: not worth it?
 export function getDurationBlank(slots: DurationSlots): boolean {
   return !slots.sign
 }
