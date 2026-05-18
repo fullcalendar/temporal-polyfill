@@ -34,11 +34,8 @@ import {
   moveMarkerToEpochNano,
 } from './relativeMath'
 import {
-  EpochAndZoneSlots,
-  InstantSlots,
-  PlainDateTimeSlots,
-  PlainTimeSlots,
-  ZonedDateTimeSlots,
+  EpochNanoFields,
+  ZonedEpochNanoFields,
   createInstantSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
@@ -69,9 +66,9 @@ import { NumberSign, compareBigInts, divFloorBigInt, divTrunc } from './utils'
 // -----------------------------------------------------------------------------
 
 export function roundInstant(
-  instantSlots: { epochNanoseconds: bigint },
+  instantSlots: EpochNanoFields,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
-): InstantSlots {
+): EpochNanoFields {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
     Unit.Hour,
@@ -93,9 +90,9 @@ export function roundInstant(
 ONLY day & time
 */
 export function roundZonedDateTime(
-  slots: ZonedDateTimeSlots, // might get returned :(
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar }, // might get returned :(
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   let { epochNanoseconds } = slots
   const { timeZone, calendar } = slots
   const [smallestUnit, roundingInc, roundingMode] =
@@ -150,7 +147,7 @@ ONLY day & time
 export function roundPlainDateTime(
   slots: CalendarDateTimeFields & { calendar: InternalCalendar },
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
-): PlainDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
   ) as [DayTimeUnit, number, RoundingMode]
@@ -165,7 +162,7 @@ export function roundPlainDateTime(
 export function roundPlainTime(
   slots: TimeFields,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
-): PlainTimeSlots {
+): TimeFields {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
     Unit.Hour,
@@ -182,7 +179,7 @@ export function roundPlainTime(
 // -----------------------------------------------------------------------------
 
 export function computeZonedHoursInDay(
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): number {
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots, timeZone)
@@ -205,8 +202,8 @@ export function computeZonedHoursInDay(
 }
 
 export function computeZonedStartOfDay(
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
-): ZonedDateTimeSlots {
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const { timeZone, calendar } = slots
   const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
   const epochNano1 = getStartOfDayInstantFor(
@@ -225,7 +222,7 @@ export function alignZonedEpoch(
     slots: CalendarDateTimeFields & { calendar: InternalCalendar },
   ) => CalendarDateTimeFields,
   timeZoneImpl: TimeZoneImpl,
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): bigint {
   const isoDateTime = zonedEpochSlotsToIso(slots, timeZoneImpl)
   const isoFields1 = computeAlignment(isoDateTime)
@@ -241,7 +238,7 @@ export function roundZonedEpochToInterval(
     slots: CalendarDateTimeFields & { calendar: InternalCalendar },
   ) => IsoDateTimeInterval,
   timeZoneImpl: TimeZoneImpl,
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   roundingMode: RoundingMode,
 ): bigint {
   const isoSlots = zonedEpochSlotsToIso(slots, timeZoneImpl)

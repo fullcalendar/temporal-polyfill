@@ -3,7 +3,8 @@ import { constructPlainTimeSlots } from '../internal/construct'
 import { plainTimeToZonedDateTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { TimeFields } from '../internal/fieldTypes'
+import { InternalCalendar } from '../internal/externalCalendar'
+import { CalendarDateFields, TimeFields } from '../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../internal/intlFormatPrep'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
@@ -17,11 +18,6 @@ import {
   TimeDisplayOptions,
 } from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
-import {
-  PlainDateSlots,
-  PlainTimeBranding,
-  PlainTimeSlots,
-} from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { TimeUnitName } from '../internal/units'
@@ -32,7 +28,7 @@ import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = PlainTimeSlots
+export type Record = TimeFields
 
 export type Fields = TimeFields
 export type FromFields = Partial<TimeFields>
@@ -65,17 +61,13 @@ export const fromFields = refinePlainTimeObjectLike as (
 
 export const fromString = parsePlainTime as (s: string) => Record
 
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === PlainTimeBranding
-}
-
 // Getters
 // -----------------------------------------------------------------------------
 
 export function getFields(record: Record): Fields {
   // PlainTime slots currently share the same time-field property names as the
-  // public field bag, but the slot record also carries internal branding.
-  // Return a fresh public bag so callers never observe slot-only metadata.
+  // public field bag. Return a fresh public bag so callers never observe
+  // future slot-only metadata.
   return {
     hour: record.hour,
     minute: record.minute,
@@ -139,7 +131,7 @@ export const compare = compareTimeFields as (
 // -----------------------------------------------------------------------------
 
 export const toZonedDateTime = bindArgs(
-  plainTimeToZonedDateTime<PlainDateSlots>,
+  plainTimeToZonedDateTime<CalendarDateFields & { calendar: InternalCalendar }>,
   refineTimeZoneId,
   identity,
 ) as (

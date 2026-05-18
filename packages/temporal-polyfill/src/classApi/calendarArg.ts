@@ -10,7 +10,7 @@ import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import { getSlots } from './slotClass'
+import { getBrandingAndSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type CalendarArg =
@@ -47,7 +47,7 @@ Returns a calendarId
 */
 export function refineCalendarArg(arg: CalendarArg): string {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
+    const slots = getBrandingAndSlots(arg)?.[1]
     if (!slots || !('calendar' in slots)) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))

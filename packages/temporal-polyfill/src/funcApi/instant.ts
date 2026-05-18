@@ -23,7 +23,7 @@ import {
 } from '../internal/optionsModel'
 import { roundInstant } from '../internal/round'
 import {
-  InstantBranding,
+  EpochNanoFields,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -37,17 +37,7 @@ import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof InstantBranding
-
-  /**
-   * @deprecated Use the epochNanoseconds() function instead.
-   */
-  readonly epochNanoseconds: bigint
-}
+export type Record = EpochNanoFields
 
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
@@ -81,10 +71,6 @@ export const fromEpochNanoseconds = epochNanoToInstant as (
 ) => Record
 
 export const fromString = parseInstant as (s: string) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === InstantBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

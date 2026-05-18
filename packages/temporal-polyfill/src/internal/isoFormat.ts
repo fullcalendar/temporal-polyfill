@@ -43,7 +43,7 @@ import {
   roundTimeToNano,
   roundToMinute,
 } from './round'
-import { EpochAndZoneSlots } from './slots'
+import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
@@ -61,7 +61,7 @@ import { NumberSign, divModFloor, padNumber, padNumber2 } from './utils'
 
 export function formatInstantIso(
   refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
-  instantSlots: { epochNanoseconds: bigint },
+  instantSlots: EpochNanoFields,
   options?: InstantDisplayOptions,
 ): string {
   const [timeZoneArg, roundingMode, nanoInc, subsecDigits] =
@@ -85,7 +85,7 @@ export function formatInstantIso(
 }
 
 export function formatZonedDateTimeIso(
-  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)

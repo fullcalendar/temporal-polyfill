@@ -9,9 +9,17 @@ import {
 } from '../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainDateTimes, getCommonCalendar } from '../internal/diff'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
 import { timeFieldDefaults } from '../internal/fieldNames'
-import { DateLikeObject, DateTimeLikeObject } from '../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  DateLikeObject,
+  DateTimeLikeObject,
+} from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { combineDateAndTime } from '../internal/fieldUtils'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -28,13 +36,10 @@ import {
 } from '../internal/optionsModel'
 import { roundPlainDateTime } from '../internal/round'
 import {
-  BrandingSlots,
   PlainDateBranding,
-  PlainDateSlots,
   PlainDateTimeBranding,
-  PlainDateTimeSlots,
   ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
@@ -63,7 +68,11 @@ import {
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
@@ -81,7 +90,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   },
   {
     with(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       mod: Partial<DateTimeFields>,
       options?: OverflowOptions,
     ): PlainDateTime {
@@ -90,7 +99,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     withCalendar(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       calendarArg: CalendarArg,
     ): PlainDateTime {
       return createPlainDateTime(
@@ -101,7 +110,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     withPlainTime(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       plainTimeArg?: PlainTimeArg,
     ): PlainDateTime {
       return createPlainDateTime(
@@ -113,7 +122,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     add(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): PlainDateTime {
@@ -122,7 +131,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     subtract(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): PlainDateTime {
@@ -131,7 +140,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     until(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       otherArg: PlainDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
@@ -142,7 +151,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     since(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       otherArg: PlainDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
@@ -153,16 +162,19 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
     },
     round(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
     ): PlainDateTime {
       return createPlainDateTime(roundPlainDateTime(slots, options))
     },
-    equals(slots: PlainDateTimeSlots, otherArg: PlainDateTimeArg): boolean {
+    equals(
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+      otherArg: PlainDateTimeArg,
+    ): boolean {
       return plainDateTimesEqual(slots, toPlainDateTimeSlots(otherArg))
     },
     toZonedDateTime(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       timeZoneArg: TimeZoneArg,
       options?: EpochDisambigOptions,
     ): ZonedDateTime {
@@ -174,14 +186,18 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
         ),
       )
     },
-    toPlainDate(slots: PlainDateTimeSlots): PlainDate {
+    toPlainDate(
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+    ): PlainDate {
       return createPlainDate(createPlainDateSlots(slots, slots.calendar))
     },
-    toPlainTime(slots: PlainDateTimeSlots): PlainTime {
+    toPlainTime(
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
+    ): PlainTime {
       return createPlainTime(createPlainTimeSlots(slots))
     },
     toLocaleString(
-      slots: PlainDateTimeSlots,
+      slots: CalendarDateTimeFields & { calendar: InternalCalendar },
       locales?: LocalesArg,
       options?: Intl.DateTimeFormatOptions,
     ) {
@@ -211,25 +227,36 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
 export function toPlainDateTimeSlots(
   arg: PlainDateTimeArg,
   options?: OverflowOptions,
-): PlainDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   if (isObjectLike(arg)) {
-    const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
+    const brandingAndSlots = getBrandingAndSlots(arg)
 
-    switch (slots.branding) {
-      case PlainDateTimeBranding:
-        refineOverflowOptions(options) // parse unused options
-        return slots as PlainDateTimeSlots
+    if (brandingAndSlots) {
+      const [branding, slots] = brandingAndSlots
+      switch (branding) {
+        case PlainDateTimeBranding:
+          refineOverflowOptions(options) // parse unused options
+          return slots as CalendarDateTimeFields & {
+            calendar: InternalCalendar
+          }
 
-      case PlainDateBranding:
-        refineOverflowOptions(options) // parse unused options
-        return createPlainDateTimeSlots(
-          combineDateAndTime(slots as PlainDateSlots, timeFieldDefaults),
-          (slots as PlainDateSlots).calendar,
-        )
+        case PlainDateBranding:
+          refineOverflowOptions(options) // parse unused options
+          return createPlainDateTimeSlots(
+            combineDateAndTime(
+              slots as CalendarDateFields & { calendar: InternalCalendar },
+              timeFieldDefaults,
+            ),
+            (slots as CalendarDateFields & { calendar: InternalCalendar })
+              .calendar,
+          )
 
-      case ZonedDateTimeBranding:
-        refineOverflowOptions(options) // parse unused options
-        return zonedDateTimeToPlainDateTime(slots as ZonedDateTimeSlots)
+        case ZonedDateTimeBranding:
+          refineOverflowOptions(options) // parse unused options
+          return zonedDateTimeToPlainDateTime(
+            slots as ZonedEpochNanoFields & { calendar: InternalCalendar },
+          )
+      }
     }
 
     const calendarId = getCalendarIdFromBag(arg as DateLikeObject)

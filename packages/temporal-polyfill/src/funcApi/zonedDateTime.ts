@@ -56,8 +56,7 @@ import {
   roundZonedEpochToInterval,
 } from '../internal/round'
 import {
-  ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createZonedDateTimeSlots,
   getEpochMicro,
   getEpochMilli,
@@ -139,7 +138,7 @@ import {
   computeYearInterval,
 } from './roundUtils'
 
-export type Record = ZonedDateTimeSlots
+export type Record = ZonedEpochNanoFields & { calendar: InternalCalendar }
 
 export type Fields = ZonedDateTimeFields
 export type FromFields = ZonedDateTimeLikeObject
@@ -177,10 +176,6 @@ export const fromString = parseZonedDateTime as (
   s: string,
   options?: AssignmentOptions,
 ) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === ZonedDateTimeBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

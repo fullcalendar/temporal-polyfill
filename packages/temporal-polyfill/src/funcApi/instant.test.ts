@@ -17,22 +17,6 @@ describe('create', () => {
   })
 })
 
-describe('isInstance', () => {
-  it('returns true for actual instance', () => {
-    const inst = InstantFns.create(1n)
-    expect(InstantFns.isInstance(inst)).toBe(true)
-  })
-
-  it('returns false for other type of instance', () => {
-    const dur = DurationFns.create()
-    expect(InstantFns.isInstance(dur)).toBe(false)
-  })
-
-  it('returns false for undefined', () => {
-    expect(InstantFns.isInstance(undefined)).toBe(false)
-  })
-})
-
 describe('fromString', () => {
   it('works', () => {
     const inst = InstantFns.fromString('2024-01-01T00:00:00+01:00')
@@ -196,7 +180,6 @@ describe('toZonedDateTimeISO', () => {
     const inst = InstantFns.create(1704063600000000001n)
     const zdt = InstantFns.toZonedDateTimeISO(inst, 'America/New_York')
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
-    expect(zdt.branding).toBe('ZonedDateTime')
     expect(zdt.timeZone.id).toBe('America/New_York')
     expect(getInternalCalendarId(zdt.calendar)).toBe('iso8601')
   })
@@ -210,7 +193,6 @@ describe('toZonedDateTime', () => {
       calendar: 'hebrew',
     })
     expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
-    expect(zdt.branding).toBe('ZonedDateTime')
     expect(zdt.timeZone.id).toBe('America/New_York')
     expect(getInternalCalendarId(zdt.calendar)).toBe('hebrew')
   })

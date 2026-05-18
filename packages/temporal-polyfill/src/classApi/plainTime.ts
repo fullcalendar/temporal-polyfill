@@ -3,7 +3,8 @@ import { constructPlainTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
-import { TimeFields } from '../internal/fieldTypes'
+import { InternalCalendar } from '../internal/externalCalendar'
+import { CalendarDateTimeFields, TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../internal/isoFormat'
 import { parsePlainTime } from '../internal/isoParse'
@@ -17,13 +18,10 @@ import {
 } from '../internal/optionsModel'
 import { roundPlainTime } from '../internal/round'
 import {
-  BrandingSlots,
   PlainDateTimeBranding,
-  PlainDateTimeSlots,
   PlainTimeBranding,
-  PlainTimeSlots,
   ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createPlainTimeSlots,
 } from '../internal/slots'
 import { TimeUnitName } from '../internal/units'
@@ -36,7 +34,11 @@ import {
 } from './duration'
 import { prepPlainTimeFormat } from './intlFormatConfig'
 import { timeGetters } from './mixins'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from './slotClass'
 
 export type PlainTime = TimeFields // and other getters/methods
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
@@ -49,7 +51,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
   {
     with(
       this: PlainTime,
-      _slots: PlainTimeSlots,
+      _slots: TimeFields,
       mod: Partial<TimeFields>,
       options?: OverflowOptions,
     ): PlainTime {
@@ -57,18 +59,18 @@ export const [PlainTime, createPlainTime] = createSlotClass(
         mergePlainTimeFields(this, rejectInvalidBag(mod), options),
       )
     },
-    add(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
+    add(slots: TimeFields, durationArg: DurationArg): PlainTime {
       return createPlainTime(
         movePlainTime(false, slots, toDurationSlots(durationArg)),
       )
     },
-    subtract(slots: PlainTimeSlots, durationArg: DurationArg): PlainTime {
+    subtract(slots: TimeFields, durationArg: DurationArg): PlainTime {
       return createPlainTime(
         movePlainTime(true, slots, toDurationSlots(durationArg)),
       )
     },
     until(
-      slots: PlainTimeSlots,
+      slots: TimeFields,
       otherArg: PlainTimeArg,
       options?: DiffOptions<TimeUnitName>,
     ): Duration {
@@ -77,7 +79,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       )
     },
     since(
-      slots: PlainTimeSlots,
+      slots: TimeFields,
       otherArg: PlainTimeArg,
       options?: DiffOptions<TimeUnitName>,
     ): Duration {
@@ -86,16 +88,16 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       )
     },
     round(
-      slots: PlainTimeSlots,
+      slots: TimeFields,
       options: TimeUnitName | RoundingOptions<TimeUnitName>,
     ): PlainTime {
       return createPlainTime(roundPlainTime(slots, options))
     },
-    equals(slots: PlainTimeSlots, other: PlainTimeArg): boolean {
+    equals(slots: TimeFields, other: PlainTimeArg): boolean {
       return plainTimesEqual(slots, toPlainTimeSlots(other))
     },
     toLocaleString(
-      slots: PlainTimeSlots,
+      slots: TimeFields,
       locales?: LocalesArg,
       options?: Intl.DateTimeFormatOptions,
     ): string {
@@ -119,22 +121,29 @@ export const [PlainTime, createPlainTime] = createSlotClass(
 export function toPlainTimeSlots(
   arg: PlainTimeArg,
   options?: OverflowOptions,
-): PlainTimeSlots {
+): TimeFields {
   if (isObjectLike(arg)) {
-    const slots = (getSlots(arg) || {}) as Partial<BrandingSlots>
+    const brandingAndSlots = getBrandingAndSlots(arg)
 
-    switch (slots.branding) {
-      case PlainTimeBranding:
-        refineOverflowOptions(options) // parse unused options
-        return slots as PlainTimeSlots
+    if (brandingAndSlots) {
+      const [branding, slots] = brandingAndSlots
+      switch (branding) {
+        case PlainTimeBranding:
+          refineOverflowOptions(options) // parse unused options
+          return slots as TimeFields
 
-      case PlainDateTimeBranding:
-        refineOverflowOptions(options) // parse unused options
-        return createPlainTimeSlots(slots as PlainDateTimeSlots)
+        case PlainDateTimeBranding:
+          refineOverflowOptions(options) // parse unused options
+          return createPlainTimeSlots(
+            slots as CalendarDateTimeFields & { calendar: InternalCalendar },
+          )
 
-      case ZonedDateTimeBranding:
-        refineOverflowOptions(options) // parse unused options
-        return zonedDateTimeToPlainTime(slots as ZonedDateTimeSlots)
+        case ZonedDateTimeBranding:
+          refineOverflowOptions(options) // parse unused options
+          return zonedDateTimeToPlainTime(
+            slots as ZonedEpochNanoFields & { calendar: InternalCalendar },
+          )
+      }
     }
 
     return refinePlainTimeObjectLike(arg as Partial<TimeFields>, options)

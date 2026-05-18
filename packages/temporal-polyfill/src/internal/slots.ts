@@ -24,9 +24,8 @@ export const DurationBranding = 'Duration' as const
 // Slot-creation helpers
 // -----------------------------------------------------------------------------
 
-export function createInstantSlots(epochNano: bigint): InstantSlots {
+export function createInstantSlots(epochNano: bigint): EpochNanoFields {
   return {
-    branding: InstantBranding,
     epochNanoseconds: epochNano,
   }
 }
@@ -35,10 +34,9 @@ export function createZonedDateTimeSlots(
   epochNano: bigint,
   timeZone: TimeZoneImpl,
   calendar?: InternalCalendar,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
-    branding: ZonedDateTimeBranding,
     calendar,
     timeZone,
     epochNanoseconds: epochNano,
@@ -48,10 +46,9 @@ export function createZonedDateTimeSlots(
 export function createPlainDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
   calendar?: InternalCalendar,
-): PlainDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
-    branding: PlainDateTimeBranding,
     calendar,
     // strange to use this, but does plucking in ascending order
     ...combineDateAndTime(isoDateTime, isoDateTime),
@@ -61,10 +58,9 @@ export function createPlainDateTimeSlots(
 export function createPlainDateSlots(
   isoDate: CalendarDateFields,
   calendar?: InternalCalendar,
-): PlainDateSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
-    branding: PlainDateBranding,
     calendar,
     ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
@@ -73,9 +69,8 @@ export function createPlainDateSlots(
 export function createPlainYearMonthSlots(
   isoDate: CalendarDateFields,
   calendar: InternalCalendar,
-): PlainYearMonthSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   return {
-    branding: PlainYearMonthBranding,
     calendar,
     ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
@@ -84,26 +79,23 @@ export function createPlainYearMonthSlots(
 export function createPlainMonthDaySlots(
   isoDate: CalendarDateFields,
   calendar: InternalCalendar,
-): PlainMonthDaySlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   return {
-    branding: PlainMonthDayBranding,
     calendar,
     ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
   }
 }
 
-export function createPlainTimeSlots(time: TimeFields): PlainTimeSlots {
+export function createPlainTimeSlots(time: TimeFields): TimeFields {
   return {
-    branding: PlainTimeBranding,
     ...pluckProps(timeFieldNamesAsc, time),
   }
 }
 
 export function createDurationSlots(
   durationFields: DurationFields,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   return {
-    branding: DurationBranding,
     sign: computeDurationSign(durationFields),
     ...pluckProps(durationFieldNamesAsc, durationFields),
   }
@@ -111,49 +103,8 @@ export function createDurationSlots(
 
 // -----------------------------------------------------------------------------
 
-export type EpochSlots = { epochNanoseconds: bigint }
-export type EpochAndZoneSlots = EpochSlots & { timeZone: TimeZoneImpl }
-
-export type BrandingSlots = { branding: string }
-
-export type PlainDateSlots = CalendarDateFields & {
-  calendar: InternalCalendar
-  branding: typeof PlainDateBranding
-}
-
-export type PlainTimeSlots = TimeFields & {
-  branding: typeof PlainTimeBranding
-}
-
-export type PlainDateTimeSlots = CalendarDateTimeFields & {
-  calendar: InternalCalendar
-  branding: typeof PlainDateTimeBranding
-}
-
-export type ZonedDateTimeSlots = EpochAndZoneSlots & {
-  calendar: InternalCalendar
-  branding: typeof ZonedDateTimeBranding
-}
-
-export type PlainMonthDaySlots = CalendarDateFields & {
-  calendar: InternalCalendar
-  branding: typeof PlainMonthDayBranding
-}
-
-export type PlainYearMonthSlots = CalendarDateFields & {
-  calendar: InternalCalendar
-  branding: typeof PlainYearMonthBranding
-}
-
-export type DurationSlots = DurationFields & {
-  branding: typeof DurationBranding
-  sign: NumberSign // computed data
-}
-
-export type InstantSlots = {
-  branding: typeof InstantBranding
-  epochNanoseconds: bigint
-}
+export type EpochNanoFields = { epochNanoseconds: bigint }
+export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZoneImpl }
 
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------
@@ -162,25 +113,25 @@ export type InstantSlots = {
 /*
 Only used by funcApi
 */
-export function getEpochSec(slots: EpochSlots): number {
+export function getEpochSec(slots: EpochNanoFields): number {
   return epochNanoToSec(slots.epochNanoseconds)
 }
 
-export function getEpochMilli(slots: EpochSlots): number {
+export function getEpochMilli(slots: EpochNanoFields): number {
   return epochNanoToMilli(slots.epochNanoseconds)
 }
 
 /*
 Only used by funcApi
 */
-export function getEpochMicro(slots: EpochSlots): bigint {
+export function getEpochMicro(slots: EpochNanoFields): bigint {
   return epochNanoToMicro(slots.epochNanoseconds)
 }
 
-export function getEpochNano(slots: EpochSlots): bigint {
+export function getEpochNano(slots: EpochNanoFields): bigint {
   return slots.epochNanoseconds
 }
 
-export function extractEpochNano(slots: EpochSlots): bigint {
+export function extractEpochNano(slots: EpochNanoFields): bigint {
   return slots.epochNanoseconds
 }

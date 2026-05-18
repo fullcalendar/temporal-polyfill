@@ -8,6 +8,7 @@ import {
   instantToZonedDateTime,
 } from '../internal/convert'
 import { diffInstants } from '../internal/diff'
+import { InternalCalendar } from '../internal/externalCalendar'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatInstantIso } from '../internal/isoFormat'
 import { parseInstant } from '../internal/isoParse'
@@ -15,10 +16,10 @@ import { moveInstant } from '../internal/move'
 import { DiffOptions, RoundingOptions } from '../internal/optionsModel'
 import { roundInstant } from '../internal/round'
 import {
+  EpochNanoFields,
   InstantBranding,
-  InstantSlots,
   ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createInstantSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
@@ -32,7 +33,7 @@ import {
 } from './duration'
 import { prepInstantFormat } from './intlFormatConfig'
 import { epochGetters } from './mixins'
-import { createSlotClass, getSlots } from './slotClass'
+import { createSlotClass, getBrandingAndSlots } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
@@ -45,18 +46,18 @@ export const [Instant, createInstant] = createSlotClass(
   bindArgs(formatInstantIso, refineTimeZoneArg),
   epochGetters,
   {
-    add(slots: InstantSlots, durationArg: DurationArg): Instant {
+    add(slots: EpochNanoFields, durationArg: DurationArg): Instant {
       return createInstant(
         moveInstant(false, slots, toDurationSlots(durationArg)),
       )
     },
-    subtract(slots: InstantSlots, durationArg: DurationArg): Instant {
+    subtract(slots: EpochNanoFields, durationArg: DurationArg): Instant {
       return createInstant(
         moveInstant(true, slots, toDurationSlots(durationArg)),
       )
     },
     until(
-      slots: InstantSlots,
+      slots: EpochNanoFields,
       otherArg: InstantArg,
       options?: DiffOptions<TimeUnitName>,
     ): Duration {
@@ -65,7 +66,7 @@ export const [Instant, createInstant] = createSlotClass(
       )
     },
     since(
-      slots: InstantSlots,
+      slots: EpochNanoFields,
       otherArg: InstantArg,
       options?: DiffOptions<TimeUnitName>,
     ): Duration {
@@ -74,16 +75,16 @@ export const [Instant, createInstant] = createSlotClass(
       )
     },
     round(
-      slots: InstantSlots,
+      slots: EpochNanoFields,
       options: TimeUnitName | RoundingOptions<TimeUnitName>,
     ): Instant {
       return createInstant(roundInstant(slots, options))
     },
-    equals(slots: InstantSlots, otherArg: InstantArg): boolean {
+    equals(slots: EpochNanoFields, otherArg: InstantArg): boolean {
       return instantsEqual(slots, toInstantSlots(otherArg))
     },
     toZonedDateTimeISO(
-      slots: InstantSlots,
+      slots: EpochNanoFields,
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
       return createZonedDateTime(
@@ -94,7 +95,7 @@ export const [Instant, createInstant] = createSlotClass(
       )
     },
     toLocaleString(
-      slots: InstantSlots,
+      slots: EpochNanoFields,
       locales?: LocalesArg,
       options?: Intl.DateTimeFormatOptions,
     ): string {
@@ -121,17 +122,19 @@ export const [Instant, createInstant] = createSlotClass(
 // Utils
 // -----------------------------------------------------------------------------
 
-export function toInstantSlots(arg: InstantArg): InstantSlots {
+export function toInstantSlots(arg: InstantArg): EpochNanoFields {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
-    if (slots) {
-      switch (slots.branding) {
+    const brandingAndSlots = getBrandingAndSlots(arg)
+    if (brandingAndSlots) {
+      const [branding, slots] = brandingAndSlots
+      switch (branding) {
         case InstantBranding:
-          return slots as InstantSlots
+          return slots as EpochNanoFields
 
         case ZonedDateTimeBranding:
           return createInstantSlots(
-            (slots as ZonedDateTimeSlots).epochNanoseconds,
+            (slots as ZonedEpochNanoFields & { calendar: InternalCalendar })
+              .epochNanoseconds,
           )
       }
     }

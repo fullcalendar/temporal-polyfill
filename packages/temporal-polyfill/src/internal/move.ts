@@ -33,14 +33,8 @@ import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
-  EpochAndZoneSlots,
-  EpochSlots,
-  InstantSlots,
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainTimeSlots,
-  PlainYearMonthSlots,
-  ZonedDateTimeSlots,
+  EpochNanoFields,
+  ZonedEpochNanoFields,
   createInstantSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
@@ -64,9 +58,9 @@ import { NumberSign, clampEntity } from './utils'
 
 export function moveInstant(
   doSubtract: boolean,
-  instantSlots: { epochNanoseconds: bigint },
+  instantSlots: EpochNanoFields,
   durationSlots: DurationFields,
-): InstantSlots {
+): EpochNanoFields {
   return createInstantSlots(
     moveEpochNano(
       instantSlots.epochNanoseconds,
@@ -77,10 +71,10 @@ export function moveInstant(
 
 export function moveZonedDateTime(
   doSubtract: boolean,
-  zonedDateTimeSlots: ZonedDateTimeSlots, // could be returned :(
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   durationSlots: DurationFields,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
@@ -98,7 +92,7 @@ export function movePlainDateTime(
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
   durationSlots: DurationFields,
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): PlainDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const { calendar } = plainDateTimeSlots
   return createPlainDateTimeSlots(
     moveDateTime(
@@ -116,7 +110,7 @@ export function movePlainDate(
   plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
   durationSlots: DurationFields,
   options?: OverflowOptions,
-): PlainDateSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   const { calendar } = plainDateSlots
   return createPlainDateSlots(
     moveDate(
@@ -134,7 +128,7 @@ export function movePlainYearMonth(
   plainYearMonthSlots: CalendarDateFields & { calendar: InternalCalendar },
   durationSlots: DurationFields & { sign: NumberSign },
   options?: OverflowOptions,
-): PlainYearMonthSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   /*
   PlainYearMonth has one awkward ordering rule: overflow must be read before
   rejecting units below months. Date arithmetic normally reads overflow inside
@@ -173,7 +167,7 @@ export function movePlainTime(
   doSubtract: boolean,
   slots: TimeFields,
   durationSlots: DurationFields,
-): PlainTimeSlots {
+): TimeFields {
   return createPlainTimeSlots(
     moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0],
   )
@@ -205,10 +199,10 @@ through keeps repeated offset/transition work on one memoized implementation.
 export function moveZonedEpochs(
   timeZoneImpl: TimeZoneImpl,
   calendar: InternalCalendar,
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   durationFields: DurationFields,
   options?: OverflowOptions,
-): EpochSlots {
+): EpochNanoFields {
   const timeOnlyNano = durationFieldsToBigNano(durationFields, Unit.Hour)
   let epochNano = slots.epochNanoseconds
 

@@ -15,6 +15,7 @@ import { timeFieldDefaults } from './fieldNames'
 import { type DateOptionsRefiner, type DateOptionsTuple } from './fieldRefine'
 import {
   CalendarDateFields,
+  CalendarDateTimeFields,
   DateFields,
   DayFields,
   TimeFields,
@@ -28,10 +29,6 @@ import {
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainMonthDaySlots,
-  PlainYearMonthSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainMonthDaySlots,
@@ -52,7 +49,7 @@ export function createPlainDateTimeFromRefinedFields(
   // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
   time: TimeFields | undefined = timeFieldDefaults,
   calendar: InternalCalendar,
-): PlainDateTimeSlots {
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   // Calendar/date pipelines and time pipelines resolve their own fields before
   // reaching this point. The only cross-field validation left is whether the
   // combined PlainDateTime is inside Temporal's supported ISO range.
@@ -65,7 +62,7 @@ export function createPlainDateFromFields(
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
   options?: OverflowOptions,
-): PlainDateSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   const prepared = prepareDateFields(calendar, fields)
 
   // The normal overflow path reads options at the same phase as the callback
@@ -81,7 +78,7 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
   calendar: InternalCalendar,
   fields: Partial<DateFields>,
   refineOptions: DateOptionsRefiner<T>,
-): [slots: PlainDateSlots, ...options: T] {
+): [slots: CalendarDateFields & { calendar: InternalCalendar }, ...options: T] {
   const prepared = prepareDateFields(calendar, fields)
 
   // Options are deliberately read after all observable calendar fields,
@@ -105,7 +102,7 @@ function createPlainDateFromPreparedFields(
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
-): PlainDateSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   // The tuple is private plumbing. Index reads keep the built output from
   // carrying internal-only property names while preserving the field-read phase
   // that happens before overflow options are observed.
@@ -173,7 +170,7 @@ export function createPlainYearMonthFromFields(
   calendar: InternalCalendar,
   fields: Partial<YearMonthFields>,
   options?: OverflowOptions,
-): PlainYearMonthSlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const eraOrigins = getCalendarEraOrigins(calendar)
@@ -210,7 +207,7 @@ export function createPlainMonthDayFromFields(
   calendar: InternalCalendar,
   fields: Partial<DateFields>, // guaranteed `day`
   options?: OverflowOptions,
-): PlainMonthDaySlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   const isIso = calendar === isoCalendar
   const eraOrigins = getCalendarEraOrigins(calendar)
 

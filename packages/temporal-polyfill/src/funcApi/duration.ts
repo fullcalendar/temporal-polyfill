@@ -18,7 +18,6 @@ import {
   RelativeToOptions,
   TimeDisplayOptions,
 } from '../internal/optionsModel'
-import { DurationBranding } from '../internal/slots'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity } from '../internal/utils'
@@ -27,11 +26,6 @@ import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = Readonly<DurationFields> & {
-  /**
-   * @deprecated Use the isInstance() function instead.
-   */
-  readonly branding: typeof DurationBranding
-
   readonly sign: NumberSign
 }
 
@@ -69,10 +63,6 @@ export const fromFields = refineDurationObjectLike as (
 ) => Record
 
 export const fromString = parseDuration as (s: string) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === DurationBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

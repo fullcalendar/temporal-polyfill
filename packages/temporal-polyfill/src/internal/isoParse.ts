@@ -34,14 +34,8 @@ import { refineZonedFieldOptions } from './optionsFieldRefine'
 import { type ZonedFieldOptions } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
-  DurationSlots,
-  InstantSlots,
-  PlainDateSlots,
-  PlainDateTimeSlots,
-  PlainMonthDaySlots,
-  PlainTimeSlots,
-  PlainYearMonthSlots,
-  ZonedDateTimeSlots,
+  EpochNanoFields,
+  ZonedEpochNanoFields,
   createDurationSlots,
   createInstantSlots,
   createPlainDateSlots,
@@ -66,6 +60,7 @@ import { getMatchingInstantFor, getStartOfDayInstantFor } from './timeZoneMath'
 import { nanoToGivenFields } from './unitMath'
 import { TimeUnit, Unit, nanoInSec, unitNanoMap } from './units'
 import {
+  NumberSign,
   createRegExp,
   divModFloor,
   fractionRegExpStr,
@@ -83,7 +78,7 @@ function throwFailedParse(s: string): never {
   throw new RangeError(errorMessages.failedParse(s))
 }
 
-export function parseInstant(s: string): InstantSlots {
+export function parseInstant(s: string): EpochNanoFields {
   // instead of 'requiring' like other types,
   // coerce, because there's no fromFields, so no need to differentiate param type
   s = toStringViaPrimitive(s)
@@ -137,7 +132,7 @@ export function parseRelativeToSlots(s: string): RelativeToSlots {
 export function parseZonedDateTime(
   s: string,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || !organized.timeZoneId) {
@@ -147,7 +142,9 @@ export function parseZonedDateTime(
   return finalizeZonedDateTime(organized as ZonedDateTimeOrganized, options)
 }
 
-export function parsePlainDateTime(s: string): PlainDateTimeSlots {
+export function parsePlainDateTime(
+  s: string,
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
@@ -158,12 +155,16 @@ export function parsePlainDateTime(s: string): PlainDateTimeSlots {
   return createPlainDateTimeSlots(slots, slots.calendar)
 }
 
-export function parsePlainDate(s: string): PlainDateSlots {
+export function parsePlainDate(
+  s: string,
+): CalendarDateFields & { calendar: InternalCalendar } {
   const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
   return createPlainDateSlots(slots, slots.calendar)
 }
 
-export function parsePlainYearMonth(s: string): PlainYearMonthSlots {
+export function parsePlainYearMonth(
+  s: string,
+): CalendarDateFields & { calendar: InternalCalendar } {
   const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
@@ -193,7 +194,9 @@ function requireIsoCalendar(organized: { calendarId: string }): void {
   }
 }
 
-export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
+export function parsePlainMonthDay(
+  s: string,
+): CalendarDateFields & { calendar: InternalCalendar } {
   const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {
@@ -235,7 +238,7 @@ export function parsePlainMonthDay(s: string): PlainMonthDaySlots {
   return createPlainMonthDaySlots(isoDate, calendar)
 }
 
-export function parsePlainTime(s: string): PlainTimeSlots {
+export function parsePlainTime(s: string): TimeFields {
   s = requireString(s)
 
   let organized: TimeFields | DateTimeLikeOrganized | undefined =
@@ -268,7 +271,9 @@ export function parsePlainTime(s: string): PlainTimeSlots {
   return createPlainTimeSlots(checkTimeFields(organized))
 }
 
-export function parseDuration(s: string): DurationSlots {
+export function parseDuration(
+  s: string,
+): DurationFields & { sign: NumberSign } {
   const parsed = parseDurationFields(requireString(s))
   if (!parsed) {
     throwFailedParse(s)
@@ -383,7 +388,7 @@ Unlike others, return slots
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../dist/fns/duration'
 import * as PlainMonthDayFns from '../../dist/fns/plainmonthday'
 import '../intl-calendars'
 import {
@@ -26,22 +25,6 @@ describe('create', () => {
       month: 6,
       day: 18,
     })
-  })
-})
-
-describe('isInstance', () => {
-  it('returns true for actual instance', () => {
-    const pmd = PlainMonthDayFns.create(6, 18)
-    expect(PlainMonthDayFns.isInstance(pmd)).toBe(true)
-  })
-
-  it('returns false for other type of instance', () => {
-    const dur = DurationFns.create()
-    expect(PlainMonthDayFns.isInstance(dur)).toBe(false)
-  })
-
-  it('returns false for undefined', () => {
-    expect(PlainMonthDayFns.isInstance(undefined)).toBe(false)
   })
 })
 

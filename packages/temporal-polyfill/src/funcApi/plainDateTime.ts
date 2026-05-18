@@ -50,8 +50,6 @@ import {
   roundPlainDateTime,
 } from '../internal/round'
 import {
-  PlainDateTimeBranding,
-  PlainDateTimeSlots,
   createPlainDateSlots,
   createPlainDateTimeSlots,
   createPlainTimeSlots,
@@ -125,7 +123,7 @@ import {
 } from './roundUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = PlainDateTimeSlots
+export type Record = CalendarDateTimeFields & { calendar: InternalCalendar }
 
 export type Fields = DateTimeFields
 export type FromFields = DateTimeLikeObject
@@ -163,10 +161,6 @@ export function fromFields(
 }
 
 export const fromString = parsePlainDateTime as (s: string) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === PlainDateTimeBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

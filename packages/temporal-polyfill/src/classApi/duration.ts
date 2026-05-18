@@ -11,8 +11,15 @@ import {
   negateDuration,
   roundDuration,
 } from '../internal/durationMath'
-import { getInternalCalendar } from '../internal/externalCalendar'
-import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
+import {
+  InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  ZonedDateTimeLikeObject,
+} from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { formatDurationIso } from '../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../internal/isoParse'
@@ -24,15 +31,11 @@ import {
 } from '../internal/optionsModel'
 import { RelativeToSlots } from '../internal/relativeMath'
 import {
-  BrandingSlots,
   DurationBranding,
-  DurationSlots,
   PlainDateBranding,
-  PlainDateSlots,
   PlainDateTimeBranding,
-  PlainDateTimeSlots,
   ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createPlainDateSlots,
 } from '../internal/slots'
 import { totalDuration } from '../internal/total'
@@ -42,7 +45,7 @@ import { getCalendarIdFromBag } from './calendarArg'
 import { durationFieldGetters } from './mixins'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
-import { createSlotClass, getSlots } from './slotClass'
+import { createSlotClass, getBrandingAndSlots } from './slotClass'
 import { refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTimeArg } from './zonedDateTime'
 
@@ -55,25 +58,28 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   formatDurationIso,
   {
     ...durationFieldGetters,
-    sign(slots: DurationSlots) {
+    sign(slots: DurationFields & { sign: NumberSign }) {
       return slots.sign
     },
-    blank(slots: DurationSlots) {
+    blank(slots: DurationFields & { sign: NumberSign }) {
       return !slots.sign
     },
   },
   {
-    with(slots: DurationSlots, mod: Partial<DurationFields>): Duration {
+    with(
+      slots: DurationFields & { sign: NumberSign },
+      mod: Partial<DurationFields>,
+    ): Duration {
       return createDuration(mergeDurationFields(slots, mod))
     },
-    negated(slots: DurationSlots): Duration {
+    negated(slots: DurationFields & { sign: NumberSign }): Duration {
       return createDuration(negateDuration(slots))
     },
-    abs(slots: DurationSlots): Duration {
+    abs(slots: DurationFields & { sign: NumberSign }): Duration {
       return createDuration(absDuration(slots))
     },
     add(
-      slots: DurationSlots,
+      slots: DurationFields & { sign: NumberSign },
       otherArg: DurationArg,
       options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
     ) {
@@ -88,7 +94,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       )
     },
     subtract(
-      slots: DurationSlots,
+      slots: DurationFields & { sign: NumberSign },
       otherArg: DurationArg,
       options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
     ) {
@@ -103,7 +109,7 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       )
     },
     round(
-      slots: DurationSlots,
+      slots: DurationFields & { sign: NumberSign },
       options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
     ): Duration {
       return createDuration(
@@ -111,14 +117,14 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
       )
     },
     total(
-      slots: DurationSlots,
+      slots: DurationFields & { sign: NumberSign },
       options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
     ): number {
       return totalDuration(refinePublicRelativeTo, slots, options)
     },
     toLocaleString(
       this: Duration,
-      slots: DurationSlots,
+      slots: DurationFields & { sign: NumberSign },
       locales?: LocalesArg,
       options?: any,
     ): string {
@@ -149,12 +155,15 @@ export const [Duration, createDuration, getDurationSlots] = createSlotClass(
 // Utils
 // -----------------------------------------------------------------------------
 
-export function toDurationSlots(arg: DurationArg): DurationSlots {
+export function toDurationSlots(
+  arg: DurationArg,
+): DurationFields & { sign: NumberSign } {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
+    const brandingAndSlots = getBrandingAndSlots(arg)
 
-    if (slots && slots.branding === DurationBranding) {
-      return slots as DurationSlots
+    if (brandingAndSlots && brandingAndSlots[0] === DurationBranding) {
+      const slots = brandingAndSlots[1]
+      return slots as DurationFields & { sign: NumberSign }
     }
 
     return refineDurationObjectLike(arg as Partial<DurationFields>)
@@ -168,18 +177,24 @@ function refinePublicRelativeTo(
 ): RelativeToSlots | undefined {
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {
-      const slots = (getSlots(relativeTo) || {}) as Partial<BrandingSlots>
+      const brandingAndSlots = getBrandingAndSlots(relativeTo)
 
-      switch (slots.branding) {
-        case ZonedDateTimeBranding:
-        case PlainDateBranding:
-          return slots as ZonedDateTimeSlots | PlainDateSlots
+      if (brandingAndSlots) {
+        const [branding, slots] = brandingAndSlots
+        switch (branding) {
+          case ZonedDateTimeBranding:
+          case PlainDateBranding:
+            return slots as
+              | (ZonedEpochNanoFields & { calendar: InternalCalendar })
+              | (CalendarDateFields & { calendar: InternalCalendar })
 
-        case PlainDateTimeBranding:
-          return createPlainDateSlots(
-            slots as PlainDateTimeSlots,
-            (slots as PlainDateTimeSlots).calendar,
-          )
+          case PlainDateTimeBranding:
+            return createPlainDateSlots(
+              slots as CalendarDateTimeFields & { calendar: InternalCalendar },
+              (slots as CalendarDateTimeFields & { calendar: InternalCalendar })
+                .calendar,
+            )
+        }
       }
 
       const calendarId = getCalendarIdFromBag(relativeTo as any) // !!!

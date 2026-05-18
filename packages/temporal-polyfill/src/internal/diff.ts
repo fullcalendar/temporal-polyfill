@@ -47,8 +47,8 @@ import {
 } from './relativeMath'
 import { roundBigNanoToUnit, roundRelativeDuration } from './round'
 import {
-  DurationSlots,
-  EpochAndZoneSlots,
+  EpochNanoFields,
+  ZonedEpochNanoFields,
   createDurationSlots,
   extractEpochNano,
 } from './slots'
@@ -85,10 +85,10 @@ TODO: fix https://github.com/tc39/proposal-temporal/issues/3141#issuecomment-323
 
 export function diffInstants(
   invert: boolean,
-  instantSlots0: { epochNanoseconds: bigint },
-  instantSlots1: { epochNanoseconds: bigint },
+  instantSlots0: EpochNanoFields,
+  instantSlots1: EpochNanoFields,
   options?: DiffOptions<TimeUnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as [
       TimeUnit,
@@ -114,10 +114,10 @@ export function diffInstants(
 export function diffZonedDateTimes(
   invert: boolean,
   calendar: InternalCalendar,
-  slots0: EpochAndZoneSlots & { calendar: InternalCalendar },
-  slots1: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
   options?: DiffOptions<UnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour)
 
@@ -173,7 +173,7 @@ export function diffPlainDateTimes(
   plainDateTimeSlots0: CalendarDateTimeFields & { calendar: InternalCalendar },
   plainDateTimeSlots1: CalendarDateTimeFields & { calendar: InternalCalendar },
   options?: DiffOptions<UnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
 
@@ -228,7 +228,7 @@ export function diffPlainDates(
   plainDateSlots0: CalendarDateFields & { calendar: InternalCalendar },
   plainDateSlots1: CalendarDateFields & { calendar: InternalCalendar },
   options?: DiffOptions<DateUnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
 
@@ -250,7 +250,7 @@ export function diffPlainYearMonth(
   plainYearMonthSlots0: CalendarDateFields & { calendar: InternalCalendar },
   plainYearMonthSlots1: CalendarDateFields & { calendar: InternalCalendar },
   options?: DiffOptions<YearMonthUnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
   const getDay = (isoDate: CalendarDateFields) =>
@@ -288,7 +288,7 @@ function diffDateLike(
   roundingInc: number,
   roundingMode: RoundingMode,
   smallestPrecision: Unit = Unit.Day,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const startEpochNano = isoDateToEpochNano(startIsoDate)
   const endEpochNano = isoDateToEpochNano(endIsoDate)
 
@@ -346,7 +346,7 @@ export function diffPlainTimes(
   plainTimeSlots0: TimeFields,
   plainTimeSlots1: TimeFields,
   options?: DiffOptions<TimeUnitName>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
@@ -378,8 +378,8 @@ export function diffZonedEpochsExact(
   timeZoneImpl: TimeZoneImpl,
   calendar: InternalCalendar,
   // wish these didn't also hold calendar
-  slots0: EpochAndZoneSlots & { calendar: InternalCalendar },
-  slots1: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
   largestUnit: Unit,
 ): DurationFields {
   const sign = compareBigInts(slots1.epochNanoseconds, slots0.epochNanoseconds)
@@ -693,8 +693,8 @@ function compareIsoDate(
 
 export function prepareZonedEpochDiff(
   timeZoneImpl: TimeZoneImpl,
-  slots0: EpochAndZoneSlots & { calendar: InternalCalendar },
-  slots1: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
   sign: NumberSign, // guaranteed non-zero
 ): [CalendarDateTimeFields, CalendarDateFields, number] {
   const startIsoDate = zonedEpochSlotsToIso(slots0, timeZoneImpl)

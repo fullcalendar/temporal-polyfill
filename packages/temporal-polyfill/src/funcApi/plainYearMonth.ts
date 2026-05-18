@@ -3,8 +3,11 @@ import { constructPlainYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
-import { getInternalCalendar } from '../internal/externalCalendar'
-import { YearMonthLikeObject } from '../internal/fieldTypes'
+import {
+  InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
+import { CalendarDateFields, YearMonthLikeObject } from '../internal/fieldTypes'
 import { YearMonthFields } from '../internal/fieldTypes'
 import {
   createFormatPrepper,
@@ -20,7 +23,6 @@ import {
   DiffOptions,
   OverflowOptions,
 } from '../internal/optionsModel'
-import { PlainYearMonthBranding, PlainYearMonthSlots } from '../internal/slots'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, bindArgs, memoize } from '../internal/utils'
 import {
@@ -35,7 +37,7 @@ import * as DurationFns from './duration'
 import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 
-export type Record = PlainYearMonthSlots
+export type Record = CalendarDateFields & { calendar: InternalCalendar }
 
 export type Fields = YearMonthFields
 export type FromFields = YearMonthLikeObject
@@ -67,10 +69,6 @@ export function fromFields(
 }
 
 export const fromString = parsePlainYearMonth as (s: string) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === PlainYearMonthBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

@@ -6,7 +6,11 @@ import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateTime, moveZonedEpochs } from './move'
-import { EpochAndZoneSlots, EpochSlots, extractEpochNano } from './slots'
+import {
+  EpochNanoFields,
+  ZonedEpochNanoFields,
+  extractEpochNano,
+} from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
@@ -14,7 +18,7 @@ import { Callable, bindArgs } from './utils'
 // the relative-to "origin"
 export type RelativeToSlots =
   | (CalendarDateFields & { calendar: InternalCalendar })
-  | (EpochAndZoneSlots & { calendar: InternalCalendar })
+  | (ZonedEpochNanoFields & { calendar: InternalCalendar })
 
 // Individual Op types
 // -----------------------------------------------------------------------------
@@ -39,7 +43,7 @@ export type DiffMarkers = (
 export type MovableMarker =
   | CalendarDateFields
   | CalendarDateTimeFields
-  | EpochSlots
+  | EpochNanoFields
 export interface MarkerMoveOps {
   marker: MovableMarker
   markerToEpochNano: MarkerToEpochNano
@@ -47,7 +51,7 @@ export interface MarkerMoveOps {
 }
 
 // See comments for `createMarkerSpanOps`
-export type SpannableMarker = CalendarDateTimeFields | EpochSlots
+export type SpannableMarker = CalendarDateTimeFields | EpochNanoFields
 export interface MarkerSpanOps extends MarkerMoveOps {
   marker: SpannableMarker
   diffMarkers: DiffMarkers
@@ -125,13 +129,15 @@ export function moveMarkerToEpochNano(
 // See note in createMarkerSpanOps about short-circuiting.
 export function isZonedEpochSlots(
   marker: RelativeToSlots | undefined,
-): marker is EpochAndZoneSlots & { calendar: InternalCalendar }
+): marker is ZonedEpochNanoFields & { calendar: InternalCalendar }
 export function isZonedEpochSlots(
   marker: MovableMarker | undefined,
-): marker is EpochSlots
+): marker is EpochNanoFields
 export function isZonedEpochSlots(
   marker: MovableMarker | RelativeToSlots | undefined,
-): marker is EpochSlots | (EpochAndZoneSlots & { calendar: InternalCalendar })
+): marker is
+  | EpochNanoFields
+  | (ZonedEpochNanoFields & { calendar: InternalCalendar })
 export function isZonedEpochSlots(
   marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {

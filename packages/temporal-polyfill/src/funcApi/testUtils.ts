@@ -65,40 +65,30 @@ const timeDefaults = {
 }
 
 const plainDateDefaults = {
-  branding: 'PlainDate',
   calendar: isoCalendar,
 }
 
 const plainYearMonthDefaults = {
-  branding: 'PlainYearMonth',
   calendar: isoCalendar,
 }
 
 const plainMonthDayDefaults = {
-  branding: 'PlainMonthDay',
   calendar: isoCalendar,
 }
 
 const plainDateTimeDefaults = {
-  branding: 'PlainDateTime',
   calendar: isoCalendar,
 }
 
-const plainTimeDefaults = {
-  branding: 'PlainTime',
-}
+const plainTimeDefaults = {}
 
-const zonedDateTimeDefaults = {
-  branding: 'ZonedDateTime',
-}
+const zonedDateTimeDefaults = {}
 
 const instantSlotDefaults = {
-  branding: 'Instant',
   epochNanoseconds: 0n,
 }
 
 const durationSlotDefaults = {
-  branding: 'Duration',
   sign: 0,
   nanoseconds: 0,
   microseconds: 0,
@@ -288,8 +278,6 @@ export function expectInstantsSimilar(
   inst0: InstantFns.Record,
   inst1: InstantFns.Record,
 ): void {
-  expect(inst0.branding).toBe('Instant')
-  expect(inst1.branding).toBe('Instant')
   expectEpochNanosSimilar(
     InstantFns.epochNanoseconds(inst0),
     InstantFns.epochNanoseconds(inst1),
@@ -300,8 +288,6 @@ export function expectZonedDateTimesSimilar(
   zdt0: ZonedDateTimeFns.Record,
   zdt1: ZonedDateTimeFns.Record,
 ): void {
-  expect(zdt0.branding).toBe('ZonedDateTime')
-  expect(zdt1.branding).toBe('ZonedDateTime')
   expect(getInternalCalendarId(zdt0.calendar)).toBe(
     getInternalCalendarId(zdt1.calendar),
   )
@@ -316,8 +302,6 @@ export function expectPlainDateTimesSimilar(
   pdt0: PlainDateTimeFns.Record,
   pdt1: PlainDateTimeFns.Record,
 ): void {
-  expect(pdt0.branding).toBe('PlainDateTime')
-  expect(pdt1.branding).toBe('PlainDateTime')
   expect(getInternalCalendarId(pdt0.calendar)).toBe(
     getInternalCalendarId(pdt1.calendar),
   )
@@ -331,8 +315,6 @@ export function expectPlainDatesSimilar(
   pd0: PlainDateFns.Record,
   pd1: PlainDateFns.Record,
 ): void {
-  expect(pd0.branding).toBe('PlainDate')
-  expect(pd1.branding).toBe('PlainDate')
   expect(getInternalCalendarId(pd0.calendar)).toBe(
     getInternalCalendarId(pd1.calendar),
   )
@@ -343,8 +325,6 @@ export function expectPlainTimesSimilar(
   pt0: PlainTimeFns.Record,
   pt1: PlainTimeFns.Record,
 ): void {
-  expect(pt0.branding).toBe('PlainTime')
-  expect(pt1.branding).toBe('PlainTime')
   expectEpochNanosSimilar(
     isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt0))!,
     isoDateTimeToEpochNano(combineDateAndTime(dateDefaults, pt1))!,

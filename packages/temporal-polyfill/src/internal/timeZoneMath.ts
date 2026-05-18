@@ -11,7 +11,7 @@ import {
 } from './optionsModel'
 import { refineDirectionOptions } from './optionsTransitionRefine'
 import { roundToMinute } from './round'
-import { EpochAndZoneSlots } from './slots'
+import { ZonedEpochNanoFields } from './slots'
 import {
   checkIsoDateInBoundsStrict,
   isoDateTimeAndOffsetToEpochNano,
@@ -36,7 +36,7 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 // -----------------------------------------------------------------------------
 
 export function getTimeZoneTransitionEpochNanoseconds(
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   options: DirectionOptions | DirectionName,
 ): bigint | undefined {
   return slots.timeZone.getTransition(
@@ -54,7 +54,7 @@ export const zonedEpochSlotsToIso = memoize(
 ) as typeof _zonedEpochSlotsToIso
 
 function _zonedEpochSlotsToIso(
-  slots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   timeZoneImpl: TimeZoneImpl = slots.timeZone,
 ): FixedIsoZonedFields {
   const { epochNanoseconds } = slots

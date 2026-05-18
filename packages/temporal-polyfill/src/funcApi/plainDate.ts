@@ -35,11 +35,7 @@ import {
 } from '../internal/optionsModel'
 import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import { IsoDateTimeInterval } from '../internal/round'
-import {
-  PlainDateBranding,
-  PlainDateSlots,
-  createPlainDateSlots,
-} from '../internal/slots'
+import { createPlainDateSlots } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../internal/temporalLimits'
 import { refineTimeZoneId } from '../internal/timeZoneId'
@@ -93,7 +89,7 @@ import {
 } from './roundUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-export type Record = PlainDateSlots
+export type Record = CalendarDateFields & { calendar: InternalCalendar }
 
 export type Fields = DateFields
 export type FromFields = DateLikeObject
@@ -127,10 +123,6 @@ export function fromFields(
 }
 
 export const fromString = parsePlainDate as (s: string) => Record
-
-export function isInstance(record: any): record is Record {
-  return Boolean(record) && record.branding === PlainDateBranding
-}
 
 // Getters
 // -----------------------------------------------------------------------------

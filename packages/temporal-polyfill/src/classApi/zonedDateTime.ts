@@ -8,7 +8,10 @@ import {
 } from '../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
-import { getInternalCalendar } from '../internal/externalCalendar'
+import {
+  InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
 import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -33,7 +36,7 @@ import {
 } from '../internal/round'
 import {
   ZonedDateTimeBranding,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createDurationSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
@@ -70,7 +73,11 @@ import {
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
 export type ZonedDateTime = any
@@ -85,22 +92,30 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
     ...calendarIdGetters,
     ...adaptDateMethods(dateGetters),
     ...adaptDateMethods(timeGetters),
-    offset(slots: ZonedDateTimeSlots): string {
+    offset(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): string {
       return formatOffsetNano(zonedEpochSlotsToIso(slots).offsetNanoseconds)
     },
-    offsetNanoseconds(slots: ZonedDateTimeSlots) {
+    offsetNanoseconds(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ) {
       return zonedEpochSlotsToIso(slots).offsetNanoseconds
     },
-    timeZoneId(slots: ZonedDateTimeSlots): string {
+    timeZoneId(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): string {
       return slots.timeZone.id
     },
-    hoursInDay(slots: ZonedDateTimeSlots): number {
+    hoursInDay(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): number {
       return computeZonedHoursInDay(slots)
     },
   },
   {
     with(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       mod: Partial<DateTimeFields>,
       options?: ZonedFieldOptions,
     ): ZonedDateTime {
@@ -109,7 +124,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     withCalendar(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       calendarArg: CalendarArg,
     ): ZonedDateTime {
       return createZonedDateTime({
@@ -118,7 +133,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       })
     },
     withTimeZone(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       timeZoneArg: TimeZoneArg,
     ): ZonedDateTime {
       return createZonedDateTime({
@@ -127,7 +142,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       })
     },
     withPlainTime(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       plainTimeArg?: PlainTimeArg,
     ): ZonedDateTime {
       return createZonedDateTime(
@@ -138,7 +153,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     add(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): ZonedDateTime {
@@ -147,7 +162,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     subtract(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       durationArg: DurationArg,
       options?: OverflowOptions,
     ): ZonedDateTime {
@@ -156,7 +171,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     until(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       otherArg: ZonedDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
@@ -169,7 +184,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     since(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       otherArg: ZonedDateTimeArg,
       options?: DiffOptions<UnitName>,
     ): Duration {
@@ -182,31 +197,44 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       )
     },
     round(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
     ): ZonedDateTime {
       return createZonedDateTime(roundZonedDateTime(slots, options))
     },
-    startOfDay(slots: ZonedDateTimeSlots): ZonedDateTime {
+    startOfDay(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): ZonedDateTime {
       return createZonedDateTime(computeZonedStartOfDay(slots))
     },
-    equals(slots: ZonedDateTimeSlots, otherArg: ZonedDateTimeArg): boolean {
+    equals(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+      otherArg: ZonedDateTimeArg,
+    ): boolean {
       return zonedDateTimesEqual(slots, toZonedDateTimeSlots(otherArg))
     },
-    toInstant(slots: ZonedDateTimeSlots): Instant {
+    toInstant(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): Instant {
       return createInstant(zonedDateTimeToInstant(slots))
     },
-    toPlainDateTime(slots: ZonedDateTimeSlots): PlainDateTime {
+    toPlainDateTime(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): PlainDateTime {
       return createPlainDateTime(zonedDateTimeToPlainDateTime(slots))
     },
-    toPlainDate(slots: ZonedDateTimeSlots): PlainDate {
+    toPlainDate(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): PlainDate {
       return createPlainDate(zonedDateTimeToPlainDate(slots))
     },
-    toPlainTime(slots: ZonedDateTimeSlots): PlainTime {
+    toPlainTime(
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+    ): PlainTime {
       return createPlainTime(zonedDateTimeToPlainTime(slots))
     },
     toLocaleString(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       locales: LocalesArg,
       options: Intl.DateTimeFormatOptions = {},
     ): string {
@@ -218,7 +246,7 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
       return format.format(epochMilli)
     },
     getTimeZoneTransition(
-      slots: ZonedDateTimeSlots,
+      slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
       options: DirectionOptions | DirectionName,
     ): ZonedDateTime | null {
       const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
@@ -252,13 +280,15 @@ export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
 export function toZonedDateTimeSlots(
   arg: ZonedDateTimeArg,
   options?: ZonedFieldOptions,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
+    const brandingAndSlots = getBrandingAndSlots(arg)
 
-    if (slots && slots.branding === ZonedDateTimeBranding) {
+    if (brandingAndSlots && brandingAndSlots[0] === ZonedDateTimeBranding) {
       refineZonedFieldOptions(options) // parse unused options
-      return slots as ZonedDateTimeSlots
+      return brandingAndSlots[1] as ZonedEpochNanoFields & {
+        calendar: InternalCalendar
+      }
     }
 
     const calendarId = getCalendarIdFromBag(arg as any)
@@ -277,7 +307,7 @@ export function toZonedDateTimeSlots(
 
 function adaptDateMethods(methods: any) {
   return mapProps((method: any) => {
-    return (slots: ZonedDateTimeSlots) => {
+    return (slots: ZonedEpochNanoFields & { calendar: InternalCalendar }) => {
       return method(zonedEpochSlotsToIso(slots))
     }
   }, methods)

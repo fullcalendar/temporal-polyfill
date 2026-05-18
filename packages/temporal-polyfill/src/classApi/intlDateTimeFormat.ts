@@ -10,7 +10,6 @@ import {
   RawDateTimeFormat,
   RawFormattable,
 } from '../internal/intlFormatUtils'
-import { BrandingSlots } from '../internal/slots'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import {
   Classlike,
@@ -25,7 +24,7 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { getSlots } from './slotClass'
+import { getBrandingAndSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TemporalFormattable =
@@ -159,9 +158,7 @@ type DateTimeFormatInternals = {
   rawFormat: Intl.DateTimeFormat
   resolvedLocale: string
   copiedOptions: Intl.DateTimeFormatOptions
-  queryFormatPrepperForBranding: <S extends BrandingSlots>(
-    branding: S['branding'],
-  ) => FormatPrepper<S>
+  queryFormatPrepperForBranding: (branding: string) => FormatPrepper<any>
 
   // Only set for public Intl.DateTimeFormat wrapper instances that received a
   // timeZone option. Internal time-zone probes use RawDateTimeFormat directly,
@@ -232,16 +229,17 @@ function prepDateTimeFormatCall(
   let hasTemporalFormattable = false
   let hasRawFormattable = false
   const rawFormattables: RawFormattable[] = []
-  const slotsList: BrandingSlots[] = []
+  const slotsList: object[] = []
 
   for (let i = 0; i < formattableCnt; i++) {
-    const slots = getSlots(formattables[i])
+    const brandingAndSlots = getBrandingAndSlots(formattables[i])
 
-    if (slots) {
-      if (branding !== undefined && slots.branding !== branding) {
+    if (brandingAndSlots) {
+      const [temporalBranding, slots] = brandingAndSlots
+      if (branding !== undefined && temporalBranding !== branding) {
         hasMismatchingBranding = true
       }
-      branding = slots.branding
+      branding = temporalBranding
       hasTemporalFormattable = true
       slotsList[i] = slots
     } else {
@@ -287,9 +285,7 @@ function readOwnDataTimeZoneOption(
   return refineTimeZoneId(descriptor.value)
 }
 
-function createFormatPrepperForBranding<S extends BrandingSlots>(
-  branding: S['branding'],
-): FormatPrepper<S> {
+function createFormatPrepperForBranding(branding: string): FormatPrepper<any> {
   const config = classFormatConfigs[branding]
   if (!config) {
     throw new TypeError(errorMessages.invalidFormatType(branding))

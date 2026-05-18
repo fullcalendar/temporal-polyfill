@@ -2,8 +2,11 @@ import { plainMonthDaysEqual } from '../internal/compare'
 import { constructPlainMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
-import { getInternalCalendar } from '../internal/externalCalendar'
-import { MonthDayLikeObject } from '../internal/fieldTypes'
+import {
+  InternalCalendar,
+  getInternalCalendar,
+} from '../internal/externalCalendar'
+import { CalendarDateFields, MonthDayLikeObject } from '../internal/fieldTypes'
 import { MonthDayFields, YearFields } from '../internal/fieldTypes'
 import { isoCalendarId } from '../internal/intlCalendarConfig'
 import { LocalesArg } from '../internal/intlFormatUtils'
@@ -12,13 +15,17 @@ import { parsePlainMonthDay } from '../internal/isoParse'
 import { mergePlainMonthDayFields } from '../internal/merge'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
-import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
+import { PlainMonthDayBranding } from '../internal/slots'
 import { isObjectLike } from '../internal/utils'
 import { extractCalendarIdFromBag } from './calendarArg'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import { calendarIdGetters, monthDayFieldGetters } from './mixins'
 import { PlainDate, createPlainDate } from './plainDate'
-import { createSlotClass, getSlots, rejectInvalidBag } from './slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from './slotClass'
 
 export type PlainMonthDay = { monthCode: string; day: number } // and other getters/methods
 export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
@@ -34,7 +41,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
     },
     {
       with(
-        slots: PlainMonthDaySlots,
+        slots: CalendarDateFields & { calendar: InternalCalendar },
         mod: Partial<MonthDayFields>,
         options?: OverflowOptions,
       ): PlainMonthDay {
@@ -42,12 +49,15 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
           mergePlainMonthDayFields(slots, rejectInvalidBag(mod), options),
         )
       },
-      equals(slots: PlainMonthDaySlots, otherArg: PlainMonthDayArg): boolean {
+      equals(
+        slots: CalendarDateFields & { calendar: InternalCalendar },
+        otherArg: PlainMonthDayArg,
+      ): boolean {
         return plainMonthDaysEqual(slots, toPlainMonthDaySlots(otherArg))
       },
       toPlainDate(
         this: PlainMonthDay,
-        slots: PlainMonthDaySlots,
+        slots: CalendarDateFields & { calendar: InternalCalendar },
         bag: YearFields,
       ): PlainDate {
         return createPlainDate(
@@ -55,7 +65,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
         )
       },
       toLocaleString(
-        slots: PlainMonthDaySlots,
+        slots: CalendarDateFields & { calendar: InternalCalendar },
         locales?: LocalesArg,
         options?: Intl.DateTimeFormatOptions,
       ): string {
@@ -80,13 +90,15 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
 export function toPlainMonthDaySlots(
   arg: PlainMonthDayArg,
   options?: OverflowOptions,
-): PlainMonthDaySlots {
+): CalendarDateFields & { calendar: InternalCalendar } {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
+    const brandingAndSlots = getBrandingAndSlots(arg)
 
-    if (slots && slots.branding === PlainMonthDayBranding) {
+    if (brandingAndSlots && brandingAndSlots[0] === PlainMonthDayBranding) {
       refineOverflowOptions(options) // parse unused options
-      return slots as PlainMonthDaySlots
+      return brandingAndSlots[1] as CalendarDateFields & {
+        calendar: InternalCalendar
+      }
     }
 
     const calendarIdMaybe = extractCalendarIdFromBag(arg as { calendar?: any })

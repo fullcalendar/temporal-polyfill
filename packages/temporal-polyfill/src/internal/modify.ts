@@ -13,8 +13,7 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { OffsetDisambig } from './optionsModel'
 import {
-  EpochAndZoneSlots,
-  ZonedDateTimeSlots,
+  ZonedEpochNanoFields,
   createPlainDateTimeSlots,
   createZonedDateTimeSlots,
 } from './slots'
@@ -28,9 +27,9 @@ import {
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime(
-  zonedDateTimeSlots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   plainTimeFields: TimeFields | undefined,
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
@@ -61,9 +60,9 @@ export function zonedDateTimeWithPlainTime(
 }
 
 export function zonedDateTimeWithPlainDate(
-  zonedDateTimeSlots: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: InternalCalendar },
   plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
-): ZonedDateTimeSlots {
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime

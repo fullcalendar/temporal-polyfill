@@ -1,5 +1,4 @@
 import * as errorMessages from '../internal/errorMessages'
-import { BrandingSlots } from '../internal/slots'
 import {
   createGetterDescriptors,
   createNameDescriptors,
@@ -8,14 +7,19 @@ import {
   mapProps,
 } from '../internal/utils'
 
-const slotsMap = new WeakMap<any, object>()
+export type BrandingAndSlots<D extends object = object> = [
+  branding: string,
+  slots: D,
+]
 
-export const getSlots = slotsMap.get.bind(slotsMap) as <
-  D extends object = BrandingSlots,
+const slotsMap = new WeakMap<any, BrandingAndSlots>()
+
+export const getBrandingAndSlots = slotsMap.get.bind(slotsMap) as <
+  D extends object = object,
 >(
   obj: any,
-) => D | undefined
-const setSlots = slotsMap.set.bind(slotsMap)
+) => BrandingAndSlots<D> | undefined
+export const setBrandingAndSlots = slotsMap.set.bind(slotsMap)
 
 type SlotGetter<D extends object> = (slots: D) => unknown
 type SlotGetterMap<D extends object, G extends object> = {
@@ -61,15 +65,11 @@ export function createSlotClass<
   getters: G,
   methods: M,
   staticMethods: SM,
-): [
-  SlotClass<I, CA, SM>,
-  (slots: D | (D & BrandingSlots)) => I,
-  (obj: unknown) => D,
-] {
+): [SlotClass<I, CA, SM>, (slots: D) => I, (obj: unknown) => D] {
   function Class(this: any, ...args: CA) {
     if (this instanceof Class) {
       const slots = construct(...args)
-      setSlots(this, slots)
+      setBrandingAndSlots(this, [branding, slots])
       dbg(this, slots, formatFunc)
     } else {
       throw new TypeError(errorMessages.invalidCallingContext)
@@ -104,16 +104,16 @@ export function createSlotClass<
   }
 
   function getSpecificSlots(obj: any): D {
-    const slots = getSlots(obj)
-    if (!slots || (slots as Partial<BrandingSlots>).branding !== branding) {
+    const brandingAndSlots = getBrandingAndSlots<D>(obj)
+    if (!brandingAndSlots || brandingAndSlots[0] !== branding) {
       throw new TypeError(errorMessages.invalidCallingContext)
     }
-    return slots as D
+    return brandingAndSlots[1]
   }
 
-  function createViaSlots(slots: D | (D & BrandingSlots)): I {
+  function createViaSlots(slots: D): I {
     const instance = Object.create(Class.prototype)
-    setSlots(instance, slots)
+    setBrandingAndSlots(instance, [branding, slots])
     dbg(instance, slots, formatFunc)
     return instance
   }
@@ -131,7 +131,7 @@ export function createSlotClass<
 // TODO: best place for this?
 export function rejectInvalidBag<B>(bag: B): B {
   if (
-    getSlots(bag) ||
+    getBrandingAndSlots(bag) ||
     // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.
     // It deliberately observes the spec field names even though internal
     // slots store internal calendar/time-zone objects, but public bags still

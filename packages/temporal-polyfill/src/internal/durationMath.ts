@@ -20,7 +20,7 @@ import {
   isZonedEpochSlots,
 } from './relativeMath'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
-import { DurationSlots, createDurationSlots } from './slots'
+import { createDurationSlots } from './slots'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
@@ -44,7 +44,7 @@ export function addDurations<RA>(
   slots: DurationFields,
   otherSlots: DurationFields,
   options?: RelativeToOptions<RA>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const maxUnit = Math.max(
@@ -110,9 +110,9 @@ function addDayTimeDurations(
 
 export function roundDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  slots: DurationSlots, // could get returned :(
+  slots: DurationFields & { sign: NumberSign }, // could get returned :(
   options: DurationRoundingOptions<RA>,
-): DurationSlots {
+): DurationFields & { sign: NumberSign } {
   const durationLargestUnit = getMaxDurationUnit(slots)
   const [
     largestUnit,
@@ -194,15 +194,17 @@ export function roundDuration<RA>(
 // -----------------------------------------------------------------------------
 
 export function absDuration(
-  slots: DurationSlots, // could get returned :(
-): DurationSlots {
+  slots: DurationFields & { sign: NumberSign }, // could get returned :(
+): DurationFields & { sign: NumberSign } {
   if (slots.sign === -1) {
     return negateDuration(slots)
   }
   return slots
 }
 
-export function negateDuration(slots: DurationFields): DurationSlots {
+export function negateDuration(
+  slots: DurationFields,
+): DurationFields & { sign: NumberSign } {
   return createDurationSlots(negateDurationFields(slots))
 }
 

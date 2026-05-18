@@ -22,7 +22,7 @@ import {
   isZonedEpochSlots,
 } from '../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../internal/round'
-import { ZonedDateTimeSlots, extractEpochNano } from '../internal/slots'
+import { ZonedEpochNanoFields, extractEpochNano } from '../internal/slots'
 import { totalRelativeDuration } from '../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../internal/utils'
@@ -71,8 +71,8 @@ export const diffPlainTimeUnits = bindArgs(
 
 function diffZonedLargeUnits(
   unit: Unit,
-  record0: ZonedDateTimeSlots,
-  record1: ZonedDateTimeSlots,
+  record0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  record1: ZonedEpochNanoFields & { calendar: InternalCalendar },
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
@@ -180,8 +180,8 @@ function diffDateUnits(
 function diffZonedDayLikeUnits(
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: ZonedDateTimeSlots,
-  record1: ZonedDateTimeSlots,
+  record0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  record1: ZonedEpochNanoFields & { calendar: InternalCalendar },
   options?: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)

@@ -12,7 +12,7 @@ import {
 } from './fieldTypes'
 import { isoCalendarId } from './intlCalendarConfig'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import { EpochAndZoneSlots, EpochSlots, getEpochMilli } from './slots'
+import { EpochNanoFields, ZonedEpochNanoFields, getEpochMilli } from './slots'
 import { timeFieldsToNano } from './timeFieldMath'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { nanoInMilli } from './units'
@@ -399,8 +399,8 @@ export function createFormatForPrep(
 }
 
 function getForcedCommonTimeZone(
-  slots0?: EpochAndZoneSlots, // actually needed
-  slots1?: EpochAndZoneSlots, // optional!
+  slots0?: ZonedEpochNanoFields, // actually needed
+  slots1?: ZonedEpochNanoFields, // optional!
 ): string {
   const timeZone = slots0!.timeZone
   if (slots1 && slots1.timeZone.compareKey !== timeZone.compareKey) {
@@ -436,12 +436,12 @@ function computeNonBuggyIsoResolve() {
 }
 const nonBuggyIsoResolve = computeNonBuggyIsoResolve()
 
-export const instantConfig: ClassFormatConfig<EpochSlots> = {
+export const instantConfig: ClassFormatConfig<EpochNanoFields> = {
   transformOptions: transformInstantOptions,
   slotsToEpochMilli: getEpochMilli,
 }
 
-export const zonedConfig: ClassFormatConfig<EpochAndZoneSlots> = {
+export const zonedConfig: ClassFormatConfig<ZonedEpochNanoFields> = {
   transformOptions: transformZonedOptions,
   slotsToEpochMilli: getEpochMilli,
   strictCalendarChecks: false,

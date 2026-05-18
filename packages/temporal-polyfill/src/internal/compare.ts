@@ -19,7 +19,7 @@ import {
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
-import { EpochAndZoneSlots } from './slots'
+import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import { timeFieldsToNano } from './timeFieldMath'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
@@ -34,8 +34,8 @@ import {
 // -----------------------------------------------------------------------------
 
 export function compareInstants(
-  instantSlots0: { epochNanoseconds: bigint },
-  instantSlots1: { epochNanoseconds: bigint },
+  instantSlots0: EpochNanoFields,
+  instantSlots1: EpochNanoFields,
 ): NumberSign {
   return compareBigInts(
     instantSlots0.epochNanoseconds,
@@ -44,8 +44,8 @@ export function compareInstants(
 }
 
 export function compareZonedDateTimes(
-  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
-  zonedDateTimeSlots1: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): NumberSign {
   return compareBigInts(
     zonedDateTimeSlots0.epochNanoseconds,
@@ -127,15 +127,15 @@ export function compareTimeFields(
 // -----------------------------------------------------------------------------
 
 export function instantsEqual(
-  instantSlots0: { epochNanoseconds: bigint },
-  instantSlots1: { epochNanoseconds: bigint },
+  instantSlots0: EpochNanoFields,
+  instantSlots1: EpochNanoFields,
 ): boolean {
   return !compareInstants(instantSlots0, instantSlots1)
 }
 
 export function zonedDateTimesEqual(
-  zonedDateTimeSlots0: EpochAndZoneSlots & { calendar: InternalCalendar },
-  zonedDateTimeSlots1: EpochAndZoneSlots & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): boolean {
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&

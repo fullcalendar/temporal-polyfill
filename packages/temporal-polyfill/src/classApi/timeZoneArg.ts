@@ -4,7 +4,7 @@ import { parseTimeZoneId } from '../internal/isoParse'
 import { resolveTimeZoneId } from '../internal/timeZoneId'
 import type { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { isObjectLike } from '../internal/utils'
-import { getSlots } from './slotClass'
+import { getBrandingAndSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TimeZoneArg = string | ZonedDateTime
@@ -14,7 +14,7 @@ Returns a timeZoneId
 */
 export function refineTimeZoneArg(arg: TimeZoneArg): string {
   if (isObjectLike(arg)) {
-    const slots = getSlots(arg)
+    const slots = getBrandingAndSlots(arg)?.[1]
     if (!slots || !('timeZone' in slots)) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidTimeZone(arg as any)) // !!!
