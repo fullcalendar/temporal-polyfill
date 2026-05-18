@@ -20,7 +20,7 @@ import {
   InstantBranding,
   ZonedDateTimeBranding,
   ZonedEpochNanoFields,
-  createInstantSlots,
+  createEpochNanoSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName } from '../internal/units'
@@ -132,7 +132,7 @@ export function toInstantSlots(arg: InstantArg): EpochNanoFields {
           return slots as EpochNanoFields
 
         case ZonedDateTimeBranding:
-          return createInstantSlots(
+          return createEpochNanoSlots(
             (slots as ZonedEpochNanoFields & { calendar: InternalCalendar })
               .epochNanoseconds,
           )
@@ -151,7 +151,7 @@ export function toTemporalInstant(this: Date): Instant {
   // TODO: better error message instead of "non-integer number" or whatever?
 
   return createInstant(
-    createInstantSlots(
+    createEpochNanoSlots(
       BigInt(requireNumberIsInteger(epochMilli)) * bigNanoInMilli,
     ),
   )

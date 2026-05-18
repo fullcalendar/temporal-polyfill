@@ -36,10 +36,10 @@ import {
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
-  createInstantSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
-  createZonedDateTimeSlots,
+  createDateTimeSlots,
+  createEpochNanoSlots,
+  createTimeSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
@@ -75,7 +75,7 @@ export function roundInstant(
     true, // solarMode
   )
 
-  return createInstantSlots(
+  return createEpochNanoSlots(
     roundBigNanoToUnit(
       instantSlots.epochNanoseconds,
       smallestUnit as TimeUnit,
@@ -138,7 +138,7 @@ export function roundZonedDateTime(
     )
   }
 
-  return createZonedDateTimeSlots(epochNanoseconds, timeZone, calendar)
+  return createZonedEpochNanoSlots(epochNanoseconds, timeZone, calendar)
 }
 
 /*
@@ -156,7 +156,7 @@ export function roundPlainDateTime(
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
-  return createPlainDateTimeSlots(roundedIsoDateTime, slots.calendar)
+  return createDateTimeSlots(roundedIsoDateTime, slots.calendar)
 }
 
 export function roundPlainTime(
@@ -172,7 +172,7 @@ export function roundPlainTime(
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )[0]
-  return createPlainTimeSlots(roundedTimeFields)
+  return createTimeSlots(roundedTimeFields)
 }
 
 // Zoned Utils
@@ -211,7 +211,7 @@ export function computeZonedStartOfDay(
     combineDateAndTime(isoDateTime, timeFieldDefaults),
   )
   // nudging within-day guarantees in-bounds
-  return createZonedDateTimeSlots(epochNano1, timeZone, calendar)
+  return createZonedEpochNanoSlots(epochNano1, timeZone, calendar)
 }
 
 /*

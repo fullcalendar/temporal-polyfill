@@ -4,11 +4,11 @@ import {
   getCurrentTimeZoneId,
 } from '../internal/current'
 import {
-  createInstantSlots,
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
-  createZonedDateTimeSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createEpochNanoSlots,
+  createTimeSlots,
+  createZonedEpochNanoSlots,
 } from '../internal/slots'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import {
@@ -32,7 +32,7 @@ export const Now = Object.defineProperties(
       },
 
       instant(): Instant {
-        return createInstant(createInstantSlots(getCurrentEpochNano()))
+        return createInstant(createEpochNanoSlots(getCurrentEpochNano()))
       },
 
       zonedDateTimeISO(
@@ -41,7 +41,7 @@ export const Now = Object.defineProperties(
         const timeZone = queryTimeZone(refineTimeZoneArg(timeZoneArg))
         return createZonedDateTime(
           // Omitting calendar constructs ISO-calendar slots.
-          createZonedDateTimeSlots(getCurrentEpochNano(), timeZone),
+          createZonedEpochNanoSlots(getCurrentEpochNano(), timeZone),
         )
       },
 
@@ -53,7 +53,7 @@ export const Now = Object.defineProperties(
         )
         return createPlainDateTime(
           // Omitting calendar constructs ISO-calendar slots.
-          createPlainDateTimeSlots(isoDateTime),
+          createDateTimeSlots(isoDateTime),
         )
       },
 
@@ -64,7 +64,7 @@ export const Now = Object.defineProperties(
           queryTimeZone(refineTimeZoneArg(timeZoneArg)),
         )
         // Omitting calendar constructs ISO-calendar slots.
-        return createPlainDate(createPlainDateSlots(isoDateTime))
+        return createPlainDate(createDateSlots(isoDateTime))
       },
 
       plainTimeISO(
@@ -73,7 +73,7 @@ export const Now = Object.defineProperties(
         const isoDateTime = getCurrentIsoDateTime(
           queryTimeZone(refineTimeZoneArg(timeZoneArg)),
         )
-        return createPlainTime(createPlainTimeSlots(isoDateTime))
+        return createPlainTime(createTimeSlots(isoDateTime))
       },
     }),
   },

@@ -35,7 +35,7 @@ import {
 } from '../internal/optionsModel'
 import { refineUnitRoundOptions } from '../internal/optionsRoundingRefine'
 import { IsoDateTimeInterval } from '../internal/round'
-import { createPlainDateSlots } from '../internal/slots'
+import { createDateSlots } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../internal/temporalLimits'
 import { refineTimeZoneId } from '../internal/timeZoneId'
@@ -163,7 +163,7 @@ export const withFields = mergePlainDateFields as (
 ) => Record
 
 export function withCalendar(record: Record, calendarId: string): Record {
-  return createPlainDateSlots(
+  return createDateSlots(
     record,
     getInternalCalendar(refineCalendarId(calendarId)),
   )
@@ -497,5 +497,5 @@ function createRecordFromDateFields(
   isoDate: CalendarDateFields & { calendar: InternalCalendar },
 ): Record {
   checkIsoDateInBounds(isoDate)
-  return createPlainDateSlots(isoDate, isoDate.calendar)
+  return createDateSlots(isoDate, isoDate.calendar)
 }

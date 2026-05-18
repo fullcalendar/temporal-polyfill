@@ -30,7 +30,7 @@ import {
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
   ZonedEpochNanoFields,
-  createPlainDateSlots,
+  createDateSlots,
 } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../internal/units'
@@ -92,7 +92,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       calendarArg: CalendarArg,
     ): PlainDate {
       return createPlainDate(
-        createPlainDateSlots(
+        createDateSlots(
           slots,
           getInternalCalendar(refineCalendarArg(calendarArg)),
         ),
@@ -231,7 +231,7 @@ export function toPlainDateSlots(
 
         case PlainDateTimeBranding:
           refineOverflowOptions(options) // parse unused options
-          return createPlainDateSlots(
+          return createDateSlots(
             slots as CalendarDateTimeFields & { calendar: InternalCalendar },
             (slots as CalendarDateTimeFields & { calendar: InternalCalendar })
               .calendar,

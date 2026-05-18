@@ -50,8 +50,8 @@ import { RelativeToSlots } from './relativeMath'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
-  createPlainTimeSlots,
-  createZonedDateTimeSlots,
+  createTimeSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
@@ -153,7 +153,7 @@ export function refineZonedDateTimeObjectLike(
     epochDisambig,
   )
 
-  return createZonedDateTimeSlots(epochNanoseconds, timeZoneImpl, calendar)
+  return createZonedEpochNanoSlots(epochNanoseconds, timeZoneImpl, calendar)
 }
 
 export function refinePlainDateTimeObjectLike(
@@ -276,7 +276,7 @@ export function refinePlainTimeObjectLike(
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
 
-  return createPlainTimeSlots(resolveTimeFields(fields, overflow))
+  return createTimeSlots(resolveTimeFields(fields, overflow))
 }
 
 export function refineDurationObjectLike(

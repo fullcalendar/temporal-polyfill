@@ -40,9 +40,9 @@ import {
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
   ZonedEpochNanoFields,
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createTimeSlots,
 } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../internal/timeZoneImpl'
@@ -103,7 +103,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       calendarArg: CalendarArg,
     ): PlainDateTime {
       return createPlainDateTime(
-        createPlainDateTimeSlots(
+        createDateTimeSlots(
           slots,
           getInternalCalendar(refineCalendarArg(calendarArg)),
         ),
@@ -189,12 +189,12 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
     toPlainDate(
       slots: CalendarDateTimeFields & { calendar: InternalCalendar },
     ): PlainDate {
-      return createPlainDate(createPlainDateSlots(slots, slots.calendar))
+      return createPlainDate(createDateSlots(slots, slots.calendar))
     },
     toPlainTime(
       slots: CalendarDateTimeFields & { calendar: InternalCalendar },
     ): PlainTime {
-      return createPlainTime(createPlainTimeSlots(slots))
+      return createPlainTime(createTimeSlots(slots))
     },
     toLocaleString(
       slots: CalendarDateTimeFields & { calendar: InternalCalendar },
@@ -242,7 +242,7 @@ export function toPlainDateTimeSlots(
 
         case PlainDateBranding:
           refineOverflowOptions(options) // parse unused options
-          return createPlainDateTimeSlots(
+          return createDateTimeSlots(
             combineDateAndTime(
               slots as CalendarDateFields & { calendar: InternalCalendar },
               timeFieldDefaults,

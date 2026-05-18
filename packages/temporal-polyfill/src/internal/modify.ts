@@ -14,8 +14,8 @@ import { combineDateAndTime } from './fieldUtils'
 import { OffsetDisambig } from './optionsModel'
 import {
   ZonedEpochNanoFields,
-  createPlainDateTimeSlots,
-  createZonedDateTimeSlots,
+  createDateTimeSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import {
   getMatchingInstantFor,
@@ -52,7 +52,7 @@ export function zonedDateTimeWithPlainTime(
     )
   }
 
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     epochNano,
     timeZone,
     zonedDateTimeSlots.calendar,
@@ -79,7 +79,7 @@ export function zonedDateTimeWithPlainDate(
     OffsetDisambig.Prefer, // OffsetDisambig
   )
 
-  return createZonedDateTimeSlots(epochNano, timeZone, calendar)
+  return createZonedEpochNanoSlots(epochNano, timeZone, calendar)
 }
 
 /*
@@ -89,7 +89,7 @@ export function plainDateTimeWithPlainDate(
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
   plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
 ) {
-  return createPlainDateTimeSlots(
+  return createDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
     getPreferredCalendar(plainDateTimeSlots.calendar, plainDateSlots.calendar),
   )

@@ -50,9 +50,9 @@ import {
   roundPlainDateTime,
 } from '../internal/round'
 import {
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createTimeSlots,
 } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { refineTimeZoneId } from '../internal/timeZoneId'
@@ -210,7 +210,7 @@ export const withFields = mergePlainDateTimeFields as (
 ) => Record
 
 export function withCalendar(record: Record, calendarId: string): Record {
-  return createPlainDateTimeSlots(
+  return createDateTimeSlots(
     record,
     getInternalCalendar(refineCalendarId(calendarId)),
   )
@@ -296,11 +296,11 @@ export function toZonedDateTime(
 }
 
 export function toPlainDate(record: Record): PlainDateFns.Record {
-  return createPlainDateSlots(record, record.calendar)
+  return createDateSlots(record, record.calendar)
 }
 
 export function toPlainTime(record: Record): PlainTimeFns.Record {
-  return createPlainTimeSlots(record)
+  return createTimeSlots(record)
 }
 
 export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
@@ -374,7 +374,7 @@ export const toString = formatPlainDateTimeIso as (
 
 // Non-standard: With
 // -----------------------------------------------------------------------------
-// No need for createPlainDateTimeSlots because move* utils return self
+// No need for createDateTimeSlots because move* utils return self
 
 export function withDayOfYear(
   record: Record,

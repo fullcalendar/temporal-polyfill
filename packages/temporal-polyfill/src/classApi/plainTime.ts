@@ -22,7 +22,7 @@ import {
   PlainTimeBranding,
   ZonedDateTimeBranding,
   ZonedEpochNanoFields,
-  createPlainTimeSlots,
+  createTimeSlots,
 } from '../internal/slots'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
@@ -134,7 +134,7 @@ export function toPlainTimeSlots(
 
         case PlainDateTimeBranding:
           refineOverflowOptions(options) // parse unused options
-          return createPlainTimeSlots(
+          return createTimeSlots(
             slots as CalendarDateTimeFields & { calendar: InternalCalendar },
           )
 

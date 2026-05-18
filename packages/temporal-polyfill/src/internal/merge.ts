@@ -53,8 +53,8 @@ import {
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
-  createPlainTimeSlots,
-  createZonedDateTimeSlots,
+  createTimeSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
@@ -198,7 +198,7 @@ export function mergeZonedDateTimeFields(
     overflow,
   )
 
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     getMatchingInstantFor(
       timeZone,
       combineDateAndTime(isoDateFields, timeFields),
@@ -383,7 +383,7 @@ export function mergePlainTimeFields(
   mod: Partial<TimeFields>,
   options?: OverflowOptions,
 ): TimeFields {
-  return createPlainTimeSlots(mergePlainTimeBag(initialFields, mod, options))
+  return createTimeSlots(mergePlainTimeBag(initialFields, mod, options))
 }
 
 export function mergeDurationFields(

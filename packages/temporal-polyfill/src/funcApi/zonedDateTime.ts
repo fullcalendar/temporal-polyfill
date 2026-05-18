@@ -57,7 +57,7 @@ import {
 } from '../internal/round'
 import {
   ZonedEpochNanoFields,
-  createZonedDateTimeSlots,
+  createZonedEpochNanoSlots,
   getEpochMicro,
   getEpochMilli,
   getEpochNano,
@@ -266,7 +266,7 @@ export const withFields = mergeZonedDateTimeFields as (
 ) => Record
 
 export function withCalendar(record: Record, calendarId: string): Record {
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     record.epochNanoseconds,
     record.timeZone,
     getInternalCalendar(refineCalendarId(calendarId)),

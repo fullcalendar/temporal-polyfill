@@ -30,11 +30,11 @@ import { EpochDisambigOptions, OverflowOptions } from './optionsModel'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
-  createInstantSlots,
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
-  createZonedDateTimeSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createEpochNanoSlots,
+  createTimeSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import {
   createPlainDateFromFields,
@@ -58,7 +58,7 @@ export function instantToZonedDateTime(
   timeZone: TimeZoneImpl,
   calendar: InternalCalendar = isoCalendar,
 ): ZonedEpochNanoFields & { calendar: InternalCalendar } {
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     instantSlots.epochNanoseconds,
     timeZone,
     calendar,
@@ -71,13 +71,13 @@ export function instantToZonedDateTime(
 export function zonedDateTimeToInstant(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): EpochNanoFields {
-  return createInstantSlots(zonedDateTimeSlots0.epochNanoseconds)
+  return createEpochNanoSlots(zonedDateTimeSlots0.epochNanoseconds)
 }
 
 export function zonedDateTimeToPlainDateTime(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
-  return createPlainDateTimeSlots(
+  return createDateTimeSlots(
     zonedEpochSlotsToIso(zonedDateTimeSlots0),
     zonedDateTimeSlots0.calendar,
   )
@@ -86,7 +86,7 @@ export function zonedDateTimeToPlainDateTime(
 export function zonedDateTimeToPlainDate(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): CalendarDateFields & { calendar: InternalCalendar } {
-  return createPlainDateSlots(
+  return createDateSlots(
     zonedEpochSlotsToIso(zonedDateTimeSlots0),
     zonedDateTimeSlots0.calendar,
   )
@@ -95,7 +95,7 @@ export function zonedDateTimeToPlainDate(
 export function zonedDateTimeToPlainTime(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
 ): TimeFields {
-  return createPlainTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
+  return createTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
 // PlainDateTime -> *
@@ -107,7 +107,7 @@ export function plainDateTimeToZonedDateTime(
   options?: EpochDisambigOptions,
 ): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const epochNano = dateToEpochNano(timeZone, plainDateTimeSlots, options)
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     checkEpochNanoInBounds(epochNano),
     timeZone,
     plainDateTimeSlots.calendar,
@@ -152,7 +152,7 @@ export function plainDateToZonedDateTime<PA>(
     )
   }
 
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     epochNano,
     timeZoneImpl,
     plainDateSlots.calendar,
@@ -296,7 +296,7 @@ export function plainTimeToZonedDateTime<PA>(
   const timeZoneId = refineTimeZoneString(refinedOptions.timeZone)
   const timeZoneImpl = queryTimeZone(timeZoneId)
 
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     getSingleInstantFor(
       timeZoneImpl,
       combineDateAndTime(plainDateSlots, slots),
@@ -314,7 +314,7 @@ Only used by funcApi
 Almost public-facing, does input validation
 */
 export function epochSecToInstant(epochSec: number): EpochNanoFields {
-  return createInstantSlots(
+  return createEpochNanoSlots(
     checkEpochNanoInBounds(BigInt(toStrictInteger(epochSec)) * bigNanoInSec),
   )
 }
@@ -323,7 +323,7 @@ export function epochSecToInstant(epochSec: number): EpochNanoFields {
 Almost public-facing, does input validation
 */
 export function epochMilliToInstant(epochMilli: number): EpochNanoFields {
-  return createInstantSlots(
+  return createEpochNanoSlots(
     checkEpochNanoInBounds(
       BigInt(toStrictInteger(epochMilli)) * bigNanoInMilli,
     ),
@@ -335,7 +335,7 @@ Only used by funcApi
 Almost public-facing, does input validation
 */
 export function epochMicroToInstant(epochMicro: bigint): EpochNanoFields {
-  return createInstantSlots(
+  return createEpochNanoSlots(
     checkEpochNanoInBounds(toBigInt(epochMicro) * bigNanoInMicro),
   )
 }
@@ -344,5 +344,5 @@ export function epochMicroToInstant(epochMicro: bigint): EpochNanoFields {
 Almost public-facing, does input validation
 */
 export function epochNanoToInstant(epochNano: bigint): EpochNanoFields {
-  return createInstantSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
+  return createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
 }

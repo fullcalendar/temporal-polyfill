@@ -24,13 +24,13 @@ export const DurationBranding = 'Duration' as const
 // Slot-creation helpers
 // -----------------------------------------------------------------------------
 
-export function createInstantSlots(epochNano: bigint): EpochNanoFields {
+export function createEpochNanoSlots(epochNano: bigint): EpochNanoFields {
   return {
     epochNanoseconds: epochNano,
   }
 }
 
-export function createZonedDateTimeSlots(
+export function createZonedEpochNanoSlots(
   epochNano: bigint,
   timeZone: TimeZoneImpl,
   calendar?: InternalCalendar,
@@ -43,7 +43,7 @@ export function createZonedDateTimeSlots(
   }
 }
 
-export function createPlainDateTimeSlots(
+export function createDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
   calendar?: InternalCalendar,
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
@@ -55,7 +55,7 @@ export function createPlainDateTimeSlots(
   }
 }
 
-export function createPlainDateSlots(
+export function createDateSlots(
   isoDate: CalendarDateFields,
   calendar?: InternalCalendar,
 ): CalendarDateFields & { calendar: InternalCalendar } {
@@ -66,7 +66,8 @@ export function createPlainDateSlots(
   }
 }
 
-export function createPlainYearMonthSlots(
+// TODO: converge with createDateSlots
+export function createYearMonthSlots(
   isoDate: CalendarDateFields,
   calendar: InternalCalendar,
 ): CalendarDateFields & { calendar: InternalCalendar } {
@@ -76,7 +77,7 @@ export function createPlainYearMonthSlots(
   }
 }
 
-export function createPlainMonthDaySlots(
+export function createMonthDaySlots(
   isoDate: CalendarDateFields,
   calendar: InternalCalendar,
 ): CalendarDateFields & { calendar: InternalCalendar } {
@@ -86,7 +87,7 @@ export function createPlainMonthDaySlots(
   }
 }
 
-export function createPlainTimeSlots(time: TimeFields): TimeFields {
+export function createTimeSlots(time: TimeFields): TimeFields {
   return {
     ...pluckProps(timeFieldNamesAsc, time),
   }

@@ -29,10 +29,10 @@ import {
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow, OverflowOptions } from './optionsModel'
 import {
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainMonthDaySlots,
-  createPlainYearMonthSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createMonthDaySlots,
+  createYearMonthSlots,
 } from './slots'
 import {
   checkIsoDateInBounds,
@@ -55,7 +55,7 @@ export function createPlainDateTimeFromRefinedFields(
   // combined PlainDateTime is inside Temporal's supported ISO range.
   const isoDateTime = combineDateAndTime(isoDate, time)
   checkIsoDateTimeInBounds(isoDateTime)
-  return createPlainDateTimeSlots(isoDateTime, calendar)
+  return createDateTimeSlots(isoDateTime, calendar)
 }
 
 export function createPlainDateFromFields(
@@ -123,7 +123,7 @@ function createPlainDateFromPreparedFields(
   )
   const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, day)
 
-  return createPlainDateSlots(checkIsoDateInBounds(isoDate), calendar)
+  return createDateSlots(checkIsoDateInBounds(isoDate), calendar)
 }
 
 type PreparedDateFields = [
@@ -200,7 +200,7 @@ export function createPlainYearMonthFromFields(
   )
   const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
 
-  return createPlainYearMonthSlots(checkIsoYearMonthInBounds(isoDate), calendar)
+  return createYearMonthSlots(checkIsoYearMonthInBounds(isoDate), calendar)
 }
 
 export function createPlainMonthDayFromFields(
@@ -391,7 +391,7 @@ export function createPlainMonthDayFromFields(
   }
   const { year: finalYear, month: finalMonth } = res
 
-  return createPlainMonthDaySlots(
+  return createMonthDaySlots(
     checkIsoDateInBounds(
       computeCalendarIsoFieldsFromParts(calendar, finalYear, finalMonth, day),
     ),

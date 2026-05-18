@@ -36,7 +36,7 @@ import {
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
   ZonedEpochNanoFields,
-  createPlainDateSlots,
+  createDateSlots,
 } from '../internal/slots'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
@@ -189,7 +189,7 @@ function refinePublicRelativeTo(
               | (CalendarDateFields & { calendar: InternalCalendar })
 
           case PlainDateTimeBranding:
-            return createPlainDateSlots(
+            return createDateSlots(
               slots as CalendarDateTimeFields & { calendar: InternalCalendar },
               (slots as CalendarDateTimeFields & { calendar: InternalCalendar })
                 .calendar,

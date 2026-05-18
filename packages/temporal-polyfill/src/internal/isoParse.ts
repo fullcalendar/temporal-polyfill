@@ -36,14 +36,14 @@ import { RelativeToSlots } from './relativeMath'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
+  createDateSlots,
+  createDateTimeSlots,
   createDurationSlots,
-  createInstantSlots,
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainMonthDaySlots,
-  createPlainTimeSlots,
-  createPlainYearMonthSlots,
-  createZonedDateTimeSlots,
+  createEpochNanoSlots,
+  createMonthDaySlots,
+  createTimeSlots,
+  createYearMonthSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
 import {
   checkEpochNanoInBounds,
@@ -109,7 +109,7 @@ export function parseInstant(s: string): EpochNanoFields {
     offsetNano,
   )
 
-  return createInstantSlots(epochNanoseconds)
+  return createEpochNanoSlots(epochNanoseconds)
 }
 
 export function parseRelativeToSlots(s: string): RelativeToSlots {
@@ -152,14 +152,14 @@ export function parsePlainDateTime(
   }
 
   const slots = finalizeDateTime(organized)
-  return createPlainDateTimeSlots(slots, slots.calendar)
+  return createDateTimeSlots(slots, slots.calendar)
 }
 
 export function parsePlainDate(
   s: string,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
-  return createPlainDateSlots(slots, slots.calendar)
+  return createDateSlots(slots, slots.calendar)
 }
 
 export function parsePlainYearMonth(
@@ -169,7 +169,7 @@ export function parsePlainYearMonth(
 
   if (organized) {
     requireIsoCalendar(organized)
-    return createPlainYearMonthSlots(
+    return createYearMonthSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
       getInternalCalendar(resolveCalendarId(organized.calendarId)),
     )
@@ -185,7 +185,7 @@ export function parsePlainYearMonth(
     dateSlots,
   )
 
-  return createPlainYearMonthSlots(moveIsoSlots, calendar)
+  return createYearMonthSlots(moveIsoSlots, calendar)
 }
 
 function requireIsoCalendar(organized: { calendarId: string }): void {
@@ -202,7 +202,7 @@ export function parsePlainMonthDay(
   if (organized) {
     requireIsoCalendar(organized)
 
-    return createPlainMonthDaySlots(
+    return createMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
       getInternalCalendar(resolveCalendarId(organized.calendarId)),
     )
@@ -235,7 +235,7 @@ export function parsePlainMonthDay(
     computeCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
-  return createPlainMonthDaySlots(isoDate, calendar)
+  return createMonthDaySlots(isoDate, calendar)
 }
 
 export function parsePlainTime(s: string): TimeFields {
@@ -268,7 +268,7 @@ export function parsePlainTime(s: string): TimeFields {
     throwFailedParse(s)
   }
 
-  return createPlainTimeSlots(checkTimeFields(organized))
+  return createTimeSlots(checkTimeFields(organized))
 }
 
 export function parseDuration(
@@ -420,7 +420,7 @@ function finalizeZonedDateTime(
   // Validate the computed epochNanoseconds is within the representable range
   checkEpochNanoInBounds(epochNano)
 
-  return createZonedDateTimeSlots(
+  return createZonedEpochNanoSlots(
     epochNano,
     timeZoneImpl,
     getInternalCalendar(resolveCalendarId(organized.calendarId)),

@@ -35,11 +35,11 @@ import { Overflow, OverflowOptions } from './optionsModel'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
-  createInstantSlots,
-  createPlainDateSlots,
-  createPlainDateTimeSlots,
-  createPlainTimeSlots,
-  createPlainYearMonthSlots,
+  createDateSlots,
+  createDateTimeSlots,
+  createEpochNanoSlots,
+  createTimeSlots,
+  createYearMonthSlots,
 } from './slots'
 import {
   checkEpochNanoInBounds,
@@ -61,7 +61,7 @@ export function moveInstant(
   instantSlots: EpochNanoFields,
   durationSlots: DurationFields,
 ): EpochNanoFields {
-  return createInstantSlots(
+  return createEpochNanoSlots(
     moveEpochNano(
       instantSlots.epochNanoseconds,
       signedDurationFields(doSubtract, durationSlots),
@@ -94,7 +94,7 @@ export function movePlainDateTime(
   options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const { calendar } = plainDateTimeSlots
-  return createPlainDateTimeSlots(
+  return createDateTimeSlots(
     moveDateTime(
       calendar,
       plainDateTimeSlots,
@@ -112,7 +112,7 @@ export function movePlainDate(
   options?: OverflowOptions,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const { calendar } = plainDateSlots
-  return createPlainDateSlots(
+  return createDateSlots(
     moveDate(
       calendar,
       plainDateSlots,
@@ -157,7 +157,7 @@ export function movePlainYearMonth(
     overflow,
   )
 
-  return createPlainYearMonthSlots(
+  return createYearMonthSlots(
     moveToDayOfMonthUnsafe(getDay, movedIsoDateFields),
     calendar,
   )
@@ -168,7 +168,7 @@ export function movePlainTime(
   slots: TimeFields,
   durationSlots: DurationFields,
 ): TimeFields {
-  return createPlainTimeSlots(
+  return createTimeSlots(
     moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0],
   )
 }
