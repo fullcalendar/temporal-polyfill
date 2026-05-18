@@ -76,8 +76,7 @@ const yearMonthStatsGetters = {
   },
 }
 
-const dateStatsGetters = {
-  ...yearMonthStatsGetters,
+const dateOnlyStatsGetters = {
   weekOfYear(slots: any) {
     return slots.calendar === isoCalendar
       ? computeIsoWeekFields(slots).weekOfYear
@@ -96,6 +95,8 @@ const dateStatsGetters = {
     return 7
   },
 }
+
+const dateStatsGetters = { ...yearMonthStatsGetters, ...dateOnlyStatsGetters }
 
 export const dateGetters = { ...dateFieldGetters, ...dateStatsGetters }
 export const yearMonthGetters = {

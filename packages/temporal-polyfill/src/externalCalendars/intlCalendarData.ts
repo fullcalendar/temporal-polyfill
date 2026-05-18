@@ -8,17 +8,18 @@ if origin is <0, consider the era to be 'reverse' direction
   year = -origin - eraYear, same as...
   year = -(origin + eraYear)
 */
+const japaneseEraOrigins = {
+  ...gregoryEraOrigins,
+  'meiji': 1867,
+  'taisho': 1911,
+  'showa': 1925,
+  'heisei': 1988,
+  'reiwa': 2018,
+}
 export const eraOriginsByCalendarId: {
   [calendarId: string]: Record<string, number>
 } = {
-  'japanese': {
-    ...gregoryEraOrigins,
-    'meiji': 1867,
-    'taisho': 1911,
-    'showa': 1925,
-    'heisei': 1988,
-    'reiwa': 2018,
-  },
+  'japanese': japaneseEraOrigins,
   'ethioaa': {
     'aa': 0,
   },
