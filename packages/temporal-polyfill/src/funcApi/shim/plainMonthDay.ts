@@ -9,6 +9,11 @@ import {
   isoCalendar,
 } from '../../internal/externalCalendar'
 import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
+import {
+  createFormatPrepper,
+  monthDayConfig,
+} from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
@@ -18,10 +23,12 @@ import {
 } from '../../internal/optionsModel'
 import { computeMonthDayFields } from '../calendarUtils'
 import { PlainMonthDayRecordBranding } from '../common-branding'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
 export type PlainMonthDayShimRecord = any & MonthDayFields
+type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
 export const [
   PlainMonthDayShimRecord,
@@ -121,6 +128,33 @@ export function toPlainDate(
     fields,
   )
   return createPlainDateShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(monthDayConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    monthDayConfig,
+    getPlainMonthDayShimRecordSlots,
+    locales,
+    options,
+  )
+}
+
+export function toLocaleString(
+  record: PlainMonthDayShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getPlainMonthDayShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 export function toString(

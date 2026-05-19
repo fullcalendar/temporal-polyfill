@@ -1,14 +1,18 @@
 import { createSlotClass } from '../../classApi/slotClass'
 import { MonthDayFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { PlainMonthDayRecordBranding } from '../common-branding'
+import { DateTimeFormatLike } from '../dateTimeFormat'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import { createNativeDateTimeFormat } from './dateTimeFormat'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 
 export type PlainMonthDayNativeRecord = any & MonthDayFields
+type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
 
 export const [
   PlainMonthDayNativeRecord,
@@ -98,6 +102,21 @@ export function toPlainDate(
   const native = getPlainMonthDayNative(record)
   const resNative = native.toPlainDate(fields)
   return createPlainDateNativeRecord(resNative)
+}
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createNativeDateTimeFormat(getPlainMonthDayNative, locales, options)
+}
+
+export function toLocaleString(
+  record: PlainMonthDayNativeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getPlainMonthDayNative(record).toLocaleString(locales, options)
 }
 
 export function toString(

@@ -1,5 +1,6 @@
 import { createSlotClass } from '../../classApi/slotClass'
 import { TimeFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
   OverflowOptions,
@@ -9,6 +10,8 @@ import {
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { PlainTimeRecordBranding } from '../common-branding'
+import { DateTimeFormatLike } from '../dateTimeFormat'
+import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -25,6 +28,7 @@ import {
 } from './zonedDateTime'
 
 export type PlainTimeNativeRecord = any & TimeFields
+type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
 type ToZonedDateTimeOptions = {
   timeZone: string
@@ -196,6 +200,21 @@ export function toPlainDateTime(
   const plainDateNative = getPlainDateNative(plainDateRecord)
   const resNative = native.toPlainDateTime(plainDateNative)
   return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createNativeDateTimeFormat(getPlainTimeNative, locales, options)
+}
+
+export function toLocaleString(
+  record: PlainTimeNativeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getPlainTimeNative(record).toLocaleString(locales, options)
 }
 
 export function toString(

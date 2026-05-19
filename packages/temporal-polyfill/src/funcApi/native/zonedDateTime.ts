@@ -1,5 +1,6 @@
 import { createSlotClass } from '../../classApi/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
   DirectionName,
@@ -349,4 +350,12 @@ export function toPlainMonthDay(
 ): PlainMonthDayNativeRecord {
   const resNative = getZonedDateTimeNative(record).toPlainMonthDay()
   return createPlainMonthDayNativeRecord(resNative)
+}
+
+export function toLocaleString(
+  record: ZonedDateTimeNativeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getZonedDateTimeNative(record).toLocaleString(locales, options)
 }

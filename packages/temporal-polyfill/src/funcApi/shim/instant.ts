@@ -13,6 +13,11 @@ import {
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
 import { getInternalCalendar } from '../../internal/externalCalendar'
+import {
+  createFormatPrepper,
+  instantConfig,
+} from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
@@ -27,6 +32,7 @@ import { queryTimeZone } from '../../internal/timeZoneImpl'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { InstantRecordBranding } from '../common-branding'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -38,6 +44,7 @@ import {
 } from './zonedDateTime'
 
 export type InstantShimRecord = any
+type Format = DateTimeFormatLike<InstantShimRecord>
 
 type ToZonedDateTimeOptions = {
   timeZone: string
@@ -183,6 +190,33 @@ export function toZonedDateTimeISO(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
   return createZonedDateTimeShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(instantConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    instantConfig,
+    getInstantShimRecordSlots,
+    locales,
+    options,
+  )
+}
+
+export function toLocaleString(
+  record: InstantShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getInstantShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 export function toString(

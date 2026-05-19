@@ -20,6 +20,8 @@ import {
   isoCalendar,
 } from '../../internal/externalCalendar'
 import { DateTimeFields } from '../../internal/fieldTypes'
+import { createFormatPrepper, zonedConfig } from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatOffsetNano,
@@ -454,6 +456,21 @@ export function toPlainMonthDay(
   const fields = computeDateFields(zonedEpochSlotsToIso(slots))
   const resSlots = convertToPlainMonthDay(slots.calendar, fields)
   return createPlainMonthDayShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(zonedConfig)
+
+export function toLocaleString(
+  record: ZonedDateTimeShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getZonedDateTimeShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 function computeDateProperty<R>(

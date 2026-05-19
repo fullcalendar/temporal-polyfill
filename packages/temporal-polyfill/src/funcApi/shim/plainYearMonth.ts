@@ -13,6 +13,11 @@ import {
   isoCalendar,
 } from '../../internal/externalCalendar'
 import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
+import {
+  createFormatPrepper,
+  yearMonthConfig,
+} from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
@@ -32,6 +37,7 @@ import {
   computeYearMonthFields,
 } from '../calendarUtils'
 import { PlainYearMonthRecordBranding } from '../common-branding'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
 import {
   DurationShimRecord,
@@ -41,6 +47,7 @@ import {
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
 export type PlainYearMonthShimRecord = any & YearMonthFields
+type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
 export const [
   PlainYearMonthShimRecord,
@@ -219,6 +226,33 @@ export function toPlainDate(
     fields,
   )
   return createPlainDateShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(yearMonthConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    yearMonthConfig,
+    getPlainYearMonthShimRecordSlots,
+    locales,
+    options,
+  )
+}
+
+export function toLocaleString(
+  record: PlainYearMonthShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getPlainYearMonthShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 export function toString(

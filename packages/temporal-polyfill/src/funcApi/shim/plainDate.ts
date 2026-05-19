@@ -13,6 +13,8 @@ import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
 import { isoCalendar } from '../../internal/externalCalendar'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import { DateFields, TimeFields } from '../../internal/fieldTypes'
+import { createFormatPrepper, dateConfig } from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
@@ -38,6 +40,7 @@ import {
   computeYearOfWeek,
 } from '../calendarUtils'
 import { PlainDateRecordBranding } from '../common-branding'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
 import {
   DurationShimRecord,
@@ -68,6 +71,7 @@ type ToZonedDateTimeOptions = {
 }
 
 export type PlainDateShimRecord = any & DateFields
+type Format = DateTimeFormatLike<PlainDateShimRecord>
 
 export const [
   PlainDateShimRecord,
@@ -305,6 +309,33 @@ export function toPlainMonthDay(
     computeDateFields(slots),
   )
   return createPlainMonthDayShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(dateConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    dateConfig,
+    getPlainDateShimRecordSlots,
+    locales,
+    options,
+  )
+}
+
+export function toLocaleString(
+  record: PlainDateShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getPlainDateShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 export function toString(

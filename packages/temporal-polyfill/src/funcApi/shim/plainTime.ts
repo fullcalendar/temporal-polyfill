@@ -7,6 +7,8 @@ import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
 import { InternalCalendar } from '../../internal/externalCalendar'
 import { CalendarDateFields, TimeFields } from '../../internal/fieldTypes'
+import { createFormatPrepper, timeConfig } from '../../internal/intlFormatPrep'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
@@ -23,6 +25,7 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { PlainTimeRecordBranding } from '../common-branding'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -39,6 +42,7 @@ import {
 } from './zonedDateTime'
 
 export type PlainTimeShimRecord = any & TimeFields
+type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
 type ToZonedDateTimeOptions = {
   timeZone: string
@@ -195,6 +199,33 @@ export function toPlainDateTime(
     dateSlots.calendar,
   )
   return createPlainDateTimeShimRecord(resSlots)
+}
+
+const prepFormat = createFormatPrepper(timeConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    timeConfig,
+    getPlainTimeShimRecordSlots,
+    locales,
+    options,
+  )
+}
+
+export function toLocaleString(
+  record: PlainTimeShimRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const [format, epochMilli] = prepFormat(
+    locales,
+    options,
+    getPlainTimeShimRecordSlots(record),
+  )
+  return format.format(epochMilli)
 }
 
 export function toString(

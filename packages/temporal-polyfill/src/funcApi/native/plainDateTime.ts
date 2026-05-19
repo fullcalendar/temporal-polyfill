@@ -1,5 +1,6 @@
 import { createSlotClass } from '../../classApi/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DateTimeDisplayOptions,
   DiffOptions,
@@ -10,7 +11,9 @@ import {
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { PlainDateTimeRecordBranding } from '../common-branding'
+import { DateTimeFormatLike } from '../dateTimeFormat'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -40,6 +43,7 @@ import {
 } from './zonedDateTime'
 
 export type PlainDateTimeNativeRecord = DateTimeFields
+type Format = DateTimeFormatLike<PlainDateTimeNativeRecord>
 
 export const [
   PlainDateTimeNativeRecord,
@@ -325,6 +329,21 @@ export function toPlainMonthDay(
 ): PlainMonthDayNativeRecord {
   const resNative = getPlainDateTimeNative(record).toPlainMonthDay()
   return createPlainMonthDayNativeRecord(resNative)
+}
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createNativeDateTimeFormat(getPlainDateTimeNative, locales, options)
+}
+
+export function toLocaleString(
+  record: PlainDateTimeNativeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getPlainDateTimeNative(record).toLocaleString(locales, options)
 }
 
 export function toString(

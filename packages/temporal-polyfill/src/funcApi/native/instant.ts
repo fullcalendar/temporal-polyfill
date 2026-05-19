@@ -1,4 +1,5 @@
 import { createSlotClass } from '../../classApi/slotClass'
+import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
   InstantDisplayOptions,
@@ -7,6 +8,8 @@ import {
 import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { InstantRecordBranding } from '../common-branding'
+import { DateTimeFormatLike } from '../dateTimeFormat'
+import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -18,6 +21,7 @@ import {
 } from './zonedDateTime'
 
 export type InstantNativeRecord = any
+type Format = DateTimeFormatLike<InstantNativeRecord>
 
 const bigNanoInSec = 1000000000n
 const bigNanoInMicro = 1000n
@@ -174,6 +178,21 @@ export function toZonedDateTimeISO(
   const native = getInstantNative(record)
   const resNative = native.toZonedDateTimeISO(timeZoneId)
   return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createNativeDateTimeFormat(getInstantNative, locales, options)
+}
+
+export function toLocaleString(
+  record: InstantNativeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getInstantNative(record).toLocaleString(locales, options)
 }
 
 export function toString(
