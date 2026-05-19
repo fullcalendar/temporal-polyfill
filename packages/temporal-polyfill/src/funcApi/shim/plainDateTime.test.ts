@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
+import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -9,11 +13,7 @@ import {
   expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainDateTimeFns from './plainDateTime'
-import * as PlainTimeFns from './plainTime'
+} from './testUtils'
 
 describe('create', () => {
   it('works', () => {
@@ -31,9 +31,9 @@ describe('create', () => {
     )
     expectPlainDateTimeEquals(pdt, {
       calendarId: 'hebrew',
-      year: 2024,
-      month: 1,
-      day: 1,
+      year: 5784,
+      month: 4,
+      day: 20,
       hour: 12,
       minute: 30,
       nanosecond: 1,
@@ -46,9 +46,9 @@ describe('fromString', () => {
     const pd = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
     expectPlainDateTimeEquals(pd, {
       calendarId: 'hebrew',
-      year: 2024,
-      month: 1,
-      day: 1,
+      year: 5784,
+      month: 4,
+      day: 20,
       hour: 12,
       minute: 30,
     })
@@ -67,9 +67,9 @@ describe('fromFields', () => {
     })
     expectPlainDateTimeEquals(pdt, {
       calendarId: 'hebrew',
-      year: 2024,
-      month: 1,
-      day: 1,
+      year: 5784,
+      month: 4,
+      day: 20,
       hour: 12,
       minute: 30,
     })
@@ -450,9 +450,9 @@ describe('toPlainDate', () => {
     const pd = PlainDateTimeFns.toPlainDate(pdt)
     expectPlainDateEquals(pd, {
       calendarId: 'hebrew',
-      year: 2024,
-      month: 2,
-      day: 27,
+      year: 5784,
+      month: 6,
+      day: 18,
     })
   })
 })
@@ -473,7 +473,7 @@ describe('toPlainMonthDay', () => {
     const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
     const pmd = PlainDateTimeFns.toPlainMonthDay(pdt)
     expectPlainMonthDayEquals(pmd, {
-      month: 2,
+      monthCode: 'M02',
       day: 27,
     })
   })

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
+import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
+import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
@@ -9,10 +12,7 @@ import {
   expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainTimeFns from './plainTime'
+} from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 function getPublicFields(zdt: ZonedDateTimeFns.ZonedDateTimeShimRecord) {
@@ -673,7 +673,7 @@ describe('toPlainMonthDay', () => {
     )
     const pmd = ZonedDateTimeFns.toPlainMonthDay(zdt)
     expectPlainMonthDayEquals(pmd, {
-      month: 2,
+      monthCode: 'M02',
       day: 27,
     })
   })

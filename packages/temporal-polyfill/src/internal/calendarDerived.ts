@@ -7,6 +7,7 @@ import {
 import {
   type InternalCalendar,
   getInternalCalendarId,
+  isoCalendar,
 } from './externalCalendar'
 import { type CalendarDateFields, CalendarEraFields } from './fieldTypes'
 import {
@@ -151,12 +152,16 @@ export function computeCalendarWeekOfYear(
   calendar: InternalCalendar,
   isoDate: CalendarDateFields,
 ): number | undefined {
-  return calendar ? undefined : computeIsoWeekFields(isoDate).weekOfYear
+  return calendar === isoCalendar
+    ? computeIsoWeekFields(isoDate).weekOfYear
+    : undefined
 }
 
 export function computeCalendarYearOfWeek(
   calendar: InternalCalendar,
   isoDate: CalendarDateFields,
 ): number | undefined {
-  return calendar ? undefined : computeIsoWeekFields(isoDate).yearOfWeek
+  return calendar === isoCalendar
+    ? computeIsoWeekFields(isoDate).yearOfWeek
+    : undefined
 }

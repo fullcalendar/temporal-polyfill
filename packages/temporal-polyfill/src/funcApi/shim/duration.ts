@@ -44,7 +44,15 @@ export const [
   DurationRecordBranding,
   constructDurationSlots,
   formatDurationIso,
-  durationFieldGetters,
+  {
+    ...durationFieldGetters,
+    sign(slots: DurationFields & { sign: NumberSign }) {
+      return slots.sign
+    },
+    blank(slots: DurationFields & { sign: NumberSign }) {
+      return !slots.sign
+    },
+  },
   {},
   {},
 )

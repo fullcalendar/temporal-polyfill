@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import * as DurationFns from './duration'
+import * as PlainYearMonthFns from './plainYearMonth'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainYearMonthEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as DurationFns from './duration'
-import * as PlainYearMonthFns from './plainYearMonth'
+} from './testUtils'
 
 describe('create', () => {
   it('works with a referenceDay', () => {
@@ -15,7 +15,7 @@ describe('create', () => {
       calendarId: 'gregory',
       year: 2024,
       month: 6,
-      day: 5,
+      monthCode: 'M06',
     })
   })
 
@@ -25,6 +25,7 @@ describe('create', () => {
       calendarId: 'gregory',
       year: 2024,
       month: 6,
+      monthCode: 'M06',
     })
   })
 })
@@ -36,6 +37,7 @@ describe('fromString', () => {
       calendarId: 'gregory',
       year: 2024,
       month: 6,
+      monthCode: 'M06',
     })
   })
 })
@@ -51,6 +53,7 @@ describe('fromFields', () => {
       calendarId: 'gregory',
       year: 2024,
       month: 6,
+      monthCode: 'M06',
     })
   })
 })
@@ -84,6 +87,7 @@ describe('withFields', () => {
       calendarId: 'gregory',
       year: 2009,
       month: 6,
+      monthCode: 'M06',
     })
   })
 })

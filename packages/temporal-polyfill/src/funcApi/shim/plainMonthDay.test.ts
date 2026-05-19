@@ -1,19 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
+import * as PlainMonthDayFns from './plainMonthDay'
 import {
   expectPlainDateEquals,
   expectPlainMonthDayEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as PlainMonthDayFns from './plainMonthDay'
+} from './testUtils'
 
 describe('create', () => {
   it('works with a referenceYear', () => {
     const pmd = PlainMonthDayFns.create(6, 18, 'gregory', 2024)
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',
-      year: 2024,
-      month: 6,
+      monthCode: 'M06',
       day: 18,
     })
   })
@@ -22,7 +21,7 @@ describe('create', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'iso8601',
-      month: 6,
+      monthCode: 'M06',
       day: 18,
     })
   })
@@ -33,7 +32,7 @@ describe('fromString', () => {
     const pmd = PlainMonthDayFns.fromString('2024-06-18[u-ca=gregory]')
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',
-      month: 6,
+      monthCode: 'M06',
       day: 18,
     })
   })
@@ -48,7 +47,7 @@ describe('fromFields', () => {
     })
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',
-      month: 6,
+      monthCode: 'M06',
       day: 18,
     })
   })
@@ -70,11 +69,9 @@ describe('calendar field getters', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     expect({
       monthCode: pmd.monthCode,
-      month: pmd.month,
       day: pmd.day,
     }).toEqual({
       monthCode: 'M06',
-      month: 6,
       day: 18,
     })
   })
@@ -87,7 +84,7 @@ describe('withFields', () => {
       day: 11,
     })
     expectPlainMonthDayEquals(pmd1, {
-      month: 6,
+      monthCode: 'M06',
       day: 11,
     })
   })

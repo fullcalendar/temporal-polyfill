@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { expectDurationEquals } from '../non-standard/testUtils'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
+import { expectDurationEquals } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
@@ -25,7 +25,6 @@ describe('create', () => {
       microseconds: 9,
       nanoseconds: 10,
     })
-    expect(DurationFns.sign(dur)).toBe(1)
   })
 
   it('called with some args (negative)', () => {
@@ -42,6 +41,22 @@ describe('create', () => {
       microseconds: -9,
       nanoseconds: -10,
     })
+  })
+})
+
+describe('sign', () => {
+  it('returns 0 for a blank duration', () => {
+    const dur = DurationFns.create()
+    expect(DurationFns.sign(dur)).toBe(0)
+  })
+
+  it('returns 1 for a positive duration', () => {
+    const dur = DurationFns.create(1)
+    expect(DurationFns.sign(dur)).toBe(1)
+  })
+
+  it('returns -1 for a negative duration', () => {
+    const dur = DurationFns.create(-1)
     expect(DurationFns.sign(dur)).toBe(-1)
   })
 })

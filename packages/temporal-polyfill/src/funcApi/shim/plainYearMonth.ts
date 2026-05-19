@@ -1,4 +1,4 @@
-import { yearMonthGetters } from '../../classApi/mixins'
+import { calendarIdGetters, yearMonthGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import {
   computeCalendarDaysInMonth,
@@ -14,10 +14,6 @@ import { constructYearMonthSlots } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
-import {
-  getInternalCalendarId,
-  isoCalendar,
-} from '../../internal/externalCalendar'
 import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
 import {
   createFormatPrepper,
@@ -37,7 +33,11 @@ import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { PlainYearMonthRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
-import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
+import {
+  CalendarShimArg,
+  refineCalendarShimArg,
+  refineCalendarShimArgToId,
+} from './calendar'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -57,19 +57,20 @@ export const [
   (
     isoYear: number,
     isoMonth: number,
-    calendar?: CalendarShimRecord,
+    calendar?: CalendarShimArg,
     referenceIsoDay?: number,
   ) =>
     constructYearMonthSlots(
       isoYear,
       isoMonth,
-      calendar === undefined
-        ? undefined
-        : getInternalCalendarId(getCalendarShimRecordInternal(calendar)),
+      refineCalendarShimArgToId(calendar),
       referenceIsoDay,
     ),
   formatPlainYearMonthIso,
-  yearMonthGetters,
+  {
+    ...calendarIdGetters,
+    ...yearMonthGetters,
+  },
   {},
   {},
 )
@@ -77,7 +78,7 @@ export const [
 export function create(
   isoYear: number,
   isoMonth: number,
-  calendar?: CalendarShimRecord,
+  calendar?: CalendarShimArg,
   referenceIsoDay?: number,
 ): PlainYearMonthShimRecord {
   return new PlainYearMonthShimRecord(
@@ -89,13 +90,10 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<YearMonthFields> & { calendar?: CalendarShimRecord },
+  fields: Partial<YearMonthFields> & { calendar?: CalendarShimArg },
   options?: OverflowOptions,
 ): PlainYearMonthShimRecord {
-  const inputCalendar = fields.calendar
-  const internalCalendar = inputCalendar
-    ? getCalendarShimRecordInternal(inputCalendar)
-    : isoCalendar
+  const internalCalendar = refineCalendarShimArg(fields.calendar)
   const resSlots = refinePlainYearMonthObjectLike(
     internalCalendar,
     fields as any,

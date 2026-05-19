@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
+import * as DurationFns from './duration'
+import * as InstantFns from './instant'
 import {
   expectDurationEquals,
   expectInstantEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as DurationFns from './duration'
-import * as InstantFns from './instant'
+} from './testUtils'
 
 describe('create', () => {
   it('works', () => {

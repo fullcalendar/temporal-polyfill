@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
+import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
+import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateTimeEquals,
   expectPlainTimeEquals,
   testHotCache,
-} from '../non-standard/testUtils'
-import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainTimeFns from './plainTime'
+} from './testUtils'
 
 describe('create', () => {
   it('works', () => {

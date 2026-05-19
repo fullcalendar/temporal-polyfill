@@ -29,10 +29,6 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
-import {
-  getInternalCalendarId,
-  isoCalendar,
-} from '../../internal/externalCalendar'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { createFormatPrepper, zonedConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -72,7 +68,11 @@ import {
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign, mapProps } from '../../internal/utils'
 import { ZonedDateTimeRecordBranding } from '../common-branding'
-import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
+import {
+  CalendarShimArg,
+  refineCalendarShimArg,
+  refineCalendarShimArgToId,
+} from './calendar'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -103,7 +103,7 @@ import {
 } from './plainYearMonth'
 
 type ZonedDateTimeShimFields = Partial<DateTimeFields> & {
-  calendar?: CalendarShimRecord
+  calendar?: CalendarShimArg
   offset?: string
   timeZone: string
 }
@@ -116,17 +116,11 @@ export const [
   getZonedDateTimeShimRecordSlots,
 ] = createSlotClass(
   ZonedDateTimeRecordBranding,
-  (
-    epochNanoseconds: bigint,
-    timeZoneId: string,
-    calendar?: CalendarShimRecord,
-  ) =>
+  (epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarShimArg) =>
     constructZonedEpochNanoSlots(
       epochNanoseconds,
       timeZoneId,
-      calendar === undefined
-        ? undefined
-        : getInternalCalendarId(getCalendarShimRecordInternal(calendar)),
+      refineCalendarShimArgToId(calendar),
     ),
   formatZonedDateTimeIso,
   {
@@ -145,7 +139,7 @@ export const [
 export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarShimRecord,
+  calendar?: CalendarShimArg,
 ): ZonedDateTimeShimRecord {
   return new ZonedDateTimeShimRecord(epochNanoseconds, timeZoneId, calendar)
 }
@@ -155,9 +149,7 @@ export function fromFields(
   options?: ZonedFieldOptions,
 ): ZonedDateTimeShimRecord {
   const inputCalendar = fields.calendar
-  const internalCalendar = inputCalendar
-    ? getCalendarShimRecordInternal(inputCalendar)
-    : isoCalendar
+  const internalCalendar = refineCalendarShimArg(inputCalendar)
   const resSlots = refineZonedDateTimeObjectLike(
     refineTimeZoneId,
     internalCalendar,
@@ -190,12 +182,10 @@ export function withFields(
 
 export function withCalendar(
   record: ZonedDateTimeShimRecord,
-  inputCalendar: CalendarShimRecord,
+  inputCalendar: CalendarShimArg,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
-  const internalCalendar = inputCalendar
-    ? getCalendarShimRecordInternal(inputCalendar)
-    : isoCalendar
+  const internalCalendar = refineCalendarShimArg(inputCalendar)
   return createZonedDateTimeShimRecord(
     createZonedEpochNanoSlots(
       slots.epochNanoseconds,

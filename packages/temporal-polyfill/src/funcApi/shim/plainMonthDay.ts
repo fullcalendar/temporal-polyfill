@@ -4,10 +4,6 @@ import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
-import {
-  getInternalCalendarId,
-  isoCalendar,
-} from '../../internal/externalCalendar'
 import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
 import {
   createFormatPrepper,
@@ -23,10 +19,15 @@ import {
 } from '../../internal/optionsModel'
 import { PlainMonthDayRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
-import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
+import {
+  CalendarShimArg,
+  refineCalendarShimArg,
+  refineCalendarShimArgToId,
+} from './calendar'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
-export type PlainMonthDayShimRecord = any & MonthDayFields
+export type PlainMonthDayShimRecord = any &
+  Pick<MonthDayFields, 'monthCode' | 'day'>
 type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
 export const [
@@ -38,15 +39,13 @@ export const [
   (
     isoMonth: number,
     isoDay: number,
-    calendar?: CalendarShimRecord,
+    calendar?: CalendarShimArg,
     referenceIsoYear?: number,
   ) =>
     constructMonthDaySlots(
       isoMonth,
       isoDay,
-      calendar === undefined
-        ? undefined
-        : getInternalCalendarId(getCalendarShimRecordInternal(calendar)),
+      refineCalendarShimArgToId(calendar),
       referenceIsoYear,
     ),
   formatPlainMonthDayIso,
@@ -61,7 +60,7 @@ export const [
 export function create(
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarShimRecord,
+  calendar?: CalendarShimArg,
   referenceIsoYear?: number,
 ): PlainMonthDayShimRecord {
   return new PlainMonthDayShimRecord(
@@ -73,13 +72,11 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<MonthDayFields> & { calendar?: CalendarShimRecord },
+  fields: Partial<MonthDayFields> & { calendar?: CalendarShimArg },
   options?: OverflowOptions,
 ): PlainMonthDayShimRecord {
   const inputCalendar = fields.calendar
-  const internalCalendar = inputCalendar
-    ? getCalendarShimRecordInternal(inputCalendar)
-    : isoCalendar
+  const internalCalendar = refineCalendarShimArg(inputCalendar)
   const resSlots = refinePlainMonthDayObjectLike(
     internalCalendar,
     !inputCalendar,
