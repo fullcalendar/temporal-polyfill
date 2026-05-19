@@ -17,6 +17,7 @@ import {
   computeIsoFieldsFromParts,
   computeIsoInLeapYear,
   computeIsoMonthCodeParts,
+  computeIsoWeekFields,
   isoMonthsInYear,
 } from './isoCalendarMath'
 
@@ -144,4 +145,18 @@ export function computeCalendarDayOfYear(
   const { year } = computeCalendarDateFields(calendar, isoDate)
   const milli0 = computeCalendarEpochMilli(calendar, year)
   return diffEpochMilliDays(milli0!, isoDateToEpochMilli(isoDate)!) + 1
+}
+
+export function computeCalendarWeekOfYear(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): number | undefined {
+  return calendar ? undefined : computeIsoWeekFields(isoDate).weekOfYear
+}
+
+export function computeCalendarYearOfWeek(
+  calendar: InternalCalendar,
+  isoDate: CalendarDateFields,
+): number | undefined {
+  return calendar ? undefined : computeIsoWeekFields(isoDate).yearOfWeek
 }

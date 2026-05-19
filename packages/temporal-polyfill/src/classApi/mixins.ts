@@ -7,19 +7,17 @@ import {
   computeCalendarInLeapYear,
   computeCalendarMonthCode,
   computeCalendarMonthsInYear,
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
 } from '../internal/calendarDerived'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import {
   type InternalCalendar,
   getInternalCalendarId,
-  isoCalendar,
 } from '../internal/externalCalendar'
 import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import {
-  computeIsoDayOfWeek,
-  computeIsoWeekFields,
-} from '../internal/isoCalendarMath'
+import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import {
   getEpochMicro,
   getEpochMilli,
@@ -81,18 +79,14 @@ const yearMonthStatsGetters = {
 
 const dateOnlyStatsGetters = {
   weekOfYear(slots: any) {
-    return slots.calendar === isoCalendar
-      ? computeIsoWeekFields(slots).weekOfYear
-      : undefined
+    return computeCalendarWeekOfYear(slots.calendar, slots)
   },
   dayOfWeek: computeIsoDayOfWeek,
   dayOfYear(slots: any) {
     return computeCalendarDayOfYear(slots.calendar, slots)
   },
   yearOfWeek(slots: any) {
-    return slots.calendar === isoCalendar
-      ? computeIsoWeekFields(slots).yearOfWeek
-      : undefined
+    return computeCalendarYearOfWeek(slots.calendar, slots)
   },
   daysInWeek() {
     return 7

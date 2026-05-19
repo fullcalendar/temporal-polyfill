@@ -31,6 +31,7 @@ import {
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../../internal/utils'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -38,8 +39,7 @@ import {
   computeMonthsInYear,
   computeYearMonthFields,
   getCalendarIdFromBag,
-} from '../calendarUtils'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+} from './calendarUtils'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 

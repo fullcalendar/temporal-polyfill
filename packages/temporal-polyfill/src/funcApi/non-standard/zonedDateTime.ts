@@ -1,3 +1,7 @@
+import {
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
+} from '../../internal/calendarDerived'
 import { refineCalendarId } from '../../internal/calendarId'
 import { toStrictInteger } from '../../internal/cast'
 import {
@@ -96,10 +100,8 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
-  computeWeekOfYear,
-  computeYearOfWeek,
   getCalendarIdFromBag,
-} from '../calendarUtils'
+} from './calendarUtils'
 import {
   diffZonedDays,
   diffZonedMonths,
@@ -229,13 +231,15 @@ export function dayOfWeek(record: Record): number {
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
-export const weekOfYear = adaptDateFunc(computeWeekOfYear) as (
-  record: Record,
-) => number | undefined
+export function weekOfYear(record: Record): number | undefined {
+  const isoDate = zonedEpochSlotsToIso(record)
+  return computeCalendarWeekOfYear(record.calendar, isoDate)
+}
 
-export const yearOfWeek = adaptDateFunc(computeYearOfWeek) as (
-  record: Record,
-) => number | undefined
+export function yearOfWeek(record: Record): number | undefined {
+  const isoDate = zonedEpochSlotsToIso(record)
+  return computeCalendarYearOfWeek(record.calendar, isoDate)
+}
 
 export const dayOfYear = adaptDateFunc(computeDayOfYear) as (
   record: Record,

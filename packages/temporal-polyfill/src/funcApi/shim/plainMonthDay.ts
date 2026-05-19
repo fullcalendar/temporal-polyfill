@@ -21,7 +21,6 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
-import { computeMonthDayFields } from '../calendarUtils'
 import { PlainMonthDayRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
@@ -122,11 +121,7 @@ export function toPlainDate(
   fields: EraYearOrYear,
 ): PlainDateShimRecord {
   const slots = getPlainMonthDayShimRecordSlots(record)
-  const resSlots = convertPlainMonthDayToDate(
-    slots.calendar,
-    computeMonthDayFields(slots),
-    fields,
-  )
+  const resSlots = convertPlainMonthDayToDate(slots.calendar, record, fields)
   return createPlainDateShimRecord(resSlots)
 }
 

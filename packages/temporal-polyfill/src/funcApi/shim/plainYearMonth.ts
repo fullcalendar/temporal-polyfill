@@ -1,6 +1,12 @@
 import { yearMonthGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import {
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarInLeapYear,
+  computeCalendarMonthsInYear,
+} from '../../internal/calendarDerived'
+import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
@@ -29,13 +35,6 @@ import {
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import {
-  computeDaysInMonth,
-  computeDaysInYear,
-  computeInLeapYear,
-  computeMonthsInYear,
-  computeYearMonthFields,
-} from '../calendarUtils'
 import { PlainYearMonthRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
@@ -110,19 +109,23 @@ export function fromString(s: string): PlainYearMonthShimRecord {
 }
 
 export function daysInMonth(record: PlainYearMonthShimRecord): number {
-  return computeDaysInMonth(getPlainYearMonthShimRecordSlots(record))
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  return computeCalendarDaysInMonth(slots.calendar, slots)
 }
 
 export function daysInYear(record: PlainYearMonthShimRecord): number {
-  return computeDaysInYear(getPlainYearMonthShimRecordSlots(record))
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  return computeCalendarDaysInYear(slots.calendar, slots)
 }
 
 export function monthsInYear(record: PlainYearMonthShimRecord): number {
-  return computeMonthsInYear(getPlainYearMonthShimRecordSlots(record))
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  return computeCalendarMonthsInYear(slots.calendar, slots)
 }
 
 export function inLeapYear(record: PlainYearMonthShimRecord): boolean {
-  return computeInLeapYear(getPlainYearMonthShimRecordSlots(record))
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  return computeCalendarInLeapYear(slots.calendar, slots)
 }
 
 export function withFields(
@@ -220,11 +223,7 @@ export function toPlainDate(
   fields: DayFields,
 ): PlainDateShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
-  const resSlots = convertPlainYearMonthToDate(
-    slots.calendar,
-    computeYearMonthFields(slots),
-    fields,
-  )
+  const resSlots = convertPlainYearMonthToDate(slots.calendar, record, fields)
   return createPlainDateShimRecord(resSlots)
 }
 

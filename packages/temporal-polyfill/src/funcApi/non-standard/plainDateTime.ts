@@ -1,3 +1,7 @@
+import {
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
+} from '../../internal/calendarDerived'
 import { refineCalendarId } from '../../internal/calendarId'
 import { toStrictInteger } from '../../internal/cast'
 import {
@@ -74,6 +78,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, identity, memoize } from '../../internal/utils'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -81,11 +86,8 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
-  computeWeekOfYear,
-  computeYearOfWeek,
   getCalendarIdFromBag,
-} from '../calendarUtils'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+} from './calendarUtils'
 import {
   diffPlainDays,
   diffPlainMonths,
@@ -189,13 +191,13 @@ export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
 
-export const weekOfYear = computeWeekOfYear as (
-  record: Record,
-) => number | undefined
+export function weekOfYear(record: Record): number | undefined {
+  return computeCalendarWeekOfYear(record.calendar, record)
+}
 
-export const yearOfWeek = computeYearOfWeek as (
-  record: Record,
-) => number | undefined
+export function yearOfWeek(record: Record): number | undefined {
+  return computeCalendarYearOfWeek(record.calendar, record)
+}
 
 export const dayOfYear = computeDayOfYear as (record: Record) => number
 

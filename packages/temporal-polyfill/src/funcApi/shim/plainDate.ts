@@ -1,6 +1,14 @@
 import { calendarIdGetters, dateFieldGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
-import { computeCalendarDayOfYear } from '../../internal/calendarDerived'
+import {
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarInLeapYear,
+  computeCalendarMonthsInYear,
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
+} from '../../internal/calendarDerived'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import {
@@ -30,15 +38,6 @@ import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRe
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { DateUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import {
-  computeDateFields,
-  computeDaysInMonth,
-  computeDaysInYear,
-  computeInLeapYear,
-  computeMonthsInYear,
-  computeWeekOfYear,
-  computeYearOfWeek,
-} from '../calendarUtils'
 import { PlainDateRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
@@ -168,27 +167,33 @@ export function daysInWeek(record: PlainDateShimRecord): number {
 }
 
 export function weekOfYear(record: PlainDateShimRecord): number | undefined {
-  return computeWeekOfYear(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarWeekOfYear(slots.calendar, slots)
 }
 
 export function yearOfWeek(record: PlainDateShimRecord): number | undefined {
-  return computeYearOfWeek(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarYearOfWeek(slots.calendar, slots)
 }
 
 export function daysInMonth(record: PlainDateShimRecord): number {
-  return computeDaysInMonth(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarDaysInMonth(slots.calendar, slots)
 }
 
 export function daysInYear(record: PlainDateShimRecord): number {
-  return computeDaysInYear(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarDaysInYear(slots.calendar, slots)
 }
 
 export function monthsInYear(record: PlainDateShimRecord): number {
-  return computeMonthsInYear(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarMonthsInYear(slots.calendar, slots)
 }
 
 export function inLeapYear(record: PlainDateShimRecord): boolean {
-  return computeInLeapYear(getPlainDateShimRecordSlots(record))
+  const slots = getPlainDateShimRecordSlots(record)
+  return computeCalendarInLeapYear(slots.calendar, slots)
 }
 
 export function add(
@@ -293,10 +298,7 @@ export function toPlainYearMonth(
   record: PlainDateShimRecord,
 ): PlainYearMonthShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const resSlots = convertToPlainYearMonth(
-    slots.calendar,
-    computeDateFields(slots),
-  )
+  const resSlots = convertToPlainYearMonth(slots.calendar, record)
   return createPlainYearMonthShimRecord(resSlots)
 }
 
@@ -304,10 +306,7 @@ export function toPlainMonthDay(
   record: PlainDateShimRecord,
 ): PlainMonthDayShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const resSlots = convertToPlainMonthDay(
-    slots.calendar,
-    computeDateFields(slots),
-  )
+  const resSlots = convertToPlainMonthDay(slots.calendar, record)
   return createPlainMonthDayShimRecord(resSlots)
 }
 

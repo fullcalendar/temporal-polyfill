@@ -25,11 +25,11 @@ import {
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { identity, memoize } from '../../internal/utils'
+import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
-} from '../calendarUtils'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+} from './calendarUtils'
 import * as PlainDateFns from './plainDate'
 
 export type Record = CalendarDateFields & { calendar: InternalCalendar }

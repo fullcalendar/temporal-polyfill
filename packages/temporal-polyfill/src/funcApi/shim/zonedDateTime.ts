@@ -1,5 +1,19 @@
-import { calendarIdGetters, epochGetters } from '../../classApi/mixins'
+import {
+  calendarIdGetters,
+  dateGetters,
+  epochGetters,
+  timeGetters,
+} from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+import {
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarInLeapYear,
+  computeCalendarMonthsInYear,
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
+} from '../../internal/calendarDerived'
 import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
@@ -56,17 +70,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
-import {
-  computeDateFields,
-  computeDayOfYear,
-  computeDaysInMonth,
-  computeDaysInYear,
-  computeInLeapYear,
-  computeMonthsInYear,
-  computeWeekOfYear,
-  computeYearOfWeek,
-} from '../calendarUtils'
+import { NumberSign, mapProps } from '../../internal/utils'
 import { ZonedDateTimeRecordBranding } from '../common-branding'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
 import {
@@ -128,6 +132,8 @@ export const [
   {
     ...epochGetters,
     ...calendarIdGetters,
+    ...adaptDateMethods(dateGetters),
+    ...adaptDateMethods(timeGetters),
     timeZoneId(slots: any): string {
       return slots.timeZone.id
     },
@@ -259,33 +265,40 @@ export function daysInWeek(record: ZonedDateTimeShimRecord): number {
 export function weekOfYear(
   record: ZonedDateTimeShimRecord,
 ): number | undefined {
-  return computeDateProperty(record, computeWeekOfYear)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarWeekOfYear(slots.calendar, slots)
 }
 
 export function yearOfWeek(
   record: ZonedDateTimeShimRecord,
 ): number | undefined {
-  return computeDateProperty(record, computeYearOfWeek)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarYearOfWeek(slots.calendar, slots)
 }
 
 export function dayOfYear(record: ZonedDateTimeShimRecord): number {
-  return computeDateProperty(record, computeDayOfYear)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarDayOfYear(slots.calendar, slots)
 }
 
 export function daysInMonth(record: ZonedDateTimeShimRecord): number {
-  return computeDateProperty(record, computeDaysInMonth)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarDaysInMonth(slots.calendar, slots)
 }
 
 export function daysInYear(record: ZonedDateTimeShimRecord): number {
-  return computeDateProperty(record, computeDaysInYear)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarDaysInYear(slots.calendar, slots)
 }
 
 export function monthsInYear(record: ZonedDateTimeShimRecord): number {
-  return computeDateProperty(record, computeMonthsInYear)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarMonthsInYear(slots.calendar, slots)
 }
 
 export function inLeapYear(record: ZonedDateTimeShimRecord): boolean {
-  return computeDateProperty(record, computeInLeapYear)
+  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  return computeCalendarInLeapYear(slots.calendar, slots)
 }
 
 export function hoursInDay(record: ZonedDateTimeShimRecord): number {
@@ -444,8 +457,7 @@ export function toPlainYearMonth(
   record: ZonedDateTimeShimRecord,
 ): PlainYearMonthShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
-  const fields = computeDateFields(zonedEpochSlotsToIso(slots))
-  const resSlots = convertToPlainYearMonth(slots.calendar, fields)
+  const resSlots = convertToPlainYearMonth(slots.calendar, record)
   return createPlainYearMonthShimRecord(resSlots)
 }
 
@@ -453,8 +465,7 @@ export function toPlainMonthDay(
   record: ZonedDateTimeShimRecord,
 ): PlainMonthDayShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
-  const fields = computeDateFields(zonedEpochSlotsToIso(slots))
-  const resSlots = convertToPlainMonthDay(slots.calendar, fields)
+  const resSlots = convertToPlainMonthDay(slots.calendar, record)
   return createPlainMonthDayShimRecord(resSlots)
 }
 
@@ -473,9 +484,10 @@ export function toLocaleString(
   return format.format(epochMilli)
 }
 
-function computeDateProperty<R>(
-  record: ZonedDateTimeShimRecord,
-  compute: (dateRecord: any) => R,
-): R {
-  return compute(zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record)))
+function adaptDateMethods(methods: any) {
+  return mapProps((method: any) => {
+    return (slots: any) => {
+      return method(zonedEpochSlotsToIso(slots))
+    }
+  }, methods)
 }

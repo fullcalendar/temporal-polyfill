@@ -7,21 +7,17 @@ import {
   computeCalendarInLeapYear,
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYear,
-} from '../internal/calendarDerived'
-import { refineCalendarId } from '../internal/calendarId'
-import { formatMonthCode } from '../internal/calendarMonthCode'
-import {
-  type InternalCalendar,
-  isoCalendar,
-} from '../internal/externalCalendar'
+} from '../../internal/calendarDerived'
+import { refineCalendarId } from '../../internal/calendarId'
+import { formatMonthCode } from '../../internal/calendarMonthCode'
+import { type InternalCalendar } from '../../internal/externalCalendar'
 import {
   CalendarDateFields,
   DateFields,
   MonthDayFields,
   YearMonthFields,
-} from '../internal/fieldTypes'
-import { isoCalendarId } from '../internal/intlCalendarConfig'
-import { computeIsoWeekFields } from '../internal/isoCalendarMath'
+} from '../../internal/fieldTypes'
+import { isoCalendarId } from '../../internal/intlCalendarConfig'
 
 // these utils used directly by func-api-based slots
 
@@ -116,20 +112,4 @@ export function computeDayOfYear(
   slots: CalendarDateFields & { calendar: InternalCalendar },
 ): number {
   return computeCalendarDayOfYear(slots.calendar, slots)
-}
-
-export function computeWeekOfYear(
-  slots: CalendarDateFields & { calendar: InternalCalendar },
-): number | undefined {
-  return slots.calendar === isoCalendar
-    ? computeIsoWeekFields(slots).weekOfYear
-    : undefined
-}
-
-export function computeYearOfWeek(
-  slots: CalendarDateFields & { calendar: InternalCalendar },
-): number | undefined {
-  return slots.calendar === isoCalendar
-    ? computeIsoWeekFields(slots).yearOfWeek
-    : undefined
 }
