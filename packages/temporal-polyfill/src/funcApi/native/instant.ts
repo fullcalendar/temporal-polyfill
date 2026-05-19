@@ -23,11 +23,6 @@ import {
 export type InstantNativeRecord = any
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-type ToZonedDateTimeOptions = {
-  timeZone: string
-  calendar: string
-}
-
 export const [
   InstantNativeRecord,
   createInstantNativeRecord,
@@ -139,15 +134,6 @@ export function compare(
   const native = getInstantNative(record)
   const otherNative = getInstantNative(otherRecord)
   return (globalThis as any).Temporal.Instant.compare(native, otherNative)
-}
-
-export function toZonedDateTime(
-  record: InstantNativeRecord,
-  options: ToZonedDateTimeOptions,
-): ZonedDateTimeNativeRecord {
-  const native = getInstantNative(record)
-  const resNative = native.toZonedDateTime(options)
-  return createZonedDateTimeNativeRecord(resNative)
 }
 
 export function toZonedDateTimeISO(

@@ -20,28 +20,16 @@ import {
   getDurationNative,
 } from './duration'
 import { InstantNativeRecord, createInstantNativeRecord } from './instant'
-import {
-  PlainDateNativeRecord,
-  createPlainDateNativeRecord,
-  getPlainDateNative,
-} from './plainDate'
+import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 import {
   PlainDateTimeNativeRecord,
   createPlainDateTimeNativeRecord,
 } from './plainDateTime'
 import {
-  PlainMonthDayNativeRecord,
-  createPlainMonthDayNativeRecord,
-} from './plainMonthDay'
-import {
   PlainTimeNativeRecord,
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
-import {
-  PlainYearMonthNativeRecord,
-  createPlainYearMonthNativeRecord,
-} from './plainYearMonth'
 
 type ZonedDateTimeNativeFields = Partial<DateTimeFields> & {
   calendar?: CalendarNativeRecord
@@ -135,16 +123,6 @@ export function withTimeZone(
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
   const resNative = native.withTimeZone(timeZoneId)
-  return createZonedDateTimeNativeRecord(resNative)
-}
-
-export function withPlainDate(
-  record: ZonedDateTimeNativeRecord,
-  plainDateRecord: PlainDateNativeRecord,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
-  const plainDateNative = getPlainDateNative(plainDateRecord)
-  const resNative = native.withPlainDate(plainDateNative)
   return createZonedDateTimeNativeRecord(resNative)
 }
 
@@ -334,20 +312,6 @@ export function toPlainTime(
 ): PlainTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).toPlainTime()
   return createPlainTimeNativeRecord(resNative)
-}
-
-export function toPlainYearMonth(
-  record: ZonedDateTimeNativeRecord,
-): PlainYearMonthNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toPlainYearMonth()
-  return createPlainYearMonthNativeRecord(resNative)
-}
-
-export function toPlainMonthDay(
-  record: ZonedDateTimeNativeRecord,
-): PlainMonthDayNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toPlainMonthDay()
-  return createPlainMonthDayNativeRecord(resNative)
 }
 
 export function toLocaleString(

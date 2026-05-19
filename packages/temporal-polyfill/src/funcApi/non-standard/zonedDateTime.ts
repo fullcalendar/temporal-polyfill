@@ -10,8 +10,6 @@ import {
 } from '../../internal/compare'
 import { constructZonedEpochNanoSlots } from '../../internal/construct'
 import {
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
@@ -40,10 +38,7 @@ import {
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
-import {
-  zonedDateTimeWithPlainDate,
-  zonedDateTimeWithPlainTime,
-} from '../../internal/modify'
+import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
 import {
   DiffOptions,
@@ -90,9 +85,8 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../../internal/units'
-import { NumberSign, bindArgs, memoize } from '../../internal/utils'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import {
-  computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
   computeDaysInYear,
@@ -122,9 +116,7 @@ import {
 } from './moveUtils'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
-import * as PlainMonthDayFns from './plainMonthDay'
 import * as PlainTimeFns from './plainTime'
-import * as PlainYearMonthFns from './plainYearMonth'
 import {
   computeDayCeil,
   computeHourFloor,
@@ -184,28 +176,6 @@ export const fromString = parseZonedDateTime as (
 
 // Getters
 // -----------------------------------------------------------------------------
-
-// TODO: improve prop mergeing and combining here
-const getFields = memoize((record: Record): Fields => {
-  const isoDateTime = zonedEpochSlotsToIso(record)
-  const { offsetNanoseconds } = isoDateTime
-  const { year, month, day, ...time } = combineDateAndTime(
-    isoDateTime,
-    isoDateTime,
-  )
-  const offsetString = formatOffsetNano(offsetNanoseconds)
-
-  return {
-    ...computeDateFields({
-      calendar: record.calendar,
-      year,
-      month,
-      day,
-    }),
-    ...time,
-    offset: offsetString,
-  }
-}, WeakMap)
 
 export const epochMilliseconds = getEpochMilli as (record: Record) => number
 
@@ -282,11 +252,6 @@ export function withTimeZone(record: Record, timeZoneId: string): Record {
     timeZone: queryTimeZone(refineTimeZoneId(timeZoneId)),
   }
 }
-
-export const withPlainDate = bindArgs(zonedDateTimeWithPlainDate) as (
-  zonedDateTimeRecord: Record,
-  plainDateRecord: PlainDateFns.Record,
-) => Record
 
 export function withPlainTime(
   zonedDateTimeRecord: Record,
@@ -376,14 +341,6 @@ export const toPlainDate = bindArgs(zonedDateTimeToPlainDate) as (
 export const toPlainTime = bindArgs(zonedDateTimeToPlainTime) as (
   record: Record,
 ) => PlainTimeFns.Record
-
-export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return convertToPlainYearMonth(record.calendar, getFields(record))
-}
-
-export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertToPlainMonthDay(record.calendar, getFields(record))
-}
 
 // Formatting
 // -----------------------------------------------------------------------------

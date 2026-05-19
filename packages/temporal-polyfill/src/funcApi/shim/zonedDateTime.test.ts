@@ -1,15 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
 import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
 import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainDateTimeEquals,
-  expectPlainMonthDayEquals,
   expectPlainTimeEquals,
-  expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
   testHotCache,
 } from './testUtils'
@@ -190,32 +187,6 @@ describe('withFields', () => {
       millisecond: 0,
       nanosecond: 0,
       offset: '-05:00',
-    })
-  })
-})
-
-describe('withPlainDate', () => {
-  it('works', () => {
-    const zdt0 = ZonedDateTimeFns.create(
-      1709055000000000000n,
-      'America/New_York',
-    )
-    const pd = PlainDateFns.create(2009, 6, 1)
-    const zdt1 = ZonedDateTimeFns.withPlainDate(zdt0, pd)
-    expect(getPublicFields(zdt1)).toEqual({
-      era: undefined,
-      eraYear: undefined,
-      year: 2009,
-      monthCode: 'M06',
-      month: 6,
-      day: 1,
-      hour: 12,
-      minute: 30,
-      second: 0,
-      microsecond: 0,
-      millisecond: 0,
-      nanosecond: 0,
-      offset: '-04:00',
     })
   })
 })
@@ -629,32 +600,6 @@ describe('toPlainTime', () => {
     expectPlainTimeEquals(pt, {
       hour: 12,
       minute: 30,
-    })
-  })
-})
-
-describe('toPlainYearMonth', () => {
-  it('works', () => {
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-27T12:30:00[America/New_York]',
-    )
-    const pym = ZonedDateTimeFns.toPlainYearMonth(zdt)
-    expectPlainYearMonthEquals(pym, {
-      year: 2024,
-      month: 2,
-    })
-  })
-})
-
-describe('toPlainMonthDay', () => {
-  it('works', () => {
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-27T12:30:00[America/New_York]',
-    )
-    const pmd = ZonedDateTimeFns.toPlainMonthDay(zdt)
-    expectPlainMonthDayEquals(pmd, {
-      monthCode: 'M02',
-      day: 27,
     })
   })
 })

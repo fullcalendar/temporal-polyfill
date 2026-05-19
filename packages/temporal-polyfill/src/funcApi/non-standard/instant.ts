@@ -1,5 +1,3 @@
-import { refineCalendarId } from '../../internal/calendarId'
-import { requireObjectLike } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -8,7 +6,6 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
-import { getInternalCalendar } from '../../internal/externalCalendar'
 import {
   createFormatPrepper,
   instantConfig,
@@ -41,10 +38,6 @@ export type Record = EpochNanoFields
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
 export type ToStringOptions = InstantDisplayOptions
-export type ToZonedDateTimeOptions = {
-  timeZone: string
-  calendar: string
-}
 export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
@@ -113,19 +106,6 @@ export const compare = compareInstants as (
 
 // Conversion
 // -----------------------------------------------------------------------------
-
-export function toZonedDateTime(
-  record: Record,
-  options: ToZonedDateTimeOptions,
-): ZonedDateTimeFns.Record {
-  const refinedObj = requireObjectLike(options)
-
-  return instantToZonedDateTime(
-    record,
-    queryTimeZone(refineTimeZoneId(refinedObj.timeZone)),
-    getInternalCalendar(refineCalendarId(refinedObj.calendar)),
-  )
-}
 
 export function toZonedDateTimeISO(
   record: Record,

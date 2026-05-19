@@ -9,11 +9,7 @@ import {
   plainDateTimesEqual,
 } from '../../internal/compare'
 import { constructDateTimeSlots } from '../../internal/construct'
-import {
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
-  plainDateTimeToZonedDateTime,
-} from '../../internal/convert'
+import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes, getCommonCalendar } from '../../internal/diff'
 import {
@@ -42,7 +38,6 @@ import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
-import { plainDateTimeWithPlainDate } from '../../internal/modify'
 import { movePlainDateTime } from '../../internal/move'
 import {
   DateTimeDisplayOptions,
@@ -77,10 +72,9 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../../internal/units'
-import { NumberSign, bindArgs, identity, memoize } from '../../internal/utils'
+import { NumberSign, bindArgs, identity } from '../../internal/utils'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import {
-  computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
   computeDaysInYear,
@@ -108,9 +102,7 @@ import {
   reversedMove,
 } from './moveUtils'
 import * as PlainDateFns from './plainDate'
-import * as PlainMonthDayFns from './plainMonthDay'
 import * as PlainTimeFns from './plainTime'
-import * as PlainYearMonthFns from './plainYearMonth'
 import {
   computeDayCeil,
   computeHourFloor,
@@ -174,19 +166,6 @@ export const fromString = parsePlainDateTime as (s: string) => Record
 // Getters
 // -----------------------------------------------------------------------------
 
-const getFields = memoize((record: Record): Fields => {
-  const {
-    year: _year,
-    month: _month,
-    day: _day,
-    ...time
-  } = combineDateAndTime(record, record)
-  return {
-    ...computeDateFields(record), // contains era/eraYear/monthCode
-    ...time, // the _* fields basically plucked
-  }
-}, WeakMap)
-
 export const dayOfWeek = computeIsoDayOfWeek as (record: Record) => number
 
 export const daysInWeek = (() => 7) as (record: Record) => number
@@ -224,11 +203,6 @@ export function withCalendar(record: Record, calendarId: string): Record {
     getInternalCalendar(refineCalendarId(calendarId)),
   )
 }
-
-export const withPlainDate = plainDateTimeWithPlainDate as (
-  plainDateTimeRecord: Record,
-  plainDateRecord: PlainDateFns.Record,
-) => Record
 
 export function withPlainTime(
   plainDateTimeRecord: Record,
@@ -310,14 +284,6 @@ export function toPlainDate(record: Record): PlainDateFns.Record {
 
 export function toPlainTime(record: Record): PlainTimeFns.Record {
   return createTimeSlots(record)
-}
-
-export function toPlainYearMonth(record: Record): PlainYearMonthFns.Record {
-  return convertToPlainYearMonth(record.calendar, getFields(record))
-}
-
-export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
-  return convertToPlainMonthDay(record.calendar, getFields(record))
 }
 
 // Formatting

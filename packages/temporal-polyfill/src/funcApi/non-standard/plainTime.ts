@@ -1,10 +1,8 @@
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
-import { plainTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
-import { InternalCalendar } from '../../internal/externalCalendar'
-import { CalendarDateFields, TimeFields } from '../../internal/fieldTypes'
+import { TimeFields } from '../../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
@@ -18,15 +16,10 @@ import {
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { roundPlainTime } from '../../internal/round'
-import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
-import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign, bindArgs, identity } from '../../internal/utils'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
 import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
-import * as PlainDateTimeFns from './plainDateTime'
-import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = TimeFields
 
@@ -36,10 +29,6 @@ export type AssignmentOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<TimeUnitName>
 export type RoundOptions = RoundingOptions<TimeUnitName>
 export type ToStringOptions = TimeDisplayOptions
-export type ToZonedDateTimeOptions = {
-  timeZone: string
-  plainDate: PlainDateFns.Record
-}
 export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
@@ -109,29 +98,6 @@ export const compare = compareTimeFields as (
   record0: Record,
   record1: Record,
 ) => NumberSign
-
-// Conversion
-// -----------------------------------------------------------------------------
-
-export const toZonedDateTime = bindArgs(
-  plainTimeToZonedDateTime<CalendarDateFields & { calendar: InternalCalendar }>,
-  refineTimeZoneId,
-  identity,
-) as (
-  plainTimeRecord: Record,
-  options: ToZonedDateTimeOptions,
-) => ZonedDateTimeFns.Record
-
-export function toPlainDateTime(
-  plainTimeRecord: Record,
-  plainDateRecord: PlainDateFns.Record,
-): PlainDateTimeFns.Record {
-  return createPlainDateTimeFromRefinedFields(
-    plainDateRecord,
-    plainTimeRecord,
-    plainDateRecord.calendar,
-  )
-}
 
 // Formatting
 // -----------------------------------------------------------------------------

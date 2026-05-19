@@ -20,8 +20,6 @@ import {
 } from '../../internal/compare'
 import { constructZonedEpochNanoSlots } from '../../internal/construct'
 import {
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
@@ -39,10 +37,7 @@ import {
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
-import {
-  zonedDateTimeWithPlainDate,
-  zonedDateTimeWithPlainTime,
-} from '../../internal/modify'
+import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
 import {
   DiffOptions,
@@ -79,28 +74,16 @@ import {
   getDurationShimRecordSlots,
 } from './duration'
 import { InstantShimRecord, createInstantShimRecord } from './instant'
-import {
-  PlainDateShimRecord,
-  createPlainDateShimRecord,
-  getPlainDateShimRecordSlots,
-} from './plainDate'
+import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
   PlainDateTimeShimRecord,
   createPlainDateTimeShimRecord,
 } from './plainDateTime'
 import {
-  PlainMonthDayShimRecord,
-  createPlainMonthDayShimRecord,
-} from './plainMonthDay'
-import {
   PlainTimeShimRecord,
   createPlainTimeShimRecord,
   getPlainTimeShimRecordSlots,
 } from './plainTime'
-import {
-  PlainYearMonthShimRecord,
-  createPlainYearMonthShimRecord,
-} from './plainYearMonth'
 
 type ZonedDateTimeShimFields = Partial<DateTimeFields> & {
   calendar?: CalendarShimArg
@@ -207,16 +190,6 @@ export function withTimeZone(
       slots.calendar,
     ),
   )
-}
-
-export function withPlainDate(
-  record: ZonedDateTimeShimRecord,
-  plainDateRecord: PlainDateShimRecord,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const plainDateSlots = getPlainDateShimRecordSlots(plainDateRecord)
-  const resSlots = zonedDateTimeWithPlainDate(slots, plainDateSlots)
-  return createZonedDateTimeShimRecord(resSlots)
 }
 
 export function withPlainTime(
@@ -441,22 +414,6 @@ export function toPlainTime(
     getZonedDateTimeShimRecordSlots(record),
   )
   return createPlainTimeShimRecord(resSlots)
-}
-
-export function toPlainYearMonth(
-  record: ZonedDateTimeShimRecord,
-): PlainYearMonthShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const resSlots = convertToPlainYearMonth(slots.calendar, record)
-  return createPlainYearMonthShimRecord(resSlots)
-}
-
-export function toPlainMonthDay(
-  record: ZonedDateTimeShimRecord,
-): PlainMonthDayShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const resSlots = convertToPlainMonthDay(slots.calendar, record)
-  return createPlainMonthDayShimRecord(resSlots)
 }
 
 const prepFormat = createFormatPrepper(zonedConfig)

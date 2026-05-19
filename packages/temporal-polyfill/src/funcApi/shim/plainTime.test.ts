@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
 import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
-  expectPlainDateTimeEquals,
   expectPlainTimeEquals,
   testHotCache,
 } from './testUtils'
@@ -158,21 +156,6 @@ describe('compare', () => {
     expect(PlainTimeFns.compare(pt0, pt1)).toBe(-1)
     expect(PlainTimeFns.compare(pt1, pt0)).toBe(1)
     expect(PlainTimeFns.compare(pt0, pt0)).toBe(0)
-  })
-})
-
-describe('toPlainDateTime', () => {
-  it('works', () => {
-    const pt = PlainTimeFns.create(12, 30)
-    const pd = PlainDateFns.create(2024, 6, 3)
-    const pdt = PlainTimeFns.toPlainDateTime(pt, pd)
-    expectPlainDateTimeEquals(pdt, {
-      year: 2024,
-      month: 6,
-      day: 3,
-      hour: 12,
-      minute: 30,
-    })
   })
 })
 

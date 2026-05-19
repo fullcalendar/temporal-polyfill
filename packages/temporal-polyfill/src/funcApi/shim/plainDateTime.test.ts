@@ -1,16 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import '../../intl-calendars'
 import * as DurationFns from './duration'
-import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainDateTimeEquals,
-  expectPlainMonthDayEquals,
   expectPlainTimeEquals,
-  expectPlainYearMonthEquals,
   expectZonedDateTimeEquals,
   testHotCache,
 } from './testUtils'
@@ -150,21 +147,6 @@ describe('withFields', () => {
       millisecond: 0,
       microsecond: 0,
       nanosecond: 5,
-    })
-  })
-})
-
-describe('withPlainDate', () => {
-  it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
-    const pd = PlainDateFns.create(2009, 6, 1)
-    const pdt1 = PlainDateTimeFns.withPlainDate(pdt0, pd)
-    expectPlainDateTimeEquals(pdt1, {
-      year: 2009,
-      month: 6,
-      day: 1,
-      hour: 12,
-      minute: 30,
     })
   })
 })
@@ -453,28 +435,6 @@ describe('toPlainDate', () => {
       year: 5784,
       month: 6,
       day: 18,
-    })
-  })
-})
-
-describe('toPlainYearMonth', () => {
-  it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
-    const pym = PlainDateTimeFns.toPlainYearMonth(pdt)
-    expectPlainYearMonthEquals(pym, {
-      year: 2024,
-      month: 2,
-    })
-  })
-})
-
-describe('toPlainMonthDay', () => {
-  it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
-    const pmd = PlainDateTimeFns.toPlainMonthDay(pdt)
-    expectPlainMonthDayEquals(pmd, {
-      monthCode: 'M02',
-      day: 27,
     })
   })
 })

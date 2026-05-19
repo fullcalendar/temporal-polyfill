@@ -162,19 +162,6 @@ describe('toZonedDateTimeISO', () => {
   })
 })
 
-describe('toZonedDateTime', () => {
-  it('converts an Instant', () => {
-    const inst = InstantFns.create(1704063600000000001n)
-    const zdt = InstantFns.toZonedDateTime(inst, {
-      timeZone: 'America/New_York',
-      calendar: 'hebrew',
-    })
-    expect(zdt.epochNanoseconds).toBe(1704063600000000001n)
-    expect(zdt.timeZoneId).toBe('America/New_York')
-    expect(zdt.calendarId).toBe('hebrew')
-  })
-})
-
 describe('toLocaleString', () => {
   it('works', () => {
     const inst = InstantFns.create(1704063600000000000n)

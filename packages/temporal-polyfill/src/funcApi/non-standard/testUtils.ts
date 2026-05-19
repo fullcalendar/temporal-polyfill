@@ -38,10 +38,10 @@ export function getCurrentZonedDateTime(
   calendarId: string,
   timeZoneId: string,
 ): ZonedDateTimeFns.Record {
-  return InstantFns.toZonedDateTime(getCurrentInstant(), {
-    timeZone: timeZoneId,
-    calendar: calendarId,
-  })
+  return ZonedDateTimeFns.withCalendar(
+    InstantFns.toZonedDateTimeISO(getCurrentInstant(), timeZoneId),
+    calendarId,
+  )
 }
 
 // Equality

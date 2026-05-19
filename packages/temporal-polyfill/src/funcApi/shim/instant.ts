@@ -1,7 +1,5 @@
 import { epochGetters } from '../../classApi/mixins'
 import { createSlotClass } from '../../classApi/slotClass'
-import { refineCalendarId } from '../../internal/calendarId'
-import { requireObjectLike } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -10,7 +8,6 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
-import { getInternalCalendar } from '../../internal/externalCalendar'
 import {
   createFormatPrepper,
   instantConfig,
@@ -43,11 +40,6 @@ import {
 
 export type InstantShimRecord = any
 type Format = DateTimeFormatLike<InstantShimRecord>
-
-type ToZonedDateTimeOptions = {
-  timeZone: string
-  calendar: string
-}
 
 export const [
   InstantShimRecord,
@@ -152,19 +144,6 @@ export function compare(
   const slots = getInstantShimRecordSlots(record)
   const otherSlots = getInstantShimRecordSlots(otherRecord)
   return compareInstants(slots, otherSlots)
-}
-
-export function toZonedDateTime(
-  record: InstantShimRecord,
-  options: ToZonedDateTimeOptions,
-): ZonedDateTimeShimRecord {
-  const refinedObj = requireObjectLike(options)
-  const resSlots = instantToZonedDateTime(
-    getInstantShimRecordSlots(record),
-    queryTimeZone(refineTimeZoneId(refinedObj.timeZone)),
-    getInternalCalendar(refineCalendarId(refinedObj.calendar)),
-  )
-  return createZonedDateTimeShimRecord(resSlots)
 }
 
 export function toZonedDateTimeISO(

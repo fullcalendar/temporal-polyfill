@@ -19,24 +19,12 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
-import {
-  PlainDateNativeRecord,
-  createPlainDateNativeRecord,
-  getPlainDateNative,
-} from './plainDate'
-import {
-  PlainMonthDayNativeRecord,
-  createPlainMonthDayNativeRecord,
-} from './plainMonthDay'
+import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 import {
   PlainTimeNativeRecord,
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
-import {
-  PlainYearMonthNativeRecord,
-  createPlainYearMonthNativeRecord,
-} from './plainYearMonth'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
@@ -156,16 +144,6 @@ export function withFields(
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
   const resNative = native.with(mod, options)
-  return createPlainDateTimeNativeRecord(resNative)
-}
-
-export function withPlainDate(
-  record: PlainDateTimeNativeRecord,
-  plainDateRecord: PlainDateNativeRecord,
-): PlainDateTimeNativeRecord {
-  const native = getPlainDateTimeNative(record)
-  const plainDateNative = getPlainDateNative(plainDateRecord)
-  const resNative = native.withPlainDate(plainDateNative)
   return createPlainDateTimeNativeRecord(resNative)
 }
 
@@ -315,20 +293,6 @@ export function toPlainTime(
 ): PlainTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).toPlainTime()
   return createPlainTimeNativeRecord(resNative)
-}
-
-export function toPlainYearMonth(
-  record: PlainDateTimeNativeRecord,
-): PlainYearMonthNativeRecord {
-  const resNative = getPlainDateTimeNative(record).toPlainYearMonth()
-  return createPlainYearMonthNativeRecord(resNative)
-}
-
-export function toPlainMonthDay(
-  record: PlainDateTimeNativeRecord,
-): PlainMonthDayNativeRecord {
-  const resNative = getPlainDateTimeNative(record).toPlainMonthDay()
-  return createPlainMonthDayNativeRecord(resNative)
 }
 
 export function createFormat(
