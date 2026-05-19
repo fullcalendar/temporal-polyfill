@@ -1,21 +1,37 @@
 import { calendarIdGetters, dateFieldGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import { computeCalendarDayOfYear } from '../../internal/calendarDerived'
-import { plainDatesEqual } from '../../internal/compare'
+import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
 import { isoCalendar } from '../../internal/externalCalendar'
 import { DateFields } from '../../internal/fieldTypes'
+import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
+import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
-import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
+import {
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../../internal/optionsModel'
 import { createDateSlots } from '../../internal/slots'
 import { DateUnitName } from '../../internal/units'
+import { NumberSign } from '../../internal/utils'
+import {
+  computeDaysInMonth,
+  computeDaysInYear,
+  computeInLeapYear,
+  computeMonthsInYear,
+  computeWeekOfYear,
+  computeYearOfWeek,
+} from '../calendarUtils'
 import { PlainDateRecordBranding } from '../common-branding'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
 import {
+  DurationShimRecord,
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
@@ -76,6 +92,10 @@ export function fromFields(
   return createPlainDateShimRecord(resSlots)
 }
 
+export function fromString(s: string): PlainDateShimRecord {
+  return createPlainDateShimRecord(parsePlainDate(s))
+}
+
 export function withCalendar(
   record: PlainDateShimRecord,
   inputCalendar: CalendarShimRecord,
@@ -101,6 +121,39 @@ export function withFields(
 export function dayOfYear(record: PlainDateShimRecord) {
   const slots = getPlainDateShimRecordSlots(record)
   return computeCalendarDayOfYear(slots.calendar, slots)
+}
+
+export function dayOfWeek(record: PlainDateShimRecord): number {
+  return computeIsoDayOfWeek(getPlainDateShimRecordSlots(record))
+}
+
+export function daysInWeek(record: PlainDateShimRecord): number {
+  getPlainDateShimRecordSlots(record)
+  return 7
+}
+
+export function weekOfYear(record: PlainDateShimRecord): number | undefined {
+  return computeWeekOfYear(getPlainDateShimRecordSlots(record))
+}
+
+export function yearOfWeek(record: PlainDateShimRecord): number | undefined {
+  return computeYearOfWeek(getPlainDateShimRecordSlots(record))
+}
+
+export function daysInMonth(record: PlainDateShimRecord): number {
+  return computeDaysInMonth(getPlainDateShimRecordSlots(record))
+}
+
+export function daysInYear(record: PlainDateShimRecord): number {
+  return computeDaysInYear(getPlainDateShimRecordSlots(record))
+}
+
+export function monthsInYear(record: PlainDateShimRecord): number {
+  return computeMonthsInYear(getPlainDateShimRecordSlots(record))
+}
+
+export function inLeapYear(record: PlainDateShimRecord): boolean {
+  return computeInLeapYear(getPlainDateShimRecordSlots(record))
 }
 
 export function add(
@@ -131,7 +184,7 @@ export function until(
   record: PlainDateShimRecord,
   otherRecord: PlainDateShimRecord,
   options?: DiffOptions<DateUnitName>,
-) {
+): DurationShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const otherSlots = getPlainDateShimRecordSlots(otherRecord)
   const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
@@ -143,7 +196,7 @@ export function since(
   record: PlainDateShimRecord,
   otherRecord: PlainDateShimRecord,
   options?: DiffOptions<DateUnitName>,
-) {
+): DurationShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const otherSlots = getPlainDateShimRecordSlots(otherRecord)
   const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
@@ -158,4 +211,20 @@ export function equals(
   const slots = getPlainDateShimRecordSlots(record)
   const otherSlots = getPlainDateShimRecordSlots(otherRecord)
   return plainDatesEqual(slots, otherSlots)
+}
+
+export function compare(
+  record: PlainDateShimRecord,
+  otherRecord: PlainDateShimRecord,
+): NumberSign {
+  const slots = getPlainDateShimRecordSlots(record)
+  const otherSlots = getPlainDateShimRecordSlots(otherRecord)
+  return compareIsoDateFields(slots, otherSlots)
+}
+
+export function toString(
+  record: PlainDateShimRecord,
+  options?: CalendarDisplayOptions,
+): string {
+  return formatPlainDateIso(getPlainDateShimRecordSlots(record), options)
 }

@@ -1,0 +1,185 @@
+import { createSlotClass } from '../../classApi/slotClass'
+import { YearMonthFields } from '../../internal/fieldTypes'
+import {
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../../internal/optionsModel'
+import { YearMonthUnitName } from '../../internal/units'
+import { NumberSign } from '../../internal/utils'
+import { PlainYearMonthRecordBranding } from '../common-branding'
+import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import {
+  DurationNativeRecord,
+  createDurationNativeRecord,
+  getDurationNative,
+} from './duration'
+
+export type PlainYearMonthNativeRecord = any & YearMonthFields
+
+export const [
+  PlainYearMonthNativeRecord,
+  createPlainYearMonthNativeRecord,
+  getPlainYearMonthNative,
+] = createSlotClass(
+  PlainYearMonthRecordBranding,
+  (
+    isoYear: number,
+    isoMonth: number,
+    calendar?: CalendarNativeRecord,
+    referenceIsoDay?: number,
+  ) =>
+    new (globalThis as any).Temporal.PlainYearMonth(
+      isoYear,
+      isoMonth,
+      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+      referenceIsoDay,
+    ),
+  (native) => native.toString(),
+  {
+    calendarId: (native: any) => native.calendarId,
+    era: (native: any) => native.era,
+    eraYear: (native: any) => native.eraYear,
+    year: (native: any) => native.year,
+    monthCode: (native: any) => native.monthCode,
+    month: (native: any) => native.month,
+    daysInMonth: (native: any) => native.daysInMonth,
+    daysInYear: (native: any) => native.daysInYear,
+    inLeapYear: (native: any) => native.inLeapYear,
+    monthsInYear: (native: any) => native.monthsInYear,
+  },
+  {},
+  {},
+)
+
+export function create(
+  isoYear: number,
+  isoMonth: number,
+  calendar?: CalendarNativeRecord,
+  referenceIsoDay?: number,
+): PlainYearMonthNativeRecord {
+  return new PlainYearMonthNativeRecord(
+    isoYear,
+    isoMonth,
+    calendar,
+    referenceIsoDay,
+  )
+}
+
+export function fromFields(
+  fields: Partial<YearMonthFields> & { calendar?: CalendarNativeRecord },
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const calendar =
+    fields.calendar === undefined
+      ? undefined
+      : getCalendarNativeRecordId(fields.calendar)
+  const resNative = (globalThis as any).Temporal.PlainYearMonth.from(
+    { ...fields, calendar },
+    options,
+  )
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function fromString(s: string): PlainYearMonthNativeRecord {
+  const resNative = (globalThis as any).Temporal.PlainYearMonth.from(s)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function daysInMonth(record: PlainYearMonthNativeRecord): number {
+  return getPlainYearMonthNative(record).daysInMonth
+}
+
+export function daysInYear(record: PlainYearMonthNativeRecord): number {
+  return getPlainYearMonthNative(record).daysInYear
+}
+
+export function monthsInYear(record: PlainYearMonthNativeRecord): number {
+  return getPlainYearMonthNative(record).monthsInYear
+}
+
+export function inLeapYear(record: PlainYearMonthNativeRecord): boolean {
+  return getPlainYearMonthNative(record).inLeapYear
+}
+
+export function withFields(
+  record: PlainYearMonthNativeRecord,
+  mod: Partial<YearMonthFields>,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const resNative = native.with(mod, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function add(
+  record: PlainYearMonthNativeRecord,
+  duration: DurationNativeRecord,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const durationNative = getDurationNative(duration)
+  const resNative = native.add(durationNative, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function subtract(
+  record: PlainYearMonthNativeRecord,
+  duration: DurationNativeRecord,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const durationNative = getDurationNative(duration)
+  const resNative = native.subtract(durationNative, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function until(
+  record: PlainYearMonthNativeRecord,
+  otherRecord: PlainYearMonthNativeRecord,
+  options?: DiffOptions<YearMonthUnitName>,
+): DurationNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const otherNative = getPlainYearMonthNative(otherRecord)
+  const resNative = native.until(otherNative, options)
+  return createDurationNativeRecord(resNative)
+}
+
+export function since(
+  record: PlainYearMonthNativeRecord,
+  otherRecord: PlainYearMonthNativeRecord,
+  options?: DiffOptions<YearMonthUnitName>,
+): DurationNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const otherNative = getPlainYearMonthNative(otherRecord)
+  const resNative = native.since(otherNative, options)
+  return createDurationNativeRecord(resNative)
+}
+
+export function equals(
+  record: PlainYearMonthNativeRecord,
+  otherRecord: PlainYearMonthNativeRecord,
+): boolean {
+  const native = getPlainYearMonthNative(record)
+  const otherNative = getPlainYearMonthNative(otherRecord)
+  return native.equals(otherNative)
+}
+
+export function compare(
+  record: PlainYearMonthNativeRecord,
+  otherRecord: PlainYearMonthNativeRecord,
+): NumberSign {
+  const native = getPlainYearMonthNative(record)
+  const otherNative = getPlainYearMonthNative(otherRecord)
+  return (globalThis as any).Temporal.PlainYearMonth.compare(
+    native,
+    otherNative,
+  )
+}
+
+export function toString(
+  record: PlainYearMonthNativeRecord,
+  options?: CalendarDisplayOptions,
+): string {
+  return getPlainYearMonthNative(record).toString(options)
+}
