@@ -78,12 +78,9 @@ describe('withDayOfWeek', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
     )
-    const zdtExp = {
-      // 2024-02-29T12:30:00[America/New_York][u-ca=hebrew]
-      epochNanoseconds: 1709227800000000000n,
-      timeZoneId: 'America/New_York',
-      calendarId: 'hebrew',
-    }
+    const zdtExp = ZonedDateTimeFns.fromString(
+      '2024-02-29T12:30:00[America/New_York][u-ca=hebrew]',
+    )
 
     const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
     expectZonedDateTimeEquals(zdt1, zdtExp)

@@ -15,6 +15,7 @@ import {
   TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
+import { type ZonedEpochNanoFields } from '../../internal/slots'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
@@ -102,133 +103,75 @@ const durationSlotDefaults = {
   years: 0,
 }
 
+type CalendarSlots = Partial<
+  CalendarDateFields & { calendar: InternalCalendar }
+>
+
+type DateTimeSlots = Partial<
+  CalendarDateTimeFields & { calendar: InternalCalendar }
+>
+
+type ZonedDateTimeSlots = Partial<
+  ZonedEpochNanoFields & { calendar: InternalCalendar }
+> & {
+  epochNanoseconds: bigint
+}
+
 export function expectPlainDateEquals(
   pd: PlainDateFns.Record,
-  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
-    calendarId?: string
-  },
+  slots: CalendarSlots,
 ): void {
-  assertCalendarId(pd.calendar, slots)
   expectPropsEqualStrict(pd, {
     ...plainDateDefaults,
     ...dateDefaults,
-    ...normalizeCalendarSlots(pd.calendar, slots),
+    ...slots,
   })
 }
 
 export function expectPlainYearMonthEquals(
   pym: PlainYearMonthFns.Record,
-  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
-    calendarId?: string
-  },
+  slots: CalendarSlots,
 ): void {
-  assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
     ...plainYearMonthDefaults,
     ...dateDefaults,
     day: 1,
-    ...normalizeCalendarSlots(pym.calendar, slots),
+    ...slots,
   })
 }
 
 export function expectPlainMonthDayEquals(
   pym: PlainMonthDayFns.Record,
-  slots: Partial<CalendarDateFields & { calendar: InternalCalendar }> & {
-    calendarId?: string
-  },
+  slots: CalendarSlots,
 ): void {
-  assertCalendarId(pym.calendar, slots)
   expectPropsEqualStrict(pym, {
     ...plainMonthDayDefaults,
     ...dateDefaults,
     year: 1972,
-    ...normalizeCalendarSlots(pym.calendar, slots),
+    ...slots,
   })
 }
 
 export function expectPlainDateTimeEquals(
   pdt: PlainDateTimeFns.Record,
-  slots: Partial<CalendarDateTimeFields & { calendar: InternalCalendar }> & {
-    calendarId?: string
-  },
+  slots: DateTimeSlots,
 ): void {
-  assertCalendarId(pdt.calendar, slots)
   expectPropsEqualStrict(pdt, {
     ...plainDateTimeDefaults,
     ...timeDefaults,
     ...dateDefaults,
-    ...normalizeCalendarSlots(pdt.calendar, slots),
+    ...slots,
   })
 }
 
 export function expectZonedDateTimeEquals(
   zdt: ZonedDateTimeFns.Record,
-  slots: {
-    epochNanoseconds: bigint
-    timeZoneId?: string
-    calendarId?: string
-  },
+  slots: ZonedDateTimeSlots,
 ): void {
-  assertCalendarId(zdt.calendar, slots)
-  assertTimeZoneId(zdt.timeZone, slots)
-  const normalizedSlots = normalizeZonedSlots(zdt, slots)
   expectPropsEqualStrict(zdt, {
     ...zonedDateTimeDefaults,
-    ...normalizedSlots,
+    ...slots,
   })
-}
-
-function normalizeCalendarSlots<T extends { calendarId?: string }>(
-  calendar: InternalCalendar,
-  slots: T,
-): Omit<T, 'calendarId'> & { calendar: InternalCalendar } {
-  const { calendarId: _, ...rest } = slots
-  return {
-    ...rest,
-    calendar,
-  }
-}
-
-function normalizeZonedSlots(
-  zdt: ZonedDateTimeFns.Record,
-  slots: {
-    epochNanoseconds: bigint
-    timeZoneId?: string
-    calendarId?: string
-  },
-) {
-  const {
-    calendarId: _calendarId,
-    timeZoneId: _timeZoneId,
-    epochNanoseconds,
-  } = slots
-  return {
-    calendar: zdt.calendar,
-    timeZone: zdt.timeZone,
-    epochNanoseconds,
-  }
-}
-
-function assertCalendarId(
-  calendar: InternalCalendar,
-  slots: { calendar?: InternalCalendar; calendarId?: string },
-): void {
-  const expectedCalendarId =
-    slots.calendarId ||
-    ('calendar' in slots ? getInternalCalendarId(slots.calendar) : 'iso8601')
-  expect(getInternalCalendarId(calendar)).toBe(expectedCalendarId)
-}
-
-function assertTimeZoneId(
-  timeZone: ZonedDateTimeFns.Record['timeZone'],
-  slots: {
-    timeZone?: ZonedDateTimeFns.Record['timeZone']
-    timeZoneId?: string
-  },
-): void {
-  const expectedTimeZoneId =
-    slots.timeZoneId || slots.timeZone?.id || timeZone.id
-  expect(timeZone.id).toBe(expectedTimeZoneId)
 }
 
 export function expectPlainTimeEquals(
