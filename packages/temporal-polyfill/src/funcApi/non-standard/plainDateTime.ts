@@ -174,7 +174,7 @@ export const fromString = parsePlainDateTime as (s: string) => Record
 // Getters
 // -----------------------------------------------------------------------------
 
-export const getFields = memoize((record: Record): Fields => {
+const getFields = memoize((record: Record): Fields => {
   const {
     year: _year,
     month: _month,
@@ -339,45 +339,6 @@ export function toLocaleString(
 ): string {
   const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
-}
-
-export function toLocaleStringParts(
-  record: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, record)
-  return format.formatToParts(epochMilli)
-}
-
-export function rangeToLocaleString(
-  record0: Record,
-  record1: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  const [format, epochMilli0, epochMilli1] = prepFormat(
-    locales,
-    options,
-    record0,
-    record1,
-  )
-  return format.formatRange(epochMilli0, epochMilli1!)
-}
-
-export function rangeToLocaleStringParts(
-  record0: Record,
-  record1: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
-  const [format, epochMilli0, epochMilli1] = prepFormat(
-    locales,
-    options,
-    record0,
-    record1,
-  )
-  return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
 export const toString = formatPlainDateTimeIso as (

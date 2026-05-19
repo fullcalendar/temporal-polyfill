@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../../dist/fns/duration'
-import * as PlainYearMonthFns from '../../../dist/fns/plainyearmonth'
 import {
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainYearMonthEquals,
   testHotCache,
-} from './testUtils'
+} from '../non-standard/testUtils'
+import * as DurationFns from './duration'
+import * as PlainYearMonthFns from './plainYearMonth'
 
 describe('create', () => {
   it('works with a referenceDay', () => {
@@ -55,11 +55,16 @@ describe('fromFields', () => {
   })
 })
 
-describe('getFields', () => {
+describe('calendar field getters', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
-    const fields = PlainYearMonthFns.getFields(pym)
-    expect(fields).toEqual({
+    expect({
+      era: pym.era,
+      eraYear: pym.eraYear,
+      year: pym.year,
+      monthCode: pym.monthCode,
+      month: pym.month,
+    }).toEqual({
       era: 'ce',
       eraYear: 2024,
       year: 2024,
@@ -302,26 +307,6 @@ describe('toLocaleString', () => {
   })
 })
 
-describe('toLocaleStringParts', () => {
-  it('works', () => {
-    const pym = PlainYearMonthFns.create(2023, 12)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const parts = testHotCache(() =>
-      PlainYearMonthFns.toLocaleStringParts(pym, locale, options),
-    )
-    expect(parts).toEqual([
-      { type: 'year', value: '2023' },
-      { type: 'literal', value: ' ' },
-      { type: 'month', value: 'December' },
-    ])
-  })
-})
-
 describe('createFormat', () => {
   it('formats records', () => {
     const pym = PlainYearMonthFns.create(2023, 12)
@@ -346,6 +331,21 @@ describe('createFormat', () => {
     expect(format.format(pym)).toBe('2023')
   })
 
+  it('formats parts', () => {
+    const pym = PlainYearMonthFns.create(2023, 12)
+    const format = PlainYearMonthFns.createFormat('en', {
+      year: 'numeric',
+      month: 'long',
+      calendar: 'iso8601',
+    })
+
+    expect(format.formatToParts(pym)).toEqual([
+      { type: 'year', value: '2023' },
+      { type: 'literal', value: ' ' },
+      { type: 'month', value: 'December' },
+    ])
+  })
+
   it('formats ranges', () => {
     const pym0 = PlainYearMonthFns.create(2023, 10)
     const pym1 = PlainYearMonthFns.create(2023, 12)
@@ -357,39 +357,17 @@ describe('createFormat', () => {
 
     expect(format.formatRange(pym0, pym1)).toBe('2023 October–December')
   })
-})
 
-describe('rangeToLocaleString', () => {
-  it('works', () => {
+  it('formats range parts', () => {
     const pym0 = PlainYearMonthFns.create(2023, 10)
     const pym1 = PlainYearMonthFns.create(2023, 12)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
+    const format = PlainYearMonthFns.createFormat('en', {
       year: 'numeric',
       month: 'long',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const s = testHotCache(() =>
-      PlainYearMonthFns.rangeToLocaleString(pym0, pym1, locale, options),
-    )
-    expect(s).toBe('2023 October–December')
-  })
-})
+      calendar: 'iso8601',
+    })
 
-describe('rangeToLocaleStringParts', () => {
-  it('works', () => {
-    const pym0 = PlainYearMonthFns.create(2023, 10)
-    const pym1 = PlainYearMonthFns.create(2023, 12)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const parts = testHotCache(() =>
-      PlainYearMonthFns.rangeToLocaleStringParts(pym0, pym1, locale, options),
-    )
-    expect(parts).toEqual([
+    expect(format.formatRangeToParts(pym0, pym1)).toEqual([
       { source: 'shared', type: 'year', value: '2023' },
       { source: 'shared', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'month', value: 'October' },

@@ -30,7 +30,6 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = TimeFields
 
-export type Fields = TimeFields
 export type FromFields = Partial<TimeFields>
 export type WithFields = Partial<TimeFields>
 export type AssignmentOptions = OverflowOptions
@@ -61,23 +60,6 @@ export const fromFields = refinePlainTimeObjectLike as (
 ) => Record
 
 export const fromString = parsePlainTime as (s: string) => Record
-
-// Getters
-// -----------------------------------------------------------------------------
-
-export function getFields(record: Record): Fields {
-  // PlainTime slots currently share the same time-field property names as the
-  // public field bag. Return a fresh public bag so callers never observe
-  // future slot-only metadata.
-  return {
-    hour: record.hour,
-    minute: record.minute,
-    second: record.second,
-    millisecond: record.millisecond,
-    microsecond: record.microsecond,
-    nanosecond: record.nanosecond,
-  }
-}
 
 // Setters
 // -----------------------------------------------------------------------------
@@ -170,45 +152,6 @@ export function toLocaleString(
 ): string {
   const [format, epochMilli] = prepFormat(locales, options, record)
   return format.format(epochMilli)
-}
-
-export function toLocaleStringParts(
-  record: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): Intl.DateTimeFormatPart[] {
-  const [format, epochMilli] = prepFormat(locales, options, record)
-  return format.formatToParts(epochMilli)
-}
-
-export function rangeToLocaleString(
-  record0: Record,
-  record1: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  const [format, epochMilli0, epochMilli1] = prepFormat(
-    locales,
-    options,
-    record0,
-    record1,
-  )
-  return format.formatRange(epochMilli0, epochMilli1!)
-}
-
-export function rangeToLocaleStringParts(
-  record0: Record,
-  record1: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
-  const [format, epochMilli0, epochMilli1] = prepFormat(
-    locales,
-    options,
-    record0,
-    record1,
-  )
-  return format.formatRangeToParts(epochMilli0, epochMilli1!)
 }
 
 export const toString = formatPlainTimeIso as (

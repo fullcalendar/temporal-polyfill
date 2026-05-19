@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../../dist/fns/duration'
-import * as InstantFns from '../../../dist/fns/instant'
-import * as ZonedDateTimeFns from '../../../dist/fns/zoneddatetime'
-import { getInternalCalendarId } from '../../internal/externalCalendar'
 import '../../intl-calendars'
 import {
   expectDurationEquals,
   expectInstantEquals,
   testHotCache,
-} from './testUtils'
+} from '../non-standard/testUtils'
+import * as DurationFns from './duration'
+import * as InstantFns from './instant'
 
 describe('create', () => {
   it('works', () => {
@@ -55,21 +53,21 @@ describe('fromEpochSeconds', () => {
 describe('epochNanoseconds', () => {
   it('works', () => {
     const inst = InstantFns.create(1n)
-    expect(InstantFns.epochNanoseconds(inst)).toBe(1n)
+    expect(inst.epochNanoseconds).toBe(1n)
   })
 })
 
 describe('epochMicroseconds', () => {
   it('works', () => {
     const inst = InstantFns.create(1000n)
-    expect(InstantFns.epochMicroseconds(inst)).toBe(1n)
+    expect(inst.epochMicroseconds).toBe(1n)
   })
 })
 
 describe('epochMilliseconds', () => {
   it('works', () => {
     const inst = InstantFns.create(1000000n)
-    expect(InstantFns.epochMilliseconds(inst)).toBe(1)
+    expect(inst.epochMilliseconds).toBe(1)
   })
 })
 
@@ -179,9 +177,9 @@ describe('toZonedDateTimeISO', () => {
   it('converts an Instant', () => {
     const inst = InstantFns.create(1704063600000000001n)
     const zdt = InstantFns.toZonedDateTimeISO(inst, 'America/New_York')
-    expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
-    expect(zdt.timeZone.id).toBe('America/New_York')
-    expect(getInternalCalendarId(zdt.calendar)).toBe('iso8601')
+    expect(zdt.epochNanoseconds).toBe(1704063600000000001n)
+    expect(zdt.timeZoneId).toBe('America/New_York')
+    expect(zdt.calendarId).toBe('iso8601')
   })
 })
 
@@ -192,9 +190,9 @@ describe('toZonedDateTime', () => {
       timeZone: 'America/New_York',
       calendar: 'hebrew',
     })
-    expect(ZonedDateTimeFns.epochNanoseconds(zdt)).toBe(1704063600000000001n)
-    expect(zdt.timeZone.id).toBe('America/New_York')
-    expect(getInternalCalendarId(zdt.calendar)).toBe('hebrew')
+    expect(zdt.epochNanoseconds).toBe(1704063600000000001n)
+    expect(zdt.timeZoneId).toBe('America/New_York')
+    expect(zdt.calendarId).toBe('hebrew')
   })
 })
 
@@ -210,29 +208,6 @@ describe('toLocaleString', () => {
       InstantFns.toLocaleString(inst, locale, options),
     )
     expect(s).toEqual('Sunday, December 31, 2023')
-  })
-})
-
-describe('toLocaleStringParts', () => {
-  it('works', () => {
-    const inst = InstantFns.create(1704063600000000000n)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      dateStyle: 'full',
-      timeZone: 'America/New_York',
-    }
-    const parts = testHotCache(() =>
-      InstantFns.toLocaleStringParts(inst, locale, options),
-    )
-    expect(parts).toEqual([
-      { type: 'weekday', value: 'Sunday' },
-      { type: 'literal', value: ', ' },
-      { type: 'month', value: 'December' },
-      { type: 'literal', value: ' ' },
-      { type: 'day', value: '31' },
-      { type: 'literal', value: ', ' },
-      { type: 'year', value: '2023' },
-    ])
   })
 })
 
@@ -259,6 +234,24 @@ describe('createFormat', () => {
     expect(format.format(inst)).toBe('2023')
   })
 
+  it('formats parts', () => {
+    const inst = InstantFns.create(1704063600000000000n)
+    const format = InstantFns.createFormat('en', {
+      dateStyle: 'full',
+      timeZone: 'America/New_York',
+    })
+
+    expect(format.formatToParts(inst)).toEqual([
+      { type: 'weekday', value: 'Sunday' },
+      { type: 'literal', value: ', ' },
+      { type: 'month', value: 'December' },
+      { type: 'literal', value: ' ' },
+      { type: 'day', value: '31' },
+      { type: 'literal', value: ', ' },
+      { type: 'year', value: '2023' },
+    ])
+  })
+
   it('formats ranges', () => {
     const inst0 = InstantFns.create(1704063600000000000n)
     const inst1 = InstantFns.create(1704150000000000000n)
@@ -271,37 +264,16 @@ describe('createFormat', () => {
       'Sunday, December 31, 2023 – Monday, January 1, 2024',
     )
   })
-})
 
-describe('rangeToLocaleString', () => {
-  it('works', () => {
+  it('formats range parts', () => {
     const inst0 = InstantFns.create(1704063600000000000n)
-    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
-    const locale = 'en'
-    const options = {
-      dateStyle: 'full' as const,
+    const inst1 = InstantFns.create(1704150000000000000n)
+    const format = InstantFns.createFormat('en', {
+      dateStyle: 'full',
       timeZone: 'America/New_York',
-    }
-    const s = testHotCache(() =>
-      InstantFns.rangeToLocaleString(inst0, inst1, locale, options),
-    )
-    expect(s).toBe('Sunday, December 31, 2023 – Monday, January 1, 2024')
-  })
-})
+    })
 
-describe('rangeToLocaleStringParts', () => {
-  it('works', () => {
-    const inst0 = InstantFns.create(1704063600000000000n)
-    const inst1 = InstantFns.create(1704150000000000000n) // +1 day
-    const locale = 'en'
-    const options = {
-      dateStyle: 'full' as const,
-      timeZone: 'America/New_York',
-    }
-    const parts = testHotCache(() =>
-      InstantFns.rangeToLocaleStringParts(inst0, inst1, locale, options),
-    )
-    expect(parts).toEqual([
+    expect(format.formatRangeToParts(inst0, inst1)).toEqual([
       { source: 'startRange', type: 'weekday', value: 'Sunday' },
       { source: 'startRange', type: 'literal', value: ', ' },
       { source: 'startRange', type: 'month', value: 'December' },

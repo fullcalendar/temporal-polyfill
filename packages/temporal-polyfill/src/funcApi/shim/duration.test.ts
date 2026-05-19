@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../../dist/fns/duration'
-import * as PlainDateFns from '../../../dist/fns/plaindate'
-import * as PlainDateTimeFns from '../../../dist/fns/plaindatetime'
-import * as ZonedDateTimeFns from '../../../dist/fns/zoneddatetime'
-import { expectDurationEquals } from './testUtils'
+import { expectDurationEquals } from '../non-standard/testUtils'
+import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
+import * as PlainDateTimeFns from './plainDateTime'
+import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
   it('called without args', () => {
@@ -25,7 +25,7 @@ describe('create', () => {
       microseconds: 9,
       nanoseconds: 10,
     })
-    expect(dur.sign).toBe(1)
+    expect(DurationFns.sign(dur)).toBe(1)
   })
 
   it('called with some args (negative)', () => {
@@ -42,7 +42,7 @@ describe('create', () => {
       microseconds: -9,
       nanoseconds: -10,
     })
-    expect(dur.sign).toBe(-1)
+    expect(DurationFns.sign(dur)).toBe(-1)
   })
 })
 

@@ -227,7 +227,7 @@ function assertTimeZoneId(
   },
 ): void {
   const expectedTimeZoneId =
-    slots.timeZoneId || ('timeZone' in slots ? slots.timeZone.id : timeZone.id)
+    slots.timeZoneId || slots.timeZone?.id || timeZone.id
   expect(timeZone.id).toBe(expectedTimeZoneId)
 }
 

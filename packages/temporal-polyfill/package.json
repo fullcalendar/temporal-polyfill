@@ -27,6 +27,7 @@
     "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:license npm:bundle",
     "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",
+    "tsc:all": "tsc -p tsconfig.json --noEmit --tsBuildInfoFile dist/.tsbuildinfo.all",
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
     "bundle": "./scripts/bundle.js",
     "bundle:dev": "./scripts/bundle.js --dev",

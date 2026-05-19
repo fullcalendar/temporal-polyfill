@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import * as PlainMonthDayFns from '../../../dist/fns/plainmonthday'
 import '../../intl-calendars'
 import {
   expectPlainDateEquals,
   expectPlainMonthDayEquals,
   testHotCache,
-} from './testUtils'
+} from '../non-standard/testUtils'
+import * as PlainMonthDayFns from './plainMonthDay'
 
 describe('create', () => {
   it('works with a referenceYear', () => {
@@ -65,11 +65,14 @@ describe('fromFields', () => {
   })
 })
 
-describe('getFields', () => {
+describe('calendar field getters', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
-    const fields = PlainMonthDayFns.getFields(pmd)
-    expect(fields).toEqual({
+    expect({
+      monthCode: pmd.monthCode,
+      month: pmd.month,
+      day: pmd.day,
+    }).toEqual({
       monthCode: 'M06',
       month: 6,
       day: 18,
@@ -141,26 +144,6 @@ describe('toLocaleString', () => {
   })
 })
 
-describe('toLocaleStringParts', () => {
-  it('works', () => {
-    const pmd = PlainMonthDayFns.create(6, 18)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const parts = testHotCache(() =>
-      PlainMonthDayFns.toLocaleStringParts(pmd, locale, options),
-    )
-    expect(parts).toEqual([
-      { type: 'month', value: 'June' },
-      { type: 'literal', value: ' ' },
-      { type: 'day', value: '18' },
-    ])
-  })
-})
-
 describe('createFormat', () => {
   it('formats records', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
@@ -185,6 +168,21 @@ describe('createFormat', () => {
     expect(format.format(pmd)).toBe('June')
   })
 
+  it('formats parts', () => {
+    const pmd = PlainMonthDayFns.create(6, 18)
+    const format = PlainMonthDayFns.createFormat('en', {
+      month: 'long',
+      day: 'numeric',
+      calendar: 'iso8601',
+    })
+
+    expect(format.formatToParts(pmd)).toEqual([
+      { type: 'month', value: 'June' },
+      { type: 'literal', value: ' ' },
+      { type: 'day', value: '18' },
+    ])
+  })
+
   it('formats ranges', () => {
     const pmd0 = PlainMonthDayFns.create(6, 18)
     const pmd1 = PlainMonthDayFns.create(10, 3)
@@ -196,39 +194,17 @@ describe('createFormat', () => {
 
     expect(format.formatRange(pmd0, pmd1)).toBe('June 18 – October 3')
   })
-})
 
-describe('rangeToLocaleString', () => {
-  it('works', () => {
+  it('formats range parts', () => {
     const pmd0 = PlainMonthDayFns.create(6, 18)
     const pmd1 = PlainMonthDayFns.create(10, 3)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
+    const format = PlainMonthDayFns.createFormat('en', {
       month: 'long',
       day: 'numeric',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const s = testHotCache(() =>
-      PlainMonthDayFns.rangeToLocaleString(pmd0, pmd1, locale, options),
-    )
-    expect(s).toBe('June 18 – October 3')
-  })
-})
+      calendar: 'iso8601',
+    })
 
-describe('rangeToLocaleStringParts', () => {
-  it('works', () => {
-    const pmd0 = PlainMonthDayFns.create(6, 18)
-    const pmd1 = PlainMonthDayFns.create(10, 3)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601', // required unfortunately
-    }
-    const parts = testHotCache(() =>
-      PlainMonthDayFns.rangeToLocaleStringParts(pmd0, pmd1, locale, options),
-    )
-    expect(parts).toEqual([
+    expect(format.formatRangeToParts(pmd0, pmd1)).toEqual([
       { source: 'startRange', type: 'month', value: 'June' },
       { source: 'startRange', type: 'literal', value: ' ' },
       { source: 'startRange', type: 'day', value: '18' },

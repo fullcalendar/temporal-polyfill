@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../../dist/fns/duration'
-import * as PlainDateFns from '../../../dist/fns/plaindate'
-import * as PlainTimeFns from '../../../dist/fns/plaintime'
 import {
   expectDurationEquals,
   expectPlainDateTimeEquals,
   expectPlainTimeEquals,
   testHotCache,
-} from './testUtils'
+} from '../non-standard/testUtils'
+import * as DurationFns from './duration'
+import * as PlainDateFns from './plainDate'
+import * as PlainTimeFns from './plainTime'
 
 describe('create', () => {
   it('works', () => {
@@ -40,11 +40,17 @@ describe('fromFields', () => {
   })
 })
 
-describe('getFields', () => {
+describe('time field getters', () => {
   it('works', () => {
     const pt = PlainTimeFns.create(12, 30)
-    const fields = PlainTimeFns.getFields(pt)
-    expect(fields).toEqual({
+    expect({
+      hour: pt.hour,
+      minute: pt.minute,
+      second: pt.second,
+      millisecond: pt.millisecond,
+      microsecond: pt.microsecond,
+      nanosecond: pt.nanosecond,
+    }).toEqual({
       hour: 12,
       minute: 30,
       second: 0,
@@ -202,30 +208,6 @@ describe('toLocaleString', () => {
   })
 })
 
-describe('toLocaleStringParts', () => {
-  it('works', () => {
-    const pt = PlainTimeFns.create(12, 30)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }
-    const parts = testHotCache(() =>
-      PlainTimeFns.toLocaleStringParts(pt, locale, options),
-    )
-    expect(parts).toEqual([
-      { type: 'hour', value: '12' },
-      { type: 'literal', value: ':' },
-      { type: 'minute', value: '30' },
-      { type: 'literal', value: ':' },
-      { type: 'second', value: '00' },
-      { type: 'literal', value: ' ' },
-      { type: 'dayPeriod', value: 'PM' },
-    ])
-  })
-})
-
 describe('createFormat', () => {
   it('formats records', () => {
     const pt = PlainTimeFns.create(12, 30)
@@ -247,6 +229,25 @@ describe('createFormat', () => {
     expect(format.format(pt)).toBe('12 PM')
   })
 
+  it('formats parts', () => {
+    const pt = PlainTimeFns.create(12, 30)
+    const format = PlainTimeFns.createFormat('en', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+
+    expect(format.formatToParts(pt)).toEqual([
+      { type: 'hour', value: '12' },
+      { type: 'literal', value: ':' },
+      { type: 'minute', value: '30' },
+      { type: 'literal', value: ':' },
+      { type: 'second', value: '00' },
+      { type: 'literal', value: ' ' },
+      { type: 'dayPeriod', value: 'PM' },
+    ])
+  })
+
   it('formats ranges', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
@@ -254,31 +255,13 @@ describe('createFormat', () => {
 
     expect(format.formatRange(pt0, pt1)).toBe('12:30:00 PM – 2:45:00 PM')
   })
-})
 
-describe('rangeToLocaleString', () => {
-  it('works', () => {
+  it('formats range parts', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = { timeStyle: 'long' }
-    const s = testHotCache(() =>
-      PlainTimeFns.rangeToLocaleString(pt0, pt1, locale, options),
-    )
-    expect(s).toBe('12:30:00 PM – 2:45:00 PM')
-  })
-})
+    const format = PlainTimeFns.createFormat('en', { timeStyle: 'long' })
 
-describe('rangeToLocaleStringParts', () => {
-  it('works', () => {
-    const pt0 = PlainTimeFns.create(12, 30)
-    const pt1 = PlainTimeFns.create(14, 45)
-    const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = { timeStyle: 'long' }
-    const parts = testHotCache(() =>
-      PlainTimeFns.rangeToLocaleStringParts(pt0, pt1, locale, options),
-    )
-    expect(parts).toEqual([
+    expect(format.formatRangeToParts(pt0, pt1)).toEqual([
       { source: 'startRange', type: 'hour', value: '12' },
       { source: 'startRange', type: 'literal', value: ':' },
       { source: 'startRange', type: 'minute', value: '30' },

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import * as NowFns from '../../../dist/fns/now'
-import * as ZonedDateTimeFns from '../../../dist/fns/zoneddatetime'
 import '../../intl-calendars'
+import * as NowFns from './now'
 import {
   expectInstantsSimilar,
   expectPlainDateTimesSimilar,
@@ -12,6 +11,7 @@ import {
   getCurrentZonedDateTime,
   systemTimeZoneId,
 } from './testUtils'
+import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('timeZoneId', () => {
   it('returns the system time zone', () => {
