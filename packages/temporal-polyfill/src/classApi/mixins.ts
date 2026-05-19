@@ -18,12 +18,7 @@ import {
 import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
-import {
-  getEpochMicro,
-  getEpochMilli,
-  getEpochNano,
-  getEpochSec,
-} from '../internal/slots'
+import { getEpochMilli, getEpochNano } from '../internal/slots'
 import { zipPropsGenerator } from '../internal/utils'
 
 // For PlainDate/etc
@@ -119,8 +114,6 @@ export const timeGetters = zipPropsGenerator(
 )
 
 export const epochGetters = {
-  epochSeconds: getEpochSec,
   epochMilliseconds: getEpochMilli,
-  epochMicroseconds: getEpochMicro,
   epochNanoseconds: getEpochNano,
 }

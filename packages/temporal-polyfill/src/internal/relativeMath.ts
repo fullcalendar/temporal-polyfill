@@ -6,11 +6,7 @@ import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateTime, moveZonedEpochs } from './move'
-import {
-  EpochNanoFields,
-  ZonedEpochNanoFields,
-  extractEpochNano,
-} from './slots'
+import { EpochNanoFields, ZonedEpochNanoFields, getEpochNano } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
@@ -91,7 +87,7 @@ export function createMarkerSpanOps(
 
     return {
       marker: relativeToSlots,
-      markerToEpochNano: extractEpochNano as MarkerToEpochNano,
+      markerToEpochNano: getEpochNano as MarkerToEpochNano,
       moveMarker: bindArgs(moveZonedEpochs, timeZone, calendar) as Callable,
       diffMarkers: bindArgs(
         diffZonedEpochsExact,

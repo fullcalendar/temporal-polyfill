@@ -68,10 +68,8 @@ import {
 import {
   ZonedEpochNanoFields,
   createZonedEpochNanoSlots,
-  getEpochMicro,
   getEpochMilli,
   getEpochNano,
-  getEpochSec,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -209,11 +207,7 @@ const getFields = memoize((record: Record): Fields => {
   }
 }, WeakMap)
 
-export const epochSeconds = getEpochSec as (record: Record) => number
-
 export const epochMilliseconds = getEpochMilli as (record: Record) => number
-
-export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
 
 export const epochNanoseconds = getEpochNano as (record: Record) => bigint
 

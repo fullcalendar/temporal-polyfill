@@ -29,13 +29,6 @@ describe('fromEpochNanoseconds', () => {
   })
 })
 
-describe('fromEpochMicroseconds', () => {
-  it('works', () => {
-    const inst = InstantFns.fromEpochMicroseconds(1n)
-    expectInstantEquals(inst, 1000n)
-  })
-})
-
 describe('fromEpochMilliseconds', () => {
   it('works', () => {
     const inst = InstantFns.fromEpochMilliseconds(1)
@@ -43,24 +36,10 @@ describe('fromEpochMilliseconds', () => {
   })
 })
 
-describe('fromEpochSeconds', () => {
-  it('works', () => {
-    const inst = InstantFns.fromEpochSeconds(1)
-    expectInstantEquals(inst, 1000000000n)
-  })
-})
-
 describe('epochNanoseconds', () => {
   it('works', () => {
     const inst = InstantFns.create(1n)
     expect(inst.epochNanoseconds).toBe(1n)
-  })
-})
-
-describe('epochMicroseconds', () => {
-  it('works', () => {
-    const inst = InstantFns.create(1000n)
-    expect(inst.epochMicroseconds).toBe(1n)
   })
 })
 

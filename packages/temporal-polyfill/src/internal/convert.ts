@@ -1,4 +1,4 @@
-import { bigNanoInMicro, bigNanoInMilli, bigNanoInSec } from './bigNano'
+import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import { type InternalCalendar, isoCalendar } from './externalCalendar'
@@ -310,16 +310,6 @@ export function plainTimeToZonedDateTime<PA>(
 // -----------------------------------------------------------------------------
 
 /*
-Only used by funcApi
-Almost public-facing, does input validation
-*/
-export function epochSecToInstant(epochSec: number): EpochNanoFields {
-  return createEpochNanoSlots(
-    checkEpochNanoInBounds(BigInt(toStrictInteger(epochSec)) * bigNanoInSec),
-  )
-}
-
-/*
 Almost public-facing, does input validation
 */
 export function epochMilliToInstant(epochMilli: number): EpochNanoFields {
@@ -327,16 +317,6 @@ export function epochMilliToInstant(epochMilli: number): EpochNanoFields {
     checkEpochNanoInBounds(
       BigInt(toStrictInteger(epochMilli)) * bigNanoInMilli,
     ),
-  )
-}
-
-/*
-Only used by funcApi
-Almost public-facing, does input validation
-*/
-export function epochMicroToInstant(epochMicro: bigint): EpochNanoFields {
-  return createEpochNanoSlots(
-    checkEpochNanoInBounds(toBigInt(epochMicro) * bigNanoInMicro),
   )
 }
 

@@ -5,10 +5,8 @@ import { requireObjectLike } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
-  epochMicroToInstant,
   epochMilliToInstant,
   epochNanoToInstant,
-  epochSecToInstant,
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
@@ -68,22 +66,10 @@ export function create(epochNanoseconds: bigint): InstantShimRecord {
   return new InstantShimRecord(epochNanoseconds)
 }
 
-export function fromEpochSeconds(epochSeconds: number): InstantShimRecord {
-  const resSlots = epochSecToInstant(epochSeconds)
-  return createInstantShimRecord(resSlots)
-}
-
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantShimRecord {
   const resSlots = epochMilliToInstant(epochMilliseconds)
-  return createInstantShimRecord(resSlots)
-}
-
-export function fromEpochMicroseconds(
-  epochMicroseconds: bigint,
-): InstantShimRecord {
-  const resSlots = epochMicroToInstant(epochMicroseconds)
   return createInstantShimRecord(resSlots)
 }
 

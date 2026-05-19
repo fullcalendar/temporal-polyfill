@@ -70,9 +70,7 @@ export const [
   (native) => native.toString(),
   {
     calendarId: (native: any) => native.calendarId,
-    epochSeconds: (native: any) => native.epochSeconds,
     epochMilliseconds: (native: any) => native.epochMilliseconds,
-    epochMicroseconds: (native: any) => native.epochMicroseconds,
     epochNanoseconds: (native: any) => native.epochNanoseconds,
     timeZoneId: (native: any) => native.timeZoneId,
   },

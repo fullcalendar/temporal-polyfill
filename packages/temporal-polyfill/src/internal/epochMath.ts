@@ -1,9 +1,4 @@
-import {
-  bigNanoInMicro,
-  bigNanoInMilli,
-  bigNanoInSec,
-  bigNanoInUtcDay,
-} from './bigNano'
+import { bigNanoInMilli, bigNanoInSec, bigNanoInUtcDay } from './bigNano'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { isoYearMax, isoYearMin, maxMilli } from './temporalConstants'
 import { milliInDay, milliInSec, nanoInMicro, nanoInMilli } from './units'
@@ -24,10 +19,6 @@ export function epochNanoToSecMod(epochNano: bigint): [number, number] {
 
 export function epochNanoToMilli(epochNano: bigint): number {
   return Number(divFloorBigInt(epochNano, bigNanoInMilli))
-}
-
-export function epochNanoToMicro(epochNano: bigint): bigint {
-  return divFloorBigInt(epochNano, bigNanoInMicro)
 }
 
 // [micro/milli/sec] -> nano

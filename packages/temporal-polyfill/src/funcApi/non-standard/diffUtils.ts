@@ -25,7 +25,7 @@ import {
   isZonedEpochSlots,
 } from '../../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
-import { ZonedEpochNanoFields, extractEpochNano } from '../../internal/slots'
+import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
@@ -47,7 +47,7 @@ export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnits, Unit.Week, 7)
 export const diffZonedDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, 1)
 export const diffZonedTimeUnits = bindArgs(
   diffTimeUnit,
-  extractEpochNano as MarkerToEpochNano,
+  getEpochNano as MarkerToEpochNano,
 )
 
 export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
@@ -82,7 +82,7 @@ function diffZonedLargeUnits(
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
   return diffDateUnits(
-    extractEpochNano as MarkerToEpochNano,
+    getEpochNano as MarkerToEpochNano,
     bindArgs(prepareZonedEpochDiff, timeZone) as unknown as MarkersToIsoFields,
     bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>

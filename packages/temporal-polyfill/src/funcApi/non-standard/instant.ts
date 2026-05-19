@@ -3,10 +3,8 @@ import { requireObjectLike } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
-  epochMicroToInstant,
   epochMilliToInstant,
   epochNanoToInstant,
-  epochSecToInstant,
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
@@ -27,10 +25,8 @@ import {
 import { roundInstant } from '../../internal/round'
 import {
   EpochNanoFields,
-  getEpochMicro,
   getEpochMilli,
   getEpochNano,
-  getEpochSec,
 } from '../../internal/slots'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
@@ -58,16 +54,8 @@ export const create = constructEpochNanoSlots as (
   epochNanoseconds: bigint,
 ) => Record
 
-export const fromEpochSeconds = epochSecToInstant as (
-  epochSeconds: number,
-) => Record
-
 export const fromEpochMilliseconds = epochMilliToInstant as (
   epochMilliseconds: number,
-) => Record
-
-export const fromEpochMicroseconds = epochMicroToInstant as (
-  epochMicroseconds: bigint,
 ) => Record
 
 export const fromEpochNanoseconds = epochNanoToInstant as (
@@ -79,11 +67,7 @@ export const fromString = parseInstant as (s: string) => Record
 // Getters
 // -----------------------------------------------------------------------------
 
-export const epochSeconds = getEpochSec as (record: Record) => number
-
 export const epochMilliseconds = getEpochMilli as (record: Record) => number
-
-export const epochMicroseconds = getEpochMicro as (record: Record) => bigint
 
 export const epochNanoseconds = getEpochNano as (record: Record) => bigint
 

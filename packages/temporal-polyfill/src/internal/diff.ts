@@ -50,7 +50,7 @@ import {
   EpochNanoFields,
   ZonedEpochNanoFields,
   createDurationSlots,
-  extractEpochNano,
+  getEpochNano,
 } from './slots'
 import { checkIsoDateInBounds } from './temporalLimits'
 import { timeFieldsToNano } from './timeFieldMath'
@@ -156,7 +156,7 @@ export function diffZonedDateTimes(
       roundingMode,
       createMarkerMoveOps(
         slots0,
-        extractEpochNano as MarkerToEpochNano,
+        getEpochNano as MarkerToEpochNano,
         bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
       ),
     )

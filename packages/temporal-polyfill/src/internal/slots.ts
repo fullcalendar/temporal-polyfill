@@ -1,6 +1,6 @@
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
-import { epochNanoToMicro, epochNanoToMilli, epochNanoToSec } from './epochMath'
+import { epochNanoToMilli } from './epochMath'
 import { type InternalCalendar } from './externalCalendar'
 import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
@@ -102,28 +102,10 @@ export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZoneImpl }
 // -----------------------------------------------------------------------------
 // TODO: move to mixins?
 
-/*
-Only used by funcApi
-*/
-export function getEpochSec(slots: EpochNanoFields): number {
-  return epochNanoToSec(slots.epochNanoseconds)
-}
-
 export function getEpochMilli(slots: EpochNanoFields): number {
   return epochNanoToMilli(slots.epochNanoseconds)
 }
 
-/*
-Only used by funcApi
-*/
-export function getEpochMicro(slots: EpochNanoFields): bigint {
-  return epochNanoToMicro(slots.epochNanoseconds)
-}
-
 export function getEpochNano(slots: EpochNanoFields): bigint {
-  return slots.epochNanoseconds
-}
-
-export function extractEpochNano(slots: EpochNanoFields): bigint {
   return slots.epochNanoseconds
 }

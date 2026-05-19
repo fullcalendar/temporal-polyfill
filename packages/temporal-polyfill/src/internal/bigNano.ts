@@ -1,4 +1,4 @@
-import { nanoInMicro, nanoInMilli, nanoInSec, nanoInUtcDay } from './units'
+import { nanoInMilli, nanoInSec, nanoInUtcDay } from './units'
 
 /*
 Given a raw nanoseconds value.
@@ -11,7 +11,6 @@ Number conversion.
 export const bigNanoInUtcDay = BigInt(nanoInUtcDay)
 export const bigNanoInSec = BigInt(nanoInSec)
 export const bigNanoInMilli = BigInt(nanoInMilli)
-export const bigNanoInMicro = BigInt(nanoInMicro)
 
 export function divideBigNanoToExactNumber(
   bigNano: bigint,

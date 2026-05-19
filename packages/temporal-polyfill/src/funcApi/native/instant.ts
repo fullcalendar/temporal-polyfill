@@ -23,9 +23,6 @@ import {
 export type InstantNativeRecord = any
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-const bigNanoInSec = 1000000000n
-const bigNanoInMicro = 1000n
-
 type ToZonedDateTimeOptions = {
   timeZone: string
   calendar: string
@@ -41,9 +38,7 @@ export const [
     new (globalThis as any).Temporal.Instant(epochNanoseconds),
   (native) => native.toString(),
   {
-    epochSeconds: (native: any) => native.epochSeconds,
     epochMilliseconds: (native: any) => native.epochMilliseconds,
-    epochMicroseconds: (native: any) => native.epochMicroseconds,
     epochNanoseconds: (native: any) => native.epochNanoseconds,
   },
   {},
@@ -54,27 +49,11 @@ export function create(epochNanoseconds: bigint): InstantNativeRecord {
   return new InstantNativeRecord(epochNanoseconds)
 }
 
-export function fromEpochSeconds(epochSeconds: number): InstantNativeRecord {
-  const resNative = (globalThis as any).Temporal.Instant.fromEpochNanoseconds(
-    BigInt(epochSeconds) * bigNanoInSec,
-  )
-  return createInstantNativeRecord(resNative)
-}
-
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantNativeRecord {
   const resNative = (globalThis as any).Temporal.Instant.fromEpochMilliseconds(
     epochMilliseconds,
-  )
-  return createInstantNativeRecord(resNative)
-}
-
-export function fromEpochMicroseconds(
-  epochMicroseconds: bigint,
-): InstantNativeRecord {
-  const resNative = (globalThis as any).Temporal.Instant.fromEpochNanoseconds(
-    BigInt(epochMicroseconds) * bigNanoInMicro,
   )
   return createInstantNativeRecord(resNative)
 }

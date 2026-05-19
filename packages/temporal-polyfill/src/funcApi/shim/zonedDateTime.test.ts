@@ -101,16 +101,6 @@ describe('fromFields', () => {
   })
 })
 
-describe('epochSeconds', () => {
-  it('works', () => {
-    const zdt = ZonedDateTimeFns.create(
-      1709055000000000000n,
-      'America/New_York',
-    )
-    expect(zdt.epochSeconds).toBe(1709055000)
-  })
-})
-
 describe('epochMilliseconds', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.create(
@@ -118,16 +108,6 @@ describe('epochMilliseconds', () => {
       'America/New_York',
     )
     expect(zdt.epochMilliseconds).toBe(1709055000000)
-  })
-})
-
-describe('epochMicroseconds', () => {
-  it('works', () => {
-    const zdt = ZonedDateTimeFns.create(
-      1709055000000000000n,
-      'America/New_York',
-    )
-    expect(zdt.epochMicroseconds).toBe(1709055000000000n)
   })
 })
 
