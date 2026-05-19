@@ -16,12 +16,12 @@ import {
   OverflowOptions,
 } from '../internal/optionsModel'
 import { PlainMonthDayBranding, PlainMonthDaySlots } from '../internal/slots'
-import { memoize } from '../internal/utils'
+import { identity, memoize } from '../internal/utils'
 import {
   computeMonthDayFields,
   extractCalendarIdFromBag,
 } from './calendarUtils'
-import { createFormatCache } from './intlFormatCache'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import * as PlainDateFns from './plainDate'
 
 export type Record = PlainMonthDaySlots
@@ -33,6 +33,7 @@ export type ToPlainDateFields = EraYearOrYear
 
 export type AssignmentOptions = OverflowOptions
 export type ToStringOptions = CalendarDisplayOptions
+export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -103,10 +104,14 @@ export function toPlainDate(
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  monthDayConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(monthDayConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(monthDayConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,

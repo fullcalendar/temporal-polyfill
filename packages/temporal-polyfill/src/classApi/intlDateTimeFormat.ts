@@ -299,6 +299,8 @@ function createFormatPrepperForBranding<S extends BrandingSlots>(
     config,
     // a generator that conveniently caches by the first arg: forcedTimeZoneId
     memoize(createFormatForPrep),
+    // This is the Intl.DateTimeFormat-with-Temporal-input path, not the
+    // Temporal.prototype.toLocaleString path.
     /* strictOptions = */ true,
   )
 }

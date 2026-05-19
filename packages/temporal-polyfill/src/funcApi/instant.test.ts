@@ -254,6 +254,43 @@ describe('toLocaleStringParts', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const inst = InstantFns.create(1704063600000000000n)
+    const format = InstantFns.createFormat('en', {
+      dateStyle: 'full',
+      timeZone: 'America/New_York',
+    })
+
+    expect(format.format(inst)).toBe('Sunday, December 31, 2023')
+  })
+
+  it('snapshots options at construction', () => {
+    const inst = InstantFns.create(1704063600000000000n)
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      timeZone: 'America/New_York',
+    }
+    const format = InstantFns.createFormat('en', options)
+
+    options.year = '2-digit'
+    expect(format.format(inst)).toBe('2023')
+  })
+
+  it('formats ranges', () => {
+    const inst0 = InstantFns.create(1704063600000000000n)
+    const inst1 = InstantFns.create(1704150000000000000n)
+    const format = InstantFns.createFormat('en', {
+      dateStyle: 'full',
+      timeZone: 'America/New_York',
+    })
+
+    expect(format.formatRange(inst0, inst1)).toBe(
+      'Sunday, December 31, 2023 – Monday, January 1, 2024',
+    )
+  })
+})
+
 describe('rangeToLocaleString', () => {
   it('works', () => {
     const inst0 = InstantFns.create(1704063600000000000n)

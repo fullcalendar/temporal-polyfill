@@ -26,8 +26,8 @@ import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefin
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, identity } from '../internal/utils'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'
@@ -45,6 +45,7 @@ export type ToZonedDateTimeOptions = {
   timeZone: string
   plainDate: PlainDateFns.Record
 }
+export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -161,10 +162,14 @@ export function toPlainDateTime(
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  timeConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(timeConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(timeConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,

@@ -242,6 +242,36 @@ describe('toLocaleStringParts', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const pt = PlainTimeFns.create(12, 30)
+    const format = PlainTimeFns.createFormat('en', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+
+    expect(format.format(pt)).toBe('12:30:00 PM')
+  })
+
+  it('snapshots options at construction', () => {
+    const pt = PlainTimeFns.create(12, 30)
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit' }
+    const format = PlainTimeFns.createFormat('en', options)
+
+    options.hour = 'numeric'
+    expect(format.format(pt)).toBe('12 PM')
+  })
+
+  it('formats ranges', () => {
+    const pt0 = PlainTimeFns.create(12, 30)
+    const pt1 = PlainTimeFns.create(14, 45)
+    const format = PlainTimeFns.createFormat('en', { timeStyle: 'long' })
+
+    expect(format.formatRange(pt0, pt1)).toBe('12:30:00 PM – 2:45:00 PM')
+  })
+})
+
 describe('rangeToLocaleString', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)

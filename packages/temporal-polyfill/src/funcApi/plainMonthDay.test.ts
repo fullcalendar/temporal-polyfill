@@ -178,6 +178,43 @@ describe('toLocaleStringParts', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const pmd = PlainMonthDayFns.create(6, 18)
+    const format = PlainMonthDayFns.createFormat('en', {
+      month: 'long',
+      day: 'numeric',
+      calendar: 'iso8601',
+    })
+
+    expect(format.format(pmd)).toBe('June 18')
+  })
+
+  it('snapshots options at construction', () => {
+    const pmd = PlainMonthDayFns.create(6, 18)
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      calendar: 'iso8601',
+    }
+    const format = PlainMonthDayFns.createFormat('en', options)
+
+    options.month = 'numeric'
+    expect(format.format(pmd)).toBe('June')
+  })
+
+  it('formats ranges', () => {
+    const pmd0 = PlainMonthDayFns.create(6, 18)
+    const pmd1 = PlainMonthDayFns.create(10, 3)
+    const format = PlainMonthDayFns.createFormat('en', {
+      month: 'long',
+      day: 'numeric',
+      calendar: 'iso8601',
+    })
+
+    expect(format.formatRange(pmd0, pmd1)).toBe('June 18 – October 3')
+  })
+})
+
 describe('rangeToLocaleString', () => {
   it('works', () => {
     const pmd0 = PlainMonthDayFns.create(6, 18)

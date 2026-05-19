@@ -432,7 +432,7 @@ describe('toLocaleString', () => {
     expect(s).toBe('Sunday, December 31, 2023')
   })
 
-  it('treats reused options objects as immutable cache keys', () => {
+  it('observes reused options objects again on each call', () => {
     const pd = PlainDateFns.create(2023, 12, 31)
     const locale = 'en'
     const options: Intl.DateTimeFormatOptions = { year: 'numeric' }
@@ -440,7 +440,89 @@ describe('toLocaleString', () => {
     expect(PlainDateFns.toLocaleString(pd, locale, options)).toBe('2023')
 
     options.year = '2-digit'
-    expect(PlainDateFns.toLocaleString(pd, locale, options)).toBe('2023')
+    expect(PlainDateFns.toLocaleString(pd, locale, options)).toBe('23')
+  })
+})
+
+describe('createFormat', () => {
+  it('formats records', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
+
+    expect(format.format(pd)).toBe('Sunday, December 31, 2023')
+  })
+
+  it('snapshots options at construction', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric' }
+    const format = PlainDateFns.createFormat('en', options)
+
+    options.year = '2-digit'
+    expect(format.format(pd)).toBe('2023')
+  })
+
+  it('formats parts', () => {
+    const pd = PlainDateFns.create(2023, 12, 31)
+    const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
+
+    expect(format.formatToParts(pd)).toEqual([
+      { type: 'weekday', value: 'Sunday' },
+      { type: 'literal', value: ', ' },
+      { type: 'month', value: 'December' },
+      { type: 'literal', value: ' ' },
+      { type: 'day', value: '31' },
+      { type: 'literal', value: ', ' },
+      { type: 'year', value: '2023' },
+    ])
+  })
+
+  it('formats ranges', () => {
+    const pd0 = PlainDateFns.create(2023, 12, 31)
+    const pd1 = PlainDateFns.create(2024, 1, 1)
+    const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
+
+    expect(format.formatRange(pd0, pd1)).toBe(
+      'Sunday, December 31, 2023 – Monday, January 1, 2024',
+    )
+  })
+
+  it('formats range parts', () => {
+    const pd0 = PlainDateFns.create(2023, 12, 31)
+    const pd1 = PlainDateFns.create(2024, 1, 1)
+    const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
+
+    expect(format.formatRangeToParts(pd0, pd1)).toEqual([
+      { source: 'startRange', type: 'weekday', value: 'Sunday' },
+      { source: 'startRange', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'month', value: 'December' },
+      { source: 'startRange', type: 'literal', value: ' ' },
+      { source: 'startRange', type: 'day', value: '31' },
+      { source: 'startRange', type: 'literal', value: ', ' },
+      { source: 'startRange', type: 'year', value: '2023' },
+      { source: 'shared', type: 'literal', value: ' – ' },
+      { source: 'endRange', type: 'weekday', value: 'Monday' },
+      { source: 'endRange', type: 'literal', value: ', ' },
+      { source: 'endRange', type: 'month', value: 'January' },
+      { source: 'endRange', type: 'literal', value: ' ' },
+      { source: 'endRange', type: 'day', value: '1' },
+      { source: 'endRange', type: 'literal', value: ', ' },
+      { source: 'endRange', type: 'year', value: '2024' },
+    ])
+  })
+
+  it('exposes resolved options from construction', () => {
+    const format = PlainDateFns.createFormat('en', { year: 'numeric' })
+
+    expect(format.resolvedOptions().locale).toBe('en')
+    expect(format.resolvedOptions().year).toBe('numeric')
+  })
+
+  it('uses Intl.DateTimeFormat Temporal-input option validation', () => {
+    expect(() =>
+      PlainDateFns.createFormat('en', { timeStyle: 'short' }).format(
+        PlainDateFns.create(2023, 12, 31),
+      ),
+    ).toThrow(TypeError)
   })
 })
 

@@ -548,6 +548,42 @@ describe('toLocaleStringParts', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const format = PlainDateTimeFns.createFormat('en', {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    })
+
+    expect(format.format(pdt)).toBe('Sunday, December 31, 2023 at 12:30:00 PM')
+  })
+
+  it('snapshots options at construction', () => {
+    const pdt = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric' }
+    const format = PlainDateTimeFns.createFormat('en', options)
+
+    options.year = '2-digit'
+    expect(format.format(pdt)).toBe('2023')
+  })
+
+  it('formats ranges', () => {
+    const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)
+    const pdt1 = PlainDateTimeFns.create(2023, 12, 31, 14, 59)
+    const format = PlainDateTimeFns.createFormat('en', {
+      dateStyle: 'full',
+      timeStyle: 'full',
+      timeZone: 'America/New_York',
+    })
+
+    expect(format.formatRange(pdt0, pdt1)).toBe(
+      'Sunday, December 31, 2023, 12:30:00 PM – 2:59:00 PM',
+    )
+  })
+})
+
 describe('rangeToLocaleString', () => {
   it('works', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 12, 31, 12, 30)

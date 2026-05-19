@@ -54,6 +54,7 @@ import {
   computeYearOfWeek,
   getCalendarIdFromBag,
 } from './calendarUtils'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import {
   diffPlainDays,
   diffPlainMonths,
@@ -61,7 +62,6 @@ import {
   diffPlainYears,
 } from './diffUtils'
 import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -104,6 +104,7 @@ export type ToZonedDateTimeOptions = {
   timeZone: string
   plainTime?: PlainTimeFns.Record
 }
+export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -258,10 +259,14 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  dateConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(dateConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(dateConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,
