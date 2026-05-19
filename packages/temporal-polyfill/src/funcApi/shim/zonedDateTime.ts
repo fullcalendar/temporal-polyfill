@@ -5,6 +5,14 @@ import {
   zonedDateTimesEqual,
 } from '../../internal/compare'
 import { constructZonedEpochNanoSlots } from '../../internal/construct'
+import {
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+  zonedDateTimeToInstant,
+  zonedDateTimeToPlainDate,
+  zonedDateTimeToPlainDateTime,
+  zonedDateTimeToPlainTime,
+} from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
 import {
@@ -19,6 +27,10 @@ import {
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
+import {
+  zonedDateTimeWithPlainDate,
+  zonedDateTimeWithPlainTime,
+} from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
 import {
   DiffOptions,
@@ -50,6 +62,7 @@ import {
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import {
+  computeDateFields,
   computeDayOfYear,
   computeDaysInMonth,
   computeDaysInYear,
@@ -65,6 +78,29 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { InstantShimRecord, createInstantShimRecord } from './instant'
+import {
+  PlainDateShimRecord,
+  createPlainDateShimRecord,
+  getPlainDateShimRecordSlots,
+} from './plainDate'
+import {
+  PlainDateTimeShimRecord,
+  createPlainDateTimeShimRecord,
+} from './plainDateTime'
+import {
+  PlainMonthDayShimRecord,
+  createPlainMonthDayShimRecord,
+} from './plainMonthDay'
+import {
+  PlainTimeShimRecord,
+  createPlainTimeShimRecord,
+  getPlainTimeShimRecordSlots,
+} from './plainTime'
+import {
+  PlainYearMonthShimRecord,
+  createPlainYearMonthShimRecord,
+} from './plainYearMonth'
 
 type ZonedDateTimeShimFields = Partial<DateTimeFields> & {
   calendar?: CalendarShimRecord
@@ -179,6 +215,29 @@ export function withTimeZone(
       slots.calendar,
     ),
   )
+}
+
+export function withPlainDate(
+  record: ZonedDateTimeShimRecord,
+  plainDateRecord: PlainDateShimRecord,
+): ZonedDateTimeShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const plainDateSlots = getPlainDateShimRecordSlots(plainDateRecord)
+  const resSlots = zonedDateTimeWithPlainDate(slots, plainDateSlots)
+  return createZonedDateTimeShimRecord(resSlots)
+}
+
+export function withPlainTime(
+  record: ZonedDateTimeShimRecord,
+  plainTimeRecord?: PlainTimeShimRecord,
+): ZonedDateTimeShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const plainTimeSlots =
+    plainTimeRecord === undefined
+      ? undefined
+      : getPlainTimeShimRecordSlots(plainTimeRecord)
+  const resSlots = zonedDateTimeWithPlainTime(slots, plainTimeSlots)
+  return createZonedDateTimeShimRecord(resSlots)
 }
 
 export function epochSeconds(record: ZonedDateTimeShimRecord): number {
@@ -365,6 +424,58 @@ export function compare(
   const slots = getZonedDateTimeShimRecordSlots(record)
   const otherSlots = getZonedDateTimeShimRecordSlots(otherRecord)
   return compareZonedDateTimes(slots, otherSlots)
+}
+
+export function toInstant(record: ZonedDateTimeShimRecord): InstantShimRecord {
+  const resSlots = zonedDateTimeToInstant(
+    getZonedDateTimeShimRecordSlots(record),
+  )
+  return createInstantShimRecord(resSlots)
+}
+
+export function toPlainDateTime(
+  record: ZonedDateTimeShimRecord,
+): PlainDateTimeShimRecord {
+  const resSlots = zonedDateTimeToPlainDateTime(
+    getZonedDateTimeShimRecordSlots(record),
+  )
+  return createPlainDateTimeShimRecord(resSlots)
+}
+
+export function toPlainDate(
+  record: ZonedDateTimeShimRecord,
+): PlainDateShimRecord {
+  const resSlots = zonedDateTimeToPlainDate(
+    getZonedDateTimeShimRecordSlots(record),
+  )
+  return createPlainDateShimRecord(resSlots)
+}
+
+export function toPlainTime(
+  record: ZonedDateTimeShimRecord,
+): PlainTimeShimRecord {
+  const resSlots = zonedDateTimeToPlainTime(
+    getZonedDateTimeShimRecordSlots(record),
+  )
+  return createPlainTimeShimRecord(resSlots)
+}
+
+export function toPlainYearMonth(
+  record: ZonedDateTimeShimRecord,
+): PlainYearMonthShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const fields = computeDateFields(zonedEpochSlotsToIso(slots))
+  const resSlots = convertToPlainYearMonth(slots.calendar, fields)
+  return createPlainYearMonthShimRecord(resSlots)
+}
+
+export function toPlainMonthDay(
+  record: ZonedDateTimeShimRecord,
+): PlainMonthDayShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const fields = computeDateFields(zonedEpochSlotsToIso(slots))
+  const resSlots = convertToPlainMonthDay(slots.calendar, fields)
+  return createPlainMonthDayShimRecord(resSlots)
 }
 
 function computeDateProperty<R>(

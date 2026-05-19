@@ -2,9 +2,11 @@ import { timeGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
+import { plainTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
-import { TimeFields } from '../../internal/fieldTypes'
+import { InternalCalendar } from '../../internal/externalCalendar'
+import { CalendarDateFields, TimeFields } from '../../internal/fieldTypes'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
@@ -16,6 +18,8 @@ import {
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { roundPlainTime } from '../../internal/round'
+import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { PlainTimeRecordBranding } from '../common-branding'
@@ -24,8 +28,22 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { PlainDateShimRecord, getPlainDateShimRecordSlots } from './plainDate'
+import {
+  PlainDateTimeShimRecord,
+  createPlainDateTimeShimRecord,
+} from './plainDateTime'
+import {
+  ZonedDateTimeShimRecord,
+  createZonedDateTimeShimRecord,
+} from './zonedDateTime'
 
 export type PlainTimeShimRecord = any & TimeFields
+
+type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainDate: PlainDateShimRecord
+}
 
 export const [
   PlainTimeShimRecord,
@@ -148,6 +166,35 @@ export function compare(
   const slots = getPlainTimeShimRecordSlots(record)
   const otherSlots = getPlainTimeShimRecordSlots(otherRecord)
   return compareTimeFields(slots, otherSlots)
+}
+
+export function toZonedDateTime(
+  record: PlainTimeShimRecord,
+  options: ToZonedDateTimeOptions,
+): ZonedDateTimeShimRecord {
+  const resSlots = plainTimeToZonedDateTime<
+    CalendarDateFields & { calendar: InternalCalendar }
+  >(
+    refineTimeZoneId,
+    getPlainDateShimRecordSlots,
+    getPlainTimeShimRecordSlots(record),
+    options,
+  )
+  return createZonedDateTimeShimRecord(resSlots)
+}
+
+export function toPlainDateTime(
+  record: PlainTimeShimRecord,
+  plainDateRecord: PlainDateShimRecord,
+): PlainDateTimeShimRecord {
+  const timeSlots = getPlainTimeShimRecordSlots(record)
+  const dateSlots = getPlainDateShimRecordSlots(plainDateRecord)
+  const resSlots = createPlainDateTimeFromRefinedFields(
+    dateSlots,
+    timeSlots,
+    dateSlots.calendar,
+  )
+  return createPlainDateTimeShimRecord(resSlots)
 }
 
 export function toString(

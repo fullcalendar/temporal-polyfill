@@ -14,6 +14,7 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 
 export type PlainYearMonthNativeRecord = any & YearMonthFields
 
@@ -175,6 +176,15 @@ export function compare(
     native,
     otherNative,
   )
+}
+
+export function toPlainDate(
+  record: PlainYearMonthNativeRecord,
+  fields: { day: number },
+): PlainDateNativeRecord {
+  const native = getPlainYearMonthNative(record)
+  const resNative = native.toPlainDate(fields)
+  return createPlainDateNativeRecord(resNative)
 }
 
 export function toString(

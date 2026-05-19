@@ -2,12 +2,13 @@ import { calendarIdGetters, monthDayFieldGetters } from '../../classApi/mixins'
 import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
+import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import {
   getInternalCalendarId,
   isoCalendar,
 } from '../../internal/externalCalendar'
-import { MonthDayFields } from '../../internal/fieldTypes'
+import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
@@ -15,8 +16,10 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
+import { computeMonthDayFields } from '../calendarUtils'
 import { PlainMonthDayRecordBranding } from '../common-branding'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
+import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
 export type PlainMonthDayShimRecord = any & MonthDayFields
 
@@ -105,6 +108,19 @@ export function equals(
   const slots = getPlainMonthDayShimRecordSlots(record)
   const otherSlots = getPlainMonthDayShimRecordSlots(otherRecord)
   return plainMonthDaysEqual(slots, otherSlots)
+}
+
+export function toPlainDate(
+  record: PlainMonthDayShimRecord,
+  fields: EraYearOrYear,
+): PlainDateShimRecord {
+  const slots = getPlainMonthDayShimRecordSlots(record)
+  const resSlots = convertPlainMonthDayToDate(
+    slots.calendar,
+    computeMonthDayFields(slots),
+    fields,
+  )
+  return createPlainDateShimRecord(resSlots)
 }
 
 export function toString(

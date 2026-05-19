@@ -6,6 +6,7 @@ import {
 } from '../../internal/optionsModel'
 import { PlainMonthDayRecordBranding } from '../common-branding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 
 export type PlainMonthDayNativeRecord = any & MonthDayFields
 
@@ -88,6 +89,15 @@ export function equals(
   const native = getPlainMonthDayNative(record)
   const otherNative = getPlainMonthDayNative(otherRecord)
   return native.equals(otherNative)
+}
+
+export function toPlainDate(
+  record: PlainMonthDayNativeRecord,
+  fields: { era?: string; eraYear?: number; year?: number },
+): PlainDateNativeRecord {
+  const native = getPlainMonthDayNative(record)
+  const resNative = native.toPlainDate(fields)
+  return createPlainDateNativeRecord(resNative)
 }
 
 export function toString(

@@ -18,6 +18,29 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import { InstantNativeRecord, createInstantNativeRecord } from './instant'
+import {
+  PlainDateNativeRecord,
+  createPlainDateNativeRecord,
+  getPlainDateNative,
+} from './plainDate'
+import {
+  PlainDateTimeNativeRecord,
+  createPlainDateTimeNativeRecord,
+} from './plainDateTime'
+import {
+  PlainMonthDayNativeRecord,
+  createPlainMonthDayNativeRecord,
+} from './plainMonthDay'
+import {
+  PlainTimeNativeRecord,
+  createPlainTimeNativeRecord,
+  getPlainTimeNative,
+} from './plainTime'
+import {
+  PlainYearMonthNativeRecord,
+  createPlainYearMonthNativeRecord,
+} from './plainYearMonth'
 
 type ZonedDateTimeNativeFields = Partial<DateTimeFields> & {
   calendar?: CalendarNativeRecord
@@ -111,6 +134,29 @@ export function withTimeZone(
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
   const resNative = native.withTimeZone(timeZoneId)
+  return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function withPlainDate(
+  record: ZonedDateTimeNativeRecord,
+  plainDateRecord: PlainDateNativeRecord,
+): ZonedDateTimeNativeRecord {
+  const native = getZonedDateTimeNative(record)
+  const plainDateNative = getPlainDateNative(plainDateRecord)
+  const resNative = native.withPlainDate(plainDateNative)
+  return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function withPlainTime(
+  record: ZonedDateTimeNativeRecord,
+  plainTimeRecord?: PlainTimeNativeRecord,
+): ZonedDateTimeNativeRecord {
+  const native = getZonedDateTimeNative(record)
+  const plainTimeNative =
+    plainTimeRecord === undefined
+      ? undefined
+      : getPlainTimeNative(plainTimeRecord)
+  const resNative = native.withPlainTime(plainTimeNative)
   return createZonedDateTimeNativeRecord(resNative)
 }
 
@@ -275,4 +321,46 @@ export function compare(
   const native = getZonedDateTimeNative(record)
   const otherNative = getZonedDateTimeNative(otherRecord)
   return (globalThis as any).Temporal.ZonedDateTime.compare(native, otherNative)
+}
+
+export function toInstant(
+  record: ZonedDateTimeNativeRecord,
+): InstantNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toInstant()
+  return createInstantNativeRecord(resNative)
+}
+
+export function toPlainDateTime(
+  record: ZonedDateTimeNativeRecord,
+): PlainDateTimeNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toPlainDateTime()
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function toPlainDate(
+  record: ZonedDateTimeNativeRecord,
+): PlainDateNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toPlainDate()
+  return createPlainDateNativeRecord(resNative)
+}
+
+export function toPlainTime(
+  record: ZonedDateTimeNativeRecord,
+): PlainTimeNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toPlainTime()
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function toPlainYearMonth(
+  record: ZonedDateTimeNativeRecord,
+): PlainYearMonthNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toPlainYearMonth()
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function toPlainMonthDay(
+  record: ZonedDateTimeNativeRecord,
+): PlainMonthDayNativeRecord {
+  const resNative = getZonedDateTimeNative(record).toPlainMonthDay()
+  return createPlainMonthDayNativeRecord(resNative)
 }

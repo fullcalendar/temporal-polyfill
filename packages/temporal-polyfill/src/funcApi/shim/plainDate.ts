@@ -3,10 +3,16 @@ import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
 import { computeCalendarDayOfYear } from '../../internal/calendarDerived'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
+import {
+  convertToPlainMonthDay,
+  convertToPlainYearMonth,
+  plainDateToZonedDateTime,
+} from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
 import { isoCalendar } from '../../internal/externalCalendar'
-import { DateFields } from '../../internal/fieldTypes'
+import { timeFieldDefaults } from '../../internal/fieldNames'
+import { DateFields, TimeFields } from '../../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
@@ -18,9 +24,12 @@ import {
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { createDateSlots } from '../../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { DateUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import {
+  computeDateFields,
   computeDaysInMonth,
   computeDaysInYear,
   computeInLeapYear,
@@ -35,6 +44,28 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import {
+  PlainDateTimeShimRecord,
+  createPlainDateTimeShimRecord,
+} from './plainDateTime'
+import {
+  PlainMonthDayShimRecord,
+  createPlainMonthDayShimRecord,
+} from './plainMonthDay'
+import { PlainTimeShimRecord, getPlainTimeShimRecordSlots } from './plainTime'
+import {
+  PlainYearMonthShimRecord,
+  createPlainYearMonthShimRecord,
+} from './plainYearMonth'
+import {
+  ZonedDateTimeShimRecord,
+  createZonedDateTimeShimRecord,
+} from './zonedDateTime'
+
+type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainTime?: PlainTimeShimRecord
+}
 
 export type PlainDateShimRecord = any & DateFields
 
@@ -220,6 +251,60 @@ export function compare(
   const slots = getPlainDateShimRecordSlots(record)
   const otherSlots = getPlainDateShimRecordSlots(otherRecord)
   return compareIsoDateFields(slots, otherSlots)
+}
+
+export function toZonedDateTime(
+  record: PlainDateShimRecord,
+  options: string | ToZonedDateTimeOptions,
+): ZonedDateTimeShimRecord {
+  const optionsObj =
+    typeof options === 'string' ? { timeZone: options } : options
+  const resSlots = plainDateToZonedDateTime(
+    refineTimeZoneId,
+    getPlainTimeShimRecordSlots,
+    getPlainDateShimRecordSlots(record),
+    optionsObj,
+  )
+  return createZonedDateTimeShimRecord(resSlots)
+}
+
+export function toPlainDateTime(
+  record: PlainDateShimRecord,
+  plainTimeRecord: PlainTimeShimRecord | TimeFields = timeFieldDefaults,
+): PlainDateTimeShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  const timeFields =
+    plainTimeRecord instanceof PlainTimeShimRecord
+      ? getPlainTimeShimRecordSlots(plainTimeRecord)
+      : plainTimeRecord
+  const resSlots = createPlainDateTimeFromRefinedFields(
+    slots,
+    timeFields,
+    slots.calendar,
+  )
+  return createPlainDateTimeShimRecord(resSlots)
+}
+
+export function toPlainYearMonth(
+  record: PlainDateShimRecord,
+): PlainYearMonthShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  const resSlots = convertToPlainYearMonth(
+    slots.calendar,
+    computeDateFields(slots),
+  )
+  return createPlainYearMonthShimRecord(resSlots)
+}
+
+export function toPlainMonthDay(
+  record: PlainDateShimRecord,
+): PlainMonthDayShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  const resSlots = convertToPlainMonthDay(
+    slots.calendar,
+    computeDateFields(slots),
+  )
+  return createPlainMonthDayShimRecord(resSlots)
 }
 
 export function toString(

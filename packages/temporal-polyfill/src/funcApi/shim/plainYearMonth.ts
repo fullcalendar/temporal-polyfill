@@ -5,13 +5,14 @@ import {
   plainYearMonthsEqual,
 } from '../../internal/compare'
 import { constructYearMonthSlots } from '../../internal/construct'
+import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
 import {
   getInternalCalendarId,
   isoCalendar,
 } from '../../internal/externalCalendar'
-import { YearMonthFields } from '../../internal/fieldTypes'
+import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
@@ -28,6 +29,7 @@ import {
   computeDaysInYear,
   computeInLeapYear,
   computeMonthsInYear,
+  computeYearMonthFields,
 } from '../calendarUtils'
 import { PlainYearMonthRecordBranding } from '../common-branding'
 import { CalendarShimRecord, getCalendarShimRecordInternal } from './calendar'
@@ -36,6 +38,7 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
 export type PlainYearMonthShimRecord = any & YearMonthFields
 
@@ -203,6 +206,19 @@ export function compare(
   const slots = getPlainYearMonthShimRecordSlots(record)
   const otherSlots = getPlainYearMonthShimRecordSlots(otherRecord)
   return compareIsoDateFields(slots, otherSlots)
+}
+
+export function toPlainDate(
+  record: PlainYearMonthShimRecord,
+  fields: DayFields,
+): PlainDateShimRecord {
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  const resSlots = convertPlainYearMonthToDate(
+    slots.calendar,
+    computeYearMonthFields(slots),
+    fields,
+  )
+  return createPlainDateShimRecord(resSlots)
 }
 
 export function toString(

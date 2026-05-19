@@ -14,6 +14,28 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import {
+  PlainDateTimeNativeRecord,
+  createPlainDateTimeNativeRecord,
+} from './plainDateTime'
+import {
+  PlainMonthDayNativeRecord,
+  createPlainMonthDayNativeRecord,
+} from './plainMonthDay'
+import { PlainTimeNativeRecord, getPlainTimeNative } from './plainTime'
+import {
+  PlainYearMonthNativeRecord,
+  createPlainYearMonthNativeRecord,
+} from './plainYearMonth'
+import {
+  ZonedDateTimeNativeRecord,
+  createZonedDateTimeNativeRecord,
+} from './zonedDateTime'
+
+type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainTime?: PlainTimeNativeRecord
+}
 
 export type PlainDateNativeRecord = DateFields
 
@@ -204,6 +226,52 @@ export function compare(
   const native = getPlainDateNative(record)
   const otherNative = getPlainDateNative(otherRecord)
   return (globalThis as any).Temporal.PlainDate.compare(native, otherNative)
+}
+
+export function toZonedDateTime(
+  record: PlainDateNativeRecord,
+  options: string | ToZonedDateTimeOptions,
+): ZonedDateTimeNativeRecord {
+  const native = getPlainDateNative(record)
+  const optionsObj =
+    typeof options === 'string'
+      ? { timeZone: options }
+      : {
+          ...options,
+          plainTime:
+            options.plainTime === undefined
+              ? undefined
+              : getPlainTimeNative(options.plainTime),
+        }
+  const resNative = native.toZonedDateTime(optionsObj)
+  return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function toPlainDateTime(
+  record: PlainDateNativeRecord,
+  plainTimeRecord?: PlainTimeNativeRecord,
+): PlainDateTimeNativeRecord {
+  const native = getPlainDateNative(record)
+  const plainTimeNative =
+    plainTimeRecord === undefined
+      ? undefined
+      : getPlainTimeNative(plainTimeRecord)
+  const resNative = native.toPlainDateTime(plainTimeNative)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function toPlainYearMonth(
+  record: PlainDateNativeRecord,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainDateNative(record).toPlainYearMonth()
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function toPlainMonthDay(
+  record: PlainDateNativeRecord,
+): PlainMonthDayNativeRecord {
+  const resNative = getPlainDateNative(record).toPlainMonthDay()
+  return createPlainMonthDayNativeRecord(resNative)
 }
 
 export function toString(

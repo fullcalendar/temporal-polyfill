@@ -3,6 +3,7 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import {
   DateTimeDisplayOptions,
   DiffOptions,
+  EpochDisambigOptions,
   OverflowOptions,
   RoundingOptions,
 } from '../../internal/optionsModel'
@@ -15,6 +16,28 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import {
+  PlainDateNativeRecord,
+  createPlainDateNativeRecord,
+  getPlainDateNative,
+} from './plainDate'
+import {
+  PlainMonthDayNativeRecord,
+  createPlainMonthDayNativeRecord,
+} from './plainMonthDay'
+import {
+  PlainTimeNativeRecord,
+  createPlainTimeNativeRecord,
+  getPlainTimeNative,
+} from './plainTime'
+import {
+  PlainYearMonthNativeRecord,
+  createPlainYearMonthNativeRecord,
+} from './plainYearMonth'
+import {
+  ZonedDateTimeNativeRecord,
+  createZonedDateTimeNativeRecord,
+} from './zonedDateTime'
 
 export type PlainDateTimeNativeRecord = DateTimeFields
 
@@ -132,6 +155,29 @@ export function withFields(
   return createPlainDateTimeNativeRecord(resNative)
 }
 
+export function withPlainDate(
+  record: PlainDateTimeNativeRecord,
+  plainDateRecord: PlainDateNativeRecord,
+): PlainDateTimeNativeRecord {
+  const native = getPlainDateTimeNative(record)
+  const plainDateNative = getPlainDateNative(plainDateRecord)
+  const resNative = native.withPlainDate(plainDateNative)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function withPlainTime(
+  record: PlainDateTimeNativeRecord,
+  plainTimeRecord?: PlainTimeNativeRecord,
+): PlainDateTimeNativeRecord {
+  const native = getPlainDateTimeNative(record)
+  const plainTimeNative =
+    plainTimeRecord === undefined
+      ? undefined
+      : getPlainTimeNative(plainTimeRecord)
+  const resNative = native.withPlainTime(plainTimeNative)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
 export function dayOfWeek(record: PlainDateTimeNativeRecord): number {
   return getPlainDateTimeNative(record).dayOfWeek
 }
@@ -241,6 +287,44 @@ export function compare(
   const native = getPlainDateTimeNative(record)
   const otherNative = getPlainDateTimeNative(otherRecord)
   return (globalThis as any).Temporal.PlainDateTime.compare(native, otherNative)
+}
+
+export function toZonedDateTime(
+  record: PlainDateTimeNativeRecord,
+  timeZoneId: string,
+  options?: EpochDisambigOptions,
+): ZonedDateTimeNativeRecord {
+  const native = getPlainDateTimeNative(record)
+  const resNative = native.toZonedDateTime(timeZoneId, options)
+  return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function toPlainDate(
+  record: PlainDateTimeNativeRecord,
+): PlainDateNativeRecord {
+  const resNative = getPlainDateTimeNative(record).toPlainDate()
+  return createPlainDateNativeRecord(resNative)
+}
+
+export function toPlainTime(
+  record: PlainDateTimeNativeRecord,
+): PlainTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).toPlainTime()
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function toPlainYearMonth(
+  record: PlainDateTimeNativeRecord,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainDateTimeNative(record).toPlainYearMonth()
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function toPlainMonthDay(
+  record: PlainDateTimeNativeRecord,
+): PlainMonthDayNativeRecord {
+  const resNative = getPlainDateTimeNative(record).toPlainMonthDay()
+  return createPlainMonthDayNativeRecord(resNative)
 }
 
 export function toString(

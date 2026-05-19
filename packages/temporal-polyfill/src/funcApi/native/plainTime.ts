@@ -14,8 +14,22 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import { PlainDateNativeRecord, getPlainDateNative } from './plainDate'
+import {
+  PlainDateTimeNativeRecord,
+  createPlainDateTimeNativeRecord,
+} from './plainDateTime'
+import {
+  ZonedDateTimeNativeRecord,
+  createZonedDateTimeNativeRecord,
+} from './zonedDateTime'
 
 export type PlainTimeNativeRecord = any & TimeFields
+
+type ToZonedDateTimeOptions = {
+  timeZone: string
+  plainDate: PlainDateNativeRecord
+}
 
 export const [
   PlainTimeNativeRecord,
@@ -160,6 +174,28 @@ export function compare(
   const native = getPlainTimeNative(record)
   const otherNative = getPlainTimeNative(otherRecord)
   return (globalThis as any).Temporal.PlainTime.compare(native, otherNative)
+}
+
+export function toZonedDateTime(
+  record: PlainTimeNativeRecord,
+  options: ToZonedDateTimeOptions,
+): ZonedDateTimeNativeRecord {
+  const native = getPlainTimeNative(record)
+  const resNative = native.toZonedDateTime({
+    ...options,
+    plainDate: getPlainDateNative(options.plainDate),
+  })
+  return createZonedDateTimeNativeRecord(resNative)
+}
+
+export function toPlainDateTime(
+  record: PlainTimeNativeRecord,
+  plainDateRecord: PlainDateNativeRecord,
+): PlainDateTimeNativeRecord {
+  const native = getPlainTimeNative(record)
+  const plainDateNative = getPlainDateNative(plainDateRecord)
+  const resNative = native.toPlainDateTime(plainDateNative)
+  return createPlainDateTimeNativeRecord(resNative)
 }
 
 export function toString(
