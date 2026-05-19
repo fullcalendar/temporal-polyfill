@@ -20,7 +20,12 @@ import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
 } from '../internal/isoCalendarMath'
-import { getEpochMilli, getEpochNano } from '../internal/slots'
+import {
+  getEpochMicro,
+  getEpochMilli,
+  getEpochNano,
+  getEpochSec,
+} from '../internal/slots'
 import { zipPropsGenerator } from '../internal/utils'
 
 // For PlainDate/etc
@@ -120,6 +125,8 @@ export const timeGetters = zipPropsGenerator(
 )
 
 export const epochGetters = {
+  epochSeconds: getEpochSec,
   epochMilliseconds: getEpochMilli,
+  epochMicroseconds: getEpochMicro,
   epochNanoseconds: getEpochNano,
 }

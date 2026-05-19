@@ -46,13 +46,7 @@ import {
   computeZonedStartOfDay,
   roundZonedDateTime,
 } from '../../internal/round'
-import {
-  createZonedEpochNanoSlots,
-  getEpochMicro,
-  getEpochMilli,
-  getEpochNano,
-  getEpochSec,
-} from '../../internal/slots'
+import { createZonedEpochNanoSlots } from '../../internal/slots'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
@@ -238,22 +232,6 @@ export function withPlainTime(
       : getPlainTimeShimRecordSlots(plainTimeRecord)
   const resSlots = zonedDateTimeWithPlainTime(slots, plainTimeSlots)
   return createZonedDateTimeShimRecord(resSlots)
-}
-
-export function epochSeconds(record: ZonedDateTimeShimRecord): number {
-  return getEpochSec(getZonedDateTimeShimRecordSlots(record))
-}
-
-export function epochMilliseconds(record: ZonedDateTimeShimRecord): number {
-  return getEpochMilli(getZonedDateTimeShimRecordSlots(record))
-}
-
-export function epochMicroseconds(record: ZonedDateTimeShimRecord): bigint {
-  return getEpochMicro(getZonedDateTimeShimRecordSlots(record))
-}
-
-export function epochNanoseconds(record: ZonedDateTimeShimRecord): bigint {
-  return getEpochNano(getZonedDateTimeShimRecordSlots(record))
 }
 
 export function offsetNanoseconds(record: ZonedDateTimeShimRecord): number {

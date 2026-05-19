@@ -69,7 +69,9 @@ export const [
   (native) => native.toString(),
   {
     calendarId: (native: any) => native.calendarId,
+    epochSeconds: (native: any) => native.epochSeconds,
     epochMilliseconds: (native: any) => native.epochMilliseconds,
+    epochMicroseconds: (native: any) => native.epochMicroseconds,
     epochNanoseconds: (native: any) => native.epochNanoseconds,
     timeZoneId: (native: any) => native.timeZoneId,
   },
@@ -158,22 +160,6 @@ export function withPlainTime(
       : getPlainTimeNative(plainTimeRecord)
   const resNative = native.withPlainTime(plainTimeNative)
   return createZonedDateTimeNativeRecord(resNative)
-}
-
-export function epochSeconds(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).epochSeconds
-}
-
-export function epochMilliseconds(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).epochMilliseconds
-}
-
-export function epochMicroseconds(record: ZonedDateTimeNativeRecord): bigint {
-  return getZonedDateTimeNative(record).epochMicroseconds
-}
-
-export function epochNanoseconds(record: ZonedDateTimeNativeRecord): bigint {
-  return getZonedDateTimeNative(record).epochNanoseconds
 }
 
 export function offsetNanoseconds(record: ZonedDateTimeNativeRecord): number {
