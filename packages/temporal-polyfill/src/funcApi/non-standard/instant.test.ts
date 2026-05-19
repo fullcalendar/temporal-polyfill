@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../dist/fns/duration'
-import * as InstantFns from '../../dist/fns/instant'
-import * as ZonedDateTimeFns from '../../dist/fns/zoneddatetime'
-import { getInternalCalendarId } from '../internal/externalCalendar'
-import '../intl-calendars'
+import * as DurationFns from '../../../dist/fns/duration'
+import * as InstantFns from '../../../dist/fns/instant'
+import * as ZonedDateTimeFns from '../../../dist/fns/zoneddatetime'
+import { getInternalCalendarId } from '../../internal/externalCalendar'
+import '../../intl-calendars'
 import {
   expectDurationEquals,
   expectInstantEquals,

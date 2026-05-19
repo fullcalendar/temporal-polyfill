@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import * as DurationFns from '../../dist/fns/duration'
-import * as PlainYearMonthFns from '../../dist/fns/plainyearmonth'
+import * as DurationFns from '../../../dist/fns/duration'
+import * as PlainYearMonthFns from '../../../dist/fns/plainyearmonth'
 import {
   expectDurationEquals,
   expectPlainDateEquals,

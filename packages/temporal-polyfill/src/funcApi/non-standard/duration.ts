@@ -1,26 +1,26 @@
-import { compareDurations } from '../internal/compare'
-import { constructDurationSlots } from '../internal/construct'
-import { refineDurationObjectLike } from '../internal/createFromFields'
-import { DurationFields } from '../internal/durationFields'
+import { compareDurations } from '../../internal/compare'
+import { constructDurationSlots } from '../../internal/construct'
+import { refineDurationObjectLike } from '../../internal/createFromFields'
+import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
   addDurations,
   negateDuration,
   roundDuration,
-} from '../internal/durationMath'
-import { LocalesArg } from '../internal/intlFormatUtils'
-import { formatDurationIso } from '../internal/isoFormat'
-import { parseDuration } from '../internal/isoParse'
-import { mergeDurationFields } from '../internal/merge'
+} from '../../internal/durationMath'
+import { LocalesArg } from '../../internal/intlFormatUtils'
+import { formatDurationIso } from '../../internal/isoFormat'
+import { parseDuration } from '../../internal/isoParse'
+import { mergeDurationFields } from '../../internal/merge'
 import {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-} from '../internal/optionsModel'
-import { totalDuration } from '../internal/total'
-import { UnitName } from '../internal/units'
-import { NumberSign, bindArgs, identity } from '../internal/utils'
+} from '../../internal/optionsModel'
+import { totalDuration } from '../../internal/total'
+import { UnitName } from '../../internal/units'
+import { NumberSign, bindArgs, identity } from '../../internal/utils'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as ZonedDateTimeFns from './zonedDateTime'

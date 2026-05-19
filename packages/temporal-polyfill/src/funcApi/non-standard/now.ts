@@ -1,19 +1,19 @@
-import { refineCalendarId } from '../internal/calendarId'
+import { refineCalendarId } from '../../internal/calendarId'
 import {
   getCurrentEpochNano,
   getCurrentIsoDateTime,
   getCurrentTimeZoneId,
-} from '../internal/current'
-import { getInternalCalendar } from '../internal/externalCalendar'
+} from '../../internal/current'
+import { getInternalCalendar } from '../../internal/externalCalendar'
 import {
   createDateSlots,
   createDateTimeSlots,
   createEpochNanoSlots,
   createTimeSlots,
   createZonedEpochNanoSlots,
-} from '../internal/slots'
-import { refineTimeZoneId } from '../internal/timeZoneId'
-import { queryTimeZone } from '../internal/timeZoneImpl'
+} from '../../internal/slots'
+import { refineTimeZoneId } from '../../internal/timeZoneId'
+import { queryTimeZone } from '../../internal/timeZoneImpl'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'

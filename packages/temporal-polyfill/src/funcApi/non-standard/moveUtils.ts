@@ -3,33 +3,33 @@ import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
-} from '../internal/calendarDerived'
-import { toInteger, toStrictInteger } from '../internal/cast'
-import { epochMilliToIsoDateTime } from '../internal/epochMath'
-import * as errorMessages from '../internal/errorMessages'
+} from '../../internal/calendarDerived'
+import { toInteger, toStrictInteger } from '../../internal/cast'
+import { epochMilliToIsoDateTime } from '../../internal/epochMath'
+import * as errorMessages from '../../internal/errorMessages'
 import {
   type InternalCalendar,
   isoCalendar,
-} from '../internal/externalCalendar'
+} from '../../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
   dayOfWeekFieldName,
   weekOfYearFieldName,
-} from '../internal/fieldNames'
-import { CalendarDateFields } from '../internal/fieldTypes'
+} from '../../internal/fieldNames'
+import { CalendarDateFields } from '../../internal/fieldTypes'
 import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
-} from '../internal/isoCalendarMath'
+} from '../../internal/isoCalendarMath'
 import {
   addDateMonths,
   moveByDays,
   moveToDayOfMonthUnsafe,
-} from '../internal/move'
-import { refineOverflowOptions } from '../internal/optionsFieldRefine'
-import { OverflowOptions } from '../internal/optionsModel'
-import { clampEntity } from '../internal/utils'
+} from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { OverflowOptions } from '../../internal/optionsModel'
+import { clampEntity } from '../../internal/utils'
 
 export function reversedMove<S>(
   f: (slots: S, units: number, options?: OverflowOptions) => S,

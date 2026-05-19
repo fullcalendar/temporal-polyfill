@@ -1,20 +1,20 @@
 import { expect } from 'vitest'
-import { computeDurationSign } from '../internal/durationMath'
+import { computeDurationSign } from '../../internal/durationMath'
 import {
   isoDateTimeToEpochNano,
   isoDateToEpochNano,
-} from '../internal/epochMath'
+} from '../../internal/epochMath'
 import {
   type InternalCalendar,
   getInternalCalendarId,
   isoCalendar,
-} from '../internal/externalCalendar'
+} from '../../internal/externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
-} from '../internal/fieldTypes'
-import { combineDateAndTime } from '../internal/fieldUtils'
+} from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import * as PlainDateFns from './plainDate'

@@ -1,26 +1,26 @@
 import {
   computeCalendarDateFields,
   computeCalendarEpochMilli,
-} from '../internal/calendarDerived'
+} from '../../internal/calendarDerived'
 import {
   epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
-} from '../internal/epochMath'
-import { type InternalCalendar } from '../internal/externalCalendar'
-import { timeFieldDefaults, timeFieldNamesAsc } from '../internal/fieldNames'
+} from '../../internal/epochMath'
+import { type InternalCalendar } from '../../internal/externalCalendar'
+import { timeFieldDefaults, timeFieldNamesAsc } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
-} from '../internal/fieldTypes'
-import { combineDateAndTime } from '../internal/fieldUtils'
-import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
-import { addCalendarMonths, moveByDays } from '../internal/move'
-import { RoundingMode } from '../internal/optionsModel'
-import { IsoDateTimeInterval, roundWithMode } from '../internal/round'
-import { computeEpochNanoFrac } from '../internal/total'
-import { TimeUnit, Unit } from '../internal/units'
-import { bindArgs, zeroOutProps } from '../internal/utils'
+} from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
+import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
+import { addCalendarMonths, moveByDays } from '../../internal/move'
+import { RoundingMode } from '../../internal/optionsModel'
+import { IsoDateTimeInterval, roundWithMode } from '../../internal/round'
+import { computeEpochNanoFrac } from '../../internal/total'
+import { TimeUnit, Unit } from '../../internal/units'
+import { bindArgs, zeroOutProps } from '../../internal/utils'
 
 const clearTimeFields = bindArgs(
   zeroOutProps,

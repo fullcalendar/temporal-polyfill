@@ -1,31 +1,34 @@
-import { divideBigNanoToExactNumber } from '../internal/bigNano'
+import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import {
   diffCalendarDates,
   getCommonCalendar,
   getCommonTimeZone,
   prepareZonedEpochDiff,
-} from '../internal/diff'
-import { DurationFields } from '../internal/durationFields'
-import { isoDateTimeToEpochNano } from '../internal/epochMath'
-import { type InternalCalendar } from '../internal/externalCalendar'
-import { timeFieldDefaults } from '../internal/fieldNames'
-import { CalendarDateFields } from '../internal/fieldTypes'
-import { combineDateAndTime } from '../internal/fieldUtils'
-import { moveDate, moveDateTime, moveZonedEpochs } from '../internal/move'
-import { RoundingMathOptions, RoundingModeName } from '../internal/optionsModel'
-import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
+} from '../../internal/diff'
+import { DurationFields } from '../../internal/durationFields'
+import { isoDateTimeToEpochNano } from '../../internal/epochMath'
+import { type InternalCalendar } from '../../internal/externalCalendar'
+import { timeFieldDefaults } from '../../internal/fieldNames'
+import { CalendarDateFields } from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
+import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
+import {
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../../internal/optionsModel'
+import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
   MarkerToEpochNano,
   MovableMarker,
   MoveMarker,
   createMarkerMoveOps,
   isZonedEpochSlots,
-} from '../internal/relativeMath'
-import { roundBigNanoToInc, roundNumberToInc } from '../internal/round'
-import { ZonedEpochNanoFields, extractEpochNano } from '../internal/slots'
-import { totalRelativeDuration } from '../internal/total'
-import { TimeUnit, Unit, nanoInUtcDay } from '../internal/units'
-import { NumberSign, bindArgs, compareBigInts } from '../internal/utils'
+} from '../../internal/relativeMath'
+import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
+import { ZonedEpochNanoFields, extractEpochNano } from '../../internal/slots'
+import { totalRelativeDuration } from '../../internal/total'
+import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
+import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
 
 // TODO: Split the plain callers so each one passes a type-specific converter
 // instead of branching here between date-only, date-time, and epoch markers.
