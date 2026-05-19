@@ -322,6 +322,43 @@ describe('toLocaleStringParts', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const pym = PlainYearMonthFns.create(2023, 12)
+    const format = PlainYearMonthFns.createFormat('en', {
+      year: 'numeric',
+      month: 'long',
+      calendar: 'iso8601',
+    })
+
+    expect(format.format(pym)).toBe('2023 December')
+  })
+
+  it('snapshots options at construction', () => {
+    const pym = PlainYearMonthFns.create(2023, 12)
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      calendar: 'iso8601',
+    }
+    const format = PlainYearMonthFns.createFormat('en', options)
+
+    options.year = '2-digit'
+    expect(format.format(pym)).toBe('2023')
+  })
+
+  it('formats ranges', () => {
+    const pym0 = PlainYearMonthFns.create(2023, 10)
+    const pym1 = PlainYearMonthFns.create(2023, 12)
+    const format = PlainYearMonthFns.createFormat('en', {
+      year: 'numeric',
+      month: 'long',
+      calendar: 'iso8601',
+    })
+
+    expect(format.formatRange(pym0, pym1)).toBe('2023 October–December')
+  })
+})
+
 describe('rangeToLocaleString', () => {
   it('works', () => {
     const pym0 = PlainYearMonthFns.create(2023, 10)

@@ -120,6 +120,8 @@ const silentExclusionNames = new Set<OptionNames[number]>([
 
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
+  // false means Temporal.prototype.toLocaleString; true means Intl
+  // DateTimeFormat formatting an already-created Temporal value.
   strictOptions: boolean,
 ) => Intl.DateTimeFormatOptions
 
@@ -360,6 +362,8 @@ export type FormatQuerier = (
 export function createFormatPrepper<S>(
   config: ClassFormatConfig<S>,
   queryFormat: FormatQuerier = createFormatForPrep,
+  // false is the Temporal.prototype.toLocaleString option path. Intl
+  // DateTimeFormat-with-Temporal-input callers pass true at their call sites.
   strictOptions = false,
 ): FormatPrepper<S> {
   const { transformOptions, getForcedTimeZoneId } = config

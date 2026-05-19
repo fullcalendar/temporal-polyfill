@@ -24,7 +24,7 @@ import {
   OverflowOptions,
 } from '../internal/optionsModel'
 import { YearMonthUnitName } from '../internal/units'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import {
   computeDaysInMonth,
   computeDaysInYear,
@@ -33,8 +33,8 @@ import {
   computeYearMonthFields,
   getCalendarIdFromBag,
 } from './calendarUtils'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
 import * as PlainDateFns from './plainDate'
 
 export type Record = CalendarDateFields & { calendar: InternalCalendar }
@@ -48,6 +48,7 @@ export type AssignmentOptions = OverflowOptions
 export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<YearMonthUnitName>
 export type ToStringOptions = CalendarDisplayOptions
+export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -150,10 +151,14 @@ export function toPlainDate(
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  yearMonthConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(yearMonthConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(yearMonthConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,

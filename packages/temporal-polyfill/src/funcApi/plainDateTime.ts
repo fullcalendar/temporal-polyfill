@@ -67,7 +67,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../internal/units'
-import { NumberSign, bindArgs, memoize } from '../internal/utils'
+import { NumberSign, bindArgs, identity, memoize } from '../internal/utils'
 import {
   computeDateFields,
   computeDayOfYear,
@@ -79,6 +79,7 @@ import {
   computeYearOfWeek,
   getCalendarIdFromBag,
 } from './calendarUtils'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import {
   diffPlainDays,
   diffPlainMonths,
@@ -87,7 +88,6 @@ import {
   diffPlainYears,
 } from './diffUtils'
 import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -133,6 +133,7 @@ export type ArithmeticOptions = OverflowOptions
 export type DifferenceOptions = DiffOptions<UnitName>
 export type RoundOptions = RoundingOptions<DayTimeUnitName>
 export type ToZonedDateTimeOptions = EpochDisambigOptions
+export type Format = DateTimeFormatLike<Record>
 export type ToStringOptions = DateTimeDisplayOptions
 
 // Creation / Parsing
@@ -314,10 +315,14 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  dateTimeConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(dateTimeConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(dateTimeConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,

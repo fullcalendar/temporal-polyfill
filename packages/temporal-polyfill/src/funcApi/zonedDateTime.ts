@@ -103,7 +103,6 @@ import {
 } from './diffUtils'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
-import { createFormatCache } from './intlFormatCache'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -385,10 +384,7 @@ export function toPlainMonthDay(record: Record): PlainMonthDayFns.Record {
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  zonedConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(zonedConfig)
 
 export function toLocaleString(
   record: Record,

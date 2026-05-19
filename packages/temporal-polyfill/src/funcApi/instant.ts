@@ -32,9 +32,9 @@ import {
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs } from '../internal/utils'
+import { NumberSign, bindArgs, identity } from '../internal/utils'
+import { DateTimeFormatLike, createDateTimeFormat } from './dateTimeFormat'
 import * as DurationFns from './duration'
-import { createFormatCache } from './intlFormatCache'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 export type Record = EpochNanoFields
@@ -46,6 +46,7 @@ export type ToZonedDateTimeOptions = {
   timeZone: string
   calendar: string
 }
+export type Format = DateTimeFormatLike<Record>
 
 // Creation / Parsing
 // -----------------------------------------------------------------------------
@@ -152,10 +153,14 @@ export function toZonedDateTimeISO(
 // Formatting
 // -----------------------------------------------------------------------------
 
-const prepFormat = createFormatPrepper(
-  instantConfig,
-  /*@__PURE__*/ createFormatCache(),
-)
+const prepFormat = createFormatPrepper(instantConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(instantConfig, identity, locales, options)
+}
 
 export function toLocaleString(
   record: Record,
