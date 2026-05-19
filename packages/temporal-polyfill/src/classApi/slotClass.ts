@@ -7,22 +7,20 @@ import {
   mapProps,
 } from '../internal/utils'
 
-export type BrandingAndSlots<D extends object = object> = [
-  branding: string,
-  slots: D,
-]
+export type BrandingAndSlots<D = object> = [branding: string, slots: D]
 
-const slotsMap = new WeakMap<any, BrandingAndSlots>()
+const slotsMap = new WeakMap<any, BrandingAndSlots<any>>()
 
-export const getBrandingAndSlots = slotsMap.get.bind(slotsMap) as <
-  D extends object = object,
->(
+export const getBrandingAndSlots = slotsMap.get.bind(slotsMap) as <D = object>(
   obj: any,
 ) => BrandingAndSlots<D> | undefined
-export const setBrandingAndSlots = slotsMap.set.bind(slotsMap)
+export const setBrandingAndSlots = slotsMap.set.bind(slotsMap) as <D>(
+  obj: any,
+  brandingAndSlots: BrandingAndSlots<D>,
+) => void
 
-type SlotGetter<D extends object> = (slots: D) => unknown
-type SlotGetterMap<D extends object, G extends object> = {
+type SlotGetter<D> = (slots: D) => unknown
+type SlotGetterMap<D, G extends object> = {
   [K in keyof G]: SlotGetter<D>
 }
 type GetterProps<G extends object> = {
@@ -52,7 +50,7 @@ type SlotClass<I, CA extends any[], SM extends StaticMethods> = {
 } & SM
 
 export function createSlotClass<
-  D extends object,
+  D,
   CA extends any[],
   G extends SlotGetterMap<D, G>,
   M extends object,
