@@ -1,4 +1,7 @@
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -73,6 +76,11 @@ export function create(
     microsecond,
     nanosecond,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainTimeNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainTimeRecordBranding
 }
 
 export function fromFields(

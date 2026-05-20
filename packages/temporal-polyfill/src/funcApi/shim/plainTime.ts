@@ -1,5 +1,9 @@
 import { timeGetters } from '../../apiHelpers/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../../apiHelpers/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -61,6 +65,11 @@ export function create(
     microsecond,
     nanosecond,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainTimeShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainTimeRecordBranding
 }
 
 export function fromFields(

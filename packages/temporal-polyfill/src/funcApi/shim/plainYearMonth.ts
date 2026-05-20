@@ -1,5 +1,9 @@
 import { calendarIdGetters, yearMonthGetters } from '../../apiHelpers/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../../apiHelpers/slotClass'
 import {
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
@@ -88,6 +92,11 @@ export function create(
     calendar,
     referenceIsoDay,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainYearMonthShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainYearMonthRecordBranding
 }
 
 export function fromFields(

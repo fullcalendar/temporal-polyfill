@@ -1,4 +1,7 @@
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
@@ -42,6 +45,11 @@ export const [
 
 export function create(epochNanoseconds: bigint): InstantNativeRecord {
   return new InstantNativeRecord(epochNanoseconds)
+}
+
+export function isRecord(arg: unknown): arg is InstantNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === InstantRecordBranding
 }
 
 export function fromEpochMilliseconds(

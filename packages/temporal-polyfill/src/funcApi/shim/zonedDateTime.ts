@@ -4,7 +4,11 @@ import {
   epochGetters,
   timeGetters,
 } from '../../apiHelpers/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../../apiHelpers/slotClass'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -181,6 +185,11 @@ export function create(
   calendar?: CalendarShimArg,
 ): ZonedDateTimeShimRecord {
   return new ZonedDateTimeShimRecord(epochNanoseconds, timeZoneId, calendar)
+}
+
+export function isRecord(arg: unknown): arg is ZonedDateTimeShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === ZonedDateTimeRecordBranding
 }
 
 export function fromFields(

@@ -1,5 +1,8 @@
 import * as TemporalUtils from 'temporal-utils'
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -109,6 +112,11 @@ export function create(
     nanosecond,
     calendar,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainDateTimeNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainDateTimeRecordBranding
 }
 
 export function fromFields(

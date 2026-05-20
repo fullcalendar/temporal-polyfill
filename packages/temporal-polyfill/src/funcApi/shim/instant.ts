@@ -1,5 +1,8 @@
 import { epochGetters } from '../../apiHelpers/mixins'
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -57,6 +60,11 @@ export const [
 
 export function create(epochNanoseconds: bigint): InstantShimRecord {
   return new InstantShimRecord(epochNanoseconds)
+}
+
+export function isRecord(arg: unknown): arg is InstantShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === InstantRecordBranding
 }
 
 export function fromEpochMilliseconds(

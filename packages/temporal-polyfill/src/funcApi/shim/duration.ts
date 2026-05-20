@@ -87,6 +87,11 @@ export function create(
   )
 }
 
+export function isRecord(arg: unknown): arg is DurationShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === DurationRecordBranding
+}
+
 export function fromFields(
   fields: Partial<DurationFields>,
 ): DurationShimRecord {

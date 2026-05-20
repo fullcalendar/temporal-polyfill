@@ -1,4 +1,7 @@
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -55,6 +58,11 @@ export function create(
     calendar,
     referenceIsoYear,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainMonthDayNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainMonthDayRecordBranding
 }
 
 export function fromFields(

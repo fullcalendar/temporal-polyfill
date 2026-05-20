@@ -76,6 +76,11 @@ export function create(
   )
 }
 
+export function isRecord(arg: unknown): arg is DurationNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === DurationRecordBranding
+}
+
 export function fromFields(
   fields: Partial<DurationFields>,
 ): DurationNativeRecord {

@@ -1,5 +1,8 @@
 import * as TemporalUtils from 'temporal-utils'
-import { createSlotClass } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -73,6 +76,11 @@ export function create(
   calendar?: CalendarNativeRecord,
 ): ZonedDateTimeNativeRecord {
   return new ZonedDateTimeNativeRecord(epochNanoseconds, timeZoneId, calendar)
+}
+
+export function isRecord(arg: unknown): arg is ZonedDateTimeNativeRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === ZonedDateTimeRecordBranding
 }
 
 export function fromFields(

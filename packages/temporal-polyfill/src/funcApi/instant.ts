@@ -3,6 +3,7 @@ import { Temporal } from './nativeSwitch'
 import * as Shim from './shim/instant'
 
 export const create = Temporal ? Native.create : Shim.create
+export const isRecord = Temporal ? Native.isRecord : Shim.isRecord
 export const fromEpochMilliseconds = Temporal
   ? Native.fromEpochMilliseconds
   : Shim.fromEpochMilliseconds

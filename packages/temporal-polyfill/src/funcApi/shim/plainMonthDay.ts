@@ -2,7 +2,11 @@ import {
   calendarIdGetters,
   monthDayFieldGetters,
 } from '../../apiHelpers/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../../apiHelpers/slotClass'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
@@ -73,6 +77,11 @@ export function create(
     calendar,
     referenceIsoYear,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainMonthDayShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainMonthDayRecordBranding
 }
 
 export function fromFields(

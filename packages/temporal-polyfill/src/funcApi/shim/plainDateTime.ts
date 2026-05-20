@@ -3,7 +3,11 @@ import {
   dateFieldGetters,
   timeGetters,
 } from '../../apiHelpers/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../../apiHelpers/slotClass'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -207,6 +211,11 @@ export function create(
     nanosecond,
     calendar,
   )
+}
+
+export function isRecord(arg: unknown): arg is PlainDateTimeShimRecord {
+  const brandingAndSlots = getBrandingAndSlots(arg)
+  return brandingAndSlots?.[0] === PlainDateTimeRecordBranding
 }
 
 export function fromFields(
