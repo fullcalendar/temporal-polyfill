@@ -1,5 +1,5 @@
 import * as TemporalUtils from 'temporal-utils'
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -11,8 +11,8 @@ import {
 } from '../../internal/optionsModel'
 import { DateUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainDateRecordBranding } from '../common-branding'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import { PlainDateRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -37,11 +37,6 @@ import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
-
-type ToZonedDateTimeOptions = {
-  timeZone: string
-  plainTime?: PlainTimeNativeRecord
-}
 
 export type PlainDateNativeRecord = DateFields
 type Format = DateTimeFormatLike<PlainDateNativeRecord>
@@ -227,7 +222,7 @@ export function compare(
 
 export function toZonedDateTime(
   record: PlainDateNativeRecord,
-  options: string | ToZonedDateTimeOptions,
+  options: string | ToZonedDateTimeOptions<PlainTimeNativeRecord>,
 ): ZonedDateTimeNativeRecord {
   const native = getPlainDateNative(record)
   const optionsObj =

@@ -1,5 +1,5 @@
-import { calendarIdGetters, yearMonthGetters } from '../../classApi/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+import { calendarIdGetters, yearMonthGetters } from '../../apiHelpers/mixins'
+import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
 import {
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
@@ -31,13 +31,14 @@ import {
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainYearMonthRecordBranding } from '../common-branding'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainYearMonthRecordBranding } from '../recordBranding'
 import {
   CalendarShimArg,
   refineCalendarShimArg,
   refineCalendarShimArgToId,
 } from './calendar'
+import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,

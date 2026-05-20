@@ -1,5 +1,8 @@
-import { calendarIdGetters, monthDayFieldGetters } from '../../classApi/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+import {
+  calendarIdGetters,
+  monthDayFieldGetters,
+} from '../../apiHelpers/mixins'
+import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
@@ -17,13 +20,14 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
-import { PlainMonthDayRecordBranding } from '../common-branding'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainMonthDayRecordBranding } from '../recordBranding'
 import {
   CalendarShimArg,
   refineCalendarShimArg,
   refineCalendarShimArgToId,
 } from './calendar'
+import { createDateTimeFormat } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
 export type PlainMonthDayShimRecord = any &

@@ -3,8 +3,8 @@ import {
   dateGetters,
   epochGetters,
   timeGetters,
-} from '../../classApi/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+} from '../../apiHelpers/mixins'
+import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -86,14 +86,26 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { ZonedDateTimeRecordBranding } from '../common-branding'
+import { ZonedDateTimeFields } from '../commonTypes'
+import { ZonedDateTimeRecordBranding } from '../recordBranding'
+import {
+  CalendarShimArg,
+  refineCalendarShimArg,
+  refineCalendarShimArgToId,
+} from './calendar'
 import {
   diffZonedDays,
   diffZonedMonths,
   diffZonedTimeUnits,
   diffZonedWeeks,
   diffZonedYears,
-} from '../non-standard/diffUtils'
+} from './diffUtils'
+import {
+  DurationShimRecord,
+  createDurationShimRecord,
+  getDurationShimRecordSlots,
+} from './duration'
+import { InstantShimRecord, createInstantShimRecord } from './instant'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -104,7 +116,17 @@ import {
   moveToDayOfYear,
   moveToWeekOfYear,
   reversedMove,
-} from '../non-standard/moveUtils'
+} from './moveUtils'
+import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import {
+  PlainDateTimeShimRecord,
+  createPlainDateTimeShimRecord,
+} from './plainDateTime'
+import {
+  PlainTimeShimRecord,
+  createPlainTimeShimRecord,
+  getPlainTimeShimRecordSlots,
+} from './plainTime'
 import {
   computeDayCeil,
   computeHourFloor,
@@ -121,34 +143,9 @@ import {
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
-} from '../non-standard/roundUtils'
-import {
-  CalendarShimArg,
-  refineCalendarShimArg,
-  refineCalendarShimArgToId,
-} from './calendar'
-import {
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
-} from './duration'
-import { InstantShimRecord, createInstantShimRecord } from './instant'
-import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
-import {
-  PlainDateTimeShimRecord,
-  createPlainDateTimeShimRecord,
-} from './plainDateTime'
-import {
-  PlainTimeShimRecord,
-  createPlainTimeShimRecord,
-  getPlainTimeShimRecordSlots,
-} from './plainTime'
+} from './roundUtils'
 
-type ZonedDateTimeShimFields = Partial<DateTimeFields> & {
-  calendar?: CalendarShimArg
-  offset?: string
-  timeZone: string
-}
+type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimArg>
 
 export type ZonedDateTimeShimRecord = any
 

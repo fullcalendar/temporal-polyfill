@@ -1,3 +1,4 @@
+import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import { resolveCalendarId } from '../internal/calendarId'
 import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
@@ -10,7 +11,6 @@ import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainYearMonth } from './plainYearMonth'
-import { getBrandingAndSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type CalendarArg =

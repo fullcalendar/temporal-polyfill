@@ -1,4 +1,4 @@
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -8,8 +8,8 @@ import {
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainYearMonthRecordBranding } from '../common-branding'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainYearMonthRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {

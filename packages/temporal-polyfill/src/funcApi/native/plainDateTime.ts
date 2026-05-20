@@ -1,5 +1,5 @@
 import * as TemporalUtils from 'temporal-utils'
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -13,8 +13,8 @@ import {
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainDateTimeRecordBranding } from '../common-branding'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainDateTimeRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {

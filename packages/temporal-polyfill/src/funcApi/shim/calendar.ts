@@ -1,4 +1,4 @@
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { refineCalendarId } from '../../internal/calendarId'
 import {
   InternalCalendar,
@@ -6,7 +6,7 @@ import {
   getInternalCalendarId,
   isoCalendar,
 } from '../../internal/externalCalendar'
-import { CalendarRecordBranding } from '../common-branding'
+import { CalendarRecordBranding } from '../recordBranding'
 
 export type CalendarShimRecord = any
 export type CalendarShimArg = CalendarShimRecord | string

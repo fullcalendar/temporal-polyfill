@@ -1,3 +1,4 @@
+import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import * as errorMessages from '../internal/errorMessages'
 import {
   FormatPrepper,
@@ -24,7 +25,6 @@ import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
 import { PlainTime } from './plainTime'
 import { PlainYearMonth } from './plainYearMonth'
-import { getBrandingAndSlots } from './slotClass'
 import { ZonedDateTime } from './zonedDateTime'
 
 export type TemporalFormattable =

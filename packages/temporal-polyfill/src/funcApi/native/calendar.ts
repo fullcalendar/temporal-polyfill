@@ -1,5 +1,5 @@
-import { createSlotClass } from '../../classApi/slotClass'
-import { CalendarRecordBranding } from '../common-branding'
+import { createSlotClass } from '../../apiHelpers/slotClass'
+import { CalendarRecordBranding } from '../recordBranding'
 
 export type CalendarNativeRecord = any
 

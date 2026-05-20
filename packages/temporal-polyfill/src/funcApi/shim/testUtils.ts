@@ -3,15 +3,15 @@ import { intlCalendarProvider } from '../../externalCalendars/intlCalendarProvid
 import { registerExternalCalendarProvider } from '../../internal/externalCalendar'
 import { TimeFields } from '../../internal/fieldTypes'
 import { isoCalendarId } from '../../internal/intlCalendarConfig'
-import { systemTimeZoneId, testHotCache } from '../non-standard/testUtils'
-
-export { systemTimeZoneId, testHotCache }
 
 // The shim tests exercise source modules directly. The normal entry-point
 // resolver may load the built intl-calendars bundle first, whose minified
 // calendar-object shape is only compatible with built internals. Re-register
 // the source provider so source calendar code receives source-shaped calendars.
 registerExternalCalendarProvider(intlCalendarProvider)
+
+const systemResolvedOptions = new Intl.DateTimeFormat().resolvedOptions()
+export const systemTimeZoneId = systemResolvedOptions.timeZone
 
 const dateDefaults = {
   year: 0,
@@ -245,4 +245,25 @@ function readDurationFields(record: any) {
 
 function formatMonthCode(month: number): string {
   return 'M' + String(month).padStart(2, '0')
+}
+
+// Repeated calls to toLocaleString/etc should be faster because the internal
+// Intl.DateTimeFormat is cached. However, these Vitest tests sometimes give
+// odd results. If tests are run with describe/it.only, then second run is
+// usually 0.1, but often there's no speedup when tests are run in parallel
+// and not in isolation. Disable for now.
+const HOT_CACHE_FACTOR = 0 // 0.5
+
+export function testHotCache<R>(op: () => R): R {
+  if (HOT_CACHE_FACTOR) {
+    const t0 = performance.now()
+    const r0 = op()
+    const t1 = performance.now()
+    const r1 = op()
+    const t2 = performance.now()
+
+    expect(r0).toEqual(r1)
+    expect(t2 - t1).toBeLessThan((t1 - t0) * HOT_CACHE_FACTOR)
+  }
+  return op()
 }

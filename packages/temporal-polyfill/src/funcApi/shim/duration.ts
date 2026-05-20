@@ -1,5 +1,8 @@
-import { durationFieldGetters } from '../../classApi/mixins'
-import { createSlotClass, getBrandingAndSlots } from '../../classApi/slotClass'
+import { durationFieldGetters } from '../../apiHelpers/mixins'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
@@ -24,12 +27,13 @@ import { RelativeToSlots } from '../../internal/relativeMath'
 import { totalDuration } from '../../internal/total'
 import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { RelativeToRecord } from '../commonTypes'
 import {
   DurationRecordBranding,
   PlainDateRecordBranding,
   PlainDateTimeRecordBranding,
   ZonedDateTimeRecordBranding,
-} from '../common-branding'
+} from '../recordBranding'
 import { PlainDateShimRecord } from './plainDate'
 import { PlainDateTimeShimRecord } from './plainDateTime'
 import { ZonedDateTimeShimRecord } from './zonedDateTime'
@@ -207,10 +211,11 @@ export function toString(
 // Util
 // ----
 
-type RelativeToShimRecord =
-  | ZonedDateTimeShimRecord
-  | PlainDateTimeShimRecord
-  | PlainDateShimRecord
+type RelativeToShimRecord = RelativeToRecord<
+  ZonedDateTimeShimRecord,
+  PlainDateTimeShimRecord,
+  PlainDateShimRecord
+>
 
 function refineRelativeTo(
   arg?: RelativeToShimRecord,

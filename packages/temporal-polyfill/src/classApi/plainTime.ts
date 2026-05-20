@@ -1,3 +1,14 @@
+import {
+  PlainDateTimeBranding,
+  PlainTimeBranding,
+  ZonedDateTimeBranding,
+} from '../apiHelpers/branding'
+import { timeGetters } from '../apiHelpers/mixins'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+  rejectInvalidBag,
+} from '../apiHelpers/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../internal/compare'
 import { constructTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
@@ -21,23 +32,12 @@ import { ZonedEpochNanoFields, createTimeSlots } from '../internal/slots'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import {
-  PlainDateTimeBranding,
-  PlainTimeBranding,
-  ZonedDateTimeBranding,
-} from './branding'
-import {
   Duration,
   DurationArg,
   createDuration,
   toDurationSlots,
 } from './duration'
 import { prepPlainTimeFormat } from './intlFormatConfig'
-import { timeGetters } from './mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from './slotClass'
 
 export type PlainTime = TimeFields // and other getters/methods
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string

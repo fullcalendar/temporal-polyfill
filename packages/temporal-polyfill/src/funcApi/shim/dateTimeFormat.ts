@@ -2,24 +2,14 @@ import {
   ClassFormatConfig,
   createFormatForPrep,
   createFormatPrepper,
-} from '../internal/intlFormatPrep'
+} from '../../internal/intlFormatPrep'
 import {
   LocalesArg,
   OptionNames,
   RawDateTimeFormat,
-} from '../internal/intlFormatUtils'
-import { memoize, pluckProps } from '../internal/utils'
-
-export interface DateTimeFormatLike<R> {
-  format(record: R): string
-  formatToParts(record: R): Intl.DateTimeFormatPart[]
-  formatRange(record0: R, record1: R): string
-  formatRangeToParts(
-    record0: R,
-    record1: R,
-  ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']>
-  resolvedOptions(): Intl.ResolvedDateTimeFormatOptions
-}
+} from '../../internal/intlFormatUtils'
+import { memoize, pluckProps } from '../../internal/utils'
+import { DateTimeFormatLike } from '../commonTypes'
 
 // Creates a DTF-like formatter for one func API Temporal type. Constructor
 // options are observed once by the host Intl.DateTimeFormat, then copied from

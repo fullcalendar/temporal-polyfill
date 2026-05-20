@@ -1,12 +1,12 @@
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
-import { PlainMonthDayRecordBranding } from '../common-branding'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainMonthDayRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'

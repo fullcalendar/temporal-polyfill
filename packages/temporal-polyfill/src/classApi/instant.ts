@@ -1,3 +1,6 @@
+import { InstantBranding, ZonedDateTimeBranding } from '../apiHelpers/branding'
+import { epochGetters } from '../apiHelpers/mixins'
+import { createSlotClass, getBrandingAndSlots } from '../apiHelpers/slotClass'
 import { bigNanoInMilli } from '../internal/bigNano'
 import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
@@ -23,7 +26,6 @@ import {
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
-import { InstantBranding, ZonedDateTimeBranding } from './branding'
 import {
   Duration,
   DurationArg,
@@ -31,8 +33,6 @@ import {
   toDurationSlots,
 } from './duration'
 import { prepInstantFormat } from './intlFormatConfig'
-import { epochGetters } from './mixins'
-import { createSlotClass, getBrandingAndSlots } from './slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 

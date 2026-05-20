@@ -1,5 +1,5 @@
 import * as TemporalUtils from 'temporal-utils'
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -15,7 +15,8 @@ import {
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { ZonedDateTimeRecordBranding } from '../common-branding'
+import { ZonedDateTimeFields } from '../commonTypes'
+import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import {
   DurationNativeRecord,
@@ -34,11 +35,7 @@ import {
   getPlainTimeNative,
 } from './plainTime'
 
-type ZonedDateTimeNativeFields = Partial<DateTimeFields> & {
-  calendar?: CalendarNativeRecord
-  offset?: string
-  timeZone: string
-}
+type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
 export type ZonedDateTimeNativeRecord = any
 

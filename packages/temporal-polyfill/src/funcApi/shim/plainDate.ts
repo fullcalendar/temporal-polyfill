@@ -1,5 +1,5 @@
-import { calendarIdGetters, dateFieldGetters } from '../../classApi/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+import { calendarIdGetters, dateFieldGetters } from '../../apiHelpers/mixins'
+import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -47,14 +47,25 @@ import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { PlainDateRecordBranding } from '../common-branding'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import { PlainDateRecordBranding } from '../recordBranding'
+import {
+  CalendarShimArg,
+  refineCalendarShimArg,
+  refineCalendarShimArgToId,
+} from './calendar'
+import { createDateTimeFormat } from './dateTimeFormat'
 import {
   diffPlainDays,
   diffPlainMonths,
   diffPlainWeeks,
   diffPlainYears,
-} from '../non-standard/diffUtils'
+} from './diffUtils'
+import {
+  DurationShimRecord,
+  createDurationShimRecord,
+  getDurationShimRecordSlots,
+} from './duration'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -65,29 +76,7 @@ import {
   moveToDayOfYear,
   moveToWeekOfYear,
   reversedMove,
-} from '../non-standard/moveUtils'
-import {
-  computeIsoWeekCeil,
-  computeIsoWeekFloor,
-  computeIsoWeekInterval,
-  computeMonthCeil,
-  computeMonthFloor,
-  computeMonthInterval,
-  computeYearCeil,
-  computeYearFloor,
-  computeYearInterval,
-  roundDateTimeToInterval,
-} from '../non-standard/roundUtils'
-import {
-  CalendarShimArg,
-  refineCalendarShimArg,
-  refineCalendarShimArgToId,
-} from './calendar'
-import {
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
-} from './duration'
+} from './moveUtils'
 import {
   PlainDateTimeShimRecord,
   createPlainDateTimeShimRecord,
@@ -102,14 +91,21 @@ import {
   createPlainYearMonthShimRecord,
 } from './plainYearMonth'
 import {
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+  roundDateTimeToInterval,
+} from './roundUtils'
+import {
   ZonedDateTimeShimRecord,
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
-
-type ToZonedDateTimeOptions = {
-  timeZone: string
-  plainTime?: PlainTimeShimRecord
-}
 
 export type PlainDateShimRecord = any & DateFields
 type Format = DateTimeFormatLike<PlainDateShimRecord>
@@ -286,7 +282,7 @@ export function compare(
 
 export function toZonedDateTime(
   record: PlainDateShimRecord,
-  options: string | ToZonedDateTimeOptions,
+  options: string | ToZonedDateTimeOptions<PlainTimeShimRecord>,
 ): ZonedDateTimeShimRecord {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options

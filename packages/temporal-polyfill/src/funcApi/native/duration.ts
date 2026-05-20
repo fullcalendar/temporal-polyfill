@@ -1,4 +1,7 @@
-import { createSlotClass, getBrandingAndSlots } from '../../classApi/slotClass'
+import {
+  createSlotClass,
+  getBrandingAndSlots,
+} from '../../apiHelpers/slotClass'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -9,12 +12,13 @@ import {
 } from '../../internal/optionsModel'
 import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { RelativeToRecord } from '../commonTypes'
 import {
   DurationRecordBranding,
   PlainDateRecordBranding,
   PlainDateTimeRecordBranding,
   ZonedDateTimeRecordBranding,
-} from '../common-branding'
+} from '../recordBranding'
 import { PlainDateNativeRecord } from './plainDate'
 import { PlainDateTimeNativeRecord } from './plainDateTime'
 import { ZonedDateTimeNativeRecord } from './zonedDateTime'
@@ -197,10 +201,11 @@ export function toString(
 // Util
 // ----
 
-type RelativeToNativeRecord =
-  | ZonedDateTimeNativeRecord
-  | PlainDateTimeNativeRecord
-  | PlainDateNativeRecord
+type RelativeToNativeRecord = RelativeToRecord<
+  ZonedDateTimeNativeRecord,
+  PlainDateTimeNativeRecord,
+  PlainDateNativeRecord
+>
 
 function refineTotalOptions(
   options: UnitName | DurationTotalOptions<RelativeToNativeRecord>,

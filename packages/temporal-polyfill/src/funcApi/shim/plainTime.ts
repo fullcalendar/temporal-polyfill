@@ -1,5 +1,5 @@
-import { timeGetters } from '../../classApi/mixins'
-import { createSlotClass, rejectInvalidBag } from '../../classApi/slotClass'
+import { timeGetters } from '../../apiHelpers/mixins'
+import { createSlotClass, rejectInvalidBag } from '../../apiHelpers/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -20,8 +20,9 @@ import {
 import { roundPlainTime } from '../../internal/round'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainTimeRecordBranding } from '../common-branding'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainTimeRecordBranding } from '../recordBranding'
+import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,

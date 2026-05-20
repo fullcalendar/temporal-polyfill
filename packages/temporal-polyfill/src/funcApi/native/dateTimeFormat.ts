@@ -1,5 +1,5 @@
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
 
 export function createNativeDateTimeFormat<R>(
   getNative: (record: R) => any,

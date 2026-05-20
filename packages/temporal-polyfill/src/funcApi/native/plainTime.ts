@@ -1,4 +1,4 @@
-import { createSlotClass } from '../../classApi/slotClass'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -9,8 +9,8 @@ import {
 } from '../../internal/optionsModel'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { PlainTimeRecordBranding } from '../common-branding'
-import { DateTimeFormatLike } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { PlainTimeRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,

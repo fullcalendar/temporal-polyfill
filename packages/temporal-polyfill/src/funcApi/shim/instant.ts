@@ -1,5 +1,5 @@
-import { epochGetters } from '../../classApi/mixins'
-import { createSlotClass } from '../../classApi/slotClass'
+import { epochGetters } from '../../apiHelpers/mixins'
+import { createSlotClass } from '../../apiHelpers/slotClass'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -26,8 +26,9 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { InstantRecordBranding } from '../common-branding'
-import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import { DateTimeFormatLike } from '../commonTypes'
+import { InstantRecordBranding } from '../recordBranding'
+import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
