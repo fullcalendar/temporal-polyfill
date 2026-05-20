@@ -1,0 +1,19 @@
+import * as Native from './native/plainTime'
+import { Temporal } from './nativeSwitch'
+import * as Shim from './shim/plainTime'
+
+export const create = Temporal ? Native.create : Shim.create
+export const fromFields = Temporal ? Native.fromFields : Shim.fromFields
+export const fromString = Temporal ? Native.fromString : Shim.fromString
+export const withFields = Temporal ? Native.withFields : Shim.withFields
+export const add = Temporal ? Native.add : Shim.add
+export const subtract = Temporal ? Native.subtract : Shim.subtract
+export const diff = Temporal ? Native.diff : Shim.diff
+export const round = Temporal ? Native.round : Shim.round
+export const equals = Temporal ? Native.equals : Shim.equals
+export const compare = Temporal ? Native.compare : Shim.compare
+export const createFormat = Temporal ? Native.createFormat : Shim.createFormat
+export const toLocaleString = Temporal
+  ? Native.toLocaleString
+  : Shim.toLocaleString
+export const toString = Temporal ? Native.toString : Shim.toString

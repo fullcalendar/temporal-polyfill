@@ -61,31 +61,31 @@
         "iife": true
       },
       "./fns/instant": {
-        "src": "funcApi/shim/instant"
+        "src": "funcApi/instant"
       },
       "./fns/zoneddatetime": {
-        "src": "funcApi/shim/zonedDateTime"
+        "src": "funcApi/zonedDateTime"
       },
       "./fns/plaindatetime": {
-        "src": "funcApi/shim/plainDateTime"
+        "src": "funcApi/plainDateTime"
       },
       "./fns/plaindate": {
-        "src": "funcApi/shim/plainDate"
+        "src": "funcApi/plainDate"
       },
       "./fns/plaintime": {
-        "src": "funcApi/shim/plainTime"
+        "src": "funcApi/plainTime"
       },
       "./fns/plainyearmonth": {
-        "src": "funcApi/shim/plainYearMonth"
+        "src": "funcApi/plainYearMonth"
       },
       "./fns/plainmonthday": {
-        "src": "funcApi/shim/plainMonthDay"
+        "src": "funcApi/plainMonthDay"
       },
       "./fns/duration": {
-        "src": "funcApi/shim/duration"
+        "src": "funcApi/duration"
       },
       "./fns/now": {
-        "src": "funcApi/shim/now"
+        "src": "funcApi/now"
       }
     }
   },

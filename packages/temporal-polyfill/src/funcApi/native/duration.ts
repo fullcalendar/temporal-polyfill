@@ -13,6 +13,7 @@ import {
 import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
+import { Temporal } from '../nativeSwitch'
 import {
   DurationRecordBranding,
   PlainDateRecordBranding,
@@ -31,7 +32,7 @@ export const [
   getDurationNative,
 ] = createSlotClass(
   DurationRecordBranding,
-  (...args: any[]) => new (globalThis as any).Temporal.Duration(...args),
+  (...args: any[]) => new Temporal!.Duration(...args),
   (native) => native.toString(),
   {
     years: (native: any) => native.years,
@@ -78,12 +79,12 @@ export function create(
 export function fromFields(
   fields: Partial<DurationFields>,
 ): DurationNativeRecord {
-  const resNative = (globalThis as any).Temporal.Duration.from(fields)
+  const resNative = Temporal!.Duration.from(fields)
   return createDurationNativeRecord(resNative)
 }
 
 export function fromString(s: string): DurationNativeRecord {
-  const resNative = (globalThis as any).Temporal.Duration.from(s)
+  const resNative = Temporal!.Duration.from(s)
   return createDurationNativeRecord(resNative)
 }
 
@@ -175,7 +176,7 @@ export function compare(
 ): NumberSign {
   const native = getDurationNative(duration)
   const otherNative = getDurationNative(otherDuration)
-  return (globalThis as any).Temporal.Duration.compare(native, otherNative, {
+  return Temporal!.Duration.compare(native, otherNative, {
     ...options,
     relativeTo: refineRelativeTo(options?.relativeTo),
   })

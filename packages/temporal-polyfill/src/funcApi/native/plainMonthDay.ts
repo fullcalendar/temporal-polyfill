@@ -6,6 +6,7 @@ import {
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { DateTimeFormatLike } from '../commonTypes'
+import { Temporal } from '../nativeSwitch'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
@@ -26,7 +27,7 @@ export const [
     calendar?: CalendarNativeRecord,
     referenceIsoYear?: number,
   ) =>
-    new (globalThis as any).Temporal.PlainMonthDay(
+    new Temporal!.PlainMonthDay(
       isoMonth,
       isoDay,
       calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
@@ -64,7 +65,7 @@ export function fromFields(
     fields.calendar === undefined
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
-  const resNative = (globalThis as any).Temporal.PlainMonthDay.from(
+  const resNative = Temporal!.PlainMonthDay.from(
     { ...fields, calendar },
     options,
   )
@@ -72,7 +73,7 @@ export function fromFields(
 }
 
 export function fromString(s: string): PlainMonthDayNativeRecord {
-  const resNative = (globalThis as any).Temporal.PlainMonthDay.from(s)
+  const resNative = Temporal!.PlainMonthDay.from(s)
   return createPlainMonthDayNativeRecord(resNative)
 }
 

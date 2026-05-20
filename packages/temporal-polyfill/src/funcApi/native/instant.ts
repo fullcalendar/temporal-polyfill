@@ -8,6 +8,7 @@ import {
 import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import { Temporal } from '../nativeSwitch'
 import { InstantRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -29,8 +30,7 @@ export const [
   getInstantNative,
 ] = createSlotClass(
   InstantRecordBranding,
-  (epochNanoseconds: bigint) =>
-    new (globalThis as any).Temporal.Instant(epochNanoseconds),
+  (epochNanoseconds: bigint) => new Temporal!.Instant(epochNanoseconds),
   (native) => native.toString(),
   {
     epochMilliseconds: (native: any) => native.epochMilliseconds,
@@ -47,23 +47,19 @@ export function create(epochNanoseconds: bigint): InstantNativeRecord {
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantNativeRecord {
-  const resNative = (globalThis as any).Temporal.Instant.fromEpochMilliseconds(
-    epochMilliseconds,
-  )
+  const resNative = Temporal!.Instant.fromEpochMilliseconds(epochMilliseconds)
   return createInstantNativeRecord(resNative)
 }
 
 export function fromEpochNanoseconds(
   epochNanoseconds: bigint,
 ): InstantNativeRecord {
-  const resNative = (globalThis as any).Temporal.Instant.fromEpochNanoseconds(
-    epochNanoseconds,
-  )
+  const resNative = Temporal!.Instant.fromEpochNanoseconds(epochNanoseconds)
   return createInstantNativeRecord(resNative)
 }
 
 export function fromString(s: string): InstantNativeRecord {
-  const resNative = (globalThis as any).Temporal.Instant.from(s)
+  const resNative = Temporal!.Instant.from(s)
   return createInstantNativeRecord(resNative)
 }
 
@@ -123,7 +119,7 @@ export function compare(
 ): NumberSign {
   const native = getInstantNative(record)
   const otherNative = getInstantNative(otherRecord)
-  return (globalThis as any).Temporal.Instant.compare(native, otherNative)
+  return Temporal!.Instant.compare(native, otherNative)
 }
 
 export function toZonedDateTimeISO(

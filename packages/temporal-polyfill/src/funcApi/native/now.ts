@@ -1,10 +1,11 @@
+import { Temporal } from '../nativeSwitch'
 import { createInstantNativeRecord } from './instant'
 import { createPlainDateNativeRecord } from './plainDate'
 import { createPlainDateTimeNativeRecord } from './plainDateTime'
 import { createPlainTimeNativeRecord } from './plainTime'
 import { createZonedDateTimeNativeRecord } from './zonedDateTime'
 
-const NativeNow = (globalThis as any).Temporal.Now
+const NativeNow = Temporal!.Now
 
 export const timeZoneId = NativeNow.timeZoneId as () => string
 

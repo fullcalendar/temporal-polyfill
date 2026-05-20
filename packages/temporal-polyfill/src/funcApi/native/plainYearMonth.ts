@@ -9,6 +9,7 @@ import {
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import { Temporal } from '../nativeSwitch'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
@@ -34,7 +35,7 @@ export const [
     calendar?: CalendarNativeRecord,
     referenceIsoDay?: number,
   ) =>
-    new (globalThis as any).Temporal.PlainYearMonth(
+    new Temporal!.PlainYearMonth(
       isoYear,
       isoMonth,
       calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
@@ -79,7 +80,7 @@ export function fromFields(
     fields.calendar === undefined
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
-  const resNative = (globalThis as any).Temporal.PlainYearMonth.from(
+  const resNative = Temporal!.PlainYearMonth.from(
     { ...fields, calendar },
     options,
   )
@@ -87,7 +88,7 @@ export function fromFields(
 }
 
 export function fromString(s: string): PlainYearMonthNativeRecord {
-  const resNative = (globalThis as any).Temporal.PlainYearMonth.from(s)
+  const resNative = Temporal!.PlainYearMonth.from(s)
   return createPlainYearMonthNativeRecord(resNative)
 }
 
@@ -166,10 +167,7 @@ export function compare(
 ): NumberSign {
   const native = getPlainYearMonthNative(record)
   const otherNative = getPlainYearMonthNative(otherRecord)
-  return (globalThis as any).Temporal.PlainYearMonth.compare(
-    native,
-    otherNative,
-  )
+  return Temporal!.PlainYearMonth.compare(native, otherNative)
 }
 
 export function toPlainDate(
