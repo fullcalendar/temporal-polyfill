@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
-import { startOfMonth, startOfWeek, startOfYear } from './startOf'
-import { DateObj, YearMonthObj } from './utils'
+import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
+import { DateObj, YearMonthObj } from './utils.js'
 
 export function roundToYear<T extends YearMonthObj>(
   date: T,

@@ -7,8 +7,8 @@ import {
   startOfSecond,
   startOfWeek,
   startOfYear,
-} from './startOf'
-import { DateObj, DateTimeObj, YearMonthObj } from './utils'
+} from './startOf.js'
+import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
 
 const nanoInMicro = 1000
 const nanoInMilli = 1000000

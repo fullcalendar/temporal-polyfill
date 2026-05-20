@@ -3,7 +3,7 @@ import {
   requireNumberInRange,
   toInteger,
   toPositiveInteger,
-} from './utils'
+} from './utils.js'
 
 export function withDayOfYear<T extends DateObj>(
   date: T,

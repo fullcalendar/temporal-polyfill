@@ -94,7 +94,8 @@
     "linkDirectory": true
   },
   "dependencies": {
-    "temporal-spec": "workspace:0.3.1"
+    "temporal-spec": "workspace:0.3.1",
+    "temporal-utils": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.1",

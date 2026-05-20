@@ -15,7 +15,16 @@
     "type": "git",
     "url": "https://github.com/fullcalendar/temporal-polyfill.git"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
+    "build": "tsc --build tsconfig.build.json",
     "lint": "biome check .",
     "test": "vitest run",
     "test:dev": "vitest dev",
@@ -23,11 +32,12 @@
   },
   "type": "module",
   "dependencies": {
-    "temporal-spec": "^0.2.0"
+    "temporal-spec": "workspace:0.3.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
-    "temporal-polyfill": "workspace:*",
+    "@js-temporal/polyfill": "^0.5.1",
+    "typescript": "~5.3.3",
     "vitest": "^1.2.2"
   }
 }

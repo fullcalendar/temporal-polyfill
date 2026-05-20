@@ -1,5 +1,5 @@
-import { DateObj, DateTimeObj, YearMonthObj } from './utils'
-import { withDayOfWeek } from './with'
+import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
+import { withDayOfWeek } from './with.js'
 
 const zeroTimeFields = {
   hour: 0,

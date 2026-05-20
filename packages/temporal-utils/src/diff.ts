@@ -1,5 +1,5 @@
 import type { Temporal } from 'temporal-spec'
-import { DateObj, DateTimeObj, YearMonthObj } from './utils'
+import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
 
 export type DiffFunc<T extends YearMonthObj = DateTimeObj> = (
   date0: T,

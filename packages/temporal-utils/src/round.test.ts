@@ -1,4 +1,4 @@
-import { Temporal } from 'temporal-polyfill'
+import { Temporal } from '@js-temporal/polyfill'
 import { describe, expect, it } from 'vitest'
 import { roundToMonth, roundToWeek, roundToYear } from '.'
 
