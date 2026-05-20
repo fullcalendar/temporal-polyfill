@@ -4,6 +4,12 @@ export type DateTimeObj = Temporal.PlainDateTime | Temporal.ZonedDateTime
 export type DateObj = Temporal.PlainDate | DateTimeObj
 export type YearMonthObj = Temporal.PlainYearMonth | DateObj
 
+type Overflow = 'constrain' | 'reject'
+
+export interface OverflowOptions {
+  overflow?: Overflow
+}
+
 // Input Validation
 // -----------------------------------------------------------------------------
 // TODO: make DRY with temporal-polyfill somehow!?
@@ -43,13 +49,44 @@ function requireNumberIsPositive(num: number): number {
 /*
 Already known to be number
 */
-export function requireNumberInRange(
+export function normalizeNumberInRange(
   num: number,
   min: number,
   max: number, // inclusive
+  options?: OverflowOptions,
 ): number {
-  if (num < min || num > max) {
+  const clamped = Math.min(Math.max(num, min), max)
+
+  if (normalizeOverflow(options) === 'reject' && num !== clamped) {
     throw new RangeError(`Number must be between ${min}-${max}`)
   }
-  return num
+
+  return clamped
+}
+
+/*
+Match Temporal's field overflow shape without depending on the polyfill's
+internal option readers. Undefined defaults to constrain; explicit reject asks
+for exact in-range input.
+*/
+function normalizeOverflow(options: OverflowOptions | undefined): Overflow {
+  if (options === undefined) {
+    return 'constrain'
+  }
+
+  if (
+    options === null ||
+    (typeof options !== 'object' && typeof options !== 'function')
+  ) {
+    throw new TypeError('Options must be an object')
+  }
+
+  const overflow = options.overflow
+  if (overflow === undefined) {
+    return 'constrain'
+  }
+  if (overflow === 'constrain' || overflow === 'reject') {
+    return overflow
+  }
+  throw new RangeError('Invalid overflow option')
 }

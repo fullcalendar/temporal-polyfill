@@ -5,10 +5,6 @@ functional API surface into shim/native implementations.
 
 ## `temporal-utils` Behavior Gaps
 
-- Confirm overflow-option parity for `withDayOfYear`, `withDayOfMonth`,
-  `withDayOfWeek`, and `withWeekOfYear`.
-- Confirm `withWeekOfYear` overflow behavior. `temporal-utils` currently moves
-  by week difference and has historically allowed overflow past the last week.
 - Confirm integer coercion and error types match the existing non-standard
   function API behavior.
 

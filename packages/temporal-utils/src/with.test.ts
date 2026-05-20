@@ -21,6 +21,21 @@ describe('withDayOfYear', () => {
     })
   })
 
+  it('constrains or rejects out-of-range values based on overflow', () => {
+    const pd = Temporal.PlainDate.from('2024-02-27')
+    expect(
+      withDayOfYear(pd, 0).equals(Temporal.PlainDate.from('2024-01-01')),
+    ).toBe(true)
+    expect(
+      withDayOfYear(pd, 500, { overflow: 'constrain' }).equals(
+        Temporal.PlainDate.from('2024-12-31'),
+      ),
+    ).toBe(true)
+    expect(() => {
+      withDayOfYear(pd, 500, { overflow: 'reject' })
+    }).toThrowError(RangeError)
+  })
+
   describe('PlainDateTime', () => {
     it('works with ISO calendar', () => {
       const pdt = Temporal.PlainDateTime.from('2024-02-27T12:30:00')
@@ -61,6 +76,21 @@ describe('withDayOfWeek', () => {
       const zdt2 = withDayOfWeek(zdt0, '4.5' as any)
       expect(zdt2.equals(zdtExp)).toBe(true)
     })
+  })
+
+  it('constrains or rejects out-of-range values based on overflow', () => {
+    const pd = Temporal.PlainDate.from('2024-02-27') // Tuesday
+    expect(
+      withDayOfWeek(pd, 0).equals(Temporal.PlainDate.from('2024-02-26')),
+    ).toBe(true)
+    expect(
+      withDayOfWeek(pd, 8, { overflow: 'constrain' }).equals(
+        Temporal.PlainDate.from('2024-03-03'),
+      ),
+    ).toBe(true)
+    expect(() => {
+      withDayOfWeek(pd, 8, { overflow: 'reject' })
+    }).toThrowError(RangeError)
   })
 
   describe('PlainDateTime', () => {
@@ -137,5 +167,27 @@ describe('withWeekOfYear', () => {
         withWeekOfYear(pd, 27)
       }).toThrowError(RangeError)
     })
+  })
+
+  it('constrains or rejects out-of-range values based on ISO weeks in year', () => {
+    const pd = Temporal.PlainDate.from('2024-02-27') // week 9 of a 52-week ISO year
+    expect(
+      withWeekOfYear(pd, 0).equals(Temporal.PlainDate.from('2024-01-02')),
+    ).toBe(true)
+    expect(
+      withWeekOfYear(pd, 99, { overflow: 'constrain' }).equals(
+        Temporal.PlainDate.from('2024-12-24'),
+      ),
+    ).toBe(true)
+    expect(() => {
+      withWeekOfYear(pd, 99, { overflow: 'reject' })
+    }).toThrowError(RangeError)
+  })
+
+  it('allows week 53 in ISO years that have 53 weeks', () => {
+    const pd = Temporal.PlainDate.from('2020-02-27') // week 9 of a 53-week ISO year
+    expect(
+      withWeekOfYear(pd, 53).equals(Temporal.PlainDate.from('2020-12-31')),
+    ).toBe(true)
   })
 })
