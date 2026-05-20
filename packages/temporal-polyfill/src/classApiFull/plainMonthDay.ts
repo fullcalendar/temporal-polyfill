@@ -5,7 +5,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { plainMonthDaysEqual } from '../internal/compare'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
@@ -19,7 +18,7 @@ import { mergePlainMonthDayFields } from '../internal/merge'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
 import { isObjectLike } from '../internal/utils'
-import { extractCalendarFromBag } from './calendarArg'
+import { extractCalendarFromBag, resolveFullCalendar } from './calendarArg'
 import { constructMonthDaySlots } from './construct'
 import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -99,17 +98,17 @@ export function toPlainMonthDaySlots(
     }
 
     const calendarMaybe = extractCalendarFromBag(arg as { calendar?: any })
-    const calendar = calendarMaybe === undefined ? isoCalendar : calendarMaybe
+    const calendar = calendarMaybe || isoCalendar
 
     return refinePlainMonthDayObjectLike(
       calendar,
-      calendarMaybe === undefined,
+      !calendarMaybe,
       arg as Partial<MonthDayFields>,
       options,
     )
   }
 
-  const res = parsePlainMonthDay(arg, resolveCoreCalendar)
+  const res = parsePlainMonthDay(arg, resolveFullCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

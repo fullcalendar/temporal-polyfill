@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { getGregoryCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainYearMonthFns from './plainYearMonth'
 import {
@@ -8,9 +9,11 @@ import {
   testHotCache,
 } from './testUtils'
 
+const gregoryCalendar = getGregoryCalendar()
+
 describe('create', () => {
   it('works with a referenceDay', () => {
-    const pym = PlainYearMonthFns.create(2024, 6, 'gregory', 5)
+    const pym = PlainYearMonthFns.create(2024, 6, gregoryCalendar, 5)
     expectPlainYearMonthEquals(pym, {
       calendarId: 'gregory',
       year: 2024,
@@ -20,7 +23,7 @@ describe('create', () => {
   })
 
   it('works without a referenceDay', () => {
-    const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
+    const pym = PlainYearMonthFns.create(2024, 6, gregoryCalendar)
     expectPlainYearMonthEquals(pym, {
       calendarId: 'gregory',
       year: 2024,
@@ -45,7 +48,7 @@ describe('fromString', () => {
 describe('fromFields', () => {
   it('works without options', () => {
     const pym = PlainYearMonthFns.fromFields({
-      calendar: 'gregory',
+      calendar: gregoryCalendar,
       year: 2024,
       month: 6,
     })
@@ -60,7 +63,7 @@ describe('fromFields', () => {
 
 describe('calendar field getters', () => {
   it('works', () => {
-    const pym = PlainYearMonthFns.create(2024, 6, 'gregory')
+    const pym = PlainYearMonthFns.create(2024, 6, gregoryCalendar)
     expect({
       era: pym.era,
       eraYear: pym.eraYear,
@@ -79,7 +82,7 @@ describe('calendar field getters', () => {
 
 describe('withFields', () => {
   it('works', () => {
-    const pym0 = PlainYearMonthFns.create(2024, 6, 'gregory')
+    const pym0 = PlainYearMonthFns.create(2024, 6, gregoryCalendar)
     const pym1 = PlainYearMonthFns.withFields(pym0, {
       year: 2009,
     })

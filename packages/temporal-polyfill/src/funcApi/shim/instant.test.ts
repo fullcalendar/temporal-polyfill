@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import '../../intl-calendars'
 import * as DurationFns from './duration'
 import * as InstantFns from './instant'
 import {

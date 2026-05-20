@@ -10,7 +10,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import {
   zonedDateTimeToInstant,
@@ -55,6 +54,7 @@ import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
+  resolveFullCalendar,
 } from './calendarArg'
 import { constructZonedEpochNanoSlots } from './construct'
 import {
@@ -296,7 +296,7 @@ export function toZonedDateTimeSlots(
     )
   }
 
-  return parseZonedDateTime(arg, resolveCoreCalendar, options)
+  return parseZonedDateTime(arg, resolveFullCalendar, options)
 }
 
 function adaptDateMethods(methods: any) {

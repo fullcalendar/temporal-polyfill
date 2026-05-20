@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import '../../intl-calendars'
+import { getGregoryCalendar, getIntlCalendar } from './calendar'
 import * as PlainMonthDayFns from './plainMonthDay'
 import {
   expectPlainDateEquals,
@@ -7,9 +7,12 @@ import {
   testHotCache,
 } from './testUtils'
 
+const gregoryCalendar = getGregoryCalendar()
+const islamicCivilCalendar = getIntlCalendar('islamic-civil')
+
 describe('create', () => {
   it('works with a referenceYear', () => {
-    const pmd = PlainMonthDayFns.create(6, 18, 'gregory', 2024)
+    const pmd = PlainMonthDayFns.create(6, 18, gregoryCalendar, 2024)
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',
       monthCode: 'M06',
@@ -41,7 +44,7 @@ describe('fromString', () => {
 describe('fromFields', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.fromFields({
-      calendar: 'gregory',
+      calendar: gregoryCalendar,
       monthCode: 'M06',
       day: 18,
     })
@@ -55,7 +58,7 @@ describe('fromFields', () => {
   it('requires a year before reconciling non-iso month fields', () => {
     expect(() =>
       PlainMonthDayFns.fromFields({
-        calendar: 'islamic-civil',
+        calendar: islamicCivilCalendar,
         monthCode: 'M04',
         month: 5,
         day: 1,

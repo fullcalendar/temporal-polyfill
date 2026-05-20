@@ -21,7 +21,12 @@ import { NumberSign } from '../../internal/utils'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { Temporal } from '../nativeSwitch'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
-import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import {
+  CalendarNativeRecord,
+  CalendarNativeResolver,
+  assertCalendarNativeStringResolved,
+  getCalendarNativeRecordId,
+} from './calendar'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -100,9 +105,11 @@ export function fromFields(
 
 export function fromString(
   s: string,
+  resolveCalendar?: CalendarNativeResolver,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = Temporal!.ZonedDateTime.from(s, options)
+  assertCalendarNativeStringResolved(resNative.calendarId, resolveCalendar)
   return createZonedDateTimeNativeRecord(resNative)
 }
 

@@ -9,7 +9,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
 import {
   convertToPlainMonthDay,
@@ -41,6 +40,7 @@ import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
+  resolveFullCalendar,
 } from './calendarArg'
 import { constructDateSlots } from './construct'
 import {
@@ -243,7 +243,7 @@ export function toPlainDateSlots(
     return refinePlainDateObjectLike(calendar, arg as DateLikeObject, options)
   }
 
-  const res = parsePlainDate(arg, resolveCoreCalendar)
+  const res = parsePlainDate(arg, resolveFullCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

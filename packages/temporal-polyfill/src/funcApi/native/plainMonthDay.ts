@@ -11,7 +11,12 @@ import {
 import { DateTimeFormatLike } from '../commonTypes'
 import { Temporal } from '../nativeSwitch'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
-import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import {
+  CalendarNativeRecord,
+  CalendarNativeResolver,
+  assertCalendarNativeStringResolved,
+  getCalendarNativeRecordId,
+} from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 
@@ -80,8 +85,12 @@ export function fromFields(
   return createPlainMonthDayNativeRecord(resNative)
 }
 
-export function fromString(s: string): PlainMonthDayNativeRecord {
+export function fromString(
+  s: string,
+  resolveCalendar?: CalendarNativeResolver,
+): PlainMonthDayNativeRecord {
   const resNative = Temporal!.PlainMonthDay.from(s)
+  assertCalendarNativeStringResolved(resNative.calendarId, resolveCalendar)
   return createPlainMonthDayNativeRecord(resNative)
 }
 

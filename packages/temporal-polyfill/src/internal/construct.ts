@@ -1,8 +1,7 @@
-import { refineCalendarId } from './calendarId'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import { InternalCalendar, getInternalCalendar } from './externalCalendar'
+import { InternalCalendar } from './externalCalendar'
 import { timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -10,7 +9,6 @@ import {
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { isoCalendarId } from './intlCalendarConfig'
 import { checkIsoDateFields, isoEpochFirstLeapYear } from './isoCalendarMath'
 import {
   EpochNanoFields,
@@ -39,29 +37,29 @@ export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
   return createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
 }
 
-export function constructZonedEpochNanoSlots(
+export function constructZonedEpochNanoSlotsWithCalendar(
   epochNano: bigint,
   timeZoneId: string,
-  calendarId = isoCalendarId,
+  calendar: InternalCalendar,
 ): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   return createZonedEpochNanoSlots(
     checkEpochNanoInBounds(toBigInt(epochNano)),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
-    getInternalCalendar(refineCalendarId(calendarId)),
+    calendar,
   )
 }
 
-export function constructDateTimeSlots(
+export function constructDateTimeSlotsWithCalendar(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
+  calendar: InternalCalendar,
   hour = 0,
   minute = 0,
   second = 0,
   millisecond = 0,
   microsecond = 0,
   nanosecond = 0,
-  calendarId = isoCalendarId,
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const isoDate = checkIsoDateFields(
     mapProps(toInteger, {
@@ -82,19 +80,15 @@ export function constructDateTimeSlots(
   )
   const isoDateTime = combineDateAndTime(isoDate, time)
   checkIsoDateTimeInBounds(isoDateTime)
-  return createDateTimeSlots(
-    isoDateTime,
-    getInternalCalendar(refineCalendarId(calendarId)),
-  )
+  return createDateTimeSlots(isoDateTime, calendar)
 }
 
-export function constructDateSlots(
+export function constructDateSlotsWithCalendar(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  calendarId = isoCalendarId,
+  calendar: InternalCalendar,
 ): CalendarDateFields & { calendar: InternalCalendar } {
-  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   return createDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields(
@@ -109,15 +103,14 @@ export function constructDateSlots(
   )
 }
 
-export function constructYearMonthSlots(
+export function constructYearMonthSlotsWithCalendar(
   isoYear: number,
   isoMonth: number,
-  calendarId = isoCalendarId,
+  calendar: InternalCalendar,
   referenceIsoDay = 1,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
-  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   const isoDayInt = toInteger(referenceIsoDay)
 
   return createYearMonthSlots(
@@ -132,15 +125,14 @@ export function constructYearMonthSlots(
   )
 }
 
-export function constructMonthDaySlots(
+export function constructMonthDaySlotsWithCalendar(
   isoMonth: number,
   isoDay: number,
-  calendarId = isoCalendarId,
+  calendar: InternalCalendar,
   referenceIsoYear: number = isoEpochFirstLeapYear,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
-  const calendar = getInternalCalendar(refineCalendarId(calendarId))
   const isoYearInt = toInteger(referenceIsoYear)
 
   return createMonthDaySlots(

@@ -1,9 +1,17 @@
 import { getBrandingAndSlots } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
+import { intlCalendarProvider } from '../externalCalendars/intlCalendarProvider'
 import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import type { InternalCalendar } from '../internal/externalCalendar'
-import { isoCalendar } from '../internal/externalCalendar'
+import {
+  getInternalCalendarId,
+  gregoryCalendar,
+  isoCalendar,
+} from '../internal/externalCalendar'
+import {
+  gregoryCalendarId,
+  isoCalendarId,
+} from '../internal/intlCalendarConfig'
 import { parseCalendarId } from '../internal/isoParse'
 import { isObjectLike } from '../internal/utils'
 import { PlainDate } from './plainDate'
@@ -36,14 +44,10 @@ export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
   }
 }
 
-/*
-Returns a calendar
-*/
 export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
   if (isObjectLike(arg)) {
     const slots = getBrandingAndSlots(arg)?.[1]
     if (!slots || !('calendar' in slots)) {
-      // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
     return (slots as { calendar: InternalCalendar }).calendar
@@ -51,9 +55,23 @@ export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
   return refineCalendarString(arg)
 }
 
-/*
-Like resolveCoreCalendar, but allows different string formats, like datetime string
-*/
 function refineCalendarString(arg: string): InternalCalendar {
-  return resolveCoreCalendar(parseCalendarId(requireString(arg)))
+  return resolveFullCalendar(parseCalendarId(requireString(arg)))
+}
+
+export function resolveFullCalendar(rawCalendarId: string): InternalCalendar {
+  const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
+
+  if (lowerRawCalendarId === isoCalendarId) {
+    return isoCalendar
+  }
+  if (lowerRawCalendarId === gregoryCalendarId) {
+    return gregoryCalendar
+  }
+
+  return intlCalendarProvider(lowerRawCalendarId)
+}
+
+export function resolveFullCalendarId(rawCalendarId: string): string {
+  return getInternalCalendarId(resolveFullCalendar(rawCalendarId))
 }

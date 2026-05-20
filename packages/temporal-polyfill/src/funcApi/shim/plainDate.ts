@@ -14,7 +14,7 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
-import { constructDateSlots } from '../../internal/construct'
+import { constructDateSlotsWithCalendar } from '../../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -54,9 +54,10 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import { PlainDateRecordBranding } from '../recordBranding'
 import {
-  CalendarShimArg,
+  CalendarShimRecord,
+  CalendarShimResolver,
+  createCalendarShimStringResolver,
   refineCalendarShimArg,
-  refineCalendarShimArgToId,
 } from './calendar'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -124,13 +125,13 @@ export const [
     isoYear: number,
     isoMonth: number,
     isoDay: number,
-    calendar?: CalendarShimArg,
+    calendar?: CalendarShimRecord,
   ) => {
-    return constructDateSlots(
+    return constructDateSlotsWithCalendar(
       isoYear,
       isoMonth,
       isoDay,
-      refineCalendarShimArgToId(calendar),
+      refineCalendarShimArg(calendar),
     )
   },
   formatPlainDateIso,
@@ -146,7 +147,7 @@ export function create(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarShimArg,
+  calendar?: CalendarShimRecord,
 ): PlainDateShimRecord {
   return new PlainDateShimRecord(isoYear, isoMonth, isoDay, calendar)
 }
@@ -157,7 +158,7 @@ export function isRecord(arg: unknown): arg is PlainDateShimRecord {
 }
 
 export function fromFields(
-  fields: Partial<DateFields> & { calendar: CalendarShimArg },
+  fields: Partial<DateFields> & { calendar: CalendarShimRecord },
   options?: OverflowOptions,
 ): PlainDateShimRecord {
   const internalCalendar = refineCalendarShimArg(fields.calendar)
@@ -166,13 +167,18 @@ export function fromFields(
   return createPlainDateShimRecord(resSlots)
 }
 
-export function fromString(s: string): PlainDateShimRecord {
-  return createPlainDateShimRecord(parsePlainDate(s))
+export function fromString(
+  s: string,
+  resolveCalendar?: CalendarShimResolver,
+): PlainDateShimRecord {
+  return createPlainDateShimRecord(
+    parsePlainDate(s, createCalendarShimStringResolver(resolveCalendar)),
+  )
 }
 
 export function withCalendar(
   record: PlainDateShimRecord,
-  inputCalendar: CalendarShimArg,
+  inputCalendar: CalendarShimRecord,
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const internalCalendar = refineCalendarShimArg(inputCalendar)

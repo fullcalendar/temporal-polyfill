@@ -23,7 +23,7 @@ import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
 } from '../../internal/compare'
-import { constructZonedEpochNanoSlots } from '../../internal/construct'
+import { constructZonedEpochNanoSlotsWithCalendar } from '../../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -93,9 +93,10 @@ import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import {
-  CalendarShimArg,
+  CalendarShimRecord,
+  CalendarShimResolver,
+  createCalendarShimStringResolver,
   refineCalendarShimArg,
-  refineCalendarShimArgToId,
 } from './calendar'
 import {
   diffZonedDays,
@@ -149,7 +150,7 @@ import {
   computeYearInterval,
 } from './roundUtils'
 
-type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimArg>
+type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
 export type ZonedDateTimeShimRecord = any
 
@@ -159,11 +160,15 @@ export const [
   getZonedDateTimeShimRecordSlots,
 ] = createSlotClass(
   ZonedDateTimeRecordBranding,
-  (epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarShimArg) =>
-    constructZonedEpochNanoSlots(
+  (
+    epochNanoseconds: bigint,
+    timeZoneId: string,
+    calendar?: CalendarShimRecord,
+  ) =>
+    constructZonedEpochNanoSlotsWithCalendar(
       epochNanoseconds,
       timeZoneId,
-      refineCalendarShimArgToId(calendar),
+      refineCalendarShimArg(calendar),
     ),
   formatZonedDateTimeIso,
   {
@@ -182,7 +187,7 @@ export const [
 export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarShimArg,
+  calendar?: CalendarShimRecord,
 ): ZonedDateTimeShimRecord {
   return new ZonedDateTimeShimRecord(epochNanoseconds, timeZoneId, calendar)
 }
@@ -209,9 +214,16 @@ export function fromFields(
 
 export function fromString(
   s: string,
+  resolveCalendar?: CalendarShimResolver,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeShimRecord {
-  return createZonedDateTimeShimRecord(parseZonedDateTime(s, options))
+  return createZonedDateTimeShimRecord(
+    parseZonedDateTime(
+      s,
+      createCalendarShimStringResolver(resolveCalendar),
+      options,
+    ),
+  )
 }
 
 export function withFields(
@@ -230,7 +242,7 @@ export function withFields(
 
 export function withCalendar(
   record: ZonedDateTimeShimRecord,
-  inputCalendar: CalendarShimArg,
+  inputCalendar: CalendarShimRecord,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const internalCalendar = refineCalendarShimArg(inputCalendar)

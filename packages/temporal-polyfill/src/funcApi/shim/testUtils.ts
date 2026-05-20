@@ -1,14 +1,6 @@
 import { expect } from 'vitest'
-import { intlCalendarProvider } from '../../externalCalendars/intlCalendarProvider'
-import { registerExternalCalendarProvider } from '../../internal/externalCalendar'
 import { TimeFields } from '../../internal/fieldTypes'
 import { isoCalendarId } from '../../internal/intlCalendarConfig'
-
-// The shim tests exercise source modules directly. The normal entry-point
-// resolver may load the built intl-calendars bundle first, whose minified
-// calendar-object shape is only compatible with built internals. Re-register
-// the source provider so source calendar code receives source-shaped calendars.
-registerExternalCalendarProvider(intlCalendarProvider)
 
 const systemResolvedOptions = new Intl.DateTimeFormat().resolvedOptions()
 export const systemTimeZoneId = systemResolvedOptions.timeZone

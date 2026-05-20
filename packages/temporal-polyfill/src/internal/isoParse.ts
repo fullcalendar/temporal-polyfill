@@ -3,12 +3,12 @@ import {
   computeCalendarIsoFieldsFromParts,
   computeCalendarMonthCodeParts,
 } from './calendarDerived'
-import { resolveCalendarId } from './calendarId'
+import type { CalendarResolver } from './calendarResolver'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { type InternalCalendar, getInternalCalendar } from './externalCalendar'
+import { type InternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -112,25 +112,33 @@ export function parseInstant(s: string): EpochNanoFields {
   return createEpochNanoSlots(epochNanoseconds)
 }
 
-export function parseRelativeToSlots(s: string): RelativeToSlots {
+export function parseRelativeToSlots(
+  s: string,
+  resolveCalendar: CalendarResolver,
+): RelativeToSlots {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized) {
     throwFailedParse(s)
   }
   if (organized.timeZoneId) {
-    return finalizeZonedDateTime(organized as ZonedDateTimeOrganized)
+    return finalizeZonedDateTime(
+      organized as ZonedDateTimeOrganized,
+      resolveCalendar,
+      undefined,
+    )
   }
   if (organized.hasZ) {
     // PlainDate doesn't support Z
     throwFailedParse(s)
   }
 
-  return finalizeDate(organized)
+  return finalizeDate(organized, resolveCalendar)
 }
 
 export function parseZonedDateTime(
   s: string,
+  resolveCalendar: CalendarResolver,
   options?: ZonedFieldOptions,
 ): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const organized = parseDateTimeLike(requireString(s))
@@ -139,11 +147,16 @@ export function parseZonedDateTime(
     throwFailedParse(s)
   }
 
-  return finalizeZonedDateTime(organized as ZonedDateTimeOrganized, options)
+  return finalizeZonedDateTime(
+    organized as ZonedDateTimeOrganized,
+    resolveCalendar,
+    options,
+  )
 }
 
 export function parsePlainDateTime(
   s: string,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
   const organized = parseDateTimeLike(requireString(s))
 
@@ -151,19 +164,25 @@ export function parsePlainDateTime(
     throwFailedParse(s)
   }
 
-  const slots = finalizeDateTime(organized)
+  const slots = finalizeDateTime(organized, resolveCalendar)
   return createDateTimeSlots(slots, slots.calendar)
 }
 
 export function parsePlainDate(
   s: string,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateFields & { calendar: InternalCalendar } {
-  const slots = finalizeDateLike(parsePlainDateLike(requireString(s)))
+  const slots = finalizeDateLike(
+    parsePlainDateLike(requireString(s)),
+    undefined,
+    resolveCalendar,
+  )
   return createDateSlots(slots, slots.calendar)
 }
 
 export function parsePlainYearMonth(
   s: string,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const organized = parseYearMonthOnly(requireString(s))
 
@@ -171,13 +190,14 @@ export function parsePlainYearMonth(
     requireIsoCalendar(organized)
     return createYearMonthSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
-      getInternalCalendar(resolveCalendarId(organized.calendarId)),
+      resolveCalendar(organized.calendarId),
     )
   }
 
   const dateSlots = finalizeDateLike(
     parsePlainDateLike(s),
     projectIsoYearMonthDate,
+    resolveCalendar,
   )
   const { calendar } = dateSlots
   const moveIsoSlots = moveToDayOfMonthUnsafe(
@@ -196,6 +216,7 @@ function requireIsoCalendar(organized: { calendarId: string }): void {
 
 export function parsePlainMonthDay(
   s: string,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   const organized = parseMonthDayOnly(requireString(s))
 
@@ -204,13 +225,14 @@ export function parsePlainMonthDay(
 
     return createMonthDaySlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
-      getInternalCalendar(resolveCalendarId(organized.calendarId)),
+      resolveCalendar(organized.calendarId),
     )
   }
 
   const dateSlots = finalizeDateLike(
     parsePlainDateLike(s),
     projectIsoMonthDayDate,
+    resolveCalendar,
   )
   const { calendar } = dateSlots
 
@@ -317,7 +339,10 @@ function parsePlainDateLike(s: string): DateTimeLikeOrganized {
 
 function finalizeDateLike(
   organized: DateTimeLikeOrganized,
-  isoDateProjector?: (organized: DateTimeLikeOrganized) => DateOrganized,
+  isoDateProjector:
+    | ((organized: DateTimeLikeOrganized) => DateOrganized)
+    | undefined,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   if (isoDateProjector && organized.calendarId === isoCalendarId) {
     // Full-date strings still go through the normal ParseISODateTime-style
@@ -327,12 +352,12 @@ function finalizeDateLike(
     if (organized.hasTime) {
       checkTimeFields(organized)
     }
-    return finalizeDate(isoDateProjector(organized))
+    return finalizeDate(isoDateProjector(organized), resolveCalendar)
   }
 
   return organized.hasTime
-    ? finalizeDateTime(organized)
-    : finalizeDate(organized)
+    ? finalizeDateTime(organized, resolveCalendar)
+    : finalizeDate(organized, resolveCalendar)
 }
 
 function projectIsoYearMonthDate(
@@ -387,6 +412,7 @@ Unlike others, return slots
 */
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
+  resolveCalendar: CalendarResolver,
   options?: ZonedFieldOptions,
 ): ZonedEpochNanoFields & { calendar: InternalCalendar } {
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
@@ -423,28 +449,30 @@ function finalizeZonedDateTime(
   return createZonedEpochNanoSlots(
     epochNano,
     timeZoneImpl,
-    getInternalCalendar(resolveCalendarId(organized.calendarId)),
+    resolveCalendar(organized.calendarId),
   )
 }
 
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateTimeFields & { calendar: InternalCalendar } {
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
     ...combineDateAndTime(organized, organized),
-    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
+    calendar: resolveCalendar(organized.calendarId),
   }
 }
 
 function finalizeDate(
   organized: DateOrganized,
+  resolveCalendar: CalendarResolver,
 ): CalendarDateFields & { calendar: InternalCalendar } {
   checkIsoDateFields(organized)
   checkIsoDateInBounds(organized)
   return {
-    calendar: getInternalCalendar(resolveCalendarId(organized.calendarId)),
+    calendar: resolveCalendar(organized.calendarId),
     year: organized.year,
     month: organized.month,
     day: organized.day,

@@ -39,7 +39,7 @@ async function writeBundles(
       input: joinPaths(
         pkgDir,
         'dist',
-        'global' + extensions.esmWhenIifePrefix + extensions.esm,
+        'full/global' + extensions.esmWhenIifePrefix + extensions.esm,
       ),
     })
 
@@ -53,7 +53,7 @@ async function writeBundles(
 
     await esmBundle.write({
       format: 'iife',
-      file: joinPaths(pkgDir, 'dist', '.bundled', filename),
+      file: joinPaths(pkgDir, 'dist', '.bundled', 'full', filename),
       plugins: [bundleEsmTerser && terserSimple(), bundleEsmSwc && swcMinify()],
     })
   }
@@ -76,6 +76,8 @@ async function buildConfigs(pkgDir, isDev) {
   const externalCalendarsSrcBase =
     resolvePath(pkgDir, 'dist/.tsc', 'externalCalendars') + pathSep
   const classApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
+  const classApiFullSrcBase =
+    resolvePath(pkgDir, 'dist/.tsc', 'classApiFull') + pathSep
   const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
 
   for (const exportPath in exportMap) {
@@ -137,7 +139,7 @@ async function buildConfigs(pkgDir, isDev) {
 
   function manuallyResolveChunk(id) {
     if (id.startsWith(externalCalendarsSrcBase)) {
-      return 'intl-calendars'
+      return 'externalCalendars'
     }
     if (id.startsWith(internalSrcBase)) {
       return 'internal'
@@ -147,6 +149,9 @@ async function buildConfigs(pkgDir, isDev) {
     }
     if (id.startsWith(classApiSrcBase)) {
       return 'classApi'
+    }
+    if (id.startsWith(classApiFullSrcBase)) {
+      return 'classApiFull'
     }
   }
 
@@ -206,6 +211,9 @@ async function buildConfigs(pkgDir, isDev) {
           }
           if (id.startsWith(classApiSrcBase)) {
             return 'classApi'
+          }
+          if (id.startsWith(classApiFullSrcBase)) {
+            return 'classApiFull'
           }
         },
       },

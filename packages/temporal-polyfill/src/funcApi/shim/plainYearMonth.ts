@@ -14,7 +14,7 @@ import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { constructYearMonthSlots } from '../../internal/construct'
+import { constructYearMonthSlotsWithCalendar } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
@@ -38,9 +38,10 @@ import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import {
-  CalendarShimArg,
+  CalendarShimRecord,
+  CalendarShimResolver,
+  createCalendarShimStringResolver,
   refineCalendarShimArg,
-  refineCalendarShimArgToId,
 } from './calendar'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -62,13 +63,13 @@ export const [
   (
     isoYear: number,
     isoMonth: number,
-    calendar?: CalendarShimArg,
+    calendar?: CalendarShimRecord,
     referenceIsoDay?: number,
   ) =>
-    constructYearMonthSlots(
+    constructYearMonthSlotsWithCalendar(
       isoYear,
       isoMonth,
-      refineCalendarShimArgToId(calendar),
+      refineCalendarShimArg(calendar),
       referenceIsoDay,
     ),
   formatPlainYearMonthIso,
@@ -83,7 +84,7 @@ export const [
 export function create(
   isoYear: number,
   isoMonth: number,
-  calendar?: CalendarShimArg,
+  calendar?: CalendarShimRecord,
   referenceIsoDay?: number,
 ): PlainYearMonthShimRecord {
   return new PlainYearMonthShimRecord(
@@ -100,7 +101,7 @@ export function isRecord(arg: unknown): arg is PlainYearMonthShimRecord {
 }
 
 export function fromFields(
-  fields: Partial<YearMonthFields> & { calendar?: CalendarShimArg },
+  fields: Partial<YearMonthFields> & { calendar?: CalendarShimRecord },
   options?: OverflowOptions,
 ): PlainYearMonthShimRecord {
   const internalCalendar = refineCalendarShimArg(fields.calendar)
@@ -112,8 +113,13 @@ export function fromFields(
   return createPlainYearMonthShimRecord(resSlots)
 }
 
-export function fromString(s: string): PlainYearMonthShimRecord {
-  return createPlainYearMonthShimRecord(parsePlainYearMonth(s))
+export function fromString(
+  s: string,
+  resolveCalendar?: CalendarShimResolver,
+): PlainYearMonthShimRecord {
+  return createPlainYearMonthShimRecord(
+    parsePlainYearMonth(s, createCalendarShimStringResolver(resolveCalendar)),
+  )
 }
 
 export function daysInMonth(record: PlainYearMonthShimRecord): number {

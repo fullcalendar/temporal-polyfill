@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { Temporal as TemporalFull } from './full'
 import { Temporal } from './impl'
-import './intl-calendars'
 
 describe('integration recreations', () => {
   // TODO: Contribute these double-rounding cases to the official test262
@@ -59,7 +59,7 @@ describe('integration recreations', () => {
   // test262 maintainers or contributing this focused edge case upstream.
   describe('issue #74: calendar conversion month changes incorrectly', () => {
     it('keeps the ISO date on the same Buddhist calendar month', () => {
-      const date = Temporal.PlainDate.from({
+      const date = TemporalFull.PlainDate.from({
         year: 1582,
         month: 1,
         day: 1,

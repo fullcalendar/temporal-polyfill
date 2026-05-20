@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import '../../intl-calendars'
+import { getGregoryCalendar, getIntlCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as PlainTimeFns from './plainTime'
@@ -11,6 +11,9 @@ import {
   expectZonedDateTimeEquals,
   testHotCache,
 } from './testUtils'
+
+const gregoryCalendar = getGregoryCalendar()
+const hebrewCalendar = getIntlCalendar('hebrew')
 
 describe('create', () => {
   it('works', () => {
@@ -24,7 +27,7 @@ describe('create', () => {
       0,
       0,
       1,
-      'hebrew',
+      hebrewCalendar,
     )
     expectPlainDateTimeEquals(pdt, {
       calendarId: 'hebrew',
@@ -40,7 +43,10 @@ describe('create', () => {
 
 describe('fromString', () => {
   it('works', () => {
-    const pd = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
+    const pd = PlainDateTimeFns.fromString(
+      '2024-01-01T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expectPlainDateTimeEquals(pd, {
       calendarId: 'hebrew',
       year: 5784,
@@ -55,7 +61,7 @@ describe('fromString', () => {
 describe('fromFields', () => {
   it('works without options', () => {
     const pdt = PlainDateTimeFns.fromFields({
-      calendar: 'hebrew',
+      calendar: hebrewCalendar,
       year: 5784,
       month: 4,
       day: 20,
@@ -109,7 +115,7 @@ describe('calendar and time field getters', () => {
 describe('withFields', () => {
   it('works', () => {
     const pdt0 = PlainDateTimeFns.fromFields({
-      calendar: 'hebrew',
+      calendar: hebrewCalendar,
       year: 5784,
       month: 4,
       day: 20,
@@ -177,8 +183,11 @@ describe('withPlainTime', () => {
 
 describe('withCalendar', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=hebrew]')
-    const pdt1 = PlainDateTimeFns.withCalendar(pdt0, 'gregory')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-01-01T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.withCalendar(pdt0, gregoryCalendar)
     expectPlainDateTimeEquals(pdt1, {
       calendarId: 'gregory',
       year: 2024,
@@ -192,21 +201,30 @@ describe('withCalendar', () => {
 
 describe('dayOfWeek', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.dayOfWeek(pdt)).toBe(2)
   })
 })
 
 describe('daysInWeek', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.daysInWeek(pdt)).toBe(7)
   })
 })
 
 describe('weekOfYear', () => {
   it('returns undefined for calendars without defined weeks', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(undefined)
   })
 
@@ -223,7 +241,10 @@ describe('weekOfYear', () => {
 
 describe('yearOfWeek', () => {
   it('returns undefined for calendars without defined weeks', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(undefined)
   })
 
@@ -261,14 +282,20 @@ describe('daysInYear', () => {
 
 describe('monthsInYear', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.monthsInYear(pdt)).toBe(13)
   })
 })
 
 describe('inLeapYear', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(PlainDateTimeFns.inLeapYear(pdt)).toBe(true)
   })
 })
@@ -380,7 +407,10 @@ describe('compare', () => {
 
 describe('toZonedDateTime', () => {
   it('works without disambiguation options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     const zdt = PlainDateTimeFns.toZonedDateTime(pdt, 'America/New_York')
     expectZonedDateTimeEquals(zdt, {
       calendarId: 'hebrew',
@@ -390,7 +420,10 @@ describe('toZonedDateTime', () => {
   })
 
   it('works with disambiguation options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     const zdt = PlainDateTimeFns.toZonedDateTime(pdt, 'America/New_York', {
       disambiguation: 'later',
     })
@@ -404,7 +437,10 @@ describe('toZonedDateTime', () => {
 
 describe('toPlainDate', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     const pd = PlainDateTimeFns.toPlainDate(pdt)
     expectPlainDateEquals(pd, {
       calendarId: 'hebrew',
@@ -575,10 +611,16 @@ describe('withDayOfYear', () => {
   })
 
   it('works with non-ISO calendar', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, 5),
-      PlainDateTimeFns.fromString('2023-09-20T12:30:00[u-ca=hebrew]'),
+      PlainDateTimeFns.fromString(
+        '2023-09-20T12:30:00[u-ca=hebrew]',
+        getIntlCalendar,
+      ),
     )
   })
 })
@@ -611,10 +653,16 @@ describe('withDayOfWeek', () => {
   })
 
   it('works with non-ISO calendar', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, 4),
-      PlainDateTimeFns.fromString('2024-02-29T12:30:00[u-ca=hebrew]'),
+      PlainDateTimeFns.fromString(
+        '2024-02-29T12:30:00[u-ca=hebrew]',
+        getIntlCalendar,
+      ),
     )
   })
 })
@@ -637,7 +685,10 @@ describe('withWeekOfYear', () => {
   })
 
   it('errors on calendars that do not support week numbers', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00[u-ca=hebrew]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00[u-ca=hebrew]',
+      getIntlCalendar,
+    )
     expect(() => {
       PlainDateTimeFns.withWeekOfYear(pdt, 27)
     }).toThrowError(RangeError)

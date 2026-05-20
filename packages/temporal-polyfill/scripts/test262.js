@@ -3,7 +3,6 @@
 
 import { join as joinPaths } from 'path'
 import runTest262 from '@js-temporal/temporal-test262-runner'
-import { mkdir, readFile, writeFile } from 'fs/promises'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { extensions } from './lib/config.js'
@@ -109,23 +108,18 @@ yargs(hideBin(process.argv))
 
       // from package root
       const globalPolyfillPath = esmOpt
-        ? './dist/.bundled/global' +
+        ? './dist/.bundled/full/global' +
           (esmOptIsMin ? '.' + esmOpt + extensions.iifeMin : extensions.iife)
-        : './dist/global' + (globalIsMin ? extensions.iifeMin : extensions.iife)
-      const intlCalendarsPath =
-        './dist/intl-calendars' +
-        (globalIsMin ? extensions.iifeMin : extensions.iife)
-      const polyfillPath = await writeTest262PolyfillBootstrap(
-        pkgDir,
-        globalPolyfillPath,
-        intlCalendarsPath,
-      )
+        : './dist/full/global' +
+          (globalIsMin ? extensions.iifeMin : extensions.iife)
 
-      console.log(`Testing ${polyfillPath} with Node ${currentNodeVersion} ...`)
+      console.log(
+        `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,
+      )
 
       const result = runTest262({
         test262Dir: joinPaths(monorepoDir, 'test262'),
-        polyfillCodeFile: joinPaths(pkgDir, polyfillPath),
+        polyfillCodeFile: joinPaths(pkgDir, globalPolyfillPath),
         expectedFailureFiles: expectedFailureFiles.map((filename) =>
           joinPaths(scriptsDir, 'test262-config', filename),
         ),
@@ -154,22 +148,4 @@ function filterEnv(oldEnv) {
   }
 
   return newEnv
-}
-
-async function writeTest262PolyfillBootstrap(
-  pkgDir,
-  globalPolyfillPath,
-  intlCalendarsPath,
-) {
-  const bootstrapPath = './dist/.test262/polyfill.js'
-  const banner = (path) => `\n// ${path}\n`
-  const code =
-    banner(globalPolyfillPath) +
-    (await readFile(joinPaths(pkgDir, globalPolyfillPath), 'utf8')) +
-    banner(intlCalendarsPath) +
-    (await readFile(joinPaths(pkgDir, intlCalendarsPath), 'utf8'))
-
-  await mkdir(joinPaths(pkgDir, 'dist/.test262'), { recursive: true })
-  await writeFile(joinPaths(pkgDir, bootstrapPath), code)
-  return bootstrapPath
 }

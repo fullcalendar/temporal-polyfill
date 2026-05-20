@@ -5,7 +5,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
@@ -22,7 +21,7 @@ import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { getCalendarFromBag } from './calendarArg'
+import { getCalendarFromBag, resolveFullCalendar } from './calendarArg'
 import { constructYearMonthSlots } from './construct'
 import {
   Duration,
@@ -167,7 +166,7 @@ export function toPlainYearMonthSlots(
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
-  const res = parsePlainYearMonth(arg, resolveCoreCalendar)
+  const res = parsePlainYearMonth(arg, resolveFullCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

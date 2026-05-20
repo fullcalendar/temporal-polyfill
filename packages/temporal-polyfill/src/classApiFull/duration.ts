@@ -6,7 +6,6 @@ import {
 } from '../apiHelpers/branding'
 import { durationFieldGetters } from '../apiHelpers/mixins'
 import { createSlotClass, getBrandingAndSlots } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { compareDurations } from '../internal/compare'
 import {
   refineDurationObjectLike,
@@ -39,7 +38,7 @@ import { ZonedEpochNanoFields, createDateSlots } from '../internal/slots'
 import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { getCalendarFromBag } from './calendarArg'
+import { getCalendarFromBag, resolveFullCalendar } from './calendarArg'
 import { constructDurationSlots } from './construct'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
@@ -204,6 +203,6 @@ function refinePublicRelativeTo(
       return res
     }
 
-    return parseRelativeToSlots(relativeTo, resolveCoreCalendar)
+    return parseRelativeToSlots(relativeTo, resolveFullCalendar)
   }
 }

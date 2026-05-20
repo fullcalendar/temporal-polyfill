@@ -17,7 +17,12 @@ import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import { Temporal } from '../nativeSwitch'
 import { PlainDateRecordBranding } from '../recordBranding'
-import { CalendarNativeRecord, getCalendarNativeRecordId } from './calendar'
+import {
+  CalendarNativeRecord,
+  CalendarNativeResolver,
+  assertCalendarNativeStringResolved,
+  getCalendarNativeRecordId,
+} from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -101,8 +106,12 @@ export function fromFields(
   return createPlainDateNativeRecord(resNative)
 }
 
-export function fromString(s: string): PlainDateNativeRecord {
+export function fromString(
+  s: string,
+  resolveCalendar?: CalendarNativeResolver,
+): PlainDateNativeRecord {
   const resNative = Temporal!.PlainDate.from(s)
+  assertCalendarNativeStringResolved(resNative.calendarId, resolveCalendar)
   return createPlainDateNativeRecord(resNative)
 }
 
