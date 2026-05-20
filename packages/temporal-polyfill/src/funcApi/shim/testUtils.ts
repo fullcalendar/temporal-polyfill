@@ -59,6 +59,7 @@ type MonthDaySlots = {
 }
 
 export function expectPlainDateEquals(pd: any, slots: CalendarSlots): void {
+  slots = readExpectedDateFields(slots)
   expectCalendarId(pd, slots)
   expect(readDateFields(pd)).toStrictEqual({
     ...dateDefaults,
@@ -98,6 +99,7 @@ export function expectPlainDateTimeEquals(
   pdt: any,
   slots: DateTimeSlots,
 ): void {
+  slots = readExpectedDateTimeFields(slots)
   expectCalendarId(pdt, slots)
   expect(readDateTimeFields(pdt)).toStrictEqual({
     ...dateDefaults,
@@ -115,6 +117,7 @@ export function expectZonedDateTimeEquals(
     calendarId?: string
   },
 ): void {
+  slots = readExpectedZonedDateTimeFields(slots)
   expectCalendarId(zdt, slots)
   expect(zdt.timeZoneId).toBe(slots.timeZoneId || zdt.timeZoneId)
   expect({
@@ -166,6 +169,28 @@ function readDateFields(record: any) {
     month: record.month,
     day: record.day,
   }
+}
+
+function readExpectedDateFields(slots: any): CalendarSlots {
+  return shouldReadExpectedRecord(slots) ? readDateFields(slots) : slots
+}
+
+function readExpectedDateTimeFields(slots: any): DateTimeSlots {
+  return shouldReadExpectedRecord(slots) ? readDateTimeFields(slots) : slots
+}
+
+function readExpectedZonedDateTimeFields(slots: any) {
+  return shouldReadExpectedRecord(slots)
+    ? {
+        calendarId: slots.calendarId,
+        timeZoneId: slots.timeZoneId,
+        epochNanoseconds: slots.epochNanoseconds,
+      }
+    : slots
+}
+
+function shouldReadExpectedRecord(slots: any): boolean {
+  return slots && Object.keys(slots).length === 0
 }
 
 function readYearMonthFields(record: any) {

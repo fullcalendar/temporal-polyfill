@@ -14,6 +14,7 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
+import { toStrictInteger } from '../../internal/cast'
 import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
@@ -27,7 +28,13 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
-import { DateTimeFields } from '../../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  DateTimeFields,
+  TimeFields,
+} from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
 import { createFormatPrepper, zonedConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
@@ -44,25 +51,77 @@ import {
   DirectionName,
   DirectionOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../../internal/optionsModel'
+import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import {
+  IsoDateTimeInterval,
+  alignZonedEpoch,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
   roundZonedDateTime,
+  roundZonedEpochToInterval,
 } from '../../internal/round'
 import { createZonedEpochNanoSlots } from '../../internal/slots'
+import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
+  getSingleInstantFor,
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
-import { DayTimeUnitName, UnitName } from '../../internal/units'
-import { NumberSign, mapProps } from '../../internal/utils'
+import {
+  DayTimeUnitName,
+  Unit,
+  UnitName,
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
+} from '../../internal/units'
+import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import { ZonedDateTimeRecordBranding } from '../common-branding'
+import {
+  diffZonedDays,
+  diffZonedMonths,
+  diffZonedTimeUnits,
+  diffZonedWeeks,
+  diffZonedYears,
+} from '../non-standard/diffUtils'
+import {
+  moveByDaysStrict,
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+  reversedMove,
+} from '../non-standard/moveUtils'
+import {
+  computeDayCeil,
+  computeHourFloor,
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMicroFloor,
+  computeMilliFloor,
+  computeMinuteFloor,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeSecFloor,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+} from '../non-standard/roundUtils'
 import {
   CalendarShimArg,
   refineCalendarShimArg,
@@ -420,4 +479,251 @@ function adaptDateMethods(methods: any) {
       return method(zonedEpochSlotsToIso(slots))
     }
   }, methods)
+}
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
+
+export const withDayOfYear = zonedTransform(moveToDayOfYear)
+export const withDayOfMonth = zonedTransform(moveToDayOfMonth)
+export const withDayOfWeek = zonedTransform(moveToDayOfWeek)
+export const withWeekOfYear = zonedTransform(moveToWeekOfYear)
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export const addYears = zonedTransform(moveByYears)
+export const addMonths = zonedTransform(moveByMonths)
+export const addWeeks = zonedTransform(moveByIsoWeeks)
+export const addDays = zonedTransform(moveByDaysStrict)
+export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
+export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
+export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)
+export const addMilliseconds = bindArgs(moveByTimeUnit, nanoInMilli)
+export const addMicroseconds = bindArgs(moveByTimeUnit, nanoInMicro)
+export const addNanoseconds = bindArgs(moveByTimeUnit, 1)
+
+export const subtractYears = reversedMove(addYears)
+export const subtractMonths = reversedMove(addMonths)
+export const subtractWeeks = reversedMove(addWeeks)
+export const subtractDays = reversedMove(addDays)
+export const subtractHours = reversedMove(addHours)
+export const subtractMinutes = reversedMove(addMinutes)
+export const subtractSeconds = reversedMove(addSeconds)
+export const subtractMilliseconds = reversedMove(addMilliseconds)
+export const subtractMicroseconds = reversedMove(addMicroseconds)
+export const subtractNanoseconds = reversedMove(addNanoseconds)
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+export const roundToYear = bindArgs(
+  roundToInterval,
+  Unit.Year,
+  computeYearInterval,
+)
+
+export const roundToMonth = bindArgs(
+  roundToInterval,
+  Unit.Month,
+  computeMonthInterval,
+)
+
+export const roundToWeek = bindArgs(
+  roundToInterval,
+  Unit.Week,
+  computeIsoWeekInterval,
+)
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export const startOfYear = aligned(computeYearFloor)
+export const startOfMonth = aligned(computeMonthFloor)
+export const startOfWeek = aligned(computeIsoWeekFloor)
+export const startOfHour = aligned(alignedTime(computeHourFloor))
+export const startOfMinute = aligned(alignedTime(computeMinuteFloor))
+export const startOfSecond = aligned(alignedTime(computeSecFloor))
+export const startOfMillisecond = aligned(alignedTime(computeMilliFloor))
+export const startOfMicrosecond = aligned(alignedTime(computeMicroFloor))
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+export const endOfYear = aligned(computeYearCeil, -1)
+export const endOfMonth = aligned(computeMonthCeil, -1)
+export const endOfWeek = aligned(computeIsoWeekCeil, -1)
+export const endOfDay = aligned(computeDayCeil, -1)
+export const endOfHour = aligned(alignedTime(computeHourFloor), nanoInHour - 1)
+export const endOfMinute = aligned(
+  alignedTime(computeMinuteFloor),
+  nanoInMinute - 1,
+)
+export const endOfSecond = aligned(alignedTime(computeSecFloor), nanoInSec - 1)
+export const endOfMillisecond = aligned(
+  alignedTime(computeMilliFloor),
+  nanoInMilli - 1,
+)
+export const endOfMicrosecond = aligned(
+  alignedTime(computeMicroFloor),
+  nanoInMicro - 1,
+)
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export function diffYears(
+  record0: ZonedDateTimeShimRecord,
+  record1: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffZonedYears(
+    getZonedDateTimeShimRecordSlots(record0),
+    getZonedDateTimeShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffMonths(
+  record0: ZonedDateTimeShimRecord,
+  record1: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffZonedMonths(
+    getZonedDateTimeShimRecordSlots(record0),
+    getZonedDateTimeShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffWeeks(
+  record0: ZonedDateTimeShimRecord,
+  record1: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffZonedWeeks(
+    getZonedDateTimeShimRecordSlots(record0),
+    getZonedDateTimeShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffDays(
+  record0: ZonedDateTimeShimRecord,
+  record1: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffZonedDays(
+    getZonedDateTimeShimRecordSlots(record0),
+    getZonedDateTimeShimRecordSlots(record1),
+    options,
+  )
+}
+
+export const diffHours = bindArgs(diffTimeUnits, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(diffTimeUnits, Unit.Minute, nanoInMinute)
+export const diffSeconds = bindArgs(diffTimeUnits, Unit.Second, nanoInSec)
+export const diffMilliseconds = bindArgs(
+  diffTimeUnits,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+export const diffMicroseconds = bindArgs(
+  diffTimeUnits,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+export const diffNanoseconds = bindArgs(diffTimeUnits, Unit.Nanosecond, 1)
+
+function diffTimeUnits(
+  unit: Unit,
+  nanoInUnit: number,
+  record0: ZonedDateTimeShimRecord,
+  record1: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffZonedTimeUnits(
+    unit as any,
+    nanoInUnit,
+    getZonedDateTimeShimRecordSlots(record0),
+    getZonedDateTimeShimRecordSlots(record1),
+    options,
+  )
+}
+
+function moveByTimeUnit(
+  nanoInUnit: number,
+  record: ZonedDateTimeShimRecord,
+  units: number,
+): ZonedDateTimeShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const epochNanoseconds =
+    slots.epochNanoseconds + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
+  return createZonedDateTimeShimRecord({
+    ...slots,
+    epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+  })
+}
+
+function roundToInterval(
+  unit: Unit,
+  computeInterval: (slots: any) => IsoDateTimeInterval,
+  record: ZonedDateTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): ZonedDateTimeShimRecord {
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const epochNanoseconds = roundZonedEpochToInterval(
+    computeInterval,
+    slots.timeZone,
+    slots,
+    roundingMode,
+  )
+  return createZonedDateTimeShimRecord({
+    ...slots,
+    epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+  })
+}
+
+function aligned(
+  computeAlignment: (record: any) => CalendarDateTimeFields,
+  nanoDelta = 0,
+): (record: ZonedDateTimeShimRecord) => ZonedDateTimeShimRecord {
+  return (record) => {
+    const slots = getZonedDateTimeShimRecordSlots(record)
+    const epochNanoseconds =
+      alignZonedEpoch(computeAlignment, slots.timeZone, slots) +
+      BigInt(nanoDelta)
+    return createZonedDateTimeShimRecord({
+      ...slots,
+      epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+    })
+  }
+}
+
+function alignedTime(
+  computeAlignment: (time: TimeFields) => TimeFields,
+): (slots: CalendarDateTimeFields) => CalendarDateTimeFields {
+  return (slots) => combineDateAndTime(slots, computeAlignment(slots))
+}
+
+function zonedTransform<A extends any[]>(
+  transformIsoDate: (isoDate: any, ...args: A) => CalendarDateFields,
+): (record: ZonedDateTimeShimRecord, ...args: A) => ZonedDateTimeShimRecord {
+  return (record, ...args) => {
+    const slots = getZonedDateTimeShimRecordSlots(record)
+    const { timeZone } = slots
+    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+    const isoDate = transformIsoDate(isoDateTime, ...args)
+    // These transforms are date-only operations. Preserve the original
+    // wall-clock time while allowing the transform to replace the ISO date.
+    const epochNanoseconds = getSingleInstantFor(
+      timeZone,
+      combineDateAndTime(isoDate, isoDateTime),
+    )
+    return createZonedDateTimeShimRecord({
+      ...slots,
+      epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+    })
+  }
 }

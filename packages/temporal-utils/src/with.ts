@@ -8,6 +8,7 @@ import {
 export function withDayOfYear<T extends DateObj>(
   date: T,
   dayOfYear: number,
+  _options?: unknown,
 ): T {
   const normDayOfYear = requireNumberInRange(
     toInteger(dayOfYear),
@@ -22,6 +23,7 @@ export function withDayOfYear<T extends DateObj>(
 export function withDayOfWeek<T extends DateObj>(
   date: T,
   dayOfWeek: number,
+  _options?: unknown,
 ): T {
   const normDayOfWeek = requireNumberInRange(
     toInteger(dayOfWeek),
@@ -39,6 +41,7 @@ NOTE: does not check if beyond max number of weeks. allows overflow
 export function withWeekOfYear<T extends DateObj>(
   date: T,
   weekOfYear: number,
+  _options?: unknown,
 ): T {
   const currentWeekOfYear = date.weekOfYear
   if (currentWeekOfYear === undefined) {

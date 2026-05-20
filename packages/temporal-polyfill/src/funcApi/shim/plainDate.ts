@@ -18,27 +18,66 @@ import {
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
+import { type InternalCalendar } from '../../internal/externalCalendar'
 import { timeFieldDefaults } from '../../internal/fieldNames'
-import { DateFields, TimeFields } from '../../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  DateFields,
+  TimeFields,
+} from '../../internal/fieldTypes'
 import { createFormatPrepper, dateConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
-import { movePlainDate } from '../../internal/move'
+import { moveByDays, movePlainDate } from '../../internal/move'
 import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
 } from '../../internal/optionsModel'
+import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
+import { IsoDateTimeInterval } from '../../internal/round'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { DateUnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { DateUnitName, Unit } from '../../internal/units'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { PlainDateRecordBranding } from '../common-branding'
 import { DateTimeFormatLike, createDateTimeFormat } from '../dateTimeFormat'
+import {
+  diffPlainDays,
+  diffPlainMonths,
+  diffPlainWeeks,
+  diffPlainYears,
+} from '../non-standard/diffUtils'
+import {
+  moveByDaysStrict,
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+  reversedMove,
+} from '../non-standard/moveUtils'
+import {
+  computeIsoWeekCeil,
+  computeIsoWeekFloor,
+  computeIsoWeekInterval,
+  computeMonthCeil,
+  computeMonthFloor,
+  computeMonthInterval,
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+  roundDateTimeToInterval,
+} from '../non-standard/roundUtils'
 import {
   CalendarShimArg,
   refineCalendarShimArg,
@@ -325,4 +364,229 @@ export function toString(
   options?: CalendarDisplayOptions,
 ): string {
   return formatPlainDateIso(getPlainDateShimRecordSlots(record), options)
+}
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
+
+export function withDayOfYear(
+  record: PlainDateShimRecord,
+  dayOfYear: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  return createRecordFromDateFields(
+    moveToDayOfYear(getPlainDateShimRecordSlots(record), dayOfYear, options),
+  )
+}
+
+export function withDayOfMonth(
+  record: PlainDateShimRecord,
+  dayOfMonth: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  return createRecordFromDateFields(
+    moveToDayOfMonth(getPlainDateShimRecordSlots(record), dayOfMonth, options),
+  )
+}
+
+export function withDayOfWeek(
+  record: PlainDateShimRecord,
+  dayOfWeek: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  return createRecordFromDateFields({
+    ...moveToDayOfWeek(slots, dayOfWeek, options),
+    calendar: slots.calendar,
+  })
+}
+
+export function withWeekOfYear(
+  record: PlainDateShimRecord,
+  weekOfYear: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  return createRecordFromDateFields(
+    moveToWeekOfYear(getPlainDateShimRecordSlots(record), weekOfYear, options),
+  )
+}
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export function addYears(
+  record: PlainDateShimRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  return createRecordFromDateFields(
+    moveByYears(getPlainDateShimRecordSlots(record), years, options),
+  )
+}
+
+export function addMonths(
+  record: PlainDateShimRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainDateShimRecord {
+  return createRecordFromDateFields(
+    moveByMonths(getPlainDateShimRecordSlots(record), months, options),
+  )
+}
+
+export function addWeeks(
+  record: PlainDateShimRecord,
+  weeks: number,
+): PlainDateShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  return createRecordFromDateFields({
+    ...moveByIsoWeeks(slots, weeks),
+    calendar: slots.calendar,
+  })
+}
+
+export function addDays(
+  record: PlainDateShimRecord,
+  days: number,
+): PlainDateShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  return createRecordFromDateFields({
+    ...moveByDaysStrict(slots, days),
+    calendar: slots.calendar,
+  })
+}
+
+export const subtractYears = reversedMove(addYears)
+export const subtractMonths = reversedMove(addMonths)
+export const subtractWeeks = reversedMove(addWeeks)
+export const subtractDays = reversedMove(addDays)
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+export const roundToYear = bindArgs(
+  roundToInterval,
+  Unit.Year,
+  computeYearInterval,
+)
+
+export const roundToMonth = bindArgs(
+  roundToInterval,
+  Unit.Month,
+  computeMonthInterval,
+)
+
+export const roundToWeek = bindArgs(
+  roundToInterval,
+  Unit.Week,
+  computeIsoWeekInterval,
+)
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export const startOfYear = aligned(computeYearFloor)
+export const startOfMonth = aligned(computeMonthFloor)
+export const startOfWeek = aligned(computeIsoWeekFloor)
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+export const endOfYear = aligned(computeYearCeil, -1)
+export const endOfMonth = aligned(computeMonthCeil, -1)
+export const endOfWeek = aligned(computeIsoWeekCeil, -1)
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export function diffYears(
+  record0: PlainDateShimRecord,
+  record1: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainYears(
+    getPlainDateShimRecordSlots(record0),
+    getPlainDateShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffMonths(
+  record0: PlainDateShimRecord,
+  record1: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainMonths(
+    getPlainDateShimRecordSlots(record0),
+    getPlainDateShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffWeeks(
+  record0: PlainDateShimRecord,
+  record1: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainWeeks(
+    getPlainDateShimRecordSlots(record0),
+    getPlainDateShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffDays(
+  record0: PlainDateShimRecord,
+  record1: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainDays(
+    getPlainDateShimRecordSlots(record0),
+    getPlainDateShimRecordSlots(record1),
+    options,
+  )
+}
+
+function roundToInterval(
+  unit: Unit,
+  computeInterval: (
+    slots: CalendarDateFields & { calendar: InternalCalendar },
+  ) => IsoDateTimeInterval,
+  record: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): PlainDateShimRecord {
+  const slots = getPlainDateShimRecordSlots(record)
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const roundedIsoDateTime = roundDateTimeToInterval(
+    computeInterval,
+    slots,
+    roundingMode,
+  )
+  return createRecordFromDateFields({
+    ...roundedIsoDateTime,
+    calendar: slots.calendar,
+  })
+}
+
+function aligned(
+  computeAlignment: (
+    slots: CalendarDateFields & { calendar: InternalCalendar },
+  ) => CalendarDateFields,
+  dayDelta = 0,
+): (record: PlainDateShimRecord) => PlainDateShimRecord {
+  return (record) => {
+    const slots = getPlainDateShimRecordSlots(record)
+    const isoDate = moveByDays(computeAlignment(slots), dayDelta)
+    return createRecordFromDateFields({
+      ...isoDate,
+      calendar: slots.calendar,
+    })
+  }
+}
+
+function createRecordFromDateFields(
+  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+): PlainDateShimRecord {
+  checkIsoDateInBounds(isoDate)
+  return createPlainDateShimRecord(createDateSlots(isoDate, isoDate.calendar))
 }

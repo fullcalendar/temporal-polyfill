@@ -1,3 +1,4 @@
+import * as TemporalUtils from 'temporal-utils'
 import { createSlotClass } from '../../classApi/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -6,6 +7,8 @@ import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
@@ -305,4 +308,464 @@ export function toString(
   options?: DateTimeDisplayOptions,
 ): string {
   return getPlainDateTimeNative(record).toString(options)
+}
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
+
+export function withDayOfYear(
+  record: PlainDateTimeNativeRecord,
+  dayOfYear: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.withDayOfYear(
+      getPlainDateTimeNative(record),
+      dayOfYear,
+      options,
+    ),
+  )
+}
+
+export function withDayOfMonth(
+  record: PlainDateTimeNativeRecord,
+  dayOfMonth: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).with(
+    { day: dayOfMonth },
+    options,
+  )
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function withDayOfWeek(
+  record: PlainDateTimeNativeRecord,
+  dayOfWeek: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.withDayOfWeek(
+      getPlainDateTimeNative(record),
+      dayOfWeek,
+      options,
+    ),
+  )
+}
+
+export function withWeekOfYear(
+  record: PlainDateTimeNativeRecord,
+  weekOfYear: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.withWeekOfYear(
+      getPlainDateTimeNative(record),
+      weekOfYear,
+      options,
+    ),
+  )
+}
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export function addYears(
+  record: PlainDateTimeNativeRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ years }, options)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addMonths(
+  record: PlainDateTimeNativeRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ months }, options)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addWeeks(
+  record: PlainDateTimeNativeRecord,
+  weeks: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ weeks })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addDays(
+  record: PlainDateTimeNativeRecord,
+  days: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ days })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addHours(
+  record: PlainDateTimeNativeRecord,
+  hours: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ hours })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addMinutes(
+  record: PlainDateTimeNativeRecord,
+  minutes: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ minutes })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addSeconds(
+  record: PlainDateTimeNativeRecord,
+  seconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ seconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addMilliseconds(
+  record: PlainDateTimeNativeRecord,
+  milliseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ milliseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addMicroseconds(
+  record: PlainDateTimeNativeRecord,
+  microseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ microseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function addNanoseconds(
+  record: PlainDateTimeNativeRecord,
+  nanoseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).add({ nanoseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractYears(
+  record: PlainDateTimeNativeRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ years }, options)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractMonths(
+  record: PlainDateTimeNativeRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ months }, options)
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractWeeks(
+  record: PlainDateTimeNativeRecord,
+  weeks: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ weeks })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractDays(
+  record: PlainDateTimeNativeRecord,
+  days: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ days })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractHours(
+  record: PlainDateTimeNativeRecord,
+  hours: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ hours })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractMinutes(
+  record: PlainDateTimeNativeRecord,
+  minutes: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ minutes })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractSeconds(
+  record: PlainDateTimeNativeRecord,
+  seconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ seconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractMilliseconds(
+  record: PlainDateTimeNativeRecord,
+  milliseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ milliseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractMicroseconds(
+  record: PlainDateTimeNativeRecord,
+  microseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ microseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+export function subtractNanoseconds(
+  record: PlainDateTimeNativeRecord,
+  nanoseconds: number,
+): PlainDateTimeNativeRecord {
+  const resNative = getPlainDateTimeNative(record).subtract({ nanoseconds })
+  return createPlainDateTimeNativeRecord(resNative)
+}
+
+// Non-standard: Round / Start / End
+// -----------------------------------------------------------------------------
+
+export function roundToYear(
+  record: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.roundToYear(getPlainDateTimeNative(record), options as any),
+  )
+}
+
+export function roundToMonth(
+  record: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.roundToMonth(getPlainDateTimeNative(record), options as any),
+  )
+}
+
+export function roundToWeek(
+  record: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): PlainDateTimeNativeRecord {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.roundToWeek(getPlainDateTimeNative(record), options as any),
+  )
+}
+
+export function startOfYear(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfYear(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfMonth(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfMonth(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfWeek(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfWeek(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfDay(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfDay(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfHour(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfHour(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfMinute(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfMinute(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfSecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfSecond(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfMillisecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfMillisecond(getPlainDateTimeNative(record)),
+  )
+}
+export function startOfMicrosecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.startOfMicrosecond(getPlainDateTimeNative(record)),
+  )
+}
+
+export function endOfYear(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfYear(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfMonth(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfMonth(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfWeek(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfWeek(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfDay(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfDay(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfHour(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfHour(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfMinute(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfMinute(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfSecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfSecond(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfMillisecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfMillisecond(getPlainDateTimeNative(record)),
+  )
+}
+export function endOfMicrosecond(record: PlainDateTimeNativeRecord) {
+  return createPlainDateTimeNativeRecord(
+    TemporalUtils.endOfMicrosecond(getPlainDateTimeNative(record)),
+  )
+}
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export function diffYears(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffYears(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffMonths(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMonths(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffWeeks(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffWeeks(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffDays(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffDays(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffHours(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffHours(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffMinutes(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMinutes(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffSeconds(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffSeconds(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffMilliseconds(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMilliseconds(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffMicroseconds(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMicroseconds(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
+}
+export function diffNanoseconds(
+  record0: PlainDateTimeNativeRecord,
+  record1: PlainDateTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffNanoseconds(
+    getPlainDateTimeNative(record0),
+    getPlainDateTimeNative(record1),
+    options as any,
+  )
 }
