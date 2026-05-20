@@ -64,6 +64,7 @@ async function buildConfigs(pkgDir, isDev) {
 
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
+  const isExternalDependency = buildExternalDependencyResolver(pkgJson)
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
   const iifeConfigs = []
@@ -101,6 +102,7 @@ async function buildConfigs(pkgDir, isDev) {
       iifeConfigs.push({
         input: srcPath,
         onwarn,
+        external: isExternalDependency,
         plugins: [
           // for reading sourcemaps from tsc
           isDev && sourcemaps(),
@@ -152,6 +154,7 @@ async function buildConfigs(pkgDir, isDev) {
     dtsConfigs.push({
       input: dtsInputs,
       onwarn,
+      external: isExternalDependency,
       plugins: [
         // Will not bundle external packages by default
         dts(),
@@ -213,6 +216,7 @@ async function buildConfigs(pkgDir, isDev) {
     {
       input: moduleInputs,
       onwarn,
+      external: isExternalDependency,
       output: [
         {
           format: 'cjs',
@@ -316,6 +320,19 @@ function formatWriteMessage(input) {
 function onwarn(warning) {
   if (warning.code !== 'CIRCULAR_DEPENDENCY') {
     console.error(warning.toString())
+  }
+}
+
+function buildExternalDependencyResolver(pkgJson) {
+  const dependencyNames = Object.keys(pkgJson.dependencies || {})
+
+  return (id) => {
+    // Bare package imports are runtime dependencies, not bundled source files.
+    // Mark them external explicitly so Rollup doesn't warn while preserving
+    // any package subpath imports the dependency might expose later.
+    return dependencyNames.some((dependencyName) => {
+      return id === dependencyName || id.startsWith(dependencyName + '/')
+    })
   }
 }
 
