@@ -162,7 +162,8 @@ export function subtract(
   return createPlainYearMonthShimRecord(resSlots)
 }
 
-export function until(
+// this is equivalent to Temporal's `until`
+export function diff(
   record: PlainYearMonthShimRecord,
   otherRecord: PlainYearMonthShimRecord,
   options?: DiffOptions<YearMonthUnitName>,
@@ -172,24 +173,6 @@ export function until(
   const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
   const resSlots = diffPlainYearMonth(
     false,
-    calendar,
-    slots,
-    otherSlots,
-    options,
-  )
-  return createDurationShimRecord(resSlots)
-}
-
-export function since(
-  record: PlainYearMonthShimRecord,
-  otherRecord: PlainYearMonthShimRecord,
-  options?: DiffOptions<YearMonthUnitName>,
-): DurationShimRecord {
-  const slots = getPlainYearMonthShimRecordSlots(record)
-  const otherSlots = getPlainYearMonthShimRecordSlots(otherRecord)
-  const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
-  const resSlots = diffPlainYearMonth(
-    true,
     calendar,
     slots,
     otherSlots,

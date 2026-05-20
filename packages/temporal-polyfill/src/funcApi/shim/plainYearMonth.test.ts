@@ -226,26 +226,14 @@ describe('subtract', () => {
   })
 })
 
-describe('until', () => {
+describe('diff', () => {
   it('works without options', () => {
     const pym0 = PlainYearMonthFns.create(2024, 4)
     const pym1 = PlainYearMonthFns.create(2028, 2)
-    const d = PlainYearMonthFns.until(pym0, pym1)
+    const d = PlainYearMonthFns.diff(pym0, pym1)
     expectDurationEquals(d, {
       years: 3,
       months: 10,
-    })
-  })
-})
-
-describe('since', () => {
-  it('works without options', () => {
-    const pym0 = PlainYearMonthFns.create(2024, 4)
-    const pym1 = PlainYearMonthFns.create(2028, 2)
-    const d = PlainYearMonthFns.since(pym0, pym1)
-    expectDurationEquals(d, {
-      years: -3,
-      months: -10,
     })
   })
 })

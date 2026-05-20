@@ -307,11 +307,11 @@ describe('subtract', () => {
   })
 })
 
-describe('until', () => {
+describe('diff', () => {
   it('works without options', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
     const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
-    const d = PlainDateTimeFns.until(pdt0, pdt1)
+    const d = PlainDateTimeFns.diff(pdt0, pdt1)
     expectDurationEquals(d, {
       days: 398,
       hours: 2,
@@ -321,36 +321,12 @@ describe('until', () => {
   it('works with options', () => {
     const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
     const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
-    const d = PlainDateTimeFns.until(pdt0, pdt1, { largestUnit: 'year' })
+    const d = PlainDateTimeFns.diff(pdt0, pdt1, { largestUnit: 'year' })
     expectDurationEquals(d, {
       years: 1,
       months: 1,
       days: 2,
       hours: 2,
-    })
-  })
-})
-
-describe('since', () => {
-  it('works without options', () => {
-    const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
-    const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
-    const d = PlainDateTimeFns.since(pdt0, pdt1)
-    expectDurationEquals(d, {
-      days: -398,
-      hours: -2,
-    })
-  })
-
-  it('works with options', () => {
-    const pdt0 = PlainDateTimeFns.create(2023, 1, 25, 10)
-    const pdt1 = PlainDateTimeFns.create(2024, 2, 27, 12)
-    const d = PlainDateTimeFns.since(pdt0, pdt1, { largestUnit: 'year' })
-    expectDurationEquals(d, {
-      years: -1,
-      months: -1,
-      days: -2,
-      hours: -2,
     })
   })
 })

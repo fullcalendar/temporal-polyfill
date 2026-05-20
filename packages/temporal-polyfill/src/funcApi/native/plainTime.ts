@@ -117,7 +117,8 @@ export function subtract(
   return createPlainTimeNativeRecord(resNative)
 }
 
-export function until(
+// this is equivalent to Temporal's `until`
+export function diff(
   record: PlainTimeNativeRecord,
   otherRecord: PlainTimeNativeRecord,
   options?: DiffOptions<TimeUnitName>,
@@ -125,17 +126,6 @@ export function until(
   const native = getPlainTimeNative(record)
   const otherNative = getPlainTimeNative(otherRecord)
   const resNative = native.until(otherNative, options)
-  return createDurationNativeRecord(resNative)
-}
-
-export function since(
-  record: PlainTimeNativeRecord,
-  otherRecord: PlainTimeNativeRecord,
-  options?: DiffOptions<TimeUnitName>,
-): DurationNativeRecord {
-  const native = getPlainTimeNative(record)
-  const otherNative = getPlainTimeNative(otherRecord)
-  const resNative = native.since(otherNative, options)
   return createDurationNativeRecord(resNative)
 }
 

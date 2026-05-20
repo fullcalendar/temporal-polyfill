@@ -98,26 +98,14 @@ describe('subtract', () => {
   })
 })
 
-describe('until', () => {
+describe('diff', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(22, 45)
-    const d = PlainTimeFns.until(pt0, pt1)
+    const d = PlainTimeFns.diff(pt0, pt1)
     expectDurationEquals(d, {
       hours: 10,
       minutes: 15,
-    })
-  })
-})
-
-describe('since', () => {
-  it('works', () => {
-    const pt0 = PlainTimeFns.create(12, 30)
-    const pt1 = PlainTimeFns.create(22, 45)
-    const d = PlainTimeFns.since(pt0, pt1)
-    expectDurationEquals(d, {
-      hours: -10,
-      minutes: -15,
     })
   })
 })

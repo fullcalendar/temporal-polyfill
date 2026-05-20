@@ -139,7 +139,8 @@ export function subtract(
   return createPlainYearMonthNativeRecord(resNative)
 }
 
-export function until(
+// this is equivalent to Temporal's `until`
+export function diff(
   record: PlainYearMonthNativeRecord,
   otherRecord: PlainYearMonthNativeRecord,
   options?: DiffOptions<YearMonthUnitName>,
@@ -147,17 +148,6 @@ export function until(
   const native = getPlainYearMonthNative(record)
   const otherNative = getPlainYearMonthNative(otherRecord)
   const resNative = native.until(otherNative, options)
-  return createDurationNativeRecord(resNative)
-}
-
-export function since(
-  record: PlainYearMonthNativeRecord,
-  otherRecord: PlainYearMonthNativeRecord,
-  options?: DiffOptions<YearMonthUnitName>,
-): DurationNativeRecord {
-  const native = getPlainYearMonthNative(record)
-  const otherNative = getPlainYearMonthNative(otherRecord)
-  const resNative = native.since(otherNative, options)
   return createDurationNativeRecord(resNative)
 }
 

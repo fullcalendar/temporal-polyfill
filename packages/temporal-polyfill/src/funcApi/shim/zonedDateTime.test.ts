@@ -440,7 +440,7 @@ describe('subtract', () => {
   })
 })
 
-describe('until', () => {
+describe('diff', () => {
   it('works without options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
@@ -448,7 +448,7 @@ describe('until', () => {
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
     )
-    const d = ZonedDateTimeFns.until(zdt0, zdt1)
+    const d = ZonedDateTimeFns.diff(zdt0, zdt1)
     expectDurationEquals(d, {
       hours: 9459,
       minutes: 5,
@@ -462,44 +462,12 @@ describe('until', () => {
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
     )
-    const d = ZonedDateTimeFns.until(zdt0, zdt1, { largestUnit: 'year' })
+    const d = ZonedDateTimeFns.diff(zdt0, zdt1, { largestUnit: 'year' })
     expectDurationEquals(d, {
       years: 1,
       months: 1,
       hours: 4,
       minutes: 5,
-    })
-  })
-})
-
-describe('since', () => {
-  it('works without options', () => {
-    const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-27T12:30:00[America/New_York]',
-    )
-    const zdt1 = ZonedDateTimeFns.fromString(
-      '2025-03-27T16:35:00[America/New_York]',
-    )
-    const d = ZonedDateTimeFns.since(zdt0, zdt1)
-    expectDurationEquals(d, {
-      hours: -9459,
-      minutes: -5,
-    })
-  })
-
-  it('works with options', () => {
-    const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-27T12:30:00[America/New_York]',
-    )
-    const zdt1 = ZonedDateTimeFns.fromString(
-      '2025-03-27T16:35:00[America/New_York]',
-    )
-    const d = ZonedDateTimeFns.since(zdt0, zdt1, { largestUnit: 'year' })
-    expectDurationEquals(d, {
-      years: -1,
-      months: -1,
-      hours: -4,
-      minutes: -5,
     })
   })
 })

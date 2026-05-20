@@ -68,35 +68,19 @@ describe('subtract', () => {
   })
 })
 
-describe('until', () => {
+describe('diff', () => {
   it('diffs two objects without options', () => {
     const inst0 = InstantFns.fromString('2024-01-01T00:00:00+01:00')
     const inst1 = InstantFns.fromString('2024-01-02T00:00:00+01:00')
-    const d = InstantFns.until(inst0, inst1)
+    const d = InstantFns.diff(inst0, inst1)
     expectDurationEquals(d, { seconds: 86400 })
   })
 
   it('diffs two objects with options', () => {
     const inst0 = InstantFns.fromString('2024-01-01T00:00:00+01:00')
     const inst1 = InstantFns.fromString('2024-01-02T00:00:00+01:00')
-    const d = InstantFns.until(inst0, inst1, { largestUnit: 'hours' })
+    const d = InstantFns.diff(inst0, inst1, { largestUnit: 'hours' })
     expectDurationEquals(d, { hours: 24 })
-  })
-})
-
-describe('since', () => {
-  it('diffs two objects without options', () => {
-    const inst0 = InstantFns.fromString('2024-01-01T00:00:00+01:00')
-    const inst1 = InstantFns.fromString('2024-01-02T00:00:00+01:00')
-    const d = InstantFns.since(inst0, inst1)
-    expectDurationEquals(d, { seconds: -86400 })
-  })
-
-  it('diffs two objects with options', () => {
-    const inst0 = InstantFns.fromString('2024-01-01T00:00:00+01:00')
-    const inst1 = InstantFns.fromString('2024-01-02T00:00:00+01:00')
-    const d = InstantFns.since(inst0, inst1, { largestUnit: 'hour' })
-    expectDurationEquals(d, { hours: -24 })
   })
 })
 
