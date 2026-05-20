@@ -63,8 +63,6 @@ import {
 import {
   ZonedEpochNanoFields,
   createZonedEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -173,13 +171,6 @@ export const fromString = parseZonedDateTime as (
   s: string,
   options?: AssignmentOptions,
 ) => Record
-
-// Getters
-// -----------------------------------------------------------------------------
-
-export const epochMilliseconds = getEpochMilli as (record: Record) => number
-
-export const epochNanoseconds = getEpochNano as (record: Record) => bigint
 
 export function offsetNanoseconds(record: Record): number {
   return zonedEpochSlotsToIso(record).offsetNanoseconds

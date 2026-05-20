@@ -221,10 +221,7 @@ export function expectInstantsSimilar(
   inst0: InstantFns.Record,
   inst1: InstantFns.Record,
 ): void {
-  expectEpochNanosSimilar(
-    InstantFns.epochNanoseconds(inst0),
-    InstantFns.epochNanoseconds(inst1),
-  )
+  expectEpochNanosSimilar(inst0.epochNanoseconds, inst1.epochNanoseconds)
 }
 
 export function expectZonedDateTimesSimilar(
@@ -235,10 +232,7 @@ export function expectZonedDateTimesSimilar(
     getInternalCalendarId(zdt1.calendar),
   )
   expect(zdt0.timeZone.id).toBe(zdt1.timeZone.id)
-  expectEpochNanosSimilar(
-    ZonedDateTimeFns.epochNanoseconds(zdt0),
-    ZonedDateTimeFns.epochNanoseconds(zdt1),
-  )
+  expectEpochNanosSimilar(zdt0.epochNanoseconds, zdt1.epochNanoseconds)
 }
 
 export function expectPlainDateTimesSimilar(

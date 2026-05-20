@@ -20,11 +20,7 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { roundInstant } from '../../internal/round'
-import {
-  EpochNanoFields,
-  getEpochMilli,
-  getEpochNano,
-} from '../../internal/slots'
+import { EpochNanoFields } from '../../internal/slots'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
 import { TimeUnitName, UnitName } from '../../internal/units'
@@ -56,13 +52,6 @@ export const fromEpochNanoseconds = epochNanoToInstant as (
 ) => Record
 
 export const fromString = parseInstant as (s: string) => Record
-
-// Getters
-// -----------------------------------------------------------------------------
-
-export const epochMilliseconds = getEpochMilli as (record: Record) => number
-
-export const epochNanoseconds = getEpochNano as (record: Record) => bigint
 
 // Math
 // -----------------------------------------------------------------------------
