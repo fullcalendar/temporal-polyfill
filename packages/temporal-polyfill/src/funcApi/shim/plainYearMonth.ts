@@ -14,7 +14,6 @@ import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { constructYearMonthSlotsWithCalendar } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
@@ -43,6 +42,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { constructYearMonthSlots } from './construct'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
@@ -65,13 +65,7 @@ export const [
     isoMonth: number,
     calendar?: CalendarShimRecord,
     referenceIsoDay?: number,
-  ) =>
-    constructYearMonthSlotsWithCalendar(
-      isoYear,
-      isoMonth,
-      refineCalendarShimArg(calendar),
-      referenceIsoDay,
-    ),
+  ) => constructYearMonthSlots(isoYear, isoMonth, calendar, referenceIsoDay),
   formatPlainYearMonthIso,
   {
     ...calendarIdGetters,

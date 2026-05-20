@@ -23,7 +23,6 @@ import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
 } from '../../internal/compare'
-import { constructZonedEpochNanoSlotsWithCalendar } from '../../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -98,6 +97,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { constructZonedEpochNanoSlots } from './construct'
 import {
   diffZonedDays,
   diffZonedMonths,
@@ -164,12 +164,7 @@ export const [
     epochNanoseconds: bigint,
     timeZoneId: string,
     calendar?: CalendarShimRecord,
-  ) =>
-    constructZonedEpochNanoSlotsWithCalendar(
-      epochNanoseconds,
-      timeZoneId,
-      refineCalendarShimArg(calendar),
-    ),
+  ) => constructZonedEpochNanoSlots(epochNanoseconds, timeZoneId, calendar),
   formatZonedDateTimeIso,
   {
     ...epochGetters,

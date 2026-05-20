@@ -8,7 +8,6 @@ import {
   rejectInvalidBag,
 } from '../../apiHelpers/slotClass'
 import { plainMonthDaysEqual } from '../../internal/compare'
-import { constructMonthDaySlotsWithCalendar } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
@@ -32,6 +31,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { constructMonthDaySlots } from './construct'
 import { createDateTimeFormat } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 
@@ -50,13 +50,7 @@ export const [
     isoDay: number,
     calendar?: CalendarShimRecord,
     referenceIsoYear?: number,
-  ) =>
-    constructMonthDaySlotsWithCalendar(
-      isoMonth,
-      isoDay,
-      refineCalendarShimArg(calendar),
-      referenceIsoYear,
-    ),
+  ) => constructMonthDaySlots(isoMonth, isoDay, calendar, referenceIsoYear),
   formatPlainMonthDayIso,
   {
     ...calendarIdGetters,

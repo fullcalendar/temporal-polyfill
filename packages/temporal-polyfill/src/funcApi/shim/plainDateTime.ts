@@ -22,7 +22,6 @@ import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../../internal/compare'
-import { constructDateTimeSlotsWithCalendar } from '../../internal/construct'
 import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes, getCommonCalendar } from '../../internal/diff'
@@ -91,6 +90,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { constructDateTimeSlots } from './construct'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   diffPlainDays,
@@ -165,17 +165,17 @@ export const [
     nanosecond = 0,
     calendar?: CalendarShimRecord,
   ) => {
-    return constructDateTimeSlotsWithCalendar(
+    return constructDateTimeSlots(
       isoYear,
       isoMonth,
       isoDay,
-      refineCalendarShimArg(calendar),
       hour,
       minute,
       second,
       millisecond,
       microsecond,
       nanosecond,
+      calendar,
     )
   },
   formatPlainDateTimeIso,

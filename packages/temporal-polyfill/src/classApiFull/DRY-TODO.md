@@ -21,9 +21,25 @@ side-effect import, while keeping the refactor easy to reason about.
    calendar strings differently.
 
 2. Keep `construct.ts` branch-local for now.
-   These wrappers adapt public constructor calendar IDs to resolved internal
-   calendars before calling `internal/construct.ts`. That keeps
-   `internal/construct.ts` focused on validation and slot creation.
+   Constructor argument coercion order is observable, and calendar resolution
+   is branch policy. The calendar-bearing constructor mechanics therefore live
+   in each API branch instead of behind shared `internal/construct.ts` helpers.
+   `internal/construct.ts` should stay limited to constructors with no calendar
+   policy: Instant, PlainTime, and Duration.
+
+   The DRY problem spans `classApi/construct.ts`, `classApiFull/construct.ts`,
+   and `funcApi/shim/construct.ts`. That duplication is intentional for now,
+   but the shape is regular enough that a later helper could remove most of it
+   without reintroducing internal string calendar resolution.
+
+   Possible direction:
+
+   - keep a branch-local calendar refiner/resolver callback
+   - share the ISO/time/time-zone coercion and bounds checks
+   - preserve observable order by calling the resolver at the exact point each
+     public constructor requires
+   - make the function API construct file part of the cleanup, even though this
+     document is mostly about `classApi` vs `classApiFull`
 
 3. Merge duplicate Temporal type modules only after their calendar resolution
    dependency is injectable.

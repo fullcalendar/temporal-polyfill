@@ -98,11 +98,11 @@ export function toPlainMonthDaySlots(
     }
 
     const calendarMaybe = extractCalendarFromBag(arg as { calendar?: any })
-    const calendar = calendarMaybe || isoCalendar
+    const calendar = calendarMaybe === undefined ? isoCalendar : calendarMaybe
 
     return refinePlainMonthDayObjectLike(
       calendar,
-      !calendarMaybe,
+      calendarMaybe === undefined,
       arg as Partial<MonthDayFields>,
       options,
     )

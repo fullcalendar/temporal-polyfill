@@ -14,7 +14,6 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
-import { constructDateSlotsWithCalendar } from '../../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -59,6 +58,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { constructDateSlots } from './construct'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   diffPlainDays,
@@ -127,12 +127,7 @@ export const [
     isoDay: number,
     calendar?: CalendarShimRecord,
   ) => {
-    return constructDateSlotsWithCalendar(
-      isoYear,
-      isoMonth,
-      isoDay,
-      refineCalendarShimArg(calendar),
-    )
+    return constructDateSlots(isoYear, isoMonth, isoDay, calendar)
   },
   formatPlainDateIso,
   {
