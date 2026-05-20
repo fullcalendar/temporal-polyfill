@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { Temporal as TemporalFull } from './full'
-import { Temporal } from './impl'
+import { Temporal } from '../classApi/impl'
+import { Temporal as TemporalFull } from './impl'
 
 describe('integration recreations', () => {
   // TODO: Contribute these double-rounding cases to the official test262

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Temporal as TemporalFull } from './full'
+import { Temporal as TemporalFull } from './impl'
 
 describe('full entrypoint', () => {
   it('supports Intl calendars without the side-effect addon', () => {
