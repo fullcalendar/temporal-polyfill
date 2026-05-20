@@ -12,7 +12,6 @@ import type {
   CalendarWeekFields,
   CalendarYearMonthFields,
 } from './fieldTypes'
-import { gregoryCalendarId } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
 import { checkTimeFields } from './timeFieldMath'
 import { allPropsEqual, clampProp, divTrunc, modFloor, modTrunc } from './utils'
@@ -149,17 +148,6 @@ function computeIsoWeeksInYear(year: number): number {
 
 // Era (complicated stuff)
 // -----------------------------------------------------------------------------
-
-export function computeIsoEraFields(
-  calendarId: string | undefined,
-  isoDate: CalendarDateFields,
-): CalendarEraFields {
-  if (calendarId === gregoryCalendarId) {
-    return computeGregoryEraFields(isoDate)
-  }
-
-  return {}
-}
 
 export function computeGregoryEraFields({
   year,

@@ -6,15 +6,15 @@ import {
 } from './epochMath'
 import {
   type InternalCalendar,
-  getInternalCalendarId,
+  gregoryCalendar,
   isoCalendar,
 } from './externalCalendar'
 import { type CalendarDateFields, CalendarEraFields } from './fieldTypes'
 import {
+  computeGregoryEraFields,
   computeIsoDayOfYear,
   computeIsoDaysInMonth,
   computeIsoDaysInYear,
-  computeIsoEraFields,
   computeIsoFieldsFromParts,
   computeIsoInLeapYear,
   computeIsoMonthCodeParts,
@@ -43,9 +43,11 @@ export function computeCalendarEraFields(
   calendar: InternalCalendar,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
-  return calendar
-    ? calendar.computeEraFields(isoDate)
-    : computeIsoEraFields(getInternalCalendarId(calendar), isoDate)
+  return calendar === gregoryCalendar
+    ? computeGregoryEraFields(isoDate)
+    : calendar
+      ? calendar.computeEraFields(isoDate)
+      : {}
 }
 
 export function computeCalendarIsoFieldsFromParts(
