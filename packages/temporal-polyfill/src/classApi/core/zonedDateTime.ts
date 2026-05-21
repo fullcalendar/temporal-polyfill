@@ -10,10 +10,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../../apiHelpers/slotClass'
-import {
-  resolveCoreCalendar,
-  resolveCoreCalendarArg,
-} from '../../internal/calendarResolver'
 import { CalendarSlot } from '../../internal/calendarSlot'
 import {
   compareZonedDateTimes,
@@ -73,6 +69,7 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
+import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
 import {
   Duration,
   DurationArg,

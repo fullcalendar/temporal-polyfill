@@ -8,10 +8,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../../apiHelpers/slotClass'
-import {
-  resolveCoreCalendar,
-  resolveCoreCalendarArg,
-} from '../../internal/calendarResolver'
 import { CalendarSlot, isoCalendar } from '../../internal/calendarSlot'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
@@ -31,6 +27,7 @@ import { OverflowOptions } from '../../internal/optionsModel'
 import { bindArgs, isObjectLike } from '../../internal/utils'
 import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'
+import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
 import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainMonthDay = { monthCode: string; day: number } // and other getters/methods

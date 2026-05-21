@@ -1,10 +1,18 @@
-import { type CalendarSlot, gregoryCalendar, isoCalendar } from './calendarSlot'
-import { requireString } from './cast'
-import * as errorMessages from './errorMessages'
-import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
+import {
+  type CalendarSlot,
+  gregoryCalendar,
+  isoCalendar,
+} from '../../internal/calendarSlot'
+import { requireString } from '../../internal/cast'
+import * as errorMessages from '../../internal/errorMessages'
+import {
+  gregoryCalendarId,
+  isoCalendarId,
+} from '../../internal/intlCalendarConfig'
 
-export type CalendarResolver = (rawCalendarId: string) => CalendarSlot
-
+// classApi-only policy: the core bundle ships just ISO + Gregory; any other
+// calendar id is a request for the "full" build and is rejected here. funcApi
+// resolves via its own shim that can route through exotic calendars.
 export function resolveCoreCalendar(rawCalendarId: string): CalendarSlot {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 

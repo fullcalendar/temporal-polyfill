@@ -30,7 +30,7 @@ import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
 import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
+import { resolveAnyCalendar, resolveAnyCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -45,7 +45,7 @@ export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    bindArgs(constructYearMonthSlots, resolveFullCalendarArg),
+    bindArgs(constructYearMonthSlots, resolveAnyCalendarArg),
     formatPlainYearMonthIso,
     {
       ...calendarIdGetters,
@@ -173,7 +173,7 @@ export function toPlainYearMonthSlots(
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
-  const res = parsePlainYearMonth(arg, resolveFullCalendar)
+  const res = parsePlainYearMonth(arg, resolveAnyCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

@@ -69,7 +69,7 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
+import { resolveAnyCalendar, resolveAnyCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -91,7 +91,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
-  bindArgs(constructZonedEpochNanoSlots, resolveFullCalendarArg),
+  bindArgs(constructZonedEpochNanoSlots, resolveAnyCalendarArg),
   formatZonedDateTimeIso,
   {
     ...epochGetters,
@@ -305,7 +305,7 @@ export function toZonedDateTimeSlots(
     )
   }
 
-  return parseZonedDateTime(arg, resolveFullCalendar, options)
+  return parseZonedDateTime(arg, resolveAnyCalendar, options)
 }
 
 function adaptDateMethods(methods: any) {

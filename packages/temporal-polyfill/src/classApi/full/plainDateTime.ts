@@ -64,7 +64,7 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
+import { resolveAnyCalendar, resolveAnyCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -85,7 +85,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  bindArgs(constructDateTimeSlots, resolveFullCalendarArg),
+  bindArgs(constructDateTimeSlots, resolveAnyCalendarArg),
   formatPlainDateTimeIso,
   {
     ...calendarIdGetters,
@@ -267,7 +267,7 @@ export function toPlainDateTimeSlots(
     )
   }
 
-  const res = parsePlainDateTime(arg, resolveFullCalendar)
+  const res = parsePlainDateTime(arg, resolveAnyCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

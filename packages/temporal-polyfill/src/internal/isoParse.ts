@@ -3,7 +3,6 @@ import {
   computeCalendarIsoFieldsFromParts,
   computeCalendarMonthCodeParts,
 } from './calendarDerived'
-import type { CalendarResolver } from './calendarResolver'
 import { type CalendarSlot } from './calendarSlot'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
@@ -111,6 +110,11 @@ export function parseInstant(s: string): EpochNanoFields {
 
   return createEpochNanoSlots(epochNanoseconds)
 }
+
+// Public APIs (classApi/funcApi) supply different policies for turning a raw
+// calendar id string into a CalendarSlot — core-only, exotic-aware, etc. The
+// parser stays agnostic and just calls back through this signature.
+export type CalendarResolver = (rawCalendarId: string) => CalendarSlot
 
 export function parseRelativeToSlots(
   s: string,

@@ -44,7 +44,7 @@ import { UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { refineTimeZoneArg } from '../timeZoneArg'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar } from './calendarResolve'
+import { resolveAnyCalendar } from './calendarResolve'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { ZonedDateTimeArg } from './zonedDateTime'
@@ -207,6 +207,6 @@ function refinePublicRelativeTo(
       return res
     }
 
-    return parseRelativeToSlots(relativeTo, resolveFullCalendar)
+    return parseRelativeToSlots(relativeTo, resolveAnyCalendar)
   }
 }

@@ -9,7 +9,6 @@ import {
   createSlotClass,
   getBrandingAndSlots,
 } from '../../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../../internal/calendarResolver'
 import { CalendarSlot } from '../../internal/calendarSlot'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
@@ -45,6 +44,7 @@ import { UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { refineTimeZoneArg } from '../timeZoneArg'
 import { getCalendarFromBag } from './calendarArg'
+import { resolveCoreCalendar } from './calendarResolver'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { ZonedDateTimeArg } from './zonedDateTime'

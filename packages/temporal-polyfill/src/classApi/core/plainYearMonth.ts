@@ -5,10 +5,6 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../../apiHelpers/slotClass'
-import {
-  resolveCoreCalendar,
-  resolveCoreCalendarArg,
-} from '../../internal/calendarResolver'
 import { CalendarSlot } from '../../internal/calendarSlot'
 import {
   compareIsoDateFields,
@@ -34,6 +30,7 @@ import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
 import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
+import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
 import {
   Duration,
   DurationArg,

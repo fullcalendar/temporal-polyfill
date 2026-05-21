@@ -27,7 +27,7 @@ import { OverflowOptions } from '../../internal/optionsModel'
 import { bindArgs, isObjectLike } from '../../internal/utils'
 import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
+import { resolveAnyCalendar, resolveAnyCalendarArg } from './calendarResolve'
 import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainMonthDay = { monthCode: string; day: number } // and other getters/methods
@@ -36,7 +36,7 @@ export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
-    bindArgs(constructMonthDaySlots, resolveFullCalendarArg),
+    bindArgs(constructMonthDaySlots, resolveAnyCalendarArg),
     formatPlainMonthDayIso,
     {
       ...calendarIdGetters,
@@ -115,7 +115,7 @@ export function toPlainMonthDaySlots(
     )
   }
 
-  const res = parsePlainMonthDay(arg, resolveFullCalendar)
+  const res = parsePlainMonthDay(arg, resolveAnyCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

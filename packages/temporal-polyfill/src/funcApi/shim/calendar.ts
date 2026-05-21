@@ -1,12 +1,12 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
 import { getExoticCalendar } from '../../exoticCalendars/exoticCalendarProvider'
-import type { CalendarResolver } from '../../internal/calendarResolver'
 import {
   CalendarSlot,
   getCalendarSlotId,
   gregoryCalendar,
   isoCalendar,
 } from '../../internal/calendarSlot'
+import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
 import { CalendarRecordBranding } from '../recordBranding'
 

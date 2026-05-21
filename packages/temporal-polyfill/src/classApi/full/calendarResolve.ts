@@ -7,7 +7,7 @@ import {
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 
-export function resolveFullCalendar(rawCalendarId: string): CalendarSlot {
+export function resolveAnyCalendar(rawCalendarId: string): CalendarSlot {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
   if (lowerRawCalendarId === isoCalendarId) {
@@ -21,8 +21,8 @@ export function resolveFullCalendar(rawCalendarId: string): CalendarSlot {
 }
 
 // Allows an undefined calendar argument, which defaults to ISO.
-export function resolveFullCalendarArg(
+export function resolveAnyCalendarArg(
   rawCalendarId = isoCalendarId,
 ): CalendarSlot {
-  return resolveFullCalendar(rawCalendarId)
+  return resolveAnyCalendar(rawCalendarId)
 }
