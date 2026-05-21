@@ -62,8 +62,8 @@ import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
-  resolveFullCalendar,
 } from './calendarArg'
+import { resolveFullCalendar } from './calendarResolve'
 import { constructDateTimeSlots } from './construct'
 import {
   Duration,

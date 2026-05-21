@@ -56,8 +56,8 @@ import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
-  resolveFullCalendar,
 } from './calendarArg'
+import { resolveFullCalendar } from './calendarResolve'
 import { constructZonedEpochNanoSlots } from './construct'
 import {
   Duration,

@@ -27,7 +27,7 @@ import {
 import { checkTimeFields } from '../internal/timeFieldMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
-import { resolveFullCalendar } from './calendarArg'
+import { resolveFullCalendar } from './calendarResolve'
 
 export function constructZonedEpochNanoSlots(
   epochNano: bigint,

@@ -22,7 +22,8 @@ import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { getCalendarFromBag, resolveFullCalendar } from './calendarArg'
+import { getCalendarFromBag } from './calendarArg'
+import { resolveFullCalendar } from './calendarResolve'
 import { constructYearMonthSlots } from './construct'
 import {
   Duration,

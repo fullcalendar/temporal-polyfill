@@ -37,7 +37,7 @@ export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
 }
 
 /*
-Returns a calendar
+Returns an InternalCalendar
 */
 export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
   if (isObjectLike(arg)) {
