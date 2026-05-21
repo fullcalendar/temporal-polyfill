@@ -75,9 +75,12 @@ async function buildConfigs(pkgDir, isDev) {
   const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
   const externalCalendarsSrcBase =
     resolvePath(pkgDir, 'dist/.tsc', 'externalCalendars') + pathSep
-  const classApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
+  const classApiTopSrcBase =
+    resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
+  const classApiSrcBase =
+    resolvePath(pkgDir, 'dist/.tsc', 'classApi', 'core') + pathSep
   const classApiFullSrcBase =
-    resolvePath(pkgDir, 'dist/.tsc', 'classApiFull') + pathSep
+    resolvePath(pkgDir, 'dist/.tsc', 'classApi', 'full') + pathSep
   const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
 
   for (const exportPath in exportMap) {
@@ -153,6 +156,9 @@ async function buildConfigs(pkgDir, isDev) {
     if (id.startsWith(classApiFullSrcBase)) {
       return 'classApiFull'
     }
+    if (id.startsWith(classApiTopSrcBase)) {
+      return 'classApi'
+    }
   }
 
   if (!isDev && Object.keys(dtsInputs).length) {
@@ -201,6 +207,9 @@ async function buildConfigs(pkgDir, isDev) {
           }
           if (id.startsWith(classApiFullSrcBase)) {
             return 'classApiFull'
+          }
+          if (id.startsWith(classApiTopSrcBase)) {
+            return 'classApi'
           }
         },
       },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Temporal } from '../classApi/impl'
+import { Temporal } from '../core/impl'
 import { Temporal as TemporalFull } from './impl'
 
 describe('integration recreations', () => {

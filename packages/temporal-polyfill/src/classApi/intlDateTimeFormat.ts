@@ -1,3 +1,4 @@
+import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import * as errorMessages from '../internal/errorMessages'
 import {
   FormatPrepper,
@@ -18,7 +19,6 @@ import {
   pluckProps,
 } from '../internal/utils'
 import { classFormatConfigs } from './intlFormatConfig'
-import { getBrandingAndSlots } from './slotClass'
 // Temporal values are detected by internal slot branding at runtime, so this
 // shared Intl wrapper doesn't need to import branch-local public classes.
 export type TemporalFormattable = object

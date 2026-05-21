@@ -1,10 +1,10 @@
+import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import { parseTimeZoneId } from '../internal/isoParse'
 import { resolveTimeZoneId } from '../internal/timeZoneId'
 import type { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { isObjectLike } from '../internal/utils'
-import { getBrandingAndSlots } from './slotClass'
 
 /*
 The class API branches currently type their public Temporal classes as `any`.

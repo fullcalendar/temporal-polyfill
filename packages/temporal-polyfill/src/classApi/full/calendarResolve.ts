@@ -1,11 +1,11 @@
-import { getExternalCalendar } from '../externalCalendars/intlCalendarProvider'
-import { requireString } from '../internal/cast'
-import { gregoryCalendar, isoCalendar } from '../internal/externalCalendar'
-import type { InternalCalendar } from '../internal/externalCalendar'
+import { getExternalCalendar } from '../../externalCalendars/intlCalendarProvider'
+import { requireString } from '../../internal/cast'
+import { gregoryCalendar, isoCalendar } from '../../internal/externalCalendar'
+import type { InternalCalendar } from '../../internal/externalCalendar'
 import {
   gregoryCalendarId,
   isoCalendarId,
-} from '../internal/intlCalendarConfig'
+} from '../../internal/intlCalendarConfig'
 
 export function resolveFullCalendar(rawCalendarId: string): InternalCalendar {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()

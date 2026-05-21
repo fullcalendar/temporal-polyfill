@@ -1,11 +1,11 @@
-import { getBrandingAndSlots } from '../apiHelpers/slotClass'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
-import { requireString } from '../internal/cast'
-import * as errorMessages from '../internal/errorMessages'
-import type { InternalCalendar } from '../internal/externalCalendar'
-import { isoCalendar } from '../internal/externalCalendar'
-import { parseCalendarId } from '../internal/isoParse'
-import { isObjectLike } from '../internal/utils'
+import { getBrandingAndSlots } from '../../apiHelpers/slotClass'
+import { requireString } from '../../internal/cast'
+import * as errorMessages from '../../internal/errorMessages'
+import type { InternalCalendar } from '../../internal/externalCalendar'
+import { isoCalendar } from '../../internal/externalCalendar'
+import { parseCalendarId } from '../../internal/isoParse'
+import { isObjectLike } from '../../internal/utils'
+import { resolveFullCalendar } from './calendarResolve'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'
@@ -52,8 +52,8 @@ export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
 }
 
 /*
-Like resolveCoreCalendar, but allows different string formats, like datetime string
+Like resolveFullCalendar, but allows different string formats, like datetime string
 */
 function refineCalendarString(arg: string): InternalCalendar {
-  return resolveCoreCalendar(parseCalendarId(requireString(arg)))
+  return resolveFullCalendar(parseCalendarId(requireString(arg)))
 }

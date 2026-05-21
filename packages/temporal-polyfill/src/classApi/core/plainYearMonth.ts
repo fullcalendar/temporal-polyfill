@@ -1,30 +1,39 @@
-import { PlainYearMonthBranding } from '../apiHelpers/branding'
-import { prepPlainYearMonthFormat } from '../apiHelpers/intlFormatConfig'
-import { calendarIdGetters, yearMonthGetters } from '../apiHelpers/mixins'
+import { PlainYearMonthBranding } from '../../apiHelpers/branding'
+import { calendarIdGetters, yearMonthGetters } from '../../apiHelpers/mixins'
 import {
   createSlotClass,
   getBrandingAndSlots,
   rejectInvalidBag,
-} from '../apiHelpers/slotClass'
-import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
-import { constructYearMonthSlots } from '../internal/construct'
-import { convertPlainYearMonthToDate } from '../internal/convert'
-import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
-import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
-import { InternalCalendar } from '../internal/externalCalendar'
-import { CalendarDateFields, YearMonthLikeObject } from '../internal/fieldTypes'
-import { YearMonthFields } from '../internal/fieldTypes'
-import { LocalesArg } from '../internal/intlFormatUtils'
-import { formatPlainYearMonthIso } from '../internal/isoFormat'
-import { parsePlainYearMonth } from '../internal/isoParse'
-import { mergePlainYearMonthFields } from '../internal/merge'
-import { movePlainYearMonth } from '../internal/move'
-import { refineOverflowOptions } from '../internal/optionsFieldRefine'
-import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
-import { YearMonthUnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+} from '../../apiHelpers/slotClass'
+import {
+  resolveCoreCalendar,
+  resolveCoreCalendarArg,
+} from '../../internal/calendarResolver'
+import {
+  compareIsoDateFields,
+  plainYearMonthsEqual,
+} from '../../internal/compare'
+import { constructYearMonthSlots } from '../../internal/construct'
+import { convertPlainYearMonthToDate } from '../../internal/convert'
+import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
+import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
+import { InternalCalendar } from '../../internal/externalCalendar'
+import {
+  CalendarDateFields,
+  YearMonthLikeObject,
+} from '../../internal/fieldTypes'
+import { YearMonthFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
+import { formatPlainYearMonthIso } from '../../internal/isoFormat'
+import { parsePlainYearMonth } from '../../internal/isoParse'
+import { mergePlainYearMonthFields } from '../../internal/merge'
+import { movePlainYearMonth } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
+import { YearMonthUnitName } from '../../internal/units'
+import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
+import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -39,7 +48,7 @@ export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    bindArgs(constructYearMonthSlots, resolveFullCalendarArg),
+    bindArgs(constructYearMonthSlots, resolveCoreCalendarArg),
     formatPlainYearMonthIso,
     {
       ...calendarIdGetters,
@@ -167,7 +176,7 @@ export function toPlainYearMonthSlots(
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
-  const res = parsePlainYearMonth(arg, resolveFullCalendar)
+  const res = parsePlainYearMonth(arg, resolveCoreCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

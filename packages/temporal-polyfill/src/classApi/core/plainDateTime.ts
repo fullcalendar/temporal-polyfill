@@ -2,69 +2,72 @@ import {
   PlainDateBranding,
   PlainDateTimeBranding,
   ZonedDateTimeBranding,
-} from '../apiHelpers/branding'
-import { prepPlainDateTimeFormat } from '../apiHelpers/intlFormatConfig'
+} from '../../apiHelpers/branding'
 import {
   calendarIdGetters,
   dateGetters,
   timeGetters,
-} from '../apiHelpers/mixins'
+} from '../../apiHelpers/mixins'
 import {
   createSlotClass,
   getBrandingAndSlots,
   rejectInvalidBag,
-} from '../apiHelpers/slotClass'
-import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
+} from '../../apiHelpers/slotClass'
+import {
+  resolveCoreCalendar,
+  resolveCoreCalendarArg,
+} from '../../internal/calendarResolver'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
-} from '../internal/compare'
-import { constructDateTimeSlots } from '../internal/construct'
+} from '../../internal/compare'
+import { constructDateTimeSlots } from '../../internal/construct'
 import {
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
-} from '../internal/convert'
-import { refinePlainDateTimeObjectLike } from '../internal/createFromFields'
-import { diffPlainDateTimes, getCommonCalendar } from '../internal/diff'
-import { InternalCalendar } from '../internal/externalCalendar'
-import { timeFieldDefaults } from '../internal/fieldNames'
+} from '../../internal/convert'
+import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
+import { diffPlainDateTimes, getCommonCalendar } from '../../internal/diff'
+import { InternalCalendar } from '../../internal/externalCalendar'
+import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   DateLikeObject,
   DateTimeLikeObject,
-} from '../internal/fieldTypes'
-import { DateTimeFields } from '../internal/fieldTypes'
-import { combineDateAndTime } from '../internal/fieldUtils'
-import { LocalesArg } from '../internal/intlFormatUtils'
-import { formatPlainDateTimeIso } from '../internal/isoFormat'
-import { parsePlainDateTime } from '../internal/isoParse'
-import { mergePlainDateTimeFields } from '../internal/merge'
-import { movePlainDateTime } from '../internal/move'
-import { refineOverflowOptions } from '../internal/optionsFieldRefine'
+} from '../../internal/fieldTypes'
+import { DateTimeFields } from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
+import { LocalesArg } from '../../internal/intlFormatUtils'
+import { formatPlainDateTimeIso } from '../../internal/isoFormat'
+import { parsePlainDateTime } from '../../internal/isoParse'
+import { mergePlainDateTimeFields } from '../../internal/merge'
+import { movePlainDateTime } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import {
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
   RoundingOptions,
-} from '../internal/optionsModel'
-import { roundPlainDateTime } from '../internal/round'
+} from '../../internal/optionsModel'
+import { roundPlainDateTime } from '../../internal/round'
 import {
   ZonedEpochNanoFields,
   createDateSlots,
   createDateTimeSlots,
   createTimeSlots,
-} from '../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
-import { queryTimeZone } from '../internal/timeZoneImpl'
-import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
+} from '../../internal/slots'
+import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { queryTimeZone } from '../../internal/timeZoneImpl'
+import { DayTimeUnitName, UnitName } from '../../internal/units'
+import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
+import { prepPlainDateTimeFormat } from '../intlFormatConfig'
+import { TimeZoneArg, refineTimeZoneArg } from '../timeZoneArg'
 import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -85,7 +88,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  bindArgs(constructDateTimeSlots, resolveFullCalendarArg),
+  bindArgs(constructDateTimeSlots, resolveCoreCalendarArg),
   formatPlainDateTimeIso,
   {
     ...calendarIdGetters,
@@ -268,7 +271,7 @@ export function toPlainDateTimeSlots(
     )
   }
 
-  const res = parsePlainDateTime(arg, resolveFullCalendar)
+  const res = parsePlainDateTime(arg, resolveCoreCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

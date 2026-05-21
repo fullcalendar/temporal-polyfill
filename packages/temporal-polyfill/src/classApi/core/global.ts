@@ -1,5 +1,5 @@
-import { DateTimeFormat } from '../apiHelpers/intlDateTimeFormat'
-import { createPropDescriptors } from '../internal/utils'
+import { createPropDescriptors } from '../../internal/utils'
+import { DateTimeFormat } from '../intlDateTimeFormat'
 import { toTemporalInstant } from './instant'
 import { Temporal } from './temporal'
 

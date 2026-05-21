@@ -1,7 +1,7 @@
 import {
   createPropDescriptors,
   createStringTagDescriptors,
-} from '../internal/utils'
+} from '../../internal/utils'
 
 import { Duration } from './duration'
 import { Instant } from './instant'

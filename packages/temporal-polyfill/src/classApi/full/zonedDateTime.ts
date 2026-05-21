@@ -1,41 +1,41 @@
-import { ZonedDateTimeBranding } from '../apiHelpers/branding'
-import { prepZonedDateTimeFormat } from '../apiHelpers/intlFormatConfig'
+import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   calendarIdGetters,
   dateGetters,
   epochGetters,
   timeGetters,
-} from '../apiHelpers/mixins'
+} from '../../apiHelpers/mixins'
 import {
   createSlotClass,
   getBrandingAndSlots,
   rejectInvalidBag,
-} from '../apiHelpers/slotClass'
-import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
+} from '../../apiHelpers/slotClass'
 import {
-  resolveCoreCalendar,
-  resolveCoreCalendarArg,
-} from '../internal/calendarResolver'
-import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
-import { constructZonedEpochNanoSlots } from '../internal/construct'
+  compareZonedDateTimes,
+  zonedDateTimesEqual,
+} from '../../internal/compare'
+import { constructZonedEpochNanoSlots } from '../../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
   zonedDateTimeToPlainDateTime,
   zonedDateTimeToPlainTime,
-} from '../internal/convert'
-import { refineZonedDateTimeObjectLike } from '../internal/createFromFields'
-import { diffZonedDateTimes, getCommonCalendar } from '../internal/diff'
-import { InternalCalendar } from '../internal/externalCalendar'
-import { ZonedDateTimeLikeObject } from '../internal/fieldTypes'
-import { DateTimeFields } from '../internal/fieldTypes'
-import { LocalesArg } from '../internal/intlFormatUtils'
-import { formatOffsetNano, formatZonedDateTimeIso } from '../internal/isoFormat'
-import { parseZonedDateTime } from '../internal/isoParse'
-import { mergeZonedDateTimeFields } from '../internal/merge'
-import { zonedDateTimeWithPlainTime } from '../internal/modify'
-import { moveZonedDateTime } from '../internal/move'
-import { refineZonedFieldOptions } from '../internal/optionsFieldRefine'
+} from '../../internal/convert'
+import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
+import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
+import { InternalCalendar } from '../../internal/externalCalendar'
+import { ZonedDateTimeLikeObject } from '../../internal/fieldTypes'
+import { DateTimeFields } from '../../internal/fieldTypes'
+import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  formatOffsetNano,
+  formatZonedDateTimeIso,
+} from '../../internal/isoFormat'
+import { parseZonedDateTime } from '../../internal/isoParse'
+import { mergeZonedDateTimeFields } from '../../internal/merge'
+import { zonedDateTimeWithPlainTime } from '../../internal/modify'
+import { moveZonedDateTime } from '../../internal/move'
+import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
 import {
   DiffOptions,
   DirectionName,
@@ -43,25 +43,33 @@ import {
   OverflowOptions,
   RoundingOptions,
   ZonedFieldOptions,
-} from '../internal/optionsModel'
+} from '../../internal/optionsModel'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
   roundZonedDateTime,
-} from '../internal/round'
-import { ZonedEpochNanoFields, createDurationSlots } from '../internal/slots'
-import { queryTimeZone } from '../internal/timeZoneImpl'
+} from '../../internal/round'
+import { ZonedEpochNanoFields, createDurationSlots } from '../../internal/slots'
+import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
-} from '../internal/timeZoneMath'
-import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
+} from '../../internal/timeZoneMath'
+import { DayTimeUnitName, UnitName } from '../../internal/units'
+import {
+  NumberSign,
+  bindArgs,
+  isObjectLike,
+  mapProps,
+} from '../../internal/utils'
+import { prepZonedDateTimeFormat } from '../intlFormatConfig'
+import { TimeZoneArg, refineTimeZoneArg } from '../timeZoneArg'
 import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
+import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -83,7 +91,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
-  bindArgs(constructZonedEpochNanoSlots, resolveCoreCalendarArg),
+  bindArgs(constructZonedEpochNanoSlots, resolveFullCalendarArg),
   formatZonedDateTimeIso,
   {
     ...epochGetters,
@@ -299,7 +307,7 @@ export function toZonedDateTimeSlots(
     )
   }
 
-  return parseZonedDateTime(arg, resolveCoreCalendar, options)
+  return parseZonedDateTime(arg, resolveFullCalendar, options)
 }
 
 function adaptDateMethods(methods: any) {

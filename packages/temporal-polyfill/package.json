@@ -47,28 +47,28 @@
   "buildConfig": {
     "exports": {
       ".": {
-        "src": "classApi/index",
+        "src": "classApi/core/index",
         "types": "typeOverrides/index"
       },
       "./impl": {
-        "src": "classApi/impl",
+        "src": "classApi/core/impl",
         "types": "typeOverrides/impl"
       },
       "./global": {
-        "src": "classApi/global",
+        "src": "classApi/core/global",
         "types": "typeOverrides/global",
         "iife": true
       },
       "./full": {
-        "src": "classApiFull/index",
+        "src": "classApi/full/index",
         "types": "typeOverrides/index"
       },
       "./full/impl": {
-        "src": "classApiFull/impl",
+        "src": "classApi/full/impl",
         "types": "typeOverrides/impl"
       },
       "./full/global": {
-        "src": "classApiFull/global",
+        "src": "classApi/full/global",
         "types": "typeOverrides/global",
         "iife": true
       },
