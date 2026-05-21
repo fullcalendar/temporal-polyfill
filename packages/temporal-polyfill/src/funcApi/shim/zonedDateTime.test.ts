@@ -14,6 +14,27 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 const hebrewCalendar = getIntlCalendar('hebrew')
 
+function expectRoundToYearEquals(isoString: string, expected: string) {
+  expectZonedDateTimeEquals(
+    ZonedDateTimeFns.roundToYear(ZonedDateTimeFns.fromString(isoString)),
+    ZonedDateTimeFns.fromString(expected),
+  )
+}
+
+function expectRoundToMonthEquals(isoString: string, expected: string) {
+  expectZonedDateTimeEquals(
+    ZonedDateTimeFns.roundToMonth(ZonedDateTimeFns.fromString(isoString)),
+    ZonedDateTimeFns.fromString(expected),
+  )
+}
+
+function expectRoundToWeekEquals(isoString: string, expected: string) {
+  expectZonedDateTimeEquals(
+    ZonedDateTimeFns.roundToWeek(ZonedDateTimeFns.fromString(isoString)),
+    ZonedDateTimeFns.fromString(expected),
+  )
+}
+
 function getPublicFields(zdt: ZonedDateTimeFns.ZonedDateTimeShimRecord) {
   return {
     era: zdt.era,
@@ -673,6 +694,7 @@ describe('toLocaleString', () => {
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
+// Keep these canonical non-standard cases aligned with ../native/zonedDateTime.test.ts.
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
@@ -706,6 +728,31 @@ describe('withDayOfYear', () => {
     // coerce...
     const zdt2 = ZonedDateTimeFns.withDayOfYear(zdt0, '5.5' as any)
     expectZonedDateTimeEquals(zdt2, zdtExp)
+  })
+
+  it('matches canonical coercion and error types', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-02-27T12:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.withDayOfYear(zdt, -5),
+      ZonedDateTimeFns.fromString('2024-01-01T12:30:00[America/New_York]'),
+    )
+    expect(() => {
+      ZonedDateTimeFns.withDayOfYear(zdt, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfYear(zdt, Infinity as any, {
+        overflow: 'reject',
+      })
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfYear(zdt, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfYear(zdt, 5, 'reject' as any)
+    }).toThrowError(TypeError)
   })
 })
 
@@ -770,6 +817,31 @@ describe('withDayOfWeek', () => {
     const zdt2 = ZonedDateTimeFns.withDayOfWeek(zdt0, '4.5' as any)
     expectZonedDateTimeEquals(zdt2, zdtExp)
   })
+
+  it('matches canonical coercion and error types', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-02-27T12:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.withDayOfWeek(zdt, -5),
+      ZonedDateTimeFns.fromString('2024-02-26T12:30:00[America/New_York]'),
+    )
+    expect(() => {
+      ZonedDateTimeFns.withDayOfWeek(zdt, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfWeek(zdt, Infinity as any, {
+        overflow: 'reject',
+      })
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfWeek(zdt, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      ZonedDateTimeFns.withDayOfWeek(zdt, 5, 'reject' as any)
+    }).toThrowError(TypeError)
+  })
 })
 
 describe('withWeekOfYear', () => {
@@ -800,6 +872,31 @@ describe('withWeekOfYear', () => {
     expect(() => {
       ZonedDateTimeFns.withWeekOfYear(zdt, 27)
     }).toThrowError(RangeError)
+  })
+
+  it('matches canonical coercion and error types', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-02-27T12:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.withWeekOfYear(zdt, -5),
+      ZonedDateTimeFns.fromString('2024-01-02T12:30:00[America/New_York]'),
+    )
+    expect(() => {
+      ZonedDateTimeFns.withWeekOfYear(zdt, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withWeekOfYear(zdt, Infinity as any, {
+        overflow: 'reject',
+      })
+    }).toThrowError(RangeError)
+    expect(() => {
+      ZonedDateTimeFns.withWeekOfYear(zdt, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      ZonedDateTimeFns.withWeekOfYear(zdt, 5, 'reject' as any)
+    }).toThrowError(TypeError)
   })
 })
 
@@ -886,6 +983,24 @@ describe('addWeeks', () => {
     expect(() => {
       ZonedDateTimeFns.addWeeks(zdt, '300.5' as any)
     }).toThrowError(RangeError)
+  })
+
+  it('moves by calendar weeks across spring-forward and fall-back transitions', () => {
+    const springForward = ZonedDateTimeFns.fromString(
+      '2024-03-03T12:00:00[America/New_York]',
+    )
+    const fallBack = ZonedDateTimeFns.fromString(
+      '2024-10-27T12:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addWeeks(springForward, 1),
+      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addWeeks(fallBack, 1),
+      ZonedDateTimeFns.fromString('2024-11-03T12:00:00[America/New_York]'),
+    )
   })
 })
 
@@ -1050,6 +1165,28 @@ describe('addNanoseconds', () => {
     expect(() => {
       ZonedDateTimeFns.addNanoseconds(zdt, '300.5' as any)
     }).toThrowError(RangeError)
+  })
+
+  it('moves by exact nanoseconds across spring-forward and fall-back boundaries', () => {
+    const springForward = ZonedDateTimeFns.fromString(
+      '2024-03-10T01:59:59.999999999-05:00[America/New_York]',
+    )
+    const fallBack = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:59:59.999999999-04:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addNanoseconds(springForward, 1),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T03:00:00-04:00[America/New_York]',
+      ),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addNanoseconds(fallBack, 1),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T01:00:00-05:00[America/New_York]',
+      ),
+    )
   })
 })
 
@@ -1296,36 +1433,23 @@ describe('roundToYear', () => {
     }).toThrowError(RangeError)
   })
 
-  it('matches temporal-utils around exact and midpoint boundaries', () => {
-    const start = ZonedDateTimeFns.fromString(
+  it('matches canonical exact and midpoint boundaries', () => {
+    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
+    expectRoundToYearEquals(
+      '2024-01-01T00:00:00[America/New_York]',
       '2024-01-01T00:00:00[America/New_York]',
     )
-    const next = ZonedDateTimeFns.fromString(
+    expectRoundToYearEquals(
+      '2024-07-02T00:59:59.999999999[America/New_York]',
+      '2024-01-01T00:00:00[America/New_York]',
+    )
+    expectRoundToYearEquals(
+      '2024-07-02T01:00:00[America/New_York]',
       '2025-01-01T00:00:00[America/New_York]',
     )
-
-    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToYear(start), start)
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToYear(
-        ZonedDateTimeFns.fromString(
-          '2024-07-02T00:59:59.999999999[America/New_York]',
-        ),
-      ),
-      start,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToYear(
-        ZonedDateTimeFns.fromString('2024-07-02T01:00:00[America/New_York]'),
-      ),
-      next,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToYear(
-        ZonedDateTimeFns.fromString(
-          '2024-07-02T01:00:00.000000001[America/New_York]',
-        ),
-      ),
-      next,
+    expectRoundToYearEquals(
+      '2024-07-02T01:00:00.000000001[America/New_York]',
+      '2025-01-01T00:00:00[America/New_York]',
     )
   })
 
@@ -1399,36 +1523,23 @@ describe('roundToMonth', () => {
     }).toThrowError(RangeError)
   })
 
-  it('matches temporal-utils around exact and midpoint boundaries across DST', () => {
-    const start = ZonedDateTimeFns.fromString(
+  it('matches canonical exact and midpoint boundaries across DST', () => {
+    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
+    expectRoundToMonthEquals(
+      '2024-03-01T00:00:00[America/New_York]',
       '2024-03-01T00:00:00[America/New_York]',
     )
-    const next = ZonedDateTimeFns.fromString(
+    expectRoundToMonthEquals(
+      '2024-03-16T12:29:59.999999999[America/New_York]',
+      '2024-03-01T00:00:00[America/New_York]',
+    )
+    expectRoundToMonthEquals(
+      '2024-03-16T12:30:00[America/New_York]',
       '2024-04-01T00:00:00[America/New_York]',
     )
-
-    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToMonth(start), start)
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToMonth(
-        ZonedDateTimeFns.fromString(
-          '2024-03-16T12:29:59.999999999[America/New_York]',
-        ),
-      ),
-      start,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToMonth(
-        ZonedDateTimeFns.fromString('2024-03-16T12:30:00[America/New_York]'),
-      ),
-      next,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToMonth(
-        ZonedDateTimeFns.fromString(
-          '2024-03-16T12:30:00.000000001[America/New_York]',
-        ),
-      ),
-      next,
+    expectRoundToMonthEquals(
+      '2024-03-16T12:30:00.000000001[America/New_York]',
+      '2024-04-01T00:00:00[America/New_York]',
     )
   })
 })
@@ -1479,36 +1590,23 @@ describe('roundToWeek', () => {
     }).toThrowError(RangeError)
   })
 
-  it('matches temporal-utils around exact and midpoint boundaries across DST', () => {
-    const start = ZonedDateTimeFns.fromString(
+  it('matches canonical exact and midpoint boundaries across DST', () => {
+    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
+    expectRoundToWeekEquals(
+      '2024-03-04T00:00:00[America/New_York]',
       '2024-03-04T00:00:00[America/New_York]',
     )
-    const next = ZonedDateTimeFns.fromString(
+    expectRoundToWeekEquals(
+      '2024-03-07T11:29:59.999999999[America/New_York]',
+      '2024-03-04T00:00:00[America/New_York]',
+    )
+    expectRoundToWeekEquals(
+      '2024-03-07T11:30:00[America/New_York]',
       '2024-03-11T00:00:00[America/New_York]',
     )
-
-    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToWeek(start), start)
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToWeek(
-        ZonedDateTimeFns.fromString(
-          '2024-03-07T11:29:59.999999999[America/New_York]',
-        ),
-      ),
-      start,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToWeek(
-        ZonedDateTimeFns.fromString('2024-03-07T11:30:00[America/New_York]'),
-      ),
-      next,
-    )
-    expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToWeek(
-        ZonedDateTimeFns.fromString(
-          '2024-03-07T11:30:00.000000001[America/New_York]',
-        ),
-      ),
-      next,
+    expectRoundToWeekEquals(
+      '2024-03-07T11:30:00.000000001[America/New_York]',
+      '2024-03-11T00:00:00[America/New_York]',
     )
   })
 })
@@ -1538,6 +1636,18 @@ describe('startOfMonth', () => {
       ZonedDateTimeFns.fromString('2024-07-01T00:00:00[America/New_York]'),
     )
   })
+
+  it('uses the first real instant when the month starts after a skipped midnight', () => {
+    // Keep this skipped-midnight fixture aligned with ../native/zonedDateTime.test.ts.
+    const zdt = ZonedDateTimeFns.fromString(
+      '2009-06-15T12:30:00[Africa/Casablanca]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfMonth(zdt),
+      ZonedDateTimeFns.fromString('2009-06-01T01:00:00[Africa/Casablanca]'),
+    )
+  })
 })
 
 describe('startOfWeek', () => {
@@ -1549,6 +1659,19 @@ describe('startOfWeek', () => {
       ZonedDateTimeFns.startOfWeek(zdt),
       ZonedDateTimeFns.fromString(
         '2024-07-15T00:00:00[America/New_York]', // this Monday
+      ),
+    )
+  })
+
+  it('uses the first real instant when the week starts after a skipped midnight', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2009-06-03T12:30:00[Africa/Casablanca]', // Wednesday
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfWeek(zdt),
+      ZonedDateTimeFns.fromString(
+        '2009-06-01T01:00:00[Africa/Casablanca]', // this Monday
       ),
     )
   })
@@ -1605,6 +1728,19 @@ describe('startOfHour', () => {
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfHour(zdt),
       ZonedDateTimeFns.fromString('2024-07-20T12:00:00[America/New_York]'),
+    )
+  })
+
+  it('preserves repeated-hour offset on a 25-hour day', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-05:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfHour(zdt),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T01:00:00-05:00[America/New_York]',
+      ),
     )
   })
 })
@@ -1692,6 +1828,21 @@ describe('endOfMonth', () => {
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
     )
   })
+
+  it('ends before the first real instant when the next month skips midnight', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2009-05-15T12:30:00[Africa/Casablanca]',
+    )
+    const zdt1 = ZonedDateTimeFns.endOfMonth(zdt0)
+    const zdt2 = ZonedDateTimeFns.fromString(
+      '2009-06-01T01:00:00[Africa/Casablanca]',
+    )
+
+    expectZonedDateTimeEquals(
+      zdt1,
+      ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
+    )
+  })
 })
 
 describe('endOfWeek', () => {
@@ -1703,6 +1854,21 @@ describe('endOfWeek', () => {
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-22T00:00:00[America/New_York]', // next Monday
     )
+    expectZonedDateTimeEquals(
+      zdt1,
+      ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
+    )
+  })
+
+  it('ends before the first real instant when the next week skips midnight', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2009-05-30T12:30:00[Africa/Casablanca]', // Saturday
+    )
+    const zdt1 = ZonedDateTimeFns.endOfWeek(zdt0)
+    const zdt2 = ZonedDateTimeFns.fromString(
+      '2009-06-01T01:00:00[Africa/Casablanca]', // next Monday
+    )
+
     expectZonedDateTimeEquals(
       zdt1,
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
@@ -1773,6 +1939,21 @@ describe('endOfHour', () => {
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T13:00:00[America/New_York]',
     )
+    expectZonedDateTimeEquals(
+      zdt1,
+      ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
+    )
+  })
+
+  it('uses the last real instant before a spring-forward gap', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2024-03-10T01:30:00-05:00[America/New_York]',
+    )
+    const zdt1 = ZonedDateTimeFns.endOfHour(zdt0)
+    const zdt2 = ZonedDateTimeFns.fromString(
+      '2024-03-10T03:00:00-04:00[America/New_York]',
+    )
+
     expectZonedDateTimeEquals(
       zdt1,
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),

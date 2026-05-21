@@ -16,6 +16,27 @@ import {
 const gregoryCalendar = getGregoryCalendar()
 const hebrewCalendar = getIntlCalendar('hebrew')
 
+function expectRoundToYearEquals(isoString: string, expected: string) {
+  expectPlainDateEquals(
+    PlainDateFns.roundToYear(PlainDateFns.fromString(isoString)),
+    PlainDateFns.fromString(expected),
+  )
+}
+
+function expectRoundToMonthEquals(isoString: string, expected: string) {
+  expectPlainDateEquals(
+    PlainDateFns.roundToMonth(PlainDateFns.fromString(isoString)),
+    PlainDateFns.fromString(expected),
+  )
+}
+
+function expectRoundToWeekEquals(isoString: string, expected: string) {
+  expectPlainDateEquals(
+    PlainDateFns.roundToWeek(PlainDateFns.fromString(isoString)),
+    PlainDateFns.fromString(expected),
+  )
+}
+
 describe('create', () => {
   it('works', () => {
     const pd = PlainDateFns.create(2024, 1, 1, hebrewCalendar)
@@ -524,6 +545,7 @@ describe('createFormat', () => {
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
+// Keep these canonical non-standard cases aligned with ../native/plainDate.test.ts.
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const pd = PlainDateFns.fromString('2024-02-27')
@@ -546,6 +568,27 @@ describe('withDayOfYear', () => {
       PlainDateFns.withDayOfYear(pd, 5),
       PlainDateFns.fromString('2023-09-20[u-ca=hebrew]', getIntlCalendar),
     )
+  })
+
+  it('matches canonical coercion and error types', () => {
+    const pd = PlainDateFns.fromString('2024-02-27')
+
+    expectPlainDateEquals(
+      PlainDateFns.withDayOfYear(pd, -5),
+      PlainDateFns.fromString('2024-01-01'),
+    )
+    expect(() => {
+      PlainDateFns.withDayOfYear(pd, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withDayOfYear(pd, Infinity as any, { overflow: 'reject' })
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withDayOfYear(pd, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      PlainDateFns.withDayOfYear(pd, 5, 'reject' as any)
+    }).toThrowError(TypeError)
   })
 })
 
@@ -586,6 +629,27 @@ describe('withDayOfWeek', () => {
       PlainDateFns.fromString('2024-02-29[u-ca=hebrew]', getIntlCalendar),
     )
   })
+
+  it('matches canonical coercion and error types', () => {
+    const pd = PlainDateFns.fromString('2024-02-27')
+
+    expectPlainDateEquals(
+      PlainDateFns.withDayOfWeek(pd, -5),
+      PlainDateFns.fromString('2024-02-26'),
+    )
+    expect(() => {
+      PlainDateFns.withDayOfWeek(pd, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withDayOfWeek(pd, Infinity as any, { overflow: 'reject' })
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withDayOfWeek(pd, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      PlainDateFns.withDayOfWeek(pd, 5, 'reject' as any)
+    }).toThrowError(TypeError)
+  })
 })
 
 describe('withWeekOfYear', () => {
@@ -613,6 +677,27 @@ describe('withWeekOfYear', () => {
     expect(() => {
       PlainDateFns.withWeekOfYear(pd, 27)
     }).toThrowError(RangeError)
+  })
+
+  it('matches canonical coercion and error types', () => {
+    const pd = PlainDateFns.fromString('2024-02-27')
+
+    expectPlainDateEquals(
+      PlainDateFns.withWeekOfYear(pd, -5),
+      PlainDateFns.fromString('2024-01-02'),
+    )
+    expect(() => {
+      PlainDateFns.withWeekOfYear(pd, -Infinity as any)
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withWeekOfYear(pd, Infinity as any, { overflow: 'reject' })
+    }).toThrowError(RangeError)
+    expect(() => {
+      PlainDateFns.withWeekOfYear(pd, 5n as any)
+    }).toThrowError(TypeError)
+    expect(() => {
+      PlainDateFns.withWeekOfYear(pd, 5, 'reject' as any)
+    }).toThrowError(TypeError)
   })
 })
 
@@ -824,6 +909,14 @@ describe('roundToYear', () => {
       })
     }).toThrowError(RangeError)
   })
+
+  it('matches canonical exact and midpoint-adjacent boundaries', () => {
+    // Keep these cases aligned with ../native/plainDate.test.ts.
+    expectRoundToYearEquals('2024-01-01', '2024-01-01')
+    expectRoundToYearEquals('2024-07-01', '2024-01-01')
+    expectRoundToYearEquals('2024-07-02', '2025-01-01')
+    expectRoundToYearEquals('2024-07-03', '2025-01-01')
+  })
 })
 
 describe('roundToMonth', () => {
@@ -859,6 +952,14 @@ describe('roundToMonth', () => {
       })
     }).toThrowError(RangeError)
   })
+
+  it('matches canonical exact and midpoint-adjacent boundaries', () => {
+    // Keep these cases aligned with ../native/plainDate.test.ts.
+    expectRoundToMonthEquals('2024-04-01', '2024-04-01')
+    expectRoundToMonthEquals('2024-04-15', '2024-04-01')
+    expectRoundToMonthEquals('2024-04-16', '2024-05-01')
+    expectRoundToMonthEquals('2024-04-17', '2024-05-01')
+  })
 })
 
 describe('roundToWeek', () => {
@@ -893,6 +994,14 @@ describe('roundToWeek', () => {
         roundingIncrement: 2, // not allowed
       })
     }).toThrowError(RangeError)
+  })
+
+  it('matches canonical exact and midpoint-adjacent boundaries', () => {
+    // Keep these cases aligned with ../native/plainDate.test.ts.
+    expectRoundToWeekEquals('2024-03-04', '2024-03-04')
+    expectRoundToWeekEquals('2024-03-07', '2024-03-04')
+    expectRoundToWeekEquals('2024-03-08', '2024-03-11')
+    expectRoundToWeekEquals('2024-03-11', '2024-03-11')
   })
 })
 

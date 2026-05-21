@@ -54,6 +54,8 @@ import {
   DiffOptions,
   DirectionName,
   DirectionOptions,
+  EpochDisambig,
+  OffsetDisambig,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
@@ -75,6 +77,7 @@ import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
+  getMatchingInstantFor,
   getSingleInstantFor,
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
@@ -550,11 +553,11 @@ export const roundToWeek = bindArgs(
 export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
-export const startOfHour = aligned(alignedTime(computeHourFloor))
-export const startOfMinute = aligned(alignedTime(computeMinuteFloor))
-export const startOfSecond = aligned(alignedTime(computeSecFloor))
-export const startOfMillisecond = aligned(alignedTime(computeMilliFloor))
-export const startOfMicrosecond = aligned(alignedTime(computeMicroFloor))
+export const startOfHour = alignedZonedTime(computeHourFloor)
+export const startOfMinute = alignedZonedTime(computeMinuteFloor)
+export const startOfSecond = alignedZonedTime(computeSecFloor)
+export const startOfMillisecond = alignedZonedTime(computeMilliFloor)
+export const startOfMicrosecond = alignedZonedTime(computeMicroFloor)
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -563,18 +566,18 @@ export const endOfYear = aligned(computeYearCeil, -1)
 export const endOfMonth = aligned(computeMonthCeil, -1)
 export const endOfWeek = aligned(computeIsoWeekCeil, -1)
 export const endOfDay = aligned(computeDayCeil, -1)
-export const endOfHour = aligned(alignedTime(computeHourFloor), nanoInHour - 1)
-export const endOfMinute = aligned(
-  alignedTime(computeMinuteFloor),
+export const endOfHour = alignedZonedTime(computeHourFloor, nanoInHour - 1)
+export const endOfMinute = alignedZonedTime(
+  computeMinuteFloor,
   nanoInMinute - 1,
 )
-export const endOfSecond = aligned(alignedTime(computeSecFloor), nanoInSec - 1)
-export const endOfMillisecond = aligned(
-  alignedTime(computeMilliFloor),
+export const endOfSecond = alignedZonedTime(computeSecFloor, nanoInSec - 1)
+export const endOfMillisecond = alignedZonedTime(
+  computeMilliFloor,
   nanoInMilli - 1,
 )
-export const endOfMicrosecond = aligned(
-  alignedTime(computeMicroFloor),
+export const endOfMicrosecond = alignedZonedTime(
+  computeMicroFloor,
   nanoInMicro - 1,
 )
 
@@ -710,10 +713,40 @@ function aligned(
   }
 }
 
-function alignedTime(
+function alignedZonedTime(
   computeAlignment: (time: TimeFields) => TimeFields,
-): (slots: CalendarDateTimeFields) => CalendarDateTimeFields {
-  return (slots) => combineDateAndTime(slots, computeAlignment(slots))
+  nanoDelta = 0,
+): (record: ZonedDateTimeShimRecord) => ZonedDateTimeShimRecord {
+  return (record) => {
+    const slots = getZonedDateTimeShimRecordSlots(record)
+    const { timeZone } = slots
+    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+
+    // Sub-day alignment is wall-clock alignment, not exact-time subtraction.
+    // Transitions can happen inside an hour/minute/etc, so subtracting the
+    // apparent wall-clock remainder would cross gaps/repeats incorrectly.
+    const alignedIsoDateTime = combineDateAndTime(
+      isoDateTime,
+      computeAlignment(isoDateTime),
+    )
+
+    // If the aligned wall time is repeated, prefer the current offset so
+    // 01:30-05:00 startOfHour stays in the second 01:00 hour. If the aligned
+    // wall time is skipped, compatible disambiguation still moves forward.
+    const epochNanoseconds =
+      getMatchingInstantFor(
+        timeZone,
+        alignedIsoDateTime,
+        isoDateTime.offsetNanoseconds,
+        OffsetDisambig.Prefer,
+        EpochDisambig.Compat,
+        true,
+      ) + BigInt(nanoDelta)
+    return createZonedDateTimeShimRecord({
+      ...slots,
+      epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+    })
+  }
 }
 
 function zonedTransform<A extends any[]>(
