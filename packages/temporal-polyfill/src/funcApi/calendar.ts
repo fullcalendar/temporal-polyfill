@@ -1,4 +1,4 @@
-import { throwExoticCalendarError } from '../internal/calendarSlot'
+import * as errorMessages from '../internal/errorMessages'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -26,7 +26,12 @@ export function getCoreCalendar(calendarId: string) {
   if (calendarId === gregoryCalendarId) {
     return getGregoryCalendar()
   }
-  throwExoticCalendarError()
+  throw new RangeError(
+    errorMessages.exoticCalendarRequired(
+      calendarId,
+      'getIntlCalendar or getAnyCalendar',
+    ),
+  )
 }
 
 export function getAnyCalendar(calendarId: string) {

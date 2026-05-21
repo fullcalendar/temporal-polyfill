@@ -1,10 +1,6 @@
-import {
-  type CalendarSlot,
-  gregoryCalendar,
-  isoCalendar,
-  throwExoticCalendarError,
-} from './calendarSlot'
+import { type CalendarSlot, gregoryCalendar, isoCalendar } from './calendarSlot'
 import { requireString } from './cast'
+import * as errorMessages from './errorMessages'
 import { gregoryCalendarId, isoCalendarId } from './intlCalendarConfig'
 
 export type CalendarResolver = (rawCalendarId: string) => CalendarSlot
@@ -19,7 +15,12 @@ export function resolveCoreCalendar(rawCalendarId: string): CalendarSlot {
     return gregoryCalendar
   }
 
-  throwExoticCalendarError()
+  throw new RangeError(
+    errorMessages.exoticCalendarRequired(
+      rawCalendarId,
+      'temporal-polyfill/full',
+    ),
+  )
 }
 
 // Allows an undefined calendar argument, which defaults to ISO.

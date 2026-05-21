@@ -1,5 +1,4 @@
 import type { MonthCodeParts } from './calendarMonthCode'
-import * as errorMessages from './errorMessages'
 import type {
   CalendarDateFields,
   CalendarEraFields,
@@ -79,10 +78,6 @@ export interface ExoticCalendar {
     month1: number,
     day1: number,
   ): boolean
-}
-
-export function throwExoticCalendarError(): never {
-  throw new RangeError(errorMessages.exoticCalendarRequired)
 }
 
 export function getCalendarSlotId(calendar: CalendarSlot): string {
