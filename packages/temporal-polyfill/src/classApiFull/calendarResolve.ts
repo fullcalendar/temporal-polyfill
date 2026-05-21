@@ -24,6 +24,7 @@ export function resolveFullCalendar(rawCalendarId: string): InternalCalendar {
   return getExternalCalendar(lowerRawCalendarId)
 }
 
+// Allows an undefined calendar argument, which defaults to ISO.
 export function resolveFullCalendarArg(
   rawCalendarId = isoCalendarId,
 ): InternalCalendar {

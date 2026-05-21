@@ -22,6 +22,7 @@ export function resolveCoreCalendar(rawCalendarId: string): InternalCalendar {
   throwExternalCalendarError()
 }
 
+// Allows an undefined calendar argument, which defaults to ISO.
 export function resolveCoreCalendarArg(
   rawCalendarId = isoCalendarId,
 ): InternalCalendar {
