@@ -34,7 +34,6 @@ type MethodProps<M extends object> = {
 }
 
 type ExtraMethods = {
-  toString(options?: any): string
   toJSON(): string
   valueOf(): never
 }
@@ -59,7 +58,7 @@ export function createSlotClass<
 >(
   branding: string,
   construct: (...args: CA) => D,
-  formatFunc: (slots: D, options?: any) => string,
+  formatFunc: (slots: D) => string,
   getters: G,
   methods: M,
   staticMethods: SM,
@@ -79,8 +78,7 @@ export function createSlotClass<
     ...createPropDescriptors(
       mapProps(bindMethod, {
         ...methods,
-        toString: formatFunc,
-        toJSON: (slots: any) => formatFunc(slots), // should not forward args
+        toJSON: formatFunc,
         valueOf: neverValueOf,
       }),
     ),

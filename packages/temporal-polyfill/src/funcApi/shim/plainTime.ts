@@ -11,7 +11,7 @@ import { diffPlainTimes } from '../../internal/diff'
 import { TimeFields } from '../../internal/fieldTypes'
 import { createFormatPrepper, timeConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainTimeIso } from '../../internal/isoFormat'
+import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
@@ -43,7 +43,7 @@ export const [
 ] = createSlotClass(
   PlainTimeRecordBranding,
   constructTimeSlots,
-  formatPlainTimeIso,
+  formatTimeIsoAuto,
   timeGetters,
   {},
   {},

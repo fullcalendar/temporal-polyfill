@@ -35,7 +35,10 @@ import {
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainDateTimeIso } from '../../internal/isoFormat'
+import {
+  formatDateTimeIsoAuto,
+  formatPlainDateTimeIso,
+} from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
@@ -86,7 +89,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
   bindArgs(constructDateTimeSlots, resolveCoreCalendarArg),
-  formatPlainDateTimeIso,
+  formatDateTimeIsoAuto,
   {
     ...calendarIdGetters,
     ...dateGetters,
@@ -209,6 +212,7 @@ export const [PlainDateTime, createPlainDateTime] = createSlotClass(
       )
       return format.format(epochMilli)
     },
+    toString: formatPlainDateTimeIso,
   },
   {
     from(arg: PlainDateTimeArg, options: OverflowOptions): PlainDateTime {

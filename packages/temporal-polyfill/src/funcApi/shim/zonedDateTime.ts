@@ -45,6 +45,7 @@ import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatOffsetNano,
   formatZonedDateTimeIso,
+  formatZonedDateTimeIsoAuto,
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
@@ -164,7 +165,7 @@ export const [
 ] = createSlotClass(
   ZonedDateTimeRecordBranding,
   bindArgs(constructZonedEpochNanoSlots, refineCalendarShimArg),
-  formatZonedDateTimeIso,
+  formatZonedDateTimeIsoAuto,
   {
     ...epochGetters,
     ...calendarIdGetters,

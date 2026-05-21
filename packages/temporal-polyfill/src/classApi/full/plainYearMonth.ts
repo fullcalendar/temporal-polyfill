@@ -20,7 +20,10 @@ import {
 } from '../../internal/fieldTypes'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainYearMonthIso } from '../../internal/isoFormat'
+import {
+  formatPlainYearMonthIso,
+  formatYearMonthIsoAuto,
+} from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
@@ -46,7 +49,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
     bindArgs(constructYearMonthSlots, resolveAnyCalendarArg),
-    formatPlainYearMonthIso,
+    formatYearMonthIsoAuto,
     {
       ...calendarIdGetters,
       ...yearMonthGetters,
@@ -138,6 +141,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
         return format.format(epochMilli)
       },
+      toString: formatPlainYearMonthIso,
     },
     {
       from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {

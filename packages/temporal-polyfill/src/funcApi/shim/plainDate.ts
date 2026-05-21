@@ -32,7 +32,7 @@ import {
 import { createFormatPrepper, dateConfig } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
-import { formatPlainDateIso } from '../../internal/isoFormat'
+import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { moveByDays, movePlainDate } from '../../internal/move'
@@ -122,7 +122,7 @@ export const [
 ] = createSlotClass(
   PlainDateRecordBranding,
   bindArgs(constructDateSlots, refineCalendarShimArg),
-  formatPlainDateIso,
+  formatDateIsoAuto,
   {
     ...calendarIdGetters,
     ...dateFieldGetters,

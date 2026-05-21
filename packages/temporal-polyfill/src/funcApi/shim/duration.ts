@@ -14,7 +14,10 @@ import {
   roundDuration,
 } from '../../internal/durationMath'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatDurationIso } from '../../internal/isoFormat'
+import {
+  formatDurationIso,
+  formatDurationIsoAuto,
+} from '../../internal/isoFormat'
 import { parseDuration } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
 import {
@@ -47,7 +50,7 @@ export const [
 ] = createSlotClass(
   DurationRecordBranding,
   constructDurationSlots,
-  formatDurationIso,
+  formatDurationIsoAuto,
   {
     ...durationFieldGetters,
     sign(slots: DurationFields & { sign: NumberSign }) {

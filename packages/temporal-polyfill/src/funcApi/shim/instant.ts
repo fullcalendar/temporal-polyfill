@@ -16,7 +16,10 @@ import {
   instantConfig,
 } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatInstantIso } from '../../internal/isoFormat'
+import {
+  formatInstantIso,
+  formatInstantIsoAuto,
+} from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import {
@@ -52,7 +55,7 @@ export const [
 ] = createSlotClass(
   InstantRecordBranding,
   constructEpochNanoSlots,
-  (slots, options) => formatInstantIso(refineTimeZoneId, slots, options),
+  formatInstantIsoAuto,
   epochGetters,
   {},
   {},

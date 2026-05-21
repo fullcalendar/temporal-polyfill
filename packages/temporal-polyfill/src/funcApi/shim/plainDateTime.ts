@@ -45,7 +45,10 @@ import {
 } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
-import { formatPlainDateTimeIso } from '../../internal/isoFormat'
+import {
+  formatDateTimeIsoAuto,
+  formatPlainDateTimeIso,
+} from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
@@ -154,7 +157,7 @@ export const [
 ] = createSlotClass(
   PlainDateTimeRecordBranding,
   bindArgs(constructDateTimeSlots, refineCalendarShimArg),
-  formatPlainDateTimeIso,
+  formatDateTimeIsoAuto,
   {
     ...calendarIdGetters,
     ...dateFieldGetters,

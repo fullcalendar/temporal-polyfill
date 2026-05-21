@@ -24,7 +24,10 @@ import {
   yearMonthConfig,
 } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainYearMonthIso } from '../../internal/isoFormat'
+import {
+  formatPlainYearMonthIso,
+  formatYearMonthIsoAuto,
+} from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
@@ -61,7 +64,7 @@ export const [
 ] = createSlotClass(
   PlainYearMonthRecordBranding,
   bindArgs(constructYearMonthSlots, refineCalendarShimArg),
-  formatPlainYearMonthIso,
+  formatYearMonthIsoAuto,
   {
     ...calendarIdGetters,
     ...yearMonthGetters,

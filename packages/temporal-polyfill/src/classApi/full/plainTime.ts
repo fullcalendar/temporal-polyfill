@@ -17,7 +17,7 @@ import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
 import { CalendarDateTimeFields, TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainTimeIso } from '../../internal/isoFormat'
+import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
@@ -45,7 +45,7 @@ export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 export const [PlainTime, createPlainTime] = createSlotClass(
   PlainTimeBranding,
   constructTimeSlots,
-  formatPlainTimeIso,
+  formatTimeIsoAuto,
   timeGetters,
   {
     with(
@@ -103,6 +103,7 @@ export const [PlainTime, createPlainTime] = createSlotClass(
       const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
       return format.format(epochMilli)
     },
+    toString: formatPlainTimeIso,
   },
   {
     from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {

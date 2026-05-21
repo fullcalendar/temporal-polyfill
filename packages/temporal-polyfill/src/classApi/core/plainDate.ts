@@ -27,7 +27,7 @@ import {
 } from '../../internal/fieldTypes'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainDateIso } from '../../internal/isoFormat'
+import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
@@ -69,7 +69,7 @@ export type PlainDateArg = PlainDate | DateLikeObject | string
 export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
   bindArgs(constructDateSlots, resolveCoreCalendarArg),
-  formatPlainDateIso,
+  formatDateIsoAuto,
   {
     ...calendarIdGetters,
     ...dateGetters,
@@ -192,6 +192,7 @@ export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
       const [format, epochMilli] = prepPlainDateFormat(locales, options, slots)
       return format.format(epochMilli)
     },
+    toString: formatPlainDateIso,
   },
   {
     from(arg: any, options?: OverflowOptions): PlainDate {

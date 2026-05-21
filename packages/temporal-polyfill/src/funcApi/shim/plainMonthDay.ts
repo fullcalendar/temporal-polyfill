@@ -17,7 +17,10 @@ import {
   monthDayConfig,
 } from '../../internal/intlFormatPrep'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { formatPlainMonthDayIso } from '../../internal/isoFormat'
+import {
+  formatMonthDayIsoAuto,
+  formatPlainMonthDayIso,
+} from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import {
@@ -47,7 +50,7 @@ export const [
 ] = createSlotClass(
   PlainMonthDayRecordBranding,
   bindArgs(constructMonthDaySlots, refineCalendarShimArg),
-  formatPlainMonthDayIso,
+  formatMonthDayIsoAuto,
   {
     ...calendarIdGetters,
     ...monthDayFieldGetters,
