@@ -81,10 +81,6 @@ export interface ExternalCalendar {
   ): boolean
 }
 
-export type ExternalCalendarProvider = (
-  lowerRawCalendarId: string,
-) => ExternalCalendar | undefined
-
 export function throwExternalCalendarError(): never {
   throw new RangeError(errorMessages.externalCalendarRequired)
 }

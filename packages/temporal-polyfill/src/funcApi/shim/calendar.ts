@@ -1,5 +1,5 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
-import { intlCalendarProvider } from '../../externalCalendars/intlCalendarProvider'
+import { getExternalCalendar } from '../../externalCalendars/intlCalendarProvider'
 import type { CalendarResolver } from '../../internal/calendarResolver'
 import {
   InternalCalendar,
@@ -35,7 +35,7 @@ export const [
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)
 const getIntlCalendarRecord = memoize((calendarId: string) =>
-  createCalendarShimRecord(intlCalendarProvider(calendarId)),
+  createCalendarShimRecord(getExternalCalendar(calendarId)),
 )
 
 // Function APIs accept an omitted calendar as ISO. Massage that not-defined
