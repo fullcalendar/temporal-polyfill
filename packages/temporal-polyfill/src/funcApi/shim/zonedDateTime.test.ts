@@ -413,6 +413,18 @@ describe('hoursInDay', () => {
     const hours = ZonedDateTimeFns.hoursInDay(zdt0)
     expect(hours).toBe(24)
   })
+
+  it('detects 23-hour and 25-hour DST transition days', () => {
+    const springForward = ZonedDateTimeFns.fromString(
+      '2024-03-10T12:30:00[America/New_York]',
+    )
+    const fallBack = ZonedDateTimeFns.fromString(
+      '2024-11-03T12:30:00[America/New_York]',
+    )
+
+    expect(ZonedDateTimeFns.hoursInDay(springForward)).toBe(23)
+    expect(ZonedDateTimeFns.hoursInDay(fallBack)).toBe(25)
+  })
 })
 
 describe('add', () => {
@@ -730,6 +742,17 @@ describe('withDayOfWeek', () => {
     expectZonedDateTimeEquals(zdt2, zdtExp)
   })
 
+  it('moves by calendar days across a spring-forward gap', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2024-03-09T12:00:00[America/New_York]', // Saturday
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.withDayOfWeek(zdt0, 7),
+      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+    )
+  })
+
   it('works with non-ISO calendar', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
@@ -879,6 +902,41 @@ describe('addDays', () => {
       ZonedDateTimeFns.addDays(zdt, '300.5' as any)
     }).toThrowError(RangeError)
   })
+
+  it('moves by calendar days across a spring-forward gap', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-09T12:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addDays(zdt, 1),
+      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+    )
+  })
+
+  it('uses compatible disambiguation when the target wall time is skipped', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-09T02:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addDays(zdt, 1),
+      ZonedDateTimeFns.fromString('2024-03-10T03:30:00[America/New_York]'),
+    )
+  })
+
+  it('preserves repeated fall-back wall time for calendar-day movement', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-04:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addDays(zdt, 1),
+      ZonedDateTimeFns.fromString(
+        '2024-11-04T01:30:00-05:00[America/New_York]',
+      ),
+    )
+  })
 })
 
 describe('addHours', () => {
@@ -893,6 +951,30 @@ describe('addHours', () => {
     expect(() => {
       ZonedDateTimeFns.addHours(zdt, '300.5' as any)
     }).toThrowError(RangeError)
+  })
+
+  it('moves by exact time across a spring-forward gap', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-09T12:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addHours(zdt, 24),
+      ZonedDateTimeFns.fromString('2024-03-10T13:00:00[America/New_York]'),
+    )
+  })
+
+  it('moves by exact time across a fall-back repeat', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-04:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.addHours(zdt, 24),
+      ZonedDateTimeFns.fromString(
+        '2024-11-04T00:30:00-05:00[America/New_York]',
+      ),
+    )
   })
 })
 
@@ -1213,6 +1295,68 @@ describe('roundToYear', () => {
       })
     }).toThrowError(RangeError)
   })
+
+  it('matches temporal-utils around exact and midpoint boundaries', () => {
+    const start = ZonedDateTimeFns.fromString(
+      '2024-01-01T00:00:00[America/New_York]',
+    )
+    const next = ZonedDateTimeFns.fromString(
+      '2025-01-01T00:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToYear(start), start)
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(
+        ZonedDateTimeFns.fromString(
+          '2024-07-02T00:59:59.999999999[America/New_York]',
+        ),
+      ),
+      start,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(
+        ZonedDateTimeFns.fromString('2024-07-02T01:00:00[America/New_York]'),
+      ),
+      next,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(
+        ZonedDateTimeFns.fromString(
+          '2024-07-02T01:00:00.000000001[America/New_York]',
+        ),
+      ),
+      next,
+    )
+  })
+
+  it('preserves directed rounding at nanosecond interval edges', () => {
+    const start = ZonedDateTimeFns.fromString(
+      '2024-01-01T00:00:00[America/New_York]',
+    )
+    const next = ZonedDateTimeFns.fromString(
+      '2025-01-01T00:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(
+        ZonedDateTimeFns.fromString(
+          '2024-01-01T00:00:00.000000001[America/New_York]',
+        ),
+        'ceil',
+      ),
+      next,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(
+        ZonedDateTimeFns.fromString(
+          '2024-12-31T23:59:59.999999999[America/New_York]',
+        ),
+        'floor',
+      ),
+      start,
+    )
+    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToYear(next, 'floor'), next)
+  })
 })
 
 describe('roundToMonth', () => {
@@ -1253,6 +1397,39 @@ describe('roundToMonth', () => {
         roundingIncrement: 2, // not allowed
       })
     }).toThrowError(RangeError)
+  })
+
+  it('matches temporal-utils around exact and midpoint boundaries across DST', () => {
+    const start = ZonedDateTimeFns.fromString(
+      '2024-03-01T00:00:00[America/New_York]',
+    )
+    const next = ZonedDateTimeFns.fromString(
+      '2024-04-01T00:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToMonth(start), start)
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToMonth(
+        ZonedDateTimeFns.fromString(
+          '2024-03-16T12:29:59.999999999[America/New_York]',
+        ),
+      ),
+      start,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToMonth(
+        ZonedDateTimeFns.fromString('2024-03-16T12:30:00[America/New_York]'),
+      ),
+      next,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToMonth(
+        ZonedDateTimeFns.fromString(
+          '2024-03-16T12:30:00.000000001[America/New_York]',
+        ),
+      ),
+      next,
+    )
   })
 })
 
@@ -1300,6 +1477,39 @@ describe('roundToWeek', () => {
         roundingIncrement: 2, // not allowed
       })
     }).toThrowError(RangeError)
+  })
+
+  it('matches temporal-utils around exact and midpoint boundaries across DST', () => {
+    const start = ZonedDateTimeFns.fromString(
+      '2024-03-04T00:00:00[America/New_York]',
+    )
+    const next = ZonedDateTimeFns.fromString(
+      '2024-03-11T00:00:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToWeek(start), start)
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToWeek(
+        ZonedDateTimeFns.fromString(
+          '2024-03-07T11:29:59.999999999[America/New_York]',
+        ),
+      ),
+      start,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToWeek(
+        ZonedDateTimeFns.fromString('2024-03-07T11:30:00[America/New_York]'),
+      ),
+      next,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToWeek(
+        ZonedDateTimeFns.fromString(
+          '2024-03-07T11:30:00.000000001[America/New_York]',
+        ),
+      ),
+      next,
+    )
   })
 })
 
@@ -1352,6 +1562,37 @@ describe('startOfDay', () => {
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfDay(zdt),
       ZonedDateTimeFns.fromString('2024-07-20T00:00:00[America/New_York]'),
+    )
+  })
+
+  it('works on 23-hour and 25-hour days', () => {
+    const springForward = ZonedDateTimeFns.fromString(
+      '2024-03-10T12:30:00[America/New_York]',
+    )
+    const fallBack = ZonedDateTimeFns.fromString(
+      '2024-11-03T12:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfDay(springForward),
+      ZonedDateTimeFns.fromString('2024-03-10T00:00:00[America/New_York]'),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfDay(fallBack),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T00:00:00-04:00[America/New_York]',
+      ),
+    )
+  })
+
+  it('uses the first real instant when midnight is skipped', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-09-08T12:30:00[America/Santiago]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfDay(zdt),
+      ZonedDateTimeFns.fromString('2024-09-08T01:00:00[America/Santiago]'),
     )
   })
 })
@@ -1481,6 +1722,44 @@ describe('endOfDay', () => {
     expectZonedDateTimeEquals(
       zdt1,
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
+    )
+  })
+
+  it('works on 23-hour and 25-hour days', () => {
+    const springForward = ZonedDateTimeFns.fromString(
+      '2024-03-10T12:30:00[America/New_York]',
+    )
+    const fallBack = ZonedDateTimeFns.fromString(
+      '2024-11-03T12:30:00[America/New_York]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.endOfDay(springForward),
+      ZonedDateTimeFns.subtractNanoseconds(
+        ZonedDateTimeFns.fromString('2024-03-11T00:00:00[America/New_York]'),
+        1,
+      ),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.endOfDay(fallBack),
+      ZonedDateTimeFns.subtractNanoseconds(
+        ZonedDateTimeFns.fromString('2024-11-04T00:00:00[America/New_York]'),
+        1,
+      ),
+    )
+  })
+
+  it('works when the day starts after a skipped midnight', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-09-08T12:30:00[America/Santiago]',
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.endOfDay(zdt),
+      ZonedDateTimeFns.subtractNanoseconds(
+        ZonedDateTimeFns.fromString('2024-09-09T00:00:00[America/Santiago]'),
+        1,
+      ),
     )
   })
 })

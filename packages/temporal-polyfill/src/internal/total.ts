@@ -22,7 +22,7 @@ import {
   moveMarkerToEpochNano,
 } from './relativeMath'
 import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
-import { NumberSign, compareBigInts } from './utils'
+import { NumberSign, compareBigInts, compareToHalfFraction } from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -224,10 +224,48 @@ export function computeEpochNanoFrac(
   epochNano0: bigint,
   epochNano1: bigint,
 ): number {
-  const denom = Number(epochNano1 - epochNano0)
-  if (!denom) {
+  const denomBig = epochNano1 - epochNano0
+  if (!denomBig) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const number = Number(epochNanoProgress - epochNano0)
-  return number / denom
+  const numeratorBig = epochNanoProgress - epochNano0
+
+  if (!numeratorBig) {
+    return 0
+  }
+
+  // Number division can collapse one-nanosecond differences onto 0.5 or 1.
+  // Compare exact bigint positions before fabricating a rounding-safe fraction.
+
+
+
+  const absNumerator = numeratorBig < 0n ? -numeratorBig : numeratorBig
+  const absDenom = denomBig < 0n ? -denomBig : denomBig
+  const fracSign =
+    compareBigInts(numeratorBig, 0n) === compareBigInts(denomBig, 0n) ? 1 : -1
+
+  if (compareBigInts(absNumerator, absDenom) <= 0) {
+    if (absNumerator === absDenom) {
+      return fracSign
+    }
+
+    return compareToHalfFraction(
+      compareBigInts(absNumerator * 2n, absDenom),
+      fracSign,
+    )
+  }
+
+  const frac = Number(numeratorBig) / Number(denomBig)
+
+  if (frac === fracSign) {
+    // TODO: This fallback is only for callers that can pass progress just
+    // outside the rounding window. Consider splitting that use from the
+    // in-window rounding-decision path, so the latter can remain pure exact
+    // threshold comparison and this path can get its own precision strategy.
+    // Preserve "just outside the interval" when Number division rounds back
+    // onto the endpoint.
+    return fracSign * 1.3
+  }
+
+  return frac
 }

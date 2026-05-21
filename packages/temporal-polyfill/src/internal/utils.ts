@@ -408,6 +408,16 @@ export function roundExpand(num: number): number {
   return num < 0 ? Math.floor(num) : Math.ceil(num)
 }
 
+// Fabricate a fraction safely away from 0.5 while preserving the exact
+// before/on/after-half comparison.
+
+export function compareToHalfFraction(
+  halfCompare: NumberSign,
+  sign: NumberSign = 1,
+): number {
+  return sign * (halfCompare * 0.2 + 0.5)
+}
+
 /*
 Similar to Math.round, but rounds negative half-numbers to floor (-1.5 => -2)
 */

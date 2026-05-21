@@ -60,7 +60,13 @@ import {
   nanoInMinute,
   unitNanoMap,
 } from './units'
-import { NumberSign, compareBigInts, divFloorBigInt, divTrunc } from './utils'
+import {
+  NumberSign,
+  compareBigInts,
+  compareToHalfFraction,
+  divFloorBigInt,
+  divTrunc,
+} from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -497,10 +503,10 @@ function roundBigNanoToIncWithTail(
     // Precise way of determining before/on/after half
     const halfCompare = compareBigInts(absRemainder * 2n, bigNanoInc)
 
-    // Fabricate a fraction safely away from 0.5 while preserving the exact
-    // before/on/after-half comparison.
-
-    fraction = Math.sign(Number(remainder)) * (halfCompare * 0.2 + 0.5)
+    fraction = compareToHalfFraction(
+      halfCompare,
+      Math.sign(Number(remainder)) as NumberSign,
+    )
   }
 
   const roundedTail = roundWithMode(
