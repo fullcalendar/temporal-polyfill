@@ -56,7 +56,7 @@ import {
 } from './units'
 import { NumberSign, divModFloor, padNumber, padNumber2 } from './utils'
 
-// High-level
+// Instant
 // -----------------------------------------------------------------------------
 
 export function formatInstantIso(
@@ -92,6 +92,32 @@ export function formatInstantIsoAuto(instantSlots: EpochNanoFields): string {
     ) + 'Z'
   )
 }
+
+function formatEpochNanoIso(
+  providedTimeZone: boolean,
+  timeZone: TimeZone,
+  epochNano: bigint,
+  roundingMode: RoundingMode,
+  nanoInc: number,
+  subsecDigits: SubsecDigits | -1 | undefined,
+): string {
+  epochNano = roundBigNanoToDayOriginInc(
+    epochNano,
+    BigInt(nanoInc),
+    roundingMode,
+  )
+
+  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
+  const isoDateTime = epochNanoToIso(epochNano, offsetNano)
+
+  return (
+    formatIsoDateTimeFields(isoDateTime, subsecDigits) +
+    (providedTimeZone ? formatOffsetNano(roundToMinute(offsetNano)) : 'Z')
+  )
+}
+
+// ZonedDateTime
+// -----------------------------------------------------------------------------
 
 export function formatZonedDateTimeIso(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
@@ -130,164 +156,6 @@ export function formatZonedDateTimeIsoAuto(
   )
 }
 
-export function formatPlainDateTimeIso(
-  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
-  options?: DateTimeDisplayOptions,
-): string {
-  const displayOptions = refineDateTimeDisplayOptions(options)
-  return formatDateTimeIso(
-    plainDateTimeSlots0.calendar,
-    plainDateTimeSlots0,
-    ...displayOptions,
-  )
-}
-
-export function formatPlainDateIso(
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
-): string {
-  return formatDateIso(
-    plainDateSlots.calendar,
-    plainDateSlots,
-    refineDateDisplayOptions(options),
-  )
-}
-
-export function formatDateIsoAuto(
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
-): string {
-  return (
-    formatIsoDateFields(plainDateSlots) +
-    (plainDateSlots.calendar === isoCalendar
-      ? ''
-      : formatCalendarId(getCalendarSlotId(plainDateSlots.calendar), false))
-  )
-}
-
-export function formatPlainYearMonthIso(
-  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
-): string {
-  return formatDateLikeIso(
-    plainYearMonthSlots.calendar,
-    formatIsoYearMonthFields,
-    plainYearMonthSlots,
-    refineDateDisplayOptions(options),
-  )
-}
-
-export function formatYearMonthIsoAuto(
-  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
-): string {
-  const calendar = plainYearMonthSlots.calendar
-
-  if (calendar !== isoCalendar) {
-    return (
-      formatIsoDateFields(plainYearMonthSlots) +
-      formatCalendarId(getCalendarSlotId(calendar), false)
-    )
-  }
-
-  return formatIsoYearMonthFields(plainYearMonthSlots)
-}
-
-export function formatPlainMonthDayIso(
-  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
-): string {
-  return formatDateLikeIso(
-    plainMonthDaySlots.calendar,
-    formatIsoMonthDayFields,
-    plainMonthDaySlots,
-    refineDateDisplayOptions(options),
-  )
-}
-
-export function formatMonthDayIsoAuto(
-  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
-): string {
-  const calendar = plainMonthDaySlots.calendar
-
-  if (calendar !== isoCalendar) {
-    return (
-      formatIsoDateFields(plainMonthDaySlots) +
-      formatCalendarId(getCalendarSlotId(calendar), false)
-    )
-  }
-
-  return formatIsoMonthDayFields(plainMonthDaySlots)
-}
-
-export function formatPlainTimeIso(
-  slots: TimeFields,
-  options?: TimeDisplayOptions,
-): string {
-  const displayOptions = refineTimeDisplayOptions(options)
-  return formatTimeIso(slots, ...displayOptions)
-}
-
-export function formatTimeIsoAuto(slots: TimeFields): string {
-  return formatTimeFields(slots, undefined)
-}
-
-export function formatDurationIso(
-  slots: DurationFields & { sign: NumberSign },
-  options?: TimeDisplayOptions,
-): string {
-  const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(
-    options,
-    Unit.Second,
-  )
-
-  // for performance AND for not losing precision when no rounding
-  if (nanoInc > 1) {
-    slots = {
-      ...slots,
-      ...roundDayTimeDurationByInc(slots, nanoInc, roundingMode),
-    }
-
-    // Check out-of-bounds
-    checkDurationUnits(slots)
-  }
-
-  return formatDurationSlots(
-    slots,
-    subsecDigits as SubsecDigits | undefined, // -1 won't happen (units can't be minutes)
-  )
-}
-
-export function formatDurationIsoAuto(
-  slots: DurationFields & { sign: NumberSign },
-): string {
-  return formatDurationSlots(slots, undefined)
-}
-
-// Medium-Level (receives refined options, also for formatDateLikeIso meta)
-// -----------------------------------------------------------------------------
-
-function formatEpochNanoIso(
-  providedTimeZone: boolean,
-  timeZone: TimeZone,
-  epochNano: bigint,
-  roundingMode: RoundingMode,
-  nanoInc: number,
-  subsecDigits: SubsecDigits | -1 | undefined,
-): string {
-  epochNano = roundBigNanoToDayOriginInc(
-    epochNano,
-    BigInt(nanoInc),
-    roundingMode,
-  )
-
-  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  const isoDateTime = epochNanoToIso(epochNano, offsetNano)
-
-  return (
-    formatIsoDateTimeFields(isoDateTime, subsecDigits) +
-    (providedTimeZone ? formatOffsetNano(roundToMinute(offsetNano)) : 'Z')
-  )
-}
-
 function formatZonedEpochNanoIso(
   calendar: CalendarSlot,
   timeZoneId: string,
@@ -313,6 +181,21 @@ function formatZonedEpochNanoIso(
     formatOffsetNano(roundToMinute(offsetNano), offsetDisplay) +
     formatTimeZone(timeZoneId, timeZoneDisplay) +
     formatCalendar(calendar, calendarDisplay)
+  )
+}
+
+// PlainDateTime
+// -----------------------------------------------------------------------------
+
+export function formatPlainDateTimeIso(
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
+  options?: DateTimeDisplayOptions,
+): string {
+  const displayOptions = refineDateTimeDisplayOptions(options)
+  return formatDateTimeIso(
+    plainDateTimeSlots0.calendar,
+    plainDateTimeSlots0,
+    ...displayOptions,
   )
 }
 
@@ -351,6 +234,31 @@ export function formatDateTimeIsoAuto(
   )
 }
 
+// PlainDate
+// -----------------------------------------------------------------------------
+
+export function formatPlainDateIso(
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+  options?: CalendarDisplayOptions,
+): string {
+  return formatDateIso(
+    plainDateSlots.calendar,
+    plainDateSlots,
+    refineDateDisplayOptions(options),
+  )
+}
+
+export function formatDateIsoAuto(
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+): string {
+  return (
+    formatIsoDateFields(plainDateSlots) +
+    (plainDateSlots.calendar === isoCalendar
+      ? ''
+      : formatCalendarId(getCalendarSlotId(plainDateSlots.calendar), false))
+  )
+}
+
 export function formatDateIso(
   calendar: CalendarSlot,
   isoDate: CalendarDateFields,
@@ -360,6 +268,69 @@ export function formatDateIso(
     formatIsoDateFields(isoDate) + formatCalendar(calendar, calendarDisplay)
   )
 }
+
+// PlainYearMonth
+// -----------------------------------------------------------------------------
+
+export function formatPlainYearMonthIso(
+  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
+  options?: CalendarDisplayOptions,
+): string {
+  return formatDateLikeIso(
+    plainYearMonthSlots.calendar,
+    formatIsoYearMonthFields,
+    plainYearMonthSlots,
+    refineDateDisplayOptions(options),
+  )
+}
+
+export function formatYearMonthIsoAuto(
+  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
+): string {
+  const calendar = plainYearMonthSlots.calendar
+
+  if (calendar !== isoCalendar) {
+    return (
+      formatIsoDateFields(plainYearMonthSlots) +
+      formatCalendarId(getCalendarSlotId(calendar), false)
+    )
+  }
+
+  return formatIsoYearMonthFields(plainYearMonthSlots)
+}
+
+// PlainMonthDay
+// -----------------------------------------------------------------------------
+
+export function formatPlainMonthDayIso(
+  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
+  options?: CalendarDisplayOptions,
+): string {
+  return formatDateLikeIso(
+    plainMonthDaySlots.calendar,
+    formatIsoMonthDayFields,
+    plainMonthDaySlots,
+    refineDateDisplayOptions(options),
+  )
+}
+
+export function formatMonthDayIsoAuto(
+  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
+): string {
+  const calendar = plainMonthDaySlots.calendar
+
+  if (calendar !== isoCalendar) {
+    return (
+      formatIsoDateFields(plainMonthDaySlots) +
+      formatCalendarId(getCalendarSlotId(calendar), false)
+    )
+  }
+
+  return formatIsoMonthDayFields(plainMonthDaySlots)
+}
+
+// PlainYearMonth / PlainMonthDay shared
+// -----------------------------------------------------------------------------
 
 function formatDateLikeIso(
   calendar: CalendarSlot,
@@ -391,6 +362,21 @@ function formatDateLikeIso(
   return formatSimple(isoDate)
 }
 
+// PlainTime
+// -----------------------------------------------------------------------------
+
+export function formatPlainTimeIso(
+  slots: TimeFields,
+  options?: TimeDisplayOptions,
+): string {
+  const displayOptions = refineTimeDisplayOptions(options)
+  return formatTimeIso(slots, ...displayOptions)
+}
+
+export function formatTimeIsoAuto(slots: TimeFields): string {
+  return formatTimeFields(slots, undefined)
+}
+
 function formatTimeIso(
   fields: TimeFields,
   roundingMode: RoundingMode,
@@ -401,6 +387,41 @@ function formatTimeIso(
     roundTimeToNano(fields, nanoInc, roundingMode)[0],
     subsecDigits,
   )
+}
+
+// Duration
+// -----------------------------------------------------------------------------
+
+export function formatDurationIso(
+  slots: DurationFields & { sign: NumberSign },
+  options?: TimeDisplayOptions,
+): string {
+  const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(
+    options,
+    Unit.Second,
+  )
+
+  // for performance AND for not losing precision when no rounding
+  if (nanoInc > 1) {
+    slots = {
+      ...slots,
+      ...roundDayTimeDurationByInc(slots, nanoInc, roundingMode),
+    }
+
+    // Check out-of-bounds
+    checkDurationUnits(slots)
+  }
+
+  return formatDurationSlots(
+    slots,
+    subsecDigits as SubsecDigits | undefined, // -1 won't happen (units can't be minutes)
+  )
+}
+
+export function formatDurationIsoAuto(
+  slots: DurationFields & { sign: NumberSign },
+): string {
+  return formatDurationSlots(slots, undefined)
 }
 
 function formatDurationSlots(
@@ -462,7 +483,22 @@ function formatDurationFragments(fragObj: Record<string, string>): string {
   return parts.join('')
 }
 
-// Low-Level (Rounding already happened. Just fields)
+/*
+Only accepts non-negative numbers
+*/
+function formatDurationNumber(n: number, force?: any): string {
+  if (!n && !force) {
+    return ''
+  }
+  // avoid outputting scientific notation
+  // https://stackoverflow.com/a/50978675/96342
+  // Avoid inherited options from Object.prototype pollution.
+  const options = Object.create(null)
+  options.useGrouping = false
+  return n.toLocaleString('fullwide', options)
+}
+
+// ISO Field Formatting (shared low-level)
 // -----------------------------------------------------------------------------
 
 function formatIsoDateTimeFields(
@@ -616,19 +652,4 @@ function formatSubsecNano(
 
 function getSignStr(num: number): string {
   return num < 0 ? '-' : '+'
-}
-
-/*
-Only accepts non-negative numbers
-*/
-function formatDurationNumber(n: number, force?: any): string {
-  if (!n && !force) {
-    return ''
-  }
-  // avoid outputting scientific notation
-  // https://stackoverflow.com/a/50978675/96342
-  // Avoid inherited options from Object.prototype pollution.
-  const options = Object.create(null)
-  options.useGrouping = false
-  return n.toLocaleString('fullwide', options)
 }
