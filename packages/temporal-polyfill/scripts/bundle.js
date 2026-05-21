@@ -6,7 +6,7 @@ import {
   resolve as resolvePath,
   sep as pathSep,
 } from 'path'
-import { copyFile, readFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
@@ -171,19 +171,6 @@ async function buildConfigs(pkgDir, isDev) {
           renderChunk(code) {
             return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
           },
-
-          // Copy .d.ts to .d.cts (for CJS types)
-          async writeBundle(_options, bundle) {
-            for (const bundlePath in bundle) {
-              let outputPath = bundlePath
-              outputPath = outputPath.replace(extensions.dts, '')
-              outputPath += '.d.cts'
-              await copyFile(
-                joinPaths(pkgDir, 'dist', bundlePath),
-                joinPaths(pkgDir, 'dist', outputPath),
-              )
-            }
-          },
         },
       ],
       output: {
@@ -225,56 +212,38 @@ async function buildConfigs(pkgDir, isDev) {
       input: moduleInputs,
       onwarn,
       external: isExternalDependency,
-      output: [
-        {
-          format: 'cjs',
-          dir: 'dist',
-          entryFileNames: '[name]' + extensions.cjs,
-          chunkFileNames: chunkBase + extensions.cjs,
-          manualChunks: manuallyResolveChunk,
-          minifyInternalExports: false,
-          hoistTransitiveImports: false,
-          plugins: [
-            !isDev &&
-              buildTerserPlugin({
-                humanReadable: true,
-                // don't mangleProps. CJS require/exports names are affected
-              }),
-          ],
-        },
-        {
-          format: 'es',
-          dir: 'dist',
-          entryFileNames(chunkInfo) {
-            const exportName = chunkInfo.name
-            const exportPath = exportName === 'index' ? '.' : './' + exportName
+      output: {
+        format: 'es',
+        dir: 'dist',
+        entryFileNames(chunkInfo) {
+          const exportName = chunkInfo.name
+          const exportPath = exportName === 'index' ? '.' : './' + exportName
 
-            const esmExtension =
-              (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
-              extensions.esm
+          const esmExtension =
+            (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
+            extensions.esm
 
-            return exportName + esmExtension
-          },
-          chunkFileNames: chunkBase + extensions.esm,
-          manualChunks: manuallyResolveChunk,
-          minifyInternalExports: false,
-          hoistTransitiveImports: false,
-          // If you're tempted to write sourcemaps to ESM, don't!
-          // They don't play well with vitest it seems. Not accurate.
-          //// sourcemap: isDev,
-          //// sourcemapExcludeSources: true,
-          plugins: [
-            !isDev && pureTopLevel(),
-            !isDev &&
-              buildTerserPlugin({
-                humanReadable: true,
-                mangleProps: true,
-                manglePropsExcept: temporalReservedWords,
-                preserveAnnotations: true,
-              }),
-          ],
+          return exportName + esmExtension
         },
-      ],
+        chunkFileNames: chunkBase + extensions.esm,
+        manualChunks: manuallyResolveChunk,
+        minifyInternalExports: false,
+        hoistTransitiveImports: false,
+        // If you're tempted to write sourcemaps to ESM, don't!
+        // They don't play well with vitest it seems. Not accurate.
+        //// sourcemap: isDev,
+        //// sourcemapExcludeSources: true,
+        plugins: [
+          !isDev && pureTopLevel(),
+          !isDev &&
+            buildTerserPlugin({
+              humanReadable: true,
+              mangleProps: true,
+              manglePropsExcept: temporalReservedWords,
+              preserveAnnotations: true,
+            }),
+        ],
+      },
     },
     ...iifeConfigs,
     ...dtsConfigs,

@@ -2,6 +2,7 @@
 next
 ----
 
+- breaking: no more cjs in dist
 - fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` ([#87](https://github.com/fullcalendar/temporal-polyfill/issues/87)). This correct behavior is now also covered by test262's `test/built-ins/Temporal/Duration/prototype/round/blank-duration.js`.
 - fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` ([#55](https://github.com/fullcalendar/temporal-polyfill/issues/55)). This correct behavior is now also covered by test262's `test/built-ins/Temporal/Duration/prototype/total/blank-duration.js` and `test/built-ins/Temporal/Duration/prototype/total/zero-duration.js`.
 - fix: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification ([#92](https://github.com/fullcalendar/temporal-polyfill/issues/92)).

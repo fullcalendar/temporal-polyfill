@@ -20,7 +20,6 @@ async function writePkgJson(pkgDir, isDev) {
   const distExportMap = {}
   const sideEffectsList = []
 
-  let rootCjsPath
   let rootEsmPath
   let rootTypesPath
   let rootIifeMinPath
@@ -33,7 +32,6 @@ async function writePkgJson(pkgDir, isDev) {
     const esmExtension =
       (exportConfig.iife ? extensions.esmWhenIifePrefix : '') + extensions.esm
     const esmPath = './' + exportName + esmExtension
-    const cjsPath = './' + exportName + extensions.cjs
     const typesPath = isDev
       ? './.tsc/' +
         (exportConfig.types || exportConfig.src || exportName) +
@@ -41,17 +39,9 @@ async function writePkgJson(pkgDir, isDev) {
       : './' + exportName + extensions.dts
 
     distExportMap[exportPath] = {
-      'module-sync': esmPath,
-      require: cjsPath,
-      import:
-        isDev || exportConfig.iife
-          ? { types: typesPath, default: esmPath }
-          : esmPath,
+      import: { types: typesPath, default: esmPath },
     }
 
-    if (!rootCjsPath) {
-      rootCjsPath = cjsPath
-    }
     if (!rootEsmPath) {
       rootEsmPath = esmPath
     }
@@ -61,7 +51,6 @@ async function writePkgJson(pkgDir, isDev) {
 
     if (exportConfig.iife) {
       sideEffectsList.push(
-        './' + exportName + extensions.cjs,
         './' + exportName + esmExtension,
         './' + exportName + extensions.iife,
         './' + exportName + extensions.iifeMin,
@@ -73,7 +62,7 @@ async function writePkgJson(pkgDir, isDev) {
     }
   }
 
-  distManifest.main = rootCjsPath
+  distManifest.main = rootEsmPath
   distManifest.types = rootTypesPath
   distManifest.module = rootEsmPath
   distManifest.exports = distExportMap

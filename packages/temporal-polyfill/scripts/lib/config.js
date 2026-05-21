@@ -5,7 +5,6 @@ export const extensions = {
   // as an ESM module that can be imported by another script
   esmWhenIifePrefix: '.esm',
 
-  cjs: '.cjs',
   iife: '.js',
   iifeMin: '.min.js',
   dts: '.d.ts',
