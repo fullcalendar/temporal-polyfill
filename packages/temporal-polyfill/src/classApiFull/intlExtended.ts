@@ -1,5 +1,5 @@
+import { DateTimeFormat } from '../apiHelpers/intlDateTimeFormat'
 import { createPropDescriptors } from '../internal/utils'
-import { DateTimeFormat } from './intlDateTimeFormat'
 
 /*
 An extended version of the Intl global namespace

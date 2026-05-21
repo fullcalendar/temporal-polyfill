@@ -1,5 +1,3 @@
-import { classFormatConfigs } from '../apiHelpers/intlFormatConfig'
-import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import * as errorMessages from '../internal/errorMessages'
 import {
   FormatPrepper,
@@ -19,22 +17,11 @@ import {
   memoize,
   pluckProps,
 } from '../internal/utils'
-import { Instant } from './instant'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainTime } from './plainTime'
-import { PlainYearMonth } from './plainYearMonth'
-import { ZonedDateTime } from './zonedDateTime'
-
-export type TemporalFormattable =
-  | Instant
-  | PlainDate
-  | PlainDateTime
-  | ZonedDateTime
-  | PlainYearMonth
-  | PlainMonthDay
-  | PlainTime
+import { classFormatConfigs } from './intlFormatConfig'
+import { getBrandingAndSlots } from './slotClass'
+// Temporal values are detected by internal slot branding at runtime, so this
+// shared Intl wrapper doesn't need to import branch-local public classes.
+export type TemporalFormattable = object
 
 export type Formattable = TemporalFormattable | RawFormattable
 
