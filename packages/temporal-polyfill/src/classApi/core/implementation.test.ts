@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Intl, Temporal, toTemporalInstant } from './impl'
+import { Intl, Temporal, toTemporalInstant } from './implementation'
 
 describe('Temporal.Duration', () => {
   it('most likely falls back to toString', () => {

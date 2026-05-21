@@ -50,9 +50,9 @@
         "src": "classApi/core/index",
         "types": "typeOverrides/index"
       },
-      "./impl": {
-        "src": "classApi/core/impl",
-        "types": "typeOverrides/impl"
+      "./implementation": {
+        "src": "classApi/core/implementation",
+        "types": "typeOverrides/implementation"
       },
       "./global": {
         "src": "classApi/core/global",
@@ -63,9 +63,9 @@
         "src": "classApi/full/index",
         "types": "typeOverrides/index"
       },
-      "./full/impl": {
-        "src": "classApi/full/impl",
-        "types": "typeOverrides/impl"
+      "./full/implementation": {
+        "src": "classApi/full/implementation",
+        "types": "typeOverrides/implementation"
       },
       "./full/global": {
         "src": "classApi/full/global",
