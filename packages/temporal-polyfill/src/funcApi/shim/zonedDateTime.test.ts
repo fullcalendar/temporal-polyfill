@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getIntlCalendar } from './calendar'
+import { getCoreCalendar, getIntlCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainTimeFns from './plainTime'
 import {
@@ -16,22 +16,28 @@ const hebrewCalendar = getIntlCalendar('hebrew')
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToYear(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToYear(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToMonthEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToMonth(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToMonth(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToWeekEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToWeek(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToWeek(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
@@ -83,6 +89,7 @@ describe('fromString', () => {
   it('can parse with a timeZone', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(zdt, {
       timeZoneId: 'America/New_York',
@@ -268,6 +275,7 @@ describe('dayOfWeek', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.dayOfWeek(zdt)).toBe(2)
   })
@@ -277,6 +285,7 @@ describe('daysInWeek', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.daysInWeek(zdt)).toBe(7)
   })
@@ -294,6 +303,7 @@ describe('weekOfYear', () => {
   it('returns undefined for gregory calendar dates', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=gregory]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(undefined)
   })
@@ -301,6 +311,7 @@ describe('weekOfYear', () => {
   it('returns correct iso8601 results', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(52)
   })
@@ -318,6 +329,7 @@ describe('yearOfWeek', () => {
   it('returns undefined for gregory calendar dates', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=gregory]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(undefined)
   })
@@ -325,6 +337,7 @@ describe('yearOfWeek', () => {
   it('returns correct iso8601 results', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(2022)
   })
@@ -334,6 +347,7 @@ describe('dayOfYear', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.dayOfYear(zdt)).toBe(58)
   })
@@ -343,6 +357,7 @@ describe('daysInMonth', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.daysInMonth(zdt)).toBe(29)
   })
@@ -352,6 +367,7 @@ describe('daysInYear', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.daysInYear(zdt)).toBe(366)
   })
@@ -381,6 +397,7 @@ describe('startOfDay', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.startOfDay(zdt0)
     expectZonedDateTimeEquals(zdt1, {
@@ -430,6 +447,7 @@ describe('hoursInDay', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const hours = ZonedDateTimeFns.hoursInDay(zdt0)
     expect(hours).toBe(24)
@@ -438,9 +456,11 @@ describe('hoursInDay', () => {
   it('detects 23-hour and 25-hour DST transition days', () => {
     const springForward = ZonedDateTimeFns.fromString(
       '2024-03-10T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const fallBack = ZonedDateTimeFns.fromString(
       '2024-11-03T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expect(ZonedDateTimeFns.hoursInDay(springForward)).toBe(23)
@@ -452,6 +472,7 @@ describe('add', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.add(
       zdt0,
@@ -468,6 +489,7 @@ describe('subtract', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.subtract(
       zdt0,
@@ -484,9 +506,11 @@ describe('diff', () => {
   it('works without options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
+      getCoreCalendar,
     )
     const d = ZonedDateTimeFns.diff(zdt0, zdt1)
     expectDurationEquals(d, {
@@ -498,9 +522,11 @@ describe('diff', () => {
   it('works with options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
+      getCoreCalendar,
     )
     const d = ZonedDateTimeFns.diff(zdt0, zdt1, { largestUnit: 'year' })
     expectDurationEquals(d, {
@@ -516,6 +542,7 @@ describe('round', () => {
   it('works with single unit arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.round(zdt0, 'day')
     expectZonedDateTimeEquals(zdt1, {
@@ -527,6 +554,7 @@ describe('round', () => {
   it('works with options arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.round(zdt0, { smallestUnit: 'day' })
     expectZonedDateTimeEquals(zdt1, {
@@ -540,6 +568,7 @@ describe('equals', () => {
   it('works affirmatively', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.equals(zdt, zdt)).toBe(true)
   })
@@ -547,9 +576,11 @@ describe('equals', () => {
   it('works negatively', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.equals(zdt0, zdt1)).toBe(false)
   })
@@ -559,9 +590,11 @@ describe('compare', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2025-03-27T16:35:00[America/New_York]',
+      getCoreCalendar,
     )
     expect(ZonedDateTimeFns.compare(zdt0, zdt1)).toBe(-1)
     expect(ZonedDateTimeFns.compare(zdt1, zdt0)).toBe(1)
@@ -573,6 +606,7 @@ describe('toPlainDateTime', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const pdt = ZonedDateTimeFns.toPlainDateTime(zdt)
     expectPlainDateTimeEquals(pdt, {
@@ -589,6 +623,7 @@ describe('toPlainDate', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const pd = ZonedDateTimeFns.toPlainDate(zdt)
     expectPlainDateEquals(pd, {
@@ -603,6 +638,7 @@ describe('toPlainTime', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const pt = ZonedDateTimeFns.toPlainTime(zdt)
     expectPlainTimeEquals(pt, {
@@ -699,9 +735,11 @@ describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdtExp = ZonedDateTimeFns.fromString(
       '2024-01-05T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
@@ -733,11 +771,15 @@ describe('withDayOfYear', () => {
   it('matches canonical coercion and error types', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfYear(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-01-01T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withDayOfYear(zdt, -Infinity as any)
@@ -760,6 +802,7 @@ describe('withDayOfMonth', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfMonth(zdt, 5),
@@ -776,9 +819,11 @@ describe('withDayOfWeek', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdtExp = ZonedDateTimeFns.fromString(
       '2024-02-29T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
@@ -791,12 +836,16 @@ describe('withDayOfWeek', () => {
 
   it('moves by calendar days across a spring-forward gap', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-09T12:00:00[America/New_York]', // Saturday
+      '2024-03-09T12:00:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfWeek(zdt0, 7),
-      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
@@ -821,11 +870,15 @@ describe('withDayOfWeek', () => {
   it('matches canonical coercion and error types', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfWeek(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-02-26T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-02-26T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withDayOfWeek(zdt, -Infinity as any)
@@ -847,10 +900,12 @@ describe('withDayOfWeek', () => {
 describe('withWeekOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-27T12:30:00[America/New_York]', // weekOfYear:9, yearOfWeek:2024
+      '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar, // weekOfYear:9, yearOfWeek:2024
     )
     const zdtExp = ZonedDateTimeFns.fromString(
       '2024-07-02T12:30:00-04:00[America/New_York]',
+      getCoreCalendar,
     )
     const yearExp = 2024
 
@@ -877,11 +932,15 @@ describe('withWeekOfYear', () => {
   it('matches canonical coercion and error types', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withWeekOfYear(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-01-02T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-02T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withWeekOfYear(zdt, -Infinity as any)
@@ -907,6 +966,7 @@ describe('addYears', () => {
   it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addYears(zdt, 5),
@@ -919,7 +979,8 @@ describe('addYears', () => {
 
   it('works with explicit constrain overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-29T12:30:00[America/New_York]', // leap day
+      '2024-02-29T12:30:00[America/New_York]',
+      getCoreCalendar, // leap day
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addYears(zdt, 5, { overflow: 'constrain' }),
@@ -929,7 +990,8 @@ describe('addYears', () => {
 
   it('can throw error with reject overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-29T12:30:00[America/New_York]', // leap day
+      '2024-02-29T12:30:00[America/New_York]',
+      getCoreCalendar, // leap day
     )
     expect(() => {
       ZonedDateTimeFns.addYears(zdt, 1, { overflow: 'reject' })
@@ -941,6 +1003,7 @@ describe('addMonths', () => {
   it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addMonths(zdt, 5),
@@ -953,7 +1016,8 @@ describe('addMonths', () => {
 
   it('works with explicit constrain overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-01-31T12:30:00[America/New_York]', // 31 days
+      '2024-01-31T12:30:00[America/New_York]',
+      getCoreCalendar, // 31 days
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addMonths(zdt, 1, { overflow: 'constrain' }),
@@ -963,7 +1027,8 @@ describe('addMonths', () => {
 
   it('can throw error with reject overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-01-31T12:30:00[America/New_York]', // 31 days
+      '2024-01-31T12:30:00[America/New_York]',
+      getCoreCalendar, // 31 days
     )
     expect(() => {
       ZonedDateTimeFns.addMonths(zdt, 1, { overflow: 'reject' })
@@ -975,6 +1040,7 @@ describe('addWeeks', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addWeeks(zdt, 300),
@@ -988,18 +1054,26 @@ describe('addWeeks', () => {
   it('moves by calendar weeks across spring-forward and fall-back transitions', () => {
     const springForward = ZonedDateTimeFns.fromString(
       '2024-03-03T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
     const fallBack = ZonedDateTimeFns.fromString(
       '2024-10-27T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addWeeks(springForward, 1),
-      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addWeeks(fallBack, 1),
-      ZonedDateTimeFns.fromString('2024-11-03T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1008,6 +1082,7 @@ describe('addDays', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addDays(zdt, 300),
@@ -1021,34 +1096,44 @@ describe('addDays', () => {
   it('moves by calendar days across a spring-forward gap', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-03-09T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addDays(zdt, 1),
-      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('uses compatible disambiguation when the target wall time is skipped', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-03-09T02:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addDays(zdt, 1),
-      ZonedDateTimeFns.fromString('2024-03-10T03:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T03:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('preserves repeated fall-back wall time for calendar-day movement', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-11-03T01:30:00-04:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addDays(zdt, 1),
       ZonedDateTimeFns.fromString(
         '2024-11-04T01:30:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1058,6 +1143,7 @@ describe('addHours', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addHours(zdt, 300),
@@ -1071,23 +1157,29 @@ describe('addHours', () => {
   it('moves by exact time across a spring-forward gap', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-03-09T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addHours(zdt, 24),
-      ZonedDateTimeFns.fromString('2024-03-10T13:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T13:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('moves by exact time across a fall-back repeat', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-11-03T01:30:00-04:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addHours(zdt, 24),
       ZonedDateTimeFns.fromString(
         '2024-11-04T00:30:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1097,6 +1189,7 @@ describe('addMinutes', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addMinutes(zdt, 300),
@@ -1112,6 +1205,7 @@ describe('addSeconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addSeconds(zdt, 300),
@@ -1127,6 +1221,7 @@ describe('addMilliseconds (and throws on non-integers)', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addMilliseconds(zdt, 300),
@@ -1142,6 +1237,7 @@ describe('addMicroseconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addMicroseconds(zdt, 300),
@@ -1157,6 +1253,7 @@ describe('addNanoseconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addNanoseconds(zdt, 300),
@@ -1170,21 +1267,25 @@ describe('addNanoseconds', () => {
   it('moves by exact nanoseconds across spring-forward and fall-back boundaries', () => {
     const springForward = ZonedDateTimeFns.fromString(
       '2024-03-10T01:59:59.999999999-05:00[America/New_York]',
+      getCoreCalendar,
     )
     const fallBack = ZonedDateTimeFns.fromString(
       '2024-11-03T01:59:59.999999999-04:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addNanoseconds(springForward, 1),
       ZonedDateTimeFns.fromString(
         '2024-03-10T03:00:00-04:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addNanoseconds(fallBack, 1),
       ZonedDateTimeFns.fromString(
         '2024-11-03T01:00:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1197,6 +1298,7 @@ describe('subtractYears', () => {
   it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractYears(zdt, 5),
@@ -1209,7 +1311,8 @@ describe('subtractYears', () => {
 
   it('works with explicit constrain overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-29T12:30:00[America/New_York]', // leap day
+      '2024-02-29T12:30:00[America/New_York]',
+      getCoreCalendar, // leap day
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractYears(zdt, 5, { overflow: 'constrain' }),
@@ -1219,7 +1322,8 @@ describe('subtractYears', () => {
 
   it('can throw error with reject overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-02-29T12:30:00[America/New_York]', // leap day
+      '2024-02-29T12:30:00[America/New_York]',
+      getCoreCalendar, // leap day
     )
     expect(() => {
       ZonedDateTimeFns.subtractYears(zdt, 1, { overflow: 'reject' })
@@ -1231,6 +1335,7 @@ describe('subtractMonths', () => {
   it('works without options (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractMonths(zdt, 5),
@@ -1243,7 +1348,8 @@ describe('subtractMonths', () => {
 
   it('works with explicit constrain overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-03-31T12:30:00[America/New_York]', // 31 days
+      '2024-03-31T12:30:00[America/New_York]',
+      getCoreCalendar, // 31 days
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractMonths(zdt, 1, { overflow: 'constrain' }),
@@ -1253,7 +1359,8 @@ describe('subtractMonths', () => {
 
   it('can throw error with reject overflow option', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-03-31T12:30:00[America/New_York]', // 31 days
+      '2024-03-31T12:30:00[America/New_York]',
+      getCoreCalendar, // 31 days
     )
     expect(() => {
       ZonedDateTimeFns.subtractMonths(zdt, 1, { overflow: 'reject' })
@@ -1265,6 +1372,7 @@ describe('subtractWeeks', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractWeeks(zdt, 300),
@@ -1280,6 +1388,7 @@ describe('subtractDays', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractDays(zdt, 300),
@@ -1295,6 +1404,7 @@ describe('subtractHours', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractHours(zdt, 300),
@@ -1310,6 +1420,7 @@ describe('subtractMinutes', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractMinutes(zdt, 300),
@@ -1325,6 +1436,7 @@ describe('subtractSeconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractSeconds(zdt, 300),
@@ -1340,6 +1452,7 @@ describe('subtractMilliseconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractMilliseconds(zdt, 300),
@@ -1358,6 +1471,7 @@ describe('subtractMicroseconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractMicroseconds(zdt, 300),
@@ -1376,6 +1490,7 @@ describe('subtractNanoseconds', () => {
   it('works (and throws on non-integers)', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.subtractNanoseconds(zdt, 300),
@@ -1397,33 +1512,45 @@ describe('roundToYear', () => {
   it('works without options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToYear(zdt),
-      ZonedDateTimeFns.fromString('2025-01-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2025-01-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('works with single roundingMode arg', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToYear(zdt, 'floor'),
-      ZonedDateTimeFns.fromString('2024-01-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToYear(zdt, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      ZonedDateTimeFns.fromString('2024-01-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.roundToYear(zdt, {
@@ -1456,15 +1583,18 @@ describe('roundToYear', () => {
   it('preserves directed rounding at nanosecond interval edges', () => {
     const start = ZonedDateTimeFns.fromString(
       '2024-01-01T00:00:00[America/New_York]',
+      getCoreCalendar,
     )
     const next = ZonedDateTimeFns.fromString(
       '2025-01-01T00:00:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToYear(
         ZonedDateTimeFns.fromString(
           '2024-01-01T00:00:00.000000001[America/New_York]',
+          getCoreCalendar,
         ),
         'ceil',
       ),
@@ -1474,6 +1604,7 @@ describe('roundToYear', () => {
       ZonedDateTimeFns.roundToYear(
         ZonedDateTimeFns.fromString(
           '2024-12-31T23:59:59.999999999[America/New_York]',
+          getCoreCalendar,
         ),
         'floor',
       ),
@@ -1487,33 +1618,45 @@ describe('roundToMonth', () => {
   it('works without options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToMonth(zdt),
-      ZonedDateTimeFns.fromString('2024-08-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-08-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('works with single roundingMode arg', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToMonth(zdt, 'floor'),
-      ZonedDateTimeFns.fromString('2024-07-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToMonth(zdt, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      ZonedDateTimeFns.fromString('2024-07-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.roundToMonth(zdt, {
@@ -1547,31 +1690,36 @@ describe('roundToMonth', () => {
 describe('roundToWeek', () => {
   it('works without options', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // Saturday
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToWeek(zdt),
       ZonedDateTimeFns.fromString(
-        '2024-07-22T00:00:00[America/New_York]', // next Monday
+        '2024-07-22T00:00:00[America/New_York]',
+        getCoreCalendar, // next Monday
       ),
     )
   })
 
   it('works with single roundingMode arg', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // Saturday
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToWeek(zdt, 'floor'),
       ZonedDateTimeFns.fromString(
-        '2024-07-15T00:00:00[America/New_York]', // this Monday
+        '2024-07-15T00:00:00[America/New_York]',
+        getCoreCalendar, // this Monday
       ),
     )
   })
 
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // Saturday
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToWeek(zdt, {
@@ -1579,7 +1727,8 @@ describe('roundToWeek', () => {
         roundingIncrement: 1,
       }),
       ZonedDateTimeFns.fromString(
-        '2024-07-15T00:00:00[America/New_York]', // this Monday
+        '2024-07-15T00:00:00[America/New_York]',
+        getCoreCalendar, // this Monday
       ),
     )
     expect(() => {
@@ -1618,10 +1767,14 @@ describe('startOfYear', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfYear(zdt),
-      ZonedDateTimeFns.fromString('2024-01-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1630,10 +1783,14 @@ describe('startOfMonth', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMonth(zdt),
-      ZonedDateTimeFns.fromString('2024-07-01T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
@@ -1641,11 +1798,15 @@ describe('startOfMonth', () => {
     // Keep this skipped-midnight fixture aligned with ../native/zonedDateTime.test.ts.
     const zdt = ZonedDateTimeFns.fromString(
       '2009-06-15T12:30:00[Africa/Casablanca]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMonth(zdt),
-      ZonedDateTimeFns.fromString('2009-06-01T01:00:00[Africa/Casablanca]'),
+      ZonedDateTimeFns.fromString(
+        '2009-06-01T01:00:00[Africa/Casablanca]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1653,25 +1814,29 @@ describe('startOfMonth', () => {
 describe('startOfWeek', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // Saturday
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfWeek(zdt),
       ZonedDateTimeFns.fromString(
-        '2024-07-15T00:00:00[America/New_York]', // this Monday
+        '2024-07-15T00:00:00[America/New_York]',
+        getCoreCalendar, // this Monday
       ),
     )
   })
 
   it('uses the first real instant when the week starts after a skipped midnight', () => {
     const zdt = ZonedDateTimeFns.fromString(
-      '2009-06-03T12:30:00[Africa/Casablanca]', // Wednesday
+      '2009-06-03T12:30:00[Africa/Casablanca]',
+      getCoreCalendar, // Wednesday
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfWeek(zdt),
       ZonedDateTimeFns.fromString(
-        '2009-06-01T01:00:00[Africa/Casablanca]', // this Monday
+        '2009-06-01T01:00:00[Africa/Casablanca]',
+        getCoreCalendar, // this Monday
       ),
     )
   })
@@ -1681,29 +1846,39 @@ describe('startOfDay', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfDay(zdt),
-      ZonedDateTimeFns.fromString('2024-07-20T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-20T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('works on 23-hour and 25-hour days', () => {
     const springForward = ZonedDateTimeFns.fromString(
       '2024-03-10T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const fallBack = ZonedDateTimeFns.fromString(
       '2024-11-03T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfDay(springForward),
-      ZonedDateTimeFns.fromString('2024-03-10T00:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfDay(fallBack),
       ZonedDateTimeFns.fromString(
         '2024-11-03T00:00:00-04:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1711,11 +1886,15 @@ describe('startOfDay', () => {
   it('uses the first real instant when midnight is skipped', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-09-08T12:30:00[America/Santiago]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfDay(zdt),
-      ZonedDateTimeFns.fromString('2024-09-08T01:00:00[America/Santiago]'),
+      ZonedDateTimeFns.fromString(
+        '2024-09-08T01:00:00[America/Santiago]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1724,22 +1903,28 @@ describe('startOfHour', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfHour(zdt),
-      ZonedDateTimeFns.fromString('2024-07-20T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-20T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 
   it('preserves repeated-hour offset on a 25-hour day', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-11-03T01:30:00-05:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfHour(zdt),
       ZonedDateTimeFns.fromString(
         '2024-11-03T01:00:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1749,10 +1934,14 @@ describe('startOfMinute', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:30[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMinute(zdt),
-      ZonedDateTimeFns.fromString('2024-07-20T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-20T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1761,10 +1950,14 @@ describe('startOfSecond', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.5[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfSecond(zdt),
-      ZonedDateTimeFns.fromString('2024-07-20T12:30:44[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-20T12:30:44[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1773,10 +1966,14 @@ describe('startOfMillisecond', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.4023[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMillisecond(zdt),
-      ZonedDateTimeFns.fromString('2024-07-20T12:30:44.402[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-20T12:30:44.402[America/New_York]',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1785,11 +1982,13 @@ describe('startOfMicrosecond', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.4000023[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMicrosecond(zdt),
       ZonedDateTimeFns.fromString(
         '2024-07-20T12:30:44.400002[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -1802,10 +2001,12 @@ describe('endOfYear', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfYear(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2025-01-01T00:00:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1818,10 +2019,12 @@ describe('endOfMonth', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfMonth(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-08-01T00:00:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1832,10 +2035,12 @@ describe('endOfMonth', () => {
   it('ends before the first real instant when the next month skips midnight', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2009-05-15T12:30:00[Africa/Casablanca]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfMonth(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2009-06-01T01:00:00[Africa/Casablanca]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
@@ -1848,11 +2053,13 @@ describe('endOfMonth', () => {
 describe('endOfWeek', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // Saturday
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
     )
     const zdt1 = ZonedDateTimeFns.endOfWeek(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
-      '2024-07-22T00:00:00[America/New_York]', // next Monday
+      '2024-07-22T00:00:00[America/New_York]',
+      getCoreCalendar, // next Monday
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1862,11 +2069,13 @@ describe('endOfWeek', () => {
 
   it('ends before the first real instant when the next week skips midnight', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2009-05-30T12:30:00[Africa/Casablanca]', // Saturday
+      '2009-05-30T12:30:00[Africa/Casablanca]',
+      getCoreCalendar, // Saturday
     )
     const zdt1 = ZonedDateTimeFns.endOfWeek(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
-      '2009-06-01T01:00:00[Africa/Casablanca]', // next Monday
+      '2009-06-01T01:00:00[Africa/Casablanca]',
+      getCoreCalendar, // next Monday
     )
 
     expectZonedDateTimeEquals(
@@ -1880,10 +2089,12 @@ describe('endOfDay', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfDay(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-21T00:00:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1894,22 +2105,30 @@ describe('endOfDay', () => {
   it('works on 23-hour and 25-hour days', () => {
     const springForward = ZonedDateTimeFns.fromString(
       '2024-03-10T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const fallBack = ZonedDateTimeFns.fromString(
       '2024-11-03T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfDay(springForward),
       ZonedDateTimeFns.subtractNanoseconds(
-        ZonedDateTimeFns.fromString('2024-03-11T00:00:00[America/New_York]'),
+        ZonedDateTimeFns.fromString(
+          '2024-03-11T00:00:00[America/New_York]',
+          getCoreCalendar,
+        ),
         1,
       ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfDay(fallBack),
       ZonedDateTimeFns.subtractNanoseconds(
-        ZonedDateTimeFns.fromString('2024-11-04T00:00:00[America/New_York]'),
+        ZonedDateTimeFns.fromString(
+          '2024-11-04T00:00:00[America/New_York]',
+          getCoreCalendar,
+        ),
         1,
       ),
     )
@@ -1918,12 +2137,16 @@ describe('endOfDay', () => {
   it('works when the day starts after a skipped midnight', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-09-08T12:30:00[America/Santiago]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfDay(zdt),
       ZonedDateTimeFns.subtractNanoseconds(
-        ZonedDateTimeFns.fromString('2024-09-09T00:00:00[America/Santiago]'),
+        ZonedDateTimeFns.fromString(
+          '2024-09-09T00:00:00[America/Santiago]',
+          getCoreCalendar,
+        ),
         1,
       ),
     )
@@ -1934,10 +2157,12 @@ describe('endOfHour', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfHour(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T13:00:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1948,10 +2173,12 @@ describe('endOfHour', () => {
   it('uses the last real instant before a spring-forward gap', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-10T01:30:00-05:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfHour(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-03-10T03:00:00-04:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
@@ -1965,10 +2192,12 @@ describe('endOfMinute', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:30[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfMinute(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:31:00[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1981,10 +2210,12 @@ describe('endOfSecond', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.5[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfSecond(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:45[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -1997,10 +2228,12 @@ describe('endOfMillisecond', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.4023[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfMillisecond(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.403[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -2013,10 +2246,12 @@ describe('endOfMicrosecond', () => {
   it('works', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.4000023[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.endOfMicrosecond(zdt0)
     const zdt2 = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:44.400003[America/New_York]',
+      getCoreCalendar,
     )
     expectZonedDateTimeEquals(
       zdt1,
@@ -2031,10 +2266,12 @@ describe('endOfMicrosecond', () => {
 describe('diffYears', () => {
   it('gives exact result when no options/roundingMode specified, no offset change', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // -04:00
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2026-04-20T12:30:00[America/New_York]', // -04:00
+      '2026-04-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const years = ZonedDateTimeFns.diffYears(zdt0, zdt1)
     expect(years).toBeCloseTo(1.75) // b/c nanosecond arithmetics, not month-based
@@ -2042,10 +2279,12 @@ describe('diffYears', () => {
 
   it('gives exact result when no options/roundingMode specified, offset change', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // -04:00
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2026-01-20T12:30:00[America/New_York]', // -05:00
+      '2026-01-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const years = ZonedDateTimeFns.diffYears(zdt0, zdt1)
     expect(years).toBeCloseTo(1.504, 3)
@@ -2053,10 +2292,12 @@ describe('diffYears', () => {
 
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // -04:00
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2026-04-20T12:30:00[America/New_York]', // -04:00
+      '2026-04-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const years = ZonedDateTimeFns.diffYears(zdt0, zdt1, 'floor')
     expect(years).toBe(1)
@@ -2064,10 +2305,12 @@ describe('diffYears', () => {
 
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-07-20T12:30:00[America/New_York]', // -04:00
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2026-04-20T12:30:00[America/New_York]', // -04:00
+      '2026-04-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const years = ZonedDateTimeFns.diffYears(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2084,10 +2327,12 @@ describe('diffYears', () => {
 describe('diffMonths', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-20T12:30:00[America/New_York]', // -05:00
+      '2024-02-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-04-10T12:30:00[America/New_York]', // -04:00
+      '2024-04-10T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const months = ZonedDateTimeFns.diffMonths(zdt0, zdt1)
     expect(months).toBeCloseTo(1.677)
@@ -2095,10 +2340,12 @@ describe('diffMonths', () => {
 
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-20T12:30:00[America/New_York]', // -05:00
+      '2024-02-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-04-10T12:30:00[America/New_York]', // -04:00
+      '2024-04-10T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const months = ZonedDateTimeFns.diffMonths(zdt0, zdt1, 'floor')
     expect(months).toBe(1)
@@ -2106,10 +2353,12 @@ describe('diffMonths', () => {
 
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-02-20T12:30:00[America/New_York]', // -05:00
+      '2024-02-20T12:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-04-10T12:30:00[America/New_York]', // -04:00
+      '2024-04-10T12:30:00[America/New_York]',
+      getCoreCalendar, // -04:00
     )
     const months = ZonedDateTimeFns.diffMonths(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2126,10 +2375,12 @@ describe('diffMonths', () => {
 describe('diffWeeks', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-16T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-16T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const weeks = ZonedDateTimeFns.diffWeeks(zdt0, zdt1)
     expect(weeks).toBeCloseTo(1.66)
@@ -2137,10 +2388,12 @@ describe('diffWeeks', () => {
 
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-16T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-16T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const weeks = ZonedDateTimeFns.diffWeeks(zdt0, zdt1, 'floor')
     expect(weeks).toBe(1)
@@ -2148,10 +2401,12 @@ describe('diffWeeks', () => {
 
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-16T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-16T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const weeks = ZonedDateTimeFns.diffWeeks(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2169,10 +2424,12 @@ describe('diffWeeks', () => {
 describe('diffDays', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-15T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-15T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const days = ZonedDateTimeFns.diffDays(zdt0, zdt1)
     expect(days).toBe(10.625)
@@ -2180,10 +2437,12 @@ describe('diffDays', () => {
 
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-15T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-15T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const days = ZonedDateTimeFns.diffDays(zdt0, zdt1, 'floor')
     expect(days).toBe(10)
@@ -2191,10 +2450,12 @@ describe('diffDays', () => {
 
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]', // -05:00
+      '2024-03-05T00:30:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-15T15:30:00[America/New_York]', // -04:00 (not affected!)
+      '2024-03-15T15:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (not affected!)
     )
     const days = ZonedDateTimeFns.diffDays(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2211,10 +2472,12 @@ describe('diffDays', () => {
 describe('diffHours', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-09T22:00:00[America/New_York]', // -05:00
+      '2024-03-09T22:00:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-10T04:30:00[America/New_York]', // -04:00 (looses one hour)
+      '2024-03-10T04:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (looses one hour)
     )
     const hours = ZonedDateTimeFns.diffHours(zdt0, zdt1)
     expect(hours).toBe(5.5)
@@ -2222,10 +2485,12 @@ describe('diffHours', () => {
 
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-09T22:00:00[America/New_York]', // -05:00
+      '2024-03-09T22:00:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-10T04:30:00[America/New_York]', // -04:00 (looses one hour)
+      '2024-03-10T04:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (looses one hour)
     )
     const hours = ZonedDateTimeFns.diffHours(zdt0, zdt1, 'floor')
     expect(hours).toBe(5)
@@ -2233,10 +2498,12 @@ describe('diffHours', () => {
 
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
-      '2024-03-09T22:00:00[America/New_York]', // -05:00
+      '2024-03-09T22:00:00[America/New_York]',
+      getCoreCalendar, // -05:00
     )
     const zdt1 = ZonedDateTimeFns.fromString(
-      '2024-03-10T04:30:00[America/New_York]', // -04:00 (looses one hour)
+      '2024-03-10T04:30:00[America/New_York]',
+      getCoreCalendar, // -04:00 (looses one hour)
     )
     const hours = ZonedDateTimeFns.diffHours(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2255,9 +2522,11 @@ describe('diffMinutes', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:31:30[America/New_York]',
+      getCoreCalendar,
     )
     const minutes = ZonedDateTimeFns.diffMinutes(zdt0, zdt1)
     expect(minutes).toBe(31.5)
@@ -2266,9 +2535,11 @@ describe('diffMinutes', () => {
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:31:30[America/New_York]',
+      getCoreCalendar,
     )
     const minutes = ZonedDateTimeFns.diffMinutes(zdt0, zdt1, 'floor')
     expect(minutes).toBe(31)
@@ -2277,9 +2548,11 @@ describe('diffMinutes', () => {
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:00:00[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:31:30[America/New_York]',
+      getCoreCalendar,
     )
     const minutes = ZonedDateTimeFns.diffMinutes(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2298,9 +2571,11 @@ describe('diffSeconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:31.5[America/New_York]',
+      getCoreCalendar,
     )
     const seconds = ZonedDateTimeFns.diffSeconds(zdt0, zdt1)
     expect(seconds).toBe(11.5)
@@ -2309,9 +2584,11 @@ describe('diffSeconds', () => {
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:31.1[America/New_York]',
+      getCoreCalendar,
     )
     const seconds = ZonedDateTimeFns.diffSeconds(zdt0, zdt1, 'floor')
     expect(seconds).toBe(11)
@@ -2320,9 +2597,11 @@ describe('diffSeconds', () => {
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:31.1[America/New_York]',
+      getCoreCalendar,
     )
     const seconds = ZonedDateTimeFns.diffSeconds(zdt0, zdt1, {
       roundingMode: 'floor',
@@ -2341,9 +2620,11 @@ describe('diffMilliseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:21.6668[America/New_York]',
+      getCoreCalendar,
     )
     const milli = ZonedDateTimeFns.diffMilliseconds(zdt0, zdt1)
     expect(milli).toBe(1666.8)
@@ -2352,9 +2633,11 @@ describe('diffMilliseconds', () => {
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:21.6667[America/New_York]',
+      getCoreCalendar,
     )
     const milli = ZonedDateTimeFns.diffMilliseconds(zdt0, zdt1, 'halfExpand')
     expect(milli).toBe(1667)
@@ -2363,9 +2646,11 @@ describe('diffMilliseconds', () => {
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:21.6667[America/New_York]',
+      getCoreCalendar,
     )
     const milli = ZonedDateTimeFns.diffMilliseconds(zdt0, zdt1, {
       roundingMode: 'halfExpand',
@@ -2384,9 +2669,11 @@ describe('diffMicroseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.0006668[America/New_York]',
+      getCoreCalendar,
     )
     const micro = ZonedDateTimeFns.diffMicroseconds(zdt0, zdt1)
     expect(micro).toBe(666.8)
@@ -2395,9 +2682,11 @@ describe('diffMicroseconds', () => {
   it('gives rounded result with roundingMode single arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.0006668[America/New_York]',
+      getCoreCalendar,
     )
     const micro = ZonedDateTimeFns.diffMicroseconds(zdt0, zdt1, 'halfExpand')
     expect(micro).toBe(667)
@@ -2406,9 +2695,11 @@ describe('diffMicroseconds', () => {
   it('gives rounded result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.0006668[America/New_York]',
+      getCoreCalendar,
     )
     const micro = ZonedDateTimeFns.diffMicroseconds(zdt0, zdt1, {
       roundingMode: 'halfExpand',
@@ -2427,9 +2718,11 @@ describe('diffNanoseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.000000666[America/New_York]',
+      getCoreCalendar,
     )
     const nano = ZonedDateTimeFns.diffNanoseconds(zdt0, zdt1)
     expect(nano).toBe(666)
@@ -2438,9 +2731,11 @@ describe('diffNanoseconds', () => {
   it('parses but ignores single roundingMode arg', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.000000666[America/New_York]',
+      getCoreCalendar,
     )
     const nano = ZonedDateTimeFns.diffNanoseconds(zdt0, zdt1, 'halfExpand')
     expect(nano).toBe(666)
@@ -2452,9 +2747,11 @@ describe('diffNanoseconds', () => {
   it('gives increment-aligned result with options object', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20[America/New_York]',
+      getCoreCalendar,
     )
     const zdt1 = ZonedDateTimeFns.fromString(
       '2024-03-20T12:30:20.000000666[America/New_York]',
+      getCoreCalendar,
     )
     const nano = ZonedDateTimeFns.diffNanoseconds(zdt0, zdt1, {
       roundingMode: 'halfExpand',

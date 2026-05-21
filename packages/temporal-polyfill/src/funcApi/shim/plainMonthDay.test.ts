@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { getGregoryCalendar, getIntlCalendar } from './calendar'
+import {
+  getCoreCalendar,
+  getGregoryCalendar,
+  getIntlCalendar,
+} from './calendar'
 import * as PlainMonthDayFns from './plainMonthDay'
 import {
   expectPlainDateEquals,
@@ -32,7 +36,10 @@ describe('create', () => {
 
 describe('fromString', () => {
   it('works', () => {
-    const pmd = PlainMonthDayFns.fromString('2024-06-18[u-ca=gregory]')
+    const pmd = PlainMonthDayFns.fromString(
+      '2024-06-18[u-ca=gregory]',
+      getCoreCalendar,
+    )
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',
       monthCode: 'M06',

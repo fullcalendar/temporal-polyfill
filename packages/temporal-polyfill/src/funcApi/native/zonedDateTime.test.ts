@@ -1,27 +1,34 @@
 import { describe, expect, it } from 'vitest'
 import { expectZonedDateTimeEquals } from '../shim/testUtils'
+import { getCoreCalendar } from './calendar'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 const describeNative = (globalThis as any).Temporal ? describe : describe.skip
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToYear(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToYear(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToMonthEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToMonth(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToMonth(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToWeekEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
-    ZonedDateTimeFns.roundToWeek(ZonedDateTimeFns.fromString(isoString)),
-    ZonedDateTimeFns.fromString(expected),
+    ZonedDateTimeFns.roundToWeek(
+      ZonedDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    ZonedDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
@@ -30,11 +37,15 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
   it('matches canonical coercion and error types', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfYear(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-01-01T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withDayOfYear(zdt, -Infinity as any)
@@ -53,7 +64,10 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withDayOfWeek(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-02-26T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-02-26T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withDayOfWeek(zdt, -Infinity as any)
@@ -72,7 +86,10 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.withWeekOfYear(zdt, -5),
-      ZonedDateTimeFns.fromString('2024-01-02T12:30:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-02T12:30:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expect(() => {
       ZonedDateTimeFns.withWeekOfYear(zdt, -Infinity as any)
@@ -93,39 +110,55 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
   it('matches canonical DST movement and sub-day alignment behavior', () => {
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addWeeks(
-        ZonedDateTimeFns.fromString('2024-03-03T12:00:00[America/New_York]'),
+        ZonedDateTimeFns.fromString(
+          '2024-03-03T12:00:00[America/New_York]',
+          getCoreCalendar,
+        ),
         1,
       ),
-      ZonedDateTimeFns.fromString('2024-03-10T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-03-10T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addWeeks(
-        ZonedDateTimeFns.fromString('2024-10-27T12:00:00[America/New_York]'),
+        ZonedDateTimeFns.fromString(
+          '2024-10-27T12:00:00[America/New_York]',
+          getCoreCalendar,
+        ),
         1,
       ),
-      ZonedDateTimeFns.fromString('2024-11-03T12:00:00[America/New_York]'),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T12:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addNanoseconds(
         ZonedDateTimeFns.fromString(
           '2024-03-10T01:59:59.999999999-05:00[America/New_York]',
+          getCoreCalendar,
         ),
         1,
       ),
       ZonedDateTimeFns.fromString(
         '2024-03-10T03:00:00-04:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.addNanoseconds(
         ZonedDateTimeFns.fromString(
           '2024-11-03T01:59:59.999999999-04:00[America/New_York]',
+          getCoreCalendar,
         ),
         1,
       ),
       ZonedDateTimeFns.fromString(
         '2024-11-03T01:00:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
 
@@ -133,20 +166,24 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
       ZonedDateTimeFns.startOfHour(
         ZonedDateTimeFns.fromString(
           '2024-11-03T01:30:00-05:00[America/New_York]',
+          getCoreCalendar,
         ),
       ),
       ZonedDateTimeFns.fromString(
         '2024-11-03T01:00:00-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfHour(
         ZonedDateTimeFns.fromString(
           '2024-03-10T01:30:00-05:00[America/New_York]',
+          getCoreCalendar,
         ),
       ),
       ZonedDateTimeFns.fromString(
         '2024-03-10T01:59:59.999999999-05:00[America/New_York]',
+        getCoreCalendar,
       ),
     )
   })
@@ -155,30 +192,43 @@ describeNative('ZonedDateTime native non-standard parity cases', () => {
     // Keep these cases aligned with ../shim/zonedDateTime.test.ts.
     const skippedMidnight = ZonedDateTimeFns.fromString(
       '2009-06-01T01:00:00[Africa/Casablanca]',
+      getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfMonth(
-        ZonedDateTimeFns.fromString('2009-06-15T12:30:00[Africa/Casablanca]'),
+        ZonedDateTimeFns.fromString(
+          '2009-06-15T12:30:00[Africa/Casablanca]',
+          getCoreCalendar,
+        ),
       ),
       skippedMidnight,
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.startOfWeek(
-        ZonedDateTimeFns.fromString('2009-06-03T12:30:00[Africa/Casablanca]'),
+        ZonedDateTimeFns.fromString(
+          '2009-06-03T12:30:00[Africa/Casablanca]',
+          getCoreCalendar,
+        ),
       ),
       skippedMidnight,
     )
 
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfMonth(
-        ZonedDateTimeFns.fromString('2009-05-15T12:30:00[Africa/Casablanca]'),
+        ZonedDateTimeFns.fromString(
+          '2009-05-15T12:30:00[Africa/Casablanca]',
+          getCoreCalendar,
+        ),
       ),
       ZonedDateTimeFns.subtractNanoseconds(skippedMidnight, 1),
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.endOfWeek(
-        ZonedDateTimeFns.fromString('2009-05-30T12:30:00[Africa/Casablanca]'),
+        ZonedDateTimeFns.fromString(
+          '2009-05-30T12:30:00[Africa/Casablanca]',
+          getCoreCalendar,
+        ),
       ),
       ZonedDateTimeFns.subtractNanoseconds(skippedMidnight, 1),
     )

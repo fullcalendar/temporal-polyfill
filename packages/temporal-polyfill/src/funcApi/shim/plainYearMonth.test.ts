@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getGregoryCalendar } from './calendar'
+import { getCoreCalendar, getGregoryCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainYearMonthFns from './plainYearMonth'
 import {
@@ -35,7 +35,10 @@ describe('create', () => {
 
 describe('fromString', () => {
   it('works', () => {
-    const pym = PlainYearMonthFns.fromString('2024-06-01[u-ca=gregory]')
+    const pym = PlainYearMonthFns.fromString(
+      '2024-06-01[u-ca=gregory]',
+      getCoreCalendar,
+    )
     expectPlainYearMonthEquals(pym, {
       calendarId: 'gregory',
       year: 2024,

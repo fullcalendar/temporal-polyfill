@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { getGregoryCalendar, getIntlCalendar } from './calendar'
+import {
+  getCoreCalendar,
+  getGregoryCalendar,
+  getIntlCalendar,
+} from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateTimeFns from './plainDateTime'
 import * as PlainTimeFns from './plainTime'
@@ -17,22 +21,28 @@ const hebrewCalendar = getIntlCalendar('hebrew')
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectPlainDateTimeEquals(
-    PlainDateTimeFns.roundToYear(PlainDateTimeFns.fromString(isoString)),
-    PlainDateTimeFns.fromString(expected),
+    PlainDateTimeFns.roundToYear(
+      PlainDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToMonthEquals(isoString: string, expected: string) {
   expectPlainDateTimeEquals(
-    PlainDateTimeFns.roundToMonth(PlainDateTimeFns.fromString(isoString)),
-    PlainDateTimeFns.fromString(expected),
+    PlainDateTimeFns.roundToMonth(
+      PlainDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToWeekEquals(isoString: string, expected: string) {
   expectPlainDateTimeEquals(
-    PlainDateTimeFns.roundToWeek(PlainDateTimeFns.fromString(isoString)),
-    PlainDateTimeFns.fromString(expected),
+    PlainDateTimeFns.roundToWeek(
+      PlainDateTimeFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateTimeFns.fromString(expected, getCoreCalendar),
   )
 }
 
@@ -102,7 +112,10 @@ describe('fromFields', () => {
 
 describe('calendar and time field getters', () => {
   it('works with calendar with eras', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-01-01T12:30:00[u-ca=gregory]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-01-01T12:30:00[u-ca=gregory]',
+      getCoreCalendar,
+    )
     expect({
       era: pdt.era,
       eraYear: pdt.eraYear,
@@ -180,7 +193,10 @@ describe('withFields', () => {
 
 describe('withPlainTime', () => {
   it('works with a time argument', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-01-01T12:30:00',
+      getCoreCalendar,
+    )
     const pt = PlainTimeFns.create(3) // 3:00
     const pdt1 = PlainDateTimeFns.withPlainTime(pdt0, pt)
     expectPlainDateTimeEquals(pdt1, {
@@ -192,7 +208,10 @@ describe('withPlainTime', () => {
   })
 
   it('works without an argument', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-01-01T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-01-01T12:30:00',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.withPlainTime(pdt0)
     expectPlainDateTimeEquals(pdt1, {
       year: 2024,
@@ -250,12 +269,18 @@ describe('weekOfYear', () => {
   })
 
   it('returns undefined for gregory calendar dates', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=gregory]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00[u-ca=gregory]',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(52)
   })
 })
@@ -270,33 +295,48 @@ describe('yearOfWeek', () => {
   })
 
   it('returns undefined for gregory calendar dates', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00[u-ca=gregory]')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00[u-ca=gregory]',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(undefined)
   })
 
   it('returns correct iso8601 results', () => {
-    const pdt = PlainDateTimeFns.fromString('2023-01-01T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2023-01-01T12:30:00',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(2022)
   })
 })
 
 describe('dayOfYear', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.dayOfYear(pdt)).toBe(58)
   })
 })
 
 describe('daysInMonth', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.daysInMonth(pdt)).toBe(29)
   })
 })
 
 describe('daysInYear', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expect(PlainDateTimeFns.daysInYear(pdt)).toBe(366)
   })
 })
@@ -474,7 +514,10 @@ describe('toPlainDate', () => {
 
 describe('toPlainTime', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     const pt = PlainDateTimeFns.toPlainTime(pdt)
     expectPlainTimeEquals(pt, {
       hour: 12,
@@ -621,14 +664,17 @@ describe('createFormat', () => {
 // Keep these canonical non-standard cases aligned with ../native/plainDateTime.test.ts.
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, 5),
-      PlainDateTimeFns.fromString('2024-01-05T12:30:00'),
+      PlainDateTimeFns.fromString('2024-01-05T12:30:00', getCoreCalendar),
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, '5.5' as any),
-      PlainDateTimeFns.fromString('2024-01-05T12:30:00'),
+      PlainDateTimeFns.fromString('2024-01-05T12:30:00', getCoreCalendar),
     )
   })
 
@@ -647,11 +693,14 @@ describe('withDayOfYear', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
 
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, -5),
-      PlainDateTimeFns.fromString('2024-01-01T12:30:00'),
+      PlainDateTimeFns.fromString('2024-01-01T12:30:00', getCoreCalendar),
     )
     expect(() => {
       PlainDateTimeFns.withDayOfYear(pdt, -Infinity as any)
@@ -672,7 +721,10 @@ describe('withDayOfYear', () => {
 
 describe('withDayOfMonth', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfMonth(pdt, 5),
       PlainDateTimeFns.withFields(pdt, { day: 5 }),
@@ -686,14 +738,17 @@ describe('withDayOfMonth', () => {
 
 describe('withDayOfWeek', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, 4),
-      PlainDateTimeFns.fromString('2024-02-29T12:30:00'),
+      PlainDateTimeFns.fromString('2024-02-29T12:30:00', getCoreCalendar),
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, '4.5' as any),
-      PlainDateTimeFns.fromString('2024-02-29T12:30:00'),
+      PlainDateTimeFns.fromString('2024-02-29T12:30:00', getCoreCalendar),
     )
   })
 
@@ -712,11 +767,14 @@ describe('withDayOfWeek', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
 
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, -5),
-      PlainDateTimeFns.fromString('2024-02-26T12:30:00'),
+      PlainDateTimeFns.fromString('2024-02-26T12:30:00', getCoreCalendar),
     )
     expect(() => {
       PlainDateTimeFns.withDayOfWeek(pdt, -Infinity as any)
@@ -738,8 +796,14 @@ describe('withDayOfWeek', () => {
 describe('withWeekOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     // weekOfYear:9, yearOfWeek:2024
-    const pdt0 = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
-    const pdExp = PlainDateTimeFns.fromString('2024-07-02T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
+    const pdExp = PlainDateTimeFns.fromString(
+      '2024-07-02T12:30:00',
+      getCoreCalendar,
+    )
     const yearExp = 2024
 
     const pdt1 = PlainDateTimeFns.withWeekOfYear(pdt0, 27)
@@ -763,11 +827,14 @@ describe('withWeekOfYear', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
 
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withWeekOfYear(pdt, -5),
-      PlainDateTimeFns.fromString('2024-01-02T12:30:00'),
+      PlainDateTimeFns.fromString('2024-01-02T12:30:00', getCoreCalendar),
     )
     expect(() => {
       PlainDateTimeFns.withWeekOfYear(pdt, -Infinity as any)
@@ -791,7 +858,10 @@ describe('withWeekOfYear', () => {
 
 describe('addYears', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addYears(pdt, 5),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ years: 5 })),
@@ -802,7 +872,10 @@ describe('addYears', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-29T12:30:00') // leap day
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-29T12:30:00',
+      getCoreCalendar,
+    ) // leap day
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addYears(pdt, 5, { overflow: 'constrain' }),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ years: 5 })),
@@ -810,7 +883,10 @@ describe('addYears', () => {
   })
 
   it('can throw error with reject overflow option', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-29T12:30:00') // leap day
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-29T12:30:00',
+      getCoreCalendar,
+    ) // leap day
     expect(() => {
       PlainDateTimeFns.addYears(pdt, 1, { overflow: 'reject' })
     }).toThrowError(RangeError)
@@ -819,7 +895,10 @@ describe('addYears', () => {
 
 describe('addMonths', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMonths(pdt, 5),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ months: 5 })),
@@ -831,7 +910,8 @@ describe('addMonths', () => {
 
   it('works with explicit constrain overflow option', () => {
     const pdt = PlainDateTimeFns.fromString(
-      '2024-01-31T12:30:00', // 31 days
+      '2024-01-31T12:30:00',
+      getCoreCalendar, // 31 days
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMonths(pdt, 1, { overflow: 'constrain' }),
@@ -841,7 +921,8 @@ describe('addMonths', () => {
 
   it('can throw error with reject overflow option', () => {
     const pdt = PlainDateTimeFns.fromString(
-      '2024-01-31T12:30:00', // 31 days
+      '2024-01-31T12:30:00',
+      getCoreCalendar, // 31 days
     )
     expect(() => {
       PlainDateTimeFns.addMonths(pdt, 1, { overflow: 'reject' })
@@ -851,7 +932,10 @@ describe('addMonths', () => {
 
 describe('addWeeks', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addWeeks(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ weeks: 300 })),
@@ -864,7 +948,10 @@ describe('addWeeks', () => {
 
 describe('addDays', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addDays(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ days: 300 })),
@@ -877,7 +964,10 @@ describe('addDays', () => {
 
 describe('addHours', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addHours(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ hours: 300 })),
@@ -890,7 +980,10 @@ describe('addHours', () => {
 
 describe('addMinutes', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMinutes(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ minutes: 300 })),
@@ -903,7 +996,10 @@ describe('addMinutes', () => {
 
 describe('addSeconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addSeconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ seconds: 300 })),
@@ -916,7 +1012,10 @@ describe('addSeconds', () => {
 
 describe('addMilliseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMilliseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ milliseconds: 300 })),
@@ -929,7 +1028,10 @@ describe('addMilliseconds', () => {
 
 describe('addMicroseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addMicroseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ microseconds: 300 })),
@@ -942,7 +1044,10 @@ describe('addMicroseconds', () => {
 
 describe('addNanoseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.addNanoseconds(pdt, 300),
       PlainDateTimeFns.add(pdt, DurationFns.fromFields({ nanoseconds: 300 })),
@@ -958,7 +1063,10 @@ describe('addNanoseconds', () => {
 
 describe('subtractYears', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractYears(pdt, 5),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ years: 5 })),
@@ -969,7 +1077,10 @@ describe('subtractYears', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-29T12:30:00') // leap day
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-29T12:30:00',
+      getCoreCalendar,
+    ) // leap day
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractYears(pdt, 5, {
         overflow: 'constrain',
@@ -979,7 +1090,10 @@ describe('subtractYears', () => {
   })
 
   it('can throw error with reject overflow option', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-29T12:30:00') // leap day
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-29T12:30:00',
+      getCoreCalendar,
+    ) // leap day
     expect(() => {
       PlainDateTimeFns.subtractYears(pdt, 1, { overflow: 'reject' })
     }).toThrowError(RangeError)
@@ -988,7 +1102,10 @@ describe('subtractYears', () => {
 
 describe('subtractMonths', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMonths(pdt, 5),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ months: 5 })),
@@ -1000,7 +1117,8 @@ describe('subtractMonths', () => {
 
   it('works with explicit constrain overflow option', () => {
     const pdt = PlainDateTimeFns.fromString(
-      '2024-03-31T12:30:00', // 31 days
+      '2024-03-31T12:30:00',
+      getCoreCalendar, // 31 days
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMonths(pdt, 1, {
@@ -1012,7 +1130,8 @@ describe('subtractMonths', () => {
 
   it('can throw error with reject overflow option', () => {
     const pdt = PlainDateTimeFns.fromString(
-      '2024-03-31T12:30:00', // 31 days
+      '2024-03-31T12:30:00',
+      getCoreCalendar, // 31 days
     )
     expect(() => {
       PlainDateTimeFns.subtractMonths(pdt, 1, { overflow: 'reject' })
@@ -1022,7 +1141,10 @@ describe('subtractMonths', () => {
 
 describe('subtractWeeks', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractWeeks(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ weeks: 300 })),
@@ -1035,7 +1157,10 @@ describe('subtractWeeks', () => {
 
 describe('subtractDays', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractDays(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ days: 300 })),
@@ -1048,7 +1173,10 @@ describe('subtractDays', () => {
 
 describe('subtractHours', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractHours(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ hours: 300 })),
@@ -1061,7 +1189,10 @@ describe('subtractHours', () => {
 
 describe('subtractMinutes', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMinutes(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ minutes: 300 })),
@@ -1074,7 +1205,10 @@ describe('subtractMinutes', () => {
 
 describe('subtractSeconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractSeconds(pdt, 300),
       PlainDateTimeFns.subtract(pdt, DurationFns.fromFields({ seconds: 300 })),
@@ -1087,7 +1221,10 @@ describe('subtractSeconds', () => {
 
 describe('subtractMilliseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMilliseconds(pdt, 300),
       PlainDateTimeFns.subtract(
@@ -1103,7 +1240,10 @@ describe('subtractMilliseconds', () => {
 
 describe('subtractMicroseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractMicroseconds(pdt, 300),
       PlainDateTimeFns.subtract(
@@ -1119,7 +1259,10 @@ describe('subtractMicroseconds', () => {
 
 describe('subtractNanoseconds', () => {
   it('works (and throws on non-integers)', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-02-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-02-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.subtractNanoseconds(pdt, 300),
       PlainDateTimeFns.subtract(
@@ -1138,29 +1281,38 @@ describe('subtractNanoseconds', () => {
 
 describe('roundToYear', () => {
   it('works without options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToYear(pdt),
-      PlainDateTimeFns.fromString('2025-01-01T00:00:00'),
+      PlainDateTimeFns.fromString('2025-01-01T00:00:00', getCoreCalendar),
     )
   })
 
   it('works with single roundingMode arg', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToYear(pdt, 'floor'),
-      PlainDateTimeFns.fromString('2024-01-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-01-01T00:00:00', getCoreCalendar),
     )
   })
 
   it('works with options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToYear(pdt, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateTimeFns.fromString('2024-01-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-01-01T00:00:00', getCoreCalendar),
     )
     expect(() => {
       PlainDateTimeFns.roundToYear(pdt, {
@@ -1187,29 +1339,38 @@ describe('roundToYear', () => {
 
 describe('roundToMonth', () => {
   it('works without options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToMonth(pdt),
-      PlainDateTimeFns.fromString('2024-08-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-08-01T00:00:00', getCoreCalendar),
     )
   })
 
   it('works with single roundingMode arg', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToMonth(pdt, 'floor'),
-      PlainDateTimeFns.fromString('2024-07-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-07-01T00:00:00', getCoreCalendar),
     )
   })
 
   it('works with options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToMonth(pdt, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateTimeFns.fromString('2024-07-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-07-01T00:00:00', getCoreCalendar),
     )
     expect(() => {
       PlainDateTimeFns.roundToMonth(pdt, {
@@ -1236,29 +1397,38 @@ describe('roundToMonth', () => {
 
 describe('roundToWeek', () => {
   it('works without options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00') // Saturday
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    ) // Saturday
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToWeek(pdt),
-      PlainDateTimeFns.fromString('2024-07-22T00:00:00'), // next Monday
+      PlainDateTimeFns.fromString('2024-07-22T00:00:00', getCoreCalendar), // next Monday
     )
   })
 
   it('works with single roundingMode arg', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00') // Saturday
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    ) // Saturday
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToWeek(pdt, 'floor'),
-      PlainDateTimeFns.fromString('2024-07-15T00:00:00'), // this Monday
+      PlainDateTimeFns.fromString('2024-07-15T00:00:00', getCoreCalendar), // this Monday
     )
   })
 
   it('works with options', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00') // Saturday
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    ) // Saturday
     expectPlainDateTimeEquals(
       PlainDateTimeFns.roundToWeek(pdt, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateTimeFns.fromString('2024-07-15T00:00:00'), // this Monday
+      PlainDateTimeFns.fromString('2024-07-15T00:00:00', getCoreCalendar), // this Monday
     )
     expect(() => {
       PlainDateTimeFns.roundToWeek(pdt, {
@@ -1288,90 +1458,120 @@ describe('roundToWeek', () => {
 
 describe('startOfYear', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfYear(pdt),
-      PlainDateTimeFns.fromString('2024-01-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-01-01T00:00:00', getCoreCalendar),
     )
   })
 })
 
 describe('startOfMonth', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfMonth(pdt),
-      PlainDateTimeFns.fromString('2024-07-01T00:00:00'),
+      PlainDateTimeFns.fromString('2024-07-01T00:00:00', getCoreCalendar),
     )
   })
 })
 
 describe('startOfWeek', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00') // Saturday
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    ) // Saturday
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfWeek(pdt),
-      PlainDateTimeFns.fromString('2024-07-15T00:00:00'), // this Monday
+      PlainDateTimeFns.fromString('2024-07-15T00:00:00', getCoreCalendar), // this Monday
     )
   })
 })
 
 describe('startOfDay', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfDay(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T00:00:00'),
+      PlainDateTimeFns.fromString('2024-07-20T00:00:00', getCoreCalendar),
     )
   })
 })
 
 describe('startOfHour', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfHour(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T12:00:00'),
+      PlainDateTimeFns.fromString('2024-07-20T12:00:00', getCoreCalendar),
     )
   })
 })
 
 describe('startOfMinute', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:30')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:30',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfMinute(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T12:30:00'),
+      PlainDateTimeFns.fromString('2024-07-20T12:30:00', getCoreCalendar),
     )
   })
 })
 
 describe('startOfSecond', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:44.5')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.5',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfSecond(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T12:30:44'),
+      PlainDateTimeFns.fromString('2024-07-20T12:30:44', getCoreCalendar),
     )
   })
 })
 
 describe('startOfMillisecond', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:44.4023')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.4023',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfMillisecond(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T12:30:44.402'),
+      PlainDateTimeFns.fromString('2024-07-20T12:30:44.402', getCoreCalendar),
     )
   })
 })
 
 describe('startOfMicrosecond', () => {
   it('works', () => {
-    const pdt = PlainDateTimeFns.fromString('2024-07-20T12:30:44.4000023')
+    const pdt = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.4000023',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.startOfMicrosecond(pdt),
-      PlainDateTimeFns.fromString('2024-07-20T12:30:44.400002'),
+      PlainDateTimeFns.fromString(
+        '2024-07-20T12:30:44.400002',
+        getCoreCalendar,
+      ),
     )
   })
 })
@@ -1381,9 +1581,15 @@ describe('startOfMicrosecond', () => {
 
 describe('endOfYear', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfYear(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2025-01-01T00:00:00')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2025-01-01T00:00:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1393,9 +1599,15 @@ describe('endOfYear', () => {
 
 describe('endOfMonth', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-27T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-27T12:30:00',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfMonth(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-08-01T00:00:00')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-08-01T00:00:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1405,9 +1617,15 @@ describe('endOfMonth', () => {
 
 describe('endOfWeek', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00') // Saturday
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    ) // Saturday
     const pdt1 = PlainDateTimeFns.endOfWeek(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-22T00:00:00') // next Monday
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-22T00:00:00',
+      getCoreCalendar,
+    ) // next Monday
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1417,9 +1635,15 @@ describe('endOfWeek', () => {
 
 describe('endOfDay', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfDay(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-21T00:00:00')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-21T00:00:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1429,9 +1653,15 @@ describe('endOfDay', () => {
 
 describe('endOfHour', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfHour(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-20T13:00:00')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-20T13:00:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1441,9 +1671,15 @@ describe('endOfHour', () => {
 
 describe('endOfMinute', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:30')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:30',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfMinute(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-20T12:31:00')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:31:00',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1453,9 +1689,15 @@ describe('endOfMinute', () => {
 
 describe('endOfSecond', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:44.5')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.5',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfSecond(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-20T12:30:45')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:45',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1465,9 +1707,15 @@ describe('endOfSecond', () => {
 
 describe('endOfMillisecond', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:44.4023')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.4023',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfMillisecond(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-20T12:30:44.403')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.403',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1477,9 +1725,15 @@ describe('endOfMillisecond', () => {
 
 describe('endOfMicrosecond', () => {
   it('works', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:44.4000023')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.4000023',
+      getCoreCalendar,
+    )
     const pdt1 = PlainDateTimeFns.endOfMicrosecond(pdt0)
-    const pdt2 = PlainDateTimeFns.fromString('2024-07-20T12:30:44.400003')
+    const pdt2 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:44.400003',
+      getCoreCalendar,
+    )
     expectPlainDateTimeEquals(
       pdt1,
       PlainDateTimeFns.subtractNanoseconds(pdt2, 1),
@@ -1492,22 +1746,40 @@ describe('endOfMicrosecond', () => {
 
 describe('diffYears', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2026-04-20T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2026-04-20T12:30:00',
+      getCoreCalendar,
+    )
     const years = PlainDateTimeFns.diffYears(pdt0, pdt1)
     expect(years).toBeCloseTo(1.75) // b/c nanosecond arithmetics, not month-based
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2026-04-20T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2026-04-20T12:30:00',
+      getCoreCalendar,
+    )
     const years = PlainDateTimeFns.diffYears(pdt0, pdt1, 'floor')
     expect(years).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-07-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2026-04-20T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-07-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2026-04-20T12:30:00',
+      getCoreCalendar,
+    )
     const years = PlainDateTimeFns.diffYears(pdt0, pdt1, {
       roundingMode: 'floor',
     })
@@ -1522,22 +1794,40 @@ describe('diffYears', () => {
 
 describe('diffMonths', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-02-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-04-10T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-02-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-04-10T12:30:00',
+      getCoreCalendar,
+    )
     const months = PlainDateTimeFns.diffMonths(pdt0, pdt1)
     expect(months).toBeCloseTo(1.677)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-02-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-04-10T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-02-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-04-10T12:30:00',
+      getCoreCalendar,
+    )
     const months = PlainDateTimeFns.diffMonths(pdt0, pdt1, 'floor')
     expect(months).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-02-20T12:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-04-10T12:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-02-20T12:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-04-10T12:30:00',
+      getCoreCalendar,
+    )
     const months = PlainDateTimeFns.diffMonths(pdt0, pdt1, {
       roundingMode: 'floor',
     })
@@ -1552,22 +1842,40 @@ describe('diffMonths', () => {
 
 describe('diffWeeks', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-16T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-16T15:30:00',
+      getCoreCalendar,
+    )
     const weeks = PlainDateTimeFns.diffWeeks(pdt0, pdt1)
     expect(weeks).toBeCloseTo(1.66)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-16T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-16T15:30:00',
+      getCoreCalendar,
+    )
     const weeks = PlainDateTimeFns.diffWeeks(pdt0, pdt1, 'floor')
     expect(weeks).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-16T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-16T15:30:00',
+      getCoreCalendar,
+    )
     const weeks = PlainDateTimeFns.diffWeeks(pdt0, pdt1, {
       roundingMode: 'floor',
     })
@@ -1582,22 +1890,40 @@ describe('diffWeeks', () => {
 
 describe('diffDays', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-15T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-15T15:30:00',
+      getCoreCalendar,
+    )
     const days = PlainDateTimeFns.diffDays(pdt0, pdt1)
     expect(days).toBe(10.625)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-15T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-15T15:30:00',
+      getCoreCalendar,
+    )
     const days = PlainDateTimeFns.diffDays(pdt0, pdt1, 'floor')
     expect(days).toBe(10)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-05T00:30:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-15T15:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-05T00:30:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-15T15:30:00',
+      getCoreCalendar,
+    )
     const days = PlainDateTimeFns.diffDays(pdt0, pdt1, {
       roundingMode: 'floor',
     })
@@ -1612,22 +1938,40 @@ describe('diffDays', () => {
 
 describe('diffHours', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-09T22:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-10T03:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-09T22:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-10T03:30:00',
+      getCoreCalendar,
+    )
     const hours = PlainDateTimeFns.diffHours(pdt0, pdt1)
     expect(hours).toBe(5.5)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-09T22:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-10T03:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-09T22:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-10T03:30:00',
+      getCoreCalendar,
+    )
     const hours = PlainDateTimeFns.diffHours(pdt0, pdt1, 'floor')
     expect(hours).toBe(5)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-09T22:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-10T03:30:00')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-09T22:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-10T03:30:00',
+      getCoreCalendar,
+    )
     const hours = PlainDateTimeFns.diffHours(pdt0, pdt1, {
       roundingMode: 'floor',
       roundingIncrement: 1,
@@ -1643,22 +1987,40 @@ describe('diffHours', () => {
 
 describe('diffMinutes', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:31:30')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:31:30',
+      getCoreCalendar,
+    )
     const minutes = PlainDateTimeFns.diffMinutes(pdt0, pdt1)
     expect(minutes).toBe(31.5)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:31:30')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:31:30',
+      getCoreCalendar,
+    )
     const minutes = PlainDateTimeFns.diffMinutes(pdt0, pdt1, 'floor')
     expect(minutes).toBe(31)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:00:00')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:31:30')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:00:00',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:31:30',
+      getCoreCalendar,
+    )
     const minutes = PlainDateTimeFns.diffMinutes(pdt0, pdt1, {
       roundingMode: 'floor',
       roundingIncrement: 1,
@@ -1674,22 +2036,40 @@ describe('diffMinutes', () => {
 
 describe('diffSeconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:31.5')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:31.5',
+      getCoreCalendar,
+    )
     const seconds = PlainDateTimeFns.diffSeconds(pdt0, pdt1)
     expect(seconds).toBe(11.5)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:31.1')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:31.1',
+      getCoreCalendar,
+    )
     const seconds = PlainDateTimeFns.diffSeconds(pdt0, pdt1, 'floor')
     expect(seconds).toBe(11)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:31.1')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:31.1',
+      getCoreCalendar,
+    )
     const seconds = PlainDateTimeFns.diffSeconds(pdt0, pdt1, {
       roundingMode: 'floor',
       roundingIncrement: 1,
@@ -1705,22 +2085,40 @@ describe('diffSeconds', () => {
 
 describe('diffMilliseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:21.6668')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:21.6668',
+      getCoreCalendar,
+    )
     const milli = PlainDateTimeFns.diffMilliseconds(pdt0, pdt1)
     expect(milli).toBe(1666.8)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:21.6667')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:21.6667',
+      getCoreCalendar,
+    )
     const milli = PlainDateTimeFns.diffMilliseconds(pdt0, pdt1, 'halfExpand')
     expect(milli).toBe(1667)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:21.6667')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:21.6667',
+      getCoreCalendar,
+    )
     const milli = PlainDateTimeFns.diffMilliseconds(pdt0, pdt1, {
       roundingMode: 'halfExpand',
       roundingIncrement: 1,
@@ -1736,22 +2134,40 @@ describe('diffMilliseconds', () => {
 
 describe('diffMicroseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.0006668')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.0006668',
+      getCoreCalendar,
+    )
     const micro = PlainDateTimeFns.diffMicroseconds(pdt0, pdt1)
     expect(micro).toBe(666.8)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.0006668')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.0006668',
+      getCoreCalendar,
+    )
     const micro = PlainDateTimeFns.diffMicroseconds(pdt0, pdt1, 'halfExpand')
     expect(micro).toBe(667)
   })
 
   it('gives rounded result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.0006668')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.0006668',
+      getCoreCalendar,
+    )
     const micro = PlainDateTimeFns.diffMicroseconds(pdt0, pdt1, {
       roundingMode: 'halfExpand',
       roundingIncrement: 1,
@@ -1767,15 +2183,27 @@ describe('diffMicroseconds', () => {
 
 describe('diffNanoseconds', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.000000666')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.000000666',
+      getCoreCalendar,
+    )
     const nano = PlainDateTimeFns.diffNanoseconds(pdt0, pdt1)
     expect(nano).toBe(666)
   })
 
   it('parses but ignores single roundingMode arg', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.000000666')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.000000666',
+      getCoreCalendar,
+    )
     const nano = PlainDateTimeFns.diffNanoseconds(pdt0, pdt1, 'halfExpand')
     expect(nano).toBe(666)
     expect(() => {
@@ -1784,8 +2212,14 @@ describe('diffNanoseconds', () => {
   })
 
   it('gives increment-aligned result with options object', () => {
-    const pdt0 = PlainDateTimeFns.fromString('2024-03-20T12:30:20')
-    const pdt1 = PlainDateTimeFns.fromString('2024-03-20T12:30:20.000000666')
+    const pdt0 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20',
+      getCoreCalendar,
+    )
+    const pdt1 = PlainDateTimeFns.fromString(
+      '2024-03-20T12:30:20.000000666',
+      getCoreCalendar,
+    )
     const nano = PlainDateTimeFns.diffNanoseconds(pdt0, pdt1, {
       roundingMode: 'halfExpand',
       roundingIncrement: 10,

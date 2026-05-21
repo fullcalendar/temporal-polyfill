@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { getCoreCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -151,7 +152,10 @@ describe('add', () => {
   it('advances larger units with ZonedDateTime relativeTo', () => {
     const d0 = DurationFns.fromFields({ months: 1, days: 1 })
     const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const zdt = ZonedDateTimeFns.fromString('2024-01-01[America/New_York]')
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-01-01[America/New_York]',
+      getCoreCalendar,
+    )
     const sum = DurationFns.add(d0, d1, { relativeTo: zdt })
     expectDurationEquals(sum, { months: 3, days: 4 })
   })
@@ -184,7 +188,10 @@ describe('subtract', () => {
   it('advances larger units with ZonedDateTime relativeTo', () => {
     const d0 = DurationFns.fromFields({ months: -1, days: -1 })
     const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const zdt = ZonedDateTimeFns.fromString('2024-01-01[America/New_York]')
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-01-01[America/New_York]',
+      getCoreCalendar,
+    )
     const diff = DurationFns.subtract(d0, d1, { relativeTo: zdt })
     expectDurationEquals(diff, { months: -3, days: -4 })
   })
@@ -219,7 +226,10 @@ describe('round', () => {
 
   it('rounds months with ZonedDateTime relativeTo', () => {
     const dur = DurationFns.fromFields({ months: 1, days: 15 })
-    const zdt = ZonedDateTimeFns.fromString('2024-01-01[America/New_York]')
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-01-01[America/New_York]',
+      getCoreCalendar,
+    )
     const rounded = DurationFns.round(dur, {
       smallestUnit: 'months',
       relativeTo: zdt,
@@ -251,7 +261,10 @@ describe('total', () => {
 
   it('totals months with ZonedDateTime relativeTo', () => {
     const dur = DurationFns.fromFields({ months: 1, days: 14 })
-    const zdt = ZonedDateTimeFns.fromString('2023-01-01[America/New_York]')
+    const zdt = ZonedDateTimeFns.fromString(
+      '2023-01-01[America/New_York]',
+      getCoreCalendar,
+    )
     const total = DurationFns.total(dur, { unit: 'months', relativeTo: zdt })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
   })
@@ -284,7 +297,10 @@ describe('compare', () => {
   it('compares larger units with ZonedDateTime relativeTo', () => {
     const d0 = DurationFns.fromFields({ months: 1, days: 2 })
     const d1 = DurationFns.fromFields({ months: 2, days: 1 })
-    const zdt = ZonedDateTimeFns.fromString('2024-01-01[America/New_York]')
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-01-01[America/New_York]',
+      getCoreCalendar,
+    )
     expect(DurationFns.compare(d0, d1, { relativeTo: zdt })).toBe(-1)
     expect(DurationFns.compare(d1, d0, { relativeTo: zdt })).toBe(1)
   })

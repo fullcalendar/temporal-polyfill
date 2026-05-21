@@ -1,38 +1,45 @@
 import { describe, expect, it } from 'vitest'
 import { expectPlainDateEquals } from '../shim/testUtils'
+import { getCoreCalendar } from './calendar'
 import * as PlainDateFns from './plainDate'
 
 const describeNative = (globalThis as any).Temporal ? describe : describe.skip
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
-    PlainDateFns.roundToYear(PlainDateFns.fromString(isoString)),
-    PlainDateFns.fromString(expected),
+    PlainDateFns.roundToYear(
+      PlainDateFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToMonthEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
-    PlainDateFns.roundToMonth(PlainDateFns.fromString(isoString)),
-    PlainDateFns.fromString(expected),
+    PlainDateFns.roundToMonth(
+      PlainDateFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateFns.fromString(expected, getCoreCalendar),
   )
 }
 
 function expectRoundToWeekEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
-    PlainDateFns.roundToWeek(PlainDateFns.fromString(isoString)),
-    PlainDateFns.fromString(expected),
+    PlainDateFns.roundToWeek(
+      PlainDateFns.fromString(isoString, getCoreCalendar),
+    ),
+    PlainDateFns.fromString(expected, getCoreCalendar),
   )
 }
 
 describeNative('PlainDate native non-standard parity cases', () => {
   // Keep these canonical cases aligned with ../shim/plainDate.test.ts.
   it('matches canonical coercion and error types', () => {
-    const pd = PlainDateFns.fromString('2024-02-27')
+    const pd = PlainDateFns.fromString('2024-02-27', getCoreCalendar)
 
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, -5),
-      PlainDateFns.fromString('2024-01-01'),
+      PlainDateFns.fromString('2024-01-01', getCoreCalendar),
     )
     expect(() => {
       PlainDateFns.withDayOfYear(pd, -Infinity as any)
@@ -49,7 +56,7 @@ describeNative('PlainDate native non-standard parity cases', () => {
 
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, -5),
-      PlainDateFns.fromString('2024-02-26'),
+      PlainDateFns.fromString('2024-02-26', getCoreCalendar),
     )
     expect(() => {
       PlainDateFns.withDayOfWeek(pd, -Infinity as any)
@@ -66,7 +73,7 @@ describeNative('PlainDate native non-standard parity cases', () => {
 
     expectPlainDateEquals(
       PlainDateFns.withWeekOfYear(pd, -5),
-      PlainDateFns.fromString('2024-01-02'),
+      PlainDateFns.fromString('2024-01-02', getCoreCalendar),
     )
     expect(() => {
       PlainDateFns.withWeekOfYear(pd, -Infinity as any)
