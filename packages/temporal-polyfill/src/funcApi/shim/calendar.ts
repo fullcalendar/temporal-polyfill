@@ -1,13 +1,13 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
-import { getExternalCalendar } from '../../externalCalendars/intlCalendarProvider'
+import { getExoticCalendar } from '../../exoticCalendars/exoticCalendarProvider'
 import type { CalendarResolver } from '../../internal/calendarResolver'
 import {
-  InternalCalendar,
-  getInternalCalendarId,
+  CalendarSlot,
+  getCalendarSlotId,
   gregoryCalendar,
   isoCalendar,
-  throwExternalCalendarError,
-} from '../../internal/externalCalendar'
+  throwExoticCalendarError,
+} from '../../internal/calendarSlot'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -24,9 +24,8 @@ export const [
   getCalendarShimRecordInternal,
 ] = createSlotClass(
   CalendarRecordBranding,
-  (internalCalendar: InternalCalendar) => internalCalendar, // TODO: use identity
-  (internalCalendar: InternalCalendar) =>
-    getInternalCalendarId(internalCalendar), // formatFunc
+  (calendarSlot: CalendarSlot) => calendarSlot, // TODO: use identity
+  (calendarSlot: CalendarSlot) => getCalendarSlotId(calendarSlot), // formatFunc
   {}, // getters
   {},
   {},
@@ -35,14 +34,14 @@ export const [
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)
 const getIntlCalendarRecord = memoize((calendarId: string) =>
-  createCalendarShimRecord(getExternalCalendar(calendarId)),
+  createCalendarShimRecord(getExoticCalendar(calendarId)),
 )
 
 // Function APIs accept an omitted calendar as ISO. Massage that not-defined
 // public input into the internal ISO sentinel before the shared date logic runs.
 export function refineCalendarShimArg(
   calendar?: CalendarShimRecord,
-): InternalCalendar {
+): CalendarSlot {
   return calendar === undefined
     ? isoCalendar
     : getCalendarShimRecordInternal(calendar)
@@ -64,7 +63,7 @@ export function createCalendarShimStringResolver(
       return gregoryCalendar
     }
     if (!resolveCalendar) {
-      throwExternalCalendarError()
+      throwExoticCalendarError()
     }
 
     return getCalendarShimRecordInternal(resolveCalendar(lowerCalendarId))

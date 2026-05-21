@@ -1,5 +1,5 @@
+import { type ExoticCalendar } from '../internal/calendarSlot'
 import { isoArgsToEpochMilli, isoDateToEpochMilli } from '../internal/epochMath'
-import { type ExternalCalendar } from '../internal/externalCalendar'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
@@ -18,14 +18,21 @@ import {
   isoMonthsInYear,
 } from '../internal/isoCalendarMath'
 import { memoize } from '../internal/utils'
-import { getIntlCalendar } from './intlCalendar'
 import {
   eraOriginsByCalendarId,
   eraRemapsByCalendarId,
   isoYearOffsetsByCalendarId,
-} from './intlCalendarData'
+} from './exoticCalendarData'
+import { getIntlCalendar } from './intlCalendar'
 
-const isoDerivedCalendarIds: Record<string, true> = {
+// Gregory-aligned calendars share ISO month/day math and derive their year from
+// a fixed offset, so they avoid Intl for the bulk of their work. The one
+// exception is `japanese` era labeling on/after 1873-01-01: Temporal exposes
+// the modern era names (meiji/taisho/showa/heisei/reiwa) via Intl rather than
+// a hand-maintained table, so we delegate to getIntlCalendar('japanese') for
+// that narrow case. `buddhist` and `roc` have no Intl dependency.
+
+const gregoryAlignedCalendarIds: Record<string, true> = {
   'buddhist': true,
   'roc': true,
   'japanese': true,
@@ -33,13 +40,13 @@ const isoDerivedCalendarIds: Record<string, true> = {
 
 const primaryJapaneseEraMilli = isoArgsToEpochMilli(1873, 1, 1)!
 
-export function isIsoDerivedCalendarId(normCalendarId: string): boolean {
-  return Boolean(isoDerivedCalendarIds[normCalendarId])
+export function isGregoryAlignedCalendarId(normCalendarId: string): boolean {
+  return Boolean(gregoryAlignedCalendarIds[normCalendarId])
 }
 
-export const getIsoDerivedCalendar = memoize(createIsoDerivedCalendar)
+export const getGregoryAlignedCalendar = memoize(createGregoryAlignedCalendar)
 
-function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
+function createGregoryAlignedCalendar(normCalendarId: string): ExoticCalendar {
   const isoYearOffset = isoYearOffsetsByCalendarId[normCalendarId] || 0
 
   function calendarYearToIsoYear(year: number) {
@@ -99,7 +106,7 @@ function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
       return undefined
     },
     computeEraFields(isoDate) {
-      return computeIsoDerivedEraFields(normCalendarId, isoDate)
+      return computeGregoryAlignedEraFields(normCalendarId, isoDate)
     },
     addMonths(year, month, monthDelta) {
       const yearMonth = addIsoMonths(
@@ -126,7 +133,7 @@ function createIsoDerivedCalendar(normCalendarId: string): ExternalCalendar {
   }
 }
 
-function computeIsoDerivedEraFields(
+function computeGregoryAlignedEraFields(
   normCalendarId: string,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {

@@ -1,7 +1,7 @@
+import { type CalendarSlot } from './calendarSlot'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
 import { epochNanoToMilli } from './epochMath'
-import { type InternalCalendar } from './externalCalendar'
 import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -9,7 +9,7 @@ import {
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { type TimeZoneImpl } from './timeZoneImpl'
+import { type TimeZone } from './timeZone'
 import { NumberSign, pluckProps } from './utils'
 
 // Slot-creation helpers
@@ -23,9 +23,9 @@ export function createEpochNanoSlots(epochNano: bigint): EpochNanoFields {
 
 export function createZonedEpochNanoSlots(
   epochNano: bigint,
-  timeZone: TimeZoneImpl,
-  calendar?: InternalCalendar,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+  timeZone: TimeZone,
+  calendar?: CalendarSlot,
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,
@@ -36,8 +36,8 @@ export function createZonedEpochNanoSlots(
 
 export function createDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
-  calendar?: InternalCalendar,
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+  calendar?: CalendarSlot,
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,
@@ -48,8 +48,8 @@ export function createDateTimeSlots(
 
 export function createDateSlots(
   isoDate: CalendarDateFields,
-  calendar?: InternalCalendar,
-): CalendarDateFields & { calendar: InternalCalendar } {
+  calendar?: CalendarSlot,
+): CalendarDateFields & { calendar: CalendarSlot } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,
@@ -60,8 +60,8 @@ export function createDateSlots(
 // TODO: converge with createDateSlots
 export function createYearMonthSlots(
   isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
-): CalendarDateFields & { calendar: InternalCalendar } {
+  calendar: CalendarSlot,
+): CalendarDateFields & { calendar: CalendarSlot } {
   return {
     calendar,
     ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
@@ -70,8 +70,8 @@ export function createYearMonthSlots(
 
 export function createMonthDaySlots(
   isoDate: CalendarDateFields,
-  calendar: InternalCalendar,
-): CalendarDateFields & { calendar: InternalCalendar } {
+  calendar: CalendarSlot,
+): CalendarDateFields & { calendar: CalendarSlot } {
   return {
     calendar,
     ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
@@ -96,7 +96,7 @@ export function createDurationSlots(
 // -----------------------------------------------------------------------------
 
 export type EpochNanoFields = { epochNanoseconds: bigint }
-export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZoneImpl }
+export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZone }
 
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------

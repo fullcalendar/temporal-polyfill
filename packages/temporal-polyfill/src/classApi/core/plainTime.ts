@@ -9,12 +9,12 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../../apiHelpers/slotClass'
+import { CalendarSlot } from '../../internal/calendarSlot'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
-import { InternalCalendar } from '../../internal/externalCalendar'
 import { CalendarDateTimeFields, TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
@@ -134,13 +134,13 @@ export function toPlainTimeSlots(
         case PlainDateTimeBranding:
           refineOverflowOptions(options) // parse unused options
           return createTimeSlots(
-            slots as CalendarDateTimeFields & { calendar: InternalCalendar },
+            slots as CalendarDateTimeFields & { calendar: CalendarSlot },
           )
 
         case ZonedDateTimeBranding:
           refineOverflowOptions(options) // parse unused options
           return zonedDateTimeToPlainTime(
-            slots as ZonedEpochNanoFields & { calendar: InternalCalendar },
+            slots as ZonedEpochNanoFields & { calendar: CalendarSlot },
           )
       }
     }

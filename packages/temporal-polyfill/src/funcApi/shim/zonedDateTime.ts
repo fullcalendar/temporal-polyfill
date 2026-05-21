@@ -74,8 +74,8 @@ import {
 } from '../../internal/round'
 import { createZonedEpochNanoSlots } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
+import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
   getMatchingInstantFor,
   getSingleInstantFor,
@@ -196,10 +196,10 @@ export function fromFields(
   options?: ZonedFieldOptions,
 ): ZonedDateTimeShimRecord {
   const inputCalendar = fields.calendar
-  const internalCalendar = refineCalendarShimArg(inputCalendar)
+  const calendarSlot = refineCalendarShimArg(inputCalendar)
   const resSlots = refineZonedDateTimeObjectLike(
     refineTimeZoneId,
-    internalCalendar,
+    calendarSlot,
     fields as any,
     options,
   )
@@ -239,12 +239,12 @@ export function withCalendar(
   inputCalendar: CalendarShimRecord,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
-  const internalCalendar = refineCalendarShimArg(inputCalendar)
+  const calendarSlot = refineCalendarShimArg(inputCalendar)
   return createZonedDateTimeShimRecord(
     createZonedEpochNanoSlots(
       slots.epochNanoseconds,
       slots.timeZone,
-      internalCalendar,
+      calendarSlot,
     ),
   )
 }

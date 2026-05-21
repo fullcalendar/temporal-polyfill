@@ -1,10 +1,10 @@
+import {
+  type CalendarSlot,
+  getCalendarSlotId,
+  isoCalendar,
+} from './calendarSlot'
 import { isoDateTimeToEpochMilli, isoDateToEpochMilli } from './epochMath'
 import * as errorMessages from './errorMessages'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-  isoCalendar,
-} from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -511,13 +511,13 @@ function toEpochMillis<S>(
 }
 
 function checkCalendarsCompatible(
-  internalCalendar: InternalCalendar,
+  calendarSlot: CalendarSlot,
   resolvedCalendarId: string,
   strictCalendarCheck: boolean | undefined,
 ): void {
   if (
-    (strictCalendarCheck || internalCalendar !== isoCalendar) &&
-    getInternalCalendarId(internalCalendar) !== resolvedCalendarId
+    (strictCalendarCheck || calendarSlot !== isoCalendar) &&
+    getCalendarSlotId(calendarSlot) !== resolvedCalendarId
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }

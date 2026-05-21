@@ -1,4 +1,5 @@
 import { divideBigNanoToExactNumber } from '../../internal/bigNano'
+import { type CalendarSlot } from '../../internal/calendarSlot'
 import {
   diffCalendarDates,
   getCommonCalendar,
@@ -7,7 +8,6 @@ import {
 } from '../../internal/diff'
 import { DurationFields } from '../../internal/durationFields'
 import { isoDateTimeToEpochNano } from '../../internal/epochMath'
-import { type InternalCalendar } from '../../internal/externalCalendar'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import { CalendarDateFields } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
@@ -74,8 +74,8 @@ export const diffPlainTimeUnits = bindArgs(
 
 function diffZonedLargeUnits(
   unit: Unit,
-  record0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  record1: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
   options?: RoundingModeName | RoundingMathOptions,
 ): number {
   const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
@@ -96,7 +96,7 @@ function diffZonedLargeUnits(
 
 // TODO: split this instead of using 'hour' conditional
 function diffPlainLargeUnits<
-  S extends CalendarDateFields & { calendar: InternalCalendar },
+  S extends CalendarDateFields & { calendar: CalendarSlot },
 >(
   unit: Unit,
   record0: S,
@@ -183,8 +183,8 @@ function diffDateUnits(
 function diffZonedDayLikeUnits(
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  record1: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
   options?: RoundingModeName | RoundingMathOptions | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)

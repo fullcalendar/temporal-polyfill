@@ -15,12 +15,12 @@ export const gregoryCalendar = 0 as const
 // local value: undefined for ISO, a falsy sentinel for gregory, or an external
 // calendar object for non-core implementations. The `isoCalendar` alias keeps
 // callers from passing a bare `undefined` when they intentionally mean ISO.
-export type InternalCalendar =
+export type CalendarSlot =
   | typeof isoCalendar
   | typeof gregoryCalendar
-  | ExternalCalendar
+  | ExoticCalendar
 
-export interface ExternalCalendar {
+export interface ExoticCalendar {
   id: string
   eraOrigins?: Record<string, number>
   eraRemaps?: Record<string, string>
@@ -81,11 +81,11 @@ export interface ExternalCalendar {
   ): boolean
 }
 
-export function throwExternalCalendarError(): never {
-  throw new RangeError(errorMessages.externalCalendarRequired)
+export function throwExoticCalendarError(): never {
+  throw new RangeError(errorMessages.exoticCalendarRequired)
 }
 
-export function getInternalCalendarId(calendar: InternalCalendar): string {
+export function getCalendarSlotId(calendar: CalendarSlot): string {
   return calendar === isoCalendar
     ? isoCalendarId
     : calendar === gregoryCalendar

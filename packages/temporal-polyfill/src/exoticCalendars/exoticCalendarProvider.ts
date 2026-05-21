@@ -1,9 +1,9 @@
 import * as errorMessages from '../internal/errorMessages'
-import { getIntlCalendar, queryCalendarIntlFormat } from './intlCalendar'
 import {
-  getIsoDerivedCalendar,
-  isIsoDerivedCalendarId,
-} from './isoDerivedCalendar'
+  getGregoryAlignedCalendar,
+  isGregoryAlignedCalendarId,
+} from './gregoryAlignedCalendar'
+import { getIntlCalendar, queryCalendarIntlFormat } from './intlCalendar'
 
 // These aliases are Temporal-recognized legacy calendar IDs. Keep them in the
 // addon so core validation does not need to ask Intl about non-core calendars.
@@ -12,7 +12,7 @@ const deprecatedCalendarIdMap = {
   'islamicc': 'islamic-civil',
 } as const
 
-export function getExternalCalendar(lowerRawCalendarId: string) {
+export function getExoticCalendar(lowerRawCalendarId: string) {
   // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
   // true aliases like `islamicc`, but rejects broad Intl fallbacks.
   if (
@@ -35,7 +35,7 @@ export function getExternalCalendar(lowerRawCalendarId: string) {
   }
 
   const normCalendarId = deprecatedNormCalendarId || lowerRawCalendarId
-  return isIsoDerivedCalendarId(normCalendarId)
-    ? getIsoDerivedCalendar(normCalendarId)
+  return isGregoryAlignedCalendarId(normCalendarId)
+    ? getGregoryAlignedCalendar(normCalendarId)
     : getIntlCalendar(normCalendarId)
 }

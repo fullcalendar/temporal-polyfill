@@ -4,11 +4,11 @@ import {
   computeCalendarMonthCodeParts,
 } from './calendarDerived'
 import type { CalendarResolver } from './calendarResolver'
+import { type CalendarSlot } from './calendarSlot'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits, negateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { type InternalCalendar } from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -53,9 +53,9 @@ import {
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
 import { checkTimeFields, nanoToTimeAndDay } from './timeFieldMath'
+import { FixedTimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
-import { FixedTimeZone, queryTimeZone } from './timeZoneImpl'
 import { getMatchingInstantFor, getStartOfDayInstantFor } from './timeZoneMath'
 import { nanoToGivenFields } from './unitMath'
 import { TimeUnit, Unit, nanoInSec, unitNanoMap } from './units'
@@ -140,7 +140,7 @@ export function parseZonedDateTime(
   s: string,
   resolveCalendar: CalendarResolver,
   options?: ZonedFieldOptions,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || !organized.timeZoneId) {
@@ -157,7 +157,7 @@ export function parseZonedDateTime(
 export function parsePlainDateTime(
   s: string,
   resolveCalendar: CalendarResolver,
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
@@ -171,7 +171,7 @@ export function parsePlainDateTime(
 export function parsePlainDate(
   s: string,
   resolveCalendar: CalendarResolver,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const slots = finalizeDateLike(
     parsePlainDateLike(requireString(s)),
     undefined,
@@ -183,7 +183,7 @@ export function parsePlainDate(
 export function parsePlainYearMonth(
   s: string,
   resolveCalendar: CalendarResolver,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
@@ -217,7 +217,7 @@ function requireIsoCalendar(organized: { calendarId: string }): void {
 export function parsePlainMonthDay(
   s: string,
   resolveCalendar: CalendarResolver,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {
@@ -343,7 +343,7 @@ function finalizeDateLike(
     | ((organized: DateTimeLikeOrganized) => DateOrganized)
     | undefined,
   resolveCalendar: CalendarResolver,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   if (isoDateProjector && organized.calendarId === isoCalendarId) {
     // Full-date strings still go through the normal ParseISODateTime-style
     // validation. Only after that do PlainYearMonth/PlainMonthDay project the
@@ -384,7 +384,7 @@ function projectIsoMonthDayDate(
 }
 
 function computeMonthDayReferenceYearMonth(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   day: number,
@@ -414,9 +414,9 @@ function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
   resolveCalendar: CalendarResolver,
   options?: ZonedFieldOptions,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const timeZone = queryTimeZone(timeZoneId)
 
   checkIsoDateTimeFields(organized)
 
@@ -428,19 +428,19 @@ function finalizeZonedDateTime(
       : undefined
     const [, offsetDisambig, epochDisambig] = refineZonedFieldOptions(options)
     epochNano = getMatchingInstantFor(
-      timeZoneImpl,
+      timeZone,
       organized,
       offsetNano,
       offsetDisambig,
       epochDisambig,
-      !(timeZoneImpl as FixedTimeZone).offsetNano && // not fixed?
+      !(timeZone as FixedTimeZone).offsetNano && // not fixed?
         organized.offset !== undefined &&
         !offsetHasSeconds(organized.offset),
       organized.hasZ,
     )
   } else {
     refineZonedFieldOptions(options)
-    epochNano = getStartOfDayInstantFor(timeZoneImpl, organized)
+    epochNano = getStartOfDayInstantFor(timeZone, organized)
   }
 
   // Validate the computed epochNanoseconds is within the representable range
@@ -448,7 +448,7 @@ function finalizeZonedDateTime(
 
   return createZonedEpochNanoSlots(
     epochNano,
-    timeZoneImpl,
+    timeZone,
     resolveCalendar(organized.calendarId),
   )
 }
@@ -456,7 +456,7 @@ function finalizeZonedDateTime(
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
   resolveCalendar: CalendarResolver,
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   checkIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
@@ -468,7 +468,7 @@ function finalizeDateTime(
 function finalizeDate(
   organized: DateOrganized,
   resolveCalendar: CalendarResolver,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   checkIsoDateFields(organized)
   checkIsoDateInBounds(organized)
   return {

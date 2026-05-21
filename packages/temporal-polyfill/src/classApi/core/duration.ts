@@ -10,6 +10,7 @@ import {
   getBrandingAndSlots,
 } from '../../apiHelpers/slotClass'
 import { resolveCoreCalendar } from '../../internal/calendarResolver'
+import { CalendarSlot } from '../../internal/calendarSlot'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import {
@@ -23,7 +24,6 @@ import {
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
-import { InternalCalendar } from '../../internal/externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -185,13 +185,13 @@ function refinePublicRelativeTo(
           case ZonedDateTimeBranding:
           case PlainDateBranding:
             return slots as
-              | (ZonedEpochNanoFields & { calendar: InternalCalendar })
-              | (CalendarDateFields & { calendar: InternalCalendar })
+              | (ZonedEpochNanoFields & { calendar: CalendarSlot })
+              | (CalendarDateFields & { calendar: CalendarSlot })
 
           case PlainDateTimeBranding:
             return createDateSlots(
-              slots as CalendarDateTimeFields & { calendar: InternalCalendar },
-              (slots as CalendarDateTimeFields & { calendar: InternalCalendar })
+              slots as CalendarDateTimeFields & { calendar: CalendarSlot },
+              (slots as CalendarDateTimeFields & { calendar: CalendarSlot })
                 .calendar,
             )
         }

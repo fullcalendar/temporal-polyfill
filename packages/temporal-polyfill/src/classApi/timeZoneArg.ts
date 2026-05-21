@@ -2,8 +2,8 @@ import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import { requireString } from '../internal/cast'
 import * as errorMessages from '../internal/errorMessages'
 import { parseTimeZoneId } from '../internal/isoParse'
+import type { TimeZone } from '../internal/timeZone'
 import { resolveTimeZoneId } from '../internal/timeZoneId'
-import type { TimeZoneImpl } from '../internal/timeZoneImpl'
 import { isObjectLike } from '../internal/utils'
 
 /*
@@ -23,7 +23,7 @@ export function refineTimeZoneArg(arg: TimeZoneArg): string {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidTimeZone(arg as any)) // !!!
     }
-    return (slots as { timeZone: TimeZoneImpl }).timeZone.id
+    return (slots as { timeZone: TimeZone }).timeZone.id
   }
   return refineTimeZoneString(arg)
 }

@@ -1,9 +1,9 @@
-import * as errorMessages from './errorMessages'
 import {
-  type InternalCalendar,
-  getInternalCalendarId,
+  type CalendarSlot,
+  getCalendarSlotId,
   isoCalendar,
-} from './externalCalendar'
+} from './calendarSlot'
+import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import {
   CalendarDateFields,
@@ -27,9 +27,9 @@ import {
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
   plainTimeFields: TimeFields | undefined,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
@@ -60,9 +60,9 @@ export function zonedDateTimeWithPlainTime(
 }
 
 export function zonedDateTimeWithPlainDate(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
@@ -86,8 +86,8 @@ export function zonedDateTimeWithPlainDate(
 Only used by funcApi
 */
 export function plainDateTimeWithPlainDate(
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
-  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
 ) {
   return createDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
@@ -97,10 +97,7 @@ export function plainDateTimeWithPlainDate(
 
 // -----------------------------------------------------------------------------
 
-function getPreferredCalendar(
-  a: InternalCalendar,
-  b: InternalCalendar,
-): InternalCalendar {
+function getPreferredCalendar(a: CalendarSlot, b: CalendarSlot): CalendarSlot {
   if (a === b) {
     return a
   }
@@ -112,7 +109,7 @@ function getPreferredCalendar(
     return a
   }
 
-  if (getInternalCalendarId(a) === getInternalCalendarId(b)) {
+  if (getCalendarSlotId(a) === getCalendarSlotId(b)) {
     return b
   }
 

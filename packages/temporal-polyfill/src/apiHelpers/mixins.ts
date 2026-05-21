@@ -10,11 +10,8 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../internal/calendarDerived'
+import { type CalendarSlot, getCalendarSlotId } from '../internal/calendarSlot'
 import { durationFieldNamesAsc } from '../internal/durationFields'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-} from '../internal/externalCalendar'
 import { timeFieldNamesAsc } from '../internal/fieldNames'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
@@ -24,12 +21,11 @@ import { zipPropsGenerator } from '../internal/utils'
 // For PlainDate/etc
 // -----------------------------------------------------------------------------
 
-const day = (slots: CalendarDateFields & { calendar: InternalCalendar }) =>
+const day = (slots: CalendarDateFields & { calendar: CalendarSlot }) =>
   computeCalendarDateFields(slots.calendar, slots).day
 
-const monthCode = (
-  slots: CalendarDateFields & { calendar: InternalCalendar },
-) => computeCalendarMonthCode(slots.calendar, slots)
+const monthCode = (slots: CalendarDateFields & { calendar: CalendarSlot }) =>
+  computeCalendarMonthCode(slots.calendar, slots)
 
 const yearMonthFieldGetters = {
   era(slots: any) {
@@ -97,7 +93,7 @@ export const yearMonthGetters = {
 }
 export const calendarIdGetters = {
   calendarId(slots: any): string {
-    return getInternalCalendarId(slots.calendar)
+    return getCalendarSlotId(slots.calendar)
   },
 }
 

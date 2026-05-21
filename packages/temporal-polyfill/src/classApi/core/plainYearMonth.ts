@@ -9,6 +9,7 @@ import {
   resolveCoreCalendar,
   resolveCoreCalendarArg,
 } from '../../internal/calendarResolver'
+import { CalendarSlot } from '../../internal/calendarSlot'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -17,7 +18,6 @@ import { constructYearMonthSlots } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
-import { InternalCalendar } from '../../internal/externalCalendar'
 import {
   CalendarDateFields,
   YearMonthLikeObject,
@@ -56,7 +56,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
     },
     {
       with(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         mod: Partial<YearMonthFields>,
         options?: OverflowOptions,
       ): PlainYearMonth {
@@ -65,7 +65,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       add(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         durationArg: DurationArg,
         options?: OverflowOptions,
       ): PlainYearMonth {
@@ -79,7 +79,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       subtract(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         durationArg: DurationArg,
         options?: OverflowOptions,
       ): PlainYearMonth {
@@ -93,7 +93,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       until(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         otherArg: PlainYearMonthArg,
         options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
@@ -104,7 +104,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       since(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         otherArg: PlainYearMonthArg,
         options?: DiffOptions<YearMonthUnitName>,
       ): Duration {
@@ -115,14 +115,14 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       equals(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         otherArg: PlainYearMonthArg,
       ): boolean {
         return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
       },
       toPlainDate(
         this: PlainYearMonth,
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         bag: { day: number },
       ): PlainDate {
         return createPlainDate(
@@ -130,7 +130,7 @@ export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
         )
       },
       toLocaleString(
-        slots: CalendarDateFields & { calendar: InternalCalendar },
+        slots: CalendarDateFields & { calendar: CalendarSlot },
         locales?: LocalesArg,
         options?: Intl.DateTimeFormatOptions,
       ): string {
@@ -168,7 +168,7 @@ export function toPlainYearMonthSlots(
     if (brandingAndSlots && brandingAndSlots[0] === PlainYearMonthBranding) {
       refineOverflowOptions(options) // parse unused options
       return brandingAndSlots[1] as CalendarDateFields & {
-        calendar: InternalCalendar
+        calendar: CalendarSlot
       }
     }
 

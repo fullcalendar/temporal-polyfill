@@ -1,8 +1,8 @@
 import { getBrandingAndSlots } from '../../apiHelpers/slotClass'
+import type { CalendarSlot } from '../../internal/calendarSlot'
+import { isoCalendar } from '../../internal/calendarSlot'
 import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
-import type { InternalCalendar } from '../../internal/externalCalendar'
-import { isoCalendar } from '../../internal/externalCalendar'
 import { parseCalendarId } from '../../internal/isoParse'
 import { isObjectLike } from '../../internal/utils'
 import { resolveFullCalendar } from './calendarResolve'
@@ -22,13 +22,13 @@ export type CalendarArg =
 
 export function getCalendarFromBag(bag: {
   calendar?: CalendarArg
-}): InternalCalendar {
+}): CalendarSlot {
   const calendar = extractCalendarFromBag(bag)
   return calendar === undefined ? isoCalendar : calendar
 }
 
 export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
-  | InternalCalendar
+  | CalendarSlot
   | undefined {
   const { calendar: calendarArg } = bag
   if (calendarArg !== undefined) {
@@ -37,16 +37,16 @@ export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
 }
 
 /*
-Returns an InternalCalendar
+Returns an CalendarSlot
 */
-export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
+export function refineCalendarArg(arg: CalendarArg): CalendarSlot {
   if (isObjectLike(arg)) {
     const slots = getBrandingAndSlots(arg)?.[1]
     if (!slots || !('calendar' in slots)) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
-    return (slots as { calendar: InternalCalendar }).calendar
+    return (slots as { calendar: CalendarSlot }).calendar
   }
   return refineCalendarString(arg)
 }
@@ -54,6 +54,6 @@ export function refineCalendarArg(arg: CalendarArg): InternalCalendar {
 /*
 Like resolveFullCalendar, but allows different string formats, like datetime string
 */
-function refineCalendarString(arg: string): InternalCalendar {
+function refineCalendarString(arg: string): CalendarSlot {
   return resolveFullCalendar(parseCalendarId(requireString(arg)))
 }

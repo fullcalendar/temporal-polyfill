@@ -18,7 +18,7 @@ import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
 import { clampNumber, compareNumbers, memoize } from './utils'
 
-export interface TimeZoneImpl {
+export interface TimeZone {
   id: string
   compareKey: string | number
   getOffsetNanosecondsFor(epochNano: bigint): number
@@ -26,14 +26,14 @@ export interface TimeZoneImpl {
   getTransition(epochNano: bigint, direction: -1 | 1): bigint | undefined
 }
 
-export function queryTimeZone(rawTimeZoneId: string): TimeZoneImpl {
+export function queryTimeZone(rawTimeZoneId: string): TimeZone {
   const record = resolveTimeZoneRecord(rawTimeZoneId)
   return queryTimeZoneRecord(record.id, record)
 }
 
 // Cache by normalized ID after resolveTimeZoneRecord.
 const queryTimeZoneRecord = memoize(
-  (normTimeZoneId: string, record: ResolvedTimeZone): TimeZoneImpl => {
+  (normTimeZoneId: string, record: ResolvedTimeZone): TimeZone => {
     return record.kind === 'named'
       ? new IntlTimeZone(normTimeZoneId, record.compareKey, record.format)
       : new FixedTimeZone(
@@ -53,7 +53,7 @@ const maxIntlSampleSec = maxMilli / milliInSec
 // Fixed
 // -----------------------------------------------------------------------------
 
-export class FixedTimeZone implements TimeZoneImpl {
+export class FixedTimeZone implements TimeZone {
   constructor(
     public id: string,
     public compareKey: string | number,
@@ -85,7 +85,7 @@ interface IntlTimeZoneStore {
   getTransition: (epochSec: number, direction: -1 | 1) => number | undefined
 }
 
-export class IntlTimeZone implements TimeZoneImpl {
+export class IntlTimeZone implements TimeZone {
   tzStore: IntlTimeZoneStore // NOTE: `store` is a reserved prop and won't be mangled
 
   constructor(

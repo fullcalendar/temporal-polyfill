@@ -69,7 +69,7 @@ export const invalidProtocolResults = 'Invalid protocol results'
 // Calendar
 export const invalidCalendar = (calendarId: string) =>
   invalidEntity('Calendar', calendarId)
-export const externalCalendarRequired =
+export const exoticCalendarRequired =
   'calendar requires temporal-polyfill/calendars'
 export const mismatchingCalendars = 'Mismatching Calendars'
 export const unsupportedWeekNumbers = 'Calendar week operations forbidden'

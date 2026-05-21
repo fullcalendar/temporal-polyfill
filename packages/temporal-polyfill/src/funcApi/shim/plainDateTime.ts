@@ -17,6 +17,7 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
+import { CalendarSlot } from '../../internal/calendarSlot'
 import { toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
@@ -30,7 +31,6 @@ import {
   epochNanoToIso,
   isoDateTimeToEpochNano,
 } from '../../internal/epochMath'
-import { InternalCalendar } from '../../internal/externalCalendar'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -70,8 +70,8 @@ import {
   createTimeSlots,
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
 import {
   DayTimeUnitName,
   Unit,
@@ -199,13 +199,9 @@ export function fromFields(
   fields: Partial<DateTimeFields> & { calendar: CalendarShimRecord },
   options?: OverflowOptions,
 ): PlainDateTimeShimRecord {
-  const internalCalendar = refineCalendarShimArg(fields.calendar)
+  const calendarSlot = refineCalendarShimArg(fields.calendar)
   // already proper slots
-  const resSlots = refinePlainDateTimeObjectLike(
-    internalCalendar,
-    fields,
-    options,
-  )
+  const resSlots = refinePlainDateTimeObjectLike(calendarSlot, fields, options)
   return createPlainDateTimeShimRecord(resSlots)
 }
 
@@ -223,10 +219,8 @@ export function withCalendar(
   inputCalendar: CalendarShimRecord,
 ): PlainDateTimeShimRecord {
   const slots = getPlainDateTimeShimRecordSlots(record)
-  const internalCalendar = refineCalendarShimArg(inputCalendar)
-  return createPlainDateTimeShimRecord(
-    createDateTimeSlots(slots, internalCalendar),
-  )
+  const calendarSlot = refineCalendarShimArg(inputCalendar)
+  return createPlainDateTimeShimRecord(createDateTimeSlots(slots, calendarSlot))
 }
 
 export function withFields(
@@ -746,7 +740,7 @@ function moveByTimeUnit(
 function roundToInterval(
   unit: Unit,
   computeInterval: (
-    slots: CalendarDateFields & { calendar: InternalCalendar },
+    slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateTimeShimRecord,
   options?: RoundingModeName | RoundingMathOptions,

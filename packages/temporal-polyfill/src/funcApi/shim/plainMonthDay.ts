@@ -80,9 +80,9 @@ export function fromFields(
   options?: OverflowOptions,
 ): PlainMonthDayShimRecord {
   const inputCalendar = fields.calendar
-  const internalCalendar = refineCalendarShimArg(inputCalendar)
+  const calendarSlot = refineCalendarShimArg(inputCalendar)
   const resSlots = refinePlainMonthDayObjectLike(
-    internalCalendar,
+    calendarSlot,
     !inputCalendar,
     fields as any,
     options,

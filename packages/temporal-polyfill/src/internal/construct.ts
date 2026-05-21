@@ -1,7 +1,7 @@
+import { type CalendarSlot } from './calendarSlot'
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
-import { type InternalCalendar } from './externalCalendar'
 import { timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -29,11 +29,11 @@ import {
   checkIsoYearMonthInBounds,
 } from './temporalLimits'
 import { checkTimeFields } from './timeFieldMath'
+import { queryTimeZone } from './timeZone'
 import { refineTimeZoneId } from './timeZoneId'
-import { queryTimeZone } from './timeZoneImpl'
 import { NumberSign, mapProps, zipPropsDesc } from './utils'
 
-type RefineCalendarArg<C> = (calendar: C | undefined) => InternalCalendar
+type RefineCalendarArg<C> = (calendar: C | undefined) => CalendarSlot
 
 export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
   return createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
@@ -92,7 +92,7 @@ export function constructZonedEpochNanoSlots<C>(
   epochNano: bigint,
   timeZoneId: string,
   calendar?: C,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const epochNanoBigInt = toBigInt(epochNano)
   const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
   return createZonedEpochNanoSlots(
@@ -114,7 +114,7 @@ export function constructDateTimeSlots<C>(
   microsecond = 0,
   nanosecond = 0,
   calendar?: C,
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
@@ -149,7 +149,7 @@ export function constructDateSlots<C>(
   isoMonth: number,
   isoDay: number,
   calendar?: C,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
@@ -171,7 +171,7 @@ export function constructYearMonthSlots<C>(
   isoMonth: number,
   calendar?: C,
   referenceIsoDay = 1,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const isoYearInt = toInteger(isoYear)
   const isoMonthInt = toInteger(isoMonth)
   const calendarImpl = refineCalendarArg(calendar)
@@ -194,7 +194,7 @@ export function constructMonthDaySlots<C>(
   isoDay: number,
   calendar?: C,
   referenceIsoYear?: number,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const isoMonthInt = toInteger(isoMonth)
   const isoDayInt = toInteger(isoDay)
   const calendarImpl = refineCalendarArg(calendar)

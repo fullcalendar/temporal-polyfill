@@ -4,13 +4,10 @@ import {
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
 } from '../../internal/calendarDerived'
+import { type CalendarSlot, isoCalendar } from '../../internal/calendarSlot'
 import { toInteger, toStrictInteger } from '../../internal/cast'
 import { epochMilliToIsoDateTime } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
-import {
-  type InternalCalendar,
-  isoCalendar,
-} from '../../internal/externalCalendar'
 import {
   dayFieldName,
   dayOfMonthName,
@@ -47,10 +44,10 @@ export function reversedMove<S>(
 // their calendar only when building record/slot outputs.
 
 export function moveByYears(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
   years: number,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!years) {
@@ -65,10 +62,10 @@ export function moveByYears(
 }
 
 export function moveByMonths(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
   months: number,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   if (!months) {
@@ -100,10 +97,10 @@ export function moveByDaysStrict(
 // -----------------------------------------------------------------------------
 
 export function moveToDayOfYear(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
   dayOfYear: number,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
@@ -123,10 +120,10 @@ export function moveToDayOfYear(
 }
 
 export function moveToDayOfMonth(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
   day: number,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
@@ -165,10 +162,10 @@ export function moveToDayOfWeek(
 }
 
 export function moveToWeekOfYear(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
   weekOfYear: number,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const overflow = refineOverflowOptions(options)
   const weekFields =
     isoDate.calendar === isoCalendar ? computeIsoWeekFields(isoDate) : {}

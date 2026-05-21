@@ -1,4 +1,9 @@
 import { bigNanoInSec } from './bigNano'
+import {
+  type CalendarSlot,
+  getCalendarSlotId,
+  isoCalendar,
+} from './calendarSlot'
 import { DurationFields } from './durationFields'
 import {
   checkDurationTimeUnit,
@@ -7,11 +12,6 @@ import {
   negateDurationFields,
 } from './durationMath'
 import { epochNanoToIso } from './epochMath'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-  isoCalendar,
-} from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -44,8 +44,8 @@ import {
   roundToMinute,
 } from './round'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
+import { TimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
 import {
   Unit,
   nanoInHour,
@@ -68,7 +68,7 @@ export function formatInstantIso(
     refineInstantDisplayOptions(options)
 
   const providedTimeZone = timeZoneArg !== undefined
-  const timeZoneImpl = queryTimeZone(
+  const timeZone = queryTimeZone(
     providedTimeZone
       ? refineTimeZoneString(timeZoneArg)
       : (utcTimeZoneId as any),
@@ -76,7 +76,7 @@ export function formatInstantIso(
 
   return formatEpochNanoIso(
     providedTimeZone,
-    timeZoneImpl,
+    timeZone,
     instantSlots.epochNanoseconds,
     roundingMode,
     nanoInc,
@@ -85,7 +85,7 @@ export function formatInstantIso(
 }
 
 export function formatZonedDateTimeIso(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
   options?: ZonedDateTimeDisplayOptions,
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)
@@ -99,7 +99,7 @@ export function formatZonedDateTimeIso(
 }
 
 export function formatPlainDateTimeIso(
-  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: InternalCalendar },
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
   options?: DateTimeDisplayOptions,
 ): string {
   const displayOptions = refineDateTimeDisplayOptions(options)
@@ -111,7 +111,7 @@ export function formatPlainDateTimeIso(
 }
 
 export function formatPlainDateIso(
-  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateIso(
@@ -122,7 +122,7 @@ export function formatPlainDateIso(
 }
 
 export function formatPlainYearMonthIso(
-  plainYearMonthSlots: CalendarDateFields & { calendar: InternalCalendar },
+  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
@@ -134,7 +134,7 @@ export function formatPlainYearMonthIso(
 }
 
 export function formatPlainMonthDayIso(
-  plainMonthDaySlots: CalendarDateFields & { calendar: InternalCalendar },
+  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
   options?: CalendarDisplayOptions,
 ): string {
   return formatDateLikeIso(
@@ -184,7 +184,7 @@ export function formatDurationIso(
 
 function formatEpochNanoIso(
   providedTimeZone: boolean,
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   epochNano: bigint,
   roundingMode: RoundingMode,
   nanoInc: number,
@@ -196,7 +196,7 @@ function formatEpochNanoIso(
     roundingMode,
   )
 
-  const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
   const isoDateTime = epochNanoToIso(epochNano, offsetNano)
 
   return (
@@ -206,9 +206,9 @@ function formatEpochNanoIso(
 }
 
 function formatZonedEpochNanoIso(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   timeZoneId: string,
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   epochNano: bigint,
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
@@ -222,7 +222,7 @@ function formatZonedEpochNanoIso(
     BigInt(nanoInc),
     roundingMode,
   )
-  const offsetNano = timeZoneImpl.getOffsetNanosecondsFor(epochNano)
+  const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
   const isoDateTime = epochNanoToIso(epochNano, offsetNano)
 
   return (
@@ -234,7 +234,7 @@ function formatZonedEpochNanoIso(
 }
 
 function formatDateTimeIso(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   isoDateTime: CalendarDateTimeFields,
   calendarDisplay: CalendarDisplay,
   roundingMode: RoundingMode,
@@ -257,7 +257,7 @@ function formatDateTimeIso(
 }
 
 function formatDateIso(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
 ): string {
@@ -267,7 +267,7 @@ function formatDateIso(
 }
 
 function formatDateLikeIso(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   formatSimple: (isoDate: CalendarDateFields) => string,
   isoDate: CalendarDateFields,
   calendarDisplay: CalendarDisplay,
@@ -287,7 +287,7 @@ function formatDateLikeIso(
     return (
       formatIsoDateFields(isoDate) +
       formatCalendarId(
-        getInternalCalendarId(calendar),
+        getCalendarSlotId(calendar),
         calendarDisplay === CalendarDisplay.Critical,
       )
     )
@@ -468,7 +468,7 @@ function formatTimeZone(
 }
 
 function formatCalendar(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   calendarDisplay: CalendarDisplay,
 ): string {
   if (
@@ -476,7 +476,7 @@ function formatCalendar(
     (calendarDisplay === CalendarDisplay.Auto && calendar !== isoCalendar)
   ) {
     return formatCalendarId(
-      getInternalCalendarId(calendar),
+      getCalendarSlotId(calendar),
       calendarDisplay === CalendarDisplay.Critical,
     )
   }

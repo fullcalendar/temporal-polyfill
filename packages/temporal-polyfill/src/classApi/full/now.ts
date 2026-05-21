@@ -10,7 +10,7 @@ import {
   createTimeSlots,
   createZonedEpochNanoSlots,
 } from '../../internal/slots'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
+import { queryTimeZone } from '../../internal/timeZone'
 import {
   createPropDescriptors,
   createStringTagDescriptors,

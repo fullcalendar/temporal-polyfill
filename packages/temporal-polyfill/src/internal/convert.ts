@@ -1,7 +1,7 @@
 import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
+import { type CalendarSlot, isoCalendar } from './calendarSlot'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
-import { type InternalCalendar, isoCalendar } from './externalCalendar'
 import {
   dayFieldNamesAsc,
   monthCodeDayFieldNamesAlpha,
@@ -42,7 +42,7 @@ import {
   createPlainYearMonthFromFields,
 } from './slotsFromRefinedFields'
 import { checkEpochNanoInBounds } from './temporalLimits'
-import { TimeZoneImpl, queryTimeZone } from './timeZoneImpl'
+import { TimeZone, queryTimeZone } from './timeZone'
 import {
   getSingleInstantFor,
   getStartOfDayInstantFor,
@@ -55,9 +55,9 @@ import { pluckProps } from './utils'
 
 export function instantToZonedDateTime(
   instantSlots: EpochNanoFields,
-  timeZone: TimeZoneImpl,
-  calendar: InternalCalendar = isoCalendar,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+  timeZone: TimeZone,
+  calendar: CalendarSlot = isoCalendar,
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   return createZonedEpochNanoSlots(
     instantSlots.epochNanoseconds,
     timeZone,
@@ -69,14 +69,14 @@ export function instantToZonedDateTime(
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeToInstant(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
 ): EpochNanoFields {
   return createEpochNanoSlots(zonedDateTimeSlots0.epochNanoseconds)
 }
 
 export function zonedDateTimeToPlainDateTime(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   return createDateTimeSlots(
     zonedEpochSlotsToIso(zonedDateTimeSlots0),
     zonedDateTimeSlots0.calendar,
@@ -84,8 +84,8 @@ export function zonedDateTimeToPlainDateTime(
 }
 
 export function zonedDateTimeToPlainDate(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-): CalendarDateFields & { calendar: InternalCalendar } {
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+): CalendarDateFields & { calendar: CalendarSlot } {
   return createDateSlots(
     zonedEpochSlotsToIso(zonedDateTimeSlots0),
     zonedDateTimeSlots0.calendar,
@@ -93,7 +93,7 @@ export function zonedDateTimeToPlainDate(
 }
 
 export function zonedDateTimeToPlainTime(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
 ): TimeFields {
   return createTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
@@ -102,10 +102,10 @@ export function zonedDateTimeToPlainTime(
 // -----------------------------------------------------------------------------
 
 export function plainDateTimeToZonedDateTime(
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: InternalCalendar },
-  timeZone: TimeZoneImpl,
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
+  timeZone: TimeZone,
   options?: EpochDisambigOptions,
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const epochNano = dateToEpochNano(timeZone, plainDateTimeSlots, options)
   return createZonedEpochNanoSlots(
     checkEpochNanoInBounds(epochNano),
@@ -115,12 +115,12 @@ export function plainDateTimeToZonedDateTime(
 }
 
 function dateToEpochNano(
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
   options?: EpochDisambigOptions,
 ): bigint | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
-  return getSingleInstantFor(timeZoneImpl, isoDateTime, epochDisambig)
+  return getSingleInstantFor(timeZone, isoDateTime, epochDisambig)
 }
 
 // PlainDate -> *
@@ -129,34 +129,30 @@ function dateToEpochNano(
 export function plainDateToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainTimeArg: (plainTimeArg: PA) => TimeFields,
-  plainDateSlots: CalendarDateFields & { calendar: InternalCalendar },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
   options: { timeZone: string; plainTime?: PA },
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const timeZoneId = refineTimeZoneString(options.timeZone)
   const plainTimeArg = options.plainTime
   const timeFields =
     plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
 
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const timeZone = queryTimeZone(timeZoneId)
   let epochNano: bigint
 
   if (timeFields) {
     epochNano = getSingleInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(plainDateSlots, timeFields),
     )
   } else {
     epochNano = getStartOfDayInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(plainDateSlots, timeFieldDefaults),
     )
   }
 
-  return createZonedEpochNanoSlots(
-    epochNano,
-    timeZoneImpl,
-    plainDateSlots.calendar,
-  )
+  return createZonedEpochNanoSlots(epochNano, timeZone, plainDateSlots.calendar)
 }
 
 /*
@@ -171,10 +167,10 @@ field-pipeline boundary.
 // -----------------------------------------------------------------------------
 
 export function convertPlainYearMonthToDate(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   input: YearMonthFields,
   bag: DayFields,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const inputFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthCodeFieldNamesAlpha,
@@ -198,10 +194,10 @@ export function convertPlainYearMonthToDate(
 // -----------------------------------------------------------------------------
 
 export function convertPlainMonthDayToDate(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   input: { monthCode: string; day: number },
   bag: EraYearOrYear,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const extraFieldNames = getCalendarFieldNames(
     calendar,
     yearFieldNamesAsc,
@@ -222,9 +218,9 @@ export function convertPlainMonthDayToDate(
 }
 
 export function convertToPlainMonthDay(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   input: { monthCode: string; day: number }, // TODO: better type for this?
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const fields = readAndRefineBagFields(
     /* bag */ input,
     /* validFieldNames */ monthCodeDayFieldNamesAlpha,
@@ -234,10 +230,10 @@ export function convertToPlainMonthDay(
 }
 
 export function convertToPlainYearMonth(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   input: { year: number; monthCode: string },
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthCodeFieldNamesAlpha,
@@ -256,10 +252,10 @@ export function convertToPlainYearMonth(
 }
 
 function createPlainDateFromMergedFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   inputFields: Record<string, unknown>,
   extraFields: Record<string, unknown>,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const mergedFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthCodeDayFieldNamesAlpha,
@@ -287,21 +283,18 @@ export function plainTimeToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainDateArg: (
     plainDateArg: PA,
-  ) => CalendarDateFields & { calendar: InternalCalendar },
+  ) => CalendarDateFields & { calendar: CalendarSlot },
   slots: TimeFields,
   options: { timeZone: string; plainDate: PA },
-): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const refinedOptions = requireObjectLike(options)
   const plainDateSlots = refinePlainDateArg(refinedOptions.plainDate)
   const timeZoneId = refineTimeZoneString(refinedOptions.timeZone)
-  const timeZoneImpl = queryTimeZone(timeZoneId)
+  const timeZone = queryTimeZone(timeZoneId)
 
   return createZonedEpochNanoSlots(
-    getSingleInstantFor(
-      timeZoneImpl,
-      combineDateAndTime(plainDateSlots, slots),
-    ),
-    timeZoneImpl,
+    getSingleInstantFor(timeZone, combineDateAndTime(plainDateSlots, slots)),
+    timeZone,
     plainDateSlots.calendar,
   )
 }

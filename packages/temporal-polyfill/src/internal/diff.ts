@@ -4,6 +4,7 @@ import {
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
+import { type CalendarSlot, getCalendarSlotId } from './calendarSlot'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
   nanoToDurationDayTimeFields,
@@ -18,10 +19,6 @@ import {
   isoDateToEpochNano,
 } from './epochMath'
 import * as errorMessages from './errorMessages'
-import {
-  type InternalCalendar,
-  getInternalCalendarId,
-} from './externalCalendar'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -54,7 +51,7 @@ import {
 } from './slots'
 import { checkIsoDateInBounds } from './temporalLimits'
 import { timeFieldsToNano } from './timeFieldMath'
-import { TimeZoneImpl } from './timeZoneImpl'
+import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import {
   DateUnitName,
@@ -113,9 +110,9 @@ export function diffInstants(
 
 export function diffZonedDateTimes(
   invert: boolean,
-  calendar: InternalCalendar,
-  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  calendar: CalendarSlot,
+  slots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  slots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
   options?: DiffOptions<UnitName>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
@@ -169,9 +166,9 @@ export function diffZonedDateTimes(
 
 export function diffPlainDateTimes(
   invert: boolean,
-  calendar: InternalCalendar,
-  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: InternalCalendar },
-  plainDateTimeSlots1: CalendarDateTimeFields & { calendar: InternalCalendar },
+  calendar: CalendarSlot,
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
+  plainDateTimeSlots1: CalendarDateTimeFields & { calendar: CalendarSlot },
   options?: DiffOptions<UnitName>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
@@ -224,9 +221,9 @@ export function diffPlainDateTimes(
 
 export function diffPlainDates(
   invert: boolean,
-  calendar: InternalCalendar,
-  plainDateSlots0: CalendarDateFields & { calendar: InternalCalendar },
-  plainDateSlots1: CalendarDateFields & { calendar: InternalCalendar },
+  calendar: CalendarSlot,
+  plainDateSlots0: CalendarDateFields & { calendar: CalendarSlot },
+  plainDateSlots1: CalendarDateFields & { calendar: CalendarSlot },
   options?: DiffOptions<DateUnitName>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
@@ -246,9 +243,9 @@ export function diffPlainDates(
 
 export function diffPlainYearMonth(
   invert: boolean,
-  calendar: InternalCalendar,
-  plainYearMonthSlots0: CalendarDateFields & { calendar: InternalCalendar },
-  plainYearMonthSlots1: CalendarDateFields & { calendar: InternalCalendar },
+  calendar: CalendarSlot,
+  plainYearMonthSlots0: CalendarDateFields & { calendar: CalendarSlot },
+  plainYearMonthSlots1: CalendarDateFields & { calendar: CalendarSlot },
   options?: DiffOptions<YearMonthUnitName>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
@@ -280,7 +277,7 @@ export function diffPlainYearMonth(
 
 function diffDateLike(
   invert: boolean,
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
   largestUnit: Unit, // TODO: large field
@@ -375,11 +372,11 @@ export function diffPlainTimes(
 // -----------------------------------------------------------------------------
 
 export function diffZonedEpochsExact(
-  timeZoneImpl: TimeZoneImpl,
-  calendar: InternalCalendar,
+  timeZone: TimeZone,
+  calendar: CalendarSlot,
   // wish these didn't also hold calendar
-  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  slots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  slots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
   largestUnit: Unit,
 ): DurationFields {
   const sign = compareBigInts(slots1.epochNanoseconds, slots0.epochNanoseconds)
@@ -400,8 +397,8 @@ export function diffZonedEpochsExact(
   // Same-date zoned diffs have no calendar date part. Keeping them as instant
   // diffs also avoids re-resolving an ambiguous repeated wall-clock time while
   // deriving the intermediate marker.
-  const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZoneImpl)
-  const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZoneImpl)
+  const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZone)
+  const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZone)
   if (!compareIsoDate(isoDateTime0, isoDateTime1)) {
     return {
       ...durationFieldDefaults,
@@ -413,7 +410,7 @@ export function diffZonedEpochsExact(
   }
 
   const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZoneImpl,
+    timeZone,
     slots0,
     slots1,
     sign,
@@ -427,7 +424,7 @@ export function diffZonedEpochsExact(
 }
 
 export function diffDateTimesExact(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   startIsoDateTime: CalendarDateTimeFields,
   endIsoDateTime: CalendarDateTimeFields,
   largestUnit: Unit,
@@ -462,7 +459,7 @@ export function diffDateTimesExact(
 // -----------------------------------------------------------------------------
 
 function diffDateTimesBig(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   startIsoDateTime: CalendarDateTimeFields,
   endIsoDateTime: CalendarDateTimeFields,
   sign: NumberSign, // guaranteed non-zero
@@ -488,7 +485,7 @@ function diffDateTimesBig(
 }
 
 export function diffCalendarDates(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
   largestUnit: Unit, // TODO: put this arg after calendar to allow for bindArgs?
@@ -692,13 +689,13 @@ function compareIsoDate(
 // -----------------------------------------------------------------------------
 
 export function prepareZonedEpochDiff(
-  timeZoneImpl: TimeZoneImpl,
-  slots0: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  slots1: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  timeZone: TimeZone,
+  slots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  slots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
   sign: NumberSign, // guaranteed non-zero
 ): [CalendarDateTimeFields, CalendarDateFields, number] {
-  const startIsoDate = zonedEpochSlotsToIso(slots0, timeZoneImpl)
-  const endIsoDate = zonedEpochSlotsToIso(slots1, timeZoneImpl)
+  const startIsoDate = zonedEpochSlotsToIso(slots0, timeZone)
+  const endIsoDate = zonedEpochSlotsToIso(slots1, timeZone)
   const endEpochNano = slots1.epochNanoseconds
   let dayCorrection = 0
 
@@ -719,7 +716,7 @@ export function prepareZonedEpochDiff(
   for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
     const midIsoDate = moveByDays(endIsoDate, dayCorrection * -sign)
     const midEpochNano = getSingleInstantFor(
-      timeZoneImpl,
+      timeZone,
       combineDateAndTime(midIsoDate, startIsoDate),
     )
 
@@ -773,20 +770,17 @@ function diffDays(
 // -----------------------------------------------------------------------------
 
 export function getCommonCalendar(
-  a: InternalCalendar,
-  b: InternalCalendar,
-): InternalCalendar {
-  if (getInternalCalendarId(a) !== getInternalCalendarId(b)) {
+  a: CalendarSlot,
+  b: CalendarSlot,
+): CalendarSlot {
+  if (getCalendarSlotId(a) !== getCalendarSlotId(b)) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
 
   return a
 }
 
-export function getCommonTimeZone(
-  a: TimeZoneImpl,
-  b: TimeZoneImpl,
-): TimeZoneImpl {
+export function getCommonTimeZone(a: TimeZone, b: TimeZone): TimeZone {
   if (a.compareKey !== b.compareKey) {
     throw new RangeError(errorMessages.mismatchingTimeZones)
   }

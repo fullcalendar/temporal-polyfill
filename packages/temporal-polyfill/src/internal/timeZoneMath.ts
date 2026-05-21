@@ -1,7 +1,7 @@
 import { bigNanoInUtcDay } from './bigNano'
+import { type CalendarSlot } from './calendarSlot'
 import { epochNanoToIso, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
-import { type InternalCalendar } from './externalCalendar'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
 import {
   DirectionName,
@@ -16,7 +16,7 @@ import {
   checkIsoDateInBoundsStrict,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
-import { TimeZoneImpl } from './timeZoneImpl'
+import { TimeZone } from './timeZone'
 import { nanoInUtcDay } from './units'
 import { memoize } from './utils'
 
@@ -26,7 +26,7 @@ export type PossibleInstantsOp = (
 ) => bigint[]
 
 export type FixedIsoZonedFields = CalendarDateTimeFields & {
-  calendar: InternalCalendar
+  calendar: CalendarSlot
   offsetNanoseconds: number
 }
 
@@ -36,7 +36,7 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 // -----------------------------------------------------------------------------
 
 export function getTimeZoneTransitionEpochNanoseconds(
-  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
+  slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
   options: DirectionOptions | DirectionName,
 ): bigint | undefined {
   return slots.timeZone.getTransition(
@@ -54,13 +54,12 @@ export const zonedEpochSlotsToIso = memoize(
 ) as typeof _zonedEpochSlotsToIso
 
 function _zonedEpochSlotsToIso(
-  slots: ZonedEpochNanoFields & { calendar: InternalCalendar },
-  timeZoneImpl: TimeZoneImpl = slots.timeZone,
+  slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  timeZone: TimeZone = slots.timeZone,
 ): FixedIsoZonedFields {
   const { epochNanoseconds } = slots
 
-  const offsetNanoseconds =
-    timeZoneImpl.getOffsetNanosecondsFor(epochNanoseconds)
+  const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTime = epochNanoToIso(epochNanoseconds, offsetNanoseconds)
 
   return {
@@ -71,7 +70,7 @@ function _zonedEpochSlotsToIso(
 }
 
 export function getMatchingInstantFor(
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
   offsetNano: number | undefined,
   offsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
@@ -96,7 +95,7 @@ export function getMatchingInstantFor(
     checkIsoDateInBoundsStrict(isoDateTime)
   }
 
-  const possibleEpochNanos = timeZoneImpl.getPossibleInstantsFor(isoDateTime)
+  const possibleEpochNanos = timeZone.getPossibleInstantsFor(isoDateTime)
 
   // Prefer or Reject
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
@@ -121,7 +120,7 @@ export function getMatchingInstantFor(
   }
 
   return getSingleInstantFor(
-    timeZoneImpl,
+    timeZone,
     isoDateTime,
     epochDisambig,
     possibleEpochNanos,
@@ -129,12 +128,10 @@ export function getMatchingInstantFor(
 }
 
 export function getSingleInstantFor(
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
   disambig: EpochDisambig = EpochDisambig.Compat,
-  possibleEpochNanos: bigint[] = timeZoneImpl.getPossibleInstantsFor(
-    isoDateTime,
-  ),
+  possibleEpochNanos: bigint[] = timeZone.getPossibleInstantsFor(isoDateTime),
 ): bigint {
   if (possibleEpochNanos.length === 1) {
     return possibleEpochNanos[0]
@@ -155,13 +152,13 @@ export function getSingleInstantFor(
   // within a transition that jumps forward...
   // ('compatible' means 'later')
   const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)!
-  const gapNano = computeGapNear(timeZoneImpl, zonedEpochNano)
+  const gapNano = computeGapNear(timeZone, zonedEpochNano)
 
   // 'later' or 'compatible'
   const shiftNano = gapNano * (disambig === EpochDisambig.Earlier ? -1 : 1)
 
   const shiftedIsoDateTime = epochNanoToIso(zonedEpochNano, shiftNano)
-  possibleEpochNanos = timeZoneImpl.getPossibleInstantsFor(shiftedIsoDateTime)
+  possibleEpochNanos = timeZone.getPossibleInstantsFor(shiftedIsoDateTime)
 
   return possibleEpochNanos[
     // 'later' or 'compatible'
@@ -170,10 +167,10 @@ export function getSingleInstantFor(
 }
 
 export function getStartOfDayInstantFor(
-  timeZoneImpl: TimeZoneImpl,
+  timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
 ): bigint {
-  const possibleEpochNanos = timeZoneImpl.getPossibleInstantsFor(isoDateTime)
+  const possibleEpochNanos = timeZone.getPossibleInstantsFor(isoDateTime)
 
   // If not a DST gap, return the single or earlier epochNs
   if (possibleEpochNanos.length) {
@@ -183,7 +180,7 @@ export function getStartOfDayInstantFor(
   const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)!
   const zonedEpochNanoDayBefore = zonedEpochNano - bigNanoInUtcDay
 
-  return timeZoneImpl.getTransition(zonedEpochNanoDayBefore, 1)!
+  return timeZone.getTransition(zonedEpochNanoDayBefore, 1)!
 }
 
 function findMatchingEpochNano(
@@ -211,14 +208,11 @@ function findMatchingEpochNano(
   }
 }
 
-function computeGapNear(
-  timeZoneImpl: TimeZoneImpl,
-  zonedEpochNano: bigint,
-): number {
-  const startOffsetNano = timeZoneImpl.getOffsetNanosecondsFor(
+function computeGapNear(timeZone: TimeZone, zonedEpochNano: bigint): number {
+  const startOffsetNano = timeZone.getOffsetNanosecondsFor(
     zonedEpochNano - bigNanoInUtcDay,
   )
-  const endOffsetNano = timeZoneImpl.getOffsetNanosecondsFor(
+  const endOffsetNano = timeZone.getOffsetNanosecondsFor(
     zonedEpochNano + bigNanoInUtcDay,
   )
   return validateTimeZoneGap(endOffsetNano - startOffsetNano)

@@ -25,8 +25,8 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { roundInstant } from '../../internal/round'
+import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'

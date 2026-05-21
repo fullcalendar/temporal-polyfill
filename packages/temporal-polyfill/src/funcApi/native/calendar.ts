@@ -1,5 +1,5 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
-import { throwExternalCalendarError } from '../../internal/externalCalendar'
+import { throwExoticCalendarError } from '../../internal/calendarSlot'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -49,7 +49,7 @@ export function assertCalendarNativeStringResolved(
     return
   }
   if (!resolveCalendar) {
-    throwExternalCalendarError()
+    throwExoticCalendarError()
   }
 
   getCalendarNativeRecordId(resolveCalendar(lowerCalendarId))

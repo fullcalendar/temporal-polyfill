@@ -4,16 +4,16 @@ import {
 } from './calendarDerived'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
+import { type CalendarSlot, gregoryCalendar } from './calendarSlot'
 import { toInteger } from './cast'
 import * as errorMessages from './errorMessages'
-import { type InternalCalendar, gregoryCalendar } from './externalCalendar'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
 import { clampEntity, clampProp } from './utils'
 
 export function getCalendarEraOrigins(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
 ): Record<string, number> | undefined {
   return calendar === gregoryCalendar
     ? gregoryEraOrigins
@@ -23,7 +23,7 @@ export function getCalendarEraOrigins(
 }
 
 export function getCalendarFieldNames(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fieldNames: string[],
   fieldNamesWithEra: string[] = fieldNames,
 ): string[] {
@@ -40,12 +40,12 @@ happen before those deferred coercions.
 */
 
 export function resolveCalendarYear(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>,
 ): number {
-  const externalCalendar = calendar || undefined
+  const exoticCalendar = calendar || undefined
   const eraOrigins = getCalendarEraOrigins(calendar)
-  const eraRemaps = externalCalendar?.eraRemaps || {}
+  const eraRemaps = exoticCalendar?.eraRemaps || {}
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {
@@ -75,8 +75,8 @@ export function resolveCalendarYear(
     // ISO/Gregory use the compact era-origin convention directly. External
     // calendars get the last word because a few era systems count from an
     // offset epoch instead of the usual forward/reverse origin.
-    const yearByEra = externalCalendar?.computeYearFromEra
-      ? externalCalendar.computeYearFromEra(eraYear, normalizedEra, eraOrigin)
+    const yearByEra = exoticCalendar?.computeYearFromEra
+      ? exoticCalendar.computeYearFromEra(eraYear, normalizedEra, eraOrigin)
       : eraYearToYear(eraYear, eraOrigin)
     if (year !== undefined && year !== yearByEra) {
       throw new RangeError(errorMessages.mismatchingYearAndEra)
@@ -91,7 +91,7 @@ export function resolveCalendarYear(
 }
 
 export function resolveCalendarMonth(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
@@ -128,7 +128,7 @@ export function resolveCalendarMonth(
 }
 
 export function resolveCalendarDay(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: DayFields,
   month: number,
   year: number,
@@ -144,7 +144,7 @@ export function resolveCalendarDay(
 }
 
 function resolveMonthCode(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   monthCode: string,
   year: number,
   overflow: Overflow,

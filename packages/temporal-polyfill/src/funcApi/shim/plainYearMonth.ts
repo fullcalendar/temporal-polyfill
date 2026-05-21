@@ -93,9 +93,9 @@ export function fromFields(
   fields: Partial<YearMonthFields> & { calendar?: CalendarShimRecord },
   options?: OverflowOptions,
 ): PlainYearMonthShimRecord {
-  const internalCalendar = refineCalendarShimArg(fields.calendar)
+  const calendarSlot = refineCalendarShimArg(fields.calendar)
   const resSlots = refinePlainYearMonthObjectLike(
-    internalCalendar,
+    calendarSlot,
     fields as any,
     options,
   )

@@ -10,8 +10,8 @@ import {
   createTimeSlots,
   createZonedEpochNanoSlots,
 } from '../../internal/slots'
+import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
 import { InstantShimRecord, createInstantShimRecord } from './instant'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {

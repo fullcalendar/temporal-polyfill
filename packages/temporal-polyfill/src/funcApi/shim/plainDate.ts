@@ -13,6 +13,7 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
+import { type CalendarSlot } from '../../internal/calendarSlot'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import {
@@ -22,7 +23,6 @@ import {
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
-import { type InternalCalendar } from '../../internal/externalCalendar'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -149,9 +149,9 @@ export function fromFields(
   fields: Partial<DateFields> & { calendar: CalendarShimRecord },
   options?: OverflowOptions,
 ): PlainDateShimRecord {
-  const internalCalendar = refineCalendarShimArg(fields.calendar)
+  const calendarSlot = refineCalendarShimArg(fields.calendar)
   // already proper slots
-  const resSlots = refinePlainDateObjectLike(internalCalendar, fields, options)
+  const resSlots = refinePlainDateObjectLike(calendarSlot, fields, options)
   return createPlainDateShimRecord(resSlots)
 }
 
@@ -169,8 +169,8 @@ export function withCalendar(
   inputCalendar: CalendarShimRecord,
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const internalCalendar = refineCalendarShimArg(inputCalendar)
-  return createPlainDateShimRecord(createDateSlots(slots, internalCalendar))
+  const calendarSlot = refineCalendarShimArg(inputCalendar)
+  return createPlainDateShimRecord(createDateSlots(slots, calendarSlot))
 }
 
 export function withFields(
@@ -549,7 +549,7 @@ export function diffDays(
 function roundToInterval(
   unit: Unit,
   computeInterval: (
-    slots: CalendarDateFields & { calendar: InternalCalendar },
+    slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateShimRecord,
   options?: RoundingModeName | RoundingMathOptions,
@@ -569,7 +569,7 @@ function roundToInterval(
 
 function aligned(
   computeAlignment: (
-    slots: CalendarDateFields & { calendar: InternalCalendar },
+    slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => CalendarDateFields,
   dayDelta = 0,
 ): (record: PlainDateShimRecord) => PlainDateShimRecord {
@@ -584,7 +584,7 @@ function aligned(
 }
 
 function createRecordFromDateFields(
-  isoDate: CalendarDateFields & { calendar: InternalCalendar },
+  isoDate: CalendarDateFields & { calendar: CalendarSlot },
 ): PlainDateShimRecord {
   checkIsoDateInBounds(isoDate)
   return createPlainDateShimRecord(createDateSlots(isoDate, isoDate.calendar))

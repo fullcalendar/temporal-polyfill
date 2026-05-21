@@ -9,8 +9,8 @@ import {
   resolveCalendarYear,
 } from './calendarFields'
 import { type MonthCodeParts, parseMonthCode } from './calendarMonthCode'
+import { type CalendarSlot, isoCalendar } from './calendarSlot'
 import * as errorMessages from './errorMessages'
-import { type InternalCalendar, isoCalendar } from './externalCalendar'
 import { timeFieldDefaults } from './fieldNames'
 import { type DateOptionsRefiner, type DateOptionsTuple } from './fieldRefine'
 import {
@@ -48,8 +48,8 @@ export function createPlainDateTimeFromRefinedFields(
   isoDate: CalendarDateFields,
   // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
   time: TimeFields | undefined = timeFieldDefaults,
-  calendar: InternalCalendar,
-): CalendarDateTimeFields & { calendar: InternalCalendar } {
+  calendar: CalendarSlot,
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   // Calendar/date pipelines and time pipelines resolve their own fields before
   // reaching this point. The only cross-field validation left is whether the
   // combined PlainDateTime is inside Temporal's supported ISO range.
@@ -59,10 +59,10 @@ export function createPlainDateTimeFromRefinedFields(
 }
 
 export function createPlainDateFromFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const prepared = prepareDateFields(calendar, fields)
 
   // The normal overflow path reads options at the same phase as the callback
@@ -75,10 +75,10 @@ export function createPlainDateFromFields(
 export function createPlainDateFromFieldsWithOptionsRefiner<
   T extends DateOptionsTuple,
 >(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>,
   refineOptions: DateOptionsRefiner<T>,
-): [slots: CalendarDateFields & { calendar: InternalCalendar }, ...options: T] {
+): [slots: CalendarDateFields & { calendar: CalendarSlot }, ...options: T] {
   const prepared = prepareDateFields(calendar, fields)
 
   // Options are deliberately read after all observable calendar fields,
@@ -98,11 +98,11 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
 }
 
 function createPlainDateFromPreparedFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   // The tuple is private plumbing. Index reads keep the built output from
   // carrying internal-only property names while preserving the field-read phase
   // that happens before overflow options are observed.
@@ -143,7 +143,7 @@ function parseMonthCodeField(
 }
 
 function prepareDateFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>,
 ): PreparedDateFields {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
@@ -167,10 +167,10 @@ function prepareDateFields(
 }
 
 export function createPlainYearMonthFromFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<YearMonthFields>,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const eraOrigins = getCalendarEraOrigins(calendar)
@@ -204,10 +204,10 @@ export function createPlainYearMonthFromFields(
 }
 
 export function createPlainMonthDayFromFields(
-  calendar: InternalCalendar,
+  calendar: CalendarSlot,
   fields: Partial<DateFields>, // guaranteed `day`
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: InternalCalendar } {
+): CalendarDateFields & { calendar: CalendarSlot } {
   const isIso = calendar === isoCalendar
   const eraOrigins = getCalendarEraOrigins(calendar)
 

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { queryTimeZone } from './timeZone'
 import { resolveTimeZoneId, resolveTimeZoneRecord } from './timeZoneId'
-import { queryTimeZone } from './timeZoneImpl'
 
 describe('resolveTimeZoneRecord', () => {
   it('keeps fixed-offset zones numeric for comparison and native math', () => {
     const record = resolveTimeZoneRecord('+05:30')
-    const timeZoneImpl = queryTimeZone(record.id)
+    const timeZone = queryTimeZone(record.id)
 
     expect(record).toMatchObject({
       kind: 'fixed',
@@ -13,7 +13,7 @@ describe('resolveTimeZoneRecord', () => {
       offsetNano: 19_800_000_000_000,
       compareKey: 19_800_000_000_000,
     })
-    expect(timeZoneImpl.getOffsetNanosecondsFor(0n)).toBe(19_800_000_000_000)
+    expect(timeZone.getOffsetNanosecondsFor(0n)).toBe(19_800_000_000_000)
   })
 
   it('keeps UTC distinct from an equivalent zero-offset zone', () => {

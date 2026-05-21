@@ -8,6 +8,7 @@ import {
   getBrandingAndSlots,
 } from '../../apiHelpers/slotClass'
 import { bigNanoInMilli } from '../../internal/bigNano'
+import { CalendarSlot } from '../../internal/calendarSlot'
 import { requireNumberIsInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
@@ -17,7 +18,6 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
-import { InternalCalendar } from '../../internal/externalCalendar'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
@@ -29,7 +29,7 @@ import {
   ZonedEpochNanoFields,
   createEpochNanoSlots,
 } from '../../internal/slots'
-import { queryTimeZone } from '../../internal/timeZoneImpl'
+import { queryTimeZone } from '../../internal/timeZone'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
 import { prepInstantFormat } from '../intlFormatConfig'
@@ -138,7 +138,7 @@ export function toInstantSlots(arg: InstantArg): EpochNanoFields {
 
         case ZonedDateTimeBranding:
           return createEpochNanoSlots(
-            (slots as ZonedEpochNanoFields & { calendar: InternalCalendar })
+            (slots as ZonedEpochNanoFields & { calendar: CalendarSlot })
               .epochNanoseconds,
           )
       }

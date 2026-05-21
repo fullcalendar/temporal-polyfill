@@ -4,6 +4,7 @@ import {
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from '../internal/calendarMonthCode'
+import { type ExoticCalendar } from '../internal/calendarSlot'
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,
@@ -11,7 +12,6 @@ import {
   isoDateToEpochMilli,
 } from '../internal/epochMath'
 import * as errorMessages from '../internal/errorMessages'
-import { type ExternalCalendar } from '../internal/externalCalendar'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
@@ -44,7 +44,7 @@ import {
   leapMonthMetas,
   plainMonthDayCommonMonthMaxDayByCalendarIdBase,
   plainMonthDayLeapMonthMaxDaysByCalendarIdBase,
-} from './intlCalendarData'
+} from './exoticCalendarData'
 
 interface IntlDateFields {
   era: string | undefined
@@ -65,7 +65,7 @@ interface IntlYearData {
 
 type IntlYearDataCache = (year: number) => IntlYearData
 
-export interface IntlCalendar extends ExternalCalendar {
+export interface IntlCalendar extends ExoticCalendar {
   id: string
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
