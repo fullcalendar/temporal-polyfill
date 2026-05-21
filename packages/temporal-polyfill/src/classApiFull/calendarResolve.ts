@@ -1,10 +1,6 @@
 import { getExternalCalendar } from '../externalCalendars/intlCalendarProvider'
 import { requireString } from '../internal/cast'
-import {
-  getInternalCalendarId,
-  gregoryCalendar,
-  isoCalendar,
-} from '../internal/externalCalendar'
+import { gregoryCalendar, isoCalendar } from '../internal/externalCalendar'
 import type { InternalCalendar } from '../internal/externalCalendar'
 import {
   gregoryCalendarId,
@@ -29,8 +25,4 @@ export function resolveFullCalendarArg(
   rawCalendarId = isoCalendarId,
 ): InternalCalendar {
   return resolveFullCalendar(rawCalendarId)
-}
-
-export function resolveFullCalendarId(rawCalendarId: string): string {
-  return getInternalCalendarId(resolveFullCalendar(rawCalendarId))
 }
