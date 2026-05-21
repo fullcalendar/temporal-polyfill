@@ -71,8 +71,6 @@ export const [
     epochNanoseconds: (native: any) => native.epochNanoseconds,
     timeZoneId: (native: any) => native.timeZoneId,
   },
-  {},
-  {},
 )
 
 export function create(

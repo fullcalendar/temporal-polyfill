@@ -39,8 +39,6 @@ export const [
     epochMilliseconds: (native: any) => native.epochMilliseconds,
     epochNanoseconds: (native: any) => native.epochNanoseconds,
   },
-  {},
-  {},
 )
 
 export function create(epochNanoseconds: bigint): InstantNativeRecord {

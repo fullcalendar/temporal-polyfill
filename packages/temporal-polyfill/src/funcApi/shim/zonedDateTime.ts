@@ -175,8 +175,6 @@ export const [
       return slots.timeZone.id
     },
   },
-  {},
-  {},
 )
 
 export function create(

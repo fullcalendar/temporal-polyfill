@@ -57,8 +57,6 @@ export const [
   constructEpochNanoSlots,
   formatInstantIsoAuto,
   epochGetters,
-  {},
-  {},
 )
 
 export function create(epochNanoseconds: bigint): InstantShimRecord {

@@ -47,8 +47,6 @@ export const [
     monthCode: (native: any) => native.monthCode,
     day: (native: any) => native.day,
   },
-  {},
-  {},
 )
 
 export function create(

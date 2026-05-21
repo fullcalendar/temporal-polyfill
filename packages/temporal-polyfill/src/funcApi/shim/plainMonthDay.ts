@@ -55,8 +55,6 @@ export const [
     ...calendarIdGetters,
     ...monthDayFieldGetters,
   },
-  {},
-  {},
 )
 
 export function create(

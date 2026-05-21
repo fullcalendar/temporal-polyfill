@@ -60,8 +60,6 @@ export const [
       return !slots.sign
     },
   },
-  {},
-  {},
 )
 
 export function create(

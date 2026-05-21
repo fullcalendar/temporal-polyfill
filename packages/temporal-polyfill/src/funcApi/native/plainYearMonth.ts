@@ -62,8 +62,6 @@ export const [
     inLeapYear: (native: any) => native.inLeapYear,
     monthsInYear: (native: any) => native.monthsInYear,
   },
-  {},
-  {},
 )
 
 export function create(

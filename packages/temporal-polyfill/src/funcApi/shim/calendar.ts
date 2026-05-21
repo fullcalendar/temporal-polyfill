@@ -27,8 +27,6 @@ export const [
   (calendarSlot: CalendarSlot) => calendarSlot, // TODO: use identity
   (calendarSlot: CalendarSlot) => getCalendarSlotId(calendarSlot), // formatFunc
   {}, // getters
-  {},
-  {},
 )
 
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)

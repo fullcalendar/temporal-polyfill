@@ -45,8 +45,6 @@ export const [
   constructTimeSlots,
   formatTimeIsoAuto,
   timeGetters,
-  {},
-  {},
 )
 
 export function create(

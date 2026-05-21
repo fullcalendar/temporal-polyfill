@@ -163,8 +163,6 @@ export const [
     ...dateFieldGetters,
     ...timeGetters,
   },
-  {},
-  {},
 )
 
 export function create(

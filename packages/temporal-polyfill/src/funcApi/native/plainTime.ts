@@ -56,8 +56,6 @@ export const [
     microsecond: (native: any) => native.microsecond,
     nanosecond: (native: any) => native.nanosecond,
   },
-  {},
-  {},
 )
 
 export function create(

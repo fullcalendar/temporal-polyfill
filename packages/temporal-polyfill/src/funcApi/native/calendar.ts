@@ -21,8 +21,6 @@ export const [
   (calendarId: string) => calendarId, // TODO: use identity
   (calendarId: string) => calendarId, // formatFunc. TODO: use identity
   {}, // getters
-  {},
-  {},
 )
 
 const isoCalendarRecord = createCalendarNativeRecord(isoCalendarId)

@@ -127,8 +127,6 @@ export const [
     ...calendarIdGetters,
     ...dateFieldGetters,
   },
-  {},
-  {},
 )
 
 export function create(

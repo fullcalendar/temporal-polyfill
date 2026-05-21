@@ -52,16 +52,16 @@ export function createSlotClass<
   D,
   CA extends any[],
   G extends SlotGetterMap<D, G>,
-  M extends object,
-  SM extends StaticMethods,
+  M extends object = {},
+  SM extends StaticMethods = {},
   I extends SlotInstance<G, M> = SlotInstance<G, M>,
 >(
   branding: string,
   construct: (...args: CA) => D,
   formatFunc: (slots: D) => string,
   getters: G,
-  methods: M,
-  staticMethods: SM,
+  methods: M = {} as M,
+  staticMethods: SM = {} as SM,
 ): [SlotClass<I, CA, SM>, (slots: D) => I, (obj: unknown) => D] {
   function Class(this: any, ...args: CA) {
     if (this instanceof Class) {
