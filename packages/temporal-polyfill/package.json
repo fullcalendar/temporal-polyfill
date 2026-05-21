@@ -50,27 +50,33 @@
         "src": "classApi/core/index",
         "types": "typeOverrides/index"
       },
-      "./implementation": {
-        "src": "classApi/core/implementation",
-        "types": "typeOverrides/implementation"
-      },
       "./global": {
         "src": "classApi/core/global",
         "types": "typeOverrides/global",
         "iife": true
       },
+      "./shim": {
+        "src": "classApi/core/shim"
+      },
+      "./implementation": {
+        "src": "classApi/core/implementation",
+        "types": "typeOverrides/implementation"
+      },
       "./full": {
         "src": "classApi/full/index",
         "types": "typeOverrides/index"
-      },
-      "./full/implementation": {
-        "src": "classApi/full/implementation",
-        "types": "typeOverrides/implementation"
       },
       "./full/global": {
         "src": "classApi/full/global",
         "types": "typeOverrides/global",
         "iife": true
+      },
+      "./full/shim": {
+        "src": "classApi/full/shim"
+      },
+      "./full/implementation": {
+        "src": "classApi/full/implementation",
+        "types": "typeOverrides/implementation"
       },
       "./fns/calendar": {
         "src": "funcApi/calendar"
