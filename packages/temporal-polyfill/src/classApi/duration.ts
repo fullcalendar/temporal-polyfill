@@ -9,6 +9,7 @@ import { createSlotClass, getBrandingAndSlots } from '../apiHelpers/slotClass'
 import { refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
 import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { compareDurations } from '../internal/compare'
+import { constructDurationSlots } from '../internal/construct'
 import {
   refineDurationObjectLike,
   refineMaybeZonedDateTimeObjectLike,
@@ -41,7 +42,6 @@ import { totalDuration } from '../internal/total'
 import { UnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
-import { constructDurationSlots } from './construct'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
 import { ZonedDateTimeArg } from './zonedDateTime'

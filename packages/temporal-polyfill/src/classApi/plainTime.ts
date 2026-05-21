@@ -11,6 +11,7 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../internal/compare'
+import { constructTimeSlots } from '../internal/construct'
 import { zonedDateTimeToPlainTime } from '../internal/convert'
 import { refinePlainTimeObjectLike } from '../internal/createFromFields'
 import { diffPlainTimes } from '../internal/diff'
@@ -31,7 +32,6 @@ import { roundPlainTime } from '../internal/round'
 import { ZonedEpochNanoFields, createTimeSlots } from '../internal/slots'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, isObjectLike } from '../internal/utils'
-import { constructTimeSlots } from './construct'
 import {
   Duration,
   DurationArg,

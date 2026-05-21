@@ -1,10 +1,5 @@
 import { resolveCoreCalendar } from '../internal/calendarResolver'
 import { toBigInt, toInteger } from '../internal/cast'
-import {
-  constructDurationSlots,
-  constructEpochNanoSlots,
-  constructTimeSlots,
-} from '../internal/construct'
 import { type InternalCalendar } from '../internal/externalCalendar'
 import {
   type CalendarDateFields,
@@ -33,8 +28,6 @@ import {
 import { checkTimeFields } from '../internal/timeFieldMath'
 import { refineTimeZoneId } from '../internal/timeZoneId'
 import { queryTimeZone } from '../internal/timeZoneImpl'
-
-export { constructDurationSlots, constructEpochNanoSlots, constructTimeSlots }
 
 export function constructZonedEpochNanoSlots(
   epochNano: bigint,

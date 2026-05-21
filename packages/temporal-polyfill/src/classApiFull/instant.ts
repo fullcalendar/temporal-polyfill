@@ -6,6 +6,7 @@ import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
 import { bigNanoInMilli } from '../internal/bigNano'
 import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
+import { constructEpochNanoSlots } from '../internal/construct'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -27,7 +28,6 @@ import {
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
-import { constructEpochNanoSlots } from './construct'
 import {
   Duration,
   DurationArg,
