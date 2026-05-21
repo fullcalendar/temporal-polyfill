@@ -15,11 +15,15 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
+import {
+  resolveCoreCalendar,
+  resolveCoreCalendarArg,
+} from '../internal/calendarResolver'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../internal/compare'
+import { constructDateTimeSlots } from '../internal/construct'
 import {
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
@@ -58,13 +62,12 @@ import {
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../internal/timeZoneImpl'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { constructDateTimeSlots } from './construct'
 import {
   Duration,
   DurationArg,
@@ -85,7 +88,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
-  constructDateTimeSlots,
+  bindArgs(constructDateTimeSlots, resolveCoreCalendarArg),
   formatPlainDateTimeIso,
   {
     ...calendarIdGetters,

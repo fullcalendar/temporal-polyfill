@@ -7,6 +7,7 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { plainMonthDaysEqual } from '../internal/compare'
+import { constructMonthDaySlots } from '../internal/construct'
 import { convertPlainMonthDayToDate } from '../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../internal/createFromFields'
 import { InternalCalendar, isoCalendar } from '../internal/externalCalendar'
@@ -18,10 +19,9 @@ import { parsePlainMonthDay } from '../internal/isoParse'
 import { mergePlainMonthDayFields } from '../internal/merge'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { OverflowOptions } from '../internal/optionsModel'
-import { isObjectLike } from '../internal/utils'
+import { bindArgs, isObjectLike } from '../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar } from './calendarResolve'
-import { constructMonthDaySlots } from './construct'
+import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
 import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainMonthDay = { monthCode: string; day: number } // and other getters/methods
@@ -30,7 +30,7 @@ export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
 export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
-    constructMonthDaySlots,
+    bindArgs(constructMonthDaySlots, resolveFullCalendarArg),
     formatPlainMonthDayIso,
     {
       ...calendarIdGetters,

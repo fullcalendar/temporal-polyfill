@@ -7,6 +7,7 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { compareIsoDateFields, plainYearMonthsEqual } from '../internal/compare'
+import { constructYearMonthSlots } from '../internal/construct'
 import { convertPlainYearMonthToDate } from '../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../internal/diff'
@@ -21,10 +22,9 @@ import { movePlainYearMonth } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import { YearMonthUnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveFullCalendar } from './calendarResolve'
-import { constructYearMonthSlots } from './construct'
+import { resolveFullCalendar, resolveFullCalendarArg } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -39,7 +39,7 @@ export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
   createSlotClass(
     PlainYearMonthBranding,
-    constructYearMonthSlots,
+    bindArgs(constructYearMonthSlots, resolveFullCalendarArg),
     formatPlainYearMonthIso,
     {
       ...calendarIdGetters,

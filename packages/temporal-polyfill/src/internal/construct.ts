@@ -1,17 +1,39 @@
 import { toBigInt, toInteger, toStrictInteger } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
+import { type InternalCalendar } from './externalCalendar'
 import { timeFieldNamesAsc } from './fieldNames'
-import { TimeFields } from './fieldTypes'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+  TimeFields,
+} from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
+import { checkIsoDateFields, isoEpochFirstLeapYear } from './isoCalendarMath'
 import {
   EpochNanoFields,
+  ZonedEpochNanoFields,
+  createDateSlots,
+  createDateTimeSlots,
   createDurationSlots,
   createEpochNanoSlots,
+  createMonthDaySlots,
   createTimeSlots,
+  createYearMonthSlots,
+  createZonedEpochNanoSlots,
 } from './slots'
-import { checkEpochNanoInBounds } from './temporalLimits'
+import {
+  checkEpochNanoInBounds,
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+  checkIsoYearMonthInBounds,
+} from './temporalLimits'
 import { checkTimeFields } from './timeFieldMath'
+import { refineTimeZoneId } from './timeZoneId'
+import { queryTimeZone } from './timeZoneImpl'
 import { NumberSign, mapProps, zipPropsDesc } from './utils'
+
+type RefineCalendarArg<C> = (calendar: C | undefined) => InternalCalendar
 
 export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
   return createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNano)))
@@ -62,5 +84,129 @@ export function constructDurationSlots(
   ])
   return createDurationSlots(
     checkDurationUnits(mapProps(toStrictInteger, durationFields)),
+  )
+}
+
+export function constructZonedEpochNanoSlots<C>(
+  refineCalendarArg: RefineCalendarArg<C>,
+  epochNano: bigint,
+  timeZoneId: string,
+  calendar?: C,
+): ZonedEpochNanoFields & { calendar: InternalCalendar } {
+  const epochNanoBigInt = toBigInt(epochNano)
+  const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
+  return createZonedEpochNanoSlots(
+    checkEpochNanoInBounds(epochNanoBigInt),
+    queryTimeZone(refinedTimeZoneId),
+    refineCalendarArg(calendar),
+  )
+}
+
+export function constructDateTimeSlots<C>(
+  refineCalendarArg: RefineCalendarArg<C>,
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  hour = 0,
+  minute = 0,
+  second = 0,
+  millisecond = 0,
+  microsecond = 0,
+  nanosecond = 0,
+  calendar?: C,
+): CalendarDateTimeFields & { calendar: InternalCalendar } {
+  const isoYearInt = toInteger(isoYear)
+  const isoMonthInt = toInteger(isoMonth)
+  const isoDayInt = toInteger(isoDay)
+  const hourInt = toInteger(hour)
+  const minuteInt = toInteger(minute)
+  const secondInt = toInteger(second)
+  const millisecondInt = toInteger(millisecond)
+  const microsecondInt = toInteger(microsecond)
+  const nanosecondInt = toInteger(nanosecond)
+  const isoDate = checkIsoDateFields({
+    year: isoYearInt,
+    month: isoMonthInt,
+    day: isoDayInt,
+  })
+  const time = checkTimeFields({
+    hour: hourInt,
+    minute: minuteInt,
+    second: secondInt,
+    millisecond: millisecondInt,
+    microsecond: microsecondInt,
+    nanosecond: nanosecondInt,
+  })
+  const isoDateTime = combineDateAndTime(isoDate, time)
+  checkIsoDateTimeInBounds(isoDateTime)
+
+  return createDateTimeSlots(isoDateTime, refineCalendarArg(calendar))
+}
+
+export function constructDateSlots<C>(
+  refineCalendarArg: RefineCalendarArg<C>,
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  calendar?: C,
+): CalendarDateFields & { calendar: InternalCalendar } {
+  const isoYearInt = toInteger(isoYear)
+  const isoMonthInt = toInteger(isoMonth)
+  const isoDayInt = toInteger(isoDay)
+  return createDateSlots(
+    checkIsoDateInBounds(
+      checkIsoDateFields({
+        year: isoYearInt,
+        month: isoMonthInt,
+        day: isoDayInt,
+      }),
+    ),
+    refineCalendarArg(calendar),
+  )
+}
+
+export function constructYearMonthSlots<C>(
+  refineCalendarArg: RefineCalendarArg<C>,
+  isoYear: number,
+  isoMonth: number,
+  calendar?: C,
+  referenceIsoDay = 1,
+): CalendarDateFields & { calendar: InternalCalendar } {
+  const isoYearInt = toInteger(isoYear)
+  const isoMonthInt = toInteger(isoMonth)
+  const calendarImpl = refineCalendarArg(calendar)
+  const isoDayInt = toInteger(referenceIsoDay)
+  return createYearMonthSlots(
+    checkIsoYearMonthInBounds(
+      checkIsoDateFields({
+        year: isoYearInt,
+        month: isoMonthInt,
+        day: isoDayInt,
+      }),
+    ),
+    calendarImpl,
+  )
+}
+
+export function constructMonthDaySlots<C>(
+  refineCalendarArg: RefineCalendarArg<C>,
+  isoMonth: number,
+  isoDay: number,
+  calendar?: C,
+  referenceIsoYear?: number,
+): CalendarDateFields & { calendar: InternalCalendar } {
+  const isoMonthInt = toInteger(isoMonth)
+  const isoDayInt = toInteger(isoDay)
+  const calendarImpl = refineCalendarArg(calendar)
+  const isoYearInt = toInteger(referenceIsoYear ?? isoEpochFirstLeapYear)
+  return createMonthDaySlots(
+    checkIsoDateInBounds(
+      checkIsoDateFields({
+        year: isoYearInt,
+        month: isoMonthInt,
+        day: isoDayInt,
+      }),
+    ),
+    calendarImpl,
   )
 }

@@ -11,8 +11,12 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
+import {
+  resolveCoreCalendar,
+  resolveCoreCalendarArg,
+} from '../internal/calendarResolver'
 import { compareIsoDateFields, plainDatesEqual } from '../internal/compare'
+import { constructDateSlots } from '../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -38,13 +42,12 @@ import { DiffOptions, OverflowOptions } from '../internal/optionsModel'
 import { ZonedEpochNanoFields, createDateSlots } from '../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../internal/units'
-import { NumberSign, isObjectLike } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { constructDateSlots } from './construct'
 import {
   Duration,
   DurationArg,
@@ -68,7 +71,7 @@ export type PlainDateArg = PlainDate | DateLikeObject | string
 
 export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
   PlainDateBranding,
-  constructDateSlots,
+  bindArgs(constructDateSlots, resolveCoreCalendarArg),
   formatPlainDateIso,
   {
     ...calendarIdGetters,

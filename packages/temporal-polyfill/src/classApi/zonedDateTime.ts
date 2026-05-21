@@ -12,8 +12,12 @@ import {
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
 import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
-import { resolveCoreCalendar } from '../internal/calendarResolver'
+import {
+  resolveCoreCalendar,
+  resolveCoreCalendarArg,
+} from '../internal/calendarResolver'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
+import { constructZonedEpochNanoSlots } from '../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -52,13 +56,12 @@ import {
   zonedEpochSlotsToIso,
 } from '../internal/timeZoneMath'
 import { DayTimeUnitName, UnitName } from '../internal/units'
-import { NumberSign, isObjectLike, mapProps } from '../internal/utils'
+import { NumberSign, bindArgs, isObjectLike, mapProps } from '../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { constructZonedEpochNanoSlots } from './construct'
 import {
   Duration,
   DurationArg,
@@ -80,7 +83,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
-  constructZonedEpochNanoSlots,
+  bindArgs(constructZonedEpochNanoSlots, resolveCoreCalendarArg),
   formatZonedDateTimeIso,
   {
     ...epochGetters,

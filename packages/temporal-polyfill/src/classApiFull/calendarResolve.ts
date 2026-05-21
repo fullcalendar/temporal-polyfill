@@ -24,6 +24,12 @@ export function resolveFullCalendar(rawCalendarId: string): InternalCalendar {
   return getExternalCalendar(lowerRawCalendarId)
 }
 
+export function resolveFullCalendarArg(
+  rawCalendarId = isoCalendarId,
+): InternalCalendar {
+  return resolveFullCalendar(rawCalendarId)
+}
+
 export function resolveFullCalendarId(rawCalendarId: string): string {
   return getInternalCalendarId(resolveFullCalendar(rawCalendarId))
 }

@@ -21,3 +21,9 @@ export function resolveCoreCalendar(rawCalendarId: string): InternalCalendar {
 
   throwExternalCalendarError()
 }
+
+export function resolveCoreCalendarArg(
+  rawCalendarId = isoCalendarId,
+): InternalCalendar {
+  return resolveCoreCalendar(rawCalendarId)
+}
