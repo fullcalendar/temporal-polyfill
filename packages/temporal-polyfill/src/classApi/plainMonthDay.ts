@@ -1,4 +1,5 @@
 import { PlainMonthDayBranding } from '../apiHelpers/branding'
+import { prepPlainMonthDayFormat } from '../apiHelpers/intlFormatConfig'
 import { calendarIdGetters, monthDayFieldGetters } from '../apiHelpers/mixins'
 import {
   createSlotClass,
@@ -21,7 +22,6 @@ import { OverflowOptions } from '../internal/optionsModel'
 import { isObjectLike } from '../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import { constructMonthDaySlots } from './construct'
-import { prepPlainMonthDayFormat } from './intlFormatConfig'
 import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainMonthDay = { monthCode: string; day: number } // and other getters/methods

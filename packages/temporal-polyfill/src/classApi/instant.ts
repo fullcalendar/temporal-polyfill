@@ -1,6 +1,8 @@
 import { InstantBranding, ZonedDateTimeBranding } from '../apiHelpers/branding'
+import { prepInstantFormat } from '../apiHelpers/intlFormatConfig'
 import { epochGetters } from '../apiHelpers/mixins'
 import { createSlotClass, getBrandingAndSlots } from '../apiHelpers/slotClass'
+import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
 import { bigNanoInMilli } from '../internal/bigNano'
 import { requireNumberIsInteger } from '../internal/cast'
 import { compareInstants, instantsEqual } from '../internal/compare'
@@ -32,8 +34,6 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepInstantFormat } from './intlFormatConfig'
-import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export type Instant = any

@@ -1,4 +1,5 @@
 import { PlainYearMonthBranding } from '../apiHelpers/branding'
+import { prepPlainYearMonthFormat } from '../apiHelpers/intlFormatConfig'
 import { calendarIdGetters, yearMonthGetters } from '../apiHelpers/mixins'
 import {
   createSlotClass,
@@ -30,7 +31,6 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepPlainYearMonthFormat } from './intlFormatConfig'
 import { PlainDate, createPlainDate } from './plainDate'
 
 export type PlainYearMonth = YearMonthFields // and other getters/methods

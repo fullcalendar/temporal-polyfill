@@ -1,4 +1,5 @@
 import { ZonedDateTimeBranding } from '../apiHelpers/branding'
+import { prepZonedDateTimeFormat } from '../apiHelpers/intlFormatConfig'
 import {
   calendarIdGetters,
   dateGetters,
@@ -10,6 +11,7 @@ import {
   getBrandingAndSlots,
   rejectInvalidBag,
 } from '../apiHelpers/slotClass'
+import { TimeZoneArg, refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
 import { compareZonedDateTimes, zonedDateTimesEqual } from '../internal/compare'
 import {
   zonedDateTimeToInstant,
@@ -64,7 +66,6 @@ import {
   toDurationSlots,
 } from './duration'
 import { Instant, createInstant } from './instant'
-import { prepZonedDateTimeFormat } from './intlFormatConfig'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import {
@@ -73,7 +74,6 @@ import {
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
 export type ZonedDateTime = any
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string

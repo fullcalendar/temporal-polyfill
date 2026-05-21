@@ -1,3 +1,4 @@
+import { classFormatConfigs } from '../apiHelpers/intlFormatConfig'
 import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import * as errorMessages from '../internal/errorMessages'
 import {
@@ -19,7 +20,6 @@ import {
   pluckProps,
 } from '../internal/utils'
 import { Instant } from './instant'
-import { classFormatConfigs } from './intlFormatConfig'
 import { PlainDate } from './plainDate'
 import { PlainDateTime } from './plainDateTime'
 import { PlainMonthDay } from './plainMonthDay'

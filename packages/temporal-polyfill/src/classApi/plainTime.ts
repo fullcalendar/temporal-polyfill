@@ -3,6 +3,7 @@ import {
   PlainTimeBranding,
   ZonedDateTimeBranding,
 } from '../apiHelpers/branding'
+import { prepPlainTimeFormat } from '../apiHelpers/intlFormatConfig'
 import { timeGetters } from '../apiHelpers/mixins'
 import {
   createSlotClass,
@@ -37,7 +38,6 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { prepPlainTimeFormat } from './intlFormatConfig'
 
 export type PlainTime = TimeFields // and other getters/methods
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string

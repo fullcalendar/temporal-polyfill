@@ -6,6 +6,7 @@ import {
 } from '../apiHelpers/branding'
 import { durationFieldGetters } from '../apiHelpers/mixins'
 import { createSlotClass, getBrandingAndSlots } from '../apiHelpers/slotClass'
+import { refineTimeZoneArg } from '../apiHelpers/timeZoneArg'
 import { compareDurations } from '../internal/compare'
 import {
   refineDurationObjectLike,
@@ -42,7 +43,6 @@ import { getCalendarFromBag, resolveFullCalendar } from './calendarArg'
 import { constructDurationSlots } from './construct'
 import { PlainDateArg } from './plainDate'
 import { PlainDateTimeArg } from './plainDateTime'
-import { refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTimeArg } from './zonedDateTime'
 
 export type Duration = DurationFields // and other getters/methods
