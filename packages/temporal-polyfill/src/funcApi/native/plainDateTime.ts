@@ -22,8 +22,8 @@ import { PlainDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
-  assertCalendarNativeStringResolved,
   getCalendarNativeRecordId,
+  runCalendarNativeResolver,
 } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -141,10 +141,10 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  resolveCalendar?: CalendarNativeResolver,
+  getCalendar: CalendarNativeResolver,
 ): PlainDateTimeNativeRecord {
   const resNative = Temporal!.PlainDateTime.from(s)
-  assertCalendarNativeStringResolved(resNative.calendarId, resolveCalendar)
+  runCalendarNativeResolver(resNative.calendarId, getCalendar)
   return createPlainDateTimeNativeRecord(resNative)
 }
 

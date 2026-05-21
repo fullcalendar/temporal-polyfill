@@ -1,5 +1,4 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
-import { throwExoticCalendarError } from '../../internal/calendarSlot'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -32,27 +31,14 @@ const getIntlCalendarRecord = memoize((calendarId: string) =>
 )
 
 // Native Temporal owns string parsing in this branch, but the fns API still
-// owns the calendar add-on boundary. After native parsing succeeds, inspect the
-// parsed calendar ID and require the public resolver hook for non-core calendars.
-// Calling getCalendarNativeRecordId also verifies that the resolver returned one
-// of this API's calendar records, not an arbitrary value.
-export function assertCalendarNativeStringResolved(
+// owns the calendar add-on boundary. After native parsing succeeds, hand the
+// parsed calendar id off to the public resolver and validate that what comes
+// back is one of this API's calendar records, not an arbitrary value.
+export function runCalendarNativeResolver(
   calendarId: string,
-  resolveCalendar?: CalendarNativeResolver,
+  getCalendar: CalendarNativeResolver,
 ): void {
-  const lowerCalendarId = calendarId.toLowerCase()
-
-  if (
-    lowerCalendarId === isoCalendarId ||
-    lowerCalendarId === gregoryCalendarId
-  ) {
-    return
-  }
-  if (!resolveCalendar) {
-    throwExoticCalendarError()
-  }
-
-  getCalendarNativeRecordId(resolveCalendar(lowerCalendarId))
+  getCalendarNativeRecordId(getCalendar(calendarId.toLowerCase()))
 }
 
 export function getIsoCalendar(): CalendarNativeRecord {

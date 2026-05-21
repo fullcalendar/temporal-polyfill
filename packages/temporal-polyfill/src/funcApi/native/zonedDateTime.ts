@@ -24,8 +24,8 @@ import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
-  assertCalendarNativeStringResolved,
   getCalendarNativeRecordId,
+  runCalendarNativeResolver,
 } from './calendar'
 import {
   DurationNativeRecord,
@@ -105,11 +105,11 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  resolveCalendar?: CalendarNativeResolver,
+  getCalendar: CalendarNativeResolver,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = Temporal!.ZonedDateTime.from(s, options)
-  assertCalendarNativeStringResolved(resNative.calendarId, resolveCalendar)
+  runCalendarNativeResolver(resNative.calendarId, getCalendar)
   return createZonedDateTimeNativeRecord(resNative)
 }
 

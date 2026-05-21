@@ -6,12 +6,7 @@ import {
   getCalendarSlotId,
   gregoryCalendar,
   isoCalendar,
-  throwExoticCalendarError,
 } from '../../internal/calendarSlot'
-import {
-  gregoryCalendarId,
-  isoCalendarId,
-} from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
 import { CalendarRecordBranding } from '../recordBranding'
 
@@ -47,27 +42,15 @@ export function refineCalendarShimArg(
     : getCalendarShimRecordInternal(calendar)
 }
 
-// String parsing is core-calendar-only unless the public caller supplies the
-// add-on resolver hook. This keeps Intl calendar support explicit at the API
-// boundary instead of hidden inside shared parsing internals.
+// Adapt a public shim resolver (id -> CalendarShimRecord) into the internal
+// CalendarResolver signature (id -> CalendarSlot) that the parser expects.
+// The public resolver — typically getCoreCalendar or getAnyCalendar — owns the
+// iso/gregory/Intl policy, so all this wrapper does is brand-unwrap.
 export function createCalendarShimStringResolver(
-  resolveCalendar?: CalendarShimResolver,
+  getCalendar: CalendarShimResolver,
 ): CalendarResolver {
-  return (calendarId: string) => {
-    const lowerCalendarId = calendarId.toLowerCase()
-
-    if (lowerCalendarId === isoCalendarId) {
-      return isoCalendar
-    }
-    if (lowerCalendarId === gregoryCalendarId) {
-      return gregoryCalendar
-    }
-    if (!resolveCalendar) {
-      throwExoticCalendarError()
-    }
-
-    return getCalendarShimRecordInternal(resolveCalendar(lowerCalendarId))
-  }
+  return (calendarId: string) =>
+    getCalendarShimRecordInternal(getCalendar(calendarId.toLowerCase()))
 }
 
 export function getIsoCalendar(): CalendarShimRecord {

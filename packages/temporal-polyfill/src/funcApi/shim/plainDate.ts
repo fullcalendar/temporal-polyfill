@@ -157,10 +157,10 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  resolveCalendar?: CalendarShimResolver,
+  getCalendar: CalendarShimResolver,
 ): PlainDateShimRecord {
   return createPlainDateShimRecord(
-    parsePlainDate(s, createCalendarShimStringResolver(resolveCalendar)),
+    parsePlainDate(s, createCalendarShimStringResolver(getCalendar)),
   )
 }
 

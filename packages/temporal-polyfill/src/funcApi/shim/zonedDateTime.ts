@@ -208,13 +208,13 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  resolveCalendar?: CalendarShimResolver,
+  getCalendar: CalendarShimResolver,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeShimRecord {
   return createZonedDateTimeShimRecord(
     parseZonedDateTime(
       s,
-      createCalendarShimStringResolver(resolveCalendar),
+      createCalendarShimStringResolver(getCalendar),
       options,
     ),
   )

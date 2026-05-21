@@ -104,10 +104,10 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  resolveCalendar?: CalendarShimResolver,
+  getCalendar: CalendarShimResolver,
 ): PlainYearMonthShimRecord {
   return createPlainYearMonthShimRecord(
-    parsePlainYearMonth(s, createCalendarShimStringResolver(resolveCalendar)),
+    parsePlainYearMonth(s, createCalendarShimStringResolver(getCalendar)),
   )
 }
 
