@@ -16,8 +16,8 @@ import {
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { Temporal } from '../nativeSwitch'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
@@ -63,7 +63,7 @@ export const [
     nanosecond = 0,
     calendar?: CalendarNativeRecord,
   ) =>
-    new Temporal!.PlainDateTime(
+    new NativeTemporal!.PlainDateTime(
       isoYear,
       isoMonth,
       isoDay,
@@ -130,7 +130,7 @@ export function fromFields(
     fields.calendar === undefined
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
-  const resNative = Temporal!.PlainDateTime.from(
+  const resNative = NativeTemporal!.PlainDateTime.from(
     { ...fields, calendar },
     options,
   )
@@ -141,7 +141,7 @@ export function fromString(
   s: string,
   getCalendar: CalendarNativeResolver,
 ): PlainDateTimeNativeRecord {
-  const resNative = Temporal!.PlainDateTime.from(s)
+  const resNative = NativeTemporal!.PlainDateTime.from(s)
   runCalendarNativeResolver(resNative.calendarId, getCalendar)
   return createPlainDateTimeNativeRecord(resNative)
 }
@@ -277,7 +277,7 @@ export function compare(
 ): NumberSign {
   const native = getPlainDateTimeNative(record)
   const otherNative = getPlainDateTimeNative(otherRecord)
-  return Temporal!.PlainDateTime.compare(native, otherNative)
+  return NativeTemporal!.PlainDateTime.compare(native, otherNative)
 }
 
 export function toZonedDateTime(

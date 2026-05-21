@@ -3,19 +3,19 @@ import {
   gregoryCalendarId,
   isoCalendarId,
 } from '../internal/intlCalendarConfig'
+import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/calendar'
-import { Temporal } from './nativeSwitch'
 import * as Shim from './shim/calendar'
 
-export const getIsoCalendar = Temporal
+export const getIsoCalendar = NativeTemporal
   ? Native.getIsoCalendar
   : Shim.getIsoCalendar
 
-export const getGregoryCalendar = Temporal
+export const getGregoryCalendar = NativeTemporal
   ? Native.getGregoryCalendar
   : Shim.getGregoryCalendar
 
-export const getIntlCalendar = Temporal
+export const getIntlCalendar = NativeTemporal
   ? Native.getIntlCalendar
   : Shim.getIntlCalendar
 

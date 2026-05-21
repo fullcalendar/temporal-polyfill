@@ -12,8 +12,8 @@ import {
 } from '../../internal/optionsModel'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { Temporal } from '../nativeSwitch'
 import { PlainTimeRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -39,7 +39,7 @@ export const [
     microsecond = 0,
     nanosecond = 0,
   ) =>
-    new Temporal!.PlainTime(
+    new NativeTemporal!.PlainTime(
       hour,
       minute,
       second,
@@ -85,12 +85,12 @@ export function fromFields(
   fields: Partial<TimeFields>,
   options?: OverflowOptions,
 ): PlainTimeNativeRecord {
-  const resNative = Temporal!.PlainTime.from(fields, options)
+  const resNative = NativeTemporal!.PlainTime.from(fields, options)
   return createPlainTimeNativeRecord(resNative)
 }
 
 export function fromString(s: string): PlainTimeNativeRecord {
-  const resNative = Temporal!.PlainTime.from(s)
+  const resNative = NativeTemporal!.PlainTime.from(s)
   return createPlainTimeNativeRecord(resNative)
 }
 
@@ -160,7 +160,7 @@ export function compare(
 ): NumberSign {
   const native = getPlainTimeNative(record)
   const otherNative = getPlainTimeNative(otherRecord)
-  return Temporal!.PlainTime.compare(native, otherNative)
+  return NativeTemporal!.PlainTime.compare(native, otherNative)
 }
 
 export function createFormat(

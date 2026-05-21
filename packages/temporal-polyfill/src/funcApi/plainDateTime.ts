@@ -1,143 +1,179 @@
+import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/plainDateTime'
-import { Temporal } from './nativeSwitch'
 import * as Shim from './shim/plainDateTime'
 
-export const create = Temporal ? Native.create : Shim.create
-export const isRecord = Temporal ? Native.isRecord : Shim.isRecord
-export const fromFields = Temporal ? Native.fromFields : Shim.fromFields
-export const fromString = Temporal ? Native.fromString : Shim.fromString
-export const withCalendar = Temporal ? Native.withCalendar : Shim.withCalendar
-export const withFields = Temporal ? Native.withFields : Shim.withFields
-export const withPlainTime = Temporal
+export const create = NativeTemporal ? Native.create : Shim.create
+export const isRecord = NativeTemporal ? Native.isRecord : Shim.isRecord
+export const fromFields = NativeTemporal ? Native.fromFields : Shim.fromFields
+export const fromString = NativeTemporal ? Native.fromString : Shim.fromString
+export const withCalendar = NativeTemporal
+  ? Native.withCalendar
+  : Shim.withCalendar
+export const withFields = NativeTemporal ? Native.withFields : Shim.withFields
+export const withPlainTime = NativeTemporal
   ? Native.withPlainTime
   : Shim.withPlainTime
-export const dayOfWeek = Temporal ? Native.dayOfWeek : Shim.dayOfWeek
-export const daysInWeek = Temporal ? Native.daysInWeek : Shim.daysInWeek
-export const weekOfYear = Temporal ? Native.weekOfYear : Shim.weekOfYear
-export const yearOfWeek = Temporal ? Native.yearOfWeek : Shim.yearOfWeek
-export const dayOfYear = Temporal ? Native.dayOfYear : Shim.dayOfYear
-export const daysInMonth = Temporal ? Native.daysInMonth : Shim.daysInMonth
-export const daysInYear = Temporal ? Native.daysInYear : Shim.daysInYear
-export const monthsInYear = Temporal ? Native.monthsInYear : Shim.monthsInYear
-export const inLeapYear = Temporal ? Native.inLeapYear : Shim.inLeapYear
-export const add = Temporal ? Native.add : Shim.add
-export const subtract = Temporal ? Native.subtract : Shim.subtract
-export const diff = Temporal ? Native.diff : Shim.diff
-export const round = Temporal ? Native.round : Shim.round
-export const equals = Temporal ? Native.equals : Shim.equals
-export const compare = Temporal ? Native.compare : Shim.compare
-export const toZonedDateTime = Temporal
+export const dayOfWeek = NativeTemporal ? Native.dayOfWeek : Shim.dayOfWeek
+export const daysInWeek = NativeTemporal ? Native.daysInWeek : Shim.daysInWeek
+export const weekOfYear = NativeTemporal ? Native.weekOfYear : Shim.weekOfYear
+export const yearOfWeek = NativeTemporal ? Native.yearOfWeek : Shim.yearOfWeek
+export const dayOfYear = NativeTemporal ? Native.dayOfYear : Shim.dayOfYear
+export const daysInMonth = NativeTemporal
+  ? Native.daysInMonth
+  : Shim.daysInMonth
+export const daysInYear = NativeTemporal ? Native.daysInYear : Shim.daysInYear
+export const monthsInYear = NativeTemporal
+  ? Native.monthsInYear
+  : Shim.monthsInYear
+export const inLeapYear = NativeTemporal ? Native.inLeapYear : Shim.inLeapYear
+export const add = NativeTemporal ? Native.add : Shim.add
+export const subtract = NativeTemporal ? Native.subtract : Shim.subtract
+export const diff = NativeTemporal ? Native.diff : Shim.diff
+export const round = NativeTemporal ? Native.round : Shim.round
+export const equals = NativeTemporal ? Native.equals : Shim.equals
+export const compare = NativeTemporal ? Native.compare : Shim.compare
+export const toZonedDateTime = NativeTemporal
   ? Native.toZonedDateTime
   : Shim.toZonedDateTime
-export const toPlainDate = Temporal ? Native.toPlainDate : Shim.toPlainDate
-export const toPlainTime = Temporal ? Native.toPlainTime : Shim.toPlainTime
-export const createFormat = Temporal ? Native.createFormat : Shim.createFormat
-export const toLocaleString = Temporal
+export const toPlainDate = NativeTemporal
+  ? Native.toPlainDate
+  : Shim.toPlainDate
+export const toPlainTime = NativeTemporal
+  ? Native.toPlainTime
+  : Shim.toPlainTime
+export const createFormat = NativeTemporal
+  ? Native.createFormat
+  : Shim.createFormat
+export const toLocaleString = NativeTemporal
   ? Native.toLocaleString
   : Shim.toLocaleString
-export const toString = Temporal ? Native.toString : Shim.toString
-export const withDayOfYear = Temporal
+export const toString = NativeTemporal ? Native.toString : Shim.toString
+export const withDayOfYear = NativeTemporal
   ? Native.withDayOfYear
   : Shim.withDayOfYear
-export const withDayOfMonth = Temporal
+export const withDayOfMonth = NativeTemporal
   ? Native.withDayOfMonth
   : Shim.withDayOfMonth
-export const withDayOfWeek = Temporal
+export const withDayOfWeek = NativeTemporal
   ? Native.withDayOfWeek
   : Shim.withDayOfWeek
-export const withWeekOfYear = Temporal
+export const withWeekOfYear = NativeTemporal
   ? Native.withWeekOfYear
   : Shim.withWeekOfYear
-export const addYears = Temporal ? Native.addYears : Shim.addYears
-export const addMonths = Temporal ? Native.addMonths : Shim.addMonths
-export const addWeeks = Temporal ? Native.addWeeks : Shim.addWeeks
-export const addDays = Temporal ? Native.addDays : Shim.addDays
-export const addHours = Temporal ? Native.addHours : Shim.addHours
-export const addMinutes = Temporal ? Native.addMinutes : Shim.addMinutes
-export const addSeconds = Temporal ? Native.addSeconds : Shim.addSeconds
-export const addMilliseconds = Temporal
+export const addYears = NativeTemporal ? Native.addYears : Shim.addYears
+export const addMonths = NativeTemporal ? Native.addMonths : Shim.addMonths
+export const addWeeks = NativeTemporal ? Native.addWeeks : Shim.addWeeks
+export const addDays = NativeTemporal ? Native.addDays : Shim.addDays
+export const addHours = NativeTemporal ? Native.addHours : Shim.addHours
+export const addMinutes = NativeTemporal ? Native.addMinutes : Shim.addMinutes
+export const addSeconds = NativeTemporal ? Native.addSeconds : Shim.addSeconds
+export const addMilliseconds = NativeTemporal
   ? Native.addMilliseconds
   : Shim.addMilliseconds
-export const addMicroseconds = Temporal
+export const addMicroseconds = NativeTemporal
   ? Native.addMicroseconds
   : Shim.addMicroseconds
-export const addNanoseconds = Temporal
+export const addNanoseconds = NativeTemporal
   ? Native.addNanoseconds
   : Shim.addNanoseconds
-export const subtractYears = Temporal
+export const subtractYears = NativeTemporal
   ? Native.subtractYears
   : Shim.subtractYears
-export const subtractMonths = Temporal
+export const subtractMonths = NativeTemporal
   ? Native.subtractMonths
   : Shim.subtractMonths
-export const subtractWeeks = Temporal
+export const subtractWeeks = NativeTemporal
   ? Native.subtractWeeks
   : Shim.subtractWeeks
-export const subtractDays = Temporal ? Native.subtractDays : Shim.subtractDays
-export const subtractHours = Temporal
+export const subtractDays = NativeTemporal
+  ? Native.subtractDays
+  : Shim.subtractDays
+export const subtractHours = NativeTemporal
   ? Native.subtractHours
   : Shim.subtractHours
-export const subtractMinutes = Temporal
+export const subtractMinutes = NativeTemporal
   ? Native.subtractMinutes
   : Shim.subtractMinutes
-export const subtractSeconds = Temporal
+export const subtractSeconds = NativeTemporal
   ? Native.subtractSeconds
   : Shim.subtractSeconds
-export const subtractMilliseconds = Temporal
+export const subtractMilliseconds = NativeTemporal
   ? Native.subtractMilliseconds
   : Shim.subtractMilliseconds
-export const subtractMicroseconds = Temporal
+export const subtractMicroseconds = NativeTemporal
   ? Native.subtractMicroseconds
   : Shim.subtractMicroseconds
-export const subtractNanoseconds = Temporal
+export const subtractNanoseconds = NativeTemporal
   ? Native.subtractNanoseconds
   : Shim.subtractNanoseconds
-export const roundToYear = Temporal ? Native.roundToYear : Shim.roundToYear
-export const roundToMonth = Temporal ? Native.roundToMonth : Shim.roundToMonth
-export const roundToWeek = Temporal ? Native.roundToWeek : Shim.roundToWeek
-export const startOfYear = Temporal ? Native.startOfYear : Shim.startOfYear
-export const startOfMonth = Temporal ? Native.startOfMonth : Shim.startOfMonth
-export const startOfWeek = Temporal ? Native.startOfWeek : Shim.startOfWeek
-export const startOfDay = Temporal ? Native.startOfDay : Shim.startOfDay
-export const startOfHour = Temporal ? Native.startOfHour : Shim.startOfHour
-export const startOfMinute = Temporal
+export const roundToYear = NativeTemporal
+  ? Native.roundToYear
+  : Shim.roundToYear
+export const roundToMonth = NativeTemporal
+  ? Native.roundToMonth
+  : Shim.roundToMonth
+export const roundToWeek = NativeTemporal
+  ? Native.roundToWeek
+  : Shim.roundToWeek
+export const startOfYear = NativeTemporal
+  ? Native.startOfYear
+  : Shim.startOfYear
+export const startOfMonth = NativeTemporal
+  ? Native.startOfMonth
+  : Shim.startOfMonth
+export const startOfWeek = NativeTemporal
+  ? Native.startOfWeek
+  : Shim.startOfWeek
+export const startOfDay = NativeTemporal ? Native.startOfDay : Shim.startOfDay
+export const startOfHour = NativeTemporal
+  ? Native.startOfHour
+  : Shim.startOfHour
+export const startOfMinute = NativeTemporal
   ? Native.startOfMinute
   : Shim.startOfMinute
-export const startOfSecond = Temporal
+export const startOfSecond = NativeTemporal
   ? Native.startOfSecond
   : Shim.startOfSecond
-export const startOfMillisecond = Temporal
+export const startOfMillisecond = NativeTemporal
   ? Native.startOfMillisecond
   : Shim.startOfMillisecond
-export const startOfMicrosecond = Temporal
+export const startOfMicrosecond = NativeTemporal
   ? Native.startOfMicrosecond
   : Shim.startOfMicrosecond
-export const endOfYear = Temporal ? Native.endOfYear : Shim.endOfYear
-export const endOfMonth = Temporal ? Native.endOfMonth : Shim.endOfMonth
-export const endOfWeek = Temporal ? Native.endOfWeek : Shim.endOfWeek
-export const endOfDay = Temporal ? Native.endOfDay : Shim.endOfDay
-export const endOfHour = Temporal ? Native.endOfHour : Shim.endOfHour
-export const endOfMinute = Temporal ? Native.endOfMinute : Shim.endOfMinute
-export const endOfSecond = Temporal ? Native.endOfSecond : Shim.endOfSecond
-export const endOfMillisecond = Temporal
+export const endOfYear = NativeTemporal ? Native.endOfYear : Shim.endOfYear
+export const endOfMonth = NativeTemporal ? Native.endOfMonth : Shim.endOfMonth
+export const endOfWeek = NativeTemporal ? Native.endOfWeek : Shim.endOfWeek
+export const endOfDay = NativeTemporal ? Native.endOfDay : Shim.endOfDay
+export const endOfHour = NativeTemporal ? Native.endOfHour : Shim.endOfHour
+export const endOfMinute = NativeTemporal
+  ? Native.endOfMinute
+  : Shim.endOfMinute
+export const endOfSecond = NativeTemporal
+  ? Native.endOfSecond
+  : Shim.endOfSecond
+export const endOfMillisecond = NativeTemporal
   ? Native.endOfMillisecond
   : Shim.endOfMillisecond
-export const endOfMicrosecond = Temporal
+export const endOfMicrosecond = NativeTemporal
   ? Native.endOfMicrosecond
   : Shim.endOfMicrosecond
-export const diffYears = Temporal ? Native.diffYears : Shim.diffYears
-export const diffMonths = Temporal ? Native.diffMonths : Shim.diffMonths
-export const diffWeeks = Temporal ? Native.diffWeeks : Shim.diffWeeks
-export const diffDays = Temporal ? Native.diffDays : Shim.diffDays
-export const diffHours = Temporal ? Native.diffHours : Shim.diffHours
-export const diffMinutes = Temporal ? Native.diffMinutes : Shim.diffMinutes
-export const diffSeconds = Temporal ? Native.diffSeconds : Shim.diffSeconds
-export const diffMilliseconds = Temporal
+export const diffYears = NativeTemporal ? Native.diffYears : Shim.diffYears
+export const diffMonths = NativeTemporal ? Native.diffMonths : Shim.diffMonths
+export const diffWeeks = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
+export const diffDays = NativeTemporal ? Native.diffDays : Shim.diffDays
+export const diffHours = NativeTemporal ? Native.diffHours : Shim.diffHours
+export const diffMinutes = NativeTemporal
+  ? Native.diffMinutes
+  : Shim.diffMinutes
+export const diffSeconds = NativeTemporal
+  ? Native.diffSeconds
+  : Shim.diffSeconds
+export const diffMilliseconds = NativeTemporal
   ? Native.diffMilliseconds
   : Shim.diffMilliseconds
-export const diffMicroseconds = Temporal
+export const diffMicroseconds = NativeTemporal
   ? Native.diffMicroseconds
   : Shim.diffMicroseconds
-export const diffNanoseconds = Temporal
+export const diffNanoseconds = NativeTemporal
   ? Native.diffNanoseconds
   : Shim.diffNanoseconds

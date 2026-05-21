@@ -10,8 +10,8 @@ import {
 } from '../../internal/optionsModel'
 import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { Temporal } from '../nativeSwitch'
 import { InstantRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -33,7 +33,7 @@ export const [
   getInstantNative,
 ] = createSlotClass(
   InstantRecordBranding,
-  (epochNanoseconds: bigint) => new Temporal!.Instant(epochNanoseconds),
+  (epochNanoseconds: bigint) => new NativeTemporal!.Instant(epochNanoseconds),
   (native) => native.toString(),
   {
     epochMilliseconds: (native: any) => native.epochMilliseconds,
@@ -53,19 +53,21 @@ export function isRecord(arg: unknown): arg is InstantNativeRecord {
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantNativeRecord {
-  const resNative = Temporal!.Instant.fromEpochMilliseconds(epochMilliseconds)
+  const resNative =
+    NativeTemporal!.Instant.fromEpochMilliseconds(epochMilliseconds)
   return createInstantNativeRecord(resNative)
 }
 
 export function fromEpochNanoseconds(
   epochNanoseconds: bigint,
 ): InstantNativeRecord {
-  const resNative = Temporal!.Instant.fromEpochNanoseconds(epochNanoseconds)
+  const resNative =
+    NativeTemporal!.Instant.fromEpochNanoseconds(epochNanoseconds)
   return createInstantNativeRecord(resNative)
 }
 
 export function fromString(s: string): InstantNativeRecord {
-  const resNative = Temporal!.Instant.from(s)
+  const resNative = NativeTemporal!.Instant.from(s)
   return createInstantNativeRecord(resNative)
 }
 
@@ -125,7 +127,7 @@ export function compare(
 ): NumberSign {
   const native = getInstantNative(record)
   const otherNative = getInstantNative(otherRecord)
-  return Temporal!.Instant.compare(native, otherNative)
+  return NativeTemporal!.Instant.compare(native, otherNative)
 }
 
 export function toZonedDateTimeISO(

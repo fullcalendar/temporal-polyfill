@@ -18,8 +18,8 @@ import {
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
-import { Temporal } from '../nativeSwitch'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
@@ -59,7 +59,7 @@ export const [
     timeZoneId: string,
     calendar?: CalendarNativeRecord,
   ) =>
-    new Temporal!.ZonedDateTime(
+    new NativeTemporal!.ZonedDateTime(
       epochNanoseconds,
       timeZoneId,
       calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
@@ -94,7 +94,7 @@ export function fromFields(
     fields.calendar === undefined
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
-  const resNative = Temporal!.ZonedDateTime.from(
+  const resNative = NativeTemporal!.ZonedDateTime.from(
     { ...fields, calendar },
     options,
   )
@@ -106,7 +106,7 @@ export function fromString(
   getCalendar: CalendarNativeResolver,
   options?: ZonedFieldOptions,
 ): ZonedDateTimeNativeRecord {
-  const resNative = Temporal!.ZonedDateTime.from(s, options)
+  const resNative = NativeTemporal!.ZonedDateTime.from(s, options)
   runCalendarNativeResolver(resNative.calendarId, getCalendar)
   return createZonedDateTimeNativeRecord(resNative)
 }
@@ -287,7 +287,7 @@ export function compare(
 ): NumberSign {
   const native = getZonedDateTimeNative(record)
   const otherNative = getZonedDateTimeNative(otherRecord)
-  return Temporal!.ZonedDateTime.compare(native, otherNative)
+  return NativeTemporal!.ZonedDateTime.compare(native, otherNative)
 }
 
 export function toInstant(
