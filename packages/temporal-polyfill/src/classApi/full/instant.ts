@@ -19,10 +19,7 @@ import {
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
-  formatInstantIso,
-  formatInstantIsoAuto,
-} from '../../internal/isoFormat'
+import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import { DiffOptions, RoundingOptions } from '../../internal/optionsModel'
@@ -48,10 +45,12 @@ import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 export type Instant = any
 export type InstantArg = Instant | string
 
+const formatInstant = bindArgs(formatInstantIso, refineTimeZoneArg)
+
 export const [Instant, createInstant] = createSlotClass(
   InstantBranding,
   constructEpochNanoSlots,
-  formatInstantIsoAuto,
+  formatInstant,
   epochGetters,
   {
     add(slots: EpochNanoFields, durationArg: DurationArg): Instant {
@@ -110,7 +109,7 @@ export const [Instant, createInstant] = createSlotClass(
       const [format, epochMilli] = prepInstantFormat(locales, options, slots)
       return format.format(epochMilli)
     },
-    toString: bindArgs(formatInstantIso, refineTimeZoneArg),
+    toString: formatInstant,
   },
   {
     from(arg: InstantArg) {

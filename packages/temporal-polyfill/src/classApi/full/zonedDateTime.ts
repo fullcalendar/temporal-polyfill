@@ -30,7 +30,6 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   formatOffsetNano,
   formatZonedDateTimeIso,
-  formatZonedDateTimeIsoAuto,
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
@@ -93,7 +92,7 @@ export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 export const [ZonedDateTime, createZonedDateTime] = createSlotClass(
   ZonedDateTimeBranding,
   bindArgs(constructZonedEpochNanoSlots, resolveAnyCalendarArg),
-  formatZonedDateTimeIsoAuto,
+  formatZonedDateTimeIso,
   {
     ...epochGetters,
     ...calendarIdGetters,

@@ -19,10 +19,7 @@ import {
 } from '../../internal/fieldTypes'
 import { MonthDayFields, YearFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
-  formatMonthDayIsoAuto,
-  formatPlainMonthDayIso,
-} from '../../internal/isoFormat'
+import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
@@ -40,7 +37,7 @@ export const [PlainMonthDay, createPlainMonthDay, getPlainMonthDaySlots] =
   createSlotClass(
     PlainMonthDayBranding,
     bindArgs(constructMonthDaySlots, resolveAnyCalendarArg),
-    formatMonthDayIsoAuto,
+    formatPlainMonthDayIso,
     {
       ...calendarIdGetters,
       ...monthDayFieldGetters,

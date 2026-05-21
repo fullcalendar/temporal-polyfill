@@ -78,7 +78,7 @@ export function createSlotClass<
     ...createPropDescriptors(
       mapProps(bindMethod, {
         ...methods,
-        toJSON: formatFunc,
+        toJSON: (slots: any) => formatFunc(slots), // don't forward args
         valueOf: neverValueOf,
       }),
     ),

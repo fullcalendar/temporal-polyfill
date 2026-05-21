@@ -35,10 +35,7 @@ import {
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
-  formatDateTimeIsoAuto,
-  formatPlainDateTimeIso,
-} from '../../internal/isoFormat'
+import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
@@ -89,7 +86,7 @@ export type PlainDateTimeArg = PlainDateTime | DateTimeLikeObject | string
 export const [PlainDateTime, createPlainDateTime] = createSlotClass(
   PlainDateTimeBranding,
   bindArgs(constructDateTimeSlots, resolveAnyCalendarArg),
-  formatDateTimeIsoAuto,
+  formatPlainDateTimeIso,
   {
     ...calendarIdGetters,
     ...dateGetters,

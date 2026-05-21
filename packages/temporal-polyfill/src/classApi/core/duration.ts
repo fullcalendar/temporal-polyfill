@@ -29,10 +29,7 @@ import {
   ZonedDateTimeLikeObject,
 } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
-  formatDurationIso,
-  formatDurationIsoAuto,
-} from '../../internal/isoFormat'
+import { formatDurationIso } from '../../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
 import {
@@ -58,7 +55,7 @@ export type DurationArg = Duration | Partial<DurationFields> | string
 export const [Duration, createDuration, getDurationSlots] = createSlotClass(
   DurationBranding,
   constructDurationSlots,
-  formatDurationIsoAuto,
+  formatDurationIso,
   {
     ...durationFieldGetters,
     sign(slots: DurationFields & { sign: NumberSign }) {
