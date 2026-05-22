@@ -463,7 +463,11 @@ function buildSourceDirectoryChunksPlugin(sourceRoot) {
       return {
         ...outputOptions,
         manualChunks(id, meta) {
-          const chunkName = resolveSourceDirectoryChunkName(id, sourceRoot)
+          const chunkName = resolveSourceDirectoryChunkName(
+            id,
+            sourceRoot,
+            meta,
+          )
 
           if (chunkName) {
             return chunkName
@@ -482,7 +486,13 @@ function buildSourceDirectoryChunksPlugin(sourceRoot) {
 // Top-level files go to `root`; nested paths are flattened so
 // `funcApi/native/foo.js` becomes the `funcApi-native` chunk instead of writing
 // into a nested `chunks/funcApi/native.*` output path.
-function resolveSourceDirectoryChunkName(id, sourceRoot) {
+function resolveSourceDirectoryChunkName(id, sourceRoot, meta) {
+  // Keep entry modules as facades so side-effectful entries like global.ts
+  // cannot become reusable chunks for shim.ts or implementation.ts.
+  if (meta.getModuleInfo(id)?.isEntry) {
+    return
+  }
+
   const sourceRootWithSep = sourceRoot + pathSep
 
   if (!id.startsWith(sourceRootWithSep)) {
