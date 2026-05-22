@@ -5,26 +5,34 @@ import { createPlainDateTimeNativeRecord } from './plainDateTime'
 import { createPlainTimeNativeRecord } from './plainTime'
 import { createZonedDateTimeNativeRecord } from './zonedDateTime'
 
-const NativeNow = NativeTemporal!.Now
-
-export const timeZoneId = NativeNow.timeZoneId as () => string
+export function timeZoneId() {
+  return NativeTemporal!.Now.timeZoneId()
+}
 
 export function instant() {
-  return createInstantNativeRecord(NativeNow.instant())
+  return createInstantNativeRecord(NativeTemporal!.Now.instant())
 }
 
 export function zonedDateTimeISO(timeZoneId?: string) {
-  return createZonedDateTimeNativeRecord(NativeNow.zonedDateTimeISO(timeZoneId))
+  return createZonedDateTimeNativeRecord(
+    NativeTemporal!.Now.zonedDateTimeISO(timeZoneId),
+  )
 }
 
 export function plainDateTimeISO(timeZoneId?: string) {
-  return createPlainDateTimeNativeRecord(NativeNow.plainDateTimeISO(timeZoneId))
+  return createPlainDateTimeNativeRecord(
+    NativeTemporal!.Now.plainDateTimeISO(timeZoneId),
+  )
 }
 
 export function plainDateISO(timeZoneId?: string) {
-  return createPlainDateNativeRecord(NativeNow.plainDateISO(timeZoneId))
+  return createPlainDateNativeRecord(
+    NativeTemporal!.Now.plainDateISO(timeZoneId),
+  )
 }
 
 export function plainTimeISO(timeZoneId?: string) {
-  return createPlainTimeNativeRecord(NativeNow.plainTimeISO(timeZoneId))
+  return createPlainTimeNativeRecord(
+    NativeTemporal!.Now.plainTimeISO(timeZoneId),
+  )
 }

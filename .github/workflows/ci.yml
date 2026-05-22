@@ -20,15 +20,18 @@ jobs:
         TEST262_NODE_VERSION: [14.21.3, 16.20.0, 18.19.0, 20.10.0, 22.14.0]
         include:
           - TEST262_NODE_VERSION: 14.21.3
+            TEST262_CLASS_API: full
             LINTING: 1
           - TEST262_NODE_VERSION: 16.20.0
-            TEST262_MIN: 1
+            TEST262_CLASS_API: full
           - TEST262_NODE_VERSION: 18.19.0
-            TEST262_ESM: 1
+            TEST262_CLASS_API: full
           - TEST262_NODE_VERSION: 20.10.0
-            TEST262_ESM: terser
+            TEST262_CLASS_API: full
+            TEST262_MINIFIER: terser
           - TEST262_NODE_VERSION: 22.14.0
-            TEST262_ESM: swc
+            TEST262_CLASS_API: full
+            TEST262_MINIFIER: swc
 
     steps:
       - name: Checkout
@@ -57,12 +60,11 @@ jobs:
 
       - name: Build
         run: >
-          TEST262_ESM=${{ matrix.TEST262_ESM }}
+          TEST262_CLASS_API=${{ matrix.TEST262_CLASS_API }}
+          TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
           pnpm run build
 
       - name: Test
         run: >
           TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
-          TEST262_MIN=${{ matrix.TEST262_MIN }}
-          TEST262_ESM=${{ matrix.TEST262_ESM }}
           pnpm run test262

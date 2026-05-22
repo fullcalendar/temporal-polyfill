@@ -5,12 +5,12 @@ import { join as joinPaths } from 'path'
 import runTest262 from '@js-temporal/temporal-test262-runner'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { extensions } from './lib/config.js'
 import { execLive } from './lib/utils.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
 const monorepoDir = joinPaths(pkgDir, '../..')
+const globalPolyfillPath = './dist/.test262.global.js'
 
 yargs(hideBin(process.argv))
   .command(
@@ -36,19 +36,6 @@ yargs(hideBin(process.argv))
           default: 10,
           type: 'number',
           description: 'Maximum allowed number of failures before aborting',
-        })
-        .option('esm', {
-          requiresArg: false,
-          default: false,
-          type: 'boolean',
-          description: 'Whether to test the ESM module',
-        })
-        .option('min', {
-          // for "minify"
-          requiresArg: false,
-          default: false,
-          type: 'boolean',
-          description: 'Whether to test the minified bundle',
         }),
     async (options) => {
       const currentNodeVersion = process.versions.node
@@ -101,17 +88,6 @@ yargs(hideBin(process.argv))
       if (currentNodeMajorVersion >= 22) {
         expectedFailureFiles.push('expected-failures-node-gte22.txt')
       }
-
-      const esmOpt = process.env.TEST262_ESM
-      const esmOptIsMin = esmOpt === 'terser' || esmOpt === 'swc'
-      const globalIsMin = options.min || process.env.TEST262_MIN
-
-      // from package root
-      const globalPolyfillPath = esmOpt
-        ? './dist/.bundled/full/global' +
-          (esmOptIsMin ? '.' + esmOpt + extensions.iifeMin : extensions.iife)
-        : './dist/full/global' +
-          (globalIsMin ? extensions.iifeMin : extensions.iife)
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,
