@@ -555,7 +555,6 @@ describe('createFormat', () => {
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
-// Keep these canonical non-standard cases aligned with ../native/plainDate.test.ts.
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const pd = PlainDateFns.fromString('2024-02-27', getCoreCalendar)
@@ -922,7 +921,6 @@ describe('roundToYear', () => {
   })
 
   it('matches canonical exact and midpoint-adjacent boundaries', () => {
-    // Keep these cases aligned with ../native/plainDate.test.ts.
     expectRoundToYearEquals('2024-01-01', '2024-01-01')
     expectRoundToYearEquals('2024-07-01', '2024-01-01')
     expectRoundToYearEquals('2024-07-02', '2025-01-01')
@@ -965,7 +963,6 @@ describe('roundToMonth', () => {
   })
 
   it('matches canonical exact and midpoint-adjacent boundaries', () => {
-    // Keep these cases aligned with ../native/plainDate.test.ts.
     expectRoundToMonthEquals('2024-04-01', '2024-04-01')
     expectRoundToMonthEquals('2024-04-15', '2024-04-01')
     expectRoundToMonthEquals('2024-04-16', '2024-05-01')
@@ -1008,7 +1005,6 @@ describe('roundToWeek', () => {
   })
 
   it('matches canonical exact and midpoint-adjacent boundaries', () => {
-    // Keep these cases aligned with ../native/plainDate.test.ts.
     expectRoundToWeekEquals('2024-03-04', '2024-03-04')
     expectRoundToWeekEquals('2024-03-07', '2024-03-04')
     expectRoundToWeekEquals('2024-03-08', '2024-03-11')

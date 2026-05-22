@@ -41,7 +41,7 @@ function expectRoundToWeekEquals(isoString: string, expected: string) {
   )
 }
 
-function getPublicFields(zdt: ZonedDateTimeFns.ZonedDateTimeShimRecord) {
+function getPublicFields(zdt: ReturnType<typeof ZonedDateTimeFns.create>) {
   return {
     era: zdt.era,
     eraYear: zdt.eraYear,
@@ -730,7 +730,6 @@ describe('toLocaleString', () => {
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
-// Keep these canonical non-standard cases aligned with ../native/zonedDateTime.test.ts.
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
@@ -1561,7 +1560,6 @@ describe('roundToYear', () => {
   })
 
   it('matches canonical exact and midpoint boundaries', () => {
-    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
     expectRoundToYearEquals(
       '2024-01-01T00:00:00[America/New_York]',
       '2024-01-01T00:00:00[America/New_York]',
@@ -1667,7 +1665,6 @@ describe('roundToMonth', () => {
   })
 
   it('matches canonical exact and midpoint boundaries across DST', () => {
-    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
     expectRoundToMonthEquals(
       '2024-03-01T00:00:00[America/New_York]',
       '2024-03-01T00:00:00[America/New_York]',
@@ -1740,7 +1737,6 @@ describe('roundToWeek', () => {
   })
 
   it('matches canonical exact and midpoint boundaries across DST', () => {
-    // Keep these cases aligned with ../native/zonedDateTime.test.ts.
     expectRoundToWeekEquals(
       '2024-03-04T00:00:00[America/New_York]',
       '2024-03-04T00:00:00[America/New_York]',
@@ -1795,7 +1791,6 @@ describe('startOfMonth', () => {
   })
 
   it('uses the first real instant when the month starts after a skipped midnight', () => {
-    // Keep this skipped-midnight fixture aligned with ../native/zonedDateTime.test.ts.
     const zdt = ZonedDateTimeFns.fromString(
       '2009-06-15T12:30:00[Africa/Casablanca]',
       getCoreCalendar,

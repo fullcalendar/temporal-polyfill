@@ -6,11 +6,6 @@ import {
   gregoryCalendar,
   isoCalendar,
 } from '../../internal/calendarSlot'
-import * as errorMessages from '../../internal/errorMessages'
-import {
-  gregoryCalendarId,
-  isoCalendarId,
-} from '../../internal/intlCalendarConfig'
 import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
 import { CalendarRecordBranding } from '../recordBranding'
@@ -54,24 +49,6 @@ export function createCalendarShimStringResolver(
 ): CalendarResolver {
   return (calendarId: string) =>
     getCalendarShimRecordInternal(getCalendar(calendarId.toLowerCase()))
-}
-
-// Resolver for callers that intentionally want the core calendar set. Intl-
-// backed calendars require getIntlCalendar/getAnyCalendar instead, keeping that
-// wider calendar support explicit at the API boundary.
-export function getCoreCalendar(calendarId: string): CalendarShimRecord {
-  if (calendarId === isoCalendarId) {
-    return getIsoCalendar()
-  }
-  if (calendarId === gregoryCalendarId) {
-    return getGregoryCalendar()
-  }
-  throw new RangeError(
-    errorMessages.exoticCalendarRequired(
-      calendarId,
-      'getIntlCalendar or getAnyCalendar',
-    ),
-  )
 }
 
 export function getIsoCalendar(): CalendarShimRecord {

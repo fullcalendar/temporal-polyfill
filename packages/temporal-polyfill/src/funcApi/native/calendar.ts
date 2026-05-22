@@ -1,5 +1,4 @@
 import { createSlotClass } from '../../apiHelpers/slotClass'
-import * as errorMessages from '../../internal/errorMessages'
 import {
   gregoryCalendarId,
   isoCalendarId,
@@ -38,24 +37,6 @@ export function runCalendarNativeResolver(
   getCalendar: CalendarNativeResolver,
 ): void {
   getCalendarNativeRecordId(getCalendar(calendarId.toLowerCase()))
-}
-
-// Resolver for callers that intentionally want the core calendar set. Intl-
-// backed calendars require getIntlCalendar/getAnyCalendar instead, keeping that
-// wider calendar support explicit at the API boundary.
-export function getCoreCalendar(calendarId: string): CalendarNativeRecord {
-  if (calendarId === isoCalendarId) {
-    return getIsoCalendar()
-  }
-  if (calendarId === gregoryCalendarId) {
-    return getGregoryCalendar()
-  }
-  throw new RangeError(
-    errorMessages.exoticCalendarRequired(
-      calendarId,
-      'getIntlCalendar or getAnyCalendar',
-    ),
-  )
 }
 
 export function getIsoCalendar(): CalendarNativeRecord {
