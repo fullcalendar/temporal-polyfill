@@ -2,7 +2,9 @@
 
 import {
   basename,
+  dirname,
   join as joinPaths,
+  relative as relativePath,
   resolve as resolvePath,
   sep as pathSep,
 } from 'path'
@@ -78,16 +80,9 @@ async function buildConfigs(pkgDir, isDev) {
   const dtsConfigs = []
   const chunkNamesEnabled = true // isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
-  const internalSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'internal') + pathSep
-  const externalCalendarsSrcBase =
-    resolvePath(pkgDir, 'dist/.tsc', 'externalCalendars') + pathSep
-  const classApiTopSrcBase =
-    resolvePath(pkgDir, 'dist/.tsc', 'classApi') + pathSep
-  const classApiSrcBase =
-    resolvePath(pkgDir, 'dist/.tsc', 'classApi', 'core') + pathSep
-  const classApiFullSrcBase =
-    resolvePath(pkgDir, 'dist/.tsc', 'classApi', 'full') + pathSep
-  const funcApiSrcBase = resolvePath(pkgDir, 'dist/.tsc', 'funcApi') + pathSep
+  const sourceDirectoryChunksPlugin = buildSourceDirectoryChunksPlugin(
+    resolvePath(pkgDir, 'dist/.tsc'),
+  )
 
   const definePlugin = buildDefinePlugin({
     __FORCE_SHIM_IMPLEMENTATION__: false,
@@ -151,27 +146,6 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
-  function manuallyResolveChunk(id) {
-    if (id.startsWith(externalCalendarsSrcBase)) {
-      return 'externalCalendars'
-    }
-    if (id.startsWith(internalSrcBase)) {
-      return 'internal'
-    }
-    if (id.startsWith(funcApiSrcBase)) {
-      return 'funcApi'
-    }
-    if (id.startsWith(classApiSrcBase)) {
-      return 'classApi'
-    }
-    if (id.startsWith(classApiFullSrcBase)) {
-      return 'classApiFull'
-    }
-    if (id.startsWith(classApiTopSrcBase)) {
-      return 'classApi'
-    }
-  }
-
   if (!isDev && Object.keys(dtsInputs).length) {
     dtsConfigs.push({
       input: dtsInputs,
@@ -189,6 +163,7 @@ async function buildConfigs(pkgDir, isDev) {
             return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
           },
         },
+        sourceDirectoryChunksPlugin,
       ],
       output: {
         format: 'es',
@@ -196,33 +171,6 @@ async function buildConfigs(pkgDir, isDev) {
         entryFileNames: '[name]' + extensions.dts,
         chunkFileNames: chunkBase + extensions.dts,
         minifyInternalExports: false,
-        manualChunks(id) {
-          // HACK to ensure fns/* files own their own stuff
-          if (id.startsWith(funcApiSrcBase)) {
-            const moduleName = id
-              .substring(funcApiSrcBase.length)
-              .replace(/\.d\.ts/, '')
-            if (!moduleName.includes(pathSep)) {
-              return 'fns/' + moduleName
-            }
-          }
-
-          if (id.startsWith(internalSrcBase)) {
-            return 'internal'
-          }
-          if (id.startsWith(funcApiSrcBase)) {
-            return 'funcApi'
-          }
-          if (id.startsWith(classApiSrcBase)) {
-            return 'classApi'
-          }
-          if (id.startsWith(classApiFullSrcBase)) {
-            return 'classApiFull'
-          }
-          if (id.startsWith(classApiTopSrcBase)) {
-            return 'classApi'
-          }
-        },
       },
     })
   }
@@ -232,7 +180,7 @@ async function buildConfigs(pkgDir, isDev) {
       input: moduleInputs,
       onwarn,
       external: isExternalDependency,
-      plugins: [definePlugin],
+      plugins: [definePlugin, sourceDirectoryChunksPlugin],
       output: {
         format: 'es',
         dir: 'dist',
@@ -247,7 +195,6 @@ async function buildConfigs(pkgDir, isDev) {
           return exportName + esmExtension
         },
         chunkFileNames: chunkBase + extensions.esm,
-        manualChunks: manuallyResolveChunk,
         minifyInternalExports: false,
         hoistTransitiveImports: false,
         // If you're tempted to write sourcemaps to ESM, don't!
@@ -506,6 +453,46 @@ async function readTemporalReservedWords(pkgDir) {
 
 // Rollup Utils
 // -----------------------------------------------------------------------------
+
+function buildSourceDirectoryChunksPlugin(sourceRoot) {
+  return {
+    name: 'source-directory-chunks',
+    outputOptions(outputOptions) {
+      const originalManualChunks = outputOptions.manualChunks
+
+      return {
+        ...outputOptions,
+        manualChunks(id, meta) {
+          const chunkName = resolveSourceDirectoryChunkName(id, sourceRoot)
+
+          if (chunkName) {
+            return chunkName
+          }
+
+          if (typeof originalManualChunks === 'function') {
+            return originalManualChunks(id, meta)
+          }
+        },
+      }
+    },
+  }
+}
+
+// Match the Rollup chunk name to the source file's directory under `dist/.tsc`.
+// Top-level files go to `root`; nested paths are flattened so
+// `funcApi/native/foo.js` becomes the `funcApi-native` chunk instead of writing
+// into a nested `chunks/funcApi/native.*` output path.
+function resolveSourceDirectoryChunkName(id, sourceRoot) {
+  const sourceRootWithSep = sourceRoot + pathSep
+
+  if (!id.startsWith(sourceRootWithSep)) {
+    return
+  }
+
+  const sourceDir = dirname(relativePath(sourceRoot, id))
+
+  return sourceDir === '.' ? 'root' : sourceDir.split(pathSep).join('-')
+}
 
 function buildDefinePlugin(defines) {
   const replacements = Object.entries(defines).map(([key, value]) => [
