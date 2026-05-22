@@ -151,6 +151,27 @@ async function buildConfigs(pkgDir, isDev) {
     }
   }
 
+  function manuallyResolveChunk(id) {
+    if (id.startsWith(externalCalendarsSrcBase)) {
+      return 'externalCalendars'
+    }
+    if (id.startsWith(internalSrcBase)) {
+      return 'internal'
+    }
+    if (id.startsWith(funcApiSrcBase)) {
+      return 'funcApi'
+    }
+    if (id.startsWith(classApiSrcBase)) {
+      return 'classApi'
+    }
+    if (id.startsWith(classApiFullSrcBase)) {
+      return 'classApiFull'
+    }
+    if (id.startsWith(classApiTopSrcBase)) {
+      return 'classApi'
+    }
+  }
+
   if (!isDev && Object.keys(dtsInputs).length) {
     dtsConfigs.push({
       input: dtsInputs,
@@ -226,6 +247,7 @@ async function buildConfigs(pkgDir, isDev) {
           return exportName + esmExtension
         },
         chunkFileNames: chunkBase + extensions.esm,
+        manualChunks: manuallyResolveChunk,
         minifyInternalExports: false,
         hoistTransitiveImports: false,
         // If you're tempted to write sourcemaps to ESM, don't!
