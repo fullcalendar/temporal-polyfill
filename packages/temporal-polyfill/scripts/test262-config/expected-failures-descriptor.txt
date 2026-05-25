@@ -75,6 +75,7 @@ intl402/DateTimeFormat/prototype/formatRangeToParts/length.js
 intl402/DateTimeFormat/prototype/formatToParts/length.js
 
 # not-a-constructor
+built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
 built-ins/Temporal/PlainMonthDay/prototype/toJSON/not-a-constructor.js
 built-ins/Temporal/PlainMonthDay/prototype/with/not-a-constructor.js
 built-ins/Temporal/PlainMonthDay/prototype/toPlainDate/not-a-constructor.js
