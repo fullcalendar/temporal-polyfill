@@ -290,7 +290,6 @@ async function buildTest262Config({
   test262ClassApi,
   test262Minifier,
 }) {
-  const temporalReservedWords = await readTemporalReservedWords(pkgDir)
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const isExternalDependency = buildExternalDependencyResolver(pkgJson)
@@ -323,11 +322,7 @@ async function buildTest262Config({
       file: outputFile,
       plugins: [
         test262Minifier === 'swc' && swcMinify(),
-        test262Minifier === 'terser' &&
-          buildTerserPlugin({
-            mangleProps: true,
-            manglePropsExcept: temporalReservedWords,
-          }),
+        test262Minifier === 'terser' && buildTerserPlugin({}),
       ],
     },
   }
@@ -435,14 +430,18 @@ async function readTemporalReservedWords(pkgDir) {
       'dayPeriod',
       'era',
       'fractionalSecondDigits',
+      'full',
       'hour',
       'hour12',
       'hourCycle',
       'localeMatcher',
+      'long',
+      'medium',
       'minute',
       'month',
       'numberingSystem',
       'second',
+      'short',
       'timeStyle',
       'timeZone',
       'timeZoneName',

@@ -3,7 +3,7 @@ export const gregoryCalendarId = 'gregory'
 
 // Gregorian CE/BCE input resolves relative to ISO year 0:
 // CE 1 -> ISO 1, BCE 1 -> ISO 0, BCE 2 -> ISO -1, etc.
-export const gregoryEraOrigins: Record<string, number> = { bce: -1, ce: 0 }
+export const gregoryEraOrigins: Record<string, number> = { 'bce': -1, 'ce': 0 }
 
 // Normalize era names from either user input or Intl output into a stable,
 // punctuation-insensitive token before applying calendar-specific remaps.
