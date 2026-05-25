@@ -206,8 +206,11 @@ async function buildConfigs(pkgDir, isDev) {
           !isDev &&
             buildTerserPlugin({
               humanReadable: true,
-              mangleProps: true,
-              manglePropsExcept: temporalReservedWords,
+
+              //// NOTE: temporarily disable while we figure out tree-shaking problems
+              // mangleProps: true,
+              // manglePropsExcept: temporalReservedWords,
+
               preserveAnnotations: true,
             }),
         ],
