@@ -13,7 +13,7 @@
     }
   ],
   "license": "MIT",
-  "copyright": "2024 Adam Shaw",
+  "copyright": "2026 Adam Shaw",
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",

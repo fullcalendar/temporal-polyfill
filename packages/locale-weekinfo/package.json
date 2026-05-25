@@ -14,7 +14,7 @@
     }
   ],
   "license": "MIT",
-  "copyright": "2024 Adam Shaw",
+  "copyright": "2026 Adam Shaw",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
