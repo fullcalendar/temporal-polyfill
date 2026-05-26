@@ -27,3 +27,9 @@ export function attachDebugString<S>(
 export function forbiddenValueOf(): never {
   throw new TypeError(errorMessages.forbiddenValueOf)
 }
+
+export const recordValueOf = forbiddenValueOf
+
+export function invalidRecordType(): never {
+  throw new TypeError(errorMessages.invalidCallingContext)
+}

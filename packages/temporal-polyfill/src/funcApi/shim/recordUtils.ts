@@ -1,10 +1,13 @@
 import {
   attachDebugString,
-  forbiddenValueOf,
+  invalidRecordType,
+  recordValueOf,
 } from '../../apiHelpers/classStyle'
 import * as errorMessages from '../../internal/errorMessages'
 
 const shimRecords = new WeakSet<object>()
+
+export { invalidRecordType, recordValueOf }
 
 export function registerRecord<S>(
   instance: object,
@@ -28,12 +31,4 @@ export function rejectInvalidBag<B>(bag: B): B {
     throw new TypeError(errorMessages.invalidBag)
   }
   return bag
-}
-
-export function recordValueOf() {
-  return forbiddenValueOf()
-}
-
-export function invalidRecordType(): never {
-  throw new TypeError(errorMessages.invalidCallingContext)
 }

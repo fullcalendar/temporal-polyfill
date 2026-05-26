@@ -110,10 +110,8 @@ const monthDayExclusions: OptionNames = [
   'weekday',
   ...timeStandardNames,
 ]
-const silentExclusionNames = new Set<OptionNames[number]>([
-  ...timeZoneNameStrs,
-  ...eraStrs,
-])
+const silentExclusions: OptionNames = [...timeZoneNameStrs, ...eraStrs]
+const silentExclusionNames = new Set<OptionNames[number]>(silentExclusions)
 
 const dateStyleConflictNames: OptionNames = [
   ...dateFallbackNames,
