@@ -37,7 +37,11 @@ import {
   PlainYearMonthNativeRecord,
   createPlainYearMonthNativeRecord,
 } from './plainYearMonth'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
@@ -92,13 +96,13 @@ export class PlainDateNativeRecord implements DateFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setPlainDateNative(instance: object, native: any) {
   plainDateNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainDateNativeRecord(

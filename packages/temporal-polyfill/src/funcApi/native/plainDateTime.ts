@@ -32,7 +32,11 @@ import {
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
@@ -123,13 +127,13 @@ export class PlainDateTimeNativeRecord implements DateTimeFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setPlainDateTimeNative(instance: object, native: any) {
   plainDateTimeNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainDateTimeNativeRecord(

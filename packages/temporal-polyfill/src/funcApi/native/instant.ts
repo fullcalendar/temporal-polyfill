@@ -14,7 +14,11 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
@@ -42,13 +46,13 @@ export class InstantNativeRecord {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setInstantNative(instance: object, native: any) {
   instantNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createInstantNativeRecord(native: any): InstantNativeRecord {

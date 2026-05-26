@@ -16,7 +16,11 @@ import {
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
@@ -73,13 +77,13 @@ export class PlainTimeNativeRecord implements TimeFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setPlainTimeNative(instance: object, native: any) {
   plainTimeNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainTimeNativeRecord(

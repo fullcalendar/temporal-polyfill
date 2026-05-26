@@ -15,7 +15,11 @@ import {
   PlainDateTimeNativeRecord,
   getPlainDateTimeNativeIfPresent,
 } from './plainDateTime'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   getZonedDateTimeNativeIfPresent,
@@ -98,13 +102,13 @@ export class DurationNativeRecord implements DurationFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setDurationNative(instance: object, native: any) {
   durationNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createDurationNativeRecord(native: any): DurationNativeRecord {

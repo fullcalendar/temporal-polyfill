@@ -51,11 +51,11 @@ import {
 } from './duration'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
+  attachDebugString,
+  forbiddenValueOf,
   invalidRecordType,
-  recordValueOf,
-  registerRecord,
-  rejectInvalidBag,
 } from './recordUtils'
+import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
@@ -135,7 +135,7 @@ export class PlainYearMonthShimRecord implements YearMonthFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -144,7 +144,7 @@ function setPlainYearMonthShimRecordSlots(
   slots: PlainYearMonthShimSlots,
 ) {
   plainYearMonthShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatYearMonthIsoAuto)
+  attachDebugString(instance, slots, formatYearMonthIsoAuto)
 }
 
 export function createPlainYearMonthShimRecord(

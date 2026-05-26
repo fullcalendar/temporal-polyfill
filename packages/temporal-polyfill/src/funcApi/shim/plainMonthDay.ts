@@ -33,11 +33,11 @@ import {
 import { createDateTimeFormat } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
+  attachDebugString,
+  forbiddenValueOf,
   invalidRecordType,
-  recordValueOf,
-  registerRecord,
-  rejectInvalidBag,
 } from './recordUtils'
+import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
@@ -84,7 +84,7 @@ export class PlainMonthDayShimRecord
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -93,7 +93,7 @@ function setPlainMonthDayShimRecordSlots(
   slots: PlainMonthDayShimSlots,
 ) {
   plainMonthDayShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatMonthDayIsoAuto)
+  attachDebugString(instance, slots, formatMonthDayIsoAuto)
 }
 
 export function createPlainMonthDayShimRecord(

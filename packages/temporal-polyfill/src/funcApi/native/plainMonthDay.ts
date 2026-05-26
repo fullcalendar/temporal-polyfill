@@ -14,7 +14,11 @@ import {
 } from './calendar'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
 
@@ -61,13 +65,13 @@ export class PlainMonthDayNativeRecord implements MonthDayFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setPlainMonthDayNative(instance: object, native: any) {
   plainMonthDayNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainMonthDayNativeRecord(

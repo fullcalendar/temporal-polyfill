@@ -133,10 +133,9 @@ import {
   getPlainTimeShimRecordSlots,
 } from './plainTime'
 import {
+  attachDebugString,
+  forbiddenValueOf,
   invalidRecordType,
-  recordValueOf,
-  registerRecord,
-  rejectInvalidBag,
 } from './recordUtils'
 import {
   computeDayCeil,
@@ -155,6 +154,7 @@ import {
   computeYearFloor,
   computeYearInterval,
 } from './roundUtils'
+import { rejectInvalidBag } from './temporalRecords'
 
 type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
@@ -256,7 +256,7 @@ export class ZonedDateTimeShimRecord {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -265,7 +265,7 @@ function setZonedDateTimeShimRecordSlots(
   slots: ZonedDateTimeShimSlots,
 ) {
   zonedDateTimeShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatZonedDateTimeIsoAuto)
+  attachDebugString(instance, slots, formatZonedDateTimeIsoAuto)
 }
 
 export function createZonedDateTimeShimRecord(

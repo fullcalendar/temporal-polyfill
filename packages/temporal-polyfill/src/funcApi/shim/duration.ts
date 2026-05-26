@@ -34,7 +34,11 @@ import {
   PlainDateTimeShimRecord,
   getPlainDateTimeShimRecordSlotsIfPresent,
 } from './plainDateTime'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeShimRecord,
   getZonedDateTimeShimRecordSlotsIfPresent,
@@ -126,7 +130,7 @@ export class DurationShimRecord implements DurationFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -135,7 +139,7 @@ function setDurationShimRecordSlots(
   slots: DurationShimSlots,
 ) {
   durationShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatDurationIsoAuto)
+  attachDebugString(instance, slots, formatDurationIsoAuto)
 }
 
 export function createDurationShimRecord(

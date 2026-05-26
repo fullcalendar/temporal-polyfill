@@ -38,7 +38,11 @@ import {
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
@@ -83,13 +87,13 @@ export class ZonedDateTimeNativeRecord {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setZonedDateTimeNative(instance: object, native: any) {
   zonedDateTimeNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createZonedDateTimeNativeRecord(

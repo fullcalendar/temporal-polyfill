@@ -95,10 +95,9 @@ import {
   createPlainYearMonthShimRecord,
 } from './plainYearMonth'
 import {
+  attachDebugString,
+  forbiddenValueOf,
   invalidRecordType,
-  recordValueOf,
-  registerRecord,
-  rejectInvalidBag,
 } from './recordUtils'
 import {
   computeIsoWeekCeil,
@@ -112,6 +111,7 @@ import {
   computeYearInterval,
   roundDateTimeToInterval,
 } from './roundUtils'
+import { rejectInvalidBag } from './temporalRecords'
 import {
   ZonedDateTimeShimRecord,
   createZonedDateTimeShimRecord,
@@ -180,7 +180,7 @@ export class PlainDateShimRecord implements DateFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -189,7 +189,7 @@ function setPlainDateShimRecordSlots(
   slots: PlainDateShimSlots,
 ) {
   plainDateShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatDateIsoAuto)
+  attachDebugString(instance, slots, formatDateIsoAuto)
 }
 
 export function createPlainDateShimRecord(

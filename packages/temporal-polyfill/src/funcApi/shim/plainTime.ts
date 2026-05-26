@@ -26,11 +26,11 @@ import {
   getDurationShimRecordSlots,
 } from './duration'
 import {
+  attachDebugString,
+  forbiddenValueOf,
   invalidRecordType,
-  recordValueOf,
-  registerRecord,
-  rejectInvalidBag,
 } from './recordUtils'
+import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
@@ -88,7 +88,7 @@ export class PlainTimeShimRecord implements TimeFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
@@ -97,7 +97,7 @@ function setPlainTimeShimRecordSlots(
   slots: PlainTimeShimSlots,
 ) {
   plainTimeShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatTimeIsoAuto)
+  attachDebugString(instance, slots, formatTimeIsoAuto)
 }
 
 export function createPlainTimeShimRecord(

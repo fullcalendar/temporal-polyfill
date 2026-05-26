@@ -22,7 +22,11 @@ import {
   getDurationNative,
 } from './duration'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
 
@@ -93,13 +97,13 @@ export class PlainYearMonthNativeRecord implements YearMonthFields {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setPlainYearMonthNative(instance: object, native: any) {
   plainYearMonthNativeMap.set(instance, native)
-  registerRecord(instance, native, (slots) => slots.toString())
+  attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainYearMonthNativeRecord(

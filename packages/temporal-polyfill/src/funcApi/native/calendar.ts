@@ -3,7 +3,11 @@ import {
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 
 export type CalendarNativeResolver = (
   calendarId: string,
@@ -21,13 +25,13 @@ export class CalendarNativeRecord {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setCalendarNativeRecordId(instance: object, calendarId: string) {
   calendarNativeMap.set(instance, calendarId)
-  registerRecord(instance, calendarId, (slots) => slots)
+  attachDebugString(instance, calendarId, (slots) => slots)
 }
 
 export function createCalendarNativeRecord(

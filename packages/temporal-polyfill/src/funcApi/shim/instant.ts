@@ -35,7 +35,11 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
-import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  attachDebugString,
+  forbiddenValueOf,
+  invalidRecordType,
+} from './recordUtils'
 import {
   ZonedDateTimeShimRecord,
   createZonedDateTimeShimRecord,
@@ -64,13 +68,13 @@ export class InstantShimRecord {
   }
 
   valueOf() {
-    return recordValueOf()
+    return forbiddenValueOf()
   }
 }
 
 function setInstantShimRecordSlots(instance: object, slots: InstantShimSlots) {
   instantShimMap.set(instance, slots)
-  registerRecord(instance, slots, formatInstantIsoAuto)
+  attachDebugString(instance, slots, formatInstantIsoAuto)
 }
 
 export function createInstantShimRecord(
