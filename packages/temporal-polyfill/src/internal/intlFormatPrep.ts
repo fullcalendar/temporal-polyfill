@@ -115,6 +115,27 @@ const silentExclusionNames = new Set<OptionNames[number]>([
   ...eraStrs,
 ])
 
+const dateStyleConflictNames: OptionNames = [
+  ...dateFallbackNames,
+  'weekday',
+  ...eraStrs,
+]
+const timeStyleConflictNames: OptionNames = [
+  'hour',
+  'minute',
+  'second',
+  'dayPeriod',
+  'fractionalSecondDigits',
+]
+const yearMonthStyleConflictNames: OptionNames = [
+  ...yearMonthFallbackNames,
+  ...eraStrs,
+]
+const monthDayStyleConflictNames: OptionNames = [
+  ...monthDayFallbackNames,
+  ...eraStrs,
+]
+
 // Transformer Funcs
 // -----------------
 
@@ -206,13 +227,13 @@ const transformDateOptions = createOptionsTransformer(
   dateStandardNames,
   dateFallbacks,
   dateExclusions,
-  [...dateFallbackNames, 'weekday', ...eraStrs],
+  dateStyleConflictNames,
 )
 const transformTimeOptions = createOptionsTransformer(
   timeStandardNames,
   timeFallbacks,
   timeExclusions,
-  ['hour', 'minute', 'second', 'dayPeriod', 'fractionalSecondDigits'],
+  timeStyleConflictNames,
 )
 const transformYearMonthBaseOptions = createOptionsTransformer(
   yearMonthStandardNames,
@@ -244,12 +265,12 @@ const monthDayStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
 const transformYearMonthOptions = createPartialDateStyleTransformer(
   transformYearMonthBaseOptions,
   yearMonthStyleFields,
-  [...yearMonthFallbackNames, ...eraStrs],
+  yearMonthStyleConflictNames,
 )
 const transformMonthDayOptions = createPartialDateStyleTransformer(
   transformMonthDayBaseOptions,
   monthDayStyleFields,
-  [...monthDayFallbackNames, ...eraStrs],
+  monthDayStyleConflictNames,
 )
 
 function createPartialDateStyleTransformer(
