@@ -1,7 +1,3 @@
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -14,49 +10,97 @@ import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainTimeRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 
-export type PlainTimeNativeRecord = any & TimeFields
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
-export const [
-  PlainTimeNativeRecord,
-  createPlainTimeNativeRecord,
-  getPlainTimeNative,
-] = createSlotClass(
-  PlainTimeRecordBranding,
-  (
+const plainTimeNativeMap = new WeakMap<object, any>()
+
+export class PlainTimeNativeRecord implements TimeFields {
+  constructor(
     hour = 0,
     minute = 0,
     second = 0,
     millisecond = 0,
     microsecond = 0,
     nanosecond = 0,
-  ) =>
-    new NativeTemporal!.PlainTime(
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      nanosecond,
-    ),
-  (native) => native.toString(),
-  {
-    hour: (native: any) => native.hour,
-    minute: (native: any) => native.minute,
-    second: (native: any) => native.second,
-    millisecond: (native: any) => native.millisecond,
-    microsecond: (native: any) => native.microsecond,
-    nanosecond: (native: any) => native.nanosecond,
-  },
-)
+  ) {
+    setPlainTimeNative(
+      this,
+      new NativeTemporal!.PlainTime(
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+      ),
+    )
+  }
+
+  get hour() {
+    return getPlainTimeNative(this).hour
+  }
+
+  get minute() {
+    return getPlainTimeNative(this).minute
+  }
+
+  get second() {
+    return getPlainTimeNative(this).second
+  }
+
+  get millisecond() {
+    return getPlainTimeNative(this).millisecond
+  }
+
+  get microsecond() {
+    return getPlainTimeNative(this).microsecond
+  }
+
+  get nanosecond() {
+    return getPlainTimeNative(this).nanosecond
+  }
+
+  toJSON() {
+    return getPlainTimeNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainTimeNative(instance: object, native: any) {
+  plainTimeNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createPlainTimeNativeRecord(
+  native: any,
+): PlainTimeNativeRecord {
+  const instance = Object.create(PlainTimeNativeRecord.prototype)
+  setPlainTimeNative(instance, native)
+  return instance
+}
+
+export function getPlainTimeNative(record: unknown): any {
+  return getPlainTimeNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainTimeNativeIfPresent(record: unknown): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainTimeNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainTimeNativeRecord, ...)
 
 export function create(
   hour?: number,
@@ -77,8 +121,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainTimeNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainTimeRecordBranding
+  return !!getPlainTimeNativeIfPresent(arg)
 }
 
 export function fromFields(

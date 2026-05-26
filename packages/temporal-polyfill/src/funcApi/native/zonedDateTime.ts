@@ -1,8 +1,4 @@
 import * as TemporalUtils from 'temporal-utils'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -20,7 +16,6 @@ import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
-import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
@@ -43,35 +38,81 @@ import {
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
-export type ZonedDateTimeNativeRecord = any
+const zonedDateTimeNativeMap = new WeakMap<object, any>()
 
-export const [
-  ZonedDateTimeNativeRecord,
-  createZonedDateTimeNativeRecord,
-  getZonedDateTimeNative,
-] = createSlotClass(
-  ZonedDateTimeRecordBranding,
-  (
+export class ZonedDateTimeNativeRecord {
+  constructor(
     epochNanoseconds: bigint,
     timeZoneId: string,
     calendar?: CalendarNativeRecord,
-  ) =>
-    new NativeTemporal!.ZonedDateTime(
-      epochNanoseconds,
-      timeZoneId,
-      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
-    ),
-  (native) => native.toString(),
-  {
-    calendarId: (native: any) => native.calendarId,
-    epochMilliseconds: (native: any) => native.epochMilliseconds,
-    epochNanoseconds: (native: any) => native.epochNanoseconds,
-    timeZoneId: (native: any) => native.timeZoneId,
-  },
-)
+  ) {
+    setZonedDateTimeNative(
+      this,
+      new NativeTemporal!.ZonedDateTime(
+        epochNanoseconds,
+        timeZoneId,
+        calendar === undefined
+          ? undefined
+          : getCalendarNativeRecordId(calendar),
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getZonedDateTimeNative(this).calendarId
+  }
+
+  get epochMilliseconds() {
+    return getZonedDateTimeNative(this).epochMilliseconds
+  }
+
+  get epochNanoseconds() {
+    return getZonedDateTimeNative(this).epochNanoseconds
+  }
+
+  get timeZoneId() {
+    return getZonedDateTimeNative(this).timeZoneId
+  }
+
+  toJSON() {
+    return getZonedDateTimeNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setZonedDateTimeNative(instance: object, native: any) {
+  zonedDateTimeNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createZonedDateTimeNativeRecord(
+  native: any,
+): ZonedDateTimeNativeRecord {
+  const instance = Object.create(ZonedDateTimeNativeRecord.prototype)
+  setZonedDateTimeNative(instance, native)
+  return instance
+}
+
+export function getZonedDateTimeNative(record: unknown): any {
+  return getZonedDateTimeNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getZonedDateTimeNativeIfPresent(
+  record: unknown,
+): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? zonedDateTimeNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(ZonedDateTimeNativeRecord, ...)
 
 export function create(
   epochNanoseconds: bigint,
@@ -82,8 +123,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is ZonedDateTimeNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === ZonedDateTimeRecordBranding
+  return !!getZonedDateTimeNativeIfPresent(arg)
 }
 
 export function fromFields(

@@ -1,12 +1,8 @@
 import {
-  calendarIdGetters,
-  monthDayFieldGetters,
-} from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
+  computeCalendarDateFields,
+  computeCalendarMonthCode,
+} from '../../internal/calendarDerived'
+import { getCalendarSlotId } from '../../internal/calendarSlot'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
@@ -27,9 +23,7 @@ import {
   CalendarDisplayOptions,
   OverflowOptions,
 } from '../../internal/optionsModel'
-import { bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainMonthDayRecordBranding } from '../recordBranding'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -38,24 +32,93 @@ import {
 } from './calendar'
 import { createDateTimeFormat } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import {
+  invalidRecordType,
+  recordValueOf,
+  registerRecord,
+  rejectInvalidBag,
+} from './recordUtils'
 
-export type PlainMonthDayShimRecord = any &
-  Pick<MonthDayFields, 'monthCode' | 'day'>
 type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
-export const [
-  PlainMonthDayShimRecord,
-  createPlainMonthDayShimRecord,
-  getPlainMonthDayShimRecordSlots,
-] = createSlotClass(
-  PlainMonthDayRecordBranding,
-  bindArgs(constructMonthDaySlots, refineCalendarShimArg),
-  formatMonthDayIsoAuto,
-  {
-    ...calendarIdGetters,
-    ...monthDayFieldGetters,
-  },
-)
+type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
+const plainMonthDayShimMap = new WeakMap<object, PlainMonthDayShimSlots>()
+
+export class PlainMonthDayShimRecord
+  implements Pick<MonthDayFields, 'monthCode' | 'day'>
+{
+  constructor(
+    isoMonth: number,
+    isoDay: number,
+    calendar?: CalendarShimRecord,
+    referenceIsoYear?: number,
+  ) {
+    setPlainMonthDayShimRecordSlots(
+      this,
+      constructMonthDaySlots(
+        refineCalendarShimArg,
+        isoMonth,
+        isoDay,
+        calendar,
+        referenceIsoYear,
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getCalendarSlotId(getPlainMonthDayShimRecordSlots(this).calendar)
+  }
+
+  get monthCode() {
+    const slots = getPlainMonthDayShimRecordSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get day() {
+    const slots = getPlainMonthDayShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).day
+  }
+
+  toJSON() {
+    return formatMonthDayIsoAuto(getPlainMonthDayShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainMonthDayShimRecordSlots(
+  instance: object,
+  slots: PlainMonthDayShimSlots,
+) {
+  plainMonthDayShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatMonthDayIsoAuto)
+}
+
+export function createPlainMonthDayShimRecord(
+  slots: PlainMonthDayShimSlots,
+): PlainMonthDayShimRecord {
+  const instance = Object.create(PlainMonthDayShimRecord.prototype)
+  setPlainMonthDayShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getPlainMonthDayShimRecordSlots(
+  record: unknown,
+): PlainMonthDayShimSlots {
+  return getPlainMonthDayShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainMonthDayShimRecordSlotsIfPresent(
+  record: unknown,
+): PlainMonthDayShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainMonthDayShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainMonthDayShimRecord, ...)
 
 export function create(
   isoMonth: number,
@@ -72,8 +135,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainMonthDayShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainMonthDayRecordBranding
+  return !!getPlainMonthDayShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(

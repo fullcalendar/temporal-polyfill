@@ -1,7 +1,7 @@
 import { createPropDescriptors } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { DateTimeFormat } from '../intlDateTimeFormat'
 import { toTemporalInstant } from './instant'
+import { DateTimeFormat } from './intlDateTimeFormat'
 import { Temporal } from './temporal'
 
 export function installImplementation() {

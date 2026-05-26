@@ -1,8 +1,4 @@
 import * as TemporalUtils from 'temporal-utils'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -16,7 +12,6 @@ import { DateUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
-import { PlainDateRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
@@ -42,41 +37,89 @@ import {
   PlainYearMonthNativeRecord,
   createPlainYearMonthNativeRecord,
 } from './plainYearMonth'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
 
-export type PlainDateNativeRecord = DateFields
 type Format = DateTimeFormatLike<PlainDateNativeRecord>
 
-export const [
-  PlainDateNativeRecord,
-  createPlainDateNativeRecord,
-  getPlainDateNative,
-] = createSlotClass(
-  PlainDateRecordBranding,
-  (
+const plainDateNativeMap = new WeakMap<object, any>()
+
+export class PlainDateNativeRecord implements DateFields {
+  constructor(
     isoYear: number,
     isoMonth: number,
     isoDay: number,
     calendar?: CalendarNativeRecord,
-  ) =>
-    new NativeTemporal!.PlainDate(
-      isoYear,
-      isoMonth,
-      isoDay,
-      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
-    ),
-  (native) => native.toString(),
-  {
-    calendarId: (native: any) => native.calendarId,
-    year: (native: any) => native.year,
-    month: (native: any) => native.month,
-    monthCode: (native: any) => native.monthCode,
-    day: (native: any) => native.day,
-  },
-)
+  ) {
+    setPlainDateNative(
+      this,
+      new NativeTemporal!.PlainDate(
+        isoYear,
+        isoMonth,
+        isoDay,
+        calendar === undefined
+          ? undefined
+          : getCalendarNativeRecordId(calendar),
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getPlainDateNative(this).calendarId
+  }
+
+  get year() {
+    return getPlainDateNative(this).year
+  }
+
+  get month() {
+    return getPlainDateNative(this).month
+  }
+
+  get monthCode() {
+    return getPlainDateNative(this).monthCode
+  }
+
+  get day() {
+    return getPlainDateNative(this).day
+  }
+
+  toJSON() {
+    return getPlainDateNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainDateNative(instance: object, native: any) {
+  plainDateNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createPlainDateNativeRecord(
+  native: any,
+): PlainDateNativeRecord {
+  const instance = Object.create(PlainDateNativeRecord.prototype)
+  setPlainDateNative(instance, native)
+  return instance
+}
+
+export function getPlainDateNative(record: unknown): any {
+  return getPlainDateNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainDateNativeIfPresent(record: unknown): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainDateNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainDateNativeRecord, ...)
 
 export function create(
   isoYear: number,
@@ -88,8 +131,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainDateNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainDateRecordBranding
+  return !!getPlainDateNativeIfPresent(arg)
 }
 
 export function fromFields(

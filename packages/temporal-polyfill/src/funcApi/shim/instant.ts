@@ -1,8 +1,3 @@
-import { epochGetters } from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -28,44 +23,84 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { roundInstant } from '../../internal/round'
+import { getEpochMilli, getEpochNano } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
-import { InstantRecordBranding } from '../recordBranding'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 import {
   ZonedDateTimeShimRecord,
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
 
-export type InstantShimRecord = any
 type Format = DateTimeFormatLike<InstantShimRecord>
 
-export const [
-  InstantShimRecord,
-  createInstantShimRecord,
-  getInstantShimRecordSlots,
-] = createSlotClass(
-  InstantRecordBranding,
-  constructEpochNanoSlots,
-  formatInstantIsoAuto,
-  epochGetters,
-)
+type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
+const instantShimMap = new WeakMap<object, InstantShimSlots>()
+
+export class InstantShimRecord {
+  constructor(epochNanoseconds: bigint) {
+    setInstantShimRecordSlots(this, constructEpochNanoSlots(epochNanoseconds))
+  }
+
+  get epochMilliseconds() {
+    return getEpochMilli(getInstantShimRecordSlots(this))
+  }
+
+  get epochNanoseconds() {
+    return getEpochNano(getInstantShimRecordSlots(this))
+  }
+
+  toJSON() {
+    return formatInstantIsoAuto(getInstantShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setInstantShimRecordSlots(instance: object, slots: InstantShimSlots) {
+  instantShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatInstantIsoAuto)
+}
+
+export function createInstantShimRecord(
+  slots: InstantShimSlots,
+): InstantShimRecord {
+  const instance = Object.create(InstantShimRecord.prototype)
+  setInstantShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getInstantShimRecordSlots(record: unknown): InstantShimSlots {
+  return getInstantShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getInstantShimRecordSlotsIfPresent(
+  record: unknown,
+): InstantShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? instantShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(InstantShimRecord, ...)
 
 export function create(epochNanoseconds: bigint): InstantShimRecord {
   return new InstantShimRecord(epochNanoseconds)
 }
 
 export function isRecord(arg: unknown): arg is InstantShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === InstantRecordBranding
+  return !!getInstantShimRecordSlotsIfPresent(arg)
 }
 
 export function fromEpochMilliseconds(

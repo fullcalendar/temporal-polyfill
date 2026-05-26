@@ -1,7 +1,3 @@
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
@@ -12,42 +8,73 @@ import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { InstantRecordBranding } from '../recordBranding'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
   getDurationNative,
 } from './duration'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
 
-export type InstantNativeRecord = any
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-export const [
-  InstantNativeRecord,
-  createInstantNativeRecord,
-  getInstantNative,
-] = createSlotClass(
-  InstantRecordBranding,
-  (epochNanoseconds: bigint) => new NativeTemporal!.Instant(epochNanoseconds),
-  (native) => native.toString(),
-  {
-    epochMilliseconds: (native: any) => native.epochMilliseconds,
-    epochNanoseconds: (native: any) => native.epochNanoseconds,
-  },
-)
+const instantNativeMap = new WeakMap<object, any>()
+
+export class InstantNativeRecord {
+  constructor(epochNanoseconds: bigint) {
+    setInstantNative(this, new NativeTemporal!.Instant(epochNanoseconds))
+  }
+
+  get epochMilliseconds() {
+    return getInstantNative(this).epochMilliseconds
+  }
+
+  get epochNanoseconds() {
+    return getInstantNative(this).epochNanoseconds
+  }
+
+  toJSON() {
+    return getInstantNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setInstantNative(instance: object, native: any) {
+  instantNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createInstantNativeRecord(native: any): InstantNativeRecord {
+  const instance = Object.create(InstantNativeRecord.prototype)
+  setInstantNative(instance, native)
+  return instance
+}
+
+export function getInstantNative(record: unknown): any {
+  return getInstantNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getInstantNativeIfPresent(record: unknown): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? instantNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(InstantNativeRecord, ...)
 
 export function create(epochNanoseconds: bigint): InstantNativeRecord {
   return new InstantNativeRecord(epochNanoseconds)
 }
 
 export function isRecord(arg: unknown): arg is InstantNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === InstantRecordBranding
+  return !!getInstantNativeIfPresent(arg)
 }
 
 export function fromEpochMilliseconds(

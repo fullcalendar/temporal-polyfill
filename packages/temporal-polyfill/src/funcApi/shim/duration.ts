@@ -1,8 +1,3 @@
-import { durationFieldGetters } from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
@@ -32,35 +27,138 @@ import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import {
-  DurationRecordBranding,
-  PlainDateRecordBranding,
-  PlainDateTimeRecordBranding,
-  ZonedDateTimeRecordBranding,
-} from '../recordBranding'
-import { PlainDateShimRecord } from './plainDate'
-import { PlainDateTimeShimRecord } from './plainDateTime'
-import { ZonedDateTimeShimRecord } from './zonedDateTime'
+  PlainDateShimRecord,
+  getPlainDateShimRecordSlotsIfPresent,
+} from './plainDate'
+import {
+  PlainDateTimeShimRecord,
+  getPlainDateTimeShimRecordSlotsIfPresent,
+} from './plainDateTime'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  ZonedDateTimeShimRecord,
+  getZonedDateTimeShimRecordSlotsIfPresent,
+} from './zonedDateTime'
 
-export type DurationShimRecord = any & DurationFields
+type DurationShimSlots = ReturnType<typeof constructDurationSlots>
+const durationShimMap = new WeakMap<object, DurationShimSlots>()
 
-export const [
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
-] = createSlotClass(
-  DurationRecordBranding,
-  constructDurationSlots,
-  formatDurationIsoAuto,
-  {
-    ...durationFieldGetters,
-    sign(slots: DurationFields & { sign: NumberSign }) {
-      return slots.sign
-    },
-    blank(slots: DurationFields & { sign: NumberSign }) {
-      return !slots.sign
-    },
-  },
-)
+export class DurationShimRecord implements DurationFields {
+  constructor(
+    years?: number,
+    months?: number,
+    weeks?: number,
+    days?: number,
+    hours?: number,
+    minutes?: number,
+    seconds?: number,
+    milliseconds?: number,
+    microseconds?: number,
+    nanoseconds?: number,
+  ) {
+    setDurationShimRecordSlots(
+      this,
+      constructDurationSlots(
+        years,
+        months,
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds,
+        milliseconds,
+        microseconds,
+        nanoseconds,
+      ),
+    )
+  }
+
+  get years() {
+    return getDurationShimRecordSlots(this).years
+  }
+
+  get months() {
+    return getDurationShimRecordSlots(this).months
+  }
+
+  get weeks() {
+    return getDurationShimRecordSlots(this).weeks
+  }
+
+  get days() {
+    return getDurationShimRecordSlots(this).days
+  }
+
+  get hours() {
+    return getDurationShimRecordSlots(this).hours
+  }
+
+  get minutes() {
+    return getDurationShimRecordSlots(this).minutes
+  }
+
+  get seconds() {
+    return getDurationShimRecordSlots(this).seconds
+  }
+
+  get milliseconds() {
+    return getDurationShimRecordSlots(this).milliseconds
+  }
+
+  get microseconds() {
+    return getDurationShimRecordSlots(this).microseconds
+  }
+
+  get nanoseconds() {
+    return getDurationShimRecordSlots(this).nanoseconds
+  }
+
+  get sign() {
+    return getDurationShimRecordSlots(this).sign
+  }
+
+  get blank() {
+    return !getDurationShimRecordSlots(this).sign
+  }
+
+  toJSON() {
+    return formatDurationIsoAuto(getDurationShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setDurationShimRecordSlots(
+  instance: object,
+  slots: DurationShimSlots,
+) {
+  durationShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatDurationIsoAuto)
+}
+
+export function createDurationShimRecord(
+  slots: DurationShimSlots,
+): DurationShimRecord {
+  const instance = Object.create(DurationShimRecord.prototype)
+  setDurationShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getDurationShimRecordSlots(record: unknown): DurationShimSlots {
+  return getDurationShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getDurationShimRecordSlotsIfPresent(
+  record: unknown,
+): DurationShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? durationShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(DurationShimRecord, ...)
 
 export function create(
   years?: number,
@@ -89,8 +187,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is DurationShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === DurationRecordBranding
+  return !!getDurationShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(
@@ -227,16 +324,13 @@ function refineRelativeTo(
   arg?: RelativeToShimRecord,
 ): RelativeToSlots | undefined {
   if (arg) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
-    if (brandingAndSlots) {
-      const [branding, slots] = brandingAndSlots
-      if (
-        branding === ZonedDateTimeRecordBranding ||
-        branding === PlainDateTimeRecordBranding ||
-        branding === PlainDateRecordBranding
-      ) {
-        return slots as RelativeToSlots
-      }
+    const slots =
+      getZonedDateTimeShimRecordSlotsIfPresent(arg) ||
+      getPlainDateTimeShimRecordSlotsIfPresent(arg) ||
+      getPlainDateShimRecordSlotsIfPresent(arg)
+
+    if (slots) {
+      return slots as RelativeToSlots
     }
     // otherwise, throw error?
   }

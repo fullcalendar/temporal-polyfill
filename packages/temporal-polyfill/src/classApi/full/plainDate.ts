@@ -1,15 +1,21 @@
 import {
-  PlainDateBranding,
-  PlainDateTimeBranding,
-  ZonedDateTimeBranding,
-} from '../../apiHelpers/branding'
-import { calendarIdGetters, dateGetters } from '../../apiHelpers/mixins'
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import { CalendarSlot } from '../../internal/calendarSlot'
+  computeCalendarDateFields,
+  computeCalendarDayOfYear,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarEraFields,
+  computeCalendarInLeapYear,
+  computeCalendarMonthCode,
+  computeCalendarMonthsInYear,
+  computeCalendarWeekOfYear,
+  computeCalendarYearOfWeek,
+} from '../../internal/calendarDerived'
+import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import {
@@ -20,25 +26,25 @@ import {
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
+import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
-  CalendarDateTimeFields,
+  DateFields,
   DateLikeObject,
 } from '../../internal/fieldTypes'
-import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
+import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
-import { ZonedEpochNanoFields, createDateSlots } from '../../internal/slots'
+import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainDateFormat } from '../intlFormatConfig'
-import { TimeZoneArg, refineTimeZoneArg } from '../timeZoneArg'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -51,7 +57,11 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
-import { PlainDateTime, createPlainDateTime } from './plainDateTime'
+import {
+  PlainDateTime,
+  createPlainDateTime,
+  getPlainDateTimeSlotsIfPresent,
+} from './plainDateTime'
 import { PlainMonthDay, createPlainMonthDay } from './plainMonthDay'
 import {
   PlainTimeArg,
@@ -59,185 +69,294 @@ import {
   toPlainTimeSlots,
 } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
+import { rejectInvalidBag } from './temporalSlots'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
+import {
+  ZonedDateTime,
+  createZonedDateTime,
+  getZonedDateTimeSlotsIfPresent,
+} from './zonedDateTime'
 
-export type PlainDate = DateFields // and other getters/methods
 export type PlainDateArg = PlainDate | DateLikeObject | string
 
-// TODO: give `this` a type
+type PlainDateSlots = CalendarDateFields & { calendar: CalendarSlot }
 
-export const [PlainDate, createPlainDate, getPlainDateSlots] = createSlotClass(
-  PlainDateBranding,
-  bindArgs(constructDateSlots, resolveAnyCalendarArg),
-  formatPlainDateIso,
-  {
-    ...calendarIdGetters,
-    ...dateGetters,
-  },
-  {
-    with(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      mod: Partial<DateFields>,
-      options?: OverflowOptions,
-    ) {
-      return createPlainDate(
-        mergePlainDateFields(slots, rejectInvalidBag(mod), options),
-      )
-    },
-    withCalendar(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      calendarArg: CalendarArg,
-    ): PlainDate {
-      return createPlainDate(
-        createDateSlots(slots, refineCalendarArg(calendarArg)),
-      )
-    },
-    add(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      durationArg: DurationArg,
-      options?: OverflowOptions,
-    ): PlainDate {
-      return createPlainDate(
-        movePlainDate(false, slots, toDurationSlots(durationArg), options),
-      )
-    },
-    subtract(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      durationArg: DurationArg,
-      options?: OverflowOptions,
-    ): PlainDate {
-      return createPlainDate(
-        movePlainDate(true, slots, toDurationSlots(durationArg), options),
-      )
-    },
-    until(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      otherArg: PlainDateArg,
-      options?: DiffOptions<DateUnitName>,
-    ): Duration {
-      const other = toPlainDateSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDates(false, calendar, slots, other, options),
-      )
-    },
-    since(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      otherArg: PlainDateArg,
-      options?: DiffOptions<DateUnitName>,
-    ): Duration {
-      const other = toPlainDateSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDates(true, calendar, slots, other, options),
-      )
-    },
-    equals(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      otherArg: PlainDateArg,
-    ): boolean {
-      return plainDatesEqual(slots, toPlainDateSlots(otherArg))
-    },
-    toZonedDateTime(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      options:
-        | TimeZoneArg
-        | { timeZone: TimeZoneArg; plainTime?: PlainTimeArg },
-    ): ZonedDateTime {
-      const optionsObj = !isObjectLike(options)
-        ? { timeZone: options }
-        : {
-            timeZone: (options as { timeZone: TimeZoneArg }).timeZone,
-            plainTime: (options as { plainTime?: PlainTimeArg }).plainTime,
-          }
+const plainDateSlotsMap = new WeakMap<object, PlainDateSlots>()
 
-      return createZonedDateTime(
-        plainDateToZonedDateTime(
-          refineTimeZoneArg,
-          (plainTimeArg) => toPlainTimeSlots(plainTimeArg),
-          slots,
-          optionsObj,
-        ),
-      )
-    },
-    toPlainDateTime(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      plainTimeArg?: PlainTimeArg,
-    ): PlainDateTime {
-      return createPlainDateTime(
-        createPlainDateTimeFromRefinedFields(
-          slots,
-          optionalToPlainTimeFields(plainTimeArg),
-          slots.calendar,
-        ),
-      )
-    },
-    toPlainYearMonth(
-      this: PlainDate,
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-    ): PlainYearMonth {
-      return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
-    },
-    toPlainMonthDay(
-      this: PlainDate,
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-    ): PlainMonthDay {
-      return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
-    },
-    toLocaleString(
-      slots: CalendarDateFields & { calendar: CalendarSlot },
-      locales?: LocalesArg,
-      options?: Intl.DateTimeFormatOptions,
-    ) {
-      const [format, epochMilli] = prepPlainDateFormat(locales, options, slots)
-      return format.format(epochMilli)
-    },
-    toString: formatPlainDateIso,
-  },
-  {
-    from(arg: any, options?: OverflowOptions): PlainDate {
-      return createPlainDate(toPlainDateSlots(arg, options))
-    },
-    compare(arg0: PlainDateArg, arg1: PlainDateArg): NumberSign {
-      return compareIsoDateFields(
-        toPlainDateSlots(arg0),
-        toPlainDateSlots(arg1),
-      )
-    },
-  },
-)
+export class PlainDate implements DateFields {
+  constructor(
+    isoYear: number,
+    isoMonth: number,
+    isoDay: number,
+    calendar?: string,
+  ) {
+    initPlainDate(
+      this,
+      constructDateSlots(
+        resolveAnyCalendarArg,
+        isoYear,
+        isoMonth,
+        isoDay,
+        calendar,
+      ),
+    )
+  }
 
-// Utils
-// -----------------------------------------------------------------------------
+  static from(arg: any, options?: OverflowOptions): PlainDate {
+    return createPlainDate(toPlainDateSlots(arg, options))
+  }
+
+  static compare(arg0: PlainDateArg, arg1: PlainDateArg): NumberSign {
+    return compareIsoDateFields(toPlainDateSlots(arg0), toPlainDateSlots(arg1))
+  }
+
+  get calendarId(): string {
+    return getCalendarSlotId(getPlainDateSlots(this).calendar)
+  }
+
+  get era(): string | undefined {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).era
+  }
+
+  get eraYear(): number | undefined {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  }
+
+  get year(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).year
+  }
+
+  get month(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).month
+  }
+
+  get monthCode(): string {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get day(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).day
+  }
+
+  get dayOfWeek(): number {
+    return computeIsoDayOfWeek(getPlainDateSlots(this))
+  }
+
+  get dayOfYear(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDayOfYear(slots.calendar, slots)
+  }
+
+  get weekOfYear(): number | undefined {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarWeekOfYear(slots.calendar, slots)
+  }
+
+  get yearOfWeek(): number | undefined {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarYearOfWeek(slots.calendar, slots)
+  }
+
+  get daysInWeek(): number {
+    getPlainDateSlots(this)
+    return 7
+  }
+
+  get daysInMonth(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDaysInMonth(slots.calendar, slots)
+  }
+
+  get daysInYear(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarDaysInYear(slots.calendar, slots)
+  }
+
+  get monthsInYear(): number {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarMonthsInYear(slots.calendar, slots)
+  }
+
+  get inLeapYear(): boolean {
+    const slots = getPlainDateSlots(this)
+    return computeCalendarInLeapYear(slots.calendar, slots)
+  }
+
+  with(mod: Partial<DateFields>, options?: OverflowOptions): PlainDate {
+    const slots = getPlainDateSlots(this)
+    return createPlainDate(
+      mergePlainDateFields(slots, rejectInvalidBag(mod), options),
+    )
+  }
+
+  withCalendar(calendarArg: CalendarArg): PlainDate {
+    const slots = getPlainDateSlots(this)
+    return createPlainDate(
+      createDateSlots(slots, refineCalendarArg(calendarArg)),
+    )
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+    return createPlainDate(
+      movePlainDate(
+        false,
+        getPlainDateSlots(this),
+        toDurationSlots(durationArg),
+        options,
+      ),
+    )
+  }
+
+  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+    return createPlainDate(
+      movePlainDate(
+        true,
+        getPlainDateSlots(this),
+        toDurationSlots(durationArg),
+        options,
+      ),
+    )
+  }
+
+  until(otherArg: PlainDateArg, options?: DiffOptions<DateUnitName>): Duration {
+    const slots = getPlainDateSlots(this)
+    const other = toPlainDateSlots(otherArg)
+    const calendar = getCommonCalendar(slots.calendar, other.calendar)
+    return createDuration(
+      diffPlainDates(false, calendar, slots, other, options),
+    )
+  }
+
+  since(otherArg: PlainDateArg, options?: DiffOptions<DateUnitName>): Duration {
+    const slots = getPlainDateSlots(this)
+    const other = toPlainDateSlots(otherArg)
+    const calendar = getCommonCalendar(slots.calendar, other.calendar)
+    return createDuration(diffPlainDates(true, calendar, slots, other, options))
+  }
+
+  equals(otherArg: PlainDateArg): boolean {
+    return plainDatesEqual(getPlainDateSlots(this), toPlainDateSlots(otherArg))
+  }
+
+  toZonedDateTime(
+    options: TimeZoneArg | { timeZone: TimeZoneArg; plainTime?: PlainTimeArg },
+  ): ZonedDateTime {
+    const optionsObj = !isObjectLike(options)
+      ? { timeZone: options }
+      : {
+          timeZone: (options as { timeZone: TimeZoneArg }).timeZone,
+          plainTime: (options as { plainTime?: PlainTimeArg }).plainTime,
+        }
+
+    return createZonedDateTime(
+      plainDateToZonedDateTime(
+        refineTimeZoneArg,
+        (plainTimeArg) => toPlainTimeSlots(plainTimeArg),
+        getPlainDateSlots(this),
+        optionsObj,
+      ),
+    )
+  }
+
+  toPlainDateTime(plainTimeArg?: PlainTimeArg): PlainDateTime {
+    const slots = getPlainDateSlots(this)
+    return createPlainDateTime(
+      createPlainDateTimeFromRefinedFields(
+        slots,
+        optionalToPlainTimeFields(plainTimeArg),
+        slots.calendar,
+      ),
+    )
+  }
+
+  toPlainYearMonth(): PlainYearMonth {
+    const slots = getPlainDateSlots(this)
+    return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
+  }
+
+  toPlainMonthDay(): PlainMonthDay {
+    const slots = getPlainDateSlots(this)
+    return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
+  }
+
+  toLocaleString(
+    locales?: LocalesArg,
+    options?: Intl.DateTimeFormatOptions,
+  ): string {
+    const [format, epochMilli] = prepPlainDateFormat(
+      locales,
+      options,
+      getPlainDateSlots(this),
+    )
+    return format.format(epochMilli)
+  }
+
+  toString(): string {
+    return formatPlainDateIso(getPlainDateSlots(this))
+  }
+
+  toJSON(): string {
+    return formatPlainDateIso(getPlainDateSlots(this))
+  }
+
+  valueOf(): never {
+    return forbiddenValueOf()
+  }
+}
+
+defineTemporalClass(PlainDate, 'PlainDate')
+export function createPlainDate(slots: PlainDateSlots): PlainDate {
+  return initPlainDate(Object.create(PlainDate.prototype), slots)
+}
+
+export function getPlainDateSlots(obj: unknown): PlainDateSlots {
+  // Precondition: callers only pass object-like receivers because WeakMap
+  // lookup itself rejects primitives.
+  const slots = plainDateSlotsMap.get(obj as object)
+
+  if (!slots) {
+    throw new TypeError(errorMessages.invalidCallingContext)
+  }
+
+  return slots
+}
+
+export function getPlainDateSlotsIfPresent(
+  obj: unknown,
+): PlainDateSlots | undefined {
+  return plainDateSlotsMap.get(obj as object)
+}
 
 export function toPlainDateSlots(
   arg: PlainDateArg,
   options?: OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): PlainDateSlots {
   if (isObjectLike(arg)) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
+    const ownSlots = getPlainDateSlotsIfPresent(arg)
 
-    if (brandingAndSlots) {
-      const [branding, slots] = brandingAndSlots
-      switch (branding) {
-        case PlainDateBranding:
-          refineOverflowOptions(options) // parse unused options
-          return slots as CalendarDateFields & { calendar: CalendarSlot }
+    if (ownSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return ownSlots
+    }
 
-        case PlainDateTimeBranding:
-          refineOverflowOptions(options) // parse unused options
-          return createDateSlots(
-            slots as CalendarDateTimeFields & { calendar: CalendarSlot },
-            (slots as CalendarDateTimeFields & { calendar: CalendarSlot })
-              .calendar,
-          )
+    const dateTimeSlots = getPlainDateTimeSlotsIfPresent(arg)
 
-        case ZonedDateTimeBranding:
-          refineOverflowOptions(options) // parse unused options
-          return zonedDateTimeToPlainDate(
-            slots as ZonedEpochNanoFields & { calendar: CalendarSlot },
-          )
-      }
+    if (dateTimeSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return createDateSlots(dateTimeSlots, dateTimeSlots.calendar)
+    }
+
+    const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
+
+    if (zonedDateTimeSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return zonedDateTimeToPlainDate(zonedDateTimeSlots)
     }
 
     const calendar = getCalendarFromBag(arg as DateLikeObject)
@@ -247,4 +366,10 @@ export function toPlainDateSlots(
   const res = parsePlainDate(arg, resolveAnyCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
+}
+
+function initPlainDate(instance: PlainDate, slots: PlainDateSlots): PlainDate {
+  plainDateSlotsMap.set(instance, slots)
+  attachDebugString(instance, slots, formatPlainDateIso)
+  return instance
 }

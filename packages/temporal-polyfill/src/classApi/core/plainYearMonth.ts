@@ -1,11 +1,18 @@
-import { PlainYearMonthBranding } from '../../apiHelpers/branding'
-import { calendarIdGetters, yearMonthGetters } from '../../apiHelpers/mixins'
 import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import { CalendarSlot } from '../../internal/calendarSlot'
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
+import {
+  computeCalendarDateFields,
+  computeCalendarDaysInMonth,
+  computeCalendarDaysInYear,
+  computeCalendarEraFields,
+  computeCalendarInLeapYear,
+  computeCalendarMonthCode,
+  computeCalendarMonthsInYear,
+} from '../../internal/calendarDerived'
+import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -14,11 +21,12 @@ import { constructYearMonthSlots } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
+import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
+  YearMonthFields,
   YearMonthLikeObject,
 } from '../../internal/fieldTypes'
-import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
@@ -27,7 +35,7 @@ import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
-import { NumberSign, bindArgs, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
@@ -38,143 +46,248 @@ import {
   toDurationSlots,
 } from './duration'
 import { PlainDate, createPlainDate } from './plainDate'
+import { rejectInvalidBag } from './temporalSlots'
 
-export type PlainYearMonth = YearMonthFields // and other getters/methods
 export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 
-export const [PlainYearMonth, createPlainYearMonth, getPlainYearMonthSlots] =
-  createSlotClass(
-    PlainYearMonthBranding,
-    bindArgs(constructYearMonthSlots, resolveCoreCalendarArg),
-    formatPlainYearMonthIso,
-    {
-      ...calendarIdGetters,
-      ...yearMonthGetters,
-    },
-    {
-      with(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        mod: Partial<YearMonthFields>,
-        options?: OverflowOptions,
-      ): PlainYearMonth {
-        return createPlainYearMonth(
-          mergePlainYearMonthFields(slots, rejectInvalidBag(mod), options),
-        )
-      },
-      add(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        durationArg: DurationArg,
-        options?: OverflowOptions,
-      ): PlainYearMonth {
-        return createPlainYearMonth(
-          movePlainYearMonth(
-            false,
-            slots,
-            toDurationSlots(durationArg),
-            options,
-          ),
-        )
-      },
-      subtract(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        durationArg: DurationArg,
-        options?: OverflowOptions,
-      ): PlainYearMonth {
-        return createPlainYearMonth(
-          movePlainYearMonth(
-            true,
-            slots,
-            toDurationSlots(durationArg),
-            options,
-          ),
-        )
-      },
-      until(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        otherArg: PlainYearMonthArg,
-        options?: DiffOptions<YearMonthUnitName>,
-      ): Duration {
-        const other = toPlainYearMonthSlots(otherArg)
-        const calendar = getCommonCalendar(slots.calendar, other.calendar)
-        return createDuration(
-          diffPlainYearMonth(false, calendar, slots, other, options),
-        )
-      },
-      since(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        otherArg: PlainYearMonthArg,
-        options?: DiffOptions<YearMonthUnitName>,
-      ): Duration {
-        const other = toPlainYearMonthSlots(otherArg)
-        const calendar = getCommonCalendar(slots.calendar, other.calendar)
-        return createDuration(
-          diffPlainYearMonth(true, calendar, slots, other, options),
-        )
-      },
-      equals(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        otherArg: PlainYearMonthArg,
-      ): boolean {
-        return plainYearMonthsEqual(slots, toPlainYearMonthSlots(otherArg))
-      },
-      toPlainDate(
-        this: PlainYearMonth,
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        bag: { day: number },
-      ): PlainDate {
-        return createPlainDate(
-          convertPlainYearMonthToDate(slots.calendar, this, bag),
-        )
-      },
-      toLocaleString(
-        slots: CalendarDateFields & { calendar: CalendarSlot },
-        locales?: LocalesArg,
-        options?: Intl.DateTimeFormatOptions,
-      ): string {
-        const [format, epochMilli] = prepPlainYearMonthFormat(
-          locales,
-          options,
-          slots,
-        )
-        return format.format(epochMilli)
-      },
-      toString: formatPlainYearMonthIso,
-    },
-    {
-      from(arg: PlainYearMonthArg, options?: OverflowOptions): PlainYearMonth {
-        return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
-      },
-      compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumberSign {
-        return compareIsoDateFields(
-          toPlainYearMonthSlots(arg0),
-          toPlainYearMonthSlots(arg1),
-        )
-      },
-    },
-  )
+type PlainYearMonthSlots = CalendarDateFields & { calendar: CalendarSlot }
 
-// Utils
-// -----------------------------------------------------------------------------
+const plainYearMonthSlotsMap = new WeakMap<object, PlainYearMonthSlots>()
+
+export class PlainYearMonth implements YearMonthFields {
+  constructor(
+    isoYear: number,
+    isoMonth: number,
+    calendar?: string,
+    referenceIsoDay?: number,
+  ) {
+    initPlainYearMonth(
+      this,
+      constructYearMonthSlots(
+        resolveCoreCalendarArg,
+        isoYear,
+        isoMonth,
+        calendar,
+        referenceIsoDay,
+      ),
+    )
+  }
+
+  static from(
+    arg: PlainYearMonthArg,
+    options?: OverflowOptions,
+  ): PlainYearMonth {
+    return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
+  }
+
+  static compare(arg0: PlainYearMonthArg, arg1: PlainYearMonthArg): NumberSign {
+    return compareIsoDateFields(
+      toPlainYearMonthSlots(arg0),
+      toPlainYearMonthSlots(arg1),
+    )
+  }
+
+  get calendarId(): string {
+    return getCalendarSlotId(getPlainYearMonthSlots(this).calendar)
+  }
+
+  get era(): string | undefined {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).era
+  }
+
+  get eraYear(): number | undefined {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  }
+
+  get year(): number {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).year
+  }
+
+  get month(): number {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).month
+  }
+
+  get monthCode(): string {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get daysInMonth(): number {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarDaysInMonth(slots.calendar, slots)
+  }
+
+  get daysInYear(): number {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarDaysInYear(slots.calendar, slots)
+  }
+
+  get monthsInYear(): number {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarMonthsInYear(slots.calendar, slots)
+  }
+
+  get inLeapYear(): boolean {
+    const slots = getPlainYearMonthSlots(this)
+    return computeCalendarInLeapYear(slots.calendar, slots)
+  }
+
+  with(
+    mod: Partial<YearMonthFields>,
+    options?: OverflowOptions,
+  ): PlainYearMonth {
+    return createPlainYearMonth(
+      mergePlainYearMonthFields(
+        getPlainYearMonthSlots(this),
+        rejectInvalidBag(mod),
+        options,
+      ),
+    )
+  }
+
+  add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+    return createPlainYearMonth(
+      movePlainYearMonth(
+        false,
+        getPlainYearMonthSlots(this),
+        toDurationSlots(durationArg),
+        options,
+      ),
+    )
+  }
+
+  subtract(
+    durationArg: DurationArg,
+    options?: OverflowOptions,
+  ): PlainYearMonth {
+    return createPlainYearMonth(
+      movePlainYearMonth(
+        true,
+        getPlainYearMonthSlots(this),
+        toDurationSlots(durationArg),
+        options,
+      ),
+    )
+  }
+
+  until(
+    otherArg: PlainYearMonthArg,
+    options?: DiffOptions<YearMonthUnitName>,
+  ): Duration {
+    const slots = getPlainYearMonthSlots(this)
+    const other = toPlainYearMonthSlots(otherArg)
+    const calendar = getCommonCalendar(slots.calendar, other.calendar)
+    return createDuration(
+      diffPlainYearMonth(false, calendar, slots, other, options),
+    )
+  }
+
+  since(
+    otherArg: PlainYearMonthArg,
+    options?: DiffOptions<YearMonthUnitName>,
+  ): Duration {
+    const slots = getPlainYearMonthSlots(this)
+    const other = toPlainYearMonthSlots(otherArg)
+    const calendar = getCommonCalendar(slots.calendar, other.calendar)
+    return createDuration(
+      diffPlainYearMonth(true, calendar, slots, other, options),
+    )
+  }
+
+  equals(otherArg: PlainYearMonthArg): boolean {
+    return plainYearMonthsEqual(
+      getPlainYearMonthSlots(this),
+      toPlainYearMonthSlots(otherArg),
+    )
+  }
+
+  toPlainDate(bag: { day: number }): PlainDate {
+    const slots = getPlainYearMonthSlots(this)
+    return createPlainDate(
+      convertPlainYearMonthToDate(slots.calendar, this, bag),
+    )
+  }
+
+  toLocaleString(
+    locales?: LocalesArg,
+    options?: Intl.DateTimeFormatOptions,
+  ): string {
+    const [format, epochMilli] = prepPlainYearMonthFormat(
+      locales,
+      options,
+      getPlainYearMonthSlots(this),
+    )
+    return format.format(epochMilli)
+  }
+
+  toString(): string {
+    return formatPlainYearMonthIso(getPlainYearMonthSlots(this))
+  }
+
+  toJSON(): string {
+    return formatPlainYearMonthIso(getPlainYearMonthSlots(this))
+  }
+
+  valueOf(): never {
+    return forbiddenValueOf()
+  }
+}
+
+defineTemporalClass(PlainYearMonth, 'PlainYearMonth')
+export function createPlainYearMonth(
+  slots: PlainYearMonthSlots,
+): PlainYearMonth {
+  return initPlainYearMonth(Object.create(PlainYearMonth.prototype), slots)
+}
+
+export function getPlainYearMonthSlots(obj: unknown): PlainYearMonthSlots {
+  // Precondition: callers only pass object-like receivers because WeakMap
+  // lookup itself rejects primitives.
+  const slots = plainYearMonthSlotsMap.get(obj as object)
+
+  if (!slots) {
+    throw new TypeError(errorMessages.invalidCallingContext)
+  }
+
+  return slots
+}
+
+export function getPlainYearMonthSlotsIfPresent(
+  obj: unknown,
+): PlainYearMonthSlots | undefined {
+  return plainYearMonthSlotsMap.get(obj as object)
+}
 
 export function toPlainYearMonthSlots(
   arg: PlainYearMonthArg,
   options?: OverflowOptions,
-) {
+): PlainYearMonthSlots {
   if (isObjectLike(arg)) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
+    const ownSlots = getPlainYearMonthSlotsIfPresent(arg)
 
-    if (brandingAndSlots && brandingAndSlots[0] === PlainYearMonthBranding) {
+    if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
-      return brandingAndSlots[1] as CalendarDateFields & {
-        calendar: CalendarSlot
-      }
+      return ownSlots
     }
 
-    const calendar = getCalendarFromBag(arg as any)
+    const calendar = getCalendarFromBag(arg as YearMonthLikeObject)
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
   const res = parsePlainYearMonth(arg, resolveCoreCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
+}
+
+function initPlainYearMonth(
+  instance: PlainYearMonth,
+  slots: PlainYearMonthSlots,
+): PlainYearMonth {
+  plainYearMonthSlotsMap.set(instance, slots)
+  attachDebugString(instance, slots, formatPlainYearMonthIso)
+  return instance
 }

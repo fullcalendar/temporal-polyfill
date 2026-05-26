@@ -100,7 +100,6 @@ export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZone }
 
 // Epoch Slot Getters
 // -----------------------------------------------------------------------------
-// TODO: move to mixins?
 
 export function getEpochMilli(slots: EpochNanoFields): number {
   return epochNanoToMilli(slots.epochNanoseconds)

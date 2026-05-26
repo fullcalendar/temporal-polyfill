@@ -1,23 +1,16 @@
 import {
-  calendarIdGetters,
-  dateFieldGetters,
-  timeGetters,
-} from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import {
+  computeCalendarDateFields,
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
+  computeCalendarEraFields,
   computeCalendarInLeapYear,
+  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
-import { CalendarSlot } from '../../internal/calendarSlot'
+import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
 import { toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
@@ -87,7 +80,6 @@ import {
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -125,6 +117,12 @@ import {
   getPlainTimeShimRecordSlots,
 } from './plainTime'
 import {
+  invalidRecordType,
+  recordValueOf,
+  registerRecord,
+  rejectInvalidBag,
+} from './recordUtils'
+import {
   computeDayCeil,
   computeHourFloor,
   computeIsoWeekCeil,
@@ -147,23 +145,140 @@ import {
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
 
-export type PlainDateTimeShimRecord = any & DateTimeFields
 type Format = DateTimeFormatLike<PlainDateTimeShimRecord>
 
-export const [
-  PlainDateTimeShimRecord,
-  createPlainDateTimeShimRecord,
-  getPlainDateTimeShimRecordSlots,
-] = createSlotClass(
-  PlainDateTimeRecordBranding,
-  bindArgs(constructDateTimeSlots, refineCalendarShimArg),
-  formatDateTimeIsoAuto,
-  {
-    ...calendarIdGetters,
-    ...dateFieldGetters,
-    ...timeGetters,
-  },
-)
+type PlainDateTimeShimSlots = ReturnType<typeof constructDateTimeSlots>
+const plainDateTimeShimMap = new WeakMap<object, PlainDateTimeShimSlots>()
+
+export class PlainDateTimeShimRecord implements DateTimeFields {
+  constructor(
+    isoYear: number,
+    isoMonth: number,
+    isoDay: number,
+    hour?: number,
+    minute?: number,
+    second?: number,
+    millisecond?: number,
+    microsecond?: number,
+    nanosecond?: number,
+    calendar?: CalendarShimRecord,
+  ) {
+    setPlainDateTimeShimRecordSlots(
+      this,
+      constructDateTimeSlots(
+        refineCalendarShimArg,
+        isoYear,
+        isoMonth,
+        isoDay,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+        calendar,
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getCalendarSlotId(getPlainDateTimeShimRecordSlots(this).calendar)
+  }
+
+  get era() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).era
+  }
+
+  get eraYear() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  }
+
+  get year() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).year
+  }
+
+  get month() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).month
+  }
+
+  get monthCode() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get day() {
+    const slots = getPlainDateTimeShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).day
+  }
+
+  get hour() {
+    return getPlainDateTimeShimRecordSlots(this).hour
+  }
+
+  get minute() {
+    return getPlainDateTimeShimRecordSlots(this).minute
+  }
+
+  get second() {
+    return getPlainDateTimeShimRecordSlots(this).second
+  }
+
+  get millisecond() {
+    return getPlainDateTimeShimRecordSlots(this).millisecond
+  }
+
+  get microsecond() {
+    return getPlainDateTimeShimRecordSlots(this).microsecond
+  }
+
+  get nanosecond() {
+    return getPlainDateTimeShimRecordSlots(this).nanosecond
+  }
+
+  toJSON() {
+    return formatDateTimeIsoAuto(getPlainDateTimeShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainDateTimeShimRecordSlots(
+  instance: object,
+  slots: PlainDateTimeShimSlots,
+) {
+  plainDateTimeShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatDateTimeIsoAuto)
+}
+
+export function createPlainDateTimeShimRecord(
+  slots: PlainDateTimeShimSlots,
+): PlainDateTimeShimRecord {
+  const instance = Object.create(PlainDateTimeShimRecord.prototype)
+  setPlainDateTimeShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getPlainDateTimeShimRecordSlots(
+  record: unknown,
+): PlainDateTimeShimSlots {
+  return getPlainDateTimeShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainDateTimeShimRecordSlotsIfPresent(
+  record: unknown,
+): PlainDateTimeShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainDateTimeShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainDateTimeShimRecord, ...)
 
 export function create(
   isoYear: number,
@@ -192,8 +307,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainDateTimeShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainDateTimeRecordBranding
+  return !!getPlainDateTimeShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(
@@ -763,7 +877,7 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (slots: PlainDateTimeShimRecord) => CalendarDateTimeFields,
+  computeAlignment: (slots: PlainDateTimeShimSlots) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: PlainDateTimeShimRecord) => PlainDateTimeShimRecord {
   return (record) => {
@@ -789,6 +903,6 @@ function aligned(
 
 function alignedTime(
   computeAlignment: (time: TimeFields) => TimeFields,
-): (slots: PlainDateTimeShimRecord) => CalendarDateTimeFields {
+): (slots: PlainDateTimeShimSlots) => CalendarDateTimeFields {
   return (slots) => combineDateAndTime(slots, computeAlignment(slots))
 }

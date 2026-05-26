@@ -1,8 +1,4 @@
 import * as TemporalUtils from 'temporal-utils'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -18,7 +14,6 @@ import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainDateTimeRecordBranding } from '../recordBranding'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
@@ -37,21 +32,18 @@ import {
   createPlainTimeNativeRecord,
   getPlainTimeNative,
 } from './plainTime'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
 
-export type PlainDateTimeNativeRecord = DateTimeFields
 type Format = DateTimeFormatLike<PlainDateTimeNativeRecord>
 
-export const [
-  PlainDateTimeNativeRecord,
-  createPlainDateTimeNativeRecord,
-  getPlainDateTimeNative,
-] = createSlotClass(
-  PlainDateTimeRecordBranding,
-  (
+const plainDateTimeNativeMap = new WeakMap<object, any>()
+
+export class PlainDateTimeNativeRecord implements DateTimeFields {
+  constructor(
     isoYear: number,
     isoMonth: number,
     isoDay: number,
@@ -62,34 +54,105 @@ export const [
     microsecond = 0,
     nanosecond = 0,
     calendar?: CalendarNativeRecord,
-  ) =>
-    new NativeTemporal!.PlainDateTime(
-      isoYear,
-      isoMonth,
-      isoDay,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      nanosecond,
-      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
-    ),
-  (native) => native.toString(),
-  {
-    calendarId: (native: any) => native.calendarId,
-    year: (native: any) => native.year,
-    month: (native: any) => native.month,
-    monthCode: (native: any) => native.monthCode,
-    day: (native: any) => native.day,
-    hour: (native: any) => native.hour,
-    minute: (native: any) => native.minute,
-    second: (native: any) => native.second,
-    millisecond: (native: any) => native.millisecond,
-    microsecond: (native: any) => native.microsecond,
-    nanosecond: (native: any) => native.nanosecond,
-  },
-)
+  ) {
+    setPlainDateTimeNative(
+      this,
+      new NativeTemporal!.PlainDateTime(
+        isoYear,
+        isoMonth,
+        isoDay,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+        calendar === undefined
+          ? undefined
+          : getCalendarNativeRecordId(calendar),
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getPlainDateTimeNative(this).calendarId
+  }
+
+  get year() {
+    return getPlainDateTimeNative(this).year
+  }
+
+  get month() {
+    return getPlainDateTimeNative(this).month
+  }
+
+  get monthCode() {
+    return getPlainDateTimeNative(this).monthCode
+  }
+
+  get day() {
+    return getPlainDateTimeNative(this).day
+  }
+
+  get hour() {
+    return getPlainDateTimeNative(this).hour
+  }
+
+  get minute() {
+    return getPlainDateTimeNative(this).minute
+  }
+
+  get second() {
+    return getPlainDateTimeNative(this).second
+  }
+
+  get millisecond() {
+    return getPlainDateTimeNative(this).millisecond
+  }
+
+  get microsecond() {
+    return getPlainDateTimeNative(this).microsecond
+  }
+
+  get nanosecond() {
+    return getPlainDateTimeNative(this).nanosecond
+  }
+
+  toJSON() {
+    return getPlainDateTimeNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainDateTimeNative(instance: object, native: any) {
+  plainDateTimeNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createPlainDateTimeNativeRecord(
+  native: any,
+): PlainDateTimeNativeRecord {
+  const instance = Object.create(PlainDateTimeNativeRecord.prototype)
+  setPlainDateTimeNative(instance, native)
+  return instance
+}
+
+export function getPlainDateTimeNative(record: unknown): any {
+  return getPlainDateTimeNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainDateTimeNativeIfPresent(
+  record: unknown,
+): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainDateTimeNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainDateTimeNativeRecord, ...)
 
 export function create(
   isoYear: number,
@@ -118,8 +181,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainDateTimeNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainDateTimeRecordBranding
+  return !!getPlainDateTimeNativeIfPresent(arg)
 }
 
 export function fromFields(

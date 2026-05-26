@@ -1,4 +1,3 @@
-import { createSlotClass } from '../../apiHelpers/slotClass'
 import { getExoticCalendar } from '../../exoticCalendars/exoticCalendarProvider'
 import {
   CalendarSlot,
@@ -8,21 +7,55 @@ import {
 } from '../../internal/calendarSlot'
 import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
-import { CalendarRecordBranding } from '../recordBranding'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 
-export type CalendarShimRecord = any
 export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
 
-export const [
-  CalendarShimRecord,
-  createCalendarShimRecord,
-  getCalendarShimRecordInternal,
-] = createSlotClass(
-  CalendarRecordBranding,
-  (calendarSlot: CalendarSlot) => calendarSlot, // TODO: use identity
-  (calendarSlot: CalendarSlot) => getCalendarSlotId(calendarSlot), // formatFunc
-  {}, // getters
-)
+const calendarShimMap = new WeakMap<object, CalendarSlot>()
+
+export class CalendarShimRecord {
+  constructor(calendarSlot: CalendarSlot) {
+    setCalendarShimRecordInternal(this, calendarSlot)
+  }
+
+  toJSON() {
+    return getCalendarSlotId(getCalendarShimRecordInternal(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setCalendarShimRecordInternal(
+  instance: object,
+  calendarSlot: CalendarSlot,
+) {
+  calendarShimMap.set(instance, calendarSlot)
+  registerRecord(instance, calendarSlot, getCalendarSlotId)
+}
+
+export function createCalendarShimRecord(
+  calendarSlot: CalendarSlot,
+): CalendarShimRecord {
+  const instance = Object.create(CalendarShimRecord.prototype)
+  setCalendarShimRecordInternal(instance, calendarSlot)
+  return instance
+}
+
+export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
+  return getCalendarShimRecordInternalIfPresent(record) || invalidRecordType()
+}
+
+export function getCalendarShimRecordInternalIfPresent(
+  record: unknown,
+): CalendarSlot | undefined {
+  return typeof record === 'object' && record !== null
+    ? calendarShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(CalendarShimRecord, ...)
 
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)

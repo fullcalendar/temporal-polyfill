@@ -1,21 +1,15 @@
 import {
-  PlainDateTimeBranding,
-  PlainTimeBranding,
-  ZonedDateTimeBranding,
-} from '../../apiHelpers/branding'
-import { timeGetters } from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import { CalendarSlot } from '../../internal/calendarSlot'
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
-import { CalendarDateTimeFields, TimeFields } from '../../internal/fieldTypes'
+import * as errorMessages from '../../internal/errorMessages'
+import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
@@ -28,7 +22,7 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { roundPlainTime } from '../../internal/round'
-import { ZonedEpochNanoFields, createTimeSlots } from '../../internal/slots'
+import { createTimeSlots } from '../../internal/slots'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainTimeFormat } from '../intlFormatConfig'
@@ -38,112 +32,196 @@ import {
   createDuration,
   toDurationSlots,
 } from './duration'
+import { getPlainDateTimeSlotsIfPresent } from './plainDateTime'
+import { rejectInvalidBag } from './temporalSlots'
+import { getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
-export type PlainTime = TimeFields // and other getters/methods
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 
-export const [PlainTime, createPlainTime] = createSlotClass(
-  PlainTimeBranding,
-  constructTimeSlots,
-  formatPlainTimeIso,
-  timeGetters,
-  {
-    with(
-      this: PlainTime,
-      _slots: TimeFields,
-      mod: Partial<TimeFields>,
-      options?: OverflowOptions,
-    ): PlainTime {
-      return createPlainTime(
-        mergePlainTimeFields(this, rejectInvalidBag(mod), options),
-      )
-    },
-    add(slots: TimeFields, durationArg: DurationArg): PlainTime {
-      return createPlainTime(
-        movePlainTime(false, slots, toDurationSlots(durationArg)),
-      )
-    },
-    subtract(slots: TimeFields, durationArg: DurationArg): PlainTime {
-      return createPlainTime(
-        movePlainTime(true, slots, toDurationSlots(durationArg)),
-      )
-    },
-    until(
-      slots: TimeFields,
-      otherArg: PlainTimeArg,
-      options?: DiffOptions<TimeUnitName>,
-    ): Duration {
-      return createDuration(
-        diffPlainTimes(false, slots, toPlainTimeSlots(otherArg), options),
-      )
-    },
-    since(
-      slots: TimeFields,
-      otherArg: PlainTimeArg,
-      options?: DiffOptions<TimeUnitName>,
-    ): Duration {
-      return createDuration(
-        diffPlainTimes(true, slots, toPlainTimeSlots(otherArg), options),
-      )
-    },
-    round(
-      slots: TimeFields,
-      options: TimeUnitName | RoundingOptions<TimeUnitName>,
-    ): PlainTime {
-      return createPlainTime(roundPlainTime(slots, options))
-    },
-    equals(slots: TimeFields, other: PlainTimeArg): boolean {
-      return plainTimesEqual(slots, toPlainTimeSlots(other))
-    },
-    toLocaleString(
-      slots: TimeFields,
-      locales?: LocalesArg,
-      options?: Intl.DateTimeFormatOptions,
-    ): string {
-      const [format, epochMilli] = prepPlainTimeFormat(locales, options, slots)
-      return format.format(epochMilli)
-    },
-    toString: formatPlainTimeIso,
-  },
-  {
-    from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
-      return createPlainTime(toPlainTimeSlots(arg, options))
-    },
-    compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumberSign {
-      return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
-    },
-  },
-)
+const plainTimeSlotsMap = new WeakMap<object, TimeFields>()
 
-// Utils
-// -----------------------------------------------------------------------------
+export class PlainTime implements TimeFields {
+  constructor(
+    hour = 0,
+    minute = 0,
+    second = 0,
+    millisecond = 0,
+    microsecond = 0,
+    nanosecond = 0,
+  ) {
+    initPlainTime(
+      this,
+      constructTimeSlots(
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+      ),
+    )
+  }
+
+  static from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
+    return createPlainTime(toPlainTimeSlots(arg, options))
+  }
+
+  static compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumberSign {
+    return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
+  }
+
+  get hour(): number {
+    return getPlainTimeSlots(this).hour
+  }
+
+  get minute(): number {
+    return getPlainTimeSlots(this).minute
+  }
+
+  get second(): number {
+    return getPlainTimeSlots(this).second
+  }
+
+  get millisecond(): number {
+    return getPlainTimeSlots(this).millisecond
+  }
+
+  get microsecond(): number {
+    return getPlainTimeSlots(this).microsecond
+  }
+
+  get nanosecond(): number {
+    return getPlainTimeSlots(this).nanosecond
+  }
+
+  with(mod: Partial<TimeFields>, options?: OverflowOptions): PlainTime {
+    return createPlainTime(
+      mergePlainTimeFields(this, rejectInvalidBag(mod), options),
+    )
+  }
+
+  add(durationArg: DurationArg): PlainTime {
+    return createPlainTime(
+      movePlainTime(
+        false,
+        getPlainTimeSlots(this),
+        toDurationSlots(durationArg),
+      ),
+    )
+  }
+
+  subtract(durationArg: DurationArg): PlainTime {
+    return createPlainTime(
+      movePlainTime(
+        true,
+        getPlainTimeSlots(this),
+        toDurationSlots(durationArg),
+      ),
+    )
+  }
+
+  until(otherArg: PlainTimeArg, options?: DiffOptions<TimeUnitName>): Duration {
+    return createDuration(
+      diffPlainTimes(
+        false,
+        getPlainTimeSlots(this),
+        toPlainTimeSlots(otherArg),
+        options,
+      ),
+    )
+  }
+
+  since(otherArg: PlainTimeArg, options?: DiffOptions<TimeUnitName>): Duration {
+    return createDuration(
+      diffPlainTimes(
+        true,
+        getPlainTimeSlots(this),
+        toPlainTimeSlots(otherArg),
+        options,
+      ),
+    )
+  }
+
+  round(options: TimeUnitName | RoundingOptions<TimeUnitName>): PlainTime {
+    return createPlainTime(roundPlainTime(getPlainTimeSlots(this), options))
+  }
+
+  equals(other: PlainTimeArg): boolean {
+    return plainTimesEqual(getPlainTimeSlots(this), toPlainTimeSlots(other))
+  }
+
+  toLocaleString(
+    locales?: LocalesArg,
+    options?: Intl.DateTimeFormatOptions,
+  ): string {
+    const [format, epochMilli] = prepPlainTimeFormat(
+      locales,
+      options,
+      getPlainTimeSlots(this),
+    )
+    return format.format(epochMilli)
+  }
+
+  toString(): string {
+    return formatPlainTimeIso(getPlainTimeSlots(this))
+  }
+
+  toJSON(): string {
+    return formatPlainTimeIso(getPlainTimeSlots(this))
+  }
+
+  valueOf(): never {
+    return forbiddenValueOf()
+  }
+}
+
+defineTemporalClass(PlainTime, 'PlainTime')
+export function createPlainTime(slots: TimeFields): PlainTime {
+  return initPlainTime(Object.create(PlainTime.prototype), slots)
+}
+
+export function getPlainTimeSlots(obj: unknown): TimeFields {
+  // Precondition: callers only pass object-like receivers because WeakMap
+  // lookup itself rejects primitives.
+  const slots = plainTimeSlotsMap.get(obj as object)
+
+  if (!slots) {
+    throw new TypeError(errorMessages.invalidCallingContext)
+  }
+
+  return slots
+}
+
+export function getPlainTimeSlotsIfPresent(
+  obj: unknown,
+): TimeFields | undefined {
+  return plainTimeSlotsMap.get(obj as object)
+}
 
 export function toPlainTimeSlots(
   arg: PlainTimeArg,
   options?: OverflowOptions,
 ): TimeFields {
   if (isObjectLike(arg)) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
+    const ownSlots = getPlainTimeSlotsIfPresent(arg)
 
-    if (brandingAndSlots) {
-      const [branding, slots] = brandingAndSlots
-      switch (branding) {
-        case PlainTimeBranding:
-          refineOverflowOptions(options) // parse unused options
-          return slots as TimeFields
+    if (ownSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return ownSlots
+    }
 
-        case PlainDateTimeBranding:
-          refineOverflowOptions(options) // parse unused options
-          return createTimeSlots(
-            slots as CalendarDateTimeFields & { calendar: CalendarSlot },
-          )
+    const dateTimeSlots = getPlainDateTimeSlotsIfPresent(arg)
 
-        case ZonedDateTimeBranding:
-          refineOverflowOptions(options) // parse unused options
-          return zonedDateTimeToPlainTime(
-            slots as ZonedEpochNanoFields & { calendar: CalendarSlot },
-          )
-      }
+    if (dateTimeSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return createTimeSlots(dateTimeSlots)
+    }
+
+    const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
+
+    if (zonedDateTimeSlots) {
+      refineOverflowOptions(options) // parse unused options
+      return zonedDateTimeToPlainTime(zonedDateTimeSlots)
     }
 
     return refinePlainTimeObjectLike(arg as Partial<TimeFields>, options)
@@ -161,4 +239,10 @@ export function optionalToPlainTimeFields(
   timeArg: PlainTimeArg | undefined,
 ): TimeFields | undefined {
   return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
+}
+
+function initPlainTime(instance: PlainTime, slots: TimeFields): PlainTime {
+  plainTimeSlotsMap.set(instance, slots)
+  attachDebugString(instance, slots, formatPlainTimeIso)
+  return instance
 }

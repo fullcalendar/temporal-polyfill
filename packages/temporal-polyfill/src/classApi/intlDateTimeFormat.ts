@@ -1,4 +1,3 @@
-import { getBrandingAndSlots } from '../apiHelpers/slotClass'
 import * as errorMessages from '../internal/errorMessages'
 import {
   FormatPrepper,
@@ -24,16 +23,21 @@ import { classFormatConfigs } from './intlFormatConfig'
 export type TemporalFormattable = object
 
 export type Formattable = TemporalFormattable | RawFormattable
+export type TemporalBrandingAndSlots<S = object> = [branding: string, slots: S]
+export type TemporalBrandingAndSlotsGetter = (
+  obj: unknown,
+) => TemporalBrandingAndSlots | undefined
 
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
 
 export type DateTimeFormat = Intl.DateTimeFormat
-export const DateTimeFormat = createDateTimeFormatClass()
 
 const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
 
-function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
+export function createDateTimeFormatClass(
+  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter,
+): typeof Intl.DateTimeFormat {
   // The Intl.DateTimeFormat object
   // More versatile because accommodates
   // `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()`
@@ -55,7 +59,11 @@ function createDateTimeFormatClass(): typeof Intl.DateTimeFormat {
   ) {
     internalsMap.set(
       this as DateTimeFormat,
-      createDateTimeFormatInternals(locales, options),
+      createDateTimeFormatInternals(
+        locales,
+        options,
+        getTemporalBrandingAndSlots,
+      ),
     )
   }
 
@@ -145,6 +153,7 @@ type DateTimeFormatInternals = {
   rawFormat: Intl.DateTimeFormat
   resolvedLocale: string
   copiedOptions: Intl.DateTimeFormatOptions
+  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter
   queryFormatPrepperForBranding: (branding: string) => FormatPrepper<any>
 
   // Only set for public Intl.DateTimeFormat wrapper instances that received a
@@ -166,6 +175,7 @@ function getDateTimeFormatInternals(
 function createDateTimeFormatInternals(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
+  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter,
 ): DateTimeFormatInternals {
   const rawFormat = new RawDateTimeFormat(locales, options)
   const resolvedOptions = rawFormat.resolvedOptions()
@@ -185,6 +195,7 @@ function createDateTimeFormatInternals(
     rawFormat,
     resolvedLocale: resolvedOptions.locale,
     copiedOptions,
+    getTemporalBrandingAndSlots,
     // Reuse each Temporal-brand-specific prepper so this formatter's copied DTF
     // options are transformed into a subformat at most once per Temporal type.
     queryFormatPrepperForBranding: memoize(createFormatPrepperForBranding),
@@ -219,7 +230,9 @@ function prepDateTimeFormatCall(
   const slotsList: object[] = []
 
   for (let i = 0; i < formattableCnt; i++) {
-    const brandingAndSlots = getBrandingAndSlots(formattables[i])
+    const brandingAndSlots = internals.getTemporalBrandingAndSlots(
+      formattables[i],
+    )
 
     if (brandingAndSlots) {
       const [temporalBranding, slots] = brandingAndSlots

@@ -1,7 +1,3 @@
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -14,39 +10,120 @@ import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
+import { PlainDateNativeRecord, getPlainDateNativeIfPresent } from './plainDate'
 import {
-  DurationRecordBranding,
-  PlainDateRecordBranding,
-  PlainDateTimeRecordBranding,
-  ZonedDateTimeRecordBranding,
-} from '../recordBranding'
-import { PlainDateNativeRecord } from './plainDate'
-import { PlainDateTimeNativeRecord } from './plainDateTime'
-import { ZonedDateTimeNativeRecord } from './zonedDateTime'
+  PlainDateTimeNativeRecord,
+  getPlainDateTimeNativeIfPresent,
+} from './plainDateTime'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
+import {
+  ZonedDateTimeNativeRecord,
+  getZonedDateTimeNativeIfPresent,
+} from './zonedDateTime'
 
-export type DurationNativeRecord = DurationFields
+const durationNativeMap = new WeakMap<object, any>()
 
-export const [
-  DurationNativeRecord,
-  createDurationNativeRecord,
-  getDurationNative,
-] = createSlotClass(
-  DurationRecordBranding,
-  (...args: any[]) => new NativeTemporal!.Duration(...args),
-  (native) => native.toString(),
-  {
-    years: (native: any) => native.years,
-    months: (native: any) => native.months,
-    weeks: (native: any) => native.weeks,
-    days: (native: any) => native.days,
-    hours: (native: any) => native.hours,
-    minutes: (native: any) => native.minutes,
-    seconds: (native: any) => native.seconds,
-    milliseconds: (native: any) => native.milliseconds,
-    microseconds: (native: any) => native.microseconds,
-    nanoseconds: (native: any) => native.nanoseconds,
-  },
-)
+export class DurationNativeRecord implements DurationFields {
+  constructor(
+    years?: number,
+    months?: number,
+    weeks?: number,
+    days?: number,
+    hours?: number,
+    minutes?: number,
+    seconds?: number,
+    milliseconds?: number,
+    microseconds?: number,
+    nanoseconds?: number,
+  ) {
+    setDurationNative(
+      this,
+      new NativeTemporal!.Duration(
+        years,
+        months,
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds,
+        milliseconds,
+        microseconds,
+        nanoseconds,
+      ),
+    )
+  }
+
+  get years() {
+    return getDurationNative(this).years
+  }
+
+  get months() {
+    return getDurationNative(this).months
+  }
+
+  get weeks() {
+    return getDurationNative(this).weeks
+  }
+
+  get days() {
+    return getDurationNative(this).days
+  }
+
+  get hours() {
+    return getDurationNative(this).hours
+  }
+
+  get minutes() {
+    return getDurationNative(this).minutes
+  }
+
+  get seconds() {
+    return getDurationNative(this).seconds
+  }
+
+  get milliseconds() {
+    return getDurationNative(this).milliseconds
+  }
+
+  get microseconds() {
+    return getDurationNative(this).microseconds
+  }
+
+  get nanoseconds() {
+    return getDurationNative(this).nanoseconds
+  }
+
+  toJSON() {
+    return getDurationNative(this).toString()
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setDurationNative(instance: object, native: any) {
+  durationNativeMap.set(instance, native)
+  registerRecord(instance, native, (slots) => slots.toString())
+}
+
+export function createDurationNativeRecord(native: any): DurationNativeRecord {
+  const instance = Object.create(DurationNativeRecord.prototype)
+  setDurationNative(instance, native)
+  return instance
+}
+
+export function getDurationNative(record: unknown): any {
+  return getDurationNativeIfPresent(record) || invalidRecordType()
+}
+
+export function getDurationNativeIfPresent(record: unknown): any | undefined {
+  return typeof record === 'object' && record !== null
+    ? durationNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(DurationNativeRecord, ...)
 
 export function create(
   years?: number,
@@ -75,8 +152,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is DurationNativeRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === DurationRecordBranding
+  return !!getDurationNativeIfPresent(arg)
 }
 
 export function fromFields(
@@ -224,16 +300,13 @@ function refineTotalOptions(
 
 function refineRelativeTo(arg?: RelativeToNativeRecord): any | undefined {
   if (arg) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
-    if (brandingAndSlots) {
-      const [branding, native] = brandingAndSlots
-      if (
-        branding === ZonedDateTimeRecordBranding ||
-        branding === PlainDateTimeRecordBranding ||
-        branding === PlainDateRecordBranding
-      ) {
-        return native // native ZonedDateTime / PlainDateTime / PlainDate
-      }
+    const native =
+      getZonedDateTimeNativeIfPresent(arg) ||
+      getPlainDateTimeNativeIfPresent(arg) ||
+      getPlainDateNativeIfPresent(arg)
+
+    if (native) {
+      return native // native ZonedDateTime / PlainDateTime / PlainDate
     }
     // otherwise, throw error?
   }

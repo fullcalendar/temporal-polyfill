@@ -15,11 +15,11 @@ import {
   createPropDescriptors,
   createStringTagDescriptors,
 } from '../../internal/utils'
-import { TimeZoneArg, refineTimeZoneArg } from '../timeZoneArg'
 import { Instant, createInstant } from './instant'
 import { PlainDate, createPlainDate } from './plainDate'
 import { PlainDateTime, createPlainDateTime } from './plainDateTime'
 import { PlainTime, createPlainTime } from './plainTime'
+import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import { ZonedDateTime, createZonedDateTime } from './zonedDateTime'
 
 export const Now = Object.defineProperties(

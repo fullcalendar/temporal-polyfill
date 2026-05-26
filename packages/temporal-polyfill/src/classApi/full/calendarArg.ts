@@ -1,4 +1,3 @@
-import { getBrandingAndSlots } from '../../apiHelpers/slotClass'
 import type { CalendarSlot } from '../../internal/calendarSlot'
 import { isoCalendar } from '../../internal/calendarSlot'
 import { requireString } from '../../internal/cast'
@@ -6,11 +5,14 @@ import * as errorMessages from '../../internal/errorMessages'
 import { parseCalendarId } from '../../internal/isoParse'
 import { isObjectLike } from '../../internal/utils'
 import { resolveAnyCalendar } from './calendarResolve'
-import { PlainDate } from './plainDate'
-import { PlainDateTime } from './plainDateTime'
-import { PlainMonthDay } from './plainMonthDay'
-import { PlainYearMonth } from './plainYearMonth'
-import { ZonedDateTime } from './zonedDateTime'
+import { PlainDate, getPlainDateSlotsIfPresent } from './plainDate'
+import { PlainDateTime, getPlainDateTimeSlotsIfPresent } from './plainDateTime'
+import { PlainMonthDay, getPlainMonthDaySlotsIfPresent } from './plainMonthDay'
+import {
+  PlainYearMonth,
+  getPlainYearMonthSlotsIfPresent,
+} from './plainYearMonth'
+import { ZonedDateTime, getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
 export type CalendarArg =
   | string
@@ -41,12 +43,18 @@ Returns an CalendarSlot
 */
 export function refineCalendarArg(arg: CalendarArg): CalendarSlot {
   if (isObjectLike(arg)) {
-    const slots = getBrandingAndSlots(arg)?.[1]
+    const slots =
+      getPlainDateSlotsIfPresent(arg) ||
+      getPlainDateTimeSlotsIfPresent(arg) ||
+      getZonedDateTimeSlotsIfPresent(arg) ||
+      getPlainMonthDaySlotsIfPresent(arg) ||
+      getPlainYearMonthSlotsIfPresent(arg)
+
     if (!slots || !('calendar' in slots)) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
-    return (slots as { calendar: CalendarSlot }).calendar
+    return slots.calendar
   }
   return refineCalendarString(arg)
 }

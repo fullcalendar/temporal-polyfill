@@ -1,15 +1,8 @@
 import {
-  DurationBranding,
-  PlainDateBranding,
-  PlainDateTimeBranding,
-  ZonedDateTimeBranding,
-} from '../../apiHelpers/branding'
-import { durationFieldGetters } from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-} from '../../apiHelpers/slotClass'
-import { CalendarSlot } from '../../internal/calendarSlot'
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import {
@@ -23,11 +16,8 @@ import {
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
-import {
-  CalendarDateFields,
-  CalendarDateTimeFields,
-  ZonedDateTimeLikeObject,
-} from '../../internal/fieldTypes'
+import * as errorMessages from '../../internal/errorMessages'
+import { ZonedDateTimeLikeObject } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatDurationIso } from '../../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../../internal/isoParse'
@@ -38,133 +28,232 @@ import {
   RelativeToOptions,
 } from '../../internal/optionsModel'
 import { RelativeToSlots } from '../../internal/relativeMath'
-import { ZonedEpochNanoFields, createDateSlots } from '../../internal/slots'
+import { createDateSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'
 import { UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { refineTimeZoneArg } from '../timeZoneArg'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendar } from './calendarResolve'
-import { PlainDateArg } from './plainDate'
-import { PlainDateTimeArg } from './plainDateTime'
-import { ZonedDateTimeArg } from './zonedDateTime'
+import { PlainDateArg, getPlainDateSlotsIfPresent } from './plainDate'
+import {
+  PlainDateTimeArg,
+  getPlainDateTimeSlotsIfPresent,
+} from './plainDateTime'
+import { refineTimeZoneArg } from './timeZoneArg'
+import {
+  ZonedDateTimeArg,
+  getZonedDateTimeSlotsIfPresent,
+} from './zonedDateTime'
 
-export type Duration = DurationFields // and other getters/methods
 export type DurationArg = Duration | Partial<DurationFields> | string
 
-export const [Duration, createDuration, getDurationSlots] = createSlotClass(
-  DurationBranding,
-  constructDurationSlots,
-  formatDurationIso,
-  {
-    ...durationFieldGetters,
-    sign(slots: DurationFields & { sign: NumberSign }) {
-      return slots.sign
-    },
-    blank(slots: DurationFields & { sign: NumberSign }) {
-      return !slots.sign
-    },
-  },
-  {
-    with(
-      slots: DurationFields & { sign: NumberSign },
-      mod: Partial<DurationFields>,
-    ): Duration {
-      return createDuration(mergeDurationFields(slots, mod))
-    },
-    negated(slots: DurationFields & { sign: NumberSign }): Duration {
-      return createDuration(negateDuration(slots))
-    },
-    abs(slots: DurationFields & { sign: NumberSign }): Duration {
-      return createDuration(absDuration(slots))
-    },
-    add(
-      slots: DurationFields & { sign: NumberSign },
-      otherArg: DurationArg,
-      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
-    ) {
-      return createDuration(
-        addDurations(
-          refinePublicRelativeTo,
-          false,
-          slots,
-          toDurationSlots(otherArg),
-          options,
-        ),
-      )
-    },
-    subtract(
-      slots: DurationFields & { sign: NumberSign },
-      otherArg: DurationArg,
-      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
-    ) {
-      return createDuration(
-        addDurations(
-          refinePublicRelativeTo,
-          true,
-          slots,
-          toDurationSlots(otherArg),
-          options,
-        ),
-      )
-    },
-    round(
-      slots: DurationFields & { sign: NumberSign },
-      options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
-    ): Duration {
-      return createDuration(
-        roundDuration(refinePublicRelativeTo, slots, options),
-      )
-    },
-    total(
-      slots: DurationFields & { sign: NumberSign },
-      options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
-    ): number {
-      return totalDuration(refinePublicRelativeTo, slots, options)
-    },
-    toLocaleString(
-      this: Duration,
-      slots: DurationFields & { sign: NumberSign },
-      locales?: LocalesArg,
-      options?: any,
-    ): string {
-      return (Intl as any).DurationFormat
-        ? new (Intl as any).DurationFormat(locales, options).format(this)
-        : formatDurationIso(slots)
-    },
-    toString: formatDurationIso,
-  },
-  {
-    from(arg: DurationArg): Duration {
-      return createDuration(toDurationSlots(arg))
-    },
-    compare(
-      durationArg0: DurationArg,
-      durationArg1: DurationArg,
-      options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
-    ): NumberSign {
-      return compareDurations(
+type DurationSlots = DurationFields & { sign: NumberSign }
+
+const durationSlotsMap = new WeakMap<object, DurationSlots>()
+
+export class Duration implements DurationFields {
+  constructor(
+    years = 0,
+    months = 0,
+    weeks = 0,
+    days = 0,
+    hours = 0,
+    minutes = 0,
+    seconds = 0,
+    milliseconds = 0,
+    microseconds = 0,
+    nanoseconds = 0,
+  ) {
+    initDuration(
+      this,
+      constructDurationSlots(
+        years,
+        months,
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds,
+        milliseconds,
+        microseconds,
+        nanoseconds,
+      ),
+    )
+  }
+
+  static from(arg: DurationArg): Duration {
+    return createDuration(toDurationSlots(arg))
+  }
+
+  static compare(
+    durationArg0: DurationArg,
+    durationArg1: DurationArg,
+    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+  ): NumberSign {
+    return compareDurations(
+      refinePublicRelativeTo,
+      toDurationSlots(durationArg0),
+      toDurationSlots(durationArg1),
+      options,
+    )
+  }
+
+  get years(): number {
+    return getDurationSlots(this).years
+  }
+
+  get months(): number {
+    return getDurationSlots(this).months
+  }
+
+  get weeks(): number {
+    return getDurationSlots(this).weeks
+  }
+
+  get days(): number {
+    return getDurationSlots(this).days
+  }
+
+  get hours(): number {
+    return getDurationSlots(this).hours
+  }
+
+  get minutes(): number {
+    return getDurationSlots(this).minutes
+  }
+
+  get seconds(): number {
+    return getDurationSlots(this).seconds
+  }
+
+  get milliseconds(): number {
+    return getDurationSlots(this).milliseconds
+  }
+
+  get microseconds(): number {
+    return getDurationSlots(this).microseconds
+  }
+
+  get nanoseconds(): number {
+    return getDurationSlots(this).nanoseconds
+  }
+
+  get sign(): NumberSign {
+    return getDurationSlots(this).sign
+  }
+
+  get blank(): boolean {
+    return !getDurationSlots(this).sign
+  }
+
+  with(mod: Partial<DurationFields>): Duration {
+    return createDuration(mergeDurationFields(getDurationSlots(this), mod))
+  }
+
+  negated(): Duration {
+    return createDuration(negateDuration(getDurationSlots(this)))
+  }
+
+  abs(): Duration {
+    return createDuration(absDuration(getDurationSlots(this)))
+  }
+
+  add(
+    otherArg: DurationArg,
+    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+  ): Duration {
+    return createDuration(
+      addDurations(
         refinePublicRelativeTo,
-        toDurationSlots(durationArg0),
-        toDurationSlots(durationArg1),
+        false,
+        getDurationSlots(this),
+        toDurationSlots(otherArg),
         options,
-      )
-    },
-  },
-)
+      ),
+    )
+  }
 
-// Utils
-// -----------------------------------------------------------------------------
+  subtract(
+    otherArg: DurationArg,
+    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+  ): Duration {
+    return createDuration(
+      addDurations(
+        refinePublicRelativeTo,
+        true,
+        getDurationSlots(this),
+        toDurationSlots(otherArg),
+        options,
+      ),
+    )
+  }
 
-export function toDurationSlots(
-  arg: DurationArg,
-): DurationFields & { sign: NumberSign } {
+  round(
+    options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
+  ): Duration {
+    return createDuration(
+      roundDuration(refinePublicRelativeTo, getDurationSlots(this), options),
+    )
+  }
+
+  total(
+    options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
+  ): number {
+    return totalDuration(
+      refinePublicRelativeTo,
+      getDurationSlots(this),
+      options,
+    )
+  }
+
+  toLocaleString(locales?: LocalesArg, options?: any): string {
+    return (Intl as any).DurationFormat
+      ? new (Intl as any).DurationFormat(locales, options).format(this)
+      : formatDurationIso(getDurationSlots(this))
+  }
+
+  toString(): string {
+    return formatDurationIso(getDurationSlots(this))
+  }
+
+  toJSON(): string {
+    return formatDurationIso(getDurationSlots(this))
+  }
+
+  valueOf(): never {
+    return forbiddenValueOf()
+  }
+}
+
+defineTemporalClass(Duration, 'Duration')
+export function createDuration(slots: DurationSlots): Duration {
+  return initDuration(Object.create(Duration.prototype), slots)
+}
+
+export function getDurationSlots(obj: unknown): DurationSlots {
+  // Precondition: callers only pass object-like receivers because WeakMap
+  // lookup itself rejects primitives.
+  const slots = durationSlotsMap.get(obj as object)
+
+  if (!slots) {
+    throw new TypeError(errorMessages.invalidCallingContext)
+  }
+
+  return slots
+}
+
+export function getDurationSlotsIfPresent(
+  obj: unknown,
+): DurationSlots | undefined {
+  return durationSlotsMap.get(obj as object)
+}
+
+export function toDurationSlots(arg: DurationArg): DurationSlots {
   if (isObjectLike(arg)) {
-    const brandingAndSlots = getBrandingAndSlots(arg)
+    const ownSlots = getDurationSlotsIfPresent(arg)
 
-    if (brandingAndSlots && brandingAndSlots[0] === DurationBranding) {
-      const slots = brandingAndSlots[1]
-      return slots as DurationFields & { sign: NumberSign }
+    if (ownSlots) {
+      return ownSlots
     }
 
     return refineDurationObjectLike(arg as Partial<DurationFields>)
@@ -178,24 +267,22 @@ function refinePublicRelativeTo(
 ): RelativeToSlots | undefined {
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {
-      const brandingAndSlots = getBrandingAndSlots(relativeTo)
+      const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(relativeTo)
 
-      if (brandingAndSlots) {
-        const [branding, slots] = brandingAndSlots
-        switch (branding) {
-          case ZonedDateTimeBranding:
-          case PlainDateBranding:
-            return slots as
-              | (ZonedEpochNanoFields & { calendar: CalendarSlot })
-              | (CalendarDateFields & { calendar: CalendarSlot })
+      if (zonedDateTimeSlots) {
+        return zonedDateTimeSlots
+      }
 
-          case PlainDateTimeBranding:
-            return createDateSlots(
-              slots as CalendarDateTimeFields & { calendar: CalendarSlot },
-              (slots as CalendarDateTimeFields & { calendar: CalendarSlot })
-                .calendar,
-            )
-        }
+      const dateSlots = getPlainDateSlotsIfPresent(relativeTo)
+
+      if (dateSlots) {
+        return dateSlots
+      }
+
+      const dateTimeSlots = getPlainDateTimeSlotsIfPresent(relativeTo)
+
+      if (dateTimeSlots) {
+        return createDateSlots(dateTimeSlots, dateTimeSlots.calendar)
       }
 
       const calendar = getCalendarFromBag(relativeTo as any) // !!!
@@ -210,4 +297,10 @@ function refinePublicRelativeTo(
 
     return parseRelativeToSlots(relativeTo, resolveAnyCalendar)
   }
+}
+
+function initDuration(instance: Duration, slots: DurationSlots): Duration {
+  durationSlotsMap.set(instance, slots)
+  attachDebugString(instance, slots, formatDurationIso)
+  return instance
 }

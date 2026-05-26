@@ -1,26 +1,56 @@
-import { createSlotClass } from '../../apiHelpers/slotClass'
 import {
   gregoryCalendarId,
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
-import { CalendarRecordBranding } from '../recordBranding'
+import { invalidRecordType, recordValueOf, registerRecord } from './recordUtils'
 
-export type CalendarNativeRecord = any
 export type CalendarNativeResolver = (
   calendarId: string,
 ) => CalendarNativeRecord
 
-export const [
-  CalendarNativeRecord,
-  createCalendarNativeRecord,
-  getCalendarNativeRecordId,
-] = createSlotClass(
-  CalendarRecordBranding,
-  (calendarId: string) => calendarId, // TODO: use identity
-  (calendarId: string) => calendarId, // formatFunc. TODO: use identity
-  {}, // getters
-)
+const calendarNativeMap = new WeakMap<object, string>()
+
+export class CalendarNativeRecord {
+  constructor(calendarId: string) {
+    setCalendarNativeRecordId(this, calendarId)
+  }
+
+  toJSON() {
+    return getCalendarNativeRecordId(this)
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setCalendarNativeRecordId(instance: object, calendarId: string) {
+  calendarNativeMap.set(instance, calendarId)
+  registerRecord(instance, calendarId, (slots) => slots)
+}
+
+export function createCalendarNativeRecord(
+  calendarId: string,
+): CalendarNativeRecord {
+  const instance = Object.create(CalendarNativeRecord.prototype)
+  setCalendarNativeRecordId(instance, calendarId)
+  return instance
+}
+
+export function getCalendarNativeRecordId(record: unknown): string {
+  return getCalendarNativeRecordIdIfPresent(record) || invalidRecordType()
+}
+
+export function getCalendarNativeRecordIdIfPresent(
+  record: unknown,
+): string | undefined {
+  return typeof record === 'object' && record !== null
+    ? calendarNativeMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(CalendarNativeRecord, ...)
 
 const isoCalendarRecord = createCalendarNativeRecord(isoCalendarId)
 const gregoryCalendarRecord = createCalendarNativeRecord(gregoryCalendarId)

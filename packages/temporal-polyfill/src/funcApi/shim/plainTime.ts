@@ -1,9 +1,3 @@
-import { timeGetters } from '../../apiHelpers/mixins'
-import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -25,27 +19,110 @@ import { roundPlainTime } from '../../internal/round'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainTimeRecordBranding } from '../recordBranding'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import {
+  invalidRecordType,
+  recordValueOf,
+  registerRecord,
+  rejectInvalidBag,
+} from './recordUtils'
 
-export type PlainTimeShimRecord = any & TimeFields
 type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
-export const [
-  PlainTimeShimRecord,
-  createPlainTimeShimRecord,
-  getPlainTimeShimRecordSlots,
-] = createSlotClass(
-  PlainTimeRecordBranding,
-  constructTimeSlots,
-  formatTimeIsoAuto,
-  timeGetters,
-)
+type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
+const plainTimeShimMap = new WeakMap<object, PlainTimeShimSlots>()
+
+export class PlainTimeShimRecord implements TimeFields {
+  constructor(
+    hour?: number,
+    minute?: number,
+    second?: number,
+    millisecond?: number,
+    microsecond?: number,
+    nanosecond?: number,
+  ) {
+    setPlainTimeShimRecordSlots(
+      this,
+      constructTimeSlots(
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+      ),
+    )
+  }
+
+  get hour() {
+    return getPlainTimeShimRecordSlots(this).hour
+  }
+
+  get minute() {
+    return getPlainTimeShimRecordSlots(this).minute
+  }
+
+  get second() {
+    return getPlainTimeShimRecordSlots(this).second
+  }
+
+  get millisecond() {
+    return getPlainTimeShimRecordSlots(this).millisecond
+  }
+
+  get microsecond() {
+    return getPlainTimeShimRecordSlots(this).microsecond
+  }
+
+  get nanosecond() {
+    return getPlainTimeShimRecordSlots(this).nanosecond
+  }
+
+  toJSON() {
+    return formatTimeIsoAuto(getPlainTimeShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainTimeShimRecordSlots(
+  instance: object,
+  slots: PlainTimeShimSlots,
+) {
+  plainTimeShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatTimeIsoAuto)
+}
+
+export function createPlainTimeShimRecord(
+  slots: PlainTimeShimSlots,
+): PlainTimeShimRecord {
+  const instance = Object.create(PlainTimeShimRecord.prototype)
+  setPlainTimeShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getPlainTimeShimRecordSlots(
+  record: unknown,
+): PlainTimeShimSlots {
+  return getPlainTimeShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainTimeShimRecordSlotsIfPresent(
+  record: unknown,
+): PlainTimeShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainTimeShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainTimeShimRecord, ...)
 
 export function create(
   hour?: number,
@@ -66,8 +143,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainTimeShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainTimeRecordBranding
+  return !!getPlainTimeShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(

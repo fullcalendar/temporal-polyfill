@@ -1,15 +1,13 @@
-import { calendarIdGetters, yearMonthGetters } from '../../apiHelpers/mixins'
 import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import {
+  computeCalendarDateFields,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
+  computeCalendarEraFields,
   computeCalendarInLeapYear,
+  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
 } from '../../internal/calendarDerived'
+import { getCalendarSlotId } from '../../internal/calendarSlot'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -37,9 +35,8 @@ import {
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
-import { NumberSign, bindArgs } from '../../internal/utils'
+import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
-import { PlainYearMonthRecordBranding } from '../recordBranding'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -53,23 +50,128 @@ import {
   getDurationShimRecordSlots,
 } from './duration'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import {
+  invalidRecordType,
+  recordValueOf,
+  registerRecord,
+  rejectInvalidBag,
+} from './recordUtils'
 
-export type PlainYearMonthShimRecord = any & YearMonthFields
 type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
-export const [
-  PlainYearMonthShimRecord,
-  createPlainYearMonthShimRecord,
-  getPlainYearMonthShimRecordSlots,
-] = createSlotClass(
-  PlainYearMonthRecordBranding,
-  bindArgs(constructYearMonthSlots, refineCalendarShimArg),
-  formatYearMonthIsoAuto,
-  {
-    ...calendarIdGetters,
-    ...yearMonthGetters,
-  },
-)
+type PlainYearMonthShimSlots = ReturnType<typeof constructYearMonthSlots>
+const plainYearMonthShimMap = new WeakMap<object, PlainYearMonthShimSlots>()
+
+export class PlainYearMonthShimRecord implements YearMonthFields {
+  constructor(
+    isoYear: number,
+    isoMonth: number,
+    calendar?: CalendarShimRecord,
+    referenceIsoDay?: number,
+  ) {
+    setPlainYearMonthShimRecordSlots(
+      this,
+      constructYearMonthSlots(
+        refineCalendarShimArg,
+        isoYear,
+        isoMonth,
+        calendar,
+        referenceIsoDay,
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getCalendarSlotId(getPlainYearMonthShimRecordSlots(this).calendar)
+  }
+
+  get era() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).era
+  }
+
+  get eraYear() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  }
+
+  get year() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).year
+  }
+
+  get month() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).month
+  }
+
+  get monthCode() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get daysInMonth() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarDaysInMonth(slots.calendar, slots)
+  }
+
+  get daysInYear() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarDaysInYear(slots.calendar, slots)
+  }
+
+  get monthsInYear() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarMonthsInYear(slots.calendar, slots)
+  }
+
+  get inLeapYear() {
+    const slots = getPlainYearMonthShimRecordSlots(this)
+    return computeCalendarInLeapYear(slots.calendar, slots)
+  }
+
+  toJSON() {
+    return formatYearMonthIsoAuto(getPlainYearMonthShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainYearMonthShimRecordSlots(
+  instance: object,
+  slots: PlainYearMonthShimSlots,
+) {
+  plainYearMonthShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatYearMonthIsoAuto)
+}
+
+export function createPlainYearMonthShimRecord(
+  slots: PlainYearMonthShimSlots,
+): PlainYearMonthShimRecord {
+  const instance = Object.create(PlainYearMonthShimRecord.prototype)
+  setPlainYearMonthShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getPlainYearMonthShimRecordSlots(
+  record: unknown,
+): PlainYearMonthShimSlots {
+  return (
+    getPlainYearMonthShimRecordSlotsIfPresent(record) || invalidRecordType()
+  )
+}
+
+export function getPlainYearMonthShimRecordSlotsIfPresent(
+  record: unknown,
+): PlainYearMonthShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainYearMonthShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainYearMonthShimRecord, ...)
 
 export function create(
   isoYear: number,
@@ -86,8 +188,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainYearMonthShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainYearMonthRecordBranding
+  return !!getPlainYearMonthShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(

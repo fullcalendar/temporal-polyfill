@@ -1,19 +1,19 @@
-import { calendarIdGetters, dateFieldGetters } from '../../apiHelpers/mixins'
 import {
-  createSlotClass,
-  getBrandingAndSlots,
-  rejectInvalidBag,
-} from '../../apiHelpers/slotClass'
-import {
+  computeCalendarDateFields,
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
+  computeCalendarEraFields,
   computeCalendarInLeapYear,
+  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
-import { type CalendarSlot } from '../../internal/calendarSlot'
+import {
+  type CalendarSlot,
+  getCalendarSlotId,
+} from '../../internal/calendarSlot'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import {
@@ -52,7 +52,6 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
-import { PlainDateRecordBranding } from '../recordBranding'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -96,6 +95,12 @@ import {
   createPlainYearMonthShimRecord,
 } from './plainYearMonth'
 import {
+  invalidRecordType,
+  recordValueOf,
+  registerRecord,
+  rejectInvalidBag,
+} from './recordUtils'
+import {
   computeIsoWeekCeil,
   computeIsoWeekFloor,
   computeIsoWeekInterval,
@@ -112,22 +117,104 @@ import {
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
 
-export type PlainDateShimRecord = any & DateFields
 type Format = DateTimeFormatLike<PlainDateShimRecord>
 
-export const [
-  PlainDateShimRecord,
-  createPlainDateShimRecord,
-  getPlainDateShimRecordSlots,
-] = createSlotClass(
-  PlainDateRecordBranding,
-  bindArgs(constructDateSlots, refineCalendarShimArg),
-  formatDateIsoAuto,
-  {
-    ...calendarIdGetters,
-    ...dateFieldGetters,
-  },
-)
+type PlainDateShimSlots = ReturnType<typeof constructDateSlots>
+const plainDateShimMap = new WeakMap<object, PlainDateShimSlots>()
+
+export class PlainDateShimRecord implements DateFields {
+  constructor(
+    isoYear: number,
+    isoMonth: number,
+    isoDay: number,
+    calendar?: CalendarShimRecord,
+  ) {
+    setPlainDateShimRecordSlots(
+      this,
+      constructDateSlots(
+        refineCalendarShimArg,
+        isoYear,
+        isoMonth,
+        isoDay,
+        calendar,
+      ),
+    )
+  }
+
+  get calendarId() {
+    return getCalendarSlotId(getPlainDateShimRecordSlots(this).calendar)
+  }
+
+  get era() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).era
+  }
+
+  get eraYear() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  }
+
+  get year() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).year
+  }
+
+  get month() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).month
+  }
+
+  get monthCode() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarMonthCode(slots.calendar, slots)
+  }
+
+  get day() {
+    const slots = getPlainDateShimRecordSlots(this)
+    return computeCalendarDateFields(slots.calendar, slots).day
+  }
+
+  toJSON() {
+    return formatDateIsoAuto(getPlainDateShimRecordSlots(this))
+  }
+
+  valueOf() {
+    return recordValueOf()
+  }
+}
+
+function setPlainDateShimRecordSlots(
+  instance: object,
+  slots: PlainDateShimSlots,
+) {
+  plainDateShimMap.set(instance, slots)
+  registerRecord(instance, slots, formatDateIsoAuto)
+}
+
+export function createPlainDateShimRecord(
+  slots: PlainDateShimSlots,
+): PlainDateShimRecord {
+  const instance = Object.create(PlainDateShimRecord.prototype)
+  setPlainDateShimRecordSlots(instance, slots)
+  return instance
+}
+
+export function getPlainDateShimRecordSlots(
+  record: unknown,
+): PlainDateShimSlots {
+  return getPlainDateShimRecordSlotsIfPresent(record) || invalidRecordType()
+}
+
+export function getPlainDateShimRecordSlotsIfPresent(
+  record: unknown,
+): PlainDateShimSlots | undefined {
+  return typeof record === 'object' && record !== null
+    ? plainDateShimMap.get(record)
+    : undefined
+}
+
+// TEMP disabled for size inspection: defineTemporalClass(PlainDateShimRecord, ...)
 
 export function create(
   isoYear: number,
@@ -139,8 +226,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainDateShimRecord {
-  const brandingAndSlots = getBrandingAndSlots(arg)
-  return brandingAndSlots?.[0] === PlainDateRecordBranding
+  return !!getPlainDateShimRecordSlotsIfPresent(arg)
 }
 
 export function fromFields(
