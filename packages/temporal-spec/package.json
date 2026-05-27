@@ -17,6 +17,9 @@
   "main": "./index.cjs",
   "types": "./index.d.ts",
   "module": "./index.js",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.cts.json"
+  },
   "exports": {
     ".": {
       "require": "./index.cjs",
@@ -26,5 +29,8 @@
       "require": "./global.cjs",
       "import": "./global.js"
     }
+  },
+  "devDependencies": {
+    "typescript": "~5.3.3"
   }
 }

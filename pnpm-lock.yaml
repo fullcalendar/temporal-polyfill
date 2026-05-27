@@ -162,7 +162,11 @@ importers:
         version: 17.7.2
     publishDirectory: ./dist
 
-  packages/temporal-spec: {}
+  packages/temporal-spec:
+    devDependencies:
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
 
   packages/temporal-utils:
     dependencies:
