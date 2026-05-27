@@ -251,6 +251,10 @@ export function toString(
   return getZonedDateTimeNative(record).toString(options)
 }
 
+export function toSimpleString(record: ZonedDateTimeNativeRecord): string {
+  return getZonedDateTimeNative(record).toString()
+}
+
 export function add(
   record: ZonedDateTimeNativeRecord,
   duration: DurationNativeRecord,

@@ -185,3 +185,7 @@ export function toString(
 ): string {
   return getInstantNative(record).toString(options)
 }
+
+export function toSimpleString(record: InstantNativeRecord): string {
+  return getInstantNative(record).toString()
+}

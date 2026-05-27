@@ -282,6 +282,11 @@ describe('toString', () => {
     expect(s).toBe('2024-02')
   })
 
+  it('has a simple no-options variant', () => {
+    const pym = PlainYearMonthFns.create(2024, 2)
+    expect(PlainYearMonthFns.toSimpleString(pym)).toBe('2024-02')
+  })
+
   it('works with options', () => {
     const pym = PlainYearMonthFns.create(2024, 2)
     const s = PlainYearMonthFns.toString(pym, { calendarName: 'always' })

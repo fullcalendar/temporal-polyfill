@@ -276,6 +276,10 @@ export function toString(
   return getDurationNative(duration).toString(options)
 }
 
+export function toSimpleString(duration: DurationNativeRecord): string {
+  return getDurationNative(duration).toString()
+}
+
 // Util
 // ----
 

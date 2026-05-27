@@ -163,6 +163,15 @@ describe('toString', () => {
   })
 })
 
+describe('toSimpleString', () => {
+  it('uses automatic fractional-second formatting', () => {
+    const pt0 = PlainTimeFns.create(12, 30)
+    const pt1 = PlainTimeFns.create(12, 30, 0, 123)
+    expect(PlainTimeFns.toSimpleString(pt0)).toBe('12:30:00')
+    expect(PlainTimeFns.toSimpleString(pt1)).toBe('12:30:00.123')
+  })
+})
+
 describe('toLocaleString', () => {
   it('works', () => {
     const pt = PlainTimeFns.create(12, 30)

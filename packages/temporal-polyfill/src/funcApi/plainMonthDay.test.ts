@@ -128,6 +128,11 @@ describe('toString', () => {
     expect(s).toBe('06-18')
   })
 
+  it('has a simple no-options variant', () => {
+    const pmd = PlainMonthDayFns.create(6, 18)
+    expect(PlainMonthDayFns.toSimpleString(pmd)).toBe('06-18')
+  })
+
   it('works with options', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     const s = PlainMonthDayFns.toString(pmd, { calendarName: 'always' })

@@ -128,6 +128,13 @@ describe('toString', () => {
     expect(s).toBe('2023-12-31T23:00:00.000000001Z')
   })
 
+  it('has a simple no-options variant', () => {
+    const inst = InstantFns.create(1704063600000000001n)
+    expect(InstantFns.toSimpleString(inst)).toBe(
+      '2023-12-31T23:00:00.000000001Z',
+    )
+  })
+
   it('works with rounding options', () => {
     const inst = InstantFns.create(1704063600000000001n)
     const s = InstantFns.toString(inst, { smallestUnit: 'second' })

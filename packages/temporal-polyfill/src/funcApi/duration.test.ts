@@ -313,6 +313,11 @@ describe('toString', () => {
     expect(s).toBe('P2DT12H')
   })
 
+  it('has a simple no-options variant', () => {
+    const dur = DurationFns.fromFields({ days: 2, hours: 12 })
+    expect(DurationFns.toSimpleString(dur)).toBe('P2DT12H')
+  })
+
   it('can output subsecond units', () => {
     const dur = DurationFns.fromFields({
       days: 2,

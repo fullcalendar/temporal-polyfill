@@ -440,6 +440,11 @@ describe('toString', () => {
     expect(s).toBe('2024-02-27')
   })
 
+  it('has a simple no-options variant', () => {
+    const pd = PlainDateFns.create(2024, 2, 27)
+    expect(PlainDateFns.toSimpleString(pd)).toBe('2024-02-27')
+  })
+
   it('works with options', () => {
     const pd = PlainDateFns.create(2024, 2, 27)
     const s = PlainDateFns.toString(pd, { calendarName: 'always' })

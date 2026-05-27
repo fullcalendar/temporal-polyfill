@@ -228,3 +228,7 @@ export function toString(
 ): string {
   return getPlainTimeNative(record).toString(options)
 }
+
+export function toSimpleString(record: PlainTimeNativeRecord): string {
+  return getPlainTimeNative(record).toString()
+}

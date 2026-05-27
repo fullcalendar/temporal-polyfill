@@ -226,3 +226,7 @@ export function toString(
     options,
   )
 }
+
+export function toSimpleString(record: PlainMonthDayShimRecord): string {
+  return formatMonthDayIsoAuto(getPlainMonthDayShimRecordSlots(record))
+}

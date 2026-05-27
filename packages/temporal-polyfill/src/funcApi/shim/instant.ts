@@ -226,3 +226,7 @@ export function toString(
     options,
   )
 }
+
+export function toSimpleString(record: InstantShimRecord): string {
+  return formatInstantIsoAuto(getInstantShimRecordSlots(record))
+}

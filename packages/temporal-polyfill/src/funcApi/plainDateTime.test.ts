@@ -533,6 +533,11 @@ describe('toString', () => {
     expect(s).toBe('2024-02-27T12:30:00')
   })
 
+  it('has a simple no-options variant', () => {
+    const pdt = PlainDateTimeFns.create(2024, 2, 27, 12, 30)
+    expect(PlainDateTimeFns.toSimpleString(pdt)).toBe('2024-02-27T12:30:00')
+  })
+
   it('works with options', () => {
     const pdt = PlainDateTimeFns.create(2024, 2, 27, 12, 30)
     const s = PlainDateTimeFns.toString(pdt, {

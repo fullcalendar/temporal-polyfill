@@ -387,6 +387,10 @@ export function toString(
   return getPlainDateTimeNative(record).toString(options)
 }
 
+export function toSimpleString(record: PlainDateTimeNativeRecord): string {
+  return getPlainDateTimeNative(record).toString()
+}
+
 // Non-standard: With
 // -----------------------------------------------------------------------------
 

@@ -305,6 +305,10 @@ export function toString(
   return formatDurationIso(getDurationShimRecordSlots(duration), options)
 }
 
+export function toSimpleString(duration: DurationShimRecord): string {
+  return formatDurationIsoAuto(getDurationShimRecordSlots(duration))
+}
+
 // Util
 // ----
 

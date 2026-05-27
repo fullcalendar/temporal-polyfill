@@ -658,6 +658,16 @@ describe('toString', () => {
     expect(s).toBe('2024-02-27T12:30:00-05:00[America/New_York]')
   })
 
+  it('has a simple no-options variant', () => {
+    const zdt = ZonedDateTimeFns.create(
+      1709055000000000000n,
+      'America/New_York',
+    )
+    expect(ZonedDateTimeFns.toSimpleString(zdt)).toBe(
+      '2024-02-27T12:30:00-05:00[America/New_York]',
+    )
+  })
+
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.create(
       1709055000000000000n,

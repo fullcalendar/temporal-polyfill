@@ -273,3 +273,7 @@ export function toString(
 ): string {
   return getPlainYearMonthNative(record).toString(options)
 }
+
+export function toSimpleString(record: PlainYearMonthNativeRecord): string {
+  return getPlainYearMonthNative(record).toString()
+}

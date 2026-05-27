@@ -40,6 +40,9 @@ export const monthsInYear = NativeTemporal
 export const inLeapYear = NativeTemporal ? Native.inLeapYear : Shim.inLeapYear
 export const hoursInDay = NativeTemporal ? Native.hoursInDay : Shim.hoursInDay
 export const toString = NativeTemporal ? Native.toString : Shim.toString
+export const toSimpleString = NativeTemporal
+  ? Native.toSimpleString
+  : Shim.toSimpleString
 export const add = NativeTemporal ? Native.add : Shim.add
 export const subtract = NativeTemporal ? Native.subtract : Shim.subtract
 export const diff = NativeTemporal ? Native.diff : Shim.diff

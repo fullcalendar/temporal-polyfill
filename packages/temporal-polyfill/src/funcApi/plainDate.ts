@@ -52,6 +52,9 @@ export const toLocaleString = NativeTemporal
   ? Native.toLocaleString
   : Shim.toLocaleString
 export const toString = NativeTemporal ? Native.toString : Shim.toString
+export const toSimpleString = NativeTemporal
+  ? Native.toSimpleString
+  : Shim.toSimpleString
 export const withDayOfYear = NativeTemporal
   ? Native.withDayOfYear
   : Shim.withDayOfYear

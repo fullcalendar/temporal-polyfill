@@ -345,3 +345,7 @@ export function toString(
     options,
   )
 }
+
+export function toSimpleString(record: PlainYearMonthShimRecord): string {
+  return formatYearMonthIsoAuto(getPlainYearMonthShimRecordSlots(record))
+}
