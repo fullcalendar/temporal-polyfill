@@ -7,6 +7,10 @@ import {
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import {
+  getPlainMonthDayRecordIfPresent,
+  setPlainMonthDayRecord,
+} from '../temporalRecords'
+import {
   CalendarNativeRecord,
   CalendarNativeResolver,
   getCalendarNativeRecordId,
@@ -21,8 +25,6 @@ import {
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
-
-const plainMonthDayNativeMap = new WeakMap<object, any>()
 
 export class PlainMonthDayNativeRecord implements MonthDayFields {
   constructor(
@@ -70,7 +72,7 @@ export class PlainMonthDayNativeRecord implements MonthDayFields {
 }
 
 function setPlainMonthDayNative(instance: object, native: any) {
-  plainMonthDayNativeMap.set(instance, native)
+  setPlainMonthDayRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -83,15 +85,7 @@ export function createPlainMonthDayNativeRecord(
 }
 
 export function getPlainMonthDayNative(record: unknown): any {
-  return getPlainMonthDayNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainMonthDayNativeIfPresent(
-  record: unknown,
-): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainMonthDayNativeMap.get(record)
-    : undefined
+  return getPlainMonthDayRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainMonthDayNativeRecord, ...)
@@ -111,7 +105,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainMonthDayNativeRecord {
-  return !!getPlainMonthDayNativeIfPresent(arg)
+  return !!getPlainMonthDayRecordIfPresent(arg)
 }
 
 export function fromFields(

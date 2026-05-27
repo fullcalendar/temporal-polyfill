@@ -25,6 +25,10 @@ import {
 } from '../../internal/optionsModel'
 import { DateTimeFormatLike } from '../commonTypes'
 import {
+  getPlainMonthDayRecordIfPresent,
+  setPlainMonthDayRecord,
+} from '../temporalRecords'
+import {
   CalendarShimRecord,
   CalendarShimResolver,
   createCalendarShimStringResolver,
@@ -42,7 +46,6 @@ import { rejectInvalidBag } from './temporalRecords'
 type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
 type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
-const plainMonthDayShimMap = new WeakMap<object, PlainMonthDayShimSlots>()
 
 export class PlainMonthDayShimRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>
@@ -92,7 +95,7 @@ function setPlainMonthDayShimRecordSlots(
   instance: object,
   slots: PlainMonthDayShimSlots,
 ) {
-  plainMonthDayShimMap.set(instance, slots)
+  setPlainMonthDayRecord(instance, slots)
   attachDebugString(instance, slots, formatMonthDayIsoAuto)
 }
 
@@ -107,15 +110,7 @@ export function createPlainMonthDayShimRecord(
 export function getPlainMonthDayShimRecordSlots(
   record: unknown,
 ): PlainMonthDayShimSlots {
-  return getPlainMonthDayShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainMonthDayShimRecordSlotsIfPresent(
-  record: unknown,
-): PlainMonthDayShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainMonthDayShimMap.get(record)
-    : undefined
+  return getPlainMonthDayRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainMonthDayShimRecord, ...)
@@ -135,7 +130,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainMonthDayShimRecord {
-  return !!getPlainMonthDayShimRecordSlotsIfPresent(arg)
+  return !!getPlainMonthDayRecordIfPresent(arg)
 }
 
 export function fromFields(

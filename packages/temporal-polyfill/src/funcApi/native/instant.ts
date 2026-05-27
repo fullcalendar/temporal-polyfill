@@ -8,6 +8,7 @@ import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import { getInstantRecordIfPresent, setInstantRecord } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -25,8 +26,6 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<InstantNativeRecord>
-
-const instantNativeMap = new WeakMap<object, any>()
 
 export class InstantNativeRecord {
   constructor(epochNanoseconds: bigint) {
@@ -51,7 +50,7 @@ export class InstantNativeRecord {
 }
 
 function setInstantNative(instance: object, native: any) {
-  instantNativeMap.set(instance, native)
+  setInstantRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -62,13 +61,7 @@ export function createInstantNativeRecord(native: any): InstantNativeRecord {
 }
 
 export function getInstantNative(record: unknown): any {
-  return getInstantNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getInstantNativeIfPresent(record: unknown): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? instantNativeMap.get(record)
-    : undefined
+  return getInstantRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(InstantNativeRecord, ...)
@@ -78,7 +71,7 @@ export function create(epochNanoseconds: bigint): InstantNativeRecord {
 }
 
 export function isRecord(arg: unknown): arg is InstantNativeRecord {
-  return !!getInstantNativeIfPresent(arg)
+  return !!getInstantRecordIfPresent(arg)
 }
 
 export function fromEpochMilliseconds(

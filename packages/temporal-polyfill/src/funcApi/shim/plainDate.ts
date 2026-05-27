@@ -53,6 +53,10 @@ import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import {
+  getPlainDateRecordIfPresent,
+  setPlainDateRecord,
+} from '../temporalRecords'
+import {
   CalendarShimRecord,
   CalendarShimResolver,
   createCalendarShimStringResolver,
@@ -120,7 +124,6 @@ import {
 type Format = DateTimeFormatLike<PlainDateShimRecord>
 
 type PlainDateShimSlots = ReturnType<typeof constructDateSlots>
-const plainDateShimMap = new WeakMap<object, PlainDateShimSlots>()
 
 export class PlainDateShimRecord implements DateFields {
   constructor(
@@ -188,7 +191,7 @@ function setPlainDateShimRecordSlots(
   instance: object,
   slots: PlainDateShimSlots,
 ) {
-  plainDateShimMap.set(instance, slots)
+  setPlainDateRecord(instance, slots)
   attachDebugString(instance, slots, formatDateIsoAuto)
 }
 
@@ -203,15 +206,7 @@ export function createPlainDateShimRecord(
 export function getPlainDateShimRecordSlots(
   record: unknown,
 ): PlainDateShimSlots {
-  return getPlainDateShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainDateShimRecordSlotsIfPresent(
-  record: unknown,
-): PlainDateShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainDateShimMap.get(record)
-    : undefined
+  return getPlainDateRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainDateShimRecord, ...)
@@ -226,7 +221,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainDateShimRecord {
-  return !!getPlainDateShimRecordSlotsIfPresent(arg)
+  return !!getPlainDateRecordIfPresent(arg)
 }
 
 export function fromFields(

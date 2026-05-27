@@ -10,6 +10,10 @@ import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import {
+  getPlainTimeRecordIfPresent,
+  setPlainTimeRecord,
+} from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -23,8 +27,6 @@ import {
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
-
-const plainTimeNativeMap = new WeakMap<object, any>()
 
 export class PlainTimeNativeRecord implements TimeFields {
   constructor(
@@ -82,7 +84,7 @@ export class PlainTimeNativeRecord implements TimeFields {
 }
 
 function setPlainTimeNative(instance: object, native: any) {
-  plainTimeNativeMap.set(instance, native)
+  setPlainTimeRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -95,13 +97,7 @@ export function createPlainTimeNativeRecord(
 }
 
 export function getPlainTimeNative(record: unknown): any {
-  return getPlainTimeNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainTimeNativeIfPresent(record: unknown): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainTimeNativeMap.get(record)
-    : undefined
+  return getPlainTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainTimeNativeRecord, ...)
@@ -125,7 +121,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainTimeNativeRecord {
-  return !!getPlainTimeNativeIfPresent(arg)
+  return !!getPlainTimeRecordIfPresent(arg)
 }
 
 export function fromFields(

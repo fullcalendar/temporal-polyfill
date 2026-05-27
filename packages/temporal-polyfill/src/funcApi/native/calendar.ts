@@ -4,6 +4,10 @@ import {
 } from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
 import {
+  getCalendarRecordIfPresent,
+  setCalendarRecord,
+} from '../temporalRecords'
+import {
   attachDebugString,
   forbiddenValueOf,
   invalidRecordType,
@@ -12,8 +16,6 @@ import {
 export type CalendarNativeResolver = (
   calendarId: string,
 ) => CalendarNativeRecord
-
-const calendarNativeMap = new WeakMap<object, string>()
 
 export class CalendarNativeRecord {
   constructor(calendarId: string) {
@@ -30,7 +32,7 @@ export class CalendarNativeRecord {
 }
 
 function setCalendarNativeRecordId(instance: object, calendarId: string) {
-  calendarNativeMap.set(instance, calendarId)
+  setCalendarRecord(instance, calendarId)
   attachDebugString(instance, calendarId, (slots) => slots)
 }
 
@@ -43,15 +45,7 @@ export function createCalendarNativeRecord(
 }
 
 export function getCalendarNativeRecordId(record: unknown): string {
-  return getCalendarNativeRecordIdIfPresent(record) || invalidRecordType()
-}
-
-export function getCalendarNativeRecordIdIfPresent(
-  record: unknown,
-): string | undefined {
-  return typeof record === 'object' && record !== null
-    ? calendarNativeMap.get(record)
-    : undefined
+  return getCalendarRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(CalendarNativeRecord, ...)

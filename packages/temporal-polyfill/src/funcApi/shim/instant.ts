@@ -29,6 +29,7 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import { getInstantRecordIfPresent, setInstantRecord } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
@@ -48,7 +49,6 @@ import {
 type Format = DateTimeFormatLike<InstantShimRecord>
 
 type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
-const instantShimMap = new WeakMap<object, InstantShimSlots>()
 
 export class InstantShimRecord {
   constructor(epochNanoseconds: bigint) {
@@ -73,7 +73,7 @@ export class InstantShimRecord {
 }
 
 function setInstantShimRecordSlots(instance: object, slots: InstantShimSlots) {
-  instantShimMap.set(instance, slots)
+  setInstantRecord(instance, slots)
   attachDebugString(instance, slots, formatInstantIsoAuto)
 }
 
@@ -86,15 +86,7 @@ export function createInstantShimRecord(
 }
 
 export function getInstantShimRecordSlots(record: unknown): InstantShimSlots {
-  return getInstantShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getInstantShimRecordSlotsIfPresent(
-  record: unknown,
-): InstantShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? instantShimMap.get(record)
-    : undefined
+  return getInstantRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(InstantShimRecord, ...)
@@ -104,7 +96,7 @@ export function create(epochNanoseconds: bigint): InstantShimRecord {
 }
 
 export function isRecord(arg: unknown): arg is InstantShimRecord {
-  return !!getInstantShimRecordSlotsIfPresent(arg)
+  return !!getInstantRecordIfPresent(arg)
 }
 
 export function fromEpochMilliseconds(

@@ -38,6 +38,10 @@ import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import {
+  getPlainYearMonthRecordIfPresent,
+  setPlainYearMonthRecord,
+} from '../temporalRecords'
+import {
   CalendarShimRecord,
   CalendarShimResolver,
   createCalendarShimStringResolver,
@@ -60,7 +64,6 @@ import { rejectInvalidBag } from './temporalRecords'
 type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
 type PlainYearMonthShimSlots = ReturnType<typeof constructYearMonthSlots>
-const plainYearMonthShimMap = new WeakMap<object, PlainYearMonthShimSlots>()
 
 export class PlainYearMonthShimRecord implements YearMonthFields {
   constructor(
@@ -143,7 +146,7 @@ function setPlainYearMonthShimRecordSlots(
   instance: object,
   slots: PlainYearMonthShimSlots,
 ) {
-  plainYearMonthShimMap.set(instance, slots)
+  setPlainYearMonthRecord(instance, slots)
   attachDebugString(instance, slots, formatYearMonthIsoAuto)
 }
 
@@ -158,17 +161,7 @@ export function createPlainYearMonthShimRecord(
 export function getPlainYearMonthShimRecordSlots(
   record: unknown,
 ): PlainYearMonthShimSlots {
-  return (
-    getPlainYearMonthShimRecordSlotsIfPresent(record) || invalidRecordType()
-  )
-}
-
-export function getPlainYearMonthShimRecordSlotsIfPresent(
-  record: unknown,
-): PlainYearMonthShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainYearMonthShimMap.get(record)
-    : undefined
+  return getPlainYearMonthRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainYearMonthShimRecord, ...)
@@ -188,7 +181,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainYearMonthShimRecord {
-  return !!getPlainYearMonthShimRecordSlotsIfPresent(arg)
+  return !!getPlainYearMonthRecordIfPresent(arg)
 }
 
 export function fromFields(

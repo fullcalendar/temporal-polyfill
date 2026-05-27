@@ -8,14 +8,17 @@ import {
 import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
 import {
+  getCalendarRecordIfPresent,
+  isCalendarRecord,
+  setCalendarRecord,
+} from '../temporalRecords'
+import {
   attachDebugString,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 
 export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
-
-const calendarShimMap = new WeakMap<object, CalendarSlot>()
 
 export class CalendarShimRecord {
   constructor(calendarSlot: CalendarSlot) {
@@ -35,7 +38,7 @@ function setCalendarShimRecordInternal(
   instance: object,
   calendarSlot: CalendarSlot,
 ) {
-  calendarShimMap.set(instance, calendarSlot)
+  setCalendarRecord(instance, calendarSlot)
   attachDebugString(instance, calendarSlot, getCalendarSlotId)
 }
 
@@ -48,21 +51,14 @@ export function createCalendarShimRecord(
 }
 
 export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
-  return getCalendarShimRecordInternalIfPresent(record) || invalidRecordType()
-}
-
-export function getCalendarShimRecordInternalIfPresent(
-  record: unknown,
-): CalendarSlot | undefined {
-  return typeof record === 'object' && record !== null
-    ? calendarShimMap.get(record)
-    : undefined
+  if (!isCalendarRecord(record)) {
+    return invalidRecordType()
+  }
+  return getCalendarRecordIfPresent(record)
 }
 
 export function isCalendarShimRecord(record: unknown): boolean {
-  return (
-    typeof record === 'object' && record !== null && calendarShimMap.has(record)
-  )
+  return isCalendarRecord(record)
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(CalendarShimRecord, ...)

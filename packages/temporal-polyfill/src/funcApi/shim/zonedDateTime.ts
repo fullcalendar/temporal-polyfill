@@ -93,6 +93,10 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { ZonedDateTimeFields } from '../commonTypes'
 import {
+  getZonedDateTimeRecordIfPresent,
+  setZonedDateTimeRecord,
+} from '../temporalRecords'
+import {
   CalendarShimRecord,
   CalendarShimResolver,
   createCalendarShimStringResolver,
@@ -159,7 +163,6 @@ import { rejectInvalidBag } from './temporalRecords'
 type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
 type ZonedDateTimeShimSlots = ReturnType<typeof constructZonedEpochNanoSlots>
-const zonedDateTimeShimMap = new WeakMap<object, ZonedDateTimeShimSlots>()
 
 export class ZonedDateTimeShimRecord {
   constructor(
@@ -264,7 +267,7 @@ function setZonedDateTimeShimRecordSlots(
   instance: object,
   slots: ZonedDateTimeShimSlots,
 ) {
-  zonedDateTimeShimMap.set(instance, slots)
+  setZonedDateTimeRecord(instance, slots)
   attachDebugString(instance, slots, formatZonedDateTimeIsoAuto)
 }
 
@@ -279,15 +282,7 @@ export function createZonedDateTimeShimRecord(
 export function getZonedDateTimeShimRecordSlots(
   record: unknown,
 ): ZonedDateTimeShimSlots {
-  return getZonedDateTimeShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getZonedDateTimeShimRecordSlotsIfPresent(
-  record: unknown,
-): ZonedDateTimeShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? zonedDateTimeShimMap.get(record)
-    : undefined
+  return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(ZonedDateTimeShimRecord, ...)
@@ -301,7 +296,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is ZonedDateTimeShimRecord {
-  return !!getZonedDateTimeShimRecordSlotsIfPresent(arg)
+  return !!getZonedDateTimeRecordIfPresent(arg)
 }
 
 export function fromFields(

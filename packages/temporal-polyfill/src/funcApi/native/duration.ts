@@ -10,22 +10,21 @@ import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
-import { PlainDateNativeRecord, getPlainDateNativeIfPresent } from './plainDate'
 import {
-  PlainDateTimeNativeRecord,
-  getPlainDateTimeNativeIfPresent,
-} from './plainDateTime'
+  getDurationRecordIfPresent,
+  getPlainDateRecordIfPresent,
+  getPlainDateTimeRecordIfPresent,
+  getZonedDateTimeRecordIfPresent,
+  setDurationRecord,
+} from '../temporalRecords'
+import { PlainDateNativeRecord } from './plainDate'
+import { PlainDateTimeNativeRecord } from './plainDateTime'
 import {
   attachDebugString,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
-import {
-  ZonedDateTimeNativeRecord,
-  getZonedDateTimeNativeIfPresent,
-} from './zonedDateTime'
-
-const durationNativeMap = new WeakMap<object, any>()
+import { ZonedDateTimeNativeRecord } from './zonedDateTime'
 
 export class DurationNativeRecord implements DurationFields {
   constructor(
@@ -107,7 +106,7 @@ export class DurationNativeRecord implements DurationFields {
 }
 
 function setDurationNative(instance: object, native: any) {
-  durationNativeMap.set(instance, native)
+  setDurationRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -118,13 +117,7 @@ export function createDurationNativeRecord(native: any): DurationNativeRecord {
 }
 
 export function getDurationNative(record: unknown): any {
-  return getDurationNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getDurationNativeIfPresent(record: unknown): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? durationNativeMap.get(record)
-    : undefined
+  return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(DurationNativeRecord, ...)
@@ -156,7 +149,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is DurationNativeRecord {
-  return !!getDurationNativeIfPresent(arg)
+  return !!getDurationRecordIfPresent(arg)
 }
 
 export function fromFields(
@@ -305,9 +298,9 @@ function refineTotalOptions(
 function refineRelativeTo(arg?: RelativeToNativeRecord): any | undefined {
   if (arg) {
     const native =
-      getZonedDateTimeNativeIfPresent(arg) ||
-      getPlainDateTimeNativeIfPresent(arg) ||
-      getPlainDateNativeIfPresent(arg)
+      getZonedDateTimeRecordIfPresent(arg) ||
+      getPlainDateTimeRecordIfPresent(arg) ||
+      getPlainDateRecordIfPresent(arg)
 
     if (native) {
       return native // native ZonedDateTime / PlainDateTime / PlainDate

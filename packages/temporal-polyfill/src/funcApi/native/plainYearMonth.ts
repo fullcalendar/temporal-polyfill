@@ -10,6 +10,10 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import {
+  getPlainYearMonthRecordIfPresent,
+  setPlainYearMonthRecord,
+} from '../temporalRecords'
+import {
   CalendarNativeRecord,
   CalendarNativeResolver,
   getCalendarNativeRecordId,
@@ -29,8 +33,6 @@ import {
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
-
-const plainYearMonthNativeMap = new WeakMap<object, any>()
 
 export class PlainYearMonthNativeRecord implements YearMonthFields {
   constructor(
@@ -102,7 +104,7 @@ export class PlainYearMonthNativeRecord implements YearMonthFields {
 }
 
 function setPlainYearMonthNative(instance: object, native: any) {
-  plainYearMonthNativeMap.set(instance, native)
+  setPlainYearMonthRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -115,15 +117,7 @@ export function createPlainYearMonthNativeRecord(
 }
 
 export function getPlainYearMonthNative(record: unknown): any {
-  return getPlainYearMonthNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainYearMonthNativeIfPresent(
-  record: unknown,
-): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainYearMonthNativeMap.get(record)
-    : undefined
+  return getPlainYearMonthRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainYearMonthNativeRecord, ...)
@@ -143,7 +137,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainYearMonthNativeRecord {
-  return !!getPlainYearMonthNativeIfPresent(arg)
+  return !!getPlainYearMonthRecordIfPresent(arg)
 }
 
 export function fromFields(

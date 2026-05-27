@@ -17,6 +17,10 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
 import {
+  getZonedDateTimeRecordIfPresent,
+  setZonedDateTimeRecord,
+} from '../temporalRecords'
+import {
   CalendarNativeRecord,
   CalendarNativeResolver,
   getCalendarNativeRecordId,
@@ -45,8 +49,6 @@ import {
 } from './recordUtils'
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
-
-const zonedDateTimeNativeMap = new WeakMap<object, any>()
 
 export class ZonedDateTimeNativeRecord {
   constructor(
@@ -92,7 +94,7 @@ export class ZonedDateTimeNativeRecord {
 }
 
 function setZonedDateTimeNative(instance: object, native: any) {
-  zonedDateTimeNativeMap.set(instance, native)
+  setZonedDateTimeRecord(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
@@ -105,15 +107,7 @@ export function createZonedDateTimeNativeRecord(
 }
 
 export function getZonedDateTimeNative(record: unknown): any {
-  return getZonedDateTimeNativeIfPresent(record) || invalidRecordType()
-}
-
-export function getZonedDateTimeNativeIfPresent(
-  record: unknown,
-): any | undefined {
-  return typeof record === 'object' && record !== null
-    ? zonedDateTimeNativeMap.get(record)
-    : undefined
+  return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(ZonedDateTimeNativeRecord, ...)
@@ -127,7 +121,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is ZonedDateTimeNativeRecord {
-  return !!getZonedDateTimeNativeIfPresent(arg)
+  return !!getZonedDateTimeRecordIfPresent(arg)
 }
 
 export function fromFields(

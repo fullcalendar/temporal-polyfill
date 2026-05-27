@@ -27,25 +27,22 @@ import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import {
-  PlainDateShimRecord,
-  getPlainDateShimRecordSlotsIfPresent,
-} from './plainDate'
-import {
-  PlainDateTimeShimRecord,
-  getPlainDateTimeShimRecordSlotsIfPresent,
-} from './plainDateTime'
+  getDurationRecordIfPresent,
+  getPlainDateRecordIfPresent,
+  getPlainDateTimeRecordIfPresent,
+  getZonedDateTimeRecordIfPresent,
+  setDurationRecord,
+} from '../temporalRecords'
+import { PlainDateShimRecord } from './plainDate'
+import { PlainDateTimeShimRecord } from './plainDateTime'
 import {
   attachDebugString,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
-import {
-  ZonedDateTimeShimRecord,
-  getZonedDateTimeShimRecordSlotsIfPresent,
-} from './zonedDateTime'
+import { ZonedDateTimeShimRecord } from './zonedDateTime'
 
 type DurationShimSlots = ReturnType<typeof constructDurationSlots>
-const durationShimMap = new WeakMap<object, DurationShimSlots>()
 
 export class DurationShimRecord implements DurationFields {
   constructor(
@@ -138,7 +135,7 @@ function setDurationShimRecordSlots(
   instance: object,
   slots: DurationShimSlots,
 ) {
-  durationShimMap.set(instance, slots)
+  setDurationRecord(instance, slots)
   attachDebugString(instance, slots, formatDurationIsoAuto)
 }
 
@@ -151,15 +148,7 @@ export function createDurationShimRecord(
 }
 
 export function getDurationShimRecordSlots(record: unknown): DurationShimSlots {
-  return getDurationShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getDurationShimRecordSlotsIfPresent(
-  record: unknown,
-): DurationShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? durationShimMap.get(record)
-    : undefined
+  return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(DurationShimRecord, ...)
@@ -191,7 +180,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is DurationShimRecord {
-  return !!getDurationShimRecordSlotsIfPresent(arg)
+  return !!getDurationRecordIfPresent(arg)
 }
 
 export function fromFields(
@@ -329,9 +318,9 @@ function refineRelativeTo(
 ): RelativeToSlots | undefined {
   if (arg) {
     const slots =
-      getZonedDateTimeShimRecordSlotsIfPresent(arg) ||
-      getPlainDateTimeShimRecordSlotsIfPresent(arg) ||
-      getPlainDateShimRecordSlotsIfPresent(arg)
+      getZonedDateTimeRecordIfPresent(arg) ||
+      getPlainDateTimeRecordIfPresent(arg) ||
+      getPlainDateRecordIfPresent(arg)
 
     if (slots) {
       return slots as RelativeToSlots

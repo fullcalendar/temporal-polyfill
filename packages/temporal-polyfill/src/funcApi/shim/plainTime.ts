@@ -19,6 +19,10 @@ import { roundPlainTime } from '../../internal/round'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import {
+  getPlainTimeRecordIfPresent,
+  setPlainTimeRecord,
+} from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
@@ -35,7 +39,6 @@ import { rejectInvalidBag } from './temporalRecords'
 type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
 type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
-const plainTimeShimMap = new WeakMap<object, PlainTimeShimSlots>()
 
 export class PlainTimeShimRecord implements TimeFields {
   constructor(
@@ -96,7 +99,7 @@ function setPlainTimeShimRecordSlots(
   instance: object,
   slots: PlainTimeShimSlots,
 ) {
-  plainTimeShimMap.set(instance, slots)
+  setPlainTimeRecord(instance, slots)
   attachDebugString(instance, slots, formatTimeIsoAuto)
 }
 
@@ -111,15 +114,7 @@ export function createPlainTimeShimRecord(
 export function getPlainTimeShimRecordSlots(
   record: unknown,
 ): PlainTimeShimSlots {
-  return getPlainTimeShimRecordSlotsIfPresent(record) || invalidRecordType()
-}
-
-export function getPlainTimeShimRecordSlotsIfPresent(
-  record: unknown,
-): PlainTimeShimSlots | undefined {
-  return typeof record === 'object' && record !== null
-    ? plainTimeShimMap.get(record)
-    : undefined
+  return getPlainTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 // TEMP disabled for size inspection: defineTemporalClass(PlainTimeShimRecord, ...)
@@ -143,7 +138,7 @@ export function create(
 }
 
 export function isRecord(arg: unknown): arg is PlainTimeShimRecord {
-  return !!getPlainTimeShimRecordSlotsIfPresent(arg)
+  return !!getPlainTimeRecordIfPresent(arg)
 }
 
 export function fromFields(
