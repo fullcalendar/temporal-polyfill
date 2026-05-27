@@ -28,13 +28,14 @@ import {
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
 
-export class PlainYearMonthNativeRecord implements YearMonthFields {
+class _PlainYearMonthNativeRecord implements YearMonthFields {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -120,7 +121,11 @@ export function getPlainYearMonthNative(record: unknown): any {
   return getPlainYearMonthRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(PlainYearMonthNativeRecord, ...)
+export type PlainYearMonthNativeRecord = _PlainYearMonthNativeRecord
+export const PlainYearMonthNativeRecord = defineTemporalClass(
+  _PlainYearMonthNativeRecord,
+  'PlainYearMonth',
+)
 
 export function create(
   isoYear: number,

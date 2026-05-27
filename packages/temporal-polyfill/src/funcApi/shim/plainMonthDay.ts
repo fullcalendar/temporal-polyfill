@@ -38,6 +38,7 @@ import { createDateTimeFormat } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -47,7 +48,7 @@ type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
 type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
 
-export class PlainMonthDayShimRecord
+class _PlainMonthDayShimRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>
 {
   constructor(
@@ -113,7 +114,11 @@ export function getPlainMonthDayShimRecordSlots(
   return getPlainMonthDayRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(PlainMonthDayShimRecord, ...)
+export type PlainMonthDayShimRecord = _PlainMonthDayShimRecord
+export const PlainMonthDayShimRecord = defineTemporalClass(
+  _PlainMonthDayShimRecord,
+  'PlainMonthDay',
+)
 
 export function create(
   isoMonth: number,

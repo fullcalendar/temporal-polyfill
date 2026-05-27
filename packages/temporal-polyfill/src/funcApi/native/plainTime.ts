@@ -22,13 +22,14 @@ import {
 } from './duration'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
-export class PlainTimeNativeRecord implements TimeFields {
+class _PlainTimeNativeRecord implements TimeFields {
   constructor(
     hour = 0,
     minute = 0,
@@ -100,7 +101,11 @@ export function getPlainTimeNative(record: unknown): any {
   return getPlainTimeRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(PlainTimeNativeRecord, ...)
+export type PlainTimeNativeRecord = _PlainTimeNativeRecord
+export const PlainTimeNativeRecord = defineTemporalClass(
+  _PlainTimeNativeRecord,
+  'PlainTime',
+)
 
 export function create(
   hour?: number,

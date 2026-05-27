@@ -38,6 +38,7 @@ import {
 } from './duration'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -50,7 +51,7 @@ type Format = DateTimeFormatLike<InstantShimRecord>
 
 type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
 
-export class InstantShimRecord {
+class _InstantShimRecord {
   constructor(epochNanoseconds: bigint) {
     setInstantShimRecordSlots(this, constructEpochNanoSlots(epochNanoseconds))
   }
@@ -89,7 +90,11 @@ export function getInstantShimRecordSlots(record: unknown): InstantShimSlots {
   return getInstantRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(InstantShimRecord, ...)
+export type InstantShimRecord = _InstantShimRecord
+export const InstantShimRecord = defineTemporalClass(
+  _InstantShimRecord,
+  'Instant',
+)
 
 export function create(epochNanoseconds: bigint): InstantShimRecord {
   return new InstantShimRecord(epochNanoseconds)

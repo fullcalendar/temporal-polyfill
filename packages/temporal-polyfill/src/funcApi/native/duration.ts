@@ -21,12 +21,13 @@ import { PlainDateNativeRecord } from './plainDate'
 import { PlainDateTimeNativeRecord } from './plainDateTime'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 import { ZonedDateTimeNativeRecord } from './zonedDateTime'
 
-export class DurationNativeRecord implements DurationFields {
+class _DurationNativeRecord implements DurationFields {
   constructor(
     years?: number,
     months?: number,
@@ -120,7 +121,11 @@ export function getDurationNative(record: unknown): any {
   return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(DurationNativeRecord, ...)
+export type DurationNativeRecord = _DurationNativeRecord
+export const DurationNativeRecord = defineTemporalClass(
+  _DurationNativeRecord,
+  'Duration',
+)
 
 export function create(
   years?: number,

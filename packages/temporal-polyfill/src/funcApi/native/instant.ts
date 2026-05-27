@@ -17,6 +17,7 @@ import {
 } from './duration'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -27,7 +28,7 @@ import {
 
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-export class InstantNativeRecord {
+class _InstantNativeRecord {
   constructor(epochNanoseconds: bigint) {
     setInstantNative(this, new NativeTemporal!.Instant(epochNanoseconds))
   }
@@ -64,7 +65,11 @@ export function getInstantNative(record: unknown): any {
   return getInstantRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(InstantNativeRecord, ...)
+export type InstantNativeRecord = _InstantNativeRecord
+export const InstantNativeRecord = defineTemporalClass(
+  _InstantNativeRecord,
+  'Instant',
+)
 
 export function create(epochNanoseconds: bigint): InstantNativeRecord {
   return new InstantNativeRecord(epochNanoseconds)

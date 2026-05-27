@@ -1,14 +1,15 @@
 import * as errorMessages from '../internal/errorMessages'
 import { createStringTagDescriptors } from '../internal/utils'
 
-export function defineTemporalClass(
-  cls: { prototype: object },
+export function defineTemporalClass<C extends { prototype: object }>(
+  cls: C,
   branding: string,
-) {
+): C {
   Object.defineProperties(
     cls.prototype,
     createStringTagDescriptors('Temporal.' + branding),
   )
+  return cls
 }
 
 export function attachDebugString<S>(

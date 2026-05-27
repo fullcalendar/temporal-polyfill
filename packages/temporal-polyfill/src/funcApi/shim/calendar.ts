@@ -14,13 +14,14 @@ import {
 } from '../temporalRecords'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 
 export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
 
-export class CalendarShimRecord {
+class _CalendarShimRecord {
   constructor(calendarSlot: CalendarSlot) {
     setCalendarShimRecordInternal(this, calendarSlot)
   }
@@ -57,7 +58,11 @@ export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
   return getCalendarRecordIfPresent(record)
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(CalendarShimRecord, ...)
+export type CalendarShimRecord = _CalendarShimRecord
+export const CalendarShimRecord = defineTemporalClass(
+  _CalendarShimRecord,
+  'Calendar',
+)
 
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)

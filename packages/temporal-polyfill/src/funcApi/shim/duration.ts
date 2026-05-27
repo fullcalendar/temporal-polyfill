@@ -37,6 +37,7 @@ import { PlainDateShimRecord } from './plainDate'
 import { PlainDateTimeShimRecord } from './plainDateTime'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -44,7 +45,7 @@ import { ZonedDateTimeShimRecord } from './zonedDateTime'
 
 type DurationShimSlots = ReturnType<typeof constructDurationSlots>
 
-export class DurationShimRecord implements DurationFields {
+class _DurationShimRecord implements DurationFields {
   constructor(
     years?: number,
     months?: number,
@@ -151,7 +152,11 @@ export function getDurationShimRecordSlots(record: unknown): DurationShimSlots {
   return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(DurationShimRecord, ...)
+export type DurationShimRecord = _DurationShimRecord
+export const DurationShimRecord = defineTemporalClass(
+  _DurationShimRecord,
+  'Duration',
+)
 
 export function create(
   years?: number,

@@ -138,6 +138,7 @@ import {
 } from './plainTime'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -164,7 +165,7 @@ type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
 type ZonedDateTimeShimSlots = ReturnType<typeof constructZonedEpochNanoSlots>
 
-export class ZonedDateTimeShimRecord {
+class _ZonedDateTimeShimRecord {
   constructor(
     epochNanoseconds: bigint,
     timeZoneId: string,
@@ -285,7 +286,11 @@ export function getZonedDateTimeShimRecordSlots(
   return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(ZonedDateTimeShimRecord, ...)
+export type ZonedDateTimeShimRecord = _ZonedDateTimeShimRecord
+export const ZonedDateTimeShimRecord = defineTemporalClass(
+  _ZonedDateTimeShimRecord,
+  'ZonedDateTime',
+)
 
 export function create(
   epochNanoseconds: bigint,

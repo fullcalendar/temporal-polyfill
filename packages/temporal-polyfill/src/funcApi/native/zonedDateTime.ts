@@ -44,13 +44,14 @@ import {
 } from './plainTime'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
-export class ZonedDateTimeNativeRecord {
+class _ZonedDateTimeNativeRecord {
   constructor(
     epochNanoseconds: bigint,
     timeZoneId: string,
@@ -110,7 +111,11 @@ export function getZonedDateTimeNative(record: unknown): any {
   return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(ZonedDateTimeNativeRecord, ...)
+export type ZonedDateTimeNativeRecord = _ZonedDateTimeNativeRecord
+export const ZonedDateTimeNativeRecord = defineTemporalClass(
+  _ZonedDateTimeNativeRecord,
+  'ZonedDateTime',
+)
 
 export function create(
   epochNanoseconds: bigint,

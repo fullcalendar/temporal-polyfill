@@ -9,6 +9,7 @@ import {
 } from '../temporalRecords'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -17,7 +18,7 @@ export type CalendarNativeResolver = (
   calendarId: string,
 ) => CalendarNativeRecord
 
-export class CalendarNativeRecord {
+class _CalendarNativeRecord {
   constructor(calendarId: string) {
     setCalendarNativeRecordId(this, calendarId)
   }
@@ -48,7 +49,11 @@ export function getCalendarNativeRecordId(record: unknown): string {
   return getCalendarRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(CalendarNativeRecord, ...)
+export type CalendarNativeRecord = _CalendarNativeRecord
+export const CalendarNativeRecord = defineTemporalClass(
+  _CalendarNativeRecord,
+  'Calendar',
+)
 
 const isoCalendarRecord = createCalendarNativeRecord(isoCalendarId)
 const gregoryCalendarRecord = createCalendarNativeRecord(gregoryCalendarId)

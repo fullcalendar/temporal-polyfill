@@ -31,6 +31,7 @@ import {
 } from './duration'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -40,7 +41,7 @@ type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
 type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
 
-export class PlainTimeShimRecord implements TimeFields {
+class _PlainTimeShimRecord implements TimeFields {
   constructor(
     hour?: number,
     minute?: number,
@@ -117,7 +118,11 @@ export function getPlainTimeShimRecordSlots(
   return getPlainTimeRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(PlainTimeShimRecord, ...)
+export type PlainTimeShimRecord = _PlainTimeShimRecord
+export const PlainTimeShimRecord = defineTemporalClass(
+  _PlainTimeShimRecord,
+  'PlainTime',
+)
 
 export function create(
   hour?: number,

@@ -100,6 +100,7 @@ import {
 } from './plainYearMonth'
 import {
   attachDebugString,
+  defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
@@ -125,7 +126,7 @@ type Format = DateTimeFormatLike<PlainDateShimRecord>
 
 type PlainDateShimSlots = ReturnType<typeof constructDateSlots>
 
-export class PlainDateShimRecord implements DateFields {
+class _PlainDateShimRecord implements DateFields {
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -209,7 +210,11 @@ export function getPlainDateShimRecordSlots(
   return getPlainDateRecordIfPresent(record) || invalidRecordType()
 }
 
-// TEMP disabled for size inspection: defineTemporalClass(PlainDateShimRecord, ...)
+export type PlainDateShimRecord = _PlainDateShimRecord
+export const PlainDateShimRecord = defineTemporalClass(
+  _PlainDateShimRecord,
+  'PlainDate',
+)
 
 export function create(
   isoYear: number,
