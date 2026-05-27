@@ -57,10 +57,6 @@ export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
   return getCalendarRecordIfPresent(record)
 }
 
-export function isCalendarShimRecord(record: unknown): boolean {
-  return isCalendarRecord(record)
-}
-
 // TEMP disabled for size inspection: defineTemporalClass(CalendarShimRecord, ...)
 
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
