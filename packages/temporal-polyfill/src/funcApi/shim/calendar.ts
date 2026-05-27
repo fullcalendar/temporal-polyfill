@@ -7,6 +7,7 @@ import {
 } from '../../internal/calendarSlot'
 import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
+import type { CalendarRecord } from '../recordTypes'
 import {
   getCalendarRecordIfPresent,
   isCalendarRecord,
@@ -58,7 +59,7 @@ export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
   return getCalendarRecordIfPresent(record)
 }
 
-export type CalendarShimRecord = _CalendarShimRecord
+export type CalendarShimRecord = _CalendarShimRecord & CalendarRecord
 export const CalendarShimRecord = defineTemporalClass(
   _CalendarShimRecord,
   'Calendar',

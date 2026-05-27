@@ -4,6 +4,7 @@ import * as Shim from './shim/plainDate'
 import { getPlainDateRecordIfPresent } from './temporalRecords'
 
 export const create = NativeTemporal ? Native.create : Shim.create
+
 export function isRecord(
   arg: unknown,
 ): arg is Native.PlainDateNativeRecord | Shim.PlainDateShimRecord {
