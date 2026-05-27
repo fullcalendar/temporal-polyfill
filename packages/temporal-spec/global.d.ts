@@ -4,6 +4,7 @@ NOTE: keep synced with all other definition files
 
 /// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2020.intl" />
+/// <reference lib="es2021.intl" />
 
 export {} // treat as a module
 

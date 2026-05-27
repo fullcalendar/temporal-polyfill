@@ -5,7 +5,7 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2023", "ESNext.Intl"]
+		"lib": ["ES2020"]
   },
   "files": ["index.d.ts", "global.d.ts"]
 }
