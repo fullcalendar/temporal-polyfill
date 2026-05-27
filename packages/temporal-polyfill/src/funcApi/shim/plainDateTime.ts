@@ -301,10 +301,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is PlainDateTimeShimRecord {
-  return !!getPlainDateTimeRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<DateTimeFields> & { calendar: CalendarShimRecord },
   options?: OverflowOptions,

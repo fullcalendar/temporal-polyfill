@@ -220,10 +220,6 @@ export function create(
   return new PlainDateShimRecord(isoYear, isoMonth, isoDay, calendar)
 }
 
-export function isRecord(arg: unknown): arg is PlainDateShimRecord {
-  return !!getPlainDateRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<DateFields> & { calendar: CalendarShimRecord },
   options?: OverflowOptions,

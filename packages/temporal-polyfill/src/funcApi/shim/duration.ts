@@ -179,10 +179,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is DurationShimRecord {
-  return !!getDurationRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<DurationFields>,
 ): DurationShimRecord {

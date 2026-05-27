@@ -95,10 +95,6 @@ export function create(epochNanoseconds: bigint): InstantShimRecord {
   return new InstantShimRecord(epochNanoseconds)
 }
 
-export function isRecord(arg: unknown): arg is InstantShimRecord {
-  return !!getInstantRecordIfPresent(arg)
-}
-
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantShimRecord {

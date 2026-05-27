@@ -137,10 +137,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is PlainTimeShimRecord {
-  return !!getPlainTimeRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<TimeFields>,
   options?: OverflowOptions,

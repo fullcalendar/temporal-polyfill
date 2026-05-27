@@ -129,10 +129,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is PlainMonthDayShimRecord {
-  return !!getPlainMonthDayRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<MonthDayFields> & { calendar?: CalendarShimRecord },
   options?: OverflowOptions,

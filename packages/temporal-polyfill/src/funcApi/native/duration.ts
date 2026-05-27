@@ -148,10 +148,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is DurationNativeRecord {
-  return !!getDurationRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<DurationFields>,
 ): DurationNativeRecord {

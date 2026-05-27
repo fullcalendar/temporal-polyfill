@@ -1,9 +1,14 @@
 import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/instant'
 import * as Shim from './shim/instant'
+import { getInstantRecordIfPresent } from './temporalRecords'
 
 export const create = NativeTemporal ? Native.create : Shim.create
-export const isRecord = NativeTemporal ? Native.isRecord : Shim.isRecord
+export function isRecord(
+  arg: unknown,
+): arg is Native.InstantNativeRecord | Shim.InstantShimRecord {
+  return !!getInstantRecordIfPresent(arg)
+}
 export const fromEpochMilliseconds = NativeTemporal
   ? Native.fromEpochMilliseconds
   : Shim.fromEpochMilliseconds

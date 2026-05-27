@@ -10,29 +10,16 @@ const plainYearMonthMap = new WeakMap<object, unknown>()
 const plainMonthDayMap = new WeakMap<object, unknown>()
 const durationMap = new WeakMap<object, unknown>()
 
-function getMapRecord<S>(
-  map: WeakMap<object, unknown>,
-  record: unknown,
-): S | undefined {
-  return typeof record === 'object' && record !== null
-    ? (map.get(record) as S | undefined)
-    : undefined
-}
-
-function hasMapRecord(map: WeakMap<object, unknown>, record: unknown): boolean {
-  return typeof record === 'object' && record !== null && map.has(record)
-}
-
 export function setCalendarRecord(instance: object, slots: unknown) {
   calendarMap.set(instance, slots)
 }
 
 export function getCalendarRecordIfPresent<S>(record: unknown): S | undefined {
-  return getMapRecord(calendarMap, record)
+  return calendarMap.get(record as object) as S | undefined
 }
 
 export function isCalendarRecord(record: unknown): boolean {
-  return hasMapRecord(calendarMap, record)
+  return calendarMap.has(record as object)
 }
 
 export function setInstantRecord(instance: object, slots: unknown) {
@@ -40,7 +27,7 @@ export function setInstantRecord(instance: object, slots: unknown) {
 }
 
 export function getInstantRecordIfPresent<S>(record: unknown): S | undefined {
-  return getMapRecord(instantMap, record)
+  return instantMap.get(record as object) as S | undefined
 }
 
 export function setZonedDateTimeRecord(instance: object, slots: unknown) {
@@ -50,7 +37,7 @@ export function setZonedDateTimeRecord(instance: object, slots: unknown) {
 export function getZonedDateTimeRecordIfPresent<S>(
   record: unknown,
 ): S | undefined {
-  return getMapRecord(zonedDateTimeMap, record)
+  return zonedDateTimeMap.get(record as object) as S | undefined
 }
 
 export function setPlainDateTimeRecord(instance: object, slots: unknown) {
@@ -60,7 +47,7 @@ export function setPlainDateTimeRecord(instance: object, slots: unknown) {
 export function getPlainDateTimeRecordIfPresent<S>(
   record: unknown,
 ): S | undefined {
-  return getMapRecord(plainDateTimeMap, record)
+  return plainDateTimeMap.get(record as object) as S | undefined
 }
 
 export function setPlainDateRecord(instance: object, slots: unknown) {
@@ -68,7 +55,7 @@ export function setPlainDateRecord(instance: object, slots: unknown) {
 }
 
 export function getPlainDateRecordIfPresent<S>(record: unknown): S | undefined {
-  return getMapRecord(plainDateMap, record)
+  return plainDateMap.get(record as object) as S | undefined
 }
 
 export function setPlainTimeRecord(instance: object, slots: unknown) {
@@ -76,7 +63,7 @@ export function setPlainTimeRecord(instance: object, slots: unknown) {
 }
 
 export function getPlainTimeRecordIfPresent<S>(record: unknown): S | undefined {
-  return getMapRecord(plainTimeMap, record)
+  return plainTimeMap.get(record as object) as S | undefined
 }
 
 export function setPlainYearMonthRecord(instance: object, slots: unknown) {
@@ -86,7 +73,7 @@ export function setPlainYearMonthRecord(instance: object, slots: unknown) {
 export function getPlainYearMonthRecordIfPresent<S>(
   record: unknown,
 ): S | undefined {
-  return getMapRecord(plainYearMonthMap, record)
+  return plainYearMonthMap.get(record as object) as S | undefined
 }
 
 export function setPlainMonthDayRecord(instance: object, slots: unknown) {
@@ -96,7 +83,7 @@ export function setPlainMonthDayRecord(instance: object, slots: unknown) {
 export function getPlainMonthDayRecordIfPresent<S>(
   record: unknown,
 ): S | undefined {
-  return getMapRecord(plainMonthDayMap, record)
+  return plainMonthDayMap.get(record as object) as S | undefined
 }
 
 export function setDurationRecord(instance: object, slots: unknown) {
@@ -104,20 +91,20 @@ export function setDurationRecord(instance: object, slots: unknown) {
 }
 
 export function getDurationRecordIfPresent<S>(record: unknown): S | undefined {
-  return getMapRecord(durationMap, record)
+  return durationMap.get(record as object) as S | undefined
 }
 
 function isTemporalRecord(record: unknown): boolean {
   return (
-    hasMapRecord(calendarMap, record) ||
-    hasMapRecord(instantMap, record) ||
-    hasMapRecord(zonedDateTimeMap, record) ||
-    hasMapRecord(plainDateTimeMap, record) ||
-    hasMapRecord(plainDateMap, record) ||
-    hasMapRecord(plainTimeMap, record) ||
-    hasMapRecord(plainYearMonthMap, record) ||
-    hasMapRecord(plainMonthDayMap, record) ||
-    hasMapRecord(durationMap, record)
+    calendarMap.has(record as object) ||
+    instantMap.has(record as object) ||
+    zonedDateTimeMap.has(record as object) ||
+    plainDateTimeMap.has(record as object) ||
+    plainDateMap.has(record as object) ||
+    plainTimeMap.has(record as object) ||
+    plainYearMonthMap.has(record as object) ||
+    plainMonthDayMap.has(record as object) ||
+    durationMap.has(record as object)
   )
 }
 

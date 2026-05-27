@@ -120,10 +120,6 @@ export function create(
   return new ZonedDateTimeNativeRecord(epochNanoseconds, timeZoneId, calendar)
 }
 
-export function isRecord(arg: unknown): arg is ZonedDateTimeNativeRecord {
-  return !!getZonedDateTimeRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: ZonedDateTimeNativeFields,
   options?: ZonedFieldOptions,

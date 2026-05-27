@@ -130,10 +130,6 @@ export function create(
   return new PlainDateNativeRecord(isoYear, isoMonth, isoDay, calendar)
 }
 
-export function isRecord(arg: unknown): arg is PlainDateNativeRecord {
-  return !!getPlainDateRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<DateFields> & { calendar?: CalendarNativeRecord },
   options?: OverflowOptions,

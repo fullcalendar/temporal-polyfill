@@ -104,10 +104,6 @@ export function create(
   )
 }
 
-export function isRecord(arg: unknown): arg is PlainMonthDayNativeRecord {
-  return !!getPlainMonthDayRecordIfPresent(arg)
-}
-
 export function fromFields(
   fields: Partial<MonthDayFields> & { calendar?: CalendarNativeRecord },
   options?: OverflowOptions,

@@ -1,9 +1,14 @@
 import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/plainDate'
 import * as Shim from './shim/plainDate'
+import { getPlainDateRecordIfPresent } from './temporalRecords'
 
 export const create = NativeTemporal ? Native.create : Shim.create
-export const isRecord = NativeTemporal ? Native.isRecord : Shim.isRecord
+export function isRecord(
+  arg: unknown,
+): arg is Native.PlainDateNativeRecord | Shim.PlainDateShimRecord {
+  return !!getPlainDateRecordIfPresent(arg)
+}
 export const fromFields = NativeTemporal ? Native.fromFields : Shim.fromFields
 export const fromString = NativeTemporal ? Native.fromString : Shim.fromString
 export const dayOfWeek = NativeTemporal ? Native.dayOfWeek : Shim.dayOfWeek

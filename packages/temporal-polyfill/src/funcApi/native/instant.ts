@@ -70,10 +70,6 @@ export function create(epochNanoseconds: bigint): InstantNativeRecord {
   return new InstantNativeRecord(epochNanoseconds)
 }
 
-export function isRecord(arg: unknown): arg is InstantNativeRecord {
-  return !!getInstantRecordIfPresent(arg)
-}
-
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
 ): InstantNativeRecord {
