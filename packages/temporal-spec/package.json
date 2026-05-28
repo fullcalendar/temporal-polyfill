@@ -18,6 +18,8 @@
   "types": "./index.d.ts",
   "module": "./index.js",
   "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.cts.json"
   },
   "exports": {
@@ -31,6 +33,7 @@
     }
   },
   "devDependencies": {
+    "@biomejs/biome": "1.5.1",
     "typescript": "~5.3.3"
   }
 }

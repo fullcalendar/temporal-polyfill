@@ -26,6 +26,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
     "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
     "test": "vitest run",
     "test:dev": "vitest dev",
     "test:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000"

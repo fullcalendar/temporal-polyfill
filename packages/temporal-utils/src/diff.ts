@@ -7,9 +7,7 @@ export type DiffFunc<T extends YearMonthObj = DateTimeObj> = (
   options?: RoundingMode | DiffOptions,
 ) => number
 
-function createDiffFunc(
-  unit: PluralOnlyUnit,
-): DiffFunc {
+function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
   return (date0, date1, options) => {
     const normOptions = normalizeDiffOptions(options)
 
@@ -53,8 +51,20 @@ export const diffNanoseconds = createDiffFunc(
 // Options
 // -----------------------------------------------------------------------------
 
-type RoundingMode = Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>['roundingMode']
-type PluralOnlyUnit = 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds' | 'microseconds' | 'nanoseconds'
+type RoundingMode = Temporal.RoundingOptions<
+  Temporal.DateUnit | Temporal.TimeUnit
+>['roundingMode']
+type PluralOnlyUnit =
+  | 'years'
+  | 'months'
+  | 'weeks'
+  | 'days'
+  | 'hours'
+  | 'minutes'
+  | 'seconds'
+  | 'milliseconds'
+  | 'microseconds'
+  | 'nanoseconds'
 
 export type DiffOptions = {
   roundingMode?: RoundingMode

@@ -7,7 +7,10 @@ export function roundToYear<T extends YearMonthObj>(
   options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfYear(date)
-  const duration = start.until(date as any, normalizeRoundingOptions('year', options))
+  const duration = start.until(
+    date as any,
+    normalizeRoundingOptions('year', options),
+  )
   return start.add(duration)
 }
 
@@ -16,7 +19,10 @@ export function roundToMonth<T extends DateObj>(
   options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfMonth(date)
-  const duration = start.until(date as any, normalizeRoundingOptions('month', options))
+  const duration = start.until(
+    date as any,
+    normalizeRoundingOptions('month', options),
+  )
   return start.add(duration)
 }
 
@@ -25,14 +31,19 @@ export function roundToWeek<T extends DateObj>(
   options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfWeek(date)
-  const duration = start.until(date as any, normalizeRoundingOptions('week', options))
+  const duration = start.until(
+    date as any,
+    normalizeRoundingOptions('week', options),
+  )
   return start.add(duration)
 }
 
 // Options
 // -----------------------------------------------------------------------------
 
-type RoundingMode = Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>['roundingMode']
+type RoundingMode = Temporal.RoundingOptions<
+  Temporal.DateUnit | Temporal.TimeUnit
+>['roundingMode']
 
 // for big units only
 export type RoundingOptions = {

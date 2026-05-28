@@ -164,6 +164,9 @@ importers:
 
   packages/temporal-spec:
     devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
