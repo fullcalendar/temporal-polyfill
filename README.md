@@ -202,7 +202,7 @@ However, if you plan to use methods that accept/emit BigInts, your environment m
 
 ## Tree-shakable API
 
-🚧 Coming Soon
+🚧 Coming Soon ... [READ PRELIMINARY DOCS](./packages/temporal-polyfill/docs/fns/index.md)
 
 For library authors and other devs who are hyper-concerned about bundle size, `temporal-polyfill` will be providing an alternate API designed for tree-shaking.
 

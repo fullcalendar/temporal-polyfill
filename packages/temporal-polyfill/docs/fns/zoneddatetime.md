@@ -2,6 +2,117 @@
 
 Public functions exported for `ZonedDateTime`.
 
+Examples assume the functional API is imported as:
+
+```ts
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/zoneddatetime'
+```
+
+## Contents
+
+- [Record Shape](#record-shape)
+- [Type Guard](#type-guard)
+  - [`isRecord`](#isrecord)
+- [Construction And Parsing](#construction-and-parsing)
+  - [`create`](#create)
+  - [`fromFields`](#fromfields)
+  - [`fromString`](#fromstring)
+- [Calendar And Offset Properties](#calendar-and-offset-properties)
+  - [`offsetNanoseconds`](#offsetnanoseconds)
+  - [`offset`](#offset)
+  - [`dayOfWeek`](#dayofweek)
+  - [`daysInWeek`](#daysinweek)
+  - [`weekOfYear`](#weekofyear)
+  - [`yearOfWeek`](#yearofweek)
+  - [`dayOfYear`](#dayofyear)
+  - [`daysInMonth`](#daysinmonth)
+  - [`daysInYear`](#daysinyear)
+  - [`monthsInYear`](#monthsinyear)
+  - [`inLeapYear`](#inleapyear)
+  - [`hoursInDay`](#hoursinday)
+- [Field Replacement](#field-replacement)
+  - [`withFields`](#withfields)
+  - [`withCalendar`](#withcalendar)
+  - [`withTimeZone`](#withtimezone)
+  - [`withPlainTime`](#withplaintime)
+  - [`withDayOfYear`](#withdayofyear)
+  - [`withDayOfMonth`](#withdayofmonth)
+  - [`withDayOfWeek`](#withdayofweek)
+  - [`withWeekOfYear`](#withweekofyear)
+- [Arithmetic](#arithmetic)
+  - [`add`](#add)
+  - [`addYears`](#addyears)
+  - [`addMonths`](#addmonths)
+  - [`addWeeks`](#addweeks)
+  - [`addDays`](#adddays)
+  - [`addHours`](#addhours)
+  - [`addMinutes`](#addminutes)
+  - [`addSeconds`](#addseconds)
+  - [`addMilliseconds`](#addmilliseconds)
+  - [`addMicroseconds`](#addmicroseconds)
+  - [`addNanoseconds`](#addnanoseconds)
+  - [`subtract`](#subtract)
+  - [`subtractYears`](#subtractyears)
+  - [`subtractMonths`](#subtractmonths)
+  - [`subtractWeeks`](#subtractweeks)
+  - [`subtractDays`](#subtractdays)
+  - [`subtractHours`](#subtracthours)
+  - [`subtractMinutes`](#subtractminutes)
+  - [`subtractSeconds`](#subtractseconds)
+  - [`subtractMilliseconds`](#subtractmilliseconds)
+  - [`subtractMicroseconds`](#subtractmicroseconds)
+  - [`subtractNanoseconds`](#subtractnanoseconds)
+- [Difference And Comparison](#difference-and-comparison)
+  - [`diff`](#diff)
+  - [`diffYears`](#diffyears)
+  - [`diffMonths`](#diffmonths)
+  - [`diffWeeks`](#diffweeks)
+  - [`diffDays`](#diffdays)
+  - [`diffHours`](#diffhours)
+  - [`diffMinutes`](#diffminutes)
+  - [`diffSeconds`](#diffseconds)
+  - [`diffMilliseconds`](#diffmilliseconds)
+  - [`diffMicroseconds`](#diffmicroseconds)
+  - [`diffNanoseconds`](#diffnanoseconds)
+  - [`equals`](#equals)
+  - [`compare`](#compare)
+- [Rounding](#rounding)
+  - [`round`](#round)
+  - [`roundToYear`](#roundtoyear)
+  - [`roundToMonth`](#roundtomonth)
+  - [`roundToWeek`](#roundtoweek)
+- [Start And End Of Unit](#start-and-end-of-unit)
+  - [`startOfYear`](#startofyear)
+  - [`startOfMonth`](#startofmonth)
+  - [`startOfWeek`](#startofweek)
+  - [`startOfDay`](#startofday)
+  - [`startOfHour`](#startofhour)
+  - [`startOfMinute`](#startofminute)
+  - [`startOfSecond`](#startofsecond)
+  - [`startOfMillisecond`](#startofmillisecond)
+  - [`startOfMicrosecond`](#startofmicrosecond)
+  - [`endOfYear`](#endofyear)
+  - [`endOfMonth`](#endofmonth)
+  - [`endOfWeek`](#endofweek)
+  - [`endOfDay`](#endofday)
+  - [`endOfHour`](#endofhour)
+  - [`endOfMinute`](#endofminute)
+  - [`endOfSecond`](#endofsecond)
+  - [`endOfMillisecond`](#endofmillisecond)
+  - [`endOfMicrosecond`](#endofmicrosecond)
+- [Time Zone Transition](#time-zone-transition)
+  - [`getTimeZoneTransition`](#gettimezonetransition)
+- [Conversion](#conversion)
+  - [`toInstant`](#toinstant)
+  - [`toPlainDateTime`](#toplaindatetime)
+  - [`toPlainDate`](#toplaindate)
+  - [`toPlainTime`](#toplaintime)
+- [Formatting](#formatting)
+  - [`toString`](#tostring)
+  - [`toSimpleString`](#tosimplestring)
+  - [`toLocaleString`](#tolocalestring)
+  - [`createFormat`](#createformat)
+
 ## Record Shape
 
 ```ts
@@ -27,165 +138,1950 @@ type Record = {
 }
 ```
 
-## Standard Functions
+The codemod examples assume the surrounding transform has already converted
+`ZonedDateTimeFns.Record` values into `Temporal.ZonedDateTime` instances.
+Calendar records need a separate calendar transform: when a functional API call
+receives a `CalendarRecord`, the real Temporal API normally wants the calendar
+identifier or calendar-like value instead.
 
-### Type Guard
+## Type Guard
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `isRecord` | `(arg: unknown) => arg is Record` |
+### `isRecord`
 
-### Construction And Parsing
+Signature:
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `create` | `(epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarRecord) => Record` |
-| `fromFields` | `(fields: ZonedFields, options?: ZonedFieldOptions) => Record` |
-| `fromString` | `(s: string, getCalendar: (calendarId: string) => CalendarRecord, options?: ZonedFieldOptions) => Record` |
+```ts
+(arg: unknown) => arg is Record
+```
 
-### Calendar And Offset Properties
+Fn API:
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `offsetNanoseconds` | `(record: Record) => number` |
-| `offset` | `(record: Record) => string` |
-| `dayOfWeek` | `(record: Record) => number` |
-| `daysInWeek` | `(record: Record) => number` |
-| `weekOfYear` | `(record: Record) => number \| undefined` |
-| `yearOfWeek` | `(record: Record) => number \| undefined` |
-| `dayOfYear` | `(record: Record) => number` |
-| `daysInMonth` | `(record: Record) => number` |
-| `daysInYear` | `(record: Record) => number` |
-| `monthsInYear` | `(record: Record) => number` |
-| `inLeapYear` | `(record: Record) => boolean` |
-| `hoursInDay` | `(record: Record) => number` |
+```ts
+if (ZonedDateTimeFns.isRecord(value)) {
+  value.timeZoneId
+}
+```
 
-### Field Replacement
+Temporal API:
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `withFields` | `(record: Record, mod: Partial<DateTimeFields>, options?: ZonedFieldOptions) => Record` |
-| `withCalendar` | `(record: Record, calendarRecord: CalendarRecord) => Record` |
-| `withTimeZone` | `(record: Record, timeZoneId: string) => Record` |
-| `withPlainTime` | `(record: Record, plainTimeRecord?: PlainTimeRecord) => Record` |
+```ts
+if (value instanceof Temporal.ZonedDateTime) {
+  value.timeZoneId
+}
+```
 
-### Arithmetic And Comparison
+## Construction And Parsing
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `add` | `(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record` |
-| `subtract` | `(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record` |
-| `diff` | `(record: Record, otherRecord: Record, options?: DiffOptions<UnitName>) => DurationRecord` |
-| `round` | `(record: Record, options: DayTimeUnitName \| RoundingOptions<DayTimeUnitName>) => Record` |
-| `startOfDay` | `(record: Record) => Record` |
-| `getTimeZoneTransition` | `(record: Record, options: DirectionOptions \| DirectionName) => Record \| null` |
-| `equals` | `(record: Record, otherRecord: Record) => boolean` |
-| `compare` | `(record: Record, otherRecord: Record) => NumberSign` |
+### `create`
 
-### Conversion
+Signature:
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `toInstant` | `(record: Record) => InstantRecord` |
-| `toPlainDateTime` | `(record: Record) => PlainDateTimeRecord` |
-| `toPlainDate` | `(record: Record) => PlainDateRecord` |
-| `toPlainTime` | `(record: Record) => PlainTimeRecord` |
+```ts
+(epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarRecord) => Record
+```
 
-### Formatting
+Fn API:
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `toLocaleString` | `(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string` |
-| `toString` | `(record: Record, options?: ZonedDateTimeDisplayOptions) => string` |
-| `toSimpleString` | `(record: Record) => string` |
+```ts
+const zonedDateTime = ZonedDateTimeFns.create(epochNanoseconds, timeZoneId, calendar)
+```
 
-## Non-Standard Helpers
+Temporal API:
 
-### With Helpers
+```ts
+const zonedDateTime = new Temporal.ZonedDateTime(epochNanoseconds, timeZoneId, calendar)
+```
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `withDayOfYear` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `withDayOfMonth` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `withDayOfWeek` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `withWeekOfYear` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
+If the optional calendar argument is present, replace a known `CalendarRecord` expression with its calendar identifier.
 
-### Unit Add Helpers
+### `fromFields`
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `addYears` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addMonths` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addWeeks` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addDays` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addHours` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addMinutes` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addSeconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addMilliseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addMicroseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `addNanoseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
+Signature:
 
-### Unit Subtract Helpers
+```ts
+(fields: ZonedFields, options?: ZonedFieldOptions) => Record
+```
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `subtractYears` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractMonths` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractWeeks` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractDays` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractHours` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractMinutes` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractSeconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractMilliseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractMicroseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
-| `subtractNanoseconds` | `(record: Record, value: number, options?: OverflowOptions) => Record` |
+Fn API:
 
-### Unit Round Helpers
+```ts
+const zonedDateTime = ZonedDateTimeFns.fromFields(fields, options)
+```
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `roundToYear` | `(record: Record, options?: RoundOptions) => Record` |
-| `roundToMonth` | `(record: Record, options?: RoundOptions) => Record` |
-| `roundToWeek` | `(record: Record, options?: RoundOptions) => Record` |
+Temporal API:
 
-### Start-Of-Unit Helpers
+```ts
+const zonedDateTime = Temporal.ZonedDateTime.from(fields, options)
+```
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `startOfYear` | `(record: Record) => Record` |
-| `startOfMonth` | `(record: Record) => Record` |
-| `startOfWeek` | `(record: Record) => Record` |
-| `startOfHour` | `(record: Record) => Record` |
-| `startOfMinute` | `(record: Record) => Record` |
-| `startOfSecond` | `(record: Record) => Record` |
-| `startOfMillisecond` | `(record: Record) => Record` |
-| `startOfMicrosecond` | `(record: Record) => Record` |
+If `fields.calendar` is still a `CalendarRecord`, replace it with the calendar identifier before calling the real Temporal API.
 
-### End-Of-Unit Helpers
+### `fromString`
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `endOfYear` | `(record: Record) => Record` |
-| `endOfMonth` | `(record: Record) => Record` |
-| `endOfWeek` | `(record: Record) => Record` |
-| `endOfDay` | `(record: Record) => Record` |
-| `endOfHour` | `(record: Record) => Record` |
-| `endOfMinute` | `(record: Record) => Record` |
-| `endOfSecond` | `(record: Record) => Record` |
-| `endOfMillisecond` | `(record: Record) => Record` |
-| `endOfMicrosecond` | `(record: Record) => Record` |
+Signature:
 
-### Unit Difference Helpers
+```ts
+(s: string, getCalendar: (calendarId: string) => CalendarRecord, options?: ZonedFieldOptions) => Record
+```
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `diffYears` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffMonths` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffWeeks` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffDays` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffHours` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffMinutes` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffSeconds` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffMilliseconds` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffMicroseconds` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
-| `diffNanoseconds` | `(record0: Record, record1: Record, options?: RoundOptions) => number` |
+Fn API:
+
+```ts
+const zonedDateTime = ZonedDateTimeFns.fromString(value, getCalendar, options)
+```
+
+Temporal API:
+
+```ts
+const zonedDateTime = Temporal.ZonedDateTime.from(value, options)
+```
+
+The resolver argument has no direct counterpart and can usually be dropped once its import or local binding is unused.
+
+## Calendar And Offset Properties
+
+### `offsetNanoseconds`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const offsetNanoseconds = ZonedDateTimeFns.offsetNanoseconds(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const offsetNanoseconds = zonedDateTime.offsetNanoseconds
+```
+
+### `offset`
+
+Signature:
+
+```ts
+(record: Record) => string
+```
+
+Fn API:
+
+```ts
+const offset = ZonedDateTimeFns.offset(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const offset = zonedDateTime.offset
+```
+
+### `dayOfWeek`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const dayOfWeek = ZonedDateTimeFns.dayOfWeek(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const dayOfWeek = zonedDateTime.dayOfWeek
+```
+
+### `daysInWeek`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const daysInWeek = ZonedDateTimeFns.daysInWeek(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const daysInWeek = zonedDateTime.daysInWeek
+```
+
+### `weekOfYear`
+
+Signature:
+
+```ts
+(record: Record) => number | undefined
+```
+
+Fn API:
+
+```ts
+const weekOfYear = ZonedDateTimeFns.weekOfYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const weekOfYear = zonedDateTime.weekOfYear
+```
+
+### `yearOfWeek`
+
+Signature:
+
+```ts
+(record: Record) => number | undefined
+```
+
+Fn API:
+
+```ts
+const yearOfWeek = ZonedDateTimeFns.yearOfWeek(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const yearOfWeek = zonedDateTime.yearOfWeek
+```
+
+### `dayOfYear`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const dayOfYear = ZonedDateTimeFns.dayOfYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const dayOfYear = zonedDateTime.dayOfYear
+```
+
+### `daysInMonth`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const daysInMonth = ZonedDateTimeFns.daysInMonth(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const daysInMonth = zonedDateTime.daysInMonth
+```
+
+### `daysInYear`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const daysInYear = ZonedDateTimeFns.daysInYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const daysInYear = zonedDateTime.daysInYear
+```
+
+### `monthsInYear`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const monthsInYear = ZonedDateTimeFns.monthsInYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const monthsInYear = zonedDateTime.monthsInYear
+```
+
+### `inLeapYear`
+
+Signature:
+
+```ts
+(record: Record) => boolean
+```
+
+Fn API:
+
+```ts
+const inLeapYear = ZonedDateTimeFns.inLeapYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const inLeapYear = zonedDateTime.inLeapYear
+```
+
+### `hoursInDay`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Fn API:
+
+```ts
+const hoursInDay = ZonedDateTimeFns.hoursInDay(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const hoursInDay = zonedDateTime.hoursInDay
+```
+
+## Field Replacement
+
+### `withFields`
+
+Signature:
+
+```ts
+(record: Record, mod: Partial<DateTimeFields>, options?: ZonedFieldOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withFields(zonedDateTime, fields, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.with(fields, options)
+```
+
+### `withCalendar`
+
+Signature:
+
+```ts
+(record: Record, calendarRecord: CalendarRecord) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withCalendar(zonedDateTime, calendarRecord)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.withCalendar(calendar)
+```
+
+Replace a known `CalendarRecord` expression with its calendar identifier.
+
+### `withTimeZone`
+
+Signature:
+
+```ts
+(record: Record, timeZoneId: string) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withTimeZone(zonedDateTime, timeZoneId)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.withTimeZone(timeZoneId)
+```
+
+### `withPlainTime`
+
+Signature:
+
+```ts
+(record: Record, plainTimeRecord?: PlainTimeRecord) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withPlainTime(zonedDateTime, time)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.withPlainTime(time)
+```
+
+Any `PlainTimeRecord` argument needs its own record-to-Temporal transform.
+
+### `withDayOfYear`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withDayOfYear(zonedDateTime, dayOfYear, options)
+```
+
+Temporal API:
+
+```ts
+import { withDayOfYear } from 'temporal-utils'
+
+const nextZonedDateTime = withDayOfYear(zonedDateTime, dayOfYear, options)
+```
+
+### `withDayOfMonth`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withDayOfMonth(zonedDateTime, day, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.with({ day }, options)
+```
+
+### `withDayOfWeek`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withDayOfWeek(zonedDateTime, dayOfWeek, options)
+```
+
+Temporal API:
+
+```ts
+import { withDayOfWeek } from 'temporal-utils'
+
+const nextZonedDateTime = withDayOfWeek(zonedDateTime, dayOfWeek, options)
+```
+
+### `withWeekOfYear`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.withWeekOfYear(zonedDateTime, weekOfYear, options)
+```
+
+Temporal API:
+
+```ts
+import { withWeekOfYear } from 'temporal-utils'
+
+const nextZonedDateTime = withWeekOfYear(zonedDateTime, weekOfYear, options)
+```
+
+## Arithmetic
+
+### `add`
+
+Signature:
+
+```ts
+(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.add(zonedDateTime, duration, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add(duration, options)
+```
+
+Duration records need the same record-to-Temporal transform as zoned date-time records.
+
+### `addYears`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addYears(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ years: value }, options)
+```
+
+### `addMonths`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addMonths(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ months: value }, options)
+```
+
+### `addWeeks`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addWeeks(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ weeks: value }, options)
+```
+
+### `addDays`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addDays(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ days: value }, options)
+```
+
+### `addHours`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addHours(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ hours: value }, options)
+```
+
+### `addMinutes`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addMinutes(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ minutes: value }, options)
+```
+
+### `addSeconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addSeconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ seconds: value }, options)
+```
+
+### `addMilliseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addMilliseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ milliseconds: value }, options)
+```
+
+### `addMicroseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addMicroseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ microseconds: value }, options)
+```
+
+### `addNanoseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.addNanoseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.add({ nanoseconds: value }, options)
+```
+
+### `subtract`
+
+Signature:
+
+```ts
+(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtract(zonedDateTime, duration, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract(duration, options)
+```
+
+Duration records need the same record-to-Temporal transform as zoned date-time records.
+
+### `subtractYears`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractYears(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ years: value }, options)
+```
+
+### `subtractMonths`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractMonths(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ months: value }, options)
+```
+
+### `subtractWeeks`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractWeeks(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ weeks: value }, options)
+```
+
+### `subtractDays`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractDays(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ days: value }, options)
+```
+
+### `subtractHours`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractHours(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ hours: value }, options)
+```
+
+### `subtractMinutes`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractMinutes(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ minutes: value }, options)
+```
+
+### `subtractSeconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractSeconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ seconds: value }, options)
+```
+
+### `subtractMilliseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractMilliseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ milliseconds: value }, options)
+```
+
+### `subtractMicroseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractMicroseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ microseconds: value }, options)
+```
+
+### `subtractNanoseconds`
+
+Signature:
+
+```ts
+(record: Record, value: number, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.subtractNanoseconds(zonedDateTime, value, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.subtract({ nanoseconds: value }, options)
+```
+
+## Difference And Comparison
+
+### `diff`
+
+Signature:
+
+```ts
+(record: Record, otherRecord: Record, options?: DiffOptions<UnitName>) => DurationRecord
+```
+
+Fn API:
+
+```ts
+const duration = ZonedDateTimeFns.diff(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+const duration = zonedDateTime.until(otherZonedDateTime, options)
+```
+
+This helper is directional: it matches `until`, not `since`.
+
+### `diffYears`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const years = ZonedDateTimeFns.diffYears(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffYears } from 'temporal-utils'
+
+const years = diffYears(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffMonths`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const months = ZonedDateTimeFns.diffMonths(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffMonths } from 'temporal-utils'
+
+const months = diffMonths(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffWeeks`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const weeks = ZonedDateTimeFns.diffWeeks(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffWeeks } from 'temporal-utils'
+
+const weeks = diffWeeks(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffDays`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const days = ZonedDateTimeFns.diffDays(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffDays } from 'temporal-utils'
+
+const days = diffDays(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffHours`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const hours = ZonedDateTimeFns.diffHours(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffHours } from 'temporal-utils'
+
+const hours = diffHours(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffMinutes`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const minutes = ZonedDateTimeFns.diffMinutes(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffMinutes } from 'temporal-utils'
+
+const minutes = diffMinutes(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffSeconds`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const seconds = ZonedDateTimeFns.diffSeconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffSeconds } from 'temporal-utils'
+
+const seconds = diffSeconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffMilliseconds`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const milliseconds = ZonedDateTimeFns.diffMilliseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffMilliseconds } from 'temporal-utils'
+
+const milliseconds = diffMilliseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffMicroseconds`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const microseconds = ZonedDateTimeFns.diffMicroseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffMicroseconds } from 'temporal-utils'
+
+const microseconds = diffMicroseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `diffNanoseconds`
+
+Signature:
+
+```ts
+(record0: Record, record1: Record, options?: RoundOptions) => number
+```
+
+Fn API:
+
+```ts
+const nanoseconds = ZonedDateTimeFns.diffNanoseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { diffNanoseconds } from 'temporal-utils'
+
+const nanoseconds = diffNanoseconds(zonedDateTime, otherZonedDateTime, options)
+```
+
+This preserves the helper behavior, including exact totals when no rounding mode is provided.
+
+### `equals`
+
+Signature:
+
+```ts
+(record: Record, otherRecord: Record) => boolean
+```
+
+Fn API:
+
+```ts
+const same = ZonedDateTimeFns.equals(zonedDateTime, otherZonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const same = zonedDateTime.equals(otherZonedDateTime)
+```
+
+### `compare`
+
+Signature:
+
+```ts
+(record: Record, otherRecord: Record) => NumberSign
+```
+
+Fn API:
+
+```ts
+const order = ZonedDateTimeFns.compare(zonedDateTime, otherZonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const order = Temporal.ZonedDateTime.compare(zonedDateTime, otherZonedDateTime)
+```
+
+## Rounding
+
+### `round`
+
+Signature:
+
+```ts
+(record: Record, options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.round(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.round(options)
+```
+
+### `roundToYear`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { roundToYear } from 'temporal-utils'
+
+const nextZonedDateTime = roundToYear(zonedDateTime, options)
+```
+
+### `roundToMonth`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { roundToMonth } from 'temporal-utils'
+
+const nextZonedDateTime = roundToMonth(zonedDateTime, options)
+```
+
+### `roundToWeek`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+import { roundToWeek } from 'temporal-utils'
+
+const nextZonedDateTime = roundToWeek(zonedDateTime, options)
+```
+
+## Start And End Of Unit
+
+### `startOfYear`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfYear } from 'temporal-utils'
+
+const nextZonedDateTime = startOfYear(zonedDateTime)
+```
+
+### `startOfMonth`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfMonth(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfMonth } from 'temporal-utils'
+
+const nextZonedDateTime = startOfMonth(zonedDateTime)
+```
+
+### `startOfWeek`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfWeek(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfWeek } from 'temporal-utils'
+
+const nextZonedDateTime = startOfWeek(zonedDateTime)
+```
+
+### `startOfDay`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfDay(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const nextZonedDateTime = zonedDateTime.startOfDay()
+```
+
+### `startOfHour`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfHour(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfHour } from 'temporal-utils'
+
+const nextZonedDateTime = startOfHour(zonedDateTime)
+```
+
+### `startOfMinute`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfMinute(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfMinute } from 'temporal-utils'
+
+const nextZonedDateTime = startOfMinute(zonedDateTime)
+```
+
+### `startOfSecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfSecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfSecond } from 'temporal-utils'
+
+const nextZonedDateTime = startOfSecond(zonedDateTime)
+```
+
+### `startOfMillisecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfMillisecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfMillisecond } from 'temporal-utils'
+
+const nextZonedDateTime = startOfMillisecond(zonedDateTime)
+```
+
+### `startOfMicrosecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.startOfMicrosecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { startOfMicrosecond } from 'temporal-utils'
+
+const nextZonedDateTime = startOfMicrosecond(zonedDateTime)
+```
+
+### `endOfYear`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfYear(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfYear } from 'temporal-utils'
+
+const nextZonedDateTime = endOfYear(zonedDateTime)
+```
+
+### `endOfMonth`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfMonth(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfMonth } from 'temporal-utils'
+
+const nextZonedDateTime = endOfMonth(zonedDateTime)
+```
+
+### `endOfWeek`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfWeek(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfWeek } from 'temporal-utils'
+
+const nextZonedDateTime = endOfWeek(zonedDateTime)
+```
+
+### `endOfDay`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfDay(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfDay } from 'temporal-utils'
+
+const nextZonedDateTime = endOfDay(zonedDateTime)
+```
+
+### `endOfHour`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfHour(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfHour } from 'temporal-utils'
+
+const nextZonedDateTime = endOfHour(zonedDateTime)
+```
+
+### `endOfMinute`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfMinute(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfMinute } from 'temporal-utils'
+
+const nextZonedDateTime = endOfMinute(zonedDateTime)
+```
+
+### `endOfSecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfSecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfSecond } from 'temporal-utils'
+
+const nextZonedDateTime = endOfSecond(zonedDateTime)
+```
+
+### `endOfMillisecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfMillisecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfMillisecond } from 'temporal-utils'
+
+const nextZonedDateTime = endOfMillisecond(zonedDateTime)
+```
+
+### `endOfMicrosecond`
+
+Signature:
+
+```ts
+(record: Record) => Record
+```
+
+Fn API:
+
+```ts
+const nextZonedDateTime = ZonedDateTimeFns.endOfMicrosecond(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+import { endOfMicrosecond } from 'temporal-utils'
+
+const nextZonedDateTime = endOfMicrosecond(zonedDateTime)
+```
+
+## Time Zone Transition
+
+### `getTimeZoneTransition`
+
+Signature:
+
+```ts
+(record: Record, options: DirectionOptions | DirectionName) => Record | null
+```
+
+Fn API:
+
+```ts
+const transition = ZonedDateTimeFns.getTimeZoneTransition(zonedDateTime, direction)
+```
+
+Temporal API:
+
+```ts
+const transition = zonedDateTime.getTimeZoneTransition(direction)
+```
+
+## Conversion
+
+### `toInstant`
+
+Signature:
+
+```ts
+(record: Record) => InstantRecord
+```
+
+Fn API:
+
+```ts
+const instant = ZonedDateTimeFns.toInstant(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const instant = zonedDateTime.toInstant()
+```
+
+### `toPlainDateTime`
+
+Signature:
+
+```ts
+(record: Record) => PlainDateTimeRecord
+```
+
+Fn API:
+
+```ts
+const dateTime = ZonedDateTimeFns.toPlainDateTime(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const dateTime = zonedDateTime.toPlainDateTime()
+```
+
+### `toPlainDate`
+
+Signature:
+
+```ts
+(record: Record) => PlainDateRecord
+```
+
+Fn API:
+
+```ts
+const date = ZonedDateTimeFns.toPlainDate(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const date = zonedDateTime.toPlainDate()
+```
+
+### `toPlainTime`
+
+Signature:
+
+```ts
+(record: Record) => PlainTimeRecord
+```
+
+Fn API:
+
+```ts
+const time = ZonedDateTimeFns.toPlainTime(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const time = zonedDateTime.toPlainTime()
+```
+
+## Formatting
+
+### `toString`
+
+Signature:
+
+```ts
+(record: Record, options?: ZonedDateTimeDisplayOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toString(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toString(options)
+```
+
+### `toSimpleString`
+
+Signature:
+
+```ts
+(record: Record) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toSimpleString(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toString()
+```
+
+### `toLocaleString`
+
+Signature:
+
+```ts
+(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toLocaleString(zonedDateTime, locales, options)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toLocaleString(locales, options)
+```
+
+### `createFormat`
+
+Signature:
+
+```ts
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+```
+
+Fn API:
+
+```ts
+const format = ZonedDateTimeFns.createFormat('en-US', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: 'UTC',
+})
+const text = format.format(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const format = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: 'UTC',
+})
+const text = format.format(zonedDateTime)
+```
+
+TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+
+This rewrite is appropriate when later uses rely on `format.format(zonedDateTime)`.

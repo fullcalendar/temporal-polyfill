@@ -2,6 +2,33 @@
 
 Public functions exported for `PlainMonthDay`.
 
+Examples assume the functional API is imported as:
+
+```ts
+import * as PlainMonthDayFns from 'temporal-polyfill/fns/plainmonthday'
+```
+
+## Contents
+
+- [Record Shape](#record-shape)
+- [Type Guard](#type-guard)
+  - [`isRecord`](#isrecord)
+- [Construction And Parsing](#construction-and-parsing)
+  - [`create`](#create)
+  - [`fromFields`](#fromfields)
+  - [`fromString`](#fromstring)
+- [Field Replacement](#field-replacement)
+  - [`withFields`](#withfields)
+- [Comparison](#comparison)
+  - [`equals`](#equals)
+- [Conversion](#conversion)
+  - [`toPlainDate`](#toplaindate)
+- [Formatting](#formatting)
+  - [`toString`](#tostring)
+  - [`toSimpleString`](#tosimplestring)
+  - [`toLocaleString`](#tolocalestring)
+  - [`createFormat`](#createformat)
+
 ## Record Shape
 
 ```ts
@@ -14,57 +41,264 @@ type Record = {
 }
 ```
 
-## Standard Functions
+The codemod examples assume the surrounding transform has already converted
+`PlainMonthDayFns.Record` values into `Temporal.PlainMonthDay` instances.
+Calendar records need a separate calendar transform: when a functional API call
+receives a `CalendarRecord`, the real Temporal API normally wants the calendar
+identifier or calendar-like value instead.
 
-### Type Guard
+## Type Guard
 
-| Function | Abbreviated signature |
-| --- | --- |
-| `isRecord` | `(arg: unknown) => arg is Record` |
+### `isRecord`
 
-### Construction And Parsing
-
-| Function | Abbreviated signature |
-| --- | --- |
-| `create` | `(isoMonth: number, isoDay: number, calendar?: CalendarRecord, referenceIsoYear?: number) => Record` |
-| `fromFields` | `(fields: Partial<MonthDayFields> & { calendar?: CalendarRecord }, options?: OverflowOptions) => Record` |
-| `fromString` | `(s: string, getCalendar: (calendarId: string) => CalendarRecord) => Record` |
-
-### Field Replacement
-
-| Function | Abbreviated signature |
-| --- | --- |
-| `withFields` | `(record: Record, mod: Partial<MonthDayFields>, options?: OverflowOptions) => Record` |
-
-### Comparison
-
-| Function | Abbreviated signature |
-| --- | --- |
-| `equals` | `(record: Record, otherRecord: Record) => boolean` |
-
-### Conversion
-
-| Function | Abbreviated signature |
-| --- | --- |
-| `toPlainDate` | `(record: Record, fields: EraYearOrYear) => PlainDateRecord` |
-
-### Formatting
-
-| Function | Abbreviated signature |
-| --- | --- |
-| `toLocaleString` | `(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string` |
-| `toString` | `(record: Record, options?: CalendarDisplayOptions) => string` |
-| `toSimpleString` | `(record: Record) => string` |
-| `createFormat` | `(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>` |
+Signature:
 
 ```ts
-import * as PlainMonthDayFns from 'temporal-polyfill/fns/plainmonthday'
+(arg: unknown) => arg is Record
+```
 
-const record = PlainMonthDayFns.create(5, 1)
+Fn API:
+
+```ts
+if (PlainMonthDayFns.isRecord(value)) {
+  value.monthCode
+}
+```
+
+Temporal API:
+
+```ts
+if (value instanceof Temporal.PlainMonthDay) {
+  value.monthCode
+}
+```
+
+## Construction And Parsing
+
+### `create`
+
+Signature:
+
+```ts
+(isoMonth: number, isoDay: number, calendar?: CalendarRecord, referenceIsoYear?: number) => Record
+```
+
+Fn API:
+
+```ts
+const monthDay = PlainMonthDayFns.create(5, 1)
+```
+
+Temporal API:
+
+```ts
+const monthDay = new Temporal.PlainMonthDay(5, 1)
+```
+
+If the optional calendar argument is present, replace a known `CalendarRecord`
+expression with its calendar identifier. Preserve `referenceIsoYear` as the
+fourth constructor argument when present.
+
+### `fromFields`
+
+Signature:
+
+```ts
+(fields: Partial<MonthDayFields> & { calendar?: CalendarRecord }, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const monthDay = PlainMonthDayFns.fromFields(fields, options)
+```
+
+Temporal API:
+
+```ts
+const monthDay = Temporal.PlainMonthDay.from(fields, options)
+```
+
+If `fields.calendar` is still a `CalendarRecord`, replace it with the calendar
+identifier before calling the real Temporal API.
+
+### `fromString`
+
+Signature:
+
+```ts
+(s: string, getCalendar: (calendarId: string) => CalendarRecord) => Record
+```
+
+Fn API:
+
+```ts
+const monthDay = PlainMonthDayFns.fromString(value, getCalendar)
+```
+
+Temporal API:
+
+```ts
+const monthDay = Temporal.PlainMonthDay.from(value)
+```
+
+The resolver argument has no direct counterpart and can usually be dropped once
+its import or local binding is unused.
+
+## Field Replacement
+
+### `withFields`
+
+Signature:
+
+```ts
+(record: Record, mod: Partial<MonthDayFields>, options?: OverflowOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextMonthDay = PlainMonthDayFns.withFields(monthDay, fields, options)
+```
+
+Temporal API:
+
+```ts
+const nextMonthDay = monthDay.with(fields, options)
+```
+
+## Comparison
+
+### `equals`
+
+Signature:
+
+```ts
+(record: Record, otherRecord: Record) => boolean
+```
+
+Fn API:
+
+```ts
+const same = PlainMonthDayFns.equals(monthDay, otherMonthDay)
+```
+
+Temporal API:
+
+```ts
+const same = monthDay.equals(otherMonthDay)
+```
+
+## Conversion
+
+### `toPlainDate`
+
+Signature:
+
+```ts
+(record: Record, fields: EraYearOrYear) => PlainDateRecord
+```
+
+Fn API:
+
+```ts
+const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 })
+```
+
+Temporal API:
+
+```ts
+const date = monthDay.toPlainDate({ year: 2024 })
+```
+
+## Formatting
+
+### `toString`
+
+Signature:
+
+```ts
+(record: Record, options?: CalendarDisplayOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainMonthDayFns.toString(monthDay, options)
+```
+
+Temporal API:
+
+```ts
+const text = monthDay.toString(options)
+```
+
+### `toSimpleString`
+
+Signature:
+
+```ts
+(record: Record) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainMonthDayFns.toSimpleString(monthDay)
+```
+
+Temporal API:
+
+```ts
+const text = monthDay.toString()
+```
+
+### `toLocaleString`
+
+Signature:
+
+```ts
+(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainMonthDayFns.toLocaleString(monthDay, locales, options)
+```
+
+Temporal API:
+
+```ts
+const text = monthDay.toLocaleString(locales, options)
+```
+
+### `createFormat`
+
+Signature:
+
+```ts
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+```
+
+Fn API:
+
+```ts
 const format = PlainMonthDayFns.createFormat('en-US', {
   month: 'long',
   day: 'numeric',
 })
-
-format.format(record) // "May 1"
+const text = format.format(monthDay)
 ```
+
+Temporal API:
+
+```ts
+const format = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+})
+const text = format.format(monthDay)
+```
+
+This rewrite is appropriate when later uses rely on `format.format(monthDay)`.
