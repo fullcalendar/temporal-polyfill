@@ -1608,6 +1608,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last representable nanosecond before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
@@ -1629,6 +1631,8 @@ Signature:
 ```ts
 (record: Record) => Record
 ```
+
+This returns the last representable nanosecond before the exclusive end of the unit.
 
 Fn API:
 
@@ -1652,6 +1656,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last representable nanosecond before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
@@ -1673,6 +1679,8 @@ Signature:
 ```ts
 (record: Record) => Record
 ```
+
+This returns the last representable nanosecond before the exclusive end of the unit.
 
 Fn API:
 
@@ -1696,6 +1704,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last representable nanosecond before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
@@ -1717,6 +1727,8 @@ Signature:
 ```ts
 (record: Record) => Record
 ```
+
+This returns the last representable nanosecond before the exclusive end of the unit.
 
 Fn API:
 
@@ -1740,6 +1752,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last representable nanosecond before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
@@ -1762,6 +1776,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last representable nanosecond before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
@@ -1783,6 +1799,8 @@ Signature:
 ```ts
 (record: Record) => Record
 ```
+
+This returns the last representable nanosecond before the exclusive end of the unit.
 
 Fn API:
 

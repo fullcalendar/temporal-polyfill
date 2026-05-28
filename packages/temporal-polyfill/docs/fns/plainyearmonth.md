@@ -579,6 +579,8 @@ Signature:
 (record: Record) => Record
 ```
 
+This returns the last month before the exclusive end of the unit.
+
 Fn API:
 
 ```ts
