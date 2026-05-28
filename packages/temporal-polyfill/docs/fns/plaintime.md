@@ -67,3 +67,15 @@ const format = PlainTimeFns.createFormat('en-US', { timeStyle: 'short' })
 
 format.format(record) // "9:30 AM"
 ```
+
+## TODO
+
+Potential non-standard helpers to consider:
+
+| Function group | Functions |
+| --- | --- |
+| Unit Add Helpers | `addHours`, `addMinutes`, `addSeconds`, `addMilliseconds`, `addMicroseconds`, `addNanoseconds` |
+| Unit Subtract Helpers | `subtractHours`, `subtractMinutes`, `subtractSeconds`, `subtractMilliseconds`, `subtractMicroseconds`, `subtractNanoseconds` |
+| Unit Difference Helpers | `diffHours`, `diffMinutes`, `diffSeconds`, `diffMilliseconds`, `diffMicroseconds`, `diffNanoseconds` |
+| Start-Of-Unit Helpers | `startOfHour`, `startOfMinute`, `startOfSecond`, `startOfMillisecond`, `startOfMicrosecond` |
+| End-Of-Unit Helpers | `endOfHour`, `endOfMinute`, `endOfSecond`, `endOfMillisecond`, `endOfMicrosecond` |

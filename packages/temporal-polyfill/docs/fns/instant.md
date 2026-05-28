@@ -68,3 +68,13 @@ const format = InstantFns.createFormat('en-US', {
 
 format.format(record) // "May 1, 2024 at 1:30 PM"
 ```
+
+## TODO
+
+Potential non-standard helpers to consider:
+
+| Function group | Functions |
+| --- | --- |
+| Unit Add Helpers | `addHours`, `addMinutes`, `addSeconds`, `addMilliseconds`, `addMicroseconds`, `addNanoseconds` |
+| Unit Subtract Helpers | `subtractHours`, `subtractMinutes`, `subtractSeconds`, `subtractMilliseconds`, `subtractMicroseconds`, `subtractNanoseconds` |
+| Unit Difference Helpers | `diffHours`, `diffMinutes`, `diffSeconds`, `diffMilliseconds`, `diffMicroseconds`, `diffNanoseconds` |

@@ -84,3 +84,16 @@ const format = PlainYearMonthFns.createFormat('en-US', {
 
 format.format(record) // "May 2024"
 ```
+
+## TODO
+
+Potential non-standard helpers to consider:
+
+| Function group | Functions |
+| --- | --- |
+| Unit Add Helpers | `addYears`, `addMonths` |
+| Unit Subtract Helpers | `subtractYears`, `subtractMonths` |
+| Unit Difference Helpers | `diffYears`, `diffMonths` |
+| Unit Round Helpers | `roundToYear` |
+| Start-Of-Unit Helpers | `startOfYear` |
+| End-Of-Unit Helpers | `endOfYear` |
