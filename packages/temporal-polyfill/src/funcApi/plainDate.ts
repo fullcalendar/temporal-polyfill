@@ -1,83 +1,260 @@
+import { DurationFields } from '../internal/durationFields'
+import { DateFields, TimeFields } from '../internal/fieldTypes'
+import { LocalesArg } from '../internal/intlFormatUtils'
 import {
+  CalendarDisplayOptions,
+  DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
 } from '../internal/optionsModel'
+import { DateUnitName } from '../internal/units'
+import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
+import { DateTimeFormatLike, ToZonedDateTimeOptions } from './commonTypes'
 import * as Native from './native/plainDate'
-import type { PlainDateRecord, PlainDateRecord as Record } from './recordTypes'
+import type {
+  CalendarRecord as CalendarRecordBrand,
+  PlainDateRecord as Record,
+} from './recordTypes'
 import * as Shim from './shim/plainDate'
 import { getPlainDateRecordIfPresent } from './temporalRecords'
 
 export type { Record }
 
+type PlainDateRecord = Record
+
+// Temporary record shapes for cross-type PlainDate operations. These should be
+// replaced in phases as the funcApi gets real public record types for the other
+// Temporal types.
+type JsonRecord = {
+  toJSON(): string
+  valueOf(): never
+}
+type CalendarRecord = CalendarRecordBrand
+type DurationRecord = DurationFields & JsonRecord
+type PlainTimeRecord = TimeFields & JsonRecord
+type PlainDateTimeRecord = Pick<
+  PlainDateRecord,
+  'calendarId' | 'year' | 'month' | 'monthCode' | 'day'
+> &
+  TimeFields &
+  JsonRecord
+type PlainYearMonthRecord = Pick<
+  PlainDateRecord,
+  'calendarId' | 'era' | 'eraYear' | 'year' | 'month' | 'monthCode'
+> &
+  JsonRecord
+type PlainMonthDayRecord = Pick<
+  PlainDateRecord,
+  'calendarId' | 'monthCode' | 'day'
+> &
+  Partial<Pick<PlainDateRecord, 'era' | 'eraYear' | 'year' | 'month'>> &
+  JsonRecord
+type ZonedDateTimeRecord = {
+  readonly calendarId: string
+  readonly epochMilliseconds: number
+  readonly epochNanoseconds: bigint
+  readonly timeZoneId: string
+} & JsonRecord
+
 export function isRecord(arg: unknown): arg is Record {
   return !!getPlainDateRecordIfPresent(arg)
 }
 
-export const create = NativeTemporal ? Native.create : Shim.create
-export const fromFields = NativeTemporal ? Native.fromFields : Shim.fromFields
-export const fromString = NativeTemporal ? Native.fromString : Shim.fromString
-export const dayOfWeek = NativeTemporal ? Native.dayOfWeek : Shim.dayOfWeek
-export const daysInWeek = NativeTemporal ? Native.daysInWeek : Shim.daysInWeek
-export const weekOfYear = NativeTemporal ? Native.weekOfYear : Shim.weekOfYear
-export const yearOfWeek = NativeTemporal ? Native.yearOfWeek : Shim.yearOfWeek
-export const dayOfYear = NativeTemporal ? Native.dayOfYear : Shim.dayOfYear
-export const daysInMonth = NativeTemporal
+export const create: (
+  isoYear: number,
+  isoMonth: number,
+  isoDay: number,
+  calendar?: CalendarRecord,
+) => PlainDateRecord = NativeTemporal ? Native.create : Shim.create
+
+export const fromFields: (
+  fields: Partial<DateFields> & { calendar: CalendarRecord },
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
+
+export const fromString: (
+  s: string,
+  getCalendar: (calendarId: string) => CalendarRecord,
+) => PlainDateRecord = NativeTemporal ? Native.fromString : Shim.fromString
+
+export const dayOfWeek: (record: PlainDateRecord) => number = NativeTemporal
+  ? Native.dayOfWeek
+  : Shim.dayOfWeek
+
+export const daysInWeek: (record: PlainDateRecord) => number = NativeTemporal
+  ? Native.daysInWeek
+  : Shim.daysInWeek
+
+export const weekOfYear: (record: PlainDateRecord) => number | undefined =
+  NativeTemporal ? Native.weekOfYear : Shim.weekOfYear
+
+export const yearOfWeek: (record: PlainDateRecord) => number | undefined =
+  NativeTemporal ? Native.yearOfWeek : Shim.yearOfWeek
+
+export const dayOfYear: (record: PlainDateRecord) => number = NativeTemporal
+  ? Native.dayOfYear
+  : Shim.dayOfYear
+
+export const daysInMonth: (record: PlainDateRecord) => number = NativeTemporal
   ? Native.daysInMonth
   : Shim.daysInMonth
-export const daysInYear = NativeTemporal ? Native.daysInYear : Shim.daysInYear
-export const monthsInYear = NativeTemporal
+
+export const daysInYear: (record: PlainDateRecord) => number = NativeTemporal
+  ? Native.daysInYear
+  : Shim.daysInYear
+
+export const monthsInYear: (record: PlainDateRecord) => number = NativeTemporal
   ? Native.monthsInYear
   : Shim.monthsInYear
-export const inLeapYear = NativeTemporal ? Native.inLeapYear : Shim.inLeapYear
-export const withFields = NativeTemporal ? Native.withFields : Shim.withFields
-export const withCalendar = NativeTemporal
-  ? Native.withCalendar
-  : Shim.withCalendar
-export const add = NativeTemporal ? Native.add : Shim.add
-export const subtract = NativeTemporal ? Native.subtract : Shim.subtract
-export const diff = NativeTemporal ? Native.diff : Shim.diff
-export const equals = NativeTemporal ? Native.equals : Shim.equals
-export const compare = NativeTemporal ? Native.compare : Shim.compare
-export const toZonedDateTime = NativeTemporal
+
+export const inLeapYear: (record: PlainDateRecord) => boolean = NativeTemporal
+  ? Native.inLeapYear
+  : Shim.inLeapYear
+
+export const withFields: (
+  record: PlainDateRecord,
+  mod: Partial<DateFields>,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.withFields : Shim.withFields
+
+export const withCalendar: (
+  record: PlainDateRecord,
+  calendarRecord: CalendarRecord,
+) => PlainDateRecord = NativeTemporal ? Native.withCalendar : Shim.withCalendar
+
+export const add: (
+  record: PlainDateRecord,
+  duration: DurationRecord,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.add : Shim.add
+
+export const subtract: (
+  record: PlainDateRecord,
+  duration: DurationRecord,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.subtract : Shim.subtract
+
+export const diff: (
+  record: PlainDateRecord,
+  otherRecord: PlainDateRecord,
+  options?: DiffOptions<DateUnitName>,
+) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
+
+export const equals: (
+  record: PlainDateRecord,
+  otherRecord: PlainDateRecord,
+) => boolean = NativeTemporal ? Native.equals : Shim.equals
+
+export const compare: (
+  record: PlainDateRecord,
+  otherRecord: PlainDateRecord,
+) => NumberSign = NativeTemporal ? Native.compare : Shim.compare
+
+export const toZonedDateTime: (
+  record: PlainDateRecord,
+  options: string | ToZonedDateTimeOptions<PlainTimeRecord>,
+) => ZonedDateTimeRecord = NativeTemporal
   ? Native.toZonedDateTime
   : Shim.toZonedDateTime
-export const toPlainDateTime = NativeTemporal
-  ? Native.toPlainDateTime
-  : Shim.toPlainDateTime
-export const toPlainYearMonth = NativeTemporal
+
+export const toPlainDateTime: (
+  record: PlainDateRecord,
+  plainTimeRecord?: PlainTimeRecord,
+) => PlainDateTimeRecord = NativeTemporal
+  ? (Native.toPlainDateTime as (
+      record: PlainDateRecord,
+      plainTimeRecord?: PlainTimeRecord,
+    ) => PlainDateTimeRecord)
+  : (Shim.toPlainDateTime as (
+      record: PlainDateRecord,
+      plainTimeRecord?: PlainTimeRecord,
+    ) => PlainDateTimeRecord)
+
+export const toPlainYearMonth: (
+  record: PlainDateRecord,
+) => PlainYearMonthRecord = NativeTemporal
   ? Native.toPlainYearMonth
   : Shim.toPlainYearMonth
-export const toPlainMonthDay = NativeTemporal
-  ? Native.toPlainMonthDay
-  : Shim.toPlainMonthDay
-export const createFormat = NativeTemporal
+
+export const toPlainMonthDay: (record: PlainDateRecord) => PlainMonthDayRecord =
+  NativeTemporal ? Native.toPlainMonthDay : Shim.toPlainMonthDay
+
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => DateTimeFormatLike<PlainDateRecord> = NativeTemporal
   ? Native.createFormat
   : Shim.createFormat
-export const toLocaleString = NativeTemporal
-  ? Native.toLocaleString
-  : Shim.toLocaleString
-export const toString = NativeTemporal ? Native.toString : Shim.toString
-export const toSimpleString = NativeTemporal
-  ? Native.toSimpleString
-  : Shim.toSimpleString
-export const withDayOfYear = NativeTemporal
+
+export const toLocaleString: (
+  record: PlainDateRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
+
+export const toString: (
+  record: PlainDateRecord,
+  options?: CalendarDisplayOptions,
+) => string = NativeTemporal ? Native.toString : Shim.toString
+
+export const toSimpleString: (record: PlainDateRecord) => string =
+  NativeTemporal ? Native.toSimpleString : Shim.toSimpleString
+
+export const withDayOfYear: (
+  record: PlainDateRecord,
+  dayOfYear: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.withDayOfYear
   : Shim.withDayOfYear
-export const withDayOfMonth = NativeTemporal
+
+export const withDayOfMonth: (
+  record: PlainDateRecord,
+  dayOfMonth: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.withDayOfMonth
   : Shim.withDayOfMonth
-export const withDayOfWeek = NativeTemporal
+
+export const withDayOfWeek: (
+  record: PlainDateRecord,
+  dayOfWeek: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.withDayOfWeek
   : Shim.withDayOfWeek
-export const withWeekOfYear = NativeTemporal
+
+export const withWeekOfYear: (
+  record: PlainDateRecord,
+  weekOfYear: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.withWeekOfYear
   : Shim.withWeekOfYear
-export const addYears = NativeTemporal ? Native.addYears : Shim.addYears
-export const addMonths = NativeTemporal ? Native.addMonths : Shim.addMonths
-export const addWeeks = NativeTemporal ? Native.addWeeks : Shim.addWeeks
-export const addDays = NativeTemporal ? Native.addDays : Shim.addDays
+
+export const addYears: (
+  record: PlainDateRecord,
+  years: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.addYears : Shim.addYears
+
+export const addMonths: (
+  record: PlainDateRecord,
+  months: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
+
+export const addWeeks: (
+  record: PlainDateRecord,
+  weeks: number,
+) => PlainDateRecord = NativeTemporal ? Native.addWeeks : Shim.addWeeks
+
+export const addDays: (
+  record: PlainDateRecord,
+  days: number,
+) => PlainDateRecord = NativeTemporal ? Native.addDays : Shim.addDays
 
 export const subtractYears: (
   record: PlainDateRecord,
@@ -142,7 +319,26 @@ export const endOfMonth: (record: PlainDateRecord) => PlainDateRecord =
 export const endOfWeek: (record: PlainDateRecord) => PlainDateRecord =
   NativeTemporal ? Native.endOfWeek : Shim.endOfWeek
 
-export const diffYears = NativeTemporal ? Native.diffYears : Shim.diffYears
-export const diffMonths = NativeTemporal ? Native.diffMonths : Shim.diffMonths
-export const diffWeeks = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
-export const diffDays = NativeTemporal ? Native.diffDays : Shim.diffDays
+export const diffYears: (
+  record0: PlainDateRecord,
+  record1: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
+
+export const diffMonths: (
+  record0: PlainDateRecord,
+  record1: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
+
+export const diffWeeks: (
+  record0: PlainDateRecord,
+  record1: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
+
+export const diffDays: (
+  record0: PlainDateRecord,
+  record1: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffDays : Shim.diffDays

@@ -5,6 +5,8 @@ export declare const PlainDateRecordBrand: unique symbol
 
 export type CalendarRecord = {
   readonly [CalendarRecordBrand]: undefined
+  toJSON(): string
+  valueOf(): never
 }
 
 export type PlainDateRecord = {
