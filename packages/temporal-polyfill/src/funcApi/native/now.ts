@@ -1,6 +1,6 @@
 import { NativeTemporal } from '../../nativeSwitch'
 import { createInstantNativeRecord } from './instant'
-import { createPlainDateNativeRecord } from './plainDate'
+import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 import { createPlainDateTimeNativeRecord } from './plainDateTime'
 import { createPlainTimeNativeRecord } from './plainTime'
 import { createZonedDateTimeNativeRecord } from './zonedDateTime'
@@ -25,7 +25,7 @@ export function plainDateTimeISO(timeZoneId?: string) {
   )
 }
 
-export function plainDateISO(timeZoneId?: string) {
+export function plainDateISO(timeZoneId?: string): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
     NativeTemporal!.Now.plainDateISO(timeZoneId),
   )

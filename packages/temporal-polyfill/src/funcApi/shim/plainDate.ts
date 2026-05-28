@@ -544,27 +544,52 @@ export function addDays(
   })
 }
 
-export const subtractYears = reversedMove(addYears)
-export const subtractMonths = reversedMove(addMonths)
-export const subtractWeeks = reversedMove(addWeeks)
-export const subtractDays = reversedMove(addDays)
+export const subtractYears: (
+  record: PlainDateShimRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateShimRecord = reversedMove(addYears)
+export const subtractMonths: (
+  record: PlainDateShimRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateShimRecord = reversedMove(addMonths)
+export const subtractWeeks: (
+  record: PlainDateShimRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateShimRecord = reversedMove(addWeeks)
+export const subtractDays: (
+  record: PlainDateShimRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateShimRecord = reversedMove(addDays)
 
 // Non-standard: Round
 // -----------------------------------------------------------------------------
 
-export const roundToYear = bindArgs(
+export const roundToYear: (
+  record: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Year,
   computeYearInterval,
 )
 
-export const roundToMonth = bindArgs(
+export const roundToMonth: (
+  record: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Month,
   computeMonthInterval,
 )
 
-export const roundToWeek = bindArgs(
+export const roundToWeek: (
+  record: PlainDateShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Week,
   computeIsoWeekInterval,
@@ -573,16 +598,23 @@ export const roundToWeek = bindArgs(
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------
 
-export const startOfYear = aligned(computeYearFloor)
-export const startOfMonth = aligned(computeMonthFloor)
-export const startOfWeek = aligned(computeIsoWeekFloor)
+export const startOfYear: (record: PlainDateShimRecord) => PlainDateShimRecord =
+  aligned(computeYearFloor)
+export const startOfMonth: (
+  record: PlainDateShimRecord,
+) => PlainDateShimRecord = aligned(computeMonthFloor)
+export const startOfWeek: (record: PlainDateShimRecord) => PlainDateShimRecord =
+  aligned(computeIsoWeekFloor)
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
 
-export const endOfYear = aligned(computeYearCeil, -1)
-export const endOfMonth = aligned(computeMonthCeil, -1)
-export const endOfWeek = aligned(computeIsoWeekCeil, -1)
+export const endOfYear: (record: PlainDateShimRecord) => PlainDateShimRecord =
+  aligned(computeYearCeil, -1)
+export const endOfMonth: (record: PlainDateShimRecord) => PlainDateShimRecord =
+  aligned(computeMonthCeil, -1)
+export const endOfWeek: (record: PlainDateShimRecord) => PlainDateShimRecord =
+  aligned(computeIsoWeekCeil, -1)
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------

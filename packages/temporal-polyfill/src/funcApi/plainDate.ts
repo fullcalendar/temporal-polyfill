@@ -1,6 +1,11 @@
+import {
+  OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../internal/optionsModel'
 import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/plainDate'
-import type { PlainDateRecord as Record } from './recordTypes'
+import type { PlainDateRecord, PlainDateRecord as Record } from './recordTypes'
 import * as Shim from './shim/plainDate'
 import { getPlainDateRecordIfPresent } from './temporalRecords'
 
@@ -73,39 +78,70 @@ export const addYears = NativeTemporal ? Native.addYears : Shim.addYears
 export const addMonths = NativeTemporal ? Native.addMonths : Shim.addMonths
 export const addWeeks = NativeTemporal ? Native.addWeeks : Shim.addWeeks
 export const addDays = NativeTemporal ? Native.addDays : Shim.addDays
-export const subtractYears = NativeTemporal
+
+export const subtractYears: (
+  record: PlainDateRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.subtractYears
   : Shim.subtractYears
-export const subtractMonths = NativeTemporal
+
+export const subtractMonths: (
+  record: PlainDateRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.subtractMonths
   : Shim.subtractMonths
-export const subtractWeeks = NativeTemporal
+
+export const subtractWeeks: (
+  record: PlainDateRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal
   ? Native.subtractWeeks
   : Shim.subtractWeeks
-export const subtractDays = NativeTemporal
-  ? Native.subtractDays
-  : Shim.subtractDays
-export const roundToYear = NativeTemporal
-  ? Native.roundToYear
-  : Shim.roundToYear
-export const roundToMonth = NativeTemporal
-  ? Native.roundToMonth
-  : Shim.roundToMonth
-export const roundToWeek = NativeTemporal
-  ? Native.roundToWeek
-  : Shim.roundToWeek
-export const startOfYear = NativeTemporal
-  ? Native.startOfYear
-  : Shim.startOfYear
-export const startOfMonth = NativeTemporal
-  ? Native.startOfMonth
-  : Shim.startOfMonth
-export const startOfWeek = NativeTemporal
-  ? Native.startOfWeek
-  : Shim.startOfWeek
-export const endOfYear = NativeTemporal ? Native.endOfYear : Shim.endOfYear
-export const endOfMonth = NativeTemporal ? Native.endOfMonth : Shim.endOfMonth
-export const endOfWeek = NativeTemporal ? Native.endOfWeek : Shim.endOfWeek
+
+export const subtractDays: (
+  record: PlainDateRecord,
+  units: number,
+  options?: OverflowOptions,
+) => PlainDateRecord = NativeTemporal ? Native.subtractDays : Shim.subtractDays
+
+export const roundToYear: (
+  record: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateRecord = NativeTemporal ? Native.roundToYear : Shim.roundToYear
+
+export const roundToMonth: (
+  record: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateRecord = NativeTemporal ? Native.roundToMonth : Shim.roundToMonth
+
+export const roundToWeek: (
+  record: PlainDateRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => PlainDateRecord = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
+
+export const startOfYear: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.startOfYear : Shim.startOfYear
+
+export const startOfMonth: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.startOfMonth : Shim.startOfMonth
+
+export const startOfWeek: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.startOfWeek : Shim.startOfWeek
+
+export const endOfYear: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.endOfYear : Shim.endOfYear
+
+export const endOfMonth: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.endOfMonth : Shim.endOfMonth
+
+export const endOfWeek: (record: PlainDateRecord) => PlainDateRecord =
+  NativeTemporal ? Native.endOfWeek : Shim.endOfWeek
+
 export const diffYears = NativeTemporal ? Native.diffYears : Shim.diffYears
 export const diffMonths = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 export const diffWeeks = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks

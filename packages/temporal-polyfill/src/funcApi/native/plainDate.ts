@@ -83,6 +83,14 @@ class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
     return getPlainDateNative(this).calendarId
   }
 
+  get era() {
+    return getPlainDateNative(this).era
+  }
+
+  get eraYear() {
+    return getPlainDateNative(this).eraYear
+  }
+
   get year() {
     return getPlainDateNative(this).year
   }
