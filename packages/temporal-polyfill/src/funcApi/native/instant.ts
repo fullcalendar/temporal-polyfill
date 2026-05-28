@@ -8,6 +8,7 @@ import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import { getInstantRecordIfPresent, setInstantRecord } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -26,9 +27,13 @@ import {
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
 
+type InstantRecord = RecordTypes.InstantRecord
+
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-class _InstantNativeRecord {
+class _InstantNativeRecord implements InstantRecord {
+  declare readonly [RecordTypes.InstantRecordBrand]: undefined
+
   constructor(epochNanoseconds: bigint) {
     setInstantNative(this, new NativeTemporal!.Instant(epochNanoseconds))
   }

@@ -1,5 +1,4 @@
-import { DurationFields } from '../internal/durationFields'
-import { DateFields, TimeFields } from '../internal/fieldTypes'
+import { DateFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import {
   CalendarDisplayOptions,
@@ -14,8 +13,14 @@ import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from './commonTypes'
 import * as Native from './native/plainDate'
 import type {
-  CalendarRecord as CalendarRecordBrand,
+  CalendarRecord,
+  DurationRecord,
   PlainDateRecord as Record,
+  PlainDateTimeRecord,
+  PlainMonthDayRecord,
+  PlainTimeRecord,
+  PlainYearMonthRecord,
+  ZonedDateTimeRecord,
 } from './recordTypes'
 import * as Shim from './shim/plainDate'
 import { getPlainDateRecordIfPresent } from './temporalRecords'
@@ -23,40 +28,6 @@ import { getPlainDateRecordIfPresent } from './temporalRecords'
 export type { Record }
 
 type PlainDateRecord = Record
-
-// Temporary record shapes for cross-type PlainDate operations. These should be
-// replaced in phases as the funcApi gets real public record types for the other
-// Temporal types.
-type JsonRecord = {
-  toJSON(): string
-  valueOf(): never
-}
-type CalendarRecord = CalendarRecordBrand
-type DurationRecord = DurationFields & JsonRecord
-type PlainTimeRecord = TimeFields & JsonRecord
-type PlainDateTimeRecord = Pick<
-  PlainDateRecord,
-  'calendarId' | 'year' | 'month' | 'monthCode' | 'day'
-> &
-  TimeFields &
-  JsonRecord
-type PlainYearMonthRecord = Pick<
-  PlainDateRecord,
-  'calendarId' | 'era' | 'eraYear' | 'year' | 'month' | 'monthCode'
-> &
-  JsonRecord
-type PlainMonthDayRecord = Pick<
-  PlainDateRecord,
-  'calendarId' | 'monthCode' | 'day'
-> &
-  Partial<Pick<PlainDateRecord, 'era' | 'eraYear' | 'year' | 'month'>> &
-  JsonRecord
-type ZonedDateTimeRecord = {
-  readonly calendarId: string
-  readonly epochMilliseconds: number
-  readonly epochNanoseconds: bigint
-  readonly timeZoneId: string
-} & JsonRecord
 
 export function isRecord(arg: unknown): arg is Record {
   return !!getPlainDateRecordIfPresent(arg)

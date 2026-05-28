@@ -10,6 +10,7 @@ import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getDurationRecordIfPresent,
   getPlainDateRecordIfPresent,
@@ -17,17 +18,18 @@ import {
   getZonedDateTimeRecordIfPresent,
   setDurationRecord,
 } from '../temporalRecords'
-import { PlainDateNativeRecord } from './plainDate'
-import { PlainDateTimeNativeRecord } from './plainDateTime'
 import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
-import { ZonedDateTimeNativeRecord } from './zonedDateTime'
 
-class _DurationNativeRecord implements DurationFields {
+type DurationRecord = RecordTypes.DurationRecord
+
+class _DurationNativeRecord implements DurationFields, DurationRecord {
+  declare readonly [RecordTypes.DurationRecordBrand]: undefined
+
   constructor(
     years?: number,
     months?: number,
@@ -199,9 +201,7 @@ export function abs(duration: DurationNativeRecord): DurationNativeRecord {
 export function add(
   duration: DurationNativeRecord,
   otherDuration: DurationNativeRecord,
-  options?: RelativeToOptions<
-    PlainDateNativeRecord | ZonedDateTimeNativeRecord
-  >,
+  options?: RelativeToOptions<RelativeToNativeRecord>,
 ): DurationNativeRecord {
   const native = getDurationNative(duration)
   const otherNative = getDurationNative(otherDuration)
@@ -284,9 +284,9 @@ export function toSimpleString(duration: DurationNativeRecord): string {
 // ----
 
 type RelativeToNativeRecord = RelativeToRecord<
-  ZonedDateTimeNativeRecord,
-  PlainDateTimeNativeRecord,
-  PlainDateNativeRecord
+  RecordTypes.ZonedDateTimeRecord,
+  RecordTypes.PlainDateTimeRecord,
+  RecordTypes.PlainDateRecord
 >
 
 function refineTotalOptions(

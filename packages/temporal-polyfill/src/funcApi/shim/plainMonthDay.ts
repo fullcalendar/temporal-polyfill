@@ -24,6 +24,7 @@ import {
   OverflowOptions,
 } from '../../internal/optionsModel'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainMonthDayRecordIfPresent,
   setPlainMonthDayRecord,
@@ -44,13 +45,17 @@ import {
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
+type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
+
 type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
 
 type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
 
 class _PlainMonthDayShimRecord
-  implements Pick<MonthDayFields, 'monthCode' | 'day'>
+  implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
 {
+  declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
+
   constructor(
     isoMonth: number,
     isoDay: number,

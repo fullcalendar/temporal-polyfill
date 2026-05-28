@@ -10,6 +10,7 @@ import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainTimeRecordIfPresent,
   setPlainTimeRecord,
@@ -27,9 +28,12 @@ import {
   invalidRecordType,
 } from './recordUtils'
 
+type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
-class _PlainTimeNativeRecord implements TimeFields {
+class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
+  declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
+
   constructor(
     hour = 0,
     minute = 0,

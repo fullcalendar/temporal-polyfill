@@ -6,6 +6,7 @@ import {
 } from '../../internal/optionsModel'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainMonthDayRecordIfPresent,
   setPlainMonthDayRecord,
@@ -25,9 +26,15 @@ import {
   invalidRecordType,
 } from './recordUtils'
 
+type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
+
 type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
 
-class _PlainMonthDayNativeRecord implements MonthDayFields {
+class _PlainMonthDayNativeRecord
+  implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
+{
+  declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
+
   constructor(
     isoMonth: number,
     isoDay: number,
@@ -53,10 +60,6 @@ class _PlainMonthDayNativeRecord implements MonthDayFields {
 
   get monthCode() {
     return getPlainMonthDayNative(this).monthCode
-  }
-
-  get month() {
-    return getPlainMonthDayNative(this).month
   }
 
   get day() {

@@ -80,6 +80,7 @@ import {
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainDateTimeRecordIfPresent,
   setPlainDateTimeRecord,
@@ -152,9 +153,13 @@ import {
 
 type Format = DateTimeFormatLike<PlainDateTimeShimRecord>
 
+type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
+
 type PlainDateTimeShimSlots = ReturnType<typeof constructDateTimeSlots>
 
-class _PlainDateTimeShimRecord implements DateTimeFields {
+class _PlainDateTimeShimRecord implements DateTimeFields, PlainDateTimeRecord {
+  declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,

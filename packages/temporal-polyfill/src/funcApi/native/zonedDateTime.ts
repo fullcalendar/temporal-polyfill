@@ -16,6 +16,7 @@ import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getZonedDateTimeRecordIfPresent,
   setZonedDateTimeRecord,
@@ -49,9 +50,13 @@ import {
   invalidRecordType,
 } from './recordUtils'
 
+type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
+
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
-class _ZonedDateTimeNativeRecord {
+class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
+  declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
+
   constructor(
     epochNanoseconds: bigint,
     timeZoneId: string,
@@ -83,6 +88,54 @@ class _ZonedDateTimeNativeRecord {
 
   get timeZoneId() {
     return getZonedDateTimeNative(this).timeZoneId
+  }
+
+  get era() {
+    return getZonedDateTimeNative(this).era
+  }
+
+  get eraYear() {
+    return getZonedDateTimeNative(this).eraYear
+  }
+
+  get year() {
+    return getZonedDateTimeNative(this).year
+  }
+
+  get month() {
+    return getZonedDateTimeNative(this).month
+  }
+
+  get monthCode() {
+    return getZonedDateTimeNative(this).monthCode
+  }
+
+  get day() {
+    return getZonedDateTimeNative(this).day
+  }
+
+  get hour() {
+    return getZonedDateTimeNative(this).hour
+  }
+
+  get minute() {
+    return getZonedDateTimeNative(this).minute
+  }
+
+  get second() {
+    return getZonedDateTimeNative(this).second
+  }
+
+  get millisecond() {
+    return getZonedDateTimeNative(this).millisecond
+  }
+
+  get microsecond() {
+    return getZonedDateTimeNative(this).microsecond
+  }
+
+  get nanosecond() {
+    return getZonedDateTimeNative(this).nanosecond
   }
 
   toJSON() {

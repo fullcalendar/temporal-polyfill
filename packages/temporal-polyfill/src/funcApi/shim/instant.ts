@@ -29,6 +29,7 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import { getInstantRecordIfPresent, setInstantRecord } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -47,11 +48,15 @@ import {
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
 
+type InstantRecord = RecordTypes.InstantRecord
+
 type Format = DateTimeFormatLike<InstantShimRecord>
 
 type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
 
-class _InstantShimRecord {
+class _InstantShimRecord implements InstantRecord {
+  declare readonly [RecordTypes.InstantRecordBrand]: undefined
+
   constructor(epochNanoseconds: bigint) {
     setInstantShimRecordSlots(this, constructEpochNanoSlots(epochNanoseconds))
   }

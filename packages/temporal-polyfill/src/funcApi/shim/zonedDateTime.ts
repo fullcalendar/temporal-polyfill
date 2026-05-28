@@ -92,6 +92,7 @@ import {
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { ZonedDateTimeFields } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getZonedDateTimeRecordIfPresent,
   setZonedDateTimeRecord,
@@ -161,11 +162,15 @@ import {
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
+type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
+
 type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
 type ZonedDateTimeShimSlots = ReturnType<typeof constructZonedEpochNanoSlots>
 
-class _ZonedDateTimeShimRecord {
+class _ZonedDateTimeShimRecord implements ZonedDateTimeRecord {
+  declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
+
   constructor(
     epochNanoseconds: bigint,
     timeZoneId: string,

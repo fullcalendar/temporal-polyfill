@@ -9,6 +9,7 @@ import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainYearMonthRecordIfPresent,
   setPlainYearMonthRecord,
@@ -33,9 +34,15 @@ import {
   invalidRecordType,
 } from './recordUtils'
 
+type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
+
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
 
-class _PlainYearMonthNativeRecord implements YearMonthFields {
+class _PlainYearMonthNativeRecord
+  implements YearMonthFields, PlainYearMonthRecord
+{
+  declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -77,22 +84,6 @@ class _PlainYearMonthNativeRecord implements YearMonthFields {
 
   get month() {
     return getPlainYearMonthNative(this).month
-  }
-
-  get daysInMonth() {
-    return getPlainYearMonthNative(this).daysInMonth
-  }
-
-  get daysInYear() {
-    return getPlainYearMonthNative(this).daysInYear
-  }
-
-  get inLeapYear() {
-    return getPlainYearMonthNative(this).inLeapYear
-  }
-
-  get monthsInYear() {
-    return getPlainYearMonthNative(this).monthsInYear
   }
 
   toJSON() {

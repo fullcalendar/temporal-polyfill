@@ -37,6 +37,7 @@ import {
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainYearMonthRecordIfPresent,
   setPlainYearMonthRecord,
@@ -62,11 +63,17 @@ import {
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
+type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
+
 type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
 type PlainYearMonthShimSlots = ReturnType<typeof constructYearMonthSlots>
 
-class _PlainYearMonthShimRecord implements YearMonthFields {
+class _PlainYearMonthShimRecord
+  implements YearMonthFields, PlainYearMonthRecord
+{
+  declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -112,26 +119,6 @@ class _PlainYearMonthShimRecord implements YearMonthFields {
   get monthCode() {
     const slots = getPlainYearMonthShimRecordSlots(this)
     return computeCalendarMonthCode(slots.calendar, slots)
-  }
-
-  get daysInMonth() {
-    const slots = getPlainYearMonthShimRecordSlots(this)
-    return computeCalendarDaysInMonth(slots.calendar, slots)
-  }
-
-  get daysInYear() {
-    const slots = getPlainYearMonthShimRecordSlots(this)
-    return computeCalendarDaysInYear(slots.calendar, slots)
-  }
-
-  get monthsInYear() {
-    const slots = getPlainYearMonthShimRecordSlots(this)
-    return computeCalendarMonthsInYear(slots.calendar, slots)
-  }
-
-  get inLeapYear() {
-    const slots = getPlainYearMonthShimRecordSlots(this)
-    return computeCalendarInLeapYear(slots.calendar, slots)
   }
 
   toJSON() {

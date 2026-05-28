@@ -26,6 +26,7 @@ import { totalDuration } from '../../internal/total'
 import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getDurationRecordIfPresent,
   getPlainDateRecordIfPresent,
@@ -33,19 +34,20 @@ import {
   getZonedDateTimeRecordIfPresent,
   setDurationRecord,
 } from '../temporalRecords'
-import { PlainDateShimRecord } from './plainDate'
-import { PlainDateTimeShimRecord } from './plainDateTime'
 import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
   invalidRecordType,
 } from './recordUtils'
-import { ZonedDateTimeShimRecord } from './zonedDateTime'
+
+type DurationRecord = RecordTypes.DurationRecord
 
 type DurationShimSlots = ReturnType<typeof constructDurationSlots>
 
-class _DurationShimRecord implements DurationFields {
+class _DurationShimRecord implements DurationFields, DurationRecord {
+  declare readonly [RecordTypes.DurationRecordBrand]: undefined
+
   constructor(
     years?: number,
     months?: number,
@@ -113,14 +115,6 @@ class _DurationShimRecord implements DurationFields {
 
   get nanoseconds() {
     return getDurationShimRecordSlots(this).nanoseconds
-  }
-
-  get sign() {
-    return getDurationShimRecordSlots(this).sign
-  }
-
-  get blank() {
-    return !getDurationShimRecordSlots(this).sign
   }
 
   toJSON() {
@@ -313,9 +307,9 @@ export function toSimpleString(duration: DurationShimRecord): string {
 // ----
 
 type RelativeToShimRecord = RelativeToRecord<
-  ZonedDateTimeShimRecord,
-  PlainDateTimeShimRecord,
-  PlainDateShimRecord
+  RecordTypes.ZonedDateTimeRecord,
+  RecordTypes.PlainDateTimeRecord,
+  RecordTypes.PlainDateRecord
 >
 
 function refineRelativeTo(

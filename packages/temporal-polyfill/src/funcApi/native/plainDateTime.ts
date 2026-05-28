@@ -14,6 +14,7 @@ import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainDateTimeRecordIfPresent,
   setPlainDateTimeRecord,
@@ -49,7 +50,13 @@ import {
 
 type Format = DateTimeFormatLike<PlainDateTimeNativeRecord>
 
-class _PlainDateTimeNativeRecord implements DateTimeFields {
+type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
+
+class _PlainDateTimeNativeRecord
+  implements DateTimeFields, PlainDateTimeRecord
+{
+  declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,
@@ -83,6 +90,14 @@ class _PlainDateTimeNativeRecord implements DateTimeFields {
 
   get calendarId() {
     return getPlainDateTimeNative(this).calendarId
+  }
+
+  get era() {
+    return getPlainDateTimeNative(this).era
+  }
+
+  get eraYear() {
+    return getPlainDateTimeNative(this).eraYear
   }
 
   get year() {

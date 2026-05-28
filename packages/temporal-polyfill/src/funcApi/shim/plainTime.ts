@@ -19,6 +19,7 @@ import { roundPlainTime } from '../../internal/round'
 import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainTimeRecordIfPresent,
   setPlainTimeRecord,
@@ -37,11 +38,14 @@ import {
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
+type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<PlainTimeShimRecord>
 
 type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
 
-class _PlainTimeShimRecord implements TimeFields {
+class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
+  declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
+
   constructor(
     hour?: number,
     minute?: number,
