@@ -18,7 +18,7 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getZonedDateTimeRecordIfPresent,
+  getZonedDateTimeRecord,
   setZonedDateTimeRecord,
 } from '../temporalRecords'
 import {
@@ -47,12 +47,14 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
+
+export const getZonedDateTimeNative: (record: unknown) => any =
+  getZonedDateTimeRecord
 
 class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
@@ -158,10 +160,6 @@ export function createZonedDateTimeNativeRecord(
   const instance = Object.create(ZonedDateTimeNativeRecord.prototype)
   setZonedDateTimeNative(instance, native)
   return instance
-}
-
-export function getZonedDateTimeNative(record: unknown): any {
-  return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 export type ZonedDateTimeNativeRecord = _ZonedDateTimeNativeRecord

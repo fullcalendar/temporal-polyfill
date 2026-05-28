@@ -16,7 +16,7 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainDateTimeRecordIfPresent,
+  getPlainDateTimeRecord,
   setPlainDateTimeRecord,
 } from '../temporalRecords'
 import {
@@ -41,7 +41,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
@@ -51,6 +50,9 @@ import {
 type Format = DateTimeFormatLike<PlainDateTimeNativeRecord>
 
 type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
+
+export const getPlainDateTimeNative: (record: unknown) => any =
+  getPlainDateTimeRecord
 
 class _PlainDateTimeNativeRecord
   implements DateTimeFields, PlainDateTimeRecord
@@ -160,10 +162,6 @@ export function createPlainDateTimeNativeRecord(
   const instance = Object.create(PlainDateTimeNativeRecord.prototype)
   setPlainDateTimeNative(instance, native)
   return instance
-}
-
-export function getPlainDateTimeNative(record: unknown): any {
-  return getPlainDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainDateTimeNativeRecord = _PlainDateTimeNativeRecord

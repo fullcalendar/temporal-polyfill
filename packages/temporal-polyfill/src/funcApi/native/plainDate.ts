@@ -13,10 +13,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import {
-  getPlainDateRecordIfPresent,
-  setPlainDateRecord,
-} from '../temporalRecords'
+import { getPlainDateRecord, setPlainDateRecord } from '../temporalRecords'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
@@ -46,7 +43,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
@@ -56,6 +52,8 @@ import {
 type PlainDateRecord = RecordTypes.PlainDateRecord
 
 type Format = DateTimeFormatLike<PlainDateNativeRecord>
+
+export const getPlainDateNative: (record: unknown) => any = getPlainDateRecord
 
 class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
   declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
@@ -127,10 +125,6 @@ export function createPlainDateNativeRecord(
   const instance = Object.create(PlainDateNativeRecord.prototype)
   setPlainDateNative(instance, native)
   return instance
-}
-
-export function getPlainDateNative(record: unknown): any {
-  return getPlainDateRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainDateNativeRecord = _PlainDateNativeRecord

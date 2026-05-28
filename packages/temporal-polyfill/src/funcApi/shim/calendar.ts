@@ -8,21 +8,19 @@ import {
 import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
 import type * as RecordTypes from '../recordTypes'
-import {
-  getCalendarRecordIfPresent,
-  isCalendarRecord,
-  setCalendarRecord,
-} from '../temporalRecords'
+import { getCalendarRecord, setCalendarRecord } from '../temporalRecords'
 import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
 
 type CalendarRecord = RecordTypes.CalendarRecord
+
+export const getCalendarShimRecordInternal: (record: unknown) => CalendarSlot =
+  getCalendarRecord
 
 class _CalendarShimRecord implements CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
@@ -54,13 +52,6 @@ export function createCalendarShimRecord(
   const instance = Object.create(CalendarShimRecord.prototype)
   setCalendarShimRecordInternal(instance, calendarSlot)
   return instance
-}
-
-export function getCalendarShimRecordInternal(record: unknown): CalendarSlot {
-  if (!isCalendarRecord(record)) {
-    return invalidRecordType()
-  }
-  return getCalendarRecordIfPresent(record)
 }
 
 export type CalendarShimRecord = _CalendarShimRecord

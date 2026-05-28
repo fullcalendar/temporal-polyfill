@@ -4,15 +4,11 @@ import {
 } from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
 import type * as RecordTypes from '../recordTypes'
-import {
-  getCalendarRecordIfPresent,
-  setCalendarRecord,
-} from '../temporalRecords'
+import { getCalendarRecord, setCalendarRecord } from '../temporalRecords'
 import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 export type CalendarNativeResolver = (
@@ -20,6 +16,9 @@ export type CalendarNativeResolver = (
 ) => CalendarNativeRecord
 
 type CalendarRecord = RecordTypes.CalendarRecord
+
+export const getCalendarNativeRecordId: (record: unknown) => string =
+  getCalendarRecord
 
 class _CalendarNativeRecord implements CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
@@ -48,10 +47,6 @@ export function createCalendarNativeRecord(
   const instance = Object.create(CalendarNativeRecord.prototype)
   setCalendarNativeRecordId(instance, calendarId)
   return instance
-}
-
-export function getCalendarNativeRecordId(record: unknown): string {
-  return getCalendarRecordIfPresent(record) || invalidRecordType()
 }
 
 export type CalendarNativeRecord = _CalendarNativeRecord

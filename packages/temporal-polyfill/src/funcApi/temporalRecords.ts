@@ -1,3 +1,4 @@
+import { invalidRecordType } from '../apiHelpers/classStyle'
 import * as errorMessages from '../internal/errorMessages'
 
 const calendarMap = new WeakMap<object, unknown>()
@@ -22,12 +23,23 @@ export function isCalendarRecord(record: unknown): boolean {
   return calendarMap.has(record as object)
 }
 
+export function getCalendarRecord<S>(record: unknown): S {
+  if (!isCalendarRecord(record)) {
+    return invalidRecordType()
+  }
+  return getCalendarRecordIfPresent<S>(record) as S
+}
+
 export function setInstantRecord(instance: object, slots: unknown) {
   instantMap.set(instance, slots)
 }
 
 export function getInstantRecordIfPresent<S>(record: unknown): S | undefined {
   return instantMap.get(record as object) as S | undefined
+}
+
+export function getInstantRecord<S>(record: unknown): S {
+  return getInstantRecordIfPresent<S>(record) || invalidRecordType()
 }
 
 export function setZonedDateTimeRecord(instance: object, slots: unknown) {
@@ -40,6 +52,10 @@ export function getZonedDateTimeRecordIfPresent<S>(
   return zonedDateTimeMap.get(record as object) as S | undefined
 }
 
+export function getZonedDateTimeRecord<S>(record: unknown): S {
+  return getZonedDateTimeRecordIfPresent<S>(record) || invalidRecordType()
+}
+
 export function setPlainDateTimeRecord(instance: object, slots: unknown) {
   plainDateTimeMap.set(instance, slots)
 }
@@ -50,6 +66,10 @@ export function getPlainDateTimeRecordIfPresent<S>(
   return plainDateTimeMap.get(record as object) as S | undefined
 }
 
+export function getPlainDateTimeRecord<S>(record: unknown): S {
+  return getPlainDateTimeRecordIfPresent<S>(record) || invalidRecordType()
+}
+
 export function setPlainDateRecord(instance: object, slots: unknown) {
   plainDateMap.set(instance, slots)
 }
@@ -58,12 +78,20 @@ export function getPlainDateRecordIfPresent<S>(record: unknown): S | undefined {
   return plainDateMap.get(record as object) as S | undefined
 }
 
+export function getPlainDateRecord<S>(record: unknown): S {
+  return getPlainDateRecordIfPresent<S>(record) || invalidRecordType()
+}
+
 export function setPlainTimeRecord(instance: object, slots: unknown) {
   plainTimeMap.set(instance, slots)
 }
 
 export function getPlainTimeRecordIfPresent<S>(record: unknown): S | undefined {
   return plainTimeMap.get(record as object) as S | undefined
+}
+
+export function getPlainTimeRecord<S>(record: unknown): S {
+  return getPlainTimeRecordIfPresent<S>(record) || invalidRecordType()
 }
 
 export function setPlainYearMonthRecord(instance: object, slots: unknown) {
@@ -76,6 +104,10 @@ export function getPlainYearMonthRecordIfPresent<S>(
   return plainYearMonthMap.get(record as object) as S | undefined
 }
 
+export function getPlainYearMonthRecord<S>(record: unknown): S {
+  return getPlainYearMonthRecordIfPresent<S>(record) || invalidRecordType()
+}
+
 export function setPlainMonthDayRecord(instance: object, slots: unknown) {
   plainMonthDayMap.set(instance, slots)
 }
@@ -86,12 +118,20 @@ export function getPlainMonthDayRecordIfPresent<S>(
   return plainMonthDayMap.get(record as object) as S | undefined
 }
 
+export function getPlainMonthDayRecord<S>(record: unknown): S {
+  return getPlainMonthDayRecordIfPresent<S>(record) || invalidRecordType()
+}
+
 export function setDurationRecord(instance: object, slots: unknown) {
   durationMap.set(instance, slots)
 }
 
 export function getDurationRecordIfPresent<S>(record: unknown): S | undefined {
   return durationMap.get(record as object) as S | undefined
+}
+
+export function getDurationRecord<S>(record: unknown): S {
+  return getDurationRecordIfPresent<S>(record) || invalidRecordType()
 }
 
 function isTemporalRecord(record: unknown): boolean {

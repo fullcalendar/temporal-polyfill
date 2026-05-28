@@ -11,10 +11,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import {
-  getPlainTimeRecordIfPresent,
-  setPlainTimeRecord,
-} from '../temporalRecords'
+import { getPlainTimeRecord, setPlainTimeRecord } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -25,11 +22,12 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
+
+export const getPlainTimeNative: (record: unknown) => any = getPlainTimeRecord
 
 class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
@@ -99,10 +97,6 @@ export function createPlainTimeNativeRecord(
   const instance = Object.create(PlainTimeNativeRecord.prototype)
   setPlainTimeNative(instance, native)
   return instance
-}
-
-export function getPlainTimeNative(record: unknown): any {
-  return getPlainTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainTimeNativeRecord = _PlainTimeNativeRecord

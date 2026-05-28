@@ -12,7 +12,7 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getDurationRecordIfPresent,
+  getDurationRecord,
   getPlainDateRecordIfPresent,
   getPlainDateTimeRecordIfPresent,
   getZonedDateTimeRecordIfPresent,
@@ -22,10 +22,11 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type DurationRecord = RecordTypes.DurationRecord
+
+export const getDurationNative: (record: unknown) => any = getDurationRecord
 
 class _DurationNativeRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
@@ -117,10 +118,6 @@ export function createDurationNativeRecord(native: any): DurationNativeRecord {
   const instance = Object.create(DurationNativeRecord.prototype)
   setDurationNative(instance, native)
   return instance
-}
-
-export function getDurationNative(record: unknown): any {
-  return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
 export type DurationNativeRecord = _DurationNativeRecord

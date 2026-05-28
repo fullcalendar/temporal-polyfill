@@ -94,7 +94,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getZonedDateTimeRecordIfPresent,
+  getZonedDateTimeRecord,
   setZonedDateTimeRecord,
 } from '../temporalRecords'
 import {
@@ -141,7 +141,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import {
   computeDayCeil,
@@ -167,6 +166,10 @@ type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
 type ZonedDateTimeShimSlots = ReturnType<typeof constructZonedEpochNanoSlots>
+
+export const getZonedDateTimeShimRecordSlots: (
+  record: unknown,
+) => ZonedDateTimeShimSlots = getZonedDateTimeRecord
 
 class _ZonedDateTimeShimRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
@@ -283,12 +286,6 @@ export function createZonedDateTimeShimRecord(
   const instance = Object.create(ZonedDateTimeShimRecord.prototype)
   setZonedDateTimeShimRecordSlots(instance, slots)
   return instance
-}
-
-export function getZonedDateTimeShimRecordSlots(
-  record: unknown,
-): ZonedDateTimeShimSlots {
-  return getZonedDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 export type ZonedDateTimeShimRecord = _ZonedDateTimeShimRecord

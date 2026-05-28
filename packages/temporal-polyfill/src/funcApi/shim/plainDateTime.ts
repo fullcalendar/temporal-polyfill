@@ -82,7 +82,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainDateTimeRecordIfPresent,
+  getPlainDateTimeRecord,
   setPlainDateTimeRecord,
 } from '../temporalRecords'
 import {
@@ -125,7 +125,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import {
   computeDayCeil,
@@ -156,6 +155,10 @@ type Format = DateTimeFormatLike<PlainDateTimeShimRecord>
 type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
 
 type PlainDateTimeShimSlots = ReturnType<typeof constructDateTimeSlots>
+
+export const getPlainDateTimeShimRecordSlots: (
+  record: unknown,
+) => PlainDateTimeShimSlots = getPlainDateTimeRecord
 
 class _PlainDateTimeShimRecord implements DateTimeFields, PlainDateTimeRecord {
   declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
@@ -271,12 +274,6 @@ export function createPlainDateTimeShimRecord(
   const instance = Object.create(PlainDateTimeShimRecord.prototype)
   setPlainDateTimeShimRecordSlots(instance, slots)
   return instance
-}
-
-export function getPlainDateTimeShimRecordSlots(
-  record: unknown,
-): PlainDateTimeShimSlots {
-  return getPlainDateTimeRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainDateTimeShimRecord = _PlainDateTimeShimRecord

@@ -8,7 +8,7 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainMonthDayRecordIfPresent,
+  getPlainMonthDayRecord,
   setPlainMonthDayRecord,
 } from '../temporalRecords'
 import {
@@ -23,12 +23,14 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
 
 type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
+
+export const getPlainMonthDayNative: (record: unknown) => any =
+  getPlainMonthDayRecord
 
 class _PlainMonthDayNativeRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
@@ -86,10 +88,6 @@ export function createPlainMonthDayNativeRecord(
   const instance = Object.create(PlainMonthDayNativeRecord.prototype)
   setPlainMonthDayNative(instance, native)
   return instance
-}
-
-export function getPlainMonthDayNative(record: unknown): any {
-  return getPlainMonthDayRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainMonthDayNativeRecord = _PlainMonthDayNativeRecord

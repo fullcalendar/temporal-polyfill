@@ -9,7 +9,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getInstantRecordIfPresent, setInstantRecord } from '../temporalRecords'
+import { getInstantRecord, setInstantRecord } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -20,7 +20,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import {
   ZonedDateTimeNativeRecord,
@@ -30,6 +29,8 @@ import {
 type InstantRecord = RecordTypes.InstantRecord
 
 type Format = DateTimeFormatLike<InstantNativeRecord>
+
+export const getInstantNative: (record: unknown) => any = getInstantRecord
 
 class _InstantNativeRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
@@ -64,10 +65,6 @@ export function createInstantNativeRecord(native: any): InstantNativeRecord {
   const instance = Object.create(InstantNativeRecord.prototype)
   setInstantNative(instance, native)
   return instance
-}
-
-export function getInstantNative(record: unknown): any {
-  return getInstantRecordIfPresent(record) || invalidRecordType()
 }
 
 export type InstantNativeRecord = _InstantNativeRecord

@@ -11,7 +11,7 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainYearMonthRecordIfPresent,
+  getPlainYearMonthRecord,
   setPlainYearMonthRecord,
 } from '../temporalRecords'
 import {
@@ -31,12 +31,14 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
 
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
+
+export const getPlainYearMonthNative: (record: unknown) => any =
+  getPlainYearMonthRecord
 
 class _PlainYearMonthNativeRecord
   implements YearMonthFields, PlainYearMonthRecord
@@ -106,10 +108,6 @@ export function createPlainYearMonthNativeRecord(
   const instance = Object.create(PlainYearMonthNativeRecord.prototype)
   setPlainYearMonthNative(instance, native)
   return instance
-}
-
-export function getPlainYearMonthNative(record: unknown): any {
-  return getPlainYearMonthRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainYearMonthNativeRecord = _PlainYearMonthNativeRecord

@@ -28,7 +28,7 @@ import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getDurationRecordIfPresent,
+  getDurationRecord,
   getPlainDateRecordIfPresent,
   getPlainDateTimeRecordIfPresent,
   getZonedDateTimeRecordIfPresent,
@@ -38,12 +38,15 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 
 type DurationRecord = RecordTypes.DurationRecord
 
 type DurationShimSlots = ReturnType<typeof constructDurationSlots>
+
+export const getDurationShimRecordSlots: (
+  record: unknown,
+) => DurationShimSlots = getDurationRecord
 
 class _DurationShimRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
@@ -140,10 +143,6 @@ export function createDurationShimRecord(
   const instance = Object.create(DurationShimRecord.prototype)
   setDurationShimRecordSlots(instance, slots)
   return instance
-}
-
-export function getDurationShimRecordSlots(record: unknown): DurationShimSlots {
-  return getDurationRecordIfPresent(record) || invalidRecordType()
 }
 
 export type DurationShimRecord = _DurationShimRecord

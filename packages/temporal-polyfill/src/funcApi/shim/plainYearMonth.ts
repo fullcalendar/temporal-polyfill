@@ -39,7 +39,7 @@ import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainYearMonthRecordIfPresent,
+  getPlainYearMonthRecord,
   setPlainYearMonthRecord,
 } from '../temporalRecords'
 import {
@@ -59,7 +59,6 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
-  invalidRecordType,
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
@@ -68,6 +67,10 @@ type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
 type Format = DateTimeFormatLike<PlainYearMonthShimRecord>
 
 type PlainYearMonthShimSlots = ReturnType<typeof constructYearMonthSlots>
+
+export const getPlainYearMonthShimRecordSlots: (
+  record: unknown,
+) => PlainYearMonthShimSlots = getPlainYearMonthRecord
 
 class _PlainYearMonthShimRecord
   implements YearMonthFields, PlainYearMonthRecord
@@ -144,12 +147,6 @@ export function createPlainYearMonthShimRecord(
   const instance = Object.create(PlainYearMonthShimRecord.prototype)
   setPlainYearMonthShimRecordSlots(instance, slots)
   return instance
-}
-
-export function getPlainYearMonthShimRecordSlots(
-  record: unknown,
-): PlainYearMonthShimSlots {
-  return getPlainYearMonthRecordIfPresent(record) || invalidRecordType()
 }
 
 export type PlainYearMonthShimRecord = _PlainYearMonthShimRecord
