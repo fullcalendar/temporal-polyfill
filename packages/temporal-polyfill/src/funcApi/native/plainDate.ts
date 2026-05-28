@@ -12,6 +12,7 @@ import { DateUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainDateRecordIfPresent,
   setPlainDateRecord,
@@ -52,9 +53,13 @@ import {
   createZonedDateTimeNativeRecord,
 } from './zonedDateTime'
 
+type PlainDateRecord = RecordTypes.PlainDateRecord
+
 type Format = DateTimeFormatLike<PlainDateNativeRecord>
 
-class _PlainDateNativeRecord implements DateFields {
+class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
+  declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,

@@ -4,45 +4,47 @@ import { DateObj, YearMonthObj } from './utils.js'
 
 export function roundToYear<T extends YearMonthObj>(
   date: T,
-  options?: Temporal.RoundingMode | RoundingOptions,
+  options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfYear(date)
-  const duration = start.until(date, normalizeRoundingOptions('year', options))
+  const duration = start.until(date as any, normalizeRoundingOptions('year', options))
   return start.add(duration)
 }
 
 export function roundToMonth<T extends DateObj>(
   date: T,
-  options?: Temporal.RoundingMode | RoundingOptions,
+  options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfMonth(date)
-  const duration = start.until(date, normalizeRoundingOptions('month', options))
+  const duration = start.until(date as any, normalizeRoundingOptions('month', options))
   return start.add(duration)
 }
 
 export function roundToWeek<T extends DateObj>(
   date: T,
-  options?: Temporal.RoundingMode | RoundingOptions,
+  options?: RoundingMode | RoundingOptions,
 ) {
   const start = startOfWeek(date)
-  const duration = start.until(date, normalizeRoundingOptions('week', options))
+  const duration = start.until(date as any, normalizeRoundingOptions('week', options))
   return start.add(duration)
 }
 
 // Options
 // -----------------------------------------------------------------------------
 
+type RoundingMode = Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>['roundingMode']
+
 // for big units only
 export type RoundingOptions = {
-  roundingMode?: Temporal.RoundingMode
+  roundingMode?: RoundingMode
   roundingIncrement?: 1
 }
 
 export function normalizeRoundingOptions(
-  forcedUnit: Temporal.DateTimeUnit,
-  options: Temporal.RoundingMode | RoundingOptions | undefined,
+  forcedUnit: 'week' | 'month' | 'year',
+  options: RoundingMode | RoundingOptions | undefined,
 ): {
-  roundingMode: Temporal.RoundingMode
+  roundingMode: RoundingMode
   smallestUnit: any // HACK
 } {
   if (typeof options === 'string') {

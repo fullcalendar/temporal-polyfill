@@ -52,6 +52,7 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import type * as RecordTypes from '../recordTypes'
 import {
   getPlainDateRecordIfPresent,
   setPlainDateRecord,
@@ -122,11 +123,15 @@ import {
   createZonedDateTimeShimRecord,
 } from './zonedDateTime'
 
+type PlainDateRecord = RecordTypes.PlainDateRecord
+
 type Format = DateTimeFormatLike<PlainDateShimRecord>
 
 type PlainDateShimSlots = ReturnType<typeof constructDateSlots>
 
-class _PlainDateShimRecord implements DateFields {
+class _PlainDateShimRecord implements DateFields, PlainDateRecord {
+  declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
+
   constructor(
     isoYear: number,
     isoMonth: number,

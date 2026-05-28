@@ -158,19 +158,19 @@ export type InstantDisplayOptions = { timeZone?: string } & TimeDisplayOptions
 export type InstantDisplayTuple = [string | undefined, ...TimeDisplayTuple]
 
 export interface OverflowOptions {
-  overflow?: TemporalSpec.AssignmentOptions['overflow']
+  overflow?: "constrain" | "reject" | undefined
 }
 
 export interface EpochDisambigOptions {
-  disambiguation?: TemporalSpec.ToInstantOptions['disambiguation']
+  disambiguation?: "compatible" | "earlier" | "later" | "reject" | undefined
 }
 
 export interface OffsetDisambigOptions {
-  offset?: TemporalSpec.OffsetDisambiguationOptions['offset']
+  offset?: "auto" | "never" | undefined;
 }
 
 export interface CalendarDisplayOptions {
-  calendarName?: TemporalSpec.ShowCalendarOption['calendarName']
+  calendarName?: "auto" | "always" | "never" | "critical" | undefined;
 }
 
 export interface TimeZoneDisplayOptions {
@@ -181,22 +181,21 @@ export interface OffsetDisplayOptions {
   offset?: TemporalSpec.ZonedDateTimeToStringOptions['offset']
 }
 
-export type RoundingModeName =
-  TemporalSpec.DifferenceOptions<any>['roundingMode']
+export type RoundingModeName = TemporalSpec.RoundingOptions<TemporalSpec.DateUnit | TemporalSpec.TimeUnit>['roundingMode']
 
 export interface RoundingModeOptions {
   roundingMode?: RoundingModeName
 }
 
 export interface RoundingIncOptions {
-  roundingIncrement?: TemporalSpec.DifferenceOptions<any>['roundingIncrement']
+  roundingIncrement?: TemporalSpec.RoundingOptions<TemporalSpec.DateUnit | TemporalSpec.TimeUnit>['roundingIncrement']
 }
 
 export interface SubsecDigitsOptions {
   fractionalSecondDigits?: SubsecDigits // TODO: accept 'auto' ?
 }
 
-export type DirectionName = TemporalSpec.TransitionDirection
+export type DirectionName = "next" | "previous"
 
 export interface DirectionOptions {
   direction: DirectionName
