@@ -376,7 +376,7 @@ function buildTerserPlugin({
     compress: {
       ecma: 2018,
       passes: 3, // enough to remove dead object assignment, get lower size
-      keep_fargs: false, // remove unused function args
+      keep_fargs: true, // keep explicit =undefined params that define method .length
       unsafe_arrows: true,
       unsafe_methods: true,
       booleans_as_integers: true,

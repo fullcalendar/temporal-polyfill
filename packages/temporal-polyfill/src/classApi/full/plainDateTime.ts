@@ -258,7 +258,9 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  withPlainTime(plainTimeArg?: PlainTimeArg): PlainDateTime {
+  withPlainTime(
+    plainTimeArg: PlainTimeArg | undefined = undefined,
+  ): PlainDateTime {
     const slots = getPlainDateTimeSlots(this)
     return createPlainDateTime(
       createPlainDateTimeFromRefinedFields(
@@ -347,7 +349,7 @@ export class PlainDateTime implements DateTimeFields {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepPlainDateTimeFormat(
@@ -358,7 +360,7 @@ export class PlainDateTime implements DateTimeFields {
     return format.format(epochMilli)
   }
 
-  toString(options?: DateTimeDisplayOptions): string {
+  toString(options: DateTimeDisplayOptions | undefined = undefined): string {
     return formatPlainDateTimeIso(getPlainDateTimeSlots(this), options)
   }
 

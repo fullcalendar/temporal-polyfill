@@ -39,7 +39,11 @@ import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
+import {
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../../internal/optionsModel'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../../internal/units'
@@ -264,7 +268,9 @@ export class PlainDate implements DateFields {
     )
   }
 
-  toPlainDateTime(plainTimeArg?: PlainTimeArg): PlainDateTime {
+  toPlainDateTime(
+    plainTimeArg: PlainTimeArg | undefined = undefined,
+  ): PlainDateTime {
     const slots = getPlainDateSlots(this)
     return createPlainDateTime(
       createPlainDateTimeFromRefinedFields(
@@ -286,7 +292,7 @@ export class PlainDate implements DateFields {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepPlainDateFormat(
@@ -297,8 +303,8 @@ export class PlainDate implements DateFields {
     return format.format(epochMilli)
   }
 
-  toString(): string {
-    return formatPlainDateIso(getPlainDateSlots(this))
+  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+    return formatPlainDateIso(getPlainDateSlots(this), options)
   }
 
   toJSON(): string {

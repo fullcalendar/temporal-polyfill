@@ -33,7 +33,11 @@ import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { DiffOptions, OverflowOptions } from '../../internal/optionsModel'
+import {
+  CalendarDisplayOptions,
+  DiffOptions,
+  OverflowOptions,
+} from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainYearMonthFormat } from '../intlFormatConfig'
@@ -213,7 +217,7 @@ export class PlainYearMonth implements YearMonthFields {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepPlainYearMonthFormat(
@@ -224,8 +228,8 @@ export class PlainYearMonth implements YearMonthFields {
     return format.format(epochMilli)
   }
 
-  toString(): string {
-    return formatPlainYearMonthIso(getPlainYearMonthSlots(this))
+  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+    return formatPlainYearMonthIso(getPlainYearMonthSlots(this), options)
   }
 
   toJSON(): string {

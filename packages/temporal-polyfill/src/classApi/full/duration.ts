@@ -26,6 +26,7 @@ import {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
+  TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { RelativeToSlots } from '../../internal/relativeMath'
 import { createDateSlots } from '../../internal/slots'
@@ -206,14 +207,17 @@ export class Duration implements DurationFields {
     )
   }
 
-  toLocaleString(locales?: LocalesArg, options?: any): string {
+  toLocaleString(
+    locales: LocalesArg | undefined = undefined,
+    options?: any,
+  ): string {
     return (Intl as any).DurationFormat
       ? new (Intl as any).DurationFormat(locales, options).format(this)
-      : formatDurationIso(getDurationSlots(this))
+      : formatDurationIso(getDurationSlots(this), options)
   }
 
-  toString(): string {
-    return formatDurationIso(getDurationSlots(this))
+  toString(options: TimeDisplayOptions | undefined = undefined): string {
+    return formatDurationIso(getDurationSlots(this), options)
   }
 
   toJSON(): string {

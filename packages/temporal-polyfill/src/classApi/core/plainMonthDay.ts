@@ -28,7 +28,10 @@ import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { OverflowOptions } from '../../internal/optionsModel'
+import {
+  CalendarDisplayOptions,
+  OverflowOptions,
+} from '../../internal/optionsModel'
 import { isObjectLike } from '../../internal/utils'
 import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'
@@ -109,7 +112,7 @@ export class PlainMonthDay implements MonthDayFields {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepPlainMonthDayFormat(
@@ -120,8 +123,8 @@ export class PlainMonthDay implements MonthDayFields {
     return format.format(epochMilli)
   }
 
-  toString(): string {
-    return formatPlainMonthDayIso(getPlainMonthDaySlots(this))
+  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+    return formatPlainMonthDayIso(getPlainMonthDaySlots(this), options)
   }
 
   toJSON(): string {

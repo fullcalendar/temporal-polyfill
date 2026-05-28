@@ -313,7 +313,9 @@ export class ZonedDateTime {
     })
   }
 
-  withPlainTime(plainTimeArg?: PlainTimeArg): ZonedDateTime {
+  withPlainTime(
+    plainTimeArg: PlainTimeArg | undefined = undefined,
+  ): ZonedDateTime {
     return createZonedDateTime(
       zonedDateTimeWithPlainTime(
         getZonedDateTimeSlots(this),
@@ -410,8 +412,8 @@ export class ZonedDateTime {
   }
 
   toLocaleString(
-    locales: LocalesArg,
-    options: Intl.DateTimeFormatOptions = {},
+    locales: LocalesArg | undefined = undefined,
+    options: Intl.DateTimeFormatOptions | undefined = undefined,
   ): string {
     const [format, epochMilli] = prepZonedDateTimeFormat(
       locales,
@@ -421,7 +423,9 @@ export class ZonedDateTime {
     return format.format(epochMilli)
   }
 
-  toString(options?: ZonedDateTimeDisplayOptions): string {
+  toString(
+    options: ZonedDateTimeDisplayOptions | undefined = undefined,
+  ): string {
     return formatZonedDateTimeIso(getZonedDateTimeSlots(this), options)
   }
 

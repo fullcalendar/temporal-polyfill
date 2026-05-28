@@ -132,7 +132,7 @@ export class Instant {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepInstantFormat(
@@ -143,7 +143,7 @@ export class Instant {
     return format.format(epochMilli)
   }
 
-  toString(options?: InstantDisplayOptions): string {
+  toString(options: InstantDisplayOptions | undefined = undefined): string {
     return formatInstantIso(refineTimeZoneArg, getInstantSlots(this), options)
   }
 

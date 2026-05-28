@@ -1,2 +1,19 @@
-Baseline:     20159
-After class:  21043
+Baseline
+  20159
+After class
+  21043
+After small fixes and method.length fixes
+  21071
+
+Method length note
+  Temporal prototype methods often need optional arguments while still reporting
+  length 0. In JavaScript, Function#length counts parameters only up to the
+  first defaulted parameter, so `toString(options = undefined)` has length 0.
+  For multi-arg methods like `toLocaleString(locales = undefined, options)`,
+  only the first parameter needs the explicit default; later parameters are
+  already ignored by Function#length.
+
+  Terser normally removes semantically redundant `= undefined` defaults unless
+  compress.keep_fargs is enabled. Keep that setting on, otherwise the build can
+  rewrite `method(arg = undefined)` to `method(arg)` and regress descriptor
+  test262 length checks.

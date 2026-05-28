@@ -20,6 +20,7 @@ import {
   DiffOptions,
   OverflowOptions,
   RoundingOptions,
+  TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
@@ -151,7 +152,7 @@ export class PlainTime implements TimeFields {
   }
 
   toLocaleString(
-    locales?: LocalesArg,
+    locales: LocalesArg | undefined = undefined,
     options?: Intl.DateTimeFormatOptions,
   ): string {
     const [format, epochMilli] = prepPlainTimeFormat(
@@ -162,8 +163,8 @@ export class PlainTime implements TimeFields {
     return format.format(epochMilli)
   }
 
-  toString(): string {
-    return formatPlainTimeIso(getPlainTimeSlots(this))
+  toString(options: TimeDisplayOptions | undefined = undefined): string {
+    return formatPlainTimeIso(getPlainTimeSlots(this), options)
   }
 
   toJSON(): string {
