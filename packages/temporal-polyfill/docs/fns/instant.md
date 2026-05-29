@@ -510,8 +510,6 @@ const hours = instant
   .total({ unit: 'hours' })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 This should preserve exact totals when no rounding mode is provided.
 
 ### `diffMinutes`
@@ -538,8 +536,6 @@ const minutes = instant
   })
   .total({ unit: 'minutes' })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -568,8 +564,6 @@ const seconds = instant
   .total({ unit: 'seconds' })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 This should preserve exact totals when no rounding mode is provided.
 
 ### `diffMilliseconds`
@@ -596,8 +590,6 @@ const milliseconds = instant
   })
   .total({ unit: 'milliseconds' })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -626,8 +618,6 @@ const microseconds = instant
   .total({ unit: 'microseconds' })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 This should preserve exact totals when no rounding mode is provided.
 
 ### `diffNanoseconds`
@@ -654,8 +644,6 @@ const nanoseconds = instant
   })
   .total({ unit: 'nanoseconds' })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 This should preserve exact totals when no rounding mode is provided.
 

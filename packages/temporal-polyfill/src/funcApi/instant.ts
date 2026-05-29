@@ -2,6 +2,8 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import {
   DiffOptions,
   InstantDisplayOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
 } from '../internal/optionsModel'
 import { TimeUnitName } from '../internal/units'
@@ -130,6 +132,42 @@ export const diff: (
   otherRecord: InstantRecord,
   options?: DiffOptions<TimeUnitName>,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
+
+export const diffHours: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffHours : Shim.diffHours
+
+export const diffMinutes: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
+
+export const diffSeconds: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
+
+export const diffMilliseconds: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
+
+export const diffMicroseconds: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
+
+export const diffNanoseconds: (
+  record: InstantRecord,
+  otherRecord: InstantRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
 
 export const round: (
   record: InstantRecord,

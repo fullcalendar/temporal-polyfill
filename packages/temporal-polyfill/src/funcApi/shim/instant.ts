@@ -4,6 +4,7 @@ import {
   bigNanoInMilli,
   bigNanoInMinute,
   bigNanoInSec,
+  divideBigNanoToExactNumber,
 } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
@@ -28,9 +29,12 @@ import { moveInstant } from '../../internal/move'
 import {
   DiffOptions,
   InstantDisplayOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
 } from '../../internal/optionsModel'
-import { roundInstant } from '../../internal/round'
+import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
+import { roundBigNanoToInc, roundInstant } from '../../internal/round'
 import {
   createEpochNanoSlots,
   getEpochMilli,
@@ -39,8 +43,17 @@ import {
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { TimeUnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import {
+  TimeUnit,
+  TimeUnitName,
+  Unit,
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
+} from '../../internal/units'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
@@ -291,6 +304,50 @@ export function diff(
   const resSlots = diffInstants(false, slots, otherSlots, options)
   return createDurationShimRecord(resSlots)
 }
+
+// Instants have no calendar or time-zone balancing, so unit diffs are exact
+// epoch-nanosecond math until the caller opts into rounding.
+// TODO: DRY with ZonedDateTime's
+function diffTimeUnit(
+  unit: TimeUnit,
+  nanoInUnit: number,
+  record: InstantShimRecord,
+  otherRecord: InstantShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const slots = getInstantShimRecordSlots(record)
+  const otherSlots = getInstantShimRecordSlots(otherRecord)
+
+  let nanoDiff = otherSlots.epochNanoseconds - slots.epochNanoseconds
+
+  if (roundingInc) {
+    nanoDiff = roundBigNanoToInc(
+      nanoDiff,
+      BigInt(nanoInUnit * roundingInc),
+      roundingMode!,
+    )
+  }
+
+  return roundingInc
+    ? Number(nanoDiff / BigInt(nanoInUnit))
+    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
+}
+
+export const diffHours = bindArgs(diffTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(diffTimeUnit, Unit.Minute, nanoInMinute)
+export const diffSeconds = bindArgs(diffTimeUnit, Unit.Second, nanoInSec)
+export const diffMilliseconds = bindArgs(
+  diffTimeUnit,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+export const diffMicroseconds = bindArgs(
+  diffTimeUnit,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 export function round(
   record: InstantShimRecord,

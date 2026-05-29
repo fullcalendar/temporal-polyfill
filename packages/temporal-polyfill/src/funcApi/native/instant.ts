@@ -1,8 +1,11 @@
 import { Temporal } from 'temporal-spec'
+import * as TemporalUtils from 'temporal-utils'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
   InstantDisplayOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { TimeUnitName, UnitName } from '../../internal/units'
@@ -228,6 +231,78 @@ export function diff(
   const otherNative = getInstantNative(otherRecord)
   const resNative = native.until(otherNative, options)
   return createDurationNativeRecord(resNative)
+}
+
+export function diffHours(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffHours(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
+}
+
+export function diffMinutes(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMinutes(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
+}
+
+export function diffSeconds(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffSeconds(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
+}
+
+export function diffMilliseconds(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMilliseconds(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
+}
+
+export function diffMicroseconds(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMicroseconds(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
+}
+
+export function diffNanoseconds(
+  record0: InstantNativeRecord,
+  record1: InstantNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffNanoseconds(
+    getInstantNative(record0) as any,
+    getInstantNative(record1) as any,
+    options,
+  )
 }
 
 export function round(

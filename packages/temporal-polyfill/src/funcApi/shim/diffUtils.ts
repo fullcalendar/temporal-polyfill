@@ -240,6 +240,7 @@ function diffPlainDayLikeUnit(
 // Time Units
 // -----------------------------------------------------------------------------
 
+// TODO: DRY with Instant's
 function diffTimeUnit(
   markerToEpochNano: MarkerToEpochNano,
   unit: TimeUnit,

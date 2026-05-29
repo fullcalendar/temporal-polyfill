@@ -127,6 +127,51 @@ describe('diff', () => {
   })
 })
 
+describe('diff*', () => {
+  it('totals exact time units without options', () => {
+    const inst0 = InstantFns.create(0n)
+    const inst1 = InstantFns.create(5400000000000n)
+
+    expect(InstantFns.diffHours(inst0, inst1)).toBe(1.5)
+    expect(InstantFns.diffMinutes(inst0, inst1)).toBe(90)
+    expect(InstantFns.diffSeconds(inst0, inst1)).toBe(5400)
+    expect(InstantFns.diffMilliseconds(inst0, inst1)).toBe(5400000)
+    expect(InstantFns.diffMicroseconds(inst0, inst1)).toBe(5400000000)
+    expect(InstantFns.diffNanoseconds(inst0, inst1)).toBe(5400000000000)
+  })
+
+  it('preserves direction', () => {
+    const inst0 = InstantFns.create(0n)
+    const inst1 = InstantFns.create(5400000000000n)
+
+    expect(InstantFns.diffHours(inst1, inst0)).toBe(-1.5)
+    expect(InstantFns.diffSeconds(inst1, inst0)).toBe(-5400)
+  })
+
+  it('rounds with string and object options', () => {
+    const inst0 = InstantFns.create(0n)
+    const inst1 = InstantFns.create(5400000000000n)
+    const inst2 = InstantFns.create(6000000000000n)
+
+    expect(InstantFns.diffHours(inst0, inst1, 'floor')).toBe(1)
+    expect(
+      InstantFns.diffMinutes(inst0, inst2, {
+        roundingIncrement: 30,
+        roundingMode: 'floor',
+      }),
+    ).toBe(90)
+  })
+
+  it('rejects invalid rounding options', () => {
+    const inst0 = InstantFns.create(0n)
+    const inst1 = InstantFns.create(5400000000000n)
+
+    expect(() =>
+      InstantFns.diffNanoseconds(inst0, inst1, 'halfExpanddd' as any),
+    ).toThrow(RangeError)
+  })
+})
+
 describe('round', () => {
   it('works without simple string unit', () => {
     const inst0 = InstantFns.fromString('2024-01-01T00:30:00+01:00')
