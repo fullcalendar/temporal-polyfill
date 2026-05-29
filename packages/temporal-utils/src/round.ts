@@ -1,15 +1,14 @@
+import type { Temporal } from 'temporal-spec'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import {
-  DateObj,
-  RoundingMathOptions,
-  YearMonthObj,
-  normalizeOptions,
-} from './utils.js'
+import { RoundingMathOptions, normalizeOptions } from './utils.js'
 
-export function roundToYear<T extends YearMonthObj>(
-  date: T,
-  options?: RoundingMathOptions,
-): T {
+export function roundToYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options?: RoundingMathOptions): T {
   const start = startOfYear(date)
   const duration = start.until(
     date as any,
@@ -18,10 +17,12 @@ export function roundToYear<T extends YearMonthObj>(
   return start.add(duration) as T
 }
 
-export function roundToMonth<T extends DateObj>(
-  date: T,
-  options?: RoundingMathOptions,
-): T {
+export function roundToMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options?: RoundingMathOptions): T {
   const start = startOfMonth(date)
   const duration = start.until(
     date as any,
@@ -30,10 +31,12 @@ export function roundToMonth<T extends DateObj>(
   return start.add(duration) as T
 }
 
-export function roundToWeek<T extends DateObj>(
-  date: T,
-  options?: RoundingMathOptions,
-): T {
+export function roundToWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options?: RoundingMathOptions): T {
   const start = startOfWeek(date)
   const duration = start.until(
     date as any,

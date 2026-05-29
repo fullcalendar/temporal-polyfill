@@ -1,4 +1,4 @@
-import { DateObj, DateTimeObj, TimeObj, YearMonthObj } from './utils.js'
+import type { Temporal } from 'temporal-spec'
 import { withDayOfWeek } from './with.js'
 
 const zeroTimeFields = {
@@ -10,8 +10,21 @@ const zeroTimeFields = {
   nanosecond: 0,
 }
 
-export function startOfYear<T extends YearMonthObj>(date: T): T {
-  if ((date as DateObj).day === undefined) {
+export function startOfYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
+  if (
+    (
+      date as
+        | Temporal.PlainDate
+        | Temporal.PlainDateTime
+        | Temporal.ZonedDateTime
+    ).day === undefined
+  ) {
     return date.with({ month: 1 }) as T
   }
 
@@ -22,28 +35,48 @@ export function startOfYear<T extends YearMonthObj>(date: T): T {
   }) as T
 }
 
-export function startOfMonth<T extends DateObj>(date: T): T {
+export function startOfMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return date.with({
     day: 1,
     ...zeroTimeFields,
   }) as T
 }
 
-export function startOfWeek<T extends DateObj>(date: T): T {
+export function startOfWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   const movedDate = withDayOfWeek(date, 1)
-  return (movedDate as DateTimeObj).withPlainTime
-    ? ((movedDate as DateTimeObj).withPlainTime() as T)
+  return (movedDate as Temporal.PlainDateTime | Temporal.ZonedDateTime)
+    .withPlainTime
+    ? ((
+        movedDate as Temporal.PlainDateTime | Temporal.ZonedDateTime
+      ).withPlainTime() as T)
     : movedDate
 }
 
-export function startOfDay<T extends DateTimeObj>(dateTime: T): T {
+export function startOfDay<
+  T extends Temporal.PlainDateTime | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   if (dateTime.withPlainTime) {
     return dateTime.withPlainTime() as T
   }
   return dateTime // in case PlainDate passed in, no error
 }
 
-export function startOfHour<T extends TimeObj>(dateTime: T): T {
+export function startOfHour<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   return dateTime.with({
     minute: 0,
     second: 0,
@@ -53,7 +86,12 @@ export function startOfHour<T extends TimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfMinute<T extends TimeObj>(dateTime: T): T {
+export function startOfMinute<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   return dateTime.with({
     second: 0,
     millisecond: 0,
@@ -62,7 +100,12 @@ export function startOfMinute<T extends TimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfSecond<T extends TimeObj>(dateTime: T): T {
+export function startOfSecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   return dateTime.with({
     millisecond: 0,
     microsecond: 0,
@@ -70,14 +113,24 @@ export function startOfSecond<T extends TimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfMillisecond<T extends TimeObj>(dateTime: T): T {
+export function startOfMillisecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   return dateTime.with({
     microsecond: 0,
     nanosecond: 0,
   }) as T
 }
 
-export function startOfMicrosecond<T extends TimeObj>(dateTime: T): T {
+export function startOfMicrosecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(dateTime: T): T {
   return dateTime.with({
     nanosecond: 0,
   }) as T

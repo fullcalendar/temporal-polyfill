@@ -1,13 +1,14 @@
-import { DateObj, normalizeNumberInRange, toInteger } from './utils.js'
-import type { OverflowOptions } from './utils.js'
+import type { Temporal } from 'temporal-spec'
+import { normalizeNumberInRange, toInteger } from './utils.js'
 
 const isoCalendarId = 'iso8601'
 
-export function withDayOfYear<T extends DateObj>(
-  date: T,
-  dayOfYear: number,
-  options?: OverflowOptions,
-): T {
+export function withDayOfYear<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, dayOfYear: number, options?: Temporal.OverflowOptions): T {
   const normDayOfYear = normalizeNumberInRange(
     toInteger(dayOfYear),
     1,
@@ -19,11 +20,12 @@ export function withDayOfYear<T extends DateObj>(
   }) as T
 }
 
-export function withDayOfWeek<T extends DateObj>(
-  date: T,
-  dayOfWeek: number,
-  options?: OverflowOptions,
-): T {
+export function withDayOfWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, dayOfWeek: number, options?: Temporal.OverflowOptions): T {
   const normDayOfWeek = normalizeNumberInRange(
     toInteger(dayOfWeek),
     1,
@@ -35,11 +37,12 @@ export function withDayOfWeek<T extends DateObj>(
   }) as T
 }
 
-export function withWeekOfYear<T extends DateObj>(
-  date: T,
-  weekOfYear: number,
-  options?: OverflowOptions,
-): T {
+export function withWeekOfYear<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, weekOfYear: number, options?: Temporal.OverflowOptions): T {
   if (date.calendarId !== isoCalendarId) {
     throw new RangeError('Week numbers not supported')
   }

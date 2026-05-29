@@ -6,12 +6,6 @@ export const nanoInSec = 1000000000
 export const nanoInMinute = 60000000000
 export const nanoInHour = 3600000000000
 
-// TODO: simplify this!
-export type DateTimeObj = Temporal.PlainDateTime | Temporal.ZonedDateTime
-export type TimeObj = Temporal.PlainTime | DateTimeObj
-export type DateObj = Temporal.PlainDate | DateTimeObj
-export type YearMonthObj = Temporal.PlainYearMonth | DateObj
-
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
 type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
 
@@ -19,12 +13,6 @@ export type RoundingMathOptions = Pick<
   RoundingOptionBag,
   'roundingIncrement' | 'roundingMode'
 >
-
-type Overflow = 'constrain' | 'reject'
-
-export interface OverflowOptions {
-  overflow?: Overflow
-}
 
 export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
@@ -76,7 +64,7 @@ export function normalizeNumberInRange(
   num: number,
   min: number,
   max: number, // inclusive
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): number {
   const clamped = Math.min(Math.max(num, min), max)
 
@@ -92,7 +80,9 @@ Match Temporal's field overflow shape without depending on the polyfill's
 internal option readers. Undefined defaults to constrain; explicit reject asks
 for exact in-range input.
 */
-function normalizeOverflow(options: OverflowOptions | undefined): Overflow {
+function normalizeOverflow(
+  options: Temporal.OverflowOptions | undefined,
+): NonNullable<Temporal.OverflowOptions['overflow']> {
   options = normalizeOptions(options)
 
   const overflow = options.overflow

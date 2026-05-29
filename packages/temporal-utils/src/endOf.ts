@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   startOfHour,
   startOfMicrosecond,
@@ -15,41 +16,66 @@ import {
   nanoInMinute,
   nanoInSec,
 } from './utils.js'
-import { DateObj, DateTimeObj, TimeObj, YearMonthObj } from './utils.js'
 
-export function endOfYear<T extends YearMonthObj>(date: T): T {
+export function endOfYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfYear(date)
     .add({ years: 1 })
     .subtract(
-      (date as DateObj).day === undefined
+      (
+        date as
+          | Temporal.PlainDate
+          | Temporal.PlainDateTime
+          | Temporal.ZonedDateTime
+      ).day === undefined
         ? { months: 1 }
-        : (date as DateTimeObj).nanosecond !== undefined
+        : (date as Temporal.PlainDateTime | Temporal.ZonedDateTime)
+              .nanosecond !== undefined
           ? { nanoseconds: 1 }
           : { days: 1 },
     ) as T
 }
 
-export function endOfMonth<T extends DateObj>(date: T): T {
+export function endOfMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfMonth(date)
     .add({ months: 1 })
     .subtract(
-      (date as DateTimeObj).nanosecond !== undefined
+      (date as Temporal.PlainDateTime | Temporal.ZonedDateTime).nanosecond !==
+        undefined
         ? { nanoseconds: 1 }
         : { days: 1 },
     ) as T
 }
 
-export function endOfWeek<T extends DateObj>(date: T): T {
+export function endOfWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfWeek(date)
     .add({ weeks: 1 })
     .subtract(
-      (date as DateTimeObj).nanosecond !== undefined
+      (date as Temporal.PlainDateTime | Temporal.ZonedDateTime).nanosecond !==
+        undefined
         ? { nanoseconds: 1 }
         : { days: 1 },
     ) as T
 }
 
-export function endOfDay<T extends DateTimeObj>(date: T): T {
+export function endOfDay<
+  T extends Temporal.PlainDateTime | Temporal.ZonedDateTime,
+>(date: T): T {
   if (date.withPlainTime) {
     return date
       .withPlainTime()
@@ -59,22 +85,47 @@ export function endOfDay<T extends DateTimeObj>(date: T): T {
   return date // in case PlainDate passed in, not moved to next day
 }
 
-export function endOfHour<T extends TimeObj>(date: T): T {
+export function endOfHour<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfHour(date).add({ nanoseconds: nanoInHour - 1 }) as T
 }
 
-export function endOfMinute<T extends TimeObj>(date: T): T {
+export function endOfMinute<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfMinute(date).add({ nanoseconds: nanoInMinute - 1 }) as T
 }
 
-export function endOfSecond<T extends TimeObj>(date: T): T {
+export function endOfSecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfSecond(date).add({ nanoseconds: nanoInSec - 1 }) as T
 }
 
-export function endOfMillisecond<T extends TimeObj>(date: T): T {
+export function endOfMillisecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfMillisecond(date).add({ nanoseconds: nanoInMilli - 1 }) as T
 }
 
-export function endOfMicrosecond<T extends TimeObj>(date: T): T {
+export function endOfMicrosecond<
+  T extends
+    | Temporal.PlainTime
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T {
   return startOfMicrosecond(date).add({ nanoseconds: nanoInMicro - 1 }) as T
 }

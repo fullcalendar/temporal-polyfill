@@ -1,13 +1,20 @@
 import type { Temporal } from 'temporal-spec'
-import { DateObj, TimeObj, YearMonthObj } from './utils.js'
 
-type DiffObj = Temporal.Instant | TimeObj | YearMonthObj
-
-export type DiffFunc<T extends DiffObj = DiffObj> = (
-  date0: T,
-  date1: T,
-  options?: RoundingMode | DiffOptions,
-) => number
+export type DiffFunc<
+  T extends
+    | Temporal.Instant
+    | Temporal.PlainTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime =
+    | Temporal.Instant
+    | Temporal.PlainTime
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+> = (date0: T, date1: T, options?: RoundingMode | DiffOptions) => number
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
   return (date0: any, date1: any, options) => {
@@ -42,7 +49,7 @@ function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
       !('day' in date0) && 'toPlainDate' in date0
         ? date0.toPlainDate({ day: 1 })
         : date0
-    ) as DateObj
+    ) as Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime
     return duration.total({ unit, relativeTo })
   }
 }
@@ -59,27 +66,59 @@ function isTimeUnit(unit: PluralOnlyUnit): unit is TimeUnit {
   )
 }
 
-export const diffYears = createDiffFunc('years') as DiffFunc<YearMonthObj>
-export const diffMonths = createDiffFunc('months') as DiffFunc<YearMonthObj>
-export const diffWeeks = createDiffFunc('weeks') as DiffFunc<DateObj>
-export const diffDays = createDiffFunc('days') as DiffFunc<DateObj>
+export const diffYears = createDiffFunc('years') as DiffFunc<
+  | Temporal.PlainYearMonth
+  | Temporal.PlainDate
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
+>
+export const diffMonths = createDiffFunc('months') as DiffFunc<
+  | Temporal.PlainYearMonth
+  | Temporal.PlainDate
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
+>
+export const diffWeeks = createDiffFunc('weeks') as DiffFunc<
+  Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime
+>
+export const diffDays = createDiffFunc('days') as DiffFunc<
+  Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime
+>
 export const diffHours = createDiffFunc('hours') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 export const diffMinutes = createDiffFunc('minutes') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 export const diffSeconds = createDiffFunc('seconds') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 export const diffMilliseconds = createDiffFunc('milliseconds') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 export const diffMicroseconds = createDiffFunc('microseconds') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 export const diffNanoseconds = createDiffFunc('nanoseconds') as DiffFunc<
-  Temporal.Instant | TimeObj
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
 >
 
 // Options
