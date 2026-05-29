@@ -5,6 +5,8 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
@@ -275,6 +277,78 @@ export function diff(
   const otherNative = getPlainTimeNative(otherRecord)
   const resNative = native.until(otherNative, options)
   return createDurationNativeRecord(resNative)
+}
+
+export function diffHours(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffHours(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
+}
+
+export function diffMinutes(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMinutes(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
+}
+
+export function diffSeconds(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffSeconds(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
+}
+
+export function diffMilliseconds(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMilliseconds(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
+}
+
+export function diffMicroseconds(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMicroseconds(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
+}
+
+export function diffNanoseconds(
+  record0: PlainTimeNativeRecord,
+  record1: PlainTimeNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffNanoseconds(
+    getPlainTimeNative(record0),
+    getPlainTimeNative(record1),
+    options,
+  )
 }
 
 export function round(

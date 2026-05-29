@@ -197,6 +197,49 @@ describe('diff', () => {
   })
 })
 
+describe('diff*', () => {
+  it('gives exact totals when no rounding mode is provided', () => {
+    const pt0 = PlainTimeFns.create(12)
+    const pt1 = PlainTimeFns.create(13, 30)
+
+    expect(PlainTimeFns.diffHours(pt0, pt1)).toBe(1.5)
+    expect(PlainTimeFns.diffMinutes(pt0, pt1)).toBe(90)
+    expect(PlainTimeFns.diffSeconds(pt0, pt1)).toBe(5400)
+    expect(PlainTimeFns.diffMilliseconds(pt0, pt1)).toBe(5400000)
+    expect(PlainTimeFns.diffMicroseconds(pt0, pt1)).toBe(5400000000)
+    expect(PlainTimeFns.diffNanoseconds(pt0, pt1)).toBe(5400000000000)
+  })
+
+  it('does not wrap across midnight', () => {
+    const pt0 = PlainTimeFns.create(23)
+    const pt1 = PlainTimeFns.create(1)
+
+    expect(PlainTimeFns.diffHours(pt0, pt1)).toBe(-22)
+  })
+
+  it('rounds to the requested unit increment', () => {
+    const pt0 = PlainTimeFns.create(12)
+    const pt1 = PlainTimeFns.create(13, 31)
+
+    expect(PlainTimeFns.diffHours(pt0, pt1, 'floor')).toBe(1)
+    expect(
+      PlainTimeFns.diffMinutes(pt0, pt1, {
+        roundingMode: 'floor',
+        roundingIncrement: 30,
+      }),
+    ).toBe(90)
+  })
+
+  it('validates rounding mode names', () => {
+    const pt0 = PlainTimeFns.create(12)
+    const pt1 = PlainTimeFns.create(13)
+
+    expect(() =>
+      PlainTimeFns.diffNanoseconds(pt0, pt1, 'halfExpanddd' as any),
+    ).toThrow(RangeError)
+  })
+})
+
 describe('round', () => {
   it('works with single unit arg', () => {
     const pt0 = PlainTimeFns.create(12, 30)

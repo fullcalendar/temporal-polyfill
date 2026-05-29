@@ -502,12 +502,9 @@ const hours = InstantFns.diffHours(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const hours = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'hours',
-  })
-  .total({ unit: 'hours' })
+import { diffHours } from 'temporal-utils'
+
+const hours = diffHours(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.
@@ -529,12 +526,9 @@ const minutes = InstantFns.diffMinutes(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const minutes = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'minutes',
-  })
-  .total({ unit: 'minutes' })
+import { diffMinutes } from 'temporal-utils'
+
+const minutes = diffMinutes(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.
@@ -556,12 +550,9 @@ const seconds = InstantFns.diffSeconds(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const seconds = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'seconds',
-  })
-  .total({ unit: 'seconds' })
+import { diffSeconds } from 'temporal-utils'
+
+const seconds = diffSeconds(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.
@@ -583,12 +574,9 @@ const milliseconds = InstantFns.diffMilliseconds(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const milliseconds = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'milliseconds',
-  })
-  .total({ unit: 'milliseconds' })
+import { diffMilliseconds } from 'temporal-utils'
+
+const milliseconds = diffMilliseconds(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.
@@ -610,12 +598,9 @@ const microseconds = InstantFns.diffMicroseconds(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const microseconds = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'microseconds',
-  })
-  .total({ unit: 'microseconds' })
+import { diffMicroseconds } from 'temporal-utils'
+
+const microseconds = diffMicroseconds(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.
@@ -637,12 +622,9 @@ const nanoseconds = InstantFns.diffNanoseconds(instant, otherInstant, options)
 Temporal API:
 
 ```ts
-const nanoseconds = instant
-  .until(otherInstant, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'nanoseconds',
-  })
-  .total({ unit: 'nanoseconds' })
+import { diffNanoseconds } from 'temporal-utils'
+
+const nanoseconds = diffNanoseconds(instant, otherInstant, options)
 ```
 
 This should preserve exact totals when no rounding mode is provided.

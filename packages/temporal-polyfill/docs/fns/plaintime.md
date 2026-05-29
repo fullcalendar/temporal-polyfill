@@ -518,15 +518,10 @@ const hours = PlainTimeFns.diffHours(time, otherTime, options)
 Temporal API:
 
 ```ts
-const hours = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'hours',
-  })
-  .total({ unit: 'hours' })
-```
+import { diffHours } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const hours = diffHours(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -547,15 +542,10 @@ const minutes = PlainTimeFns.diffMinutes(time, otherTime, options)
 Temporal API:
 
 ```ts
-const minutes = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'minutes',
-  })
-  .total({ unit: 'minutes' })
-```
+import { diffMinutes } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const minutes = diffMinutes(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -576,15 +566,10 @@ const seconds = PlainTimeFns.diffSeconds(time, otherTime, options)
 Temporal API:
 
 ```ts
-const seconds = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'seconds',
-  })
-  .total({ unit: 'seconds' })
-```
+import { diffSeconds } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const seconds = diffSeconds(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -605,15 +590,10 @@ const milliseconds = PlainTimeFns.diffMilliseconds(time, otherTime, options)
 Temporal API:
 
 ```ts
-const milliseconds = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'milliseconds',
-  })
-  .total({ unit: 'milliseconds' })
-```
+import { diffMilliseconds } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const milliseconds = diffMilliseconds(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -634,15 +614,10 @@ const microseconds = PlainTimeFns.diffMicroseconds(time, otherTime, options)
 Temporal API:
 
 ```ts
-const microseconds = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'microseconds',
-  })
-  .total({ unit: 'microseconds' })
-```
+import { diffMicroseconds } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const microseconds = diffMicroseconds(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 
@@ -663,15 +638,10 @@ const nanoseconds = PlainTimeFns.diffNanoseconds(time, otherTime, options)
 Temporal API:
 
 ```ts
-const nanoseconds = time
-  .until(otherTime, {
-    ...(typeof options === 'string' ? { roundingMode: options } : options),
-    largestUnit: 'nanoseconds',
-  })
-  .total({ unit: 'nanoseconds' })
-```
+import { diffNanoseconds } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nanoseconds = diffNanoseconds(time, otherTime, options)
+```
 
 This should preserve exact totals when no rounding mode is provided.
 

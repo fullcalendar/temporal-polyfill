@@ -264,6 +264,16 @@ describe('diffHours', () => {
       expect(hoursEven).toBe(4)
     })
   })
+
+  describe('PlainTime', () => {
+    it('gives exact and rounded results', () => {
+      const pt0 = Temporal.PlainTime.from('12:00')
+      const pt1 = Temporal.PlainTime.from('13:30')
+
+      expect(diffHours(pt0, pt1)).toBe(1.5)
+      expect(diffHours(pt0, pt1, 'floor')).toBe(1)
+    })
+  })
 })
 
 describe('diffMinutes', () => {
@@ -305,6 +315,16 @@ describe('diffMinutes', () => {
       })
       expect(minutes).toBe(31)
       expect(minutesEven).toBe(30)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('gives exact and rounded results', () => {
+      const pt0 = Temporal.PlainTime.from('12:00')
+      const pt1 = Temporal.PlainTime.from('12:31:30')
+
+      expect(diffMinutes(pt0, pt1)).toBe(31.5)
+      expect(diffMinutes(pt0, pt1, 'floor')).toBe(31)
     })
   })
 })
@@ -350,6 +370,16 @@ describe('diffSeconds', () => {
       expect(secondsEven).toBe(10)
     })
   })
+
+  describe('PlainTime', () => {
+    it('gives exact and rounded results', () => {
+      const pt0 = Temporal.PlainTime.from('12:30:20')
+      const pt1 = Temporal.PlainTime.from('12:30:31.5')
+
+      expect(diffSeconds(pt0, pt1)).toBe(11.5)
+      expect(diffSeconds(pt0, pt1, 'floor')).toBe(11)
+    })
+  })
 })
 
 describe('diffMilliseconds', () => {
@@ -387,6 +417,16 @@ describe('diffMilliseconds', () => {
       })
       expect(milli).toBe(1667)
       expect(milliEven).toBe(1666)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('gives exact and rounded results', () => {
+      const pt0 = Temporal.PlainTime.from('12:30:20')
+      const pt1 = Temporal.PlainTime.from('12:30:21.6668')
+
+      expect(diffMilliseconds(pt0, pt1)).toBe(1666.8)
+      expect(diffMilliseconds(pt0, pt1, 'halfExpand')).toBe(1667)
     })
   })
 })
@@ -428,6 +468,16 @@ describe('diffMicroseconds', () => {
       expect(microEven).toBe(666)
     })
   })
+
+  describe('PlainTime', () => {
+    it('gives exact and rounded results', () => {
+      const pt0 = Temporal.PlainTime.from('12:30:20')
+      const pt1 = Temporal.PlainTime.from('12:30:20.0006668')
+
+      expect(diffMicroseconds(pt0, pt1)).toBe(666.8)
+      expect(diffMicroseconds(pt0, pt1, 'halfExpand')).toBe(667)
+    })
+  })
 })
 
 describe('diffNanoseconds', () => {
@@ -463,6 +513,21 @@ describe('diffNanoseconds', () => {
         roundingIncrement: 10,
       })
       expect(nano).toBe(670)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('gives exact and increment-aligned results', () => {
+      const pt0 = Temporal.PlainTime.from('12:30:20')
+      const pt1 = Temporal.PlainTime.from('12:30:20.000000666')
+
+      expect(diffNanoseconds(pt0, pt1)).toBe(666)
+      expect(
+        diffNanoseconds(pt0, pt1, {
+          roundingMode: 'halfExpand',
+          roundingIncrement: 10,
+        }),
+      ).toBe(670)
     })
   })
 })

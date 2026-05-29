@@ -1,58 +1,86 @@
 import type { Temporal } from 'temporal-spec'
-import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
+import { DateObj, TimeObj, YearMonthObj } from './utils.js'
 
-export type DiffFunc<T extends YearMonthObj = DateTimeObj> = (
+type DiffObj = Temporal.Instant | TimeObj | YearMonthObj
+
+export type DiffFunc<T extends DiffObj = DiffObj> = (
   date0: T,
   date1: T,
   options?: RoundingMode | DiffOptions,
 ) => number
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
-  return (date0, date1, options) => {
+  return (date0: any, date1: any, options) => {
     const normOptions = normalizeDiffOptions(options)
 
+    // TODO: throw error if unit impossible for input-types?
+    // like diffing years for PlainTime?
+
     if (normOptions.roundingMode) {
-      return date0.until(date1 as any, {
+      return date0.until(date1, {
         ...normOptions,
         largestUnit: unit,
         smallestUnit: unit,
       })[unit]
     }
 
-    return date0
-      .until(date1 as any, {
-        ...normOptions,
-        largestUnit: unit,
-      })
-      .total({
-        unit,
-        relativeTo: getTotalRelativeTo(date0),
-      })
+    const duration = date0.until(date1, {
+      ...normOptions,
+      largestUnit: unit,
+    })
+
+    // Time-unit helpers produce pure elapsed-time totals. This keeps Instant
+    // and PlainTime valid because neither can be used as a `relativeTo` value.
+    if (isTimeUnit(unit)) {
+      return duration.total(unit)
+    }
+
+    // Date-bearing objects need `relativeTo` so totals account for calendar
+    // units and, for ZonedDateTime, time-zone transitions. PlainYearMonth has
+    // month precision, so day 1 gives Duration.total a concrete date anchor.
+    const relativeTo = (
+      !('day' in date0) && 'toPlainDate' in date0
+        ? date0.toPlainDate({ day: 1 })
+        : date0
+    ) as DateObj
+    return duration.total({ unit, relativeTo })
   }
 }
 
-function getTotalRelativeTo(date: YearMonthObj): DateObj {
-  return 'toPlainDate' in date && !('day' in date)
-    ? date.toPlainDate({ day: 1 })
-    : date
+// TODO: more DRY with elsewhere?
+function isTimeUnit(unit: PluralOnlyUnit): unit is TimeUnit {
+  return (
+    unit === 'hours' ||
+    unit === 'minutes' ||
+    unit === 'seconds' ||
+    unit === 'milliseconds' ||
+    unit === 'microseconds' ||
+    unit === 'nanoseconds'
+  )
 }
 
 export const diffYears = createDiffFunc('years') as DiffFunc<YearMonthObj>
 export const diffMonths = createDiffFunc('months') as DiffFunc<YearMonthObj>
 export const diffWeeks = createDiffFunc('weeks') as DiffFunc<DateObj>
 export const diffDays = createDiffFunc('days') as DiffFunc<DateObj>
-export const diffHours = createDiffFunc('hours') as DiffFunc<DateTimeObj>
-export const diffMinutes = createDiffFunc('minutes') as DiffFunc<DateTimeObj>
-export const diffSeconds = createDiffFunc('seconds') as DiffFunc<DateTimeObj>
-export const diffMilliseconds = createDiffFunc(
-  'milliseconds',
-) as DiffFunc<DateTimeObj>
-export const diffMicroseconds = createDiffFunc(
-  'microseconds',
-) as DiffFunc<DateTimeObj>
-export const diffNanoseconds = createDiffFunc(
-  'nanoseconds',
-) as DiffFunc<DateTimeObj>
+export const diffHours = createDiffFunc('hours') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
+export const diffMinutes = createDiffFunc('minutes') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
+export const diffSeconds = createDiffFunc('seconds') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
+export const diffMilliseconds = createDiffFunc('milliseconds') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
+export const diffMicroseconds = createDiffFunc('microseconds') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
+export const diffNanoseconds = createDiffFunc('nanoseconds') as DiffFunc<
+  Temporal.Instant | TimeObj
+>
 
 // Options
 // -----------------------------------------------------------------------------
@@ -60,11 +88,9 @@ export const diffNanoseconds = createDiffFunc(
 type RoundingMode = Temporal.RoundingOptions<
   Temporal.DateUnit | Temporal.TimeUnit
 >['roundingMode']
-type PluralOnlyUnit =
-  | 'years'
-  | 'months'
-  | 'weeks'
-  | 'days'
+type PluralOnlyUnit = 'years' | 'months' | 'weeks' | 'days' | TimeUnit
+
+type TimeUnit =
   | 'hours'
   | 'minutes'
   | 'seconds'

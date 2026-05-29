@@ -1,4 +1,7 @@
-import { bigNanoInUtcDay } from '../../internal/bigNano'
+import {
+  bigNanoInUtcDay,
+  divideBigNanoToExactNumber,
+} from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
@@ -14,17 +17,22 @@ import { movePlainTime } from '../../internal/move'
 import {
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
   RoundingOptions,
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
-import { roundPlainTime } from '../../internal/round'
+import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
+import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   nanoToTimeAndDay,
   timeFieldsToNano,
 } from '../../internal/timeFieldMath'
 import {
+  TimeUnit,
   TimeUnitName,
+  Unit,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -244,6 +252,49 @@ export function diff(
     diffPlainTimes(false, slots, otherSlots, options),
   )
 }
+
+// PlainTime diffs are within one ISO day, matching Temporal.PlainTime.until.
+// Unlike PlainTime add/subtract, diffing does not wrap across midnight.
+function diffTimeUnit(
+  unit: TimeUnit,
+  nanoInUnit: number,
+  record: PlainTimeShimRecord,
+  otherRecord: PlainTimeShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const nano0 = timeFieldsToNano(getPlainTimeShimRecordSlots(record))
+  const nano1 = timeFieldsToNano(getPlainTimeShimRecordSlots(otherRecord))
+
+  let nanoDiff = BigInt(nano1 - nano0)
+
+  if (roundingInc) {
+    nanoDiff = roundBigNanoToInc(
+      nanoDiff,
+      BigInt(nanoInUnit * roundingInc),
+      roundingMode!,
+    )
+  }
+
+  return roundingInc
+    ? Number(nanoDiff / BigInt(nanoInUnit))
+    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
+}
+
+export const diffHours = bindArgs(diffTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(diffTimeUnit, Unit.Minute, nanoInMinute)
+export const diffSeconds = bindArgs(diffTimeUnit, Unit.Second, nanoInSec)
+export const diffMilliseconds = bindArgs(
+  diffTimeUnit,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+export const diffMicroseconds = bindArgs(
+  diffTimeUnit,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 export function round(
   record: PlainTimeShimRecord,
