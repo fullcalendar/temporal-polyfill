@@ -26,13 +26,19 @@ function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
       })
       .total({
         unit,
-        relativeTo: date0,
+        relativeTo: getTotalRelativeTo(date0),
       })
   }
 }
 
+function getTotalRelativeTo(date: YearMonthObj): DateObj {
+  return 'toPlainDate' in date && !('day' in date)
+    ? date.toPlainDate({ day: 1 })
+    : date
+}
+
 export const diffYears = createDiffFunc('years') as DiffFunc<YearMonthObj>
-export const diffMonths = createDiffFunc('months') as DiffFunc<DateObj>
+export const diffMonths = createDiffFunc('months') as DiffFunc<YearMonthObj>
 export const diffWeeks = createDiffFunc('weeks') as DiffFunc<DateObj>
 export const diffDays = createDiffFunc('days') as DiffFunc<DateObj>
 export const diffHours = createDiffFunc('hours') as DiffFunc<DateTimeObj>

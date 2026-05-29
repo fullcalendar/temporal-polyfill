@@ -441,8 +441,6 @@ import { diffYears } from 'temporal-utils'
 const years = diffYears(yearMonth, otherYearMonth, options)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 This should preserve exact totals when no rounding mode is provided.
 
 ### `diffMonths`
@@ -467,9 +465,7 @@ import { diffMonths } from 'temporal-utils'
 const months = diffMonths(yearMonth, otherYearMonth, options)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
-This should preserve exact totals when no rounding mode is provided. `temporal-utils` may need its `diffMonths` type widened for `PlainYearMonth` before this codemod target type-checks cleanly.
+This should preserve exact totals when no rounding mode is provided.
 
 ### `equals`
 

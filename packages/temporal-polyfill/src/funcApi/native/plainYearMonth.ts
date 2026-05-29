@@ -1,10 +1,13 @@
 import { Temporal } from 'temporal-spec'
+import * as TemporalUtils from 'temporal-utils'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
@@ -256,6 +259,30 @@ export function diff(
   const otherNative = getPlainYearMonthNative(otherRecord)
   const resNative = native.until(otherNative, options)
   return createDurationNativeRecord(resNative)
+}
+
+export function diffYears(
+  record0: PlainYearMonthNativeRecord,
+  record1: PlainYearMonthNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffYears(
+    getPlainYearMonthNative(record0),
+    getPlainYearMonthNative(record1),
+    options,
+  )
+}
+
+export function diffMonths(
+  record0: PlainYearMonthNativeRecord,
+  record1: PlainYearMonthNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return TemporalUtils.diffMonths(
+    getPlainYearMonthNative(record0),
+    getPlainYearMonthNative(record1),
+    options,
+  )
 }
 
 export function equals(

@@ -384,6 +384,73 @@ describe('diff', () => {
   })
 })
 
+describe('diffYears', () => {
+  it('gives exact result when no options/roundingMode specified', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const years = PlainYearMonthFns.diffYears(pym0, pym1)
+
+    expect(years).toBeCloseTo(2.166)
+  })
+
+  it('gives rounded result with roundingMode single arg', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const years = PlainYearMonthFns.diffYears(pym0, pym1, 'floor')
+
+    expect(years).toBe(2)
+  })
+
+  it('gives rounded result with options object', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const years = PlainYearMonthFns.diffYears(pym0, pym1, {
+      roundingMode: 'floor',
+    })
+    const yearsInc = PlainYearMonthFns.diffYears(pym0, pym1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 3,
+    })
+
+    expect(years).toBe(2)
+    expect(yearsInc).toBe(3)
+  })
+})
+
+describe('diffMonths', () => {
+  it('gives exact result when no options/roundingMode specified', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const months = PlainYearMonthFns.diffMonths(pym0, pym1)
+
+    expect(months).toBe(26)
+  })
+
+  it('gives rounded result with roundingMode single arg', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const months = PlainYearMonthFns.diffMonths(pym0, pym1, 'floor')
+
+    expect(months).toBe(26)
+  })
+
+  it('gives rounded result with options object', () => {
+    const pym0 = PlainYearMonthFns.create(2024, 2)
+    const pym1 = PlainYearMonthFns.create(2026, 4)
+    const months = PlainYearMonthFns.diffMonths(pym0, pym1, {
+      roundingMode: 'floor',
+      roundingIncrement: 12,
+    })
+    const monthsInc = PlainYearMonthFns.diffMonths(pym0, pym1, {
+      roundingMode: 'ceil',
+      roundingIncrement: 12,
+    })
+
+    expect(months).toBe(24)
+    expect(monthsInc).toBe(36)
+  })
+})
+
 describe('equals', () => {
   it('works', () => {
     const pym0 = PlainYearMonthFns.create(2024, 4)

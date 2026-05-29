@@ -36,6 +36,8 @@ import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
 } from '../../internal/optionsModel'
 import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
@@ -52,6 +54,7 @@ import {
   refineCalendarShimArg,
 } from './calendar'
 import { createDateTimeFormat } from './dateTimeFormat'
+import { diffPlainMonths, diffPlainYears } from './diffUtils'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -310,6 +313,30 @@ export function diff(
     options,
   )
   return createDurationShimRecord(resSlots)
+}
+
+export function diffYears(
+  record0: PlainYearMonthShimRecord,
+  record1: PlainYearMonthShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainYears(
+    getPlainYearMonthShimRecordSlots(record0),
+    getPlainYearMonthShimRecordSlots(record1),
+    options,
+  )
+}
+
+export function diffMonths(
+  record0: PlainYearMonthShimRecord,
+  record1: PlainYearMonthShimRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): number {
+  return diffPlainMonths(
+    getPlainYearMonthShimRecordSlots(record0),
+    getPlainYearMonthShimRecordSlots(record1),
+    options,
+  )
 }
 
 export function equals(

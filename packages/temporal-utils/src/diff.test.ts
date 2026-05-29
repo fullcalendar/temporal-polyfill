@@ -63,6 +63,16 @@ describe('diffYears', () => {
       expect(yearsInc).toBe(2)
     })
   })
+
+  describe('PlainYearMonth', () => {
+    it('gives exact and rounded results', () => {
+      const pym0 = Temporal.PlainYearMonth.from('2024-02')
+      const pym1 = Temporal.PlainYearMonth.from('2026-04')
+
+      expect(diffYears(pym0, pym1)).toBeCloseTo(2.166)
+      expect(diffYears(pym0, pym1, 'floor')).toBe(2)
+    })
+  })
 })
 
 describe('diffMonths', () => {
@@ -101,6 +111,16 @@ describe('diffMonths', () => {
       })
       expect(months).toBe(1)
       expect(monthsInc).toBe(3)
+    })
+  })
+
+  describe('PlainYearMonth', () => {
+    it('gives exact and rounded results', () => {
+      const pym0 = Temporal.PlainYearMonth.from('2024-02')
+      const pym1 = Temporal.PlainYearMonth.from('2026-04')
+
+      expect(diffMonths(pym0, pym1)).toBe(26)
+      expect(diffMonths(pym0, pym1, { roundingIncrement: 12 })).toBe(24)
     })
   })
 })

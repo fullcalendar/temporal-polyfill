@@ -4,6 +4,8 @@ import {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
+  RoundingMathOptions,
+  RoundingModeName,
 } from '../internal/optionsModel'
 import { YearMonthUnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
@@ -107,6 +109,18 @@ export const diff: (
   otherRecord: PlainYearMonthRecord,
   options?: DiffOptions<YearMonthUnitName>,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
+
+export const diffYears: (
+  record0: PlainYearMonthRecord,
+  record1: PlainYearMonthRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
+
+export const diffMonths: (
+  record0: PlainYearMonthRecord,
+  record1: PlainYearMonthRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const equals: (
   record: PlainYearMonthRecord,
