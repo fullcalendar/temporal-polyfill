@@ -8,13 +8,14 @@ import {
   startOfWeek,
   startOfYear,
 } from './startOf.js'
+import {
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
+} from './utils.js'
 import { DateObj, DateTimeObj, TimeObj, YearMonthObj } from './utils.js'
-
-const nanoInMicro = 1000
-const nanoInMilli = 1000000
-const nanoInSec = 1000000000
-const nanoInMinute = 60000000000
-const nanoInHour = 3600000000000
 
 export function endOfYear<T extends YearMonthObj>(date: T): T {
   return startOfYear(date)

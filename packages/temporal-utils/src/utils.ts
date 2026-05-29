@@ -1,5 +1,11 @@
 import type { Temporal } from 'temporal-spec'
 
+export const nanoInMicro = 1000
+export const nanoInMilli = 1000000
+export const nanoInSec = 1000000000
+export const nanoInMinute = 60000000000
+export const nanoInHour = 3600000000000
+
 // TODO: simplify this!
 export type DateTimeObj = Temporal.PlainDateTime | Temporal.ZonedDateTime
 export type TimeObj = Temporal.PlainTime | DateTimeObj
