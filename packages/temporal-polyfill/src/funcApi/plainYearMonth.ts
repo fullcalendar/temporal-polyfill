@@ -5,7 +5,6 @@ import type {
   RoundingMathOptions,
   RoundingModeName,
 } from '../internal/temporalSpecHelpers'
-import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainYearMonth'
@@ -143,7 +142,7 @@ export const equals: (
 export const compare: (
   record: PlainYearMonthRecord,
   otherRecord: PlainYearMonthRecord,
-) => NumberSign = NativeTemporal ? Native.compare : Shim.compare
+) => number = NativeTemporal ? Native.compare : Shim.compare
 
 export const toPlainDate: (
   record: PlainYearMonthRecord,

@@ -6,7 +6,6 @@ import type {
   DurationTotalOptions,
   RelativeToOptions,
 } from '../internal/temporalSpecHelpers'
-import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { RelativeToRecord } from './commonTypes'
 import * as Native from './native/duration'
@@ -52,7 +51,7 @@ export const fromString: (s: string) => DurationRecord = NativeTemporal
   ? Native.fromString
   : Shim.fromString
 
-export const sign: (duration: DurationRecord) => NumberSign = NativeTemporal
+export const sign: (duration: DurationRecord) => number = NativeTemporal
   ? Native.sign
   : Shim.sign
 
@@ -100,7 +99,7 @@ export const compare: (
   duration: DurationRecord,
   otherDuration: DurationRecord,
   options?: RelativeToOptions<RelativeTo>,
-) => NumberSign = NativeTemporal ? Native.compare : Shim.compare
+) => number = NativeTemporal ? Native.compare : Shim.compare
 
 export const toLocaleString: (
   duration: DurationRecord,

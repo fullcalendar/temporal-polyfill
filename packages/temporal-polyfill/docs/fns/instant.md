@@ -658,7 +658,7 @@ const same = instant.equals(otherInstant)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record) => NumberSign
+(record: Record, otherRecord: Record) => number
 ```
 
 Fn API:

@@ -674,7 +674,7 @@ const same = time.equals(otherTime)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record) => NumberSign
+(record: Record, otherRecord: Record) => number
 ```
 
 Fn API:

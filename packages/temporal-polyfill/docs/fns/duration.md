@@ -156,7 +156,7 @@ const duration = Temporal.Duration.from('PT1H30M')
 Signature:
 
 ```ts
-(duration: Record) => NumberSign
+(duration: Record) => number
 ```
 
 Fn API:
@@ -355,7 +355,7 @@ transform.
 Signature:
 
 ```ts
-(duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => NumberSign
+(duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => number
 ```
 
 Fn API:

@@ -492,7 +492,7 @@ const same = yearMonth.equals(otherYearMonth)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record) => NumberSign
+(record: Record, otherRecord: Record) => number
 ```
 
 Fn API:

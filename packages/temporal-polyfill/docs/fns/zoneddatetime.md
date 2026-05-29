@@ -1392,7 +1392,7 @@ const same = zonedDateTime.equals(otherZonedDateTime)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record) => NumberSign
+(record: Record, otherRecord: Record) => number
 ```
 
 Fn API:

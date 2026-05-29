@@ -347,6 +347,10 @@ export const padNumber2 = bindArgs(padNumber, 2)
 // Number
 // -----------------------------------------------------------------------------
 
+// Internal helpers use this narrower sign type to document values that are
+// computed by comparison/sign algorithms. Public APIs should expose plain
+// `number`, matching temporal-spec and avoiding an exported utility type that
+// consumers might rely on as part of the package contract.
 export type NumberSign = -1 | 0 | 1
 
 /*

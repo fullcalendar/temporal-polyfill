@@ -5,7 +5,6 @@ import type {
   RoundingMathOptions,
   RoundingModeName,
 } from '../internal/temporalSpecHelpers'
-import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
 import * as Native from './native/zonedDateTime'
@@ -159,7 +158,7 @@ export const equals: (
 export const compare: (
   record: ZonedDateTimeRecord,
   otherRecord: ZonedDateTimeRecord,
-) => NumberSign = NativeTemporal ? Native.compare : Shim.compare
+) => number = NativeTemporal ? Native.compare : Shim.compare
 
 export const toInstant: (record: ZonedDateTimeRecord) => InstantRecord =
   NativeTemporal ? Native.toInstant : Shim.toInstant
