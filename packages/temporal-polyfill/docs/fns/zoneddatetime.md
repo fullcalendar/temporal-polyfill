@@ -2100,6 +2100,4 @@ const format = new Intl.DateTimeFormat('en-US', {
 const text = format.format(zonedDateTime)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 This rewrite is appropriate when later uses rely on `format.format(zonedDateTime)`.

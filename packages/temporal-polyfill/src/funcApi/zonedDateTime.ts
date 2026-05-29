@@ -14,7 +14,7 @@ import {
 import { DayTimeUnitName, UnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
-import { ZonedDateTimeFields } from './commonTypes'
+import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
 import * as Native from './native/zonedDateTime'
 import type {
   CalendarRecord,
@@ -185,6 +185,13 @@ export const toPlainDate: (record: ZonedDateTimeRecord) => PlainDateRecord =
 
 export const toPlainTime: (record: ZonedDateTimeRecord) => PlainTimeRecord =
   NativeTemporal ? Native.toPlainTime : Shim.toPlainTime
+
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => DateTimeFormatLike<ZonedDateTimeRecord> = NativeTemporal
+  ? Native.createFormat
+  : Shim.createFormat
 
 export const toLocaleString: (
   record: ZonedDateTimeRecord,

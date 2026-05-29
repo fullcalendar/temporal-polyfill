@@ -16,7 +16,7 @@ import {
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { ZonedDateTimeFields } from '../commonTypes'
+import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
   getZonedDateTimeSlots,
@@ -28,6 +28,7 @@ import {
   getCalendarNativeRecordId,
   runCalendarNativeResolver,
 } from './calendar'
+import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -51,6 +52,7 @@ import {
 } from './recordUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
+type Format = DateTimeFormatLike<ZonedDateTimeNativeRecord>
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
@@ -418,6 +420,13 @@ export function toPlainTime(
 ): PlainTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).toPlainTime()
   return createPlainTimeNativeRecord(resNative)
+}
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createNativeDateTimeFormat(getZonedDateTimeNative, locales, options)
 }
 
 export function toLocaleString(

@@ -91,7 +91,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { ZonedDateTimeFields } from '../commonTypes'
+import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
   getZonedDateTimeSlots,
@@ -103,6 +103,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
+import { createDateTimeFormat } from './dateTimeFormat'
 import {
   diffZonedDays,
   diffZonedMonths,
@@ -162,6 +163,7 @@ import {
 import { rejectInvalidBag } from './temporalRecords'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
+type Format = DateTimeFormatLike<ZonedDateTimeShimRecord>
 
 type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarShimRecord>
 
@@ -586,6 +588,18 @@ export function toPlainTime(
 }
 
 const prepFormat = createFormatPrepper(zonedConfig)
+
+export function createFormat(
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): Format {
+  return createDateTimeFormat(
+    zonedConfig,
+    getZonedDateTimeShimRecordSlots,
+    locales,
+    options,
+  )
+}
 
 export function toLocaleString(
   record: ZonedDateTimeShimRecord,

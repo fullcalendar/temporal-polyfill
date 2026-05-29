@@ -737,6 +737,27 @@ describe('toLocaleString', () => {
   })
 })
 
+describe('createFormat', () => {
+  it('formats records', () => {
+    const zdt = ZonedDateTimeFns.fromFields({
+      year: 2023,
+      month: 12,
+      day: 31,
+      hour: 12,
+      minute: 30,
+      timeZone: 'America/New_York',
+    })
+    const format = ZonedDateTimeFns.createFormat('en', {
+      dateStyle: 'full',
+      timeStyle: 'full',
+    })
+
+    expect(format.format(zdt)).toBe(
+      'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
+    )
+  })
+})
+
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
