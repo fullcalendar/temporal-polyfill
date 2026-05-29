@@ -62,7 +62,7 @@ export class PlainYearMonth implements YearMonthFields {
   constructor(
     isoYear: number,
     isoMonth: number,
-    calendar?: string,
+    calendar: string | undefined = undefined,
     referenceIsoDay?: number,
   ) {
     initPlainYearMonth(
@@ -79,7 +79,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   static from(
     arg: PlainYearMonthArg,
-    options?: OverflowOptions,
+    options: OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
   }
@@ -142,7 +142,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   with(
     mod: Partial<YearMonthFields>,
-    options?: OverflowOptions,
+    options: OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(
       mergePlainYearMonthFields(
@@ -153,7 +153,10 @@ export class PlainYearMonth implements YearMonthFields {
     )
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainYearMonth {
+  add(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainYearMonth {
     return createPlainYearMonth(
       movePlainYearMonth(
         false,
@@ -166,7 +169,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   subtract(
     durationArg: DurationArg,
-    options?: OverflowOptions,
+    options: OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(
       movePlainYearMonth(
@@ -180,7 +183,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   until(
     otherArg: PlainYearMonthArg,
-    options?: DiffOptions<YearMonthUnitName>,
+    options: DiffOptions<YearMonthUnitName> | undefined = undefined,
   ): Duration {
     const slots = getPlainYearMonthSlots(this)
     const other = toPlainYearMonthSlots(otherArg)
@@ -192,7 +195,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   since(
     otherArg: PlainYearMonthArg,
-    options?: DiffOptions<YearMonthUnitName>,
+    options: DiffOptions<YearMonthUnitName> | undefined = undefined,
   ): Duration {
     const slots = getPlainYearMonthSlots(this)
     const other = toPlainYearMonthSlots(otherArg)

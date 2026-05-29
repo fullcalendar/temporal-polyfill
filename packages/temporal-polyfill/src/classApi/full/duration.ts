@@ -89,7 +89,9 @@ export class Duration implements DurationFields {
   static compare(
     durationArg0: DurationArg,
     durationArg1: DurationArg,
-    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    options:
+      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
+      | undefined = undefined,
   ): NumberSign {
     return compareDurations(
       refinePublicRelativeTo,
@@ -161,7 +163,9 @@ export class Duration implements DurationFields {
 
   add(
     otherArg: DurationArg,
-    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    options:
+      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       addDurations(
@@ -176,7 +180,9 @@ export class Duration implements DurationFields {
 
   subtract(
     otherArg: DurationArg,
-    options?: RelativeToOptions<PlainDateArg | ZonedDateTimeArg>,
+    options:
+      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       addDurations(

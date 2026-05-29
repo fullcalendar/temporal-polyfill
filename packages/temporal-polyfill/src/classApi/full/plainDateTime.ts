@@ -109,7 +109,7 @@ export class PlainDateTime implements DateTimeFields {
     millisecond = 0,
     microsecond = 0,
     nanosecond = 0,
-    calendar?: string,
+    calendar: string | undefined = undefined,
   ) {
     initPlainDateTime(
       this,
@@ -129,7 +129,10 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  static from(arg: PlainDateTimeArg, options?: OverflowOptions): PlainDateTime {
+  static from(
+    arg: PlainDateTimeArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDateTime {
     return createPlainDateTime(toPlainDateTimeSlots(arg, options))
   }
 
@@ -241,7 +244,10 @@ export class PlainDateTime implements DateTimeFields {
     return getPlainDateTimeSlots(this).nanosecond
   }
 
-  with(mod: Partial<DateTimeFields>, options?: OverflowOptions): PlainDateTime {
+  with(
+    mod: Partial<DateTimeFields>,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDateTime {
     return createPlainDateTime(
       mergePlainDateTimeFields(
         getPlainDateTimeSlots(this),
@@ -271,7 +277,10 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+  add(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDateTime {
     return createPlainDateTime(
       movePlainDateTime(
         false,
@@ -282,7 +291,10 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDateTime {
+  subtract(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDateTime {
     return createPlainDateTime(
       movePlainDateTime(
         true,
@@ -293,7 +305,10 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  until(otherArg: PlainDateTimeArg, options?: DiffOptions<UnitName>): Duration {
+  until(
+    otherArg: PlainDateTimeArg,
+    options: DiffOptions<UnitName> | undefined = undefined,
+  ): Duration {
     const slots = getPlainDateTimeSlots(this)
     const other = toPlainDateTimeSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)
@@ -302,7 +317,10 @@ export class PlainDateTime implements DateTimeFields {
     )
   }
 
-  since(otherArg: PlainDateTimeArg, options?: DiffOptions<UnitName>): Duration {
+  since(
+    otherArg: PlainDateTimeArg,
+    options: DiffOptions<UnitName> | undefined = undefined,
+  ): Duration {
     const slots = getPlainDateTimeSlots(this)
     const other = toPlainDateTimeSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)
@@ -328,7 +346,7 @@ export class PlainDateTime implements DateTimeFields {
 
   toZonedDateTime(
     timeZoneArg: TimeZoneArg,
-    options?: EpochDisambigOptions,
+    options: EpochDisambigOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       plainDateTimeToZonedDateTime(

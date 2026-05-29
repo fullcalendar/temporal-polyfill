@@ -49,7 +49,7 @@ export class PlainMonthDay implements MonthDayFields {
   constructor(
     isoMonth: number,
     isoDay: number,
-    calendar?: string,
+    calendar: string | undefined = undefined,
     referenceIsoYear?: number,
   ) {
     initPlainMonthDay(
@@ -64,7 +64,10 @@ export class PlainMonthDay implements MonthDayFields {
     )
   }
 
-  static from(arg: PlainMonthDayArg, options?: OverflowOptions): PlainMonthDay {
+  static from(
+    arg: PlainMonthDayArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainMonthDay {
     return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
   }
 
@@ -87,7 +90,10 @@ export class PlainMonthDay implements MonthDayFields {
     return computeCalendarDateFields(slots.calendar, slots).day
   }
 
-  with(mod: Partial<MonthDayFields>, options?: OverflowOptions): PlainMonthDay {
+  with(
+    mod: Partial<MonthDayFields>,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainMonthDay {
     return createPlainMonthDay(
       mergePlainMonthDayFields(
         getPlainMonthDaySlots(this),
