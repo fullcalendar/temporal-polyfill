@@ -8,7 +8,7 @@ import {
   startOfWeek,
   startOfYear,
 } from './startOf.js'
-import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
+import { DateObj, DateTimeObj, TimeObj, YearMonthObj } from './utils.js'
 
 const nanoInMicro = 1000
 const nanoInMilli = 1000000
@@ -56,22 +56,22 @@ export function endOfDay<T extends DateTimeObj>(date: T): T {
   return date // in case PlainDate passed in, not moved to next day
 }
 
-export function endOfHour<T extends DateTimeObj>(date: T): T {
+export function endOfHour<T extends TimeObj>(date: T): T {
   return startOfHour(date).add({ nanoseconds: nanoInHour - 1 }) as T
 }
 
-export function endOfMinute<T extends DateTimeObj>(date: T): T {
+export function endOfMinute<T extends TimeObj>(date: T): T {
   return startOfMinute(date).add({ nanoseconds: nanoInMinute - 1 }) as T
 }
 
-export function endOfSecond<T extends DateTimeObj>(date: T): T {
+export function endOfSecond<T extends TimeObj>(date: T): T {
   return startOfSecond(date).add({ nanoseconds: nanoInSec - 1 }) as T
 }
 
-export function endOfMillisecond<T extends DateTimeObj>(date: T): T {
+export function endOfMillisecond<T extends TimeObj>(date: T): T {
   return startOfMillisecond(date).add({ nanoseconds: nanoInMilli - 1 }) as T
 }
 
-export function endOfMicrosecond<T extends DateTimeObj>(date: T): T {
+export function endOfMicrosecond<T extends TimeObj>(date: T): T {
   return startOfMicrosecond(date).add({ nanoseconds: nanoInMicro - 1 }) as T
 }

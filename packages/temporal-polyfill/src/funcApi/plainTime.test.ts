@@ -215,6 +215,135 @@ describe('round', () => {
   })
 })
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+describe('startOfHour', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.startOfHour(pt), { hour: 12 })
+  })
+})
+
+describe('startOfMinute', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.startOfMinute(pt), {
+      hour: 12,
+      minute: 30,
+    })
+  })
+})
+
+describe('startOfSecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.startOfSecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+    })
+  })
+})
+
+describe('startOfMillisecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.startOfMillisecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+      millisecond: 400,
+    })
+  })
+})
+
+describe('startOfMicrosecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.startOfMicrosecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+      millisecond: 400,
+      microsecond: 2,
+    })
+  })
+})
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+describe('endOfHour', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.endOfHour(pt), {
+      hour: 12,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+      microsecond: 999,
+      nanosecond: 999,
+    })
+  })
+})
+
+describe('endOfMinute', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.endOfMinute(pt), {
+      hour: 12,
+      minute: 30,
+      second: 59,
+      millisecond: 999,
+      microsecond: 999,
+      nanosecond: 999,
+    })
+  })
+})
+
+describe('endOfSecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.endOfSecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+      millisecond: 999,
+      microsecond: 999,
+      nanosecond: 999,
+    })
+  })
+})
+
+describe('endOfMillisecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.endOfMillisecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+      millisecond: 400,
+      microsecond: 999,
+      nanosecond: 999,
+    })
+  })
+})
+
+describe('endOfMicrosecond', () => {
+  it('works', () => {
+    const pt = PlainTimeFns.create(12, 30, 44, 400, 2, 3)
+    expectPlainTimeEquals(PlainTimeFns.endOfMicrosecond(pt), {
+      hour: 12,
+      minute: 30,
+      second: 44,
+      millisecond: 400,
+      microsecond: 2,
+      nanosecond: 999,
+    })
+  })
+})
+
 describe('equals', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)

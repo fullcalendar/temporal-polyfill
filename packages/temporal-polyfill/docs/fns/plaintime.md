@@ -756,16 +756,10 @@ const nextTime = PlainTimeFns.startOfHour(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  minute: 0,
-  second: 0,
-  millisecond: 0,
-  microsecond: 0,
-  nanosecond: 0,
-})
-```
+import { startOfHour } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = startOfHour(time)
+```
 
 ### `startOfMinute`
 
@@ -784,15 +778,10 @@ const nextTime = PlainTimeFns.startOfMinute(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  second: 0,
-  millisecond: 0,
-  microsecond: 0,
-  nanosecond: 0,
-})
-```
+import { startOfMinute } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = startOfMinute(time)
+```
 
 ### `startOfSecond`
 
@@ -811,14 +800,10 @@ const nextTime = PlainTimeFns.startOfSecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  millisecond: 0,
-  microsecond: 0,
-  nanosecond: 0,
-})
-```
+import { startOfSecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = startOfSecond(time)
+```
 
 ### `startOfMillisecond`
 
@@ -837,13 +822,10 @@ const nextTime = PlainTimeFns.startOfMillisecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  microsecond: 0,
-  nanosecond: 0,
-})
-```
+import { startOfMillisecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = startOfMillisecond(time)
+```
 
 ### `startOfMicrosecond`
 
@@ -862,12 +844,10 @@ const nextTime = PlainTimeFns.startOfMicrosecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  nanosecond: 0,
-})
-```
+import { startOfMicrosecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = startOfMicrosecond(time)
+```
 
 ### `endOfHour`
 
@@ -888,16 +868,10 @@ const nextTime = PlainTimeFns.endOfHour(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  minute: 59,
-  second: 59,
-  millisecond: 999,
-  microsecond: 999,
-  nanosecond: 999,
-})
-```
+import { endOfHour } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = endOfHour(time)
+```
 
 ### `endOfMinute`
 
@@ -918,15 +892,10 @@ const nextTime = PlainTimeFns.endOfMinute(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  second: 59,
-  millisecond: 999,
-  microsecond: 999,
-  nanosecond: 999,
-})
-```
+import { endOfMinute } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = endOfMinute(time)
+```
 
 ### `endOfSecond`
 
@@ -947,14 +916,10 @@ const nextTime = PlainTimeFns.endOfSecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  millisecond: 999,
-  microsecond: 999,
-  nanosecond: 999,
-})
-```
+import { endOfSecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = endOfSecond(time)
+```
 
 ### `endOfMillisecond`
 
@@ -975,13 +940,10 @@ const nextTime = PlainTimeFns.endOfMillisecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  microsecond: 999,
-  nanosecond: 999,
-})
-```
+import { endOfMillisecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = endOfMillisecond(time)
+```
 
 ### `endOfMicrosecond`
 
@@ -1002,12 +964,10 @@ const nextTime = PlainTimeFns.endOfMicrosecond(time)
 Temporal API:
 
 ```ts
-const nextTime = time.with({
-  nanosecond: 999,
-})
-```
+import { endOfMicrosecond } from 'temporal-utils'
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
+const nextTime = endOfMicrosecond(time)
+```
 
 ## Formatting
 

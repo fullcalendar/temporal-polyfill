@@ -146,6 +146,36 @@ export const round: (
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ) => PlainTimeRecord = NativeTemporal ? Native.round : Shim.round
 
+export const startOfHour: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.startOfHour : Shim.startOfHour
+
+export const startOfMinute: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.startOfMinute : Shim.startOfMinute
+
+export const startOfSecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.startOfSecond : Shim.startOfSecond
+
+export const startOfMillisecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.startOfMillisecond : Shim.startOfMillisecond
+
+export const startOfMicrosecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.startOfMicrosecond : Shim.startOfMicrosecond
+
+export const endOfHour: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.endOfHour : Shim.endOfHour
+
+export const endOfMinute: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.endOfMinute : Shim.endOfMinute
+
+export const endOfSecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.endOfSecond : Shim.endOfSecond
+
+export const endOfMillisecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.endOfMillisecond : Shim.endOfMillisecond
+
+export const endOfMicrosecond: (record: PlainTimeRecord) => PlainTimeRecord =
+  NativeTemporal ? Native.endOfMicrosecond : Shim.endOfMicrosecond
+
 export const equals: (
   record: PlainTimeRecord,
   otherRecord: PlainTimeRecord,

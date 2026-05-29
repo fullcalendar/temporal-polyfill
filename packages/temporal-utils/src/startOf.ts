@@ -1,4 +1,4 @@
-import { DateObj, DateTimeObj, YearMonthObj } from './utils.js'
+import { DateObj, DateTimeObj, TimeObj, YearMonthObj } from './utils.js'
 import { withDayOfWeek } from './with.js'
 
 const zeroTimeFields = {
@@ -39,7 +39,7 @@ export function startOfDay<T extends DateTimeObj>(dateTime: T): T {
   return dateTime // in case PlainDate passed in, no error
 }
 
-export function startOfHour<T extends DateTimeObj>(dateTime: T): T {
+export function startOfHour<T extends TimeObj>(dateTime: T): T {
   return dateTime.with({
     minute: 0,
     second: 0,
@@ -49,7 +49,7 @@ export function startOfHour<T extends DateTimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfMinute<T extends DateTimeObj>(dateTime: T): T {
+export function startOfMinute<T extends TimeObj>(dateTime: T): T {
   return dateTime.with({
     second: 0,
     millisecond: 0,
@@ -58,7 +58,7 @@ export function startOfMinute<T extends DateTimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfSecond<T extends DateTimeObj>(dateTime: T): T {
+export function startOfSecond<T extends TimeObj>(dateTime: T): T {
   return dateTime.with({
     millisecond: 0,
     microsecond: 0,
@@ -66,14 +66,14 @@ export function startOfSecond<T extends DateTimeObj>(dateTime: T): T {
   }) as T
 }
 
-export function startOfMillisecond<T extends DateTimeObj>(dateTime: T): T {
+export function startOfMillisecond<T extends TimeObj>(dateTime: T): T {
   return dateTime.with({
     microsecond: 0,
     nanosecond: 0,
   }) as T
 }
 
-export function startOfMicrosecond<T extends DateTimeObj>(dateTime: T): T {
+export function startOfMicrosecond<T extends TimeObj>(dateTime: T): T {
   return dateTime.with({
     nanosecond: 0,
   }) as T

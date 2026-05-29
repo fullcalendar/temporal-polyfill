@@ -1,4 +1,5 @@
 import { Temporal } from 'temporal-spec'
+import * as TemporalUtils from 'temporal-utils'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -283,6 +284,66 @@ export function round(
   const native = getPlainTimeNative(record)
   const resNative = native.round(options as any) // !!!
   return createPlainTimeNativeRecord(resNative)
+}
+
+export function startOfHour(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.startOfHour(getPlainTimeNative(record)),
+  )
+}
+
+export function startOfMinute(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.startOfMinute(getPlainTimeNative(record)),
+  )
+}
+
+export function startOfSecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.startOfSecond(getPlainTimeNative(record)),
+  )
+}
+
+export function startOfMillisecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.startOfMillisecond(getPlainTimeNative(record)),
+  )
+}
+
+export function startOfMicrosecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.startOfMicrosecond(getPlainTimeNative(record)),
+  )
+}
+
+export function endOfHour(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.endOfHour(getPlainTimeNative(record)),
+  )
+}
+
+export function endOfMinute(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.endOfMinute(getPlainTimeNative(record)),
+  )
+}
+
+export function endOfSecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.endOfSecond(getPlainTimeNative(record)),
+  )
+}
+
+export function endOfMillisecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.endOfMillisecond(getPlainTimeNative(record)),
+  )
+}
+
+export function endOfMicrosecond(record: PlainTimeNativeRecord) {
+  return createPlainTimeNativeRecord(
+    TemporalUtils.endOfMicrosecond(getPlainTimeNative(record)),
+  )
 }
 
 export function equals(

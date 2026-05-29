@@ -165,6 +165,15 @@ describe('endOfHour', () => {
       expect(pdt1.equals(pdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        endOfHour(pt).equals(Temporal.PlainTime.from('12:59:59.999999999')),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('endOfMinute', () => {
@@ -187,6 +196,15 @@ describe('endOfMinute', () => {
       const pdt1 = endOfMinute(pdt0)
       const pdt2 = Temporal.PlainDateTime.from('2024-07-20T12:31:00')
       expect(pdt1.equals(pdt2.subtract({ nanoseconds: 1 }))).toBe(true)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        endOfMinute(pt).equals(Temporal.PlainTime.from('12:30:59.999999999')),
+      ).toBe(true)
     })
   })
 })
@@ -213,6 +231,15 @@ describe('endOfSecond', () => {
       expect(pdt1.equals(pdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        endOfSecond(pt).equals(Temporal.PlainTime.from('12:30:44.999999999')),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('endOfMillisecond', () => {
@@ -237,6 +264,17 @@ describe('endOfMillisecond', () => {
       expect(pdt1.equals(pdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        endOfMillisecond(pt).equals(
+          Temporal.PlainTime.from('12:30:44.400999999'),
+        ),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('endOfMicrosecond', () => {
@@ -259,6 +297,17 @@ describe('endOfMicrosecond', () => {
       const pdt1 = endOfMicrosecond(pdt0)
       const pdt2 = Temporal.PlainDateTime.from('2024-07-20T12:30:44.400003')
       expect(pdt1.equals(pdt2.subtract({ nanoseconds: 1 }))).toBe(true)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        endOfMicrosecond(pt).equals(
+          Temporal.PlainTime.from('12:30:44.400002999'),
+        ),
+      ).toBe(true)
     })
   })
 })

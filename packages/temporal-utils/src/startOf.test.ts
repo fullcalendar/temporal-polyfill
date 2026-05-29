@@ -178,6 +178,15 @@ describe('startOfHour', () => {
       ).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(startOfHour(pt).equals(Temporal.PlainTime.from('12:00'))).toBe(
+        true,
+      )
+    })
+  })
 })
 
 describe('startOfMinute', () => {
@@ -204,6 +213,15 @@ describe('startOfMinute', () => {
       ).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(startOfMinute(pt).equals(Temporal.PlainTime.from('12:30'))).toBe(
+        true,
+      )
+    })
+  })
 })
 
 describe('startOfSecond', () => {
@@ -227,6 +245,15 @@ describe('startOfSecond', () => {
         startOfSecond(pdt).equals(
           Temporal.PlainDateTime.from('2024-07-20T12:30:44'),
         ),
+      ).toBe(true)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        startOfSecond(pt).equals(Temporal.PlainTime.from('12:30:44')),
       ).toBe(true)
     })
   })
@@ -258,6 +285,15 @@ describe('startOfMillisecond', () => {
       ).toBe(true)
     })
   })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        startOfMillisecond(pt).equals(Temporal.PlainTime.from('12:30:44.400')),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('startOfMicrosecond', () => {
@@ -282,6 +318,17 @@ describe('startOfMicrosecond', () => {
       expect(
         startOfMicrosecond(pdt).equals(
           Temporal.PlainDateTime.from('2024-07-20T12:30:44.400002'),
+        ),
+      ).toBe(true)
+    })
+  })
+
+  describe('PlainTime', () => {
+    it('works', () => {
+      const pt = Temporal.PlainTime.from('12:30:44.400002003')
+      expect(
+        startOfMicrosecond(pt).equals(
+          Temporal.PlainTime.from('12:30:44.400002'),
         ),
       ).toBe(true)
     })

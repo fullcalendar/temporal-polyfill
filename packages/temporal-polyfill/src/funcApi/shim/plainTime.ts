@@ -254,6 +254,108 @@ export function round(
   )
 }
 
+export function startOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMinute(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfSecond(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMillisecond(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMicrosecond(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    nanosecond: 0,
+  })
+}
+
+export function endOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    minute: 59,
+    second: 59,
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMinute(record: PlainTimeShimRecord): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    second: 59,
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfSecond(record: PlainTimeShimRecord): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMillisecond(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMicrosecond(
+  record: PlainTimeShimRecord,
+): PlainTimeShimRecord {
+  return createPlainTimeShimRecord({
+    ...getPlainTimeShimRecordSlots(record),
+    nanosecond: 999,
+  })
+}
+
 export function equals(
   record: PlainTimeShimRecord,
   otherRecord: PlainTimeShimRecord,
