@@ -92,7 +92,10 @@ export class Instant {
     )
   }
 
-  until(otherArg: InstantArg, options?: DiffOptions<TimeUnitName>): Duration {
+  until(
+    otherArg: InstantArg,
+    options: DiffOptions<TimeUnitName> | undefined = undefined,
+  ): Duration {
     return createDuration(
       diffInstants(
         false,
@@ -103,7 +106,10 @@ export class Instant {
     )
   }
 
-  since(otherArg: InstantArg, options?: DiffOptions<TimeUnitName>): Duration {
+  since(
+    otherArg: InstantArg,
+    options: DiffOptions<TimeUnitName> | undefined = undefined,
+  ): Duration {
     return createDuration(
       diffInstants(
         true,

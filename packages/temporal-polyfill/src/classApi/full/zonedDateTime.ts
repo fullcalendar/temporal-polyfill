@@ -104,7 +104,11 @@ type ZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarSlot }
 const zonedDateTimeSlotsMap = new WeakMap<object, ZonedDateTimeSlots>()
 
 export class ZonedDateTime {
-  constructor(epochNanoseconds: bigint, timeZoneId: string, calendar?: string) {
+  constructor(
+    epochNanoseconds: bigint,
+    timeZoneId: string,
+    calendar: string | undefined = undefined,
+  ) {
     initZonedDateTime(
       this,
       constructZonedEpochNanoSlots(
@@ -116,7 +120,10 @@ export class ZonedDateTime {
     )
   }
 
-  static from(arg: any, options?: ZonedFieldOptions): ZonedDateTime {
+  static from(
+    arg: any,
+    options: ZonedFieldOptions | undefined = undefined,
+  ): ZonedDateTime {
     return createZonedDateTime(toZonedDateTimeSlots(arg, options))
   }
 
@@ -288,7 +295,7 @@ export class ZonedDateTime {
 
   with(
     mod: Partial<DateTimeFields>,
-    options?: ZonedFieldOptions,
+    options: ZonedFieldOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       mergeZonedDateTimeFields(
@@ -324,7 +331,10 @@ export class ZonedDateTime {
     )
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+  add(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): ZonedDateTime {
     return createZonedDateTime(
       moveZonedDateTime(
         false,
@@ -335,7 +345,10 @@ export class ZonedDateTime {
     )
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): ZonedDateTime {
+  subtract(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): ZonedDateTime {
     return createZonedDateTime(
       moveZonedDateTime(
         true,
@@ -346,7 +359,10 @@ export class ZonedDateTime {
     )
   }
 
-  until(otherArg: ZonedDateTimeArg, options?: DiffOptions<UnitName>): Duration {
+  until(
+    otherArg: ZonedDateTimeArg,
+    options: DiffOptions<UnitName> | undefined = undefined,
+  ): Duration {
     const slots = getZonedDateTimeSlots(this)
     const other = toZonedDateTimeSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)
@@ -357,7 +373,10 @@ export class ZonedDateTime {
     )
   }
 
-  since(otherArg: ZonedDateTimeArg, options?: DiffOptions<UnitName>): Duration {
+  since(
+    otherArg: ZonedDateTimeArg,
+    options: DiffOptions<UnitName> | undefined = undefined,
+  ): Duration {
     const slots = getZonedDateTimeSlots(this)
     const other = toZonedDateTimeSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)

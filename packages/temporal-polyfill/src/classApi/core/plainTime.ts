@@ -63,7 +63,10 @@ export class PlainTime implements TimeFields {
     )
   }
 
-  static from(arg: PlainTimeArg, options?: OverflowOptions): PlainTime {
+  static from(
+    arg: PlainTimeArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainTime {
     return createPlainTime(toPlainTimeSlots(arg, options))
   }
 
@@ -95,7 +98,10 @@ export class PlainTime implements TimeFields {
     return getPlainTimeSlots(this).nanosecond
   }
 
-  with(mod: Partial<TimeFields>, options?: OverflowOptions): PlainTime {
+  with(
+    mod: Partial<TimeFields>,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainTime {
     return createPlainTime(
       mergePlainTimeFields(this, rejectInvalidBag(mod), options),
     )
@@ -121,7 +127,10 @@ export class PlainTime implements TimeFields {
     )
   }
 
-  until(otherArg: PlainTimeArg, options?: DiffOptions<TimeUnitName>): Duration {
+  until(
+    otherArg: PlainTimeArg,
+    options: DiffOptions<TimeUnitName> | undefined = undefined,
+  ): Duration {
     return createDuration(
       diffPlainTimes(
         false,
@@ -132,7 +141,10 @@ export class PlainTime implements TimeFields {
     )
   }
 
-  since(otherArg: PlainTimeArg, options?: DiffOptions<TimeUnitName>): Duration {
+  since(
+    otherArg: PlainTimeArg,
+    options: DiffOptions<TimeUnitName> | undefined = undefined,
+  ): Duration {
     return createDuration(
       diffPlainTimes(
         true,

@@ -92,7 +92,7 @@ export class PlainDate implements DateFields {
     isoYear: number,
     isoMonth: number,
     isoDay: number,
-    calendar?: string,
+    calendar: string | undefined = undefined,
   ) {
     initPlainDate(
       this,
@@ -106,7 +106,10 @@ export class PlainDate implements DateFields {
     )
   }
 
-  static from(arg: any, options?: OverflowOptions): PlainDate {
+  static from(
+    arg: any,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDate {
     return createPlainDate(toPlainDateSlots(arg, options))
   }
 
@@ -192,7 +195,10 @@ export class PlainDate implements DateFields {
     return computeCalendarInLeapYear(slots.calendar, slots)
   }
 
-  with(mod: Partial<DateFields>, options?: OverflowOptions): PlainDate {
+  with(
+    mod: Partial<DateFields>,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate(
       mergePlainDateFields(slots, rejectInvalidBag(mod), options),
@@ -206,7 +212,10 @@ export class PlainDate implements DateFields {
     )
   }
 
-  add(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+  add(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDate {
     return createPlainDate(
       movePlainDate(
         false,
@@ -217,7 +226,10 @@ export class PlainDate implements DateFields {
     )
   }
 
-  subtract(durationArg: DurationArg, options?: OverflowOptions): PlainDate {
+  subtract(
+    durationArg: DurationArg,
+    options: OverflowOptions | undefined = undefined,
+  ): PlainDate {
     return createPlainDate(
       movePlainDate(
         true,
@@ -228,7 +240,10 @@ export class PlainDate implements DateFields {
     )
   }
 
-  until(otherArg: PlainDateArg, options?: DiffOptions<DateUnitName>): Duration {
+  until(
+    otherArg: PlainDateArg,
+    options: DiffOptions<DateUnitName> | undefined = undefined,
+  ): Duration {
     const slots = getPlainDateSlots(this)
     const other = toPlainDateSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)
@@ -237,7 +252,10 @@ export class PlainDate implements DateFields {
     )
   }
 
-  since(otherArg: PlainDateArg, options?: DiffOptions<DateUnitName>): Duration {
+  since(
+    otherArg: PlainDateArg,
+    options: DiffOptions<DateUnitName> | undefined = undefined,
+  ): Duration {
     const slots = getPlainDateSlots(this)
     const other = toPlainDateSlots(otherArg)
     const calendar = getCommonCalendar(slots.calendar, other.calendar)
