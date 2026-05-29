@@ -32,13 +32,13 @@ import {
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
-import {
+import type {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { createYearMonthSlots } from '../../internal/slots'
 import { Unit, YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'

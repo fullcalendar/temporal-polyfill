@@ -45,7 +45,7 @@ import {
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
-import {
+import type {
   DateTimeDisplayOptions,
   DiffOptions,
   EpochDisambigOptions,
@@ -53,7 +53,7 @@ import {
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import {
   IsoDateTimeInterval,
   computeDayFloor,

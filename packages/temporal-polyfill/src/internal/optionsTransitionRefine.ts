@@ -1,8 +1,8 @@
 import * as errorMessages from './errorMessages'
 import { coerceDirection } from './optionsCoerce'
 import { directionName } from './optionsConfig'
+import type { DirectionName, DirectionOptions } from './optionsInput'
 import { Direction } from './optionsModel'
-import type { DirectionName, DirectionOptions } from './optionsModel'
 import { normalizeOptionsOrString } from './optionsNormalize'
 
 /*

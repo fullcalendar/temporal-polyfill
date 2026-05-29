@@ -12,7 +12,7 @@ import { type MonthCodeParts, parseMonthCode } from './calendarMonthCode'
 import { type CalendarSlot, isoCalendar } from './calendarSlot'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
-import { type DateOptionsRefiner, type DateOptionsTuple } from './fieldRefine'
+import { type DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -27,7 +27,8 @@ import {
   isoEpochFirstLeapYear,
 } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
-import { Overflow, OverflowOptions } from './optionsModel'
+import type { OverflowOptions } from './optionsInput'
+import { Overflow } from './optionsModel'
 import {
   createDateSlots,
   createDateTimeSlots,

@@ -14,17 +14,19 @@ import {
   smallestUnitStr,
   totalUnitStr,
 } from './optionsConfig'
-import { RoundingMode } from './optionsModel'
 import type {
   DiffOptions,
-  DiffTuple,
   DurationRoundingOptions,
-  DurationRoundingTuple,
   DurationTotalOptions,
   RoundingMathOptions,
-  RoundingMathTuple,
   RoundingModeName,
   RoundingOptions,
+} from './optionsInput'
+import { RoundingMode } from './optionsModel'
+import type {
+  DiffTuple,
+  DurationRoundingTuple,
+  RoundingMathTuple,
   RoundingTuple,
 } from './optionsModel'
 import { normalizeOptions, normalizeOptionsOrString } from './optionsNormalize'

@@ -30,7 +30,7 @@ import {
   parseOffsetNanoMaybe,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
-import { type ZonedFieldOptions } from './optionsModel'
+import type { ZonedFieldOptions } from './optionsInput'
 import { RelativeToSlots } from './relativeMath'
 import {
   EpochNanoFields,

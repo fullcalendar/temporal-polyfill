@@ -39,11 +39,11 @@ import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import {
+import type {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { DateUnitName } from '../../internal/units'

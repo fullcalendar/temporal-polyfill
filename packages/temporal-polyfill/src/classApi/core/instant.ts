@@ -18,11 +18,11 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
-import {
+import type {
   DiffOptions,
   InstantDisplayOptions,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { roundInstant } from '../../internal/round'
 import {
   EpochNanoFields,

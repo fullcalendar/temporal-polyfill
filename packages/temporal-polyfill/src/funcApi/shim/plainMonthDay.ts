@@ -19,10 +19,10 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
-import {
+import type {
   CalendarDisplayOptions,
   OverflowOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {

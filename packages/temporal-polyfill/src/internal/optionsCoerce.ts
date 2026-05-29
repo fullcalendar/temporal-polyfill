@@ -18,7 +18,6 @@ import {
   timeZoneDisplayMap,
   totalUnitStr,
 } from './optionsConfig'
-import { Overflow, SubsecDigits } from './optionsModel'
 import type {
   CalendarDisplayOptions,
   DirectionOptions,
@@ -29,9 +28,11 @@ import type {
   OverflowOptions,
   RoundingModeOptions,
   SmallestUnitOptions,
+  SubsecDigits,
   TimeZoneDisplayOptions,
   TotalUnitOptions,
-} from './optionsModel'
+} from './optionsInput'
+import { Overflow } from './optionsModel'
 import { StrictUnitName, Unit, UnitName, unitNameMap } from './units'
 import { bindArgs, clampEntity } from './utils'
 

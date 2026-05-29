@@ -36,8 +36,8 @@ import {
   MonthDayFields,
   TimeFields,
   YearMonthFields,
-  type ZonedDateTimeLikeObject,
-  type ZonedDateTimeRefinedObject,
+  ZonedDateTimeLikeObject,
+  ZonedDateTimeRefinedObject,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { isoEpochFirstLeapYear } from './isoCalendarMath'
@@ -45,7 +45,7 @@ import {
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsFieldRefine'
-import { OverflowOptions, ZonedFieldOptions } from './optionsModel'
+import type { OverflowOptions, ZonedFieldOptions } from './optionsInput'
 import { RelativeToSlots } from './relativeMath'
 import {
   ZonedEpochNanoFields,

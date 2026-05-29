@@ -1,12 +1,12 @@
 import { DateFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { DateUnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'

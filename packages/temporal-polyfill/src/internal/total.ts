@@ -11,7 +11,7 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { DurationTotalOptions } from './optionsModel'
+import type { DurationTotalOptions } from './optionsInput'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,

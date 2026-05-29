@@ -2,11 +2,8 @@ import {
   coerceRoundingIncInteger,
   coerceRoundingMode,
 } from '../internal/optionsCoerce'
-import {
-  RoundingMathOptions,
-  RoundingMathTuple,
-  RoundingMode,
-} from '../internal/optionsModel'
+import type { RoundingMathOptions } from '../internal/optionsInput'
+import { RoundingMathTuple, RoundingMode } from '../internal/optionsModel'
 import { normalizeOptions } from '../internal/optionsNormalize'
 import { validateRoundingInc } from '../internal/optionsValidate'
 import { Unit, UnitName } from '../internal/units'

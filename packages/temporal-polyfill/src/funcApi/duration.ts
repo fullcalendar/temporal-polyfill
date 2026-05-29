@@ -1,11 +1,11 @@
 import { DurationFields } from '../internal/durationFields'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { UnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'

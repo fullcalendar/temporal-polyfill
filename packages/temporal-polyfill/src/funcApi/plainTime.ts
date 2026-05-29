@@ -1,12 +1,12 @@
 import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
   TimeDisplayOptions,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'

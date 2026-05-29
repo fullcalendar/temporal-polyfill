@@ -16,12 +16,12 @@ import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import {
+import type {
   DiffOptions,
   OverflowOptions,
   RoundingOptions,
   TimeDisplayOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import { TimeUnitName } from '../../internal/units'

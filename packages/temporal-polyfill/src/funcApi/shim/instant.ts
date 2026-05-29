@@ -26,13 +26,13 @@ import {
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
-import {
+import type {
   DiffOptions,
   InstantDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { roundBigNanoToInc, roundInstant } from '../../internal/round'
 import {

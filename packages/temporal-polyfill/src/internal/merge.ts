@@ -45,11 +45,8 @@ import {
   refineOverflowOptions,
   refineZonedFieldOptions,
 } from './optionsFieldRefine'
-import {
-  OffsetDisambig,
-  OverflowOptions,
-  ZonedFieldOptions,
-} from './optionsModel'
+import type { OverflowOptions, ZonedFieldOptions } from './optionsInput'
+import { OffsetDisambig } from './optionsModel'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,

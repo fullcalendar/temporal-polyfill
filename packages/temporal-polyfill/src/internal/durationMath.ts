@@ -8,8 +8,8 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
+import type { DurationRoundingOptions, RelativeToOptions } from './optionsInput'
 import { Overflow } from './optionsModel'
-import { DurationRoundingOptions, RelativeToOptions } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {

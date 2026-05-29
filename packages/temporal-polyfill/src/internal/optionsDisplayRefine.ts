@@ -7,16 +7,19 @@ import {
   coerceTimeZoneDisplay,
 } from './optionsCoerce'
 import { smallestUnitStr } from './optionsConfig'
-import { CalendarDisplay, RoundingMode, SubsecDigits } from './optionsModel'
 import type {
   CalendarDisplayOptions,
   DateTimeDisplayOptions,
-  DateTimeDisplayTuple,
   InstantDisplayOptions,
-  InstantDisplayTuple,
+  SubsecDigits,
   TimeDisplayOptions,
-  TimeDisplayTuple,
   ZonedDateTimeDisplayOptions,
+} from './optionsInput'
+import { CalendarDisplay, RoundingMode } from './optionsModel'
+import type {
+  DateTimeDisplayTuple,
+  InstantDisplayTuple,
+  TimeDisplayTuple,
   ZonedDateTimeDisplayTuple,
 } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'

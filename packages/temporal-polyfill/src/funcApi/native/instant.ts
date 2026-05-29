@@ -1,13 +1,13 @@
 import { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
+import type {
   DiffOptions,
   InstantDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { TimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'

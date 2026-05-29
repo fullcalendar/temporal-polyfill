@@ -22,12 +22,12 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatDurationIso } from '../../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
-import {
+import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { RelativeToSlots } from '../../internal/relativeMath'
 import { createDateSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'

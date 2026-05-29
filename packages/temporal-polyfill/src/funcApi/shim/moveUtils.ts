@@ -25,7 +25,7 @@ import {
   moveToDayOfMonthUnsafe,
 } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { OverflowOptions } from '../../internal/optionsModel'
+import type { OverflowOptions } from '../../internal/optionsInput'
 import { clampEntity } from '../../internal/utils'
 
 export function reversedMove<S>(

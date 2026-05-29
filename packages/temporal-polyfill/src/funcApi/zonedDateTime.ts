@@ -1,6 +1,6 @@
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   DiffOptions,
   DirectionName,
   DirectionOptions,
@@ -9,7 +9,7 @@ import {
   RoundingModeName,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { UnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'

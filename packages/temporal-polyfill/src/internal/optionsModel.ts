@@ -1,15 +1,23 @@
-import { Temporal as TemporalSpec } from 'temporal-spec'
-import { DayTimeUnitName, TimeUnitName, Unit, UnitName } from './units'
+import { type SubsecDigits } from './optionsInput'
+import { Unit } from './units'
 
 /*
 Shared internal option model.
 
-This file owns the internal option enums plus the structural option bag and
-tuple contracts. Keeping the model apart from normalization, coercion,
-validation, and call-site refinement avoids pulling implementation helpers into
-otherwise independent option modules.
+There are two internal shapes in this file:
+
+- const enums are the small internal representations produced by coercion.
+- `*Tuple` types are compact internal-only return values from the
+  `refine*Options` helpers. User input should never be modeled as a tuple.
+
+Raw option-bag input shapes live in optionsInput.
+
+Keeping this model apart from normalization, coercion, validation, and
+call-site refinement avoids pulling implementation helpers into otherwise
+independent option modules.
 */
 
+// Coerced internal option values. These are never raw user strings.
 export const enum Overflow {
   Constrain = 0,
   Reject = 1,
@@ -63,8 +71,6 @@ export const enum RoundingMode {
   HalfEven = 8,
 }
 
-export type SubsecDigits = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
 /*
 common SubsecDigits addons:
   -1 means hide seconds
@@ -76,18 +82,12 @@ export const enum Direction {
   Next = 1, // "
 }
 
-export type ZonedFieldOptions = OverflowOptions &
-  EpochDisambigOptions &
-  OffsetDisambigOptions
-
+// Refined internal tuples. The tuple order follows each refining helper's
+// chosen return contract, not the user's option-property order.
 export type ZonedFieldTuple = [Overflow, OffsetDisambig, EpochDisambig]
 
-export type RoundingMathOptions = RoundingIncOptions & RoundingModeOptions
-
-export type DiffOptions<UN extends UnitName> = LargestUnitOptions<UN> &
-  SmallestUnitOptions<UN> &
-  RoundingMathOptions
-
+// Refined internal tuples. Units and modes have already been validated and
+// converted to internal enum values by the time these shapes are used.
 export type RoundingMathTuple = [
   roundingInc: number,
   roundingMode: RoundingMode,
@@ -95,37 +95,16 @@ export type RoundingMathTuple = [
 
 export type RoundingTuple = [smallestUnit: Unit, ...RoundingMathTuple]
 
-export type DiffTuple = [larestUnit: Unit, ...RoundingTuple]
-
-// for datetime-like
-export type RoundingOptions<UN extends DayTimeUnitName> = Required<
-  SmallestUnitOptions<UN>
-> &
-  RoundingMathOptions
-
-export type DurationRoundingOptions<RA> = Required<
-  SmallestUnitOptions<UnitName>
-> &
-  LargestUnitOptions<UnitName> &
-  RoundingMathOptions &
-  RelativeToOptions<RA>
+export type DiffTuple = [largestUnit: Unit, ...RoundingTuple]
 
 export type DurationRoundingTuple<R> = [...DiffTuple, R]
 
+// Refined internal tuples used by ISO string formatting.
 export type TimeDisplayTuple = [
   roundingMode: RoundingMode,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined, // TODO: change -1 to null?
 ]
-
-export type TimeDisplayOptions = SmallestUnitOptions<TimeUnitName> &
-  RoundingModeOptions &
-  SubsecDigitsOptions
-
-export type ZonedDateTimeDisplayOptions = CalendarDisplayOptions &
-  TimeZoneDisplayOptions &
-  OffsetDisplayOptions &
-  TimeDisplayOptions
 
 export type ZonedDateTimeDisplayTuple = [
   CalendarDisplay,
@@ -134,73 +113,6 @@ export type ZonedDateTimeDisplayTuple = [
   ...TimeDisplayTuple,
 ]
 
-export type RelativeToOptions<RA> = { relativeTo?: RA }
-export type DurationTotalOptions<RA> = TotalUnitOptions & RelativeToOptions<RA>
-
-export type DateTimeDisplayOptions = CalendarDisplayOptions & TimeDisplayOptions
-
 export type DateTimeDisplayTuple = [CalendarDisplay, ...TimeDisplayTuple]
 
-export interface SmallestUnitOptions<UN extends UnitName> {
-  smallestUnit?: UN
-}
-
-export interface LargestUnitOptions<UN extends UnitName> {
-  largestUnit?: UN
-}
-
-export interface TotalUnitOptions {
-  unit: UnitName
-}
-
-export type InstantDisplayOptions = { timeZone?: string } & TimeDisplayOptions
-
 export type InstantDisplayTuple = [string | undefined, ...TimeDisplayTuple]
-
-export interface OverflowOptions {
-  overflow?: 'constrain' | 'reject' | undefined
-}
-
-export interface EpochDisambigOptions {
-  disambiguation?: 'compatible' | 'earlier' | 'later' | 'reject' | undefined
-}
-
-export interface OffsetDisambigOptions {
-  offset?: TemporalSpec.ZonedDateTimeFromOptions['offset']
-}
-
-export interface CalendarDisplayOptions {
-  calendarName?: 'auto' | 'always' | 'never' | 'critical' | undefined
-}
-
-export interface TimeZoneDisplayOptions {
-  timeZoneName?: TemporalSpec.ZonedDateTimeToStringOptions['timeZoneName']
-}
-
-export interface OffsetDisplayOptions {
-  offset?: TemporalSpec.ZonedDateTimeToStringOptions['offset']
-}
-
-export type RoundingModeName = TemporalSpec.RoundingOptions<
-  TemporalSpec.DateUnit | TemporalSpec.TimeUnit
->['roundingMode']
-
-export interface RoundingModeOptions {
-  roundingMode?: RoundingModeName
-}
-
-export interface RoundingIncOptions {
-  roundingIncrement?: TemporalSpec.RoundingOptions<
-    TemporalSpec.DateUnit | TemporalSpec.TimeUnit
-  >['roundingIncrement']
-}
-
-export interface SubsecDigitsOptions {
-  fractionalSecondDigits?: SubsecDigits // TODO: accept 'auto' ?
-}
-
-export type DirectionName = 'next' | 'previous'
-
-export interface DirectionOptions {
-  direction: DirectionName
-}

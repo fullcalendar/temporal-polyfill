@@ -1,9 +1,9 @@
 import { EraYearOrYear, MonthDayFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   CalendarDisplayOptions,
   OverflowOptions,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainMonthDay'

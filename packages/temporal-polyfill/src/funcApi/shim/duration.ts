@@ -15,12 +15,12 @@ import {
 } from '../../internal/isoFormat'
 import { parseDuration } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
-import {
+import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
   TimeDisplayOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { RelativeToSlots } from '../../internal/relativeMath'
 import { totalDuration } from '../../internal/total'
 import { UnitName } from '../../internal/units'

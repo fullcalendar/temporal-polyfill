@@ -28,10 +28,10 @@ import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import {
+import type {
   CalendarDisplayOptions,
   OverflowOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { isObjectLike } from '../../internal/utils'
 import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'

@@ -25,13 +25,14 @@ import * as errorMessages from './errorMessages'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
-  type CalendarYearMonthFields,
+  CalendarYearMonthFields,
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
-import { Overflow, OverflowOptions } from './optionsModel'
+import type { OverflowOptions } from './optionsInput'
+import { Overflow } from './optionsModel'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,

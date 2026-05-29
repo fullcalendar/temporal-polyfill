@@ -35,7 +35,8 @@ import {
   moveToDayOfMonthUnsafe,
   moveZonedEpochs,
 } from './move'
-import { DiffOptions, Overflow, RoundingMode } from './optionsModel'
+import type { DiffOptions } from './optionsInput'
+import { Overflow, RoundingMode } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
 import {
   MarkerToEpochNano,

@@ -26,7 +26,7 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { mergeCalendarFields } from './merge'
 import { refineEpochDisambigOptions } from './optionsFieldRefine'
-import { EpochDisambigOptions, OverflowOptions } from './optionsModel'
+import type { EpochDisambigOptions, OverflowOptions } from './optionsInput'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,

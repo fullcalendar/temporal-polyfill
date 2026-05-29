@@ -44,19 +44,18 @@ import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
-import {
+import type {
   DiffOptions,
   DirectionName,
   DirectionOptions,
-  EpochDisambig,
-  OffsetDisambig,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
+import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import {
   IsoDateTimeInterval,
   alignZonedEpoch,

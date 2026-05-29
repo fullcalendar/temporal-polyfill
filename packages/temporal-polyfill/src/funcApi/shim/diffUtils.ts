@@ -12,10 +12,10 @@ import { timeFieldDefaults } from '../../internal/fieldNames'
 import { CalendarDateFields } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
-import {
+import type {
   RoundingMathOptions,
   RoundingModeName,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
   MarkerToEpochNano,

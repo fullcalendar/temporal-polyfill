@@ -3,12 +3,8 @@ import { type CalendarSlot } from './calendarSlot'
 import { epochNanoToIso, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
-import {
-  DirectionName,
-  DirectionOptions,
-  EpochDisambig,
-  OffsetDisambig,
-} from './optionsModel'
+import type { DirectionName, DirectionOptions } from './optionsInput'
+import { EpochDisambig, OffsetDisambig } from './optionsModel'
 import { refineDirectionOptions } from './optionsTransitionRefine'
 import { roundToMinute } from './round'
 import { ZonedEpochNanoFields } from './slots'

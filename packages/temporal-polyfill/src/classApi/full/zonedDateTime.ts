@@ -45,7 +45,7 @@ import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
 import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
-import {
+import type {
   DiffOptions,
   DirectionName,
   DirectionOptions,
@@ -53,7 +53,7 @@ import {
   RoundingOptions,
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,

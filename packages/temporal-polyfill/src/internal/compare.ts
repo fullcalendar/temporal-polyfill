@@ -8,7 +8,7 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import { RelativeToOptions } from './optionsModel'
+import type { RelativeToOptions } from './optionsInput'
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,

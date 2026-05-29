@@ -1,10 +1,10 @@
 import { LocalesArg } from '../internal/intlFormatUtils'
-import {
+import type {
   DiffOptions,
   InstantDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../internal/optionsModel'
+} from '../internal/optionsInput'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'

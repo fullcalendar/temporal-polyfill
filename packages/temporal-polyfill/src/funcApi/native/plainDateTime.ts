@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import {
+import type {
   DateTimeDisplayOptions,
   DiffOptions,
   EpochDisambigOptions,
@@ -10,7 +10,7 @@ import {
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'

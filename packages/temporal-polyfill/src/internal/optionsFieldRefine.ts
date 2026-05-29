@@ -4,13 +4,13 @@ import {
   coerceOffsetDisambig,
   coerceOverflow,
 } from './optionsCoerce'
-import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import type {
   EpochDisambigOptions,
   OverflowOptions,
   ZonedFieldOptions,
-  ZonedFieldTuple,
-} from './optionsModel'
+} from './optionsInput'
+import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
+import type { ZonedFieldTuple } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 
 /*

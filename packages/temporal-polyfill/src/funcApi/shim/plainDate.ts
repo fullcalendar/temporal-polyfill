@@ -36,13 +36,13 @@ import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { moveByDays, movePlainDate } from '../../internal/move'
-import {
+import type {
   CalendarDisplayOptions,
   DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { IsoDateTimeInterval } from '../../internal/round'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'

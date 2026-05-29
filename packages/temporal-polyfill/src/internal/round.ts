@@ -20,12 +20,8 @@ import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
-import {
-  EpochDisambig,
-  OffsetDisambig,
-  RoundingMode,
-  RoundingOptions,
-} from './optionsModel'
+import type { RoundingOptions } from './optionsInput'
+import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,

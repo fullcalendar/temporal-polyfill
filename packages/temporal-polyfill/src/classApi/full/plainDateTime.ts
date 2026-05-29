@@ -43,13 +43,13 @@ import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import {
+import type {
   DateTimeDisplayOptions,
   DiffOptions,
   EpochDisambigOptions,
   OverflowOptions,
   RoundingOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { roundPlainDateTime } from '../../internal/round'
 import {
   createDateSlots,

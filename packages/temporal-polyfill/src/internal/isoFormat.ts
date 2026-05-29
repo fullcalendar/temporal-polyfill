@@ -24,17 +24,19 @@ import {
   refineTimeDisplayOptions,
   refineZonedDateTimeDisplayOptions,
 } from './optionsDisplayRefine'
-import {
-  CalendarDisplay,
+import type {
   CalendarDisplayOptions,
   DateTimeDisplayOptions,
   InstantDisplayOptions,
-  OffsetDisplay,
-  RoundingMode,
   SubsecDigits,
   TimeDisplayOptions,
-  TimeZoneDisplay,
   ZonedDateTimeDisplayOptions,
+} from './optionsInput'
+import {
+  CalendarDisplay,
+  OffsetDisplay,
+  RoundingMode,
+  TimeZoneDisplay,
 } from './optionsModel'
 import {
   roundBigNanoToDayOriginInc,

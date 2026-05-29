@@ -14,14 +14,14 @@ import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
-import {
+import type {
   DiffOptions,
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
   RoundingOptions,
   TimeDisplayOptions,
-} from '../../internal/optionsModel'
+} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
