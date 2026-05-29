@@ -1,3 +1,11 @@
+import {
+  bigNanoInHour,
+  bigNanoInMicro,
+  bigNanoInMilli,
+  bigNanoInMinute,
+  bigNanoInSec,
+} from '../../internal/bigNano'
+import { toStrictInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
 import { constructEpochNanoSlots } from '../../internal/construct'
 import {
@@ -23,7 +31,12 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { roundInstant } from '../../internal/round'
-import { getEpochMilli, getEpochNano } from '../../internal/slots'
+import {
+  createEpochNanoSlots,
+  getEpochMilli,
+  getEpochNano,
+} from '../../internal/slots'
+import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnitName } from '../../internal/units'
@@ -140,6 +153,131 @@ export function subtract(
   const durationSlots = getDurationShimRecordSlots(durationRecord)
   const resSlots = moveInstant(true, slots, durationSlots)
   return createInstantShimRecord(resSlots)
+}
+
+function moveByNanoseconds(
+  record: InstantShimRecord,
+  nanoseconds: bigint,
+): InstantShimRecord {
+  const slots = getInstantShimRecordSlots(record)
+  const resSlots = createEpochNanoSlots(
+    checkEpochNanoInBounds(slots.epochNanoseconds + nanoseconds),
+  )
+  return createInstantShimRecord(resSlots)
+}
+
+export function addHours(
+  record: InstantShimRecord,
+  hours: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    BigInt(toStrictInteger(hours)) * bigNanoInHour,
+  )
+}
+
+export function addMinutes(
+  record: InstantShimRecord,
+  minutes: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    BigInt(toStrictInteger(minutes)) * bigNanoInMinute,
+  )
+}
+
+export function addSeconds(
+  record: InstantShimRecord,
+  seconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    BigInt(toStrictInteger(seconds)) * bigNanoInSec,
+  )
+}
+
+export function addMilliseconds(
+  record: InstantShimRecord,
+  milliseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    BigInt(toStrictInteger(milliseconds)) * bigNanoInMilli,
+  )
+}
+
+export function addMicroseconds(
+  record: InstantShimRecord,
+  microseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    BigInt(toStrictInteger(microseconds)) * bigNanoInMicro,
+  )
+}
+
+export function addNanoseconds(
+  record: InstantShimRecord,
+  nanoseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(record, BigInt(toStrictInteger(nanoseconds)))
+}
+
+export function subtractHours(
+  record: InstantShimRecord,
+  hours: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    -BigInt(toStrictInteger(hours)) * bigNanoInHour,
+  )
+}
+
+export function subtractMinutes(
+  record: InstantShimRecord,
+  minutes: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    -BigInt(toStrictInteger(minutes)) * bigNanoInMinute,
+  )
+}
+
+export function subtractSeconds(
+  record: InstantShimRecord,
+  seconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    -BigInt(toStrictInteger(seconds)) * bigNanoInSec,
+  )
+}
+
+export function subtractMilliseconds(
+  record: InstantShimRecord,
+  milliseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    -BigInt(toStrictInteger(milliseconds)) * bigNanoInMilli,
+  )
+}
+
+export function subtractMicroseconds(
+  record: InstantShimRecord,
+  microseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(
+    record,
+    -BigInt(toStrictInteger(microseconds)) * bigNanoInMicro,
+  )
+}
+
+export function subtractNanoseconds(
+  record: InstantShimRecord,
+  nanoseconds: number,
+): InstantShimRecord {
+  return moveByNanoseconds(record, -BigInt(toStrictInteger(nanoseconds)))
 }
 
 // this is equivalent to Temporal's `until`

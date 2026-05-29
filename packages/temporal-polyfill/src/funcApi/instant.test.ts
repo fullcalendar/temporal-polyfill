@@ -58,12 +58,56 @@ describe('add', () => {
   })
 })
 
+describe('add*', () => {
+  it('advances by one time unit', () => {
+    const inst = InstantFns.create(0n)
+
+    expectInstantEquals(InstantFns.addHours(inst, 1), 3600000000000n)
+    expectInstantEquals(InstantFns.addMinutes(inst, 1), 60000000000n)
+    expectInstantEquals(InstantFns.addSeconds(inst, 1), 1000000000n)
+    expectInstantEquals(InstantFns.addMilliseconds(inst, 1), 1000000n)
+    expectInstantEquals(InstantFns.addMicroseconds(inst, 1), 1000n)
+    expectInstantEquals(InstantFns.addNanoseconds(inst, 1), 1n)
+  })
+
+  it('rejects non-integer units', () => {
+    const inst = InstantFns.create(0n)
+
+    expect(() => InstantFns.addHours(inst, 1.5)).toThrow(RangeError)
+  })
+})
+
 describe('subtract', () => {
   it('advances by time units', () => {
     const inst0 = InstantFns.create(0n)
     const d = DurationFns.fromFields({ hours: -2 })
     const inst1 = InstantFns.subtract(inst0, d)
     expectInstantEquals(inst1, 7200000000000n)
+  })
+})
+
+describe('subtract*', () => {
+  it('rewinds by one time unit', () => {
+    const inst = InstantFns.create(3600000000000n)
+
+    expectInstantEquals(InstantFns.subtractHours(inst, 1), 0n)
+    expectInstantEquals(InstantFns.subtractMinutes(inst, 1), 3540000000000n)
+    expectInstantEquals(InstantFns.subtractSeconds(inst, 1), 3599000000000n)
+    expectInstantEquals(
+      InstantFns.subtractMilliseconds(inst, 1),
+      3599999000000n,
+    )
+    expectInstantEquals(
+      InstantFns.subtractMicroseconds(inst, 1),
+      3599999999000n,
+    )
+    expectInstantEquals(InstantFns.subtractNanoseconds(inst, 1), 3599999999999n)
+  })
+
+  it('rejects non-integer units', () => {
+    const inst = InstantFns.create(0n)
+
+    expect(() => InstantFns.subtractHours(inst, 1.5)).toThrow(RangeError)
   })
 })
 

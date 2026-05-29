@@ -219,8 +219,6 @@ Temporal API:
 const nextInstant = instant.add({ hours })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `addMinutes`
 
 Signature:
@@ -240,8 +238,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.add({ minutes })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `addSeconds`
 
@@ -263,8 +259,6 @@ Temporal API:
 const nextInstant = instant.add({ seconds })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `addMilliseconds`
 
 Signature:
@@ -284,8 +278,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.add({ milliseconds })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `addMicroseconds`
 
@@ -307,8 +299,6 @@ Temporal API:
 const nextInstant = instant.add({ microseconds })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `addNanoseconds`
 
 Signature:
@@ -328,8 +318,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.add({ nanoseconds })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `subtract`
 
@@ -373,8 +361,6 @@ Temporal API:
 const nextInstant = instant.subtract({ hours })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `subtractMinutes`
 
 Signature:
@@ -394,8 +380,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.subtract({ minutes })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `subtractSeconds`
 
@@ -417,8 +401,6 @@ Temporal API:
 const nextInstant = instant.subtract({ seconds })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `subtractMilliseconds`
 
 Signature:
@@ -438,8 +420,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.subtract({ milliseconds })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `subtractMicroseconds`
 
@@ -461,8 +441,6 @@ Temporal API:
 const nextInstant = instant.subtract({ microseconds })
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `subtractNanoseconds`
 
 Signature:
@@ -482,8 +460,6 @@ Temporal API:
 ```ts
 const nextInstant = instant.subtract({ nanoseconds })
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ## Difference And Comparison
 

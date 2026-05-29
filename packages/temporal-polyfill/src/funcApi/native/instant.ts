@@ -122,6 +122,102 @@ export function subtract(
   return createInstantNativeRecord(resNative)
 }
 
+export function addHours(
+  record: InstantNativeRecord,
+  hours: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ hours })
+  return createInstantNativeRecord(resNative)
+}
+
+export function addMinutes(
+  record: InstantNativeRecord,
+  minutes: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ minutes })
+  return createInstantNativeRecord(resNative)
+}
+
+export function addSeconds(
+  record: InstantNativeRecord,
+  seconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ seconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function addMilliseconds(
+  record: InstantNativeRecord,
+  milliseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ milliseconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function addMicroseconds(
+  record: InstantNativeRecord,
+  microseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ microseconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function addNanoseconds(
+  record: InstantNativeRecord,
+  nanoseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).add({ nanoseconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractHours(
+  record: InstantNativeRecord,
+  hours: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ hours })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractMinutes(
+  record: InstantNativeRecord,
+  minutes: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ minutes })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractSeconds(
+  record: InstantNativeRecord,
+  seconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ seconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractMilliseconds(
+  record: InstantNativeRecord,
+  milliseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ milliseconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractMicroseconds(
+  record: InstantNativeRecord,
+  microseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ microseconds })
+  return createInstantNativeRecord(resNative)
+}
+
+export function subtractNanoseconds(
+  record: InstantNativeRecord,
+  nanoseconds: number,
+): InstantNativeRecord {
+  const resNative = getInstantNative(record).subtract({ nanoseconds })
+  return createInstantNativeRecord(resNative)
+}
+
 // this is equivalent to Temporal's `until`
 export function diff(
   record: InstantNativeRecord,

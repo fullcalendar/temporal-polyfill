@@ -51,6 +51,80 @@ export const subtract: (
   durationRecord: DurationRecord,
 ) => InstantRecord = NativeTemporal ? Native.subtract : Shim.subtract
 
+export const addHours: (record: InstantRecord, hours: number) => InstantRecord =
+  NativeTemporal ? Native.addHours : Shim.addHours
+
+export const addMinutes: (
+  record: InstantRecord,
+  minutes: number,
+) => InstantRecord = NativeTemporal ? Native.addMinutes : Shim.addMinutes
+
+export const addSeconds: (
+  record: InstantRecord,
+  seconds: number,
+) => InstantRecord = NativeTemporal ? Native.addSeconds : Shim.addSeconds
+
+export const addMilliseconds: (
+  record: InstantRecord,
+  milliseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.addMilliseconds
+  : Shim.addMilliseconds
+
+export const addMicroseconds: (
+  record: InstantRecord,
+  microseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.addMicroseconds
+  : Shim.addMicroseconds
+
+export const addNanoseconds: (
+  record: InstantRecord,
+  nanoseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.addNanoseconds
+  : Shim.addNanoseconds
+
+export const subtractHours: (
+  record: InstantRecord,
+  hours: number,
+) => InstantRecord = NativeTemporal ? Native.subtractHours : Shim.subtractHours
+
+export const subtractMinutes: (
+  record: InstantRecord,
+  minutes: number,
+) => InstantRecord = NativeTemporal
+  ? Native.subtractMinutes
+  : Shim.subtractMinutes
+
+export const subtractSeconds: (
+  record: InstantRecord,
+  seconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.subtractSeconds
+  : Shim.subtractSeconds
+
+export const subtractMilliseconds: (
+  record: InstantRecord,
+  milliseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.subtractMilliseconds
+  : Shim.subtractMilliseconds
+
+export const subtractMicroseconds: (
+  record: InstantRecord,
+  microseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.subtractMicroseconds
+  : Shim.subtractMicroseconds
+
+export const subtractNanoseconds: (
+  record: InstantRecord,
+  nanoseconds: number,
+) => InstantRecord = NativeTemporal
+  ? Native.subtractNanoseconds
+  : Shim.subtractNanoseconds
+
 export const diff: (
   record: InstantRecord,
   otherRecord: InstantRecord,
