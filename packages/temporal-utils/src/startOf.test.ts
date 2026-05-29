@@ -24,6 +24,19 @@ describe('startOfYear', () => {
         ),
       ).toBe(true)
     })
+
+    it('uses the first real instant when the year starts after a skipped midnight', () => {
+      const zdt = Temporal.ZonedDateTime.from(
+        '1996-07-27T12:30:00[America/Danmarkshavn]',
+      )
+      expect(
+        startOfYear(zdt).equals(
+          Temporal.ZonedDateTime.from(
+            '1996-01-01T03:00:00[America/Danmarkshavn]',
+          ),
+        ),
+      ).toBe(true)
+    })
   })
 
   describe('PlainDateTime', () => {
@@ -68,6 +81,17 @@ describe('startOfMonth', () => {
         ),
       ).toBe(true)
     })
+
+    it('uses the first real instant when the month starts after a skipped midnight', () => {
+      const zdt = Temporal.ZonedDateTime.from(
+        '2009-06-15T12:30:00[Africa/Casablanca]',
+      )
+      expect(
+        startOfMonth(zdt).equals(
+          Temporal.ZonedDateTime.from('2009-06-01T01:00:00[Africa/Casablanca]'),
+        ),
+      ).toBe(true)
+    })
   })
 
   describe('PlainDateTime', () => {
@@ -101,6 +125,19 @@ describe('startOfWeek', () => {
         startOfWeek(zdt).equals(
           Temporal.ZonedDateTime.from(
             '2024-07-15T00:00:00[America/New_York]', // this Monday
+          ),
+        ),
+      ).toBe(true)
+    })
+
+    it('uses the first real instant when the week starts after a skipped midnight', () => {
+      const zdt = Temporal.ZonedDateTime.from(
+        '2009-06-03T12:30:00[Africa/Casablanca]', // Wednesday
+      )
+      expect(
+        startOfWeek(zdt).equals(
+          Temporal.ZonedDateTime.from(
+            '2009-06-01T01:00:00[Africa/Casablanca]', // this Monday
           ),
         ),
       ).toBe(true)

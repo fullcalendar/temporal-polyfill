@@ -24,6 +24,17 @@ describe('endOfYear', () => {
       )
       expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
+
+    it('ends before the first real instant when the next year skips midnight', () => {
+      const zdt0 = Temporal.ZonedDateTime.from(
+        '1995-07-27T12:30:00[America/Danmarkshavn]',
+      )
+      const zdt1 = endOfYear(zdt0)
+      const zdt2 = Temporal.ZonedDateTime.from(
+        '1996-01-01T03:00:00[America/Danmarkshavn]',
+      )
+      expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
+    })
   })
 
   describe('PlainDateTime', () => {
@@ -66,6 +77,17 @@ describe('endOfMonth', () => {
       )
       expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
+
+    it('ends before the first real instant when the next month skips midnight', () => {
+      const zdt0 = Temporal.ZonedDateTime.from(
+        '2009-05-15T12:30:00[Africa/Casablanca]',
+      )
+      const zdt1 = endOfMonth(zdt0)
+      const zdt2 = Temporal.ZonedDateTime.from(
+        '2009-06-01T01:00:00[Africa/Casablanca]',
+      )
+      expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
+    })
   })
 
   describe('PlainDateTime', () => {
@@ -96,6 +118,17 @@ describe('endOfWeek', () => {
       const zdt1 = endOfWeek(zdt0)
       const zdt2 = Temporal.ZonedDateTime.from(
         '2024-07-22T00:00:00[America/New_York]', // next Monday
+      )
+      expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
+    })
+
+    it('ends before the first real instant when the next week skips midnight', () => {
+      const zdt0 = Temporal.ZonedDateTime.from(
+        '2009-05-30T12:30:00[Africa/Casablanca]', // Saturday
+      )
+      const zdt1 = endOfWeek(zdt0)
+      const zdt2 = Temporal.ZonedDateTime.from(
+        '2009-06-01T01:00:00[Africa/Casablanca]', // next Monday
       )
       expect(zdt1.equals(zdt2.subtract({ nanoseconds: 1 }))).toBe(true)
     })
