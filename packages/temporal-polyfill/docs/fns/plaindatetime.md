@@ -1336,6 +1336,8 @@ const nextDateTime = dateTime.round(options)
 
 ### `roundToYear`
 
+If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
+
 Signature:
 
 ```ts

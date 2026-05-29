@@ -874,6 +874,8 @@ const order = Temporal.PlainDate.compare(date, otherDate)
 
 ## Rounding
 
+If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
+
 ### `roundToYear`
 
 Signature:

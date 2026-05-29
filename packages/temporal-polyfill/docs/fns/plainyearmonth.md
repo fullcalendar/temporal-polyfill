@@ -509,6 +509,8 @@ const order = Temporal.PlainYearMonth.compare(yearMonth, otherYearMonth)
 
 ## Rounding
 
+If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
+
 ### `roundToYear`
 
 Signature:
