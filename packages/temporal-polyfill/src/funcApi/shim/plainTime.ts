@@ -1,3 +1,5 @@
+import { bigNanoInUtcDay } from '../../internal/bigNano'
+import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -16,8 +18,20 @@ import {
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { roundPlainTime } from '../../internal/round'
-import { TimeUnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { createTimeSlots } from '../../internal/slots'
+import {
+  nanoToTimeAndDay,
+  timeFieldsToNano,
+} from '../../internal/timeFieldMath'
+import {
+  TimeUnitName,
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
+} from '../../internal/units'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
@@ -27,6 +41,7 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { reversedMove } from './moveUtils'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -180,6 +195,42 @@ export function subtract(
   const resSlots = movePlainTime(true, slots, durationSlots)
   return createPlainTimeShimRecord(resSlots)
 }
+
+function moveByTimeUnit(
+  nanoInUnit: number,
+  record: PlainTimeShimRecord,
+  units: number,
+): PlainTimeShimRecord {
+  const slots = getPlainTimeShimRecordSlots(record)
+  const movedNano =
+    BigInt(timeFieldsToNano(slots)) +
+    BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
+
+  // Like nanoToTimeAndDay's floor-mod day split, but kept in bigint space until
+  // after wrapping. These two paths should probably converge someday.
+  // PlainTime has no date component, so overflowing past midnight wraps within
+  // the ISO day and deliberately discards the day delta.
+  const wrappedNano =
+    ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
+
+  return createPlainTimeShimRecord(
+    createTimeSlots(nanoToTimeAndDay(Number(wrappedNano))[0]),
+  )
+}
+
+export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
+export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
+export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)
+export const addMilliseconds = bindArgs(moveByTimeUnit, nanoInMilli)
+export const addMicroseconds = bindArgs(moveByTimeUnit, nanoInMicro)
+export const addNanoseconds = bindArgs(moveByTimeUnit, 1)
+
+export const subtractHours = reversedMove(addHours)
+export const subtractMinutes = reversedMove(addMinutes)
+export const subtractSeconds = reversedMove(addSeconds)
+export const subtractMilliseconds = reversedMove(addMilliseconds)
+export const subtractMicroseconds = reversedMove(addMicroseconds)
+export const subtractNanoseconds = reversedMove(addNanoseconds)
 
 // this is equivalent to Temporal's `until`
 export function diff(

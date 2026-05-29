@@ -86,6 +86,40 @@ describe('add', () => {
   })
 })
 
+describe('add*', () => {
+  it('advances by one time unit', () => {
+    const pt = PlainTimeFns.create()
+
+    expectPlainTimeEquals(PlainTimeFns.addHours(pt, 1), { hour: 1 })
+    expectPlainTimeEquals(PlainTimeFns.addMinutes(pt, 1), { minute: 1 })
+    expectPlainTimeEquals(PlainTimeFns.addSeconds(pt, 1), { second: 1 })
+    expectPlainTimeEquals(PlainTimeFns.addMilliseconds(pt, 1), {
+      millisecond: 1,
+    })
+    expectPlainTimeEquals(PlainTimeFns.addMicroseconds(pt, 1), {
+      microsecond: 1,
+    })
+    expectPlainTimeEquals(PlainTimeFns.addNanoseconds(pt, 1), {
+      nanosecond: 1,
+    })
+  })
+
+  it('wraps around midnight', () => {
+    const pt = PlainTimeFns.create(23, 30)
+
+    expectPlainTimeEquals(PlainTimeFns.addHours(pt, 1), {
+      hour: 0,
+      minute: 30,
+    })
+  })
+
+  it('rejects non-integer units', () => {
+    const pt = PlainTimeFns.create()
+
+    expect(() => PlainTimeFns.addHours(pt, 1.5)).toThrow(RangeError)
+  })
+})
+
 describe('subtract', () => {
   it('works', () => {
     const pt0 = PlainTimeFns.create(12, 30)
@@ -95,6 +129,59 @@ describe('subtract', () => {
       hour: 22,
       minute: 15,
     })
+  })
+})
+
+describe('subtract*', () => {
+  it('rewinds by one time unit', () => {
+    const pt = PlainTimeFns.create(1)
+
+    expectPlainTimeEquals(PlainTimeFns.subtractHours(pt, 1), {})
+    expectPlainTimeEquals(PlainTimeFns.subtractMinutes(pt, 1), {
+      hour: 0,
+      minute: 59,
+    })
+    expectPlainTimeEquals(PlainTimeFns.subtractSeconds(pt, 1), {
+      hour: 0,
+      minute: 59,
+      second: 59,
+    })
+    expectPlainTimeEquals(PlainTimeFns.subtractMilliseconds(pt, 1), {
+      hour: 0,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+    })
+    expectPlainTimeEquals(PlainTimeFns.subtractMicroseconds(pt, 1), {
+      hour: 0,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+      microsecond: 999,
+    })
+    expectPlainTimeEquals(PlainTimeFns.subtractNanoseconds(pt, 1), {
+      hour: 0,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+      microsecond: 999,
+      nanosecond: 999,
+    })
+  })
+
+  it('wraps around midnight', () => {
+    const pt = PlainTimeFns.create(0, 30)
+
+    expectPlainTimeEquals(PlainTimeFns.subtractHours(pt, 1), {
+      hour: 23,
+      minute: 30,
+    })
+  })
+
+  it('rejects non-integer units', () => {
+    const pt = PlainTimeFns.create()
+
+    expect(() => PlainTimeFns.subtractHours(pt, 1.5)).toThrow(RangeError)
   })
 })
 

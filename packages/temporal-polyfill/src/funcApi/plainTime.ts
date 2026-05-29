@@ -52,10 +52,88 @@ export const add: (
   duration: DurationRecord,
 ) => PlainTimeRecord = NativeTemporal ? Native.add : Shim.add
 
+export const addHours: (
+  record: PlainTimeRecord,
+  hours: number,
+) => PlainTimeRecord = NativeTemporal ? Native.addHours : Shim.addHours
+
+export const addMinutes: (
+  record: PlainTimeRecord,
+  minutes: number,
+) => PlainTimeRecord = NativeTemporal ? Native.addMinutes : Shim.addMinutes
+
+export const addSeconds: (
+  record: PlainTimeRecord,
+  seconds: number,
+) => PlainTimeRecord = NativeTemporal ? Native.addSeconds : Shim.addSeconds
+
+export const addMilliseconds: (
+  record: PlainTimeRecord,
+  milliseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.addMilliseconds
+  : Shim.addMilliseconds
+
+export const addMicroseconds: (
+  record: PlainTimeRecord,
+  microseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.addMicroseconds
+  : Shim.addMicroseconds
+
+export const addNanoseconds: (
+  record: PlainTimeRecord,
+  nanoseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.addNanoseconds
+  : Shim.addNanoseconds
+
 export const subtract: (
   record: PlainTimeRecord,
   duration: DurationRecord,
 ) => PlainTimeRecord = NativeTemporal ? Native.subtract : Shim.subtract
+
+export const subtractHours: (
+  record: PlainTimeRecord,
+  hours: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractHours
+  : Shim.subtractHours
+
+export const subtractMinutes: (
+  record: PlainTimeRecord,
+  minutes: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractMinutes
+  : Shim.subtractMinutes
+
+export const subtractSeconds: (
+  record: PlainTimeRecord,
+  seconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractSeconds
+  : Shim.subtractSeconds
+
+export const subtractMilliseconds: (
+  record: PlainTimeRecord,
+  milliseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractMilliseconds
+  : Shim.subtractMilliseconds
+
+export const subtractMicroseconds: (
+  record: PlainTimeRecord,
+  microseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractMicroseconds
+  : Shim.subtractMicroseconds
+
+export const subtractNanoseconds: (
+  record: PlainTimeRecord,
+  nanoseconds: number,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.subtractNanoseconds
+  : Shim.subtractNanoseconds
 
 export const diff: (
   record: PlainTimeRecord,

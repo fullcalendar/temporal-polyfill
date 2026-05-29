@@ -158,6 +158,54 @@ export function add(
   return createPlainTimeNativeRecord(resNative)
 }
 
+export function addHours(
+  record: PlainTimeNativeRecord,
+  hours: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ hours })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function addMinutes(
+  record: PlainTimeNativeRecord,
+  minutes: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ minutes })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function addSeconds(
+  record: PlainTimeNativeRecord,
+  seconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ seconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function addMilliseconds(
+  record: PlainTimeNativeRecord,
+  milliseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ milliseconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function addMicroseconds(
+  record: PlainTimeNativeRecord,
+  microseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ microseconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function addNanoseconds(
+  record: PlainTimeNativeRecord,
+  nanoseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).add({ nanoseconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
 export function subtract(
   record: PlainTimeNativeRecord,
   duration: DurationNativeRecord,
@@ -165,6 +213,54 @@ export function subtract(
   const native = getPlainTimeNative(record)
   const durationNative = getDurationNative(duration)
   const resNative = native.subtract(durationNative)
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractHours(
+  record: PlainTimeNativeRecord,
+  hours: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ hours })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractMinutes(
+  record: PlainTimeNativeRecord,
+  minutes: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ minutes })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractSeconds(
+  record: PlainTimeNativeRecord,
+  seconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ seconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractMilliseconds(
+  record: PlainTimeNativeRecord,
+  milliseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ milliseconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractMicroseconds(
+  record: PlainTimeNativeRecord,
+  microseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ microseconds })
+  return createPlainTimeNativeRecord(resNative)
+}
+
+export function subtractNanoseconds(
+  record: PlainTimeNativeRecord,
+  nanoseconds: number,
+): PlainTimeNativeRecord {
+  const resNative = getPlainTimeNative(record).subtract({ nanoseconds })
   return createPlainTimeNativeRecord(resNative)
 }
 
