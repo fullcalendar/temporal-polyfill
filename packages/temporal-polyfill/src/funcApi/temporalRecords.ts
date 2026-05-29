@@ -18,11 +18,16 @@ const durationMap = new WeakMap<object, unknown>()
 // --------
 
 export function isCalendarRecord(record: unknown): boolean {
-  return !!getCalendarSlotsIfPresent(record)
+  return calendarMap.has(record as object)
 }
 
+// Core calendar slots are intentionally falsy: ISO is undefined and gregory is
+// 0. Use map membership instead of slot truthiness to distinguish a real core
+// calendar record from a missing record.
 export function getCalendarSlots<S>(record: unknown): S {
-  return getCalendarSlotsIfPresent<S>(record) || invalidRecordType()
+  return isCalendarRecord(record as object)
+    ? (calendarMap.get(record as object) as S)
+    : invalidRecordType()
 }
 
 export function getCalendarSlotsIfPresent<S>(record: unknown): S | undefined {
