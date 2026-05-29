@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -11,7 +12,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getPlainTimeRecord, setPlainTimeRecord } from '../temporalRecords'
+import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -27,7 +28,8 @@ import {
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<PlainTimeNativeRecord>
 
-export const getPlainTimeNative: (record: unknown) => any = getPlainTimeRecord
+export const getPlainTimeNative: (record: unknown) => Temporal.PlainTime =
+  getPlainTimeSlots
 
 class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
@@ -86,13 +88,13 @@ class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   }
 }
 
-function setPlainTimeNative(instance: object, native: any) {
-  setPlainTimeRecord(instance, native)
+function setPlainTimeNative(instance: object, native: Temporal.PlainTime) {
+  setPlainTimeSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainTimeNativeRecord(
-  native: any,
+  native: Temporal.PlainTime,
 ): PlainTimeNativeRecord {
   const instance = Object.create(PlainTimeNativeRecord.prototype)
   setPlainTimeNative(instance, native)
@@ -183,7 +185,7 @@ export function round(
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeNativeRecord {
   const native = getPlainTimeNative(record)
-  const resNative = native.round(options)
+  const resNative = native.round(options as any) // !!!
   return createPlainTimeNativeRecord(resNative)
 }
 
@@ -202,7 +204,7 @@ export function compare(
 ): NumberSign {
   const native = getPlainTimeNative(record)
   const otherNative = getPlainTimeNative(otherRecord)
-  return NativeTemporal!.PlainTime.compare(native, otherNative)
+  return NativeTemporal!.PlainTime.compare(native, otherNative) as NumberSign
 }
 
 export function createFormat(
@@ -224,7 +226,7 @@ export function toString(
   record: PlainTimeNativeRecord,
   options?: TimeDisplayOptions,
 ): string {
-  return getPlainTimeNative(record).toString(options)
+  return getPlainTimeNative(record).toString(options as any) // !!!
 }
 
 export function toSimpleString(record: PlainTimeNativeRecord): string {

@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -8,8 +9,8 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainMonthDayRecord,
-  setPlainMonthDayRecord,
+  getPlainMonthDaySlots,
+  setPlainMonthDaySlots,
 } from '../temporalRecords'
 import {
   CalendarNativeRecord,
@@ -29,8 +30,9 @@ type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
 
 type Format = DateTimeFormatLike<PlainMonthDayNativeRecord>
 
-export const getPlainMonthDayNative: (record: unknown) => any =
-  getPlainMonthDayRecord
+export const getPlainMonthDayNative: (
+  record: unknown,
+) => Temporal.PlainMonthDay = getPlainMonthDaySlots
 
 class _PlainMonthDayNativeRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
@@ -77,13 +79,16 @@ class _PlainMonthDayNativeRecord
   }
 }
 
-function setPlainMonthDayNative(instance: object, native: any) {
-  setPlainMonthDayRecord(instance, native)
+function setPlainMonthDayNative(
+  instance: object,
+  native: Temporal.PlainMonthDay,
+) {
+  setPlainMonthDaySlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainMonthDayNativeRecord(
-  native: any,
+  native: Temporal.PlainMonthDay,
 ): PlainMonthDayNativeRecord {
   const instance = Object.create(PlainMonthDayNativeRecord.prototype)
   setPlainMonthDayNative(instance, native)
@@ -119,7 +124,7 @@ export function fromFields(
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
   const resNative = NativeTemporal!.PlainMonthDay.from(
-    { ...fields, calendar },
+    { ...fields, calendar } as any, // !!! TODO - day is required
     options,
   )
   return createPlainMonthDayNativeRecord(resNative)

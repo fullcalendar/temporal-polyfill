@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -12,11 +13,11 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getDurationRecord,
-  getPlainDateRecordIfPresent,
-  getPlainDateTimeRecordIfPresent,
-  getZonedDateTimeRecordIfPresent,
-  setDurationRecord,
+  getDurationSlots,
+  getPlainDateSlotsIfPresent,
+  getPlainDateTimeSlotsIfPresent,
+  getZonedDateTimeSlotsIfPresent,
+  setDurationSlots,
 } from '../temporalRecords'
 import {
   attachDebugString,
@@ -26,7 +27,8 @@ import {
 
 type DurationRecord = RecordTypes.DurationRecord
 
-export const getDurationNative: (record: unknown) => any = getDurationRecord
+export const getDurationNative: (record: unknown) => Temporal.Duration =
+  getDurationSlots
 
 class _DurationNativeRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
@@ -109,12 +111,14 @@ class _DurationNativeRecord implements DurationFields, DurationRecord {
   }
 }
 
-function setDurationNative(instance: object, native: any) {
-  setDurationRecord(instance, native)
+function setDurationNative(instance: object, native: Temporal.Duration): void {
+  setDurationSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
-export function createDurationNativeRecord(native: any): DurationNativeRecord {
+export function createDurationNativeRecord(
+  native: Temporal.Duration,
+): DurationNativeRecord {
   const instance = Object.create(DurationNativeRecord.prototype)
   setDurationNative(instance, native)
   return instance
@@ -166,7 +170,7 @@ export function fromString(s: string): DurationNativeRecord {
 
 export function sign(duration: DurationNativeRecord): NumberSign {
   const native = getDurationNative(duration)
-  return native.sign
+  return native.sign as NumberSign // !!!
 }
 
 export function blank(duration: DurationNativeRecord): boolean {
@@ -198,28 +202,20 @@ export function abs(duration: DurationNativeRecord): DurationNativeRecord {
 export function add(
   duration: DurationNativeRecord,
   otherDuration: DurationNativeRecord,
-  options?: RelativeToOptions<RelativeToNativeRecord>,
 ): DurationNativeRecord {
   const native = getDurationNative(duration)
   const otherNative = getDurationNative(otherDuration)
-  const resNative = native.add(otherNative, {
-    ...options,
-    relativeTo: refineRelativeTo(options?.relativeTo),
-  })
+  const resNative = native.add(otherNative)
   return createDurationNativeRecord(resNative)
 }
 
 export function subtract(
   duration: DurationNativeRecord,
   otherDuration: DurationNativeRecord,
-  options?: RelativeToOptions<RelativeToNativeRecord>,
 ): DurationNativeRecord {
   const native = getDurationNative(duration)
   const otherNative = getDurationNative(otherDuration)
-  const resNative = native.subtract(otherNative, {
-    ...options,
-    relativeTo: refineRelativeTo(options?.relativeTo),
-  })
+  const resNative = native.subtract(otherNative)
   return createDurationNativeRecord(resNative)
 }
 
@@ -240,7 +236,7 @@ export function total(
   options: UnitName | DurationTotalOptions<RelativeToNativeRecord>,
 ): number {
   const native = getDurationNative(duration)
-  return native.total(refineTotalOptions(options))
+  return native.total(refineTotalOptions(options) as any) // !!!
 }
 
 export function compare(
@@ -253,7 +249,7 @@ export function compare(
   return NativeTemporal!.Duration.compare(native, otherNative, {
     ...options,
     relativeTo: refineRelativeTo(options?.relativeTo),
-  })
+  }) as NumberSign // !!!
 }
 
 export function toLocaleString(
@@ -270,7 +266,7 @@ export function toString(
   duration: DurationNativeRecord,
   options?: TimeDisplayOptions,
 ): string {
-  return getDurationNative(duration).toString(options)
+  return getDurationNative(duration).toString(options as any) // !!!
 }
 
 export function toSimpleString(duration: DurationNativeRecord): string {
@@ -286,6 +282,11 @@ type RelativeToNativeRecord = RelativeToRecord<
   RecordTypes.PlainDateRecord
 >
 
+type RelativeToNative =
+  | Temporal.ZonedDateTime
+  | Temporal.PlainDateTime
+  | Temporal.PlainDate
+
 function refineTotalOptions(
   options: UnitName | DurationTotalOptions<RelativeToNativeRecord>,
 ) {
@@ -297,15 +298,17 @@ function refineTotalOptions(
       }
 }
 
-function refineRelativeTo(arg?: RelativeToNativeRecord): any | undefined {
+function refineRelativeTo(
+  arg?: RelativeToNativeRecord,
+): RelativeToNative | undefined {
   if (arg) {
     const native =
-      getZonedDateTimeRecordIfPresent(arg) ||
-      getPlainDateTimeRecordIfPresent(arg) ||
-      getPlainDateRecordIfPresent(arg)
+      getZonedDateTimeSlotsIfPresent(arg) ||
+      getPlainDateTimeSlotsIfPresent(arg) ||
+      getPlainDateSlotsIfPresent(arg)
 
     if (native) {
-      return native // native ZonedDateTime / PlainDateTime / PlainDate
+      return native as RelativeToNative
     }
     // otherwise, throw error?
   }

@@ -1,5 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 
+// TODO: simplify this!
 export type DateTimeObj = Temporal.PlainDateTime | Temporal.ZonedDateTime
 export type DateObj = Temporal.PlainDate | DateTimeObj
 export type YearMonthObj = Temporal.PlainYearMonth | DateObj

@@ -53,7 +53,7 @@ import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getPlainDateRecord, setPlainDateRecord } from '../temporalRecords'
+import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -127,7 +127,7 @@ type PlainDateShimSlots = ReturnType<typeof constructDateSlots>
 
 export const getPlainDateShimRecordSlots: (
   record: unknown,
-) => PlainDateShimSlots = getPlainDateRecord
+) => PlainDateShimSlots = getPlainDateSlots
 
 class _PlainDateShimRecord implements DateFields, PlainDateRecord {
   declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
@@ -197,7 +197,7 @@ function setPlainDateShimRecordSlots(
   instance: object,
   slots: PlainDateShimSlots,
 ) {
-  setPlainDateRecord(instance, slots)
+  setPlainDateSlots(instance, slots)
   attachDebugString(instance, slots, formatDateIsoAuto)
 }
 

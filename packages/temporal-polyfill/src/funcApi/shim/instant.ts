@@ -30,7 +30,7 @@ import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getInstantRecord, setInstantRecord } from '../temporalRecords'
+import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
@@ -54,7 +54,7 @@ type Format = DateTimeFormatLike<InstantShimRecord>
 type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
 
 export const getInstantShimRecordSlots: (record: unknown) => InstantShimSlots =
-  getInstantRecord
+  getInstantSlots
 
 class _InstantShimRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
@@ -81,7 +81,7 @@ class _InstantShimRecord implements InstantRecord {
 }
 
 function setInstantShimRecordSlots(instance: object, slots: InstantShimSlots) {
-  setInstantRecord(instance, slots)
+  setInstantSlots(instance, slots)
   attachDebugString(instance, slots, formatInstantIsoAuto)
 }
 

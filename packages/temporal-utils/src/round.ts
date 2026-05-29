@@ -5,37 +5,37 @@ import { DateObj, YearMonthObj } from './utils.js'
 export function roundToYear<T extends YearMonthObj>(
   date: T,
   options?: RoundingMode | RoundingOptions,
-) {
+): T {
   const start = startOfYear(date)
   const duration = start.until(
     date as any,
     normalizeRoundingOptions('year', options),
   )
-  return start.add(duration)
+  return start.add(duration) as T
 }
 
 export function roundToMonth<T extends DateObj>(
   date: T,
   options?: RoundingMode | RoundingOptions,
-) {
+): T {
   const start = startOfMonth(date)
   const duration = start.until(
     date as any,
     normalizeRoundingOptions('month', options),
   )
-  return start.add(duration)
+  return start.add(duration) as T
 }
 
 export function roundToWeek<T extends DateObj>(
   date: T,
   options?: RoundingMode | RoundingOptions,
-) {
+): T {
   const start = startOfWeek(date)
   const duration = start.until(
     date as any,
     normalizeRoundingOptions('week', options),
   )
-  return start.add(duration)
+  return start.add(duration) as T
 }
 
 // Options

@@ -13,7 +13,7 @@ import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainTime'
 import type { DurationRecord, PlainTimeRecord as Record } from './recordTypes'
 import * as Shim from './shim/plainTime'
-import { getPlainTimeRecordIfPresent } from './temporalRecords'
+import { getPlainTimeSlotsIfPresent } from './temporalRecords'
 
 export type { Record }
 
@@ -29,7 +29,7 @@ export const create: (
 ) => PlainTimeRecord = NativeTemporal ? Native.create : Shim.create
 
 export function isRecord(arg: unknown): arg is Record {
-  return !!getPlainTimeRecordIfPresent(arg)
+  return !!getPlainTimeSlotsIfPresent(arg)
 }
 
 export const fromFields: (

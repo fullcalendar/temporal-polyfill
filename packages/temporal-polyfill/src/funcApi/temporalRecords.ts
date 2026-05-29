@@ -1,6 +1,9 @@
 import { invalidRecordType } from '../apiHelpers/classStyle'
 import * as errorMessages from '../internal/errorMessages'
 
+/*
+Might contain a slot object (if shim) or a single native object (if native)
+*/
 const calendarMap = new WeakMap<object, unknown>()
 const instantMap = new WeakMap<object, unknown>()
 const zonedDateTimeMap = new WeakMap<object, unknown>()
@@ -11,128 +14,187 @@ const plainYearMonthMap = new WeakMap<object, unknown>()
 const plainMonthDayMap = new WeakMap<object, unknown>()
 const durationMap = new WeakMap<object, unknown>()
 
-export function setCalendarRecord(instance: object, slots: unknown) {
-  calendarMap.set(instance, slots)
+// Calendar
+// --------
+
+export function isCalendarRecord(record: unknown): boolean {
+  return !!getCalendarSlotsIfPresent(record)
 }
 
-export function getCalendarRecordIfPresent<S>(record: unknown): S | undefined {
+export function getCalendarSlots<S>(record: unknown): S {
+  return getCalendarSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getCalendarSlotsIfPresent<S>(record: unknown): S | undefined {
   return calendarMap.get(record as object) as S | undefined
 }
 
-export function isCalendarRecord(record: unknown): boolean {
-  return calendarMap.has(record as object)
+export function setCalendarSlots(instance: object, slots: unknown) {
+  calendarMap.set(instance, slots)
 }
 
-export function getCalendarRecord<S>(record: unknown): S {
-  if (!isCalendarRecord(record)) {
-    return invalidRecordType()
-  }
-  return getCalendarRecordIfPresent<S>(record) as S
+// Instant
+// -------
+
+export function isInstantRecord(record: unknown): boolean {
+  return !!getInstantSlotsIfPresent(record)
 }
 
-export function setInstantRecord(instance: object, slots: unknown) {
-  instantMap.set(instance, slots)
+export function getInstantSlots<S>(record: unknown): S {
+  return getInstantSlotsIfPresent<S>(record) || invalidRecordType()
 }
 
-export function getInstantRecordIfPresent<S>(record: unknown): S | undefined {
+export function getInstantSlotsIfPresent<S>(record: unknown): S | undefined {
   return instantMap.get(record as object) as S | undefined
 }
 
-export function getInstantRecord<S>(record: unknown): S {
-  return getInstantRecordIfPresent<S>(record) || invalidRecordType()
+export function setInstantSlots(instance: object, slots: unknown) {
+  instantMap.set(instance, slots)
 }
 
-export function setZonedDateTimeRecord(instance: object, slots: unknown) {
-  zonedDateTimeMap.set(instance, slots)
+// ZonedDateTime
+// -------------
+
+export function isZonedDateTimeRecord(record: unknown): boolean {
+  return !!getZonedDateTimeSlotsIfPresent(record)
 }
 
-export function getZonedDateTimeRecordIfPresent<S>(
+export function getZonedDateTimeSlots<S>(record: unknown): S {
+  return getZonedDateTimeSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getZonedDateTimeSlotsIfPresent<S>(
   record: unknown,
 ): S | undefined {
   return zonedDateTimeMap.get(record as object) as S | undefined
 }
 
-export function getZonedDateTimeRecord<S>(record: unknown): S {
-  return getZonedDateTimeRecordIfPresent<S>(record) || invalidRecordType()
+export function setZonedDateTimeSlots(instance: object, slots: unknown) {
+  zonedDateTimeMap.set(instance, slots)
 }
 
-export function setPlainDateTimeRecord(instance: object, slots: unknown) {
-  plainDateTimeMap.set(instance, slots)
+// PlainDateTime
+// -------------
+
+export function isPlainDateTimeRecord(record: unknown): boolean {
+  return !!getPlainDateTimeSlotsIfPresent(record)
 }
 
-export function getPlainDateTimeRecordIfPresent<S>(
+export function getPlainDateTimeSlots<S>(record: unknown): S {
+  return getPlainDateTimeSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getPlainDateTimeSlotsIfPresent<S>(
   record: unknown,
 ): S | undefined {
   return plainDateTimeMap.get(record as object) as S | undefined
 }
 
-export function getPlainDateTimeRecord<S>(record: unknown): S {
-  return getPlainDateTimeRecordIfPresent<S>(record) || invalidRecordType()
+export function setPlainDateTimeSlots(instance: object, slots: unknown) {
+  plainDateTimeMap.set(instance, slots)
 }
 
-export function setPlainDateRecord(instance: object, slots: unknown) {
-  plainDateMap.set(instance, slots)
+// PlainDate
+// ---------
+
+export function isPlainDateRecord(record: unknown): boolean {
+  return !!getPlainDateSlotsIfPresent(record)
 }
 
-export function getPlainDateRecordIfPresent<S>(record: unknown): S | undefined {
+export function getPlainDateSlots<S>(record: unknown): S {
+  return getPlainDateSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getPlainDateSlotsIfPresent<S>(record: unknown): S | undefined {
   return plainDateMap.get(record as object) as S | undefined
 }
 
-export function getPlainDateRecord<S>(record: unknown): S {
-  return getPlainDateRecordIfPresent<S>(record) || invalidRecordType()
+export function setPlainDateSlots(instance: object, slots: unknown) {
+  plainDateMap.set(instance, slots)
 }
 
-export function setPlainTimeRecord(instance: object, slots: unknown) {
-  plainTimeMap.set(instance, slots)
+// PlainTime
+// ---------
+
+export function isPlainTimeRecord(record: unknown): boolean {
+  return !!getPlainTimeSlotsIfPresent(record)
 }
 
-export function getPlainTimeRecordIfPresent<S>(record: unknown): S | undefined {
+export function getPlainTimeSlots<S>(record: unknown): S {
+  return getPlainTimeSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getPlainTimeSlotsIfPresent<S>(record: unknown): S | undefined {
   return plainTimeMap.get(record as object) as S | undefined
 }
 
-export function getPlainTimeRecord<S>(record: unknown): S {
-  return getPlainTimeRecordIfPresent<S>(record) || invalidRecordType()
+export function setPlainTimeSlots(instance: object, slots: unknown) {
+  plainTimeMap.set(instance, slots)
 }
 
-export function setPlainYearMonthRecord(instance: object, slots: unknown) {
-  plainYearMonthMap.set(instance, slots)
+// PlainYearMonth
+// --------------
+
+export function isPlainYearMonthRecord(record: unknown): boolean {
+  return !!getPlainYearMonthSlotsIfPresent(record)
 }
 
-export function getPlainYearMonthRecordIfPresent<S>(
+export function getPlainYearMonthSlots<S>(record: unknown): S {
+  return getPlainYearMonthSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getPlainYearMonthSlotsIfPresent<S>(
   record: unknown,
 ): S | undefined {
   return plainYearMonthMap.get(record as object) as S | undefined
 }
 
-export function getPlainYearMonthRecord<S>(record: unknown): S {
-  return getPlainYearMonthRecordIfPresent<S>(record) || invalidRecordType()
+export function setPlainYearMonthSlots(instance: object, slots: unknown) {
+  plainYearMonthMap.set(instance, slots)
 }
 
-export function setPlainMonthDayRecord(instance: object, slots: unknown) {
-  plainMonthDayMap.set(instance, slots)
+// PlainMonthDay
+// -------------
+
+export function isPlainMonthDayRecord(record: unknown): boolean {
+  return !!getPlainMonthDaySlotsIfPresent(record)
 }
 
-export function getPlainMonthDayRecordIfPresent<S>(
+export function getPlainMonthDaySlots<S>(record: unknown): S {
+  return getPlainMonthDaySlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getPlainMonthDaySlotsIfPresent<S>(
   record: unknown,
 ): S | undefined {
   return plainMonthDayMap.get(record as object) as S | undefined
 }
 
-export function getPlainMonthDayRecord<S>(record: unknown): S {
-  return getPlainMonthDayRecordIfPresent<S>(record) || invalidRecordType()
+export function setPlainMonthDaySlots(instance: object, slots: unknown) {
+  plainMonthDayMap.set(instance, slots)
 }
 
-export function setDurationRecord(instance: object, slots: unknown) {
-  durationMap.set(instance, slots)
+// Duration
+// --------
+
+export function isDurationRecord(record: unknown): boolean {
+  return !!getDurationSlotsIfPresent(record)
 }
 
-export function getDurationRecordIfPresent<S>(record: unknown): S | undefined {
+export function getDurationSlots<S>(record: unknown): S {
+  return getDurationSlotsIfPresent<S>(record) || invalidRecordType()
+}
+
+export function getDurationSlotsIfPresent<S>(record: unknown): S | undefined {
   return durationMap.get(record as object) as S | undefined
 }
 
-export function getDurationRecord<S>(record: unknown): S {
-  return getDurationRecordIfPresent<S>(record) || invalidRecordType()
+export function setDurationSlots(instance: object, slots: unknown) {
+  durationMap.set(instance, slots)
 }
+
+// Utils
+// -----
 
 function isTemporalRecord(record: unknown): boolean {
   return (

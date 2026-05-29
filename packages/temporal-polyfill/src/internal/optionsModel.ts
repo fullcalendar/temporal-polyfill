@@ -166,7 +166,7 @@ export interface EpochDisambigOptions {
 }
 
 export interface OffsetDisambigOptions {
-  offset?: 'auto' | 'never' | undefined
+  offset?: TemporalSpec.ZonedDateTimeFromOptions['offset']
 }
 
 export interface CalendarDisplayOptions {

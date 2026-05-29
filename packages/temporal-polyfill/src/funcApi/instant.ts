@@ -15,7 +15,7 @@ import type {
   ZonedDateTimeRecord,
 } from './recordTypes'
 import * as Shim from './shim/instant'
-import { getInstantRecordIfPresent } from './temporalRecords'
+import { getInstantSlotsIfPresent } from './temporalRecords'
 
 export type { Record }
 
@@ -25,7 +25,7 @@ export const create: (epochNanoseconds: bigint) => InstantRecord =
   NativeTemporal ? Native.create : Shim.create
 
 export function isRecord(arg: unknown): arg is Record {
-  return !!getInstantRecordIfPresent(arg)
+  return !!getInstantSlotsIfPresent(arg)
 }
 
 export const fromEpochMilliseconds: (

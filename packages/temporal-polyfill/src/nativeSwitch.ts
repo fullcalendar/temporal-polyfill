@@ -1,3 +1,5 @@
+import { Temporal } from 'temporal-spec'
+
 declare const __FORCE_SHIM_IMPLEMENTATION__: boolean | undefined
 
 // Build and test tooling can replace this token before module evaluation.
@@ -8,5 +10,5 @@ const forceShimImplementation =
     ? __FORCE_SHIM_IMPLEMENTATION__
     : false
 
-export const NativeTemporal: Record<string, any> | undefined =
+export const NativeTemporal: typeof Temporal | undefined =
   forceShimImplementation ? undefined : (globalThis as any).Temporal

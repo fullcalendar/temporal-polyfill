@@ -17,7 +17,7 @@ import type {
   PlainYearMonthRecord as Record,
 } from './recordTypes'
 import * as Shim from './shim/plainYearMonth'
-import { getPlainYearMonthRecordIfPresent } from './temporalRecords'
+import { getPlainYearMonthSlotsIfPresent } from './temporalRecords'
 
 export type { Record }
 
@@ -31,7 +31,7 @@ export const create: (
 ) => PlainYearMonthRecord = NativeTemporal ? Native.create : Shim.create
 
 export function isRecord(arg: unknown): arg is Record {
-  return !!getPlainYearMonthRecordIfPresent(arg)
+  return !!getPlainYearMonthSlotsIfPresent(arg)
 }
 
 export const fromFields: (

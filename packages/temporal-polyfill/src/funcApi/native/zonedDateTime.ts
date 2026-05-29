@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -18,8 +19,8 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getZonedDateTimeRecord,
-  setZonedDateTimeRecord,
+  getZonedDateTimeSlots,
+  setZonedDateTimeSlots,
 } from '../temporalRecords'
 import {
   CalendarNativeRecord,
@@ -53,8 +54,9 @@ type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
-export const getZonedDateTimeNative: (record: unknown) => any =
-  getZonedDateTimeRecord
+export const getZonedDateTimeNative: (
+  record: unknown,
+) => Temporal.ZonedDateTime = getZonedDateTimeSlots
 
 class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
@@ -149,13 +151,16 @@ class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   }
 }
 
-function setZonedDateTimeNative(instance: object, native: any) {
-  setZonedDateTimeRecord(instance, native)
+function setZonedDateTimeNative(
+  instance: object,
+  native: Temporal.ZonedDateTime,
+) {
+  setZonedDateTimeSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createZonedDateTimeNativeRecord(
-  native: any,
+  native: Temporal.ZonedDateTime,
 ): ZonedDateTimeNativeRecord {
   const instance = Object.create(ZonedDateTimeNativeRecord.prototype)
   setZonedDateTimeNative(instance, native)
@@ -185,7 +190,7 @@ export function fromFields(
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
   const resNative = NativeTemporal!.ZonedDateTime.from(
-    { ...fields, calendar },
+    { ...fields, calendar } as any, // !!! TODO - day is required
     options,
   )
   return createZonedDateTimeNativeRecord(resNative)
@@ -299,7 +304,7 @@ export function toString(
   record: ZonedDateTimeNativeRecord,
   options?: ZonedDateTimeDisplayOptions,
 ): string {
-  return getZonedDateTimeNative(record).toString(options)
+  return getZonedDateTimeNative(record).toString(options as any) // !!!
 }
 
 export function toSimpleString(record: ZonedDateTimeNativeRecord): string {
@@ -345,7 +350,7 @@ export function round(
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
-  const resNative = native.round(options)
+  const resNative = native.round(options as any) // !!!
   return createZonedDateTimeNativeRecord(resNative)
 }
 
@@ -362,7 +367,7 @@ export function getTimeZoneTransition(
   options: DirectionOptions | DirectionName,
 ): ZonedDateTimeNativeRecord | null {
   const native = getZonedDateTimeNative(record)
-  const resNative = native.getTimeZoneTransition(options)
+  const resNative = native.getTimeZoneTransition(options as any) // !!!
   return resNative ? createZonedDateTimeNativeRecord(resNative) : null
 }
 
@@ -381,7 +386,10 @@ export function compare(
 ): NumberSign {
   const native = getZonedDateTimeNative(record)
   const otherNative = getZonedDateTimeNative(otherRecord)
-  return NativeTemporal!.ZonedDateTime.compare(native, otherNative)
+  return NativeTemporal!.ZonedDateTime.compare(
+    native,
+    otherNative,
+  ) as NumberSign // !!!
 }
 
 export function toInstant(
@@ -633,7 +641,7 @@ export function roundToYear(
   options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToYear(getZonedDateTimeNative(record), options as any),
+    TemporalUtils.roundToYear(getZonedDateTimeNative(record), options as any), // !!!
   )
 }
 export function roundToMonth(
@@ -641,7 +649,7 @@ export function roundToMonth(
   options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options as any),
+    TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options as any), // !!!
   )
 }
 export function roundToWeek(
@@ -649,7 +657,7 @@ export function roundToWeek(
   options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options as any),
+    TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options as any), // !!!
   )
 }
 
@@ -751,7 +759,7 @@ export function diffYears(
   return TemporalUtils.diffYears(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMonths(
@@ -762,7 +770,7 @@ export function diffMonths(
   return TemporalUtils.diffMonths(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffWeeks(
@@ -773,7 +781,7 @@ export function diffWeeks(
   return TemporalUtils.diffWeeks(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffDays(
@@ -784,7 +792,7 @@ export function diffDays(
   return TemporalUtils.diffDays(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffHours(
@@ -795,7 +803,7 @@ export function diffHours(
   return TemporalUtils.diffHours(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMinutes(
@@ -806,7 +814,7 @@ export function diffMinutes(
   return TemporalUtils.diffMinutes(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffSeconds(
@@ -817,7 +825,7 @@ export function diffSeconds(
   return TemporalUtils.diffSeconds(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMilliseconds(
@@ -828,7 +836,7 @@ export function diffMilliseconds(
   return TemporalUtils.diffMilliseconds(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMicroseconds(
@@ -839,7 +847,7 @@ export function diffMicroseconds(
   return TemporalUtils.diffMicroseconds(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffNanoseconds(
@@ -850,6 +858,6 @@ export function diffNanoseconds(
   return TemporalUtils.diffNanoseconds(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
-    options as any,
+    options,
   )
 }

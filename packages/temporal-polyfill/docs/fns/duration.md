@@ -260,19 +260,19 @@ const nextDuration = duration.abs()
 Signature:
 
 ```ts
-(duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => Record
+(duration: Record, otherDuration: Record) => Record
 ```
 
 Fn API:
 
 ```ts
-const nextDuration = DurationFns.add(duration, otherDuration, options)
+const nextDuration = DurationFns.add(duration, otherDuration)
 ```
 
 Temporal API:
 
 ```ts
-const nextDuration = duration.add(otherDuration, options)
+const nextDuration = duration.add(otherDuration)
 ```
 
 Duration records and any `relativeTo` record need their own record-to-Temporal
@@ -283,19 +283,19 @@ transform.
 Signature:
 
 ```ts
-(duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => Record
+(duration: Record, otherDuration: Record) => Record
 ```
 
 Fn API:
 
 ```ts
-const nextDuration = DurationFns.subtract(duration, otherDuration, options)
+const nextDuration = DurationFns.subtract(duration, otherDuration)
 ```
 
 Temporal API:
 
 ```ts
-const nextDuration = duration.subtract(otherDuration, options)
+const nextDuration = duration.subtract(otherDuration)
 ```
 
 Duration records and any `relativeTo` record need their own record-to-Temporal

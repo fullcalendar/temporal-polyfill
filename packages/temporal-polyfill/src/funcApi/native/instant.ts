@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   DiffOptions,
@@ -9,7 +10,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getInstantRecord, setInstantRecord } from '../temporalRecords'
+import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
   DurationNativeRecord,
@@ -30,7 +31,8 @@ type InstantRecord = RecordTypes.InstantRecord
 
 type Format = DateTimeFormatLike<InstantNativeRecord>
 
-export const getInstantNative: (record: unknown) => any = getInstantRecord
+export const getInstantNative: (record: unknown) => Temporal.Instant =
+  getInstantSlots
 
 class _InstantNativeRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
@@ -56,12 +58,14 @@ class _InstantNativeRecord implements InstantRecord {
   }
 }
 
-function setInstantNative(instance: object, native: any) {
-  setInstantRecord(instance, native)
+function setInstantNative(instance: object, native: Temporal.Instant) {
+  setInstantSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
-export function createInstantNativeRecord(native: any): InstantNativeRecord {
+export function createInstantNativeRecord(
+  native: Temporal.Instant,
+): InstantNativeRecord {
   const instance = Object.create(InstantNativeRecord.prototype)
   setInstantNative(instance, native)
   return instance
@@ -135,7 +139,7 @@ export function round(
   options: UnitName | RoundingOptions<TimeUnitName>,
 ): InstantNativeRecord {
   const native = getInstantNative(record)
-  const resNative = native.round(options)
+  const resNative = native.round(options as any) // !!!
   return createInstantNativeRecord(resNative)
 }
 
@@ -154,7 +158,7 @@ export function compare(
 ): NumberSign {
   const native = getInstantNative(record)
   const otherNative = getInstantNative(otherRecord)
-  return NativeTemporal!.Instant.compare(native, otherNative)
+  return NativeTemporal!.Instant.compare(native, otherNative) as NumberSign // !!!
 }
 
 export function toZonedDateTimeISO(
@@ -185,7 +189,7 @@ export function toString(
   record: InstantNativeRecord,
   options?: InstantDisplayOptions,
 ): string {
-  return getInstantNative(record).toString(options)
+  return getInstantNative(record).toString(options as any) // !!!
 }
 
 export function toSimpleString(record: InstantNativeRecord): string {

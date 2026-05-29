@@ -23,14 +23,14 @@ import type {
   ZonedDateTimeRecord,
 } from './recordTypes'
 import * as Shim from './shim/plainDate'
-import { getPlainDateRecordIfPresent } from './temporalRecords'
+import { getPlainDateSlotsIfPresent } from './temporalRecords'
 
 export type { Record }
 
 type PlainDateRecord = Record
 
 export function isRecord(arg: unknown): arg is Record {
-  return !!getPlainDateRecordIfPresent(arg)
+  return !!getPlainDateSlotsIfPresent(arg)
 }
 
 export const create: (

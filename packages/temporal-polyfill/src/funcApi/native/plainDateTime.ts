@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -16,8 +17,8 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainDateTimeRecord,
-  setPlainDateTimeRecord,
+  getPlainDateTimeSlots,
+  setPlainDateTimeSlots,
 } from '../temporalRecords'
 import {
   CalendarNativeRecord,
@@ -51,8 +52,9 @@ type Format = DateTimeFormatLike<PlainDateTimeNativeRecord>
 
 type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
 
-export const getPlainDateTimeNative: (record: unknown) => any =
-  getPlainDateTimeRecord
+export const getPlainDateTimeNative: (
+  record: unknown,
+) => Temporal.PlainDateTime = getPlainDateTimeSlots
 
 class _PlainDateTimeNativeRecord
   implements DateTimeFields, PlainDateTimeRecord
@@ -151,13 +153,16 @@ class _PlainDateTimeNativeRecord
   }
 }
 
-function setPlainDateTimeNative(instance: object, native: any) {
-  setPlainDateTimeRecord(instance, native)
+function setPlainDateTimeNative(
+  instance: object,
+  native: Temporal.PlainDateTime,
+) {
+  setPlainDateTimeSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainDateTimeNativeRecord(
-  native: any,
+  native: Temporal.PlainDateTime,
 ): PlainDateTimeNativeRecord {
   const instance = Object.create(PlainDateTimeNativeRecord.prototype)
   setPlainDateTimeNative(instance, native)
@@ -205,7 +210,7 @@ export function fromFields(
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
   const resNative = NativeTemporal!.PlainDateTime.from(
-    { ...fields, calendar },
+    { ...fields, calendar } as any, // !!! TODO - day is required
     options,
   )
   return createPlainDateTimeNativeRecord(resNative)
@@ -332,7 +337,7 @@ export function round(
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
-  const resNative = native.round(options)
+  const resNative = native.round(options as any) // !!!
   return createPlainDateTimeNativeRecord(resNative)
 }
 
@@ -351,7 +356,10 @@ export function compare(
 ): NumberSign {
   const native = getPlainDateTimeNative(record)
   const otherNative = getPlainDateTimeNative(otherRecord)
-  return NativeTemporal!.PlainDateTime.compare(native, otherNative)
+  return NativeTemporal!.PlainDateTime.compare(
+    native,
+    otherNative,
+  ) as NumberSign // !!!
 }
 
 export function toZonedDateTime(
@@ -397,7 +405,7 @@ export function toString(
   record: PlainDateTimeNativeRecord,
   options?: DateTimeDisplayOptions,
 ): string {
-  return getPlainDateTimeNative(record).toString(options)
+  return getPlainDateTimeNative(record).toString(options as any) // !!!
 }
 
 export function toSimpleString(record: PlainDateTimeNativeRecord): string {
@@ -761,7 +769,7 @@ export function diffYears(
   return TemporalUtils.diffYears(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMonths(
@@ -772,7 +780,7 @@ export function diffMonths(
   return TemporalUtils.diffMonths(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffWeeks(
@@ -783,7 +791,7 @@ export function diffWeeks(
   return TemporalUtils.diffWeeks(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffDays(
@@ -794,7 +802,7 @@ export function diffDays(
   return TemporalUtils.diffDays(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffHours(
@@ -805,7 +813,7 @@ export function diffHours(
   return TemporalUtils.diffHours(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMinutes(
@@ -816,7 +824,7 @@ export function diffMinutes(
   return TemporalUtils.diffMinutes(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffSeconds(
@@ -827,7 +835,7 @@ export function diffSeconds(
   return TemporalUtils.diffSeconds(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMilliseconds(
@@ -838,7 +846,7 @@ export function diffMilliseconds(
   return TemporalUtils.diffMilliseconds(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffMicroseconds(
@@ -849,7 +857,7 @@ export function diffMicroseconds(
   return TemporalUtils.diffMicroseconds(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }
 export function diffNanoseconds(
@@ -860,6 +868,6 @@ export function diffNanoseconds(
   return TemporalUtils.diffNanoseconds(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
-    options as any,
+    options,
   )
 }

@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -11,8 +12,8 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainYearMonthRecord,
-  setPlainYearMonthRecord,
+  getPlainYearMonthSlots,
+  setPlainYearMonthSlots,
 } from '../temporalRecords'
 import {
   CalendarNativeRecord,
@@ -37,8 +38,9 @@ type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
 
 type Format = DateTimeFormatLike<PlainYearMonthNativeRecord>
 
-export const getPlainYearMonthNative: (record: unknown) => any =
-  getPlainYearMonthRecord
+export const getPlainYearMonthNative: (
+  record: unknown,
+) => Temporal.PlainYearMonth = getPlainYearMonthSlots
 
 class _PlainYearMonthNativeRecord
   implements YearMonthFields, PlainYearMonthRecord
@@ -97,13 +99,16 @@ class _PlainYearMonthNativeRecord
   }
 }
 
-function setPlainYearMonthNative(instance: object, native: any) {
-  setPlainYearMonthRecord(instance, native)
+function setPlainYearMonthNative(
+  instance: object,
+  native: Temporal.PlainYearMonth,
+) {
+  setPlainYearMonthSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainYearMonthNativeRecord(
-  native: any,
+  native: Temporal.PlainYearMonth,
 ): PlainYearMonthNativeRecord {
   const instance = Object.create(PlainYearMonthNativeRecord.prototype)
   setPlainYearMonthNative(instance, native)
@@ -229,7 +234,10 @@ export function compare(
 ): NumberSign {
   const native = getPlainYearMonthNative(record)
   const otherNative = getPlainYearMonthNative(otherRecord)
-  return NativeTemporal!.PlainYearMonth.compare(native, otherNative)
+  return NativeTemporal!.PlainYearMonth.compare(
+    native,
+    otherNative,
+  ) as NumberSign // !!!
 }
 
 export function toPlainDate(

@@ -26,8 +26,8 @@ import {
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getPlainMonthDayRecord,
-  setPlainMonthDayRecord,
+  getPlainMonthDaySlots,
+  setPlainMonthDaySlots,
 } from '../temporalRecords'
 import {
   CalendarShimRecord,
@@ -52,7 +52,7 @@ type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
 
 export const getPlainMonthDayShimRecordSlots: (
   record: unknown,
-) => PlainMonthDayShimSlots = getPlainMonthDayRecord
+) => PlainMonthDayShimSlots = getPlainMonthDaySlots
 
 class _PlainMonthDayShimRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
@@ -104,7 +104,7 @@ function setPlainMonthDayShimRecordSlots(
   instance: object,
   slots: PlainMonthDayShimSlots,
 ) {
-  setPlainMonthDayRecord(instance, slots)
+  setPlainMonthDaySlots(instance, slots)
   attachDebugString(instance, slots, formatMonthDayIsoAuto)
 }
 

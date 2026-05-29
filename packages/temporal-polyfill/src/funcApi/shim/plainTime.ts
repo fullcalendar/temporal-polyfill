@@ -20,7 +20,7 @@ import { TimeUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getPlainTimeRecord, setPlainTimeRecord } from '../temporalRecords'
+import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
   DurationShimRecord,
@@ -41,7 +41,7 @@ type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
 
 export const getPlainTimeShimRecordSlots: (
   record: unknown,
-) => PlainTimeShimSlots = getPlainTimeRecord
+) => PlainTimeShimSlots = getPlainTimeSlots
 
 class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
@@ -104,7 +104,7 @@ function setPlainTimeShimRecordSlots(
   instance: object,
   slots: PlainTimeShimSlots,
 ) {
-  setPlainTimeRecord(instance, slots)
+  setPlainTimeSlots(instance, slots)
   attachDebugString(instance, slots, formatTimeIsoAuto)
 }
 

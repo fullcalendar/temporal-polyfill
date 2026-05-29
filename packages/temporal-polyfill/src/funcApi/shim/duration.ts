@@ -28,11 +28,11 @@ import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
-  getDurationRecord,
-  getPlainDateRecordIfPresent,
-  getPlainDateTimeRecordIfPresent,
-  getZonedDateTimeRecordIfPresent,
-  setDurationRecord,
+  getDurationSlots,
+  getPlainDateSlotsIfPresent,
+  getPlainDateTimeSlotsIfPresent,
+  getZonedDateTimeSlotsIfPresent,
+  setDurationSlots,
 } from '../temporalRecords'
 import {
   attachDebugString,
@@ -46,7 +46,7 @@ type DurationShimSlots = ReturnType<typeof constructDurationSlots>
 
 export const getDurationShimRecordSlots: (
   record: unknown,
-) => DurationShimSlots = getDurationRecord
+) => DurationShimSlots = getDurationSlots
 
 class _DurationShimRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
@@ -133,7 +133,7 @@ function setDurationShimRecordSlots(
   instance: object,
   slots: DurationShimSlots,
 ) {
-  setDurationRecord(instance, slots)
+  setDurationSlots(instance, slots)
   attachDebugString(instance, slots, formatDurationIsoAuto)
 }
 
@@ -316,9 +316,9 @@ function refineRelativeTo(
 ): RelativeToSlots | undefined {
   if (arg) {
     const slots =
-      getZonedDateTimeRecordIfPresent(arg) ||
-      getPlainDateTimeRecordIfPresent(arg) ||
-      getPlainDateRecordIfPresent(arg)
+      getZonedDateTimeSlotsIfPresent(arg) ||
+      getPlainDateTimeSlotsIfPresent(arg) ||
+      getPlainDateSlotsIfPresent(arg)
 
     if (slots) {
       return slots as RelativeToSlots

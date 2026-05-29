@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -13,7 +14,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getPlainDateRecord, setPlainDateRecord } from '../temporalRecords'
+import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
@@ -53,7 +54,8 @@ type PlainDateRecord = RecordTypes.PlainDateRecord
 
 type Format = DateTimeFormatLike<PlainDateNativeRecord>
 
-export const getPlainDateNative: (record: unknown) => any = getPlainDateRecord
+export const getPlainDateNative: (record: unknown) => Temporal.PlainDate =
+  getPlainDateSlots
 
 class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
   declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
@@ -114,13 +116,13 @@ class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
   }
 }
 
-function setPlainDateNative(instance: object, native: any) {
-  setPlainDateRecord(instance, native)
+function setPlainDateNative(instance: object, native: Temporal.PlainDate) {
+  setPlainDateSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
 }
 
 export function createPlainDateNativeRecord(
-  native: any,
+  native: Temporal.PlainDate,
 ): PlainDateNativeRecord {
   const instance = Object.create(PlainDateNativeRecord.prototype)
   setPlainDateNative(instance, native)
@@ -151,7 +153,7 @@ export function fromFields(
       ? undefined
       : getCalendarNativeRecordId(fields.calendar)
   const resNative = NativeTemporal!.PlainDate.from(
-    { ...fields, calendar },
+    { ...fields, calendar } as any, // !!! TODO - day is required
     options,
   )
   return createPlainDateNativeRecord(resNative)
@@ -283,7 +285,7 @@ export function compare(
 ): NumberSign {
   const native = getPlainDateNative(record)
   const otherNative = getPlainDateNative(otherRecord)
-  return NativeTemporal!.PlainDate.compare(native, otherNative)
+  return NativeTemporal!.PlainDate.compare(native, otherNative) as NumberSign // !!!
 }
 
 export function toZonedDateTime(
@@ -491,7 +493,7 @@ export function roundToYear(
   options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToYear(getPlainDateNative(record), options as any),
+    TemporalUtils.roundToYear(getPlainDateNative(record), options as any), // !!!
   )
 }
 
@@ -500,7 +502,7 @@ export function roundToMonth(
   options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToMonth(getPlainDateNative(record), options as any),
+    TemporalUtils.roundToMonth(getPlainDateNative(record), options as any), // !!!
   )
 }
 
@@ -509,7 +511,7 @@ export function roundToWeek(
   options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToWeek(getPlainDateNative(record), options as any),
+    TemporalUtils.roundToWeek(getPlainDateNative(record), options as any), // !!!
   )
 }
 
@@ -578,7 +580,7 @@ export function diffYears(
   return TemporalUtils.diffYears(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
-    options as any,
+    options,
   )
 }
 
@@ -590,7 +592,7 @@ export function diffMonths(
   return TemporalUtils.diffMonths(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
-    options as any,
+    options,
   )
 }
 
@@ -602,7 +604,7 @@ export function diffWeeks(
   return TemporalUtils.diffWeeks(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
-    options as any,
+    options,
   )
 }
 
@@ -614,6 +616,6 @@ export function diffDays(
   return TemporalUtils.diffDays(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
-    options as any,
+    options,
   )
 }
