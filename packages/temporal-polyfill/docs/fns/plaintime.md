@@ -45,7 +45,11 @@ import * as PlainTimeFns from 'temporal-polyfill/fns/plaintime'
   - [`equals`](#equals)
   - [`compare`](#compare)
 - [Rounding](#rounding)
-  - [`round`](#round)
+  - [`roundToHour`](#roundtohour)
+  - [`roundToMinute`](#roundtominute)
+  - [`roundToSecond`](#roundtosecond)
+  - [`roundToMillisecond`](#roundtomillisecond)
+  - [`roundToMicrosecond`](#roundtomicrosecond)
 - [Start And End Of Unit](#start-and-end-of-unit)
   - [`startOfHour`](#startofhour)
   - [`startOfMinute`](#startofminute)
@@ -687,24 +691,106 @@ const order = Temporal.PlainTime.compare(time, otherTime)
 
 ## Rounding
 
-### `round`
+`RoundToOptions` is object-only and must not include `smallestUnit`.
+
+### `roundToHour`
 
 Signature:
 
 ```ts
-(record: Record, options: TimeUnitName | RoundingOptions<TimeUnitName>) => Record
+(record: Record, options?: RoundToOptions) => Record
 ```
 
 Fn API:
 
 ```ts
-const nextTime = PlainTimeFns.round(time, options)
+const nextTime = PlainTimeFns.roundToHour(time, options)
 ```
 
 Temporal API:
 
 ```ts
-const nextTime = time.round(options)
+const nextTime = time.round({ ...options, smallestUnit: 'hour' })
+```
+
+### `roundToMinute`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextTime = PlainTimeFns.roundToMinute(time, options)
+```
+
+Temporal API:
+
+```ts
+const nextTime = time.round({ ...options, smallestUnit: 'minute' })
+```
+
+### `roundToSecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextTime = PlainTimeFns.roundToSecond(time, options)
+```
+
+Temporal API:
+
+```ts
+const nextTime = time.round({ ...options, smallestUnit: 'second' })
+```
+
+### `roundToMillisecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextTime = PlainTimeFns.roundToMillisecond(time, options)
+```
+
+Temporal API:
+
+```ts
+const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
+```
+
+### `roundToMicrosecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextTime = PlainTimeFns.roundToMicrosecond(time, options)
+```
+
+Temporal API:
+
+```ts
+const nextTime = time.round({ ...options, smallestUnit: 'microsecond' })
 ```
 
 ## Start And End Of Unit

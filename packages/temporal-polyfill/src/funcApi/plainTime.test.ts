@@ -240,21 +240,44 @@ describe('diff*', () => {
   })
 })
 
-describe('round', () => {
-  it('works with single unit arg', () => {
+describe('roundToHour', () => {
+  it('works without options', () => {
     const pt0 = PlainTimeFns.create(12, 30)
-    const pt1 = PlainTimeFns.round(pt0, 'hour')
+    const pt1 = PlainTimeFns.roundToHour(pt0)
     expectPlainTimeEquals(pt1, {
       hour: 13,
     })
   })
 
-  it('works with options arg', () => {
-    const pt0 = PlainTimeFns.create(12, 30)
-    const pt1 = PlainTimeFns.round(pt0, { smallestUnit: 'hour' })
-    expectPlainTimeEquals(pt1, {
-      hour: 13,
-    })
+  it('rounds to each named time unit', () => {
+    const pt = PlainTimeFns.create(12, 34, 56, 789, 123, 456)
+
+    const cases: [
+      typeof PlainTimeFns.roundToHour,
+      Partial<PlainTimeFns.Record>,
+    ][] = [
+      [PlainTimeFns.roundToHour, { hour: 12 }],
+      [PlainTimeFns.roundToMinute, { hour: 12, minute: 34 }],
+      [PlainTimeFns.roundToSecond, { hour: 12, minute: 34, second: 56 }],
+      [
+        PlainTimeFns.roundToMillisecond,
+        { hour: 12, minute: 34, second: 56, millisecond: 789 },
+      ],
+      [
+        PlainTimeFns.roundToMicrosecond,
+        {
+          hour: 12,
+          minute: 34,
+          second: 56,
+          millisecond: 789,
+          microsecond: 123,
+        },
+      ],
+    ]
+
+    for (const [roundTo, expected] of cases) {
+      expectPlainTimeEquals(roundTo(pt, { roundingMode: 'floor' }), expected)
+    }
   })
 })
 

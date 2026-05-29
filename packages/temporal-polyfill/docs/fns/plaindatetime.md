@@ -73,10 +73,15 @@ import * as PlainDateTimeFns from 'temporal-polyfill/fns/plaindatetime'
   - [`equals`](#equals)
   - [`compare`](#compare)
 - [Rounding](#rounding)
-  - [`round`](#round)
   - [`roundToYear`](#roundtoyear)
   - [`roundToMonth`](#roundtomonth)
   - [`roundToWeek`](#roundtoweek)
+  - [`roundToDay`](#roundtoday)
+  - [`roundToHour`](#roundtohour)
+  - [`roundToMinute`](#roundtominute)
+  - [`roundToSecond`](#roundtosecond)
+  - [`roundToMillisecond`](#roundtomillisecond)
+  - [`roundToMicrosecond`](#roundtomicrosecond)
 - [Start And End Of Unit](#start-and-end-of-unit)
   - [`startOfYear`](#startofyear)
   - [`startOfMonth`](#startofmonth)
@@ -1314,25 +1319,7 @@ const order = Temporal.PlainDateTime.compare(dateTime, otherDateTime)
 
 ## Rounding
 
-### `round`
-
-Signature:
-
-```ts
-(record: Record, options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>) => Record
-```
-
-Fn API:
-
-```ts
-const nextDateTime = PlainDateTimeFns.round(dateTime, options)
-```
-
-Temporal API:
-
-```ts
-const nextDateTime = dateTime.round(options)
-```
+`RoundToOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToYear`
 
@@ -1341,7 +1328,7 @@ If `options` or `options.roundingMode` is omitted, the rounding mode defaults to
 Signature:
 
 ```ts
-(record: Record, options?: RoundOptions) => Record
+(record: Record, options?: RoundToOptions) => Record
 ```
 
 Fn API:
@@ -1363,7 +1350,7 @@ const nextDateTime = roundToYear(dateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundOptions) => Record
+(record: Record, options?: RoundToOptions) => Record
 ```
 
 Fn API:
@@ -1385,7 +1372,7 @@ const nextDateTime = roundToMonth(dateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundOptions) => Record
+(record: Record, options?: RoundToOptions) => Record
 ```
 
 Fn API:
@@ -1400,6 +1387,126 @@ Temporal API:
 import { roundToWeek } from 'temporal-utils'
 
 const nextDateTime = roundToWeek(dateTime, options)
+```
+
+### `roundToDay`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToDay(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'day' })
+```
+
+### `roundToHour`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToHour(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'hour' })
+```
+
+### `roundToMinute`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToMinute(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'minute' })
+```
+
+### `roundToSecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToSecond(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'second' })
+```
+
+### `roundToMillisecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToMillisecond(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'millisecond' })
+```
+
+### `roundToMicrosecond`
+
+Signature:
+
+```ts
+(record: Record, options?: RoundToOptions) => Record
+```
+
+Fn API:
+
+```ts
+const nextDateTime = PlainDateTimeFns.roundToMicrosecond(dateTime, options)
+```
+
+Temporal API:
+
+```ts
+const nextDateTime = dateTime.round({ ...options, smallestUnit: 'microsecond' })
 ```
 
 ## Start And End Of Unit

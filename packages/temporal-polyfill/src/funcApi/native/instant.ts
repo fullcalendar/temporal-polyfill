@@ -9,10 +9,11 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { TimeUnitName, UnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -305,7 +306,7 @@ export function diffNanoseconds(
   )
 }
 
-export function round(
+function round(
   record: InstantNativeRecord,
   options: UnitName | RoundingOptions<TimeUnitName>,
 ): InstantNativeRecord {
@@ -313,6 +314,20 @@ export function round(
   const resNative = native.round(options as any) // !!!
   return createInstantNativeRecord(resNative)
 }
+
+function roundToUnit(
+  smallestUnit: TimeUnitName,
+  record: InstantNativeRecord,
+  options?: RoundToOptions,
+): InstantNativeRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToHour = bindArgs(roundToUnit, 'hour')
+export const roundToMinute = bindArgs(roundToUnit, 'minute')
+export const roundToSecond = bindArgs(roundToUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
 
 export function equals(
   record: InstantNativeRecord,

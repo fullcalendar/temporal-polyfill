@@ -5,7 +5,6 @@ import {
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
   TimeDisplayOptions,
 } from '../internal/optionsModel'
 import { TimeUnitName } from '../internal/units'
@@ -14,6 +13,7 @@ import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainTime'
 import type { DurationRecord, PlainTimeRecord as Record } from './recordTypes'
+import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/plainTime'
 import { getPlainTimeSlotsIfPresent } from './temporalRecords'
 
@@ -179,10 +179,38 @@ export const diffNanoseconds: (
   options?: RoundingModeName | RoundingMathOptions,
 ) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
 
-export const round: (
+export const roundToHour: (
   record: PlainTimeRecord,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
-) => PlainTimeRecord = NativeTemporal ? Native.round : Shim.round
+  options?: RoundToOptions,
+) => PlainTimeRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
+
+export const roundToMinute: (
+  record: PlainTimeRecord,
+  options?: RoundToOptions,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.roundToMinute
+  : Shim.roundToMinute
+
+export const roundToSecond: (
+  record: PlainTimeRecord,
+  options?: RoundToOptions,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.roundToSecond
+  : Shim.roundToSecond
+
+export const roundToMillisecond: (
+  record: PlainTimeRecord,
+  options?: RoundToOptions,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.roundToMillisecond
+  : Shim.roundToMillisecond
+
+export const roundToMicrosecond: (
+  record: PlainTimeRecord,
+  options?: RoundToOptions,
+) => PlainTimeRecord = NativeTemporal
+  ? Native.roundToMicrosecond
+  : Shim.roundToMicrosecond
 
 export const startOfHour: (record: PlainTimeRecord) => PlainTimeRecord =
   NativeTemporal ? Native.startOfHour : Shim.startOfHour

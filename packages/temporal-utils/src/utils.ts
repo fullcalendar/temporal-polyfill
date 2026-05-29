@@ -12,6 +12,13 @@ export interface OverflowOptions {
   overflow?: Overflow
 }
 
+export function normalizeOptions<O extends {}>(options: O | undefined): O {
+  if (options === undefined) {
+    return Object.create(null)
+  }
+  return requireObjectLike(options)
+}
+
 // Input Validation
 // -----------------------------------------------------------------------------
 // TODO: make DRY with temporal-polyfill somehow!?
@@ -72,16 +79,7 @@ internal option readers. Undefined defaults to constrain; explicit reject asks
 for exact in-range input.
 */
 function normalizeOverflow(options: OverflowOptions | undefined): Overflow {
-  if (options === undefined) {
-    return 'constrain'
-  }
-
-  if (
-    options === null ||
-    (typeof options !== 'object' && typeof options !== 'function')
-  ) {
-    throw new TypeError('Options must be an object')
-  }
+  options = normalizeOptions(options)
 
   const overflow = options.overflow
   if (overflow === undefined) {
@@ -91,4 +89,11 @@ function normalizeOverflow(options: OverflowOptions | undefined): Overflow {
     return overflow
   }
   throw new RangeError('Invalid overflow option')
+}
+
+function requireObjectLike<O extends {}>(arg: O): O {
+  if (arg === null || (typeof arg !== 'object' && typeof arg !== 'function')) {
+    throw new TypeError('Options must be an object')
+  }
+  return arg
 }

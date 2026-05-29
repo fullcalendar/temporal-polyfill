@@ -56,6 +56,7 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -349,7 +350,7 @@ export const diffMicroseconds = bindArgs(
 )
 export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
-export function round(
+function round(
   record: InstantShimRecord,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): InstantShimRecord {
@@ -357,6 +358,20 @@ export function round(
   const resSlots = roundInstant(slots, options)
   return createInstantShimRecord(resSlots)
 }
+
+function roundToUnit(
+  smallestUnit: TimeUnitName,
+  record: InstantShimRecord,
+  options?: RoundToOptions,
+): InstantShimRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToHour = bindArgs(roundToUnit, 'hour')
+export const roundToMinute = bindArgs(roundToUnit, 'minute')
+export const roundToSecond = bindArgs(roundToUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
 
 export function equals(
   record: InstantShimRecord,

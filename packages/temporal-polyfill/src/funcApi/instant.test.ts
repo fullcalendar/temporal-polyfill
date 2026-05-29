@@ -172,17 +172,30 @@ describe('diff*', () => {
   })
 })
 
-describe('round', () => {
-  it('works without simple string unit', () => {
+describe('roundToHour', () => {
+  it('works without options', () => {
     const inst0 = InstantFns.fromString('2024-01-01T00:30:00+01:00')
-    const inst1 = InstantFns.round(inst0, 'hour')
+    const inst1 = InstantFns.roundToHour(inst0)
     expectInstantEquals(inst1, 1704067200000000000n)
   })
 
-  it('works with options object', () => {
-    const inst0 = InstantFns.fromString('2024-01-01T00:30:00+01:00')
-    const inst1 = InstantFns.round(inst0, { smallestUnit: 'hour' })
-    expectInstantEquals(inst1, 1704067200000000000n)
+  it('rounds to each named time unit', () => {
+    const inst = InstantFns.fromString('2024-01-01T12:34:56.789123456Z')
+
+    const cases: [string, typeof InstantFns.roundToHour][] = [
+      ['2024-01-01T12:00:00Z', InstantFns.roundToHour],
+      ['2024-01-01T12:34:00Z', InstantFns.roundToMinute],
+      ['2024-01-01T12:34:56Z', InstantFns.roundToSecond],
+      ['2024-01-01T12:34:56.789Z', InstantFns.roundToMillisecond],
+      ['2024-01-01T12:34:56.789123Z', InstantFns.roundToMicrosecond],
+    ]
+
+    for (const [expected, roundTo] of cases) {
+      expectInstantEquals(
+        roundTo(inst, { roundingMode: 'floor' }),
+        InstantFns.fromString(expected).epochNanoseconds,
+      )
+    }
   })
 })
 

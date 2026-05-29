@@ -57,7 +57,6 @@ import {
   ZonedDateTimeDisplayOptions,
   ZonedFieldOptions,
 } from '../../internal/optionsModel'
-import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import {
   IsoDateTimeInterval,
   alignZonedEpoch,
@@ -93,6 +92,11 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import {
+  RoundToOptions,
+  createRoundToOptions,
+  refineRoundToOptions,
+} from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -507,7 +511,7 @@ export function diff(
   return createDurationShimRecord(resSlots)
 }
 
-export function round(
+function round(
   record: ZonedDateTimeShimRecord,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeShimRecord {
@@ -668,6 +672,21 @@ export const roundToWeek = bindArgs(
   computeIsoWeekInterval,
 )
 
+function roundToDayTimeUnit(
+  smallestUnit: DayTimeUnitName,
+  record: ZonedDateTimeShimRecord,
+  options?: RoundToOptions,
+): ZonedDateTimeShimRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
+export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
+export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
+export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
+
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------
 
@@ -802,10 +821,10 @@ function roundToInterval(
   unit: Unit,
   computeInterval: (slots: any) => IsoDateTimeInterval,
   record: ZonedDateTimeShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
-  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const [, roundingMode] = refineRoundToOptions(unit, options)
   const epochNanoseconds = roundZonedEpochToInterval(
     computeInterval,
     slots.timeZone,

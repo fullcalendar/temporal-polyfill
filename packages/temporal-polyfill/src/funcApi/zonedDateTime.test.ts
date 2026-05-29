@@ -538,13 +538,13 @@ describe('diff', () => {
   })
 })
 
-describe('round', () => {
-  it('works with single unit arg', () => {
+describe('roundToDay', () => {
+  it('works without options', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York]',
       getCoreCalendar,
     )
-    const zdt1 = ZonedDateTimeFns.round(zdt0, 'day')
+    const zdt1 = ZonedDateTimeFns.roundToDay(zdt0)
     expectZonedDateTimeEquals(zdt1, {
       timeZoneId: 'America/New_York',
       epochNanoseconds: 1709096400000000000n,
@@ -556,11 +556,42 @@ describe('round', () => {
       '2024-02-27T12:30:00[America/New_York]',
       getCoreCalendar,
     )
-    const zdt1 = ZonedDateTimeFns.round(zdt0, { smallestUnit: 'day' })
+    const zdt1 = ZonedDateTimeFns.roundToDay(zdt0, {
+      roundingMode: 'halfExpand',
+    })
     expectZonedDateTimeEquals(zdt1, {
       timeZoneId: 'America/New_York',
       epochNanoseconds: 1709096400000000000n,
     })
+  })
+
+  it('rounds to each named day-or-time unit', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-07-20T12:34:56.789123456[America/New_York]',
+      getCoreCalendar,
+    )
+
+    const cases: [string, typeof ZonedDateTimeFns.roundToDay][] = [
+      ['2024-07-20T00:00:00[America/New_York]', ZonedDateTimeFns.roundToDay],
+      ['2024-07-20T12:00:00[America/New_York]', ZonedDateTimeFns.roundToHour],
+      ['2024-07-20T12:34:00[America/New_York]', ZonedDateTimeFns.roundToMinute],
+      ['2024-07-20T12:34:56[America/New_York]', ZonedDateTimeFns.roundToSecond],
+      [
+        '2024-07-20T12:34:56.789[America/New_York]',
+        ZonedDateTimeFns.roundToMillisecond,
+      ],
+      [
+        '2024-07-20T12:34:56.789123[America/New_York]',
+        ZonedDateTimeFns.roundToMicrosecond,
+      ],
+    ]
+
+    for (const [expected, roundTo] of cases) {
+      expectZonedDateTimeEquals(
+        roundTo(zdt, { roundingMode: 'floor' }),
+        ZonedDateTimeFns.fromString(expected, getCoreCalendar),
+      )
+    }
   })
 })
 
@@ -1553,13 +1584,13 @@ describe('roundToYear', () => {
     )
   })
 
-  it('works with single roundingMode arg', () => {
+  it('works with roundingMode option', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
       getCoreCalendar,
     )
     expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToYear(zdt, 'floor'),
+      ZonedDateTimeFns.roundToYear(zdt, { roundingMode: 'floor' }),
       ZonedDateTimeFns.fromString(
         '2024-01-01T00:00:00[America/New_York]',
         getCoreCalendar,
@@ -1625,7 +1656,7 @@ describe('roundToYear', () => {
           '2024-01-01T00:00:00.000000001[America/New_York]',
           getCoreCalendar,
         ),
-        'ceil',
+        { roundingMode: 'ceil' },
       ),
       next,
     )
@@ -1635,11 +1666,14 @@ describe('roundToYear', () => {
           '2024-12-31T23:59:59.999999999[America/New_York]',
           getCoreCalendar,
         ),
-        'floor',
+        { roundingMode: 'floor' },
       ),
       start,
     )
-    expectZonedDateTimeEquals(ZonedDateTimeFns.roundToYear(next, 'floor'), next)
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(next, { roundingMode: 'floor' }),
+      next,
+    )
   })
 })
 
@@ -1658,13 +1692,13 @@ describe('roundToMonth', () => {
     )
   })
 
-  it('works with single roundingMode arg', () => {
+  it('works with roundingMode option', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
       getCoreCalendar,
     )
     expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToMonth(zdt, 'floor'),
+      ZonedDateTimeFns.roundToMonth(zdt, { roundingMode: 'floor' }),
       ZonedDateTimeFns.fromString(
         '2024-07-01T00:00:00[America/New_York]',
         getCoreCalendar,
@@ -1730,13 +1764,13 @@ describe('roundToWeek', () => {
     )
   })
 
-  it('works with single roundingMode arg', () => {
+  it('works with roundingMode option', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-20T12:30:00[America/New_York]',
       getCoreCalendar, // Saturday
     )
     expectZonedDateTimeEquals(
-      ZonedDateTimeFns.roundToWeek(zdt, 'floor'),
+      ZonedDateTimeFns.roundToWeek(zdt, { roundingMode: 'floor' }),
       ZonedDateTimeFns.fromString(
         '2024-07-15T00:00:00[America/New_York]',
         getCoreCalendar, // this Monday

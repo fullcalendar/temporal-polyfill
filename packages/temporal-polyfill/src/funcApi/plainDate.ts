@@ -22,6 +22,7 @@ import type {
   PlainYearMonthRecord,
   ZonedDateTimeRecord,
 } from './recordTypes'
+import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/plainDate'
 import { getPlainDateSlotsIfPresent } from './temporalRecords'
 
@@ -259,17 +260,17 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToYear : Shim.roundToYear
 
 export const roundToMonth: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToMonth : Shim.roundToMonth
 
 export const roundToWeek: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
 
 export const startOfYear: (record: PlainDateRecord) => PlainDateRecord =

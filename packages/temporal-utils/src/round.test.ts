@@ -17,13 +17,18 @@ describe('roundToYear', () => {
   })
 
   describe('PlainDateTime', () => {
-    it('works with single roundingMode arg', () => {
+    it('works with roundingMode option', () => {
       const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
       expect(
-        roundToYear(pdt, 'floor').equals(
+        roundToYear(pdt, { roundingMode: 'floor' }).equals(
           Temporal.PlainDateTime.from('2024-01-01T00:00:00'),
         ),
       ).toBe(true)
+    })
+
+    it('rejects single roundingMode arg', () => {
+      const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
+      expect(() => roundToYear(pdt, 'floor' as any)).toThrow(TypeError)
     })
   })
 
@@ -61,13 +66,18 @@ describe('roundToMonth', () => {
   })
 
   describe('PlainDateTime', () => {
-    it('works with single roundingMode arg', () => {
+    it('works with roundingMode option', () => {
       const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
       expect(
-        roundToMonth(pdt, 'floor').equals(
+        roundToMonth(pdt, { roundingMode: 'floor' }).equals(
           Temporal.PlainDateTime.from('2024-07-01T00:00:00'),
         ),
       ).toBe(true)
+    })
+
+    it('rejects single roundingMode arg', () => {
+      const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
+      expect(() => roundToMonth(pdt, 'floor' as any)).toThrow(TypeError)
     })
   })
 
@@ -107,13 +117,18 @@ describe('roundToWeek', () => {
   })
 
   describe('PlainDateTime', () => {
-    it('works with single roundingMode arg', () => {
+    it('works with roundingMode option', () => {
       const pdt = Temporal.PlainDateTime.from('2024-07-20T12:30:00') // Saturday
       expect(
-        roundToWeek(pdt, 'floor').equals(
+        roundToWeek(pdt, { roundingMode: 'floor' }).equals(
           Temporal.PlainDateTime.from('2024-07-15T00:00:00'), // this Monday
         ),
       ).toBe(true)
+    })
+
+    it('rejects single roundingMode arg', () => {
+      const pdt = Temporal.PlainDateTime.from('2024-07-20T12:30:00')
+      expect(() => roundToWeek(pdt, 'floor' as any)).toThrow(TypeError)
     })
   })
 

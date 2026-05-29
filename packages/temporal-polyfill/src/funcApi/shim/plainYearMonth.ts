@@ -39,12 +39,12 @@ import {
   RoundingMathOptions,
   RoundingModeName,
 } from '../../internal/optionsModel'
-import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { createYearMonthSlots } from '../../internal/slots'
 import { Unit, YearMonthUnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, refineRoundToOptions } from '../roundTo'
 import {
   getPlainYearMonthSlots,
   setPlainYearMonthSlots,
@@ -352,10 +352,10 @@ export function diffMonths(
 // non-ISO calendars aligned with the same semantics as PlainDate rounding.
 export function roundToYear(
   record: PlainYearMonthShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
-  const [, roundingMode] = refineUnitRoundOptions(Unit.Year, options)
+  const [, roundingMode] = refineRoundToOptions(Unit.Year, options)
   const roundedIsoDateTime = roundDateTimeToInterval(
     computeYearInterval,
     slots,

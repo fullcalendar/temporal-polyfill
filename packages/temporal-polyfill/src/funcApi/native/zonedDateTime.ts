@@ -14,10 +14,11 @@ import {
   ZonedFieldOptions,
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, createRoundToOptions } from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -347,7 +348,7 @@ export function diff(
   return createDurationNativeRecord(resNative)
 }
 
-export function round(
+function round(
   record: ZonedDateTimeNativeRecord,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): ZonedDateTimeNativeRecord {
@@ -647,7 +648,7 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToYear(getZonedDateTimeNative(record), options as any), // !!!
@@ -655,7 +656,7 @@ export function roundToYear(
 }
 export function roundToMonth(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options as any), // !!!
@@ -663,12 +664,27 @@ export function roundToMonth(
 }
 export function roundToWeek(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options as any), // !!!
   )
 }
+
+function roundToDayTimeUnit(
+  smallestUnit: DayTimeUnitName,
+  record: ZonedDateTimeNativeRecord,
+  options?: RoundToOptions,
+): ZonedDateTimeNativeRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
+export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
+export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
+export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
 
 export function startOfYear(record: ZonedDateTimeNativeRecord) {
   return createZonedDateTimeNativeRecord(

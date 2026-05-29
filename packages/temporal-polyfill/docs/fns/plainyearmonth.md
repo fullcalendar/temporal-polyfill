@@ -510,13 +510,14 @@ const order = Temporal.PlainYearMonth.compare(yearMonth, otherYearMonth)
 ## Rounding
 
 If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
+`RoundToOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToYear`
 
 Signature:
 
 ```ts
-(record: Record, options?: RoundOptions) => Record
+(record: Record, options?: RoundToOptions) => Record
 ```
 
 Fn API:

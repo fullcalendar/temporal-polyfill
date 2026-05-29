@@ -4,7 +4,6 @@ import {
   InstantDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
 } from '../internal/optionsModel'
 import { TimeUnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
@@ -16,6 +15,7 @@ import type {
   InstantRecord as Record,
   ZonedDateTimeRecord,
 } from './recordTypes'
+import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/instant'
 import { getInstantSlotsIfPresent } from './temporalRecords'
 
@@ -169,10 +169,34 @@ export const diffNanoseconds: (
   options?: RoundingModeName | RoundingMathOptions,
 ) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
 
-export const round: (
+export const roundToHour: (
   record: InstantRecord,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
-) => InstantRecord = NativeTemporal ? Native.round : Shim.round
+  options?: RoundToOptions,
+) => InstantRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
+
+export const roundToMinute: (
+  record: InstantRecord,
+  options?: RoundToOptions,
+) => InstantRecord = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
+
+export const roundToSecond: (
+  record: InstantRecord,
+  options?: RoundToOptions,
+) => InstantRecord = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
+
+export const roundToMillisecond: (
+  record: InstantRecord,
+  options?: RoundToOptions,
+) => InstantRecord = NativeTemporal
+  ? Native.roundToMillisecond
+  : Shim.roundToMillisecond
+
+export const roundToMicrosecond: (
+  record: InstantRecord,
+  options?: RoundToOptions,
+) => InstantRecord = NativeTemporal
+  ? Native.roundToMicrosecond
+  : Shim.roundToMicrosecond
 
 export const equals: (
   record: InstantRecord,

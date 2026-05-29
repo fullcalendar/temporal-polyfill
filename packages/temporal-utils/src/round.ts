@@ -1,10 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import { DateObj, YearMonthObj } from './utils.js'
+import { DateObj, YearMonthObj, normalizeOptions } from './utils.js'
 
 export function roundToYear<T extends YearMonthObj>(
   date: T,
-  options?: RoundingMode | RoundingOptions,
+  options?: RoundingOptions,
 ): T {
   const start = startOfYear(date)
   const duration = start.until(
@@ -16,7 +16,7 @@ export function roundToYear<T extends YearMonthObj>(
 
 export function roundToMonth<T extends DateObj>(
   date: T,
-  options?: RoundingMode | RoundingOptions,
+  options?: RoundingOptions,
 ): T {
   const start = startOfMonth(date)
   const duration = start.until(
@@ -28,7 +28,7 @@ export function roundToMonth<T extends DateObj>(
 
 export function roundToWeek<T extends DateObj>(
   date: T,
-  options?: RoundingMode | RoundingOptions,
+  options?: RoundingOptions,
 ): T {
   const start = startOfWeek(date)
   const duration = start.until(
@@ -53,22 +53,21 @@ export type RoundingOptions = {
 
 export function normalizeRoundingOptions(
   forcedUnit: 'week' | 'month' | 'year',
-  options: RoundingMode | RoundingOptions | undefined,
+  options: RoundingOptions | undefined,
 ): {
   roundingMode: RoundingMode
   smallestUnit: any // HACK
 } {
-  if (typeof options === 'string') {
-    options = { roundingMode: options }
-  } else {
-    options = options || {}
-  }
-  if (options.roundingIncrement && options.roundingIncrement !== 1) {
+  const normOptions = normalizeOptions(options)
+
+  // This is just for units >day
+  if (normOptions.roundingIncrement && normOptions.roundingIncrement !== 1) {
     throw new RangeError('Non-1 roundingIncrement not allowed')
   }
+
   return {
     roundingMode: 'halfExpand',
-    ...options,
+    ...normOptions,
     smallestUnit: forcedUnit,
   }
 }

@@ -18,6 +18,7 @@ import type {
   PlainDateRecord,
   PlainYearMonthRecord as Record,
 } from './recordTypes'
+import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/plainYearMonth'
 import { getPlainYearMonthSlotsIfPresent } from './temporalRecords'
 
@@ -124,7 +125,7 @@ export const diffMonths: (
 
 export const roundToYear: (
   record: PlainYearMonthRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear

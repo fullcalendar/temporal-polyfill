@@ -43,7 +43,6 @@ import {
   RoundingMathOptions,
   RoundingModeName,
 } from '../../internal/optionsModel'
-import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { IsoDateTimeInterval } from '../../internal/round'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
@@ -53,6 +52,7 @@ import { DateUnitName, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, refineRoundToOptions } from '../roundTo'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarShimRecord,
@@ -564,7 +564,7 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Year,
@@ -573,7 +573,7 @@ export const roundToYear: (
 
 export const roundToMonth: (
   record: PlainDateShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Month,
@@ -582,7 +582,7 @@ export const roundToMonth: (
 
 export const roundToWeek: (
   record: PlainDateShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Week,
@@ -667,10 +667,10 @@ function roundToInterval(
     slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const [, roundingMode] = refineRoundToOptions(unit, options)
   const roundedIsoDateTime = roundDateTimeToInterval(
     computeInterval,
     slots,

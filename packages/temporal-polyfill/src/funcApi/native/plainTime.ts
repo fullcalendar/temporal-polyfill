@@ -11,10 +11,11 @@ import {
   TimeDisplayOptions,
 } from '../../internal/optionsModel'
 import { TimeUnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -351,7 +352,7 @@ export function diffNanoseconds(
   )
 }
 
-export function round(
+function round(
   record: PlainTimeNativeRecord,
   options: TimeUnitName | RoundingOptions<TimeUnitName>,
 ): PlainTimeNativeRecord {
@@ -359,6 +360,20 @@ export function round(
   const resNative = native.round(options as any) // !!!
   return createPlainTimeNativeRecord(resNative)
 }
+
+function roundToUnit(
+  smallestUnit: TimeUnitName,
+  record: PlainTimeNativeRecord,
+  options?: RoundToOptions,
+): PlainTimeNativeRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToHour = bindArgs(roundToUnit, 'hour')
+export const roundToMinute = bindArgs(roundToUnit, 'minute')
+export const roundToSecond = bindArgs(roundToUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
 
 export function startOfHour(record: PlainTimeNativeRecord) {
   return createPlainTimeNativeRecord(

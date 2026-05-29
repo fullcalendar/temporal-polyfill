@@ -7,9 +7,8 @@ import {
   OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
 } from '../internal/optionsModel'
-import { DayTimeUnitName, UnitName } from '../internal/units'
+import { UnitName } from '../internal/units'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
@@ -22,6 +21,7 @@ import type {
   PlainTimeRecord,
   ZonedDateTimeRecord,
 } from './recordTypes'
+import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/plainDateTime'
 import { getPlainDateTimeSlotsIfPresent } from './temporalRecords'
 
@@ -122,11 +122,6 @@ export const diff: (
   otherRecord: PlainDateTimeRecord,
   options?: DiffOptions<UnitName>,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
-
-export const round: (
-  record: PlainDateTimeRecord,
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
-) => PlainDateTimeRecord = NativeTemporal ? Native.round : Shim.round
 
 export const equals: (
   record: PlainDateTimeRecord,
@@ -337,24 +332,64 @@ export const subtractNanoseconds: (
 
 export const roundToYear: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear
 
 export const roundToMonth: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToMonth
   : Shim.roundToMonth
 
 export const roundToWeek: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToWeek
   : Shim.roundToWeek
+
+export const roundToDay: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal ? Native.roundToDay : Shim.roundToDay
+
+export const roundToHour: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal
+  ? Native.roundToHour
+  : Shim.roundToHour
+
+export const roundToMinute: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal
+  ? Native.roundToMinute
+  : Shim.roundToMinute
+
+export const roundToSecond: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal
+  ? Native.roundToSecond
+  : Shim.roundToSecond
+
+export const roundToMillisecond: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal
+  ? Native.roundToMillisecond
+  : Shim.roundToMillisecond
+
+export const roundToMicrosecond: (
+  record: PlainDateTimeRecord,
+  options?: RoundToOptions,
+) => PlainDateTimeRecord = NativeTemporal
+  ? Native.roundToMicrosecond
+  : Shim.roundToMicrosecond
 
 export const startOfYear: (record: PlainDateTimeRecord) => PlainDateTimeRecord =
   NativeTemporal ? Native.startOfYear : Shim.startOfYear

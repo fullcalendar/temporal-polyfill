@@ -54,7 +54,6 @@ import {
   RoundingModeName,
   RoundingOptions,
 } from '../../internal/optionsModel'
-import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import {
   IsoDateTimeInterval,
   computeDayFloor,
@@ -81,6 +80,11 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import {
+  RoundToOptions,
+  createRoundToOptions,
+  refineRoundToOptions,
+} from '../roundTo'
 import {
   getPlainDateTimeSlots,
   setPlainDateTimeSlots,
@@ -459,7 +463,7 @@ export function diff(
   return createDurationShimRecord(resSlots)
 }
 
-export function round(
+function round(
   record: PlainDateTimeShimRecord,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeShimRecord {
@@ -718,6 +722,21 @@ export const roundToWeek = bindArgs(
   computeIsoWeekInterval,
 )
 
+function roundToDayTimeUnit(
+  smallestUnit: DayTimeUnitName,
+  record: PlainDateTimeShimRecord,
+  options?: RoundToOptions,
+): PlainDateTimeShimRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
+export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
+export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
+export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
+
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------
 
@@ -860,10 +879,10 @@ function roundToInterval(
     slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateTimeShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainDateTimeShimRecord {
   const slots = getPlainDateTimeShimRecordSlots(record)
-  const [, roundingMode] = refineUnitRoundOptions(unit, options)
+  const [, roundingMode] = refineRoundToOptions(unit, options)
   const isoDateTime = roundDateTimeToInterval(
     computeInterval,
     slots,

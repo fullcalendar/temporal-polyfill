@@ -12,10 +12,11 @@ import {
   RoundingOptions,
 } from '../../internal/optionsModel'
 import { DayTimeUnitName, UnitName } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { RoundToOptions, createRoundToOptions } from '../roundTo'
 import {
   getPlainDateTimeSlots,
   setPlainDateTimeSlots,
@@ -332,7 +333,7 @@ export function diff(
   return createDurationNativeRecord(resNative)
 }
 
-export function round(
+function round(
   record: PlainDateTimeNativeRecord,
   options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
 ): PlainDateTimeNativeRecord {
@@ -641,7 +642,7 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.roundToYear(getPlainDateTimeNative(record), options as any),
@@ -650,7 +651,7 @@ export function roundToYear(
 
 export function roundToMonth(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.roundToMonth(getPlainDateTimeNative(record), options as any),
@@ -659,12 +660,27 @@ export function roundToMonth(
 
 export function roundToWeek(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundToOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.roundToWeek(getPlainDateTimeNative(record), options as any),
   )
 }
+
+function roundToDayTimeUnit(
+  smallestUnit: DayTimeUnitName,
+  record: PlainDateTimeNativeRecord,
+  options?: RoundToOptions,
+): PlainDateTimeNativeRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
+export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
+export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
+export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
 
 export function startOfYear(record: PlainDateTimeNativeRecord) {
   return createPlainDateTimeNativeRecord(
