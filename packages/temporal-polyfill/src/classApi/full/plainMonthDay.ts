@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -28,10 +29,6 @@ import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type {
-  CalendarDisplayOptions,
-  OverflowOptions,
-} from '../../internal/optionsInput'
 import { isObjectLike } from '../../internal/utils'
 import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'
@@ -66,7 +63,7 @@ export class PlainMonthDay implements MonthDayFields {
 
   static from(
     arg: PlainMonthDayArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainMonthDay {
     return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
   }
@@ -92,7 +89,7 @@ export class PlainMonthDay implements MonthDayFields {
 
   with(
     mod: Partial<MonthDayFields>,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainMonthDay {
     return createPlainMonthDay(
       mergePlainMonthDayFields(
@@ -129,7 +126,9 @@ export class PlainMonthDay implements MonthDayFields {
     return format.format(epochMilli)
   }
 
-  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.PlainDateToStringOptions | undefined = undefined,
+  ): string {
     return formatPlainMonthDayIso(getPlainMonthDaySlots(this), options)
   }
 
@@ -167,7 +166,7 @@ export function getPlainMonthDaySlotsIfPresent(
 
 export function toPlainMonthDaySlots(
   arg: PlainMonthDayArg,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainMonthDaySlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainMonthDaySlotsIfPresent(arg)

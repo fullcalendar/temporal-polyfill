@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   bigNanoInUtcDay,
   divideBigNanoToExactNumber,
@@ -14,24 +15,19 @@ import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
-import type {
-  DiffOptions,
-  OverflowOptions,
-  RoundingMathOptions,
-  RoundingModeName,
-  RoundingOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
+import type {
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../../internal/temporalSpecHelpers'
 import {
   nanoToTimeAndDay,
   timeFieldsToNano,
 } from '../../internal/timeFieldMath'
 import {
   TimeUnit,
-  TimeUnitName,
   Unit,
   nanoInHour,
   nanoInMicro,
@@ -42,7 +38,7 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -166,7 +162,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainTimeShimRecord {
   return createPlainTimeShimRecord(refinePlainTimeObjectLike(fields, options))
 }
@@ -178,7 +174,7 @@ export function fromString(s: string): PlainTimeShimRecord {
 export function withFields(
   record: PlainTimeShimRecord,
   mod: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainTimeShimRecord {
   const slots = getPlainTimeShimRecordSlots(record)
   const resSlots = mergePlainTimeFields(slots, rejectInvalidBag(mod), options)
@@ -245,7 +241,7 @@ export const subtractNanoseconds = reversedMove(addNanoseconds)
 export function diff(
   record: PlainTimeShimRecord,
   otherRecord: PlainTimeShimRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationShimRecord {
   const slots = getPlainTimeShimRecordSlots(record)
   const otherSlots = getPlainTimeShimRecordSlots(otherRecord)
@@ -299,7 +295,9 @@ export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 function round(
   record: PlainTimeShimRecord,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.TimeUnit>
+    | Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): PlainTimeShimRecord {
   return createPlainTimeShimRecord(
     roundPlainTime(getPlainTimeShimRecordSlots(record), options),
@@ -307,9 +305,9 @@ function round(
 }
 
 function roundToUnit(
-  smallestUnit: TimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: PlainTimeShimRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -469,7 +467,7 @@ export function toLocaleString(
 
 export function toString(
   record: PlainTimeShimRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.PlainTimeToStringOptions,
 ): string {
   return formatPlainTimeIso(getPlainTimeShimRecordSlots(record), options)
 }

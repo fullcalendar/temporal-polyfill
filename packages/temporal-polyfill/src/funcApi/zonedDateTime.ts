@@ -1,16 +1,10 @@
+import type { Temporal } from 'temporal-spec'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  DirectionName,
-  DirectionOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  ZonedDateTimeDisplayOptions,
-  ZonedFieldOptions,
-} from '../internal/optionsInput'
-import { UnitName } from '../internal/units'
+} from '../internal/temporalSpecHelpers'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
@@ -24,7 +18,6 @@ import type {
   PlainTimeRecord,
   ZonedDateTimeRecord as Record,
 } from './recordTypes'
-import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/zonedDateTime'
 import { getZonedDateTimeSlotsIfPresent } from './temporalRecords'
 
@@ -45,19 +38,19 @@ export function isRecord(arg: unknown): arg is Record {
 
 export const fromFields: (
   fields: ZonedFields,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
   s: string,
   getCalendar: (calendarId: string) => CalendarRecord,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.fromString : Shim.fromString
 
 export const withFields: (
   record: ZonedDateTimeRecord,
   mod: Partial<DateTimeFields>,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const withCalendar: (
@@ -122,7 +115,7 @@ export const hoursInDay: (record: ZonedDateTimeRecord) => number =
 
 export const toString: (
   record: ZonedDateTimeRecord,
-  options?: ZonedDateTimeDisplayOptions,
+  options?: Temporal.ZonedDateTimeToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: ZonedDateTimeRecord) => string =
@@ -131,19 +124,21 @@ export const toSimpleString: (record: ZonedDateTimeRecord) => string =
 export const add: (
   record: ZonedDateTimeRecord,
   duration: DurationRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.add : Shim.add
 
 export const subtract: (
   record: ZonedDateTimeRecord,
   duration: DurationRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.subtract : Shim.subtract
 
 export const diff: (
   record: ZonedDateTimeRecord,
   otherRecord: ZonedDateTimeRecord,
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const startOfDay: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
@@ -151,7 +146,7 @@ export const startOfDay: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
 
 export const getTimeZoneTransition: (
   record: ZonedDateTimeRecord,
-  options: DirectionOptions | DirectionName,
+  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ) => ZonedDateTimeRecord | null = NativeTemporal
   ? Native.getTimeZoneTransition
   : Shim.getTimeZoneTransition
@@ -197,7 +192,7 @@ export const toLocaleString: (
 export const withDayOfYear: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.withDayOfYear
   : Shim.withDayOfYear
@@ -205,7 +200,7 @@ export const withDayOfYear: (
 export const withDayOfMonth: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.withDayOfMonth
   : Shim.withDayOfMonth
@@ -213,7 +208,7 @@ export const withDayOfMonth: (
 export const withDayOfWeek: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.withDayOfWeek
   : Shim.withDayOfWeek
@@ -221,7 +216,7 @@ export const withDayOfWeek: (
 export const withWeekOfYear: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.withWeekOfYear
   : Shim.withWeekOfYear
@@ -229,49 +224,49 @@ export const withWeekOfYear: (
 export const addYears: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addYears : Shim.addYears
 
 export const addMonths: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
 
 export const addWeeks: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addWeeks : Shim.addWeeks
 
 export const addDays: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addDays : Shim.addDays
 
 export const addHours: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addHours : Shim.addHours
 
 export const addMinutes: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addMinutes : Shim.addMinutes
 
 export const addSeconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.addSeconds : Shim.addSeconds
 
 export const addMilliseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.addMilliseconds
   : Shim.addMilliseconds
@@ -279,7 +274,7 @@ export const addMilliseconds: (
 export const addMicroseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.addMicroseconds
   : Shim.addMicroseconds
@@ -287,7 +282,7 @@ export const addMicroseconds: (
 export const addNanoseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.addNanoseconds
   : Shim.addNanoseconds
@@ -295,7 +290,7 @@ export const addNanoseconds: (
 export const subtractYears: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractYears
   : Shim.subtractYears
@@ -303,7 +298,7 @@ export const subtractYears: (
 export const subtractMonths: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractMonths
   : Shim.subtractMonths
@@ -311,7 +306,7 @@ export const subtractMonths: (
 export const subtractWeeks: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractWeeks
   : Shim.subtractWeeks
@@ -319,7 +314,7 @@ export const subtractWeeks: (
 export const subtractDays: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractDays
   : Shim.subtractDays
@@ -327,7 +322,7 @@ export const subtractDays: (
 export const subtractHours: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractHours
   : Shim.subtractHours
@@ -335,7 +330,7 @@ export const subtractHours: (
 export const subtractMinutes: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractMinutes
   : Shim.subtractMinutes
@@ -343,7 +338,7 @@ export const subtractMinutes: (
 export const subtractSeconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractSeconds
   : Shim.subtractSeconds
@@ -351,7 +346,7 @@ export const subtractSeconds: (
 export const subtractMilliseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractMilliseconds
   : Shim.subtractMilliseconds
@@ -359,7 +354,7 @@ export const subtractMilliseconds: (
 export const subtractMicroseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractMicroseconds
   : Shim.subtractMicroseconds
@@ -367,68 +362,68 @@ export const subtractMicroseconds: (
 export const subtractNanoseconds: (
   record: ZonedDateTimeRecord,
   value: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.subtractNanoseconds
   : Shim.subtractNanoseconds
 
 export const roundToYear: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear
 
 export const roundToMonth: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMonth
   : Shim.roundToMonth
 
 export const roundToWeek: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToWeek
   : Shim.roundToWeek
 
 export const roundToDay: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.roundToDay : Shim.roundToDay
 
 export const roundToHour: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToHour
   : Shim.roundToHour
 
 export const roundToMinute: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMinute
   : Shim.roundToMinute
 
 export const roundToSecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToSecond
   : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond

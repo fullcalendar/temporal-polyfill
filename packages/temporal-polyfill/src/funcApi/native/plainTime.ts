@@ -1,21 +1,16 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
-import { TimeUnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -131,7 +126,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainTimeNativeRecord {
   const resNative = NativeTemporal!.PlainTime.from(fields, options)
   return createPlainTimeNativeRecord(resNative)
@@ -145,7 +140,7 @@ export function fromString(s: string): PlainTimeNativeRecord {
 export function withFields(
   record: PlainTimeNativeRecord,
   mod: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainTimeNativeRecord {
   const native = getPlainTimeNative(record)
   const resNative = native.with(mod, options)
@@ -272,7 +267,7 @@ export function subtractNanoseconds(
 export function diff(
   record: PlainTimeNativeRecord,
   otherRecord: PlainTimeNativeRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationNativeRecord {
   const native = getPlainTimeNative(record)
   const otherNative = getPlainTimeNative(otherRecord)
@@ -354,17 +349,17 @@ export function diffNanoseconds(
 
 function round(
   record: PlainTimeNativeRecord,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
+  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): PlainTimeNativeRecord {
   const native = getPlainTimeNative(record)
-  const resNative = native.round(options as any) // !!!
+  const resNative = native.round(options)
   return createPlainTimeNativeRecord(resNative)
 }
 
 function roundToUnit(
-  smallestUnit: TimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: PlainTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -470,9 +465,9 @@ export function toLocaleString(
 
 export function toString(
   record: PlainTimeNativeRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.PlainTimeToStringOptions,
 ): string {
-  return getPlainTimeNative(record).toString(options as any) // !!!
+  return getPlainTimeNative(record).toString(options)
 }
 
 export function toSimpleString(record: PlainTimeNativeRecord): string {

@@ -1,10 +1,14 @@
-import type { Temporal } from 'temporal-spec'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import { DateObj, YearMonthObj, normalizeOptions } from './utils.js'
+import {
+  DateObj,
+  RoundingMathOptions,
+  YearMonthObj,
+  normalizeOptions,
+} from './utils.js'
 
 export function roundToYear<T extends YearMonthObj>(
   date: T,
-  options?: RoundingOptions,
+  options?: RoundingMathOptions,
 ): T {
   const start = startOfYear(date)
   const duration = start.until(
@@ -16,7 +20,7 @@ export function roundToYear<T extends YearMonthObj>(
 
 export function roundToMonth<T extends DateObj>(
   date: T,
-  options?: RoundingOptions,
+  options?: RoundingMathOptions,
 ): T {
   const start = startOfMonth(date)
   const duration = start.until(
@@ -28,7 +32,7 @@ export function roundToMonth<T extends DateObj>(
 
 export function roundToWeek<T extends DateObj>(
   date: T,
-  options?: RoundingOptions,
+  options?: RoundingMathOptions,
 ): T {
   const start = startOfWeek(date)
   const duration = start.until(
@@ -38,24 +42,11 @@ export function roundToWeek<T extends DateObj>(
   return start.add(duration) as T
 }
 
-// Options
-// -----------------------------------------------------------------------------
-
-type RoundingMode = Temporal.RoundingOptions<
-  Temporal.DateUnit | Temporal.TimeUnit
->['roundingMode']
-
-// for big units only
-export type RoundingOptions = {
-  roundingMode?: RoundingMode
-  roundingIncrement?: 1
-}
-
 export function normalizeRoundingOptions(
   forcedUnit: 'week' | 'month' | 'year',
-  options: RoundingOptions | undefined,
+  options: RoundingMathOptions | undefined,
 ): {
-  roundingMode: RoundingMode
+  roundingMode: RoundingMathOptions['roundingMode']
   smallestUnit: any // HACK
 } {
   const normOptions = normalizeOptions(options)

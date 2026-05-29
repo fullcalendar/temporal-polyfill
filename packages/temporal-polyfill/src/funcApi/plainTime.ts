@@ -1,19 +1,15 @@
+import type { Temporal } from 'temporal-spec'
 import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  TimeDisplayOptions,
-} from '../internal/optionsInput'
-import { TimeUnitName } from '../internal/units'
+} from '../internal/temporalSpecHelpers'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainTime'
 import type { DurationRecord, PlainTimeRecord as Record } from './recordTypes'
-import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/plainTime'
 import { getPlainTimeSlotsIfPresent } from './temporalRecords'
 
@@ -36,7 +32,7 @@ export function isRecord(arg: unknown): arg is Record {
 
 export const fromFields: (
   fields: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainTimeRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (s: string) => PlainTimeRecord = NativeTemporal
@@ -46,7 +42,7 @@ export const fromString: (s: string) => PlainTimeRecord = NativeTemporal
 export const withFields: (
   record: PlainTimeRecord,
   mod: Partial<TimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainTimeRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const add: (
@@ -140,7 +136,7 @@ export const subtractNanoseconds: (
 export const diff: (
   record: PlainTimeRecord,
   otherRecord: PlainTimeRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffHours: (
@@ -181,33 +177,33 @@ export const diffNanoseconds: (
 
 export const roundToHour: (
   record: PlainTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => PlainTimeRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
 export const roundToMinute: (
   record: PlainTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => PlainTimeRecord = NativeTemporal
   ? Native.roundToMinute
   : Shim.roundToMinute
 
 export const roundToSecond: (
   record: PlainTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => PlainTimeRecord = NativeTemporal
   ? Native.roundToSecond
   : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: PlainTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => PlainTimeRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: PlainTimeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => PlainTimeRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond
@@ -267,7 +263,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainTimeRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.PlainTimeToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainTimeRecord) => string =

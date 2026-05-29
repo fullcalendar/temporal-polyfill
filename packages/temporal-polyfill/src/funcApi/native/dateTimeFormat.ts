@@ -6,7 +6,7 @@ export function createNativeDateTimeFormat<R>(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): DateTimeFormatLike<R> {
-  const format = new Intl.DateTimeFormat(locales, options) as any
+  const format = new Intl.DateTimeFormat(locales, options)
 
   return {
     format(record: R): string {

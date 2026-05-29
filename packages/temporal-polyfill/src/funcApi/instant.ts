@@ -1,11 +1,10 @@
+import type { Temporal } from 'temporal-spec'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  InstantDisplayOptions,
+  InstantStringTimeZoneDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../internal/optionsInput'
-import { TimeUnitName } from '../internal/units'
+} from '../internal/temporalSpecHelpers'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
@@ -15,7 +14,6 @@ import type {
   InstantRecord as Record,
   ZonedDateTimeRecord,
 } from './recordTypes'
-import { RoundToOptions } from './roundTo'
 import * as Shim from './shim/instant'
 import { getInstantSlotsIfPresent } from './temporalRecords'
 
@@ -130,7 +128,7 @@ export const subtractNanoseconds: (
 export const diff: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffHours: (
@@ -171,29 +169,29 @@ export const diffNanoseconds: (
 
 export const roundToHour: (
   record: InstantRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
 export const roundToMinute: (
   record: InstantRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
 
 export const roundToSecond: (
   record: InstantRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: InstantRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: InstantRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond
@@ -230,7 +228,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: InstantRecord,
-  options?: InstantDisplayOptions,
+  options?: InstantStringTimeZoneDisplayOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: InstantRecord) => string = NativeTemporal

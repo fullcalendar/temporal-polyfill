@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -44,17 +45,6 @@ import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
-import type {
-  DiffOptions,
-  DirectionName,
-  DirectionOptions,
-  OverflowOptions,
-  RoundingMathOptions,
-  RoundingModeName,
-  RoundingOptions,
-  ZonedDateTimeDisplayOptions,
-  ZonedFieldOptions,
-} from '../../internal/optionsInput'
 import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import {
   IsoDateTimeInterval,
@@ -70,6 +60,10 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
+import type {
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
@@ -79,9 +73,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
 import {
-  DayTimeUnitName,
   Unit,
-  UnitName,
   nanoInHour,
   nanoInMicro,
   nanoInMilli,
@@ -91,11 +83,7 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import {
-  RoundToOptions,
-  createRoundToOptions,
-  refineRoundToOptions,
-} from '../roundTo'
+import { createRoundToOptions, refineRoundToOptions } from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -309,7 +297,7 @@ export function create(
 
 export function fromFields(
   fields: ZonedDateTimeShimFields,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeShimRecord {
   const inputCalendar = fields.calendar
   const calendarSlot = refineCalendarShimArg(inputCalendar)
@@ -325,7 +313,7 @@ export function fromFields(
 export function fromString(
   s: string,
   getCalendar: CalendarShimResolver,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeShimRecord {
   return createZonedDateTimeShimRecord(
     parseZonedDateTime(
@@ -339,7 +327,7 @@ export function fromString(
 export function withFields(
   record: ZonedDateTimeShimRecord,
   mod: Partial<DateTimeFields>,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const resSlots = mergeZonedDateTimeFields(
@@ -457,7 +445,7 @@ export function hoursInDay(record: ZonedDateTimeShimRecord): number {
 
 export function toString(
   record: ZonedDateTimeShimRecord,
-  options?: ZonedDateTimeDisplayOptions,
+  options?: Temporal.ZonedDateTimeToStringOptions,
 ): string {
   return formatZonedDateTimeIso(
     getZonedDateTimeShimRecordSlots(record),
@@ -472,7 +460,7 @@ export function toSimpleString(record: ZonedDateTimeShimRecord): string {
 export function add(
   record: ZonedDateTimeShimRecord,
   durationRecord: DurationShimRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const durationSlots = getDurationShimRecordSlots(durationRecord)
@@ -483,7 +471,7 @@ export function add(
 export function subtract(
   record: ZonedDateTimeShimRecord,
   durationRecord: DurationShimRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const durationSlots = getDurationShimRecordSlots(durationRecord)
@@ -495,7 +483,9 @@ export function subtract(
 export function diff(
   record: ZonedDateTimeShimRecord,
   otherRecord: ZonedDateTimeShimRecord,
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ): DurationShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const otherSlots = getZonedDateTimeShimRecordSlots(otherRecord)
@@ -512,7 +502,9 @@ export function diff(
 
 function round(
   record: ZonedDateTimeShimRecord,
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): ZonedDateTimeShimRecord {
   return createZonedDateTimeShimRecord(
     roundZonedDateTime(getZonedDateTimeShimRecordSlots(record), options),
@@ -529,7 +521,7 @@ export function startOfDay(
 
 export function getTimeZoneTransition(
   record: ZonedDateTimeShimRecord,
-  options: DirectionOptions | DirectionName,
+  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ): ZonedDateTimeShimRecord | null {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const epochNanoseconds = getTimeZoneTransitionEpochNanoseconds(slots, options)
@@ -672,9 +664,9 @@ export const roundToWeek = bindArgs(
 )
 
 function roundToDayTimeUnit(
-  smallestUnit: DayTimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeShimRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -820,7 +812,7 @@ function roundToInterval(
   unit: Unit,
   computeInterval: (slots: any) => IsoDateTimeInterval,
   record: ZonedDateTimeShimRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -18,11 +19,6 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
-import type {
-  DiffOptions,
-  InstantDisplayOptions,
-  RoundingOptions,
-} from '../../internal/optionsInput'
 import { roundInstant } from '../../internal/round'
 import {
   EpochNanoFields,
@@ -31,7 +27,6 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
-import { TimeUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepInstantFormat } from '../intlFormatConfig'
 import {
@@ -94,7 +89,9 @@ export class Instant {
 
   until(
     otherArg: InstantArg,
-    options: DiffOptions<TimeUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       diffInstants(
@@ -108,7 +105,9 @@ export class Instant {
 
   since(
     otherArg: InstantArg,
-    options: DiffOptions<TimeUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       diffInstants(
@@ -120,7 +119,11 @@ export class Instant {
     )
   }
 
-  round(options: TimeUnitName | RoundingOptions<TimeUnitName>): Instant {
+  round(
+    options:
+      | Temporal.PluralizeUnit<Temporal.TimeUnit>
+      | Temporal.RoundingOptions<Temporal.TimeUnit>,
+  ): Instant {
     return createInstant(roundInstant(getInstantSlots(this), options))
   }
 
@@ -149,7 +152,9 @@ export class Instant {
     return format.format(epochMilli)
   }
 
-  toString(options: InstantDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.InstantToStringOptions | undefined = undefined,
+  ): string {
     return formatInstantIso(refineTimeZoneArg, getInstantSlots(this), options)
   }
 

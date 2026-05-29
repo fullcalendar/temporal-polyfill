@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay } from './bigNano'
 import {
   computeCalendarDateFields,
@@ -31,7 +32,6 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
-import type { OverflowOptions } from './optionsInput'
 import { Overflow } from './optionsModel'
 import {
   EpochNanoFields,
@@ -74,7 +74,7 @@ export function moveZonedDateTime(
   doSubtract: boolean,
   zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
   durationSlots: DurationFields,
-  options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
+  options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
@@ -92,7 +92,7 @@ export function movePlainDateTime(
   doSubtract: boolean,
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
   durationSlots: DurationFields,
-  options: OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
+  options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
 ): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const { calendar } = plainDateTimeSlots
   return createDateTimeSlots(
@@ -110,7 +110,7 @@ export function movePlainDate(
   doSubtract: boolean,
   plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
   durationSlots: DurationFields,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = plainDateSlots
   return createDateSlots(
@@ -128,7 +128,7 @@ export function movePlainYearMonth(
   doSubtract: boolean,
   plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
   durationSlots: DurationFields & { sign: NumberSign },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   /*
   PlainYearMonth has one awkward ordering rule: overflow must be read before
@@ -202,7 +202,7 @@ export function moveZonedEpochs(
   calendar: CalendarSlot,
   slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): EpochNanoFields {
   const timeOnlyNano = durationFieldsToBigNano(durationFields, Unit.Hour)
   let epochNano = slots.epochNanoseconds
@@ -237,7 +237,7 @@ export function moveDateTime(
   calendar: CalendarSlot,
   isoDateTimeFields: CalendarDateTimeFields,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateTimeFields {
   // could have over 24 hours in certain zones
   const [movedTimeFields, dayDelta] = moveTime(
@@ -271,7 +271,7 @@ export function moveDate(
   calendar: CalendarSlot,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
     return dateAddWithOverflow(

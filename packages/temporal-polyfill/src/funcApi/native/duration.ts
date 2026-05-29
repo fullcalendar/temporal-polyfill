@@ -1,13 +1,11 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
-import { UnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
@@ -233,10 +231,22 @@ export function round(
 
 export function total(
   duration: DurationNativeRecord,
-  options: UnitName | DurationTotalOptions<RelativeToNativeRecord>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | DurationTotalOptions<RelativeToNativeRecord>,
 ): number {
   const native = getDurationNative(duration)
-  return native.total(refineTotalOptions(options) as any) // !!!
+
+  // TODO: better pattern for this?
+  if (typeof options === 'string') {
+    return native.total(options)
+  }
+  const refinedOptions: Temporal.DurationTotalOptions = {
+    ...options,
+    relativeTo: refineRelativeTo(options.relativeTo),
+  }
+
+  return native.total(refinedOptions)
 }
 
 export function compare(
@@ -264,9 +274,9 @@ export function toLocaleString(
 
 export function toString(
   duration: DurationNativeRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.DurationToStringOptions,
 ): string {
-  return getDurationNative(duration).toString(options as any) // !!!
+  return getDurationNative(duration).toString(options)
 }
 
 export function toSimpleString(duration: DurationNativeRecord): string {
@@ -286,17 +296,6 @@ type RelativeToNative =
   | Temporal.ZonedDateTime
   | Temporal.PlainDateTime
   | Temporal.PlainDate
-
-function refineTotalOptions(
-  options: UnitName | DurationTotalOptions<RelativeToNativeRecord>,
-) {
-  return typeof options === 'string'
-    ? options
-    : {
-        ...options,
-        relativeTo: refineRelativeTo(options.relativeTo),
-      }
-}
 
 function refineRelativeTo(
   arg?: RelativeToNativeRecord,

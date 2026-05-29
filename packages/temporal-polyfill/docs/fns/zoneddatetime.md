@@ -1409,7 +1409,7 @@ const order = Temporal.ZonedDateTime.compare(zonedDateTime, otherZonedDateTime)
 
 ## Rounding
 
-`RoundToOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToYear`
 
@@ -1418,7 +1418,7 @@ If `options` or `options.roundingMode` is omitted, the rounding mode defaults to
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1440,7 +1440,7 @@ const nextZonedDateTime = roundToYear(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1462,7 +1462,7 @@ const nextZonedDateTime = roundToMonth(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1484,7 +1484,7 @@ const nextZonedDateTime = roundToWeek(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1504,7 +1504,7 @@ const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'day' 
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1524,7 +1524,7 @@ const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'hour'
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1544,7 +1544,7 @@ const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'minut
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1564,7 +1564,7 @@ const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'secon
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1584,7 +1584,7 @@ const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'milli
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:

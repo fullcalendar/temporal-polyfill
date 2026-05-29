@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarSlot } from './calendarSlot'
 import {
@@ -20,7 +21,6 @@ import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
-import type { RoundingOptions } from './optionsInput'
 import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
@@ -48,9 +48,7 @@ import {
 import { clampRelativeDuration, computeEpochNanoFrac } from './total'
 import {
   DayTimeUnit,
-  DayTimeUnitName,
   TimeUnit,
-  TimeUnitName,
   Unit,
   nanoInHour,
   nanoInMinute,
@@ -69,7 +67,9 @@ import {
 
 export function roundInstant(
   instantSlots: EpochNanoFields,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.TimeUnit>
+    | Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): EpochNanoFields {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
@@ -93,7 +93,9 @@ ONLY day & time
 */
 export function roundZonedDateTime(
   slots: ZonedEpochNanoFields & { calendar: CalendarSlot }, // might get returned :(
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   let { epochNanoseconds } = slots
   const { timeZone, calendar } = slots
@@ -148,7 +150,9 @@ ONLY day & time
 */
 export function roundPlainDateTime(
   slots: CalendarDateTimeFields & { calendar: CalendarSlot },
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
@@ -163,7 +167,9 @@ export function roundPlainDateTime(
 
 export function roundPlainTime(
   slots: TimeFields,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.TimeUnit>
+    | Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): TimeFields {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,

@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { bigNanoInSec } from './bigNano'
 import {
   type CalendarSlot,
@@ -24,14 +25,6 @@ import {
   refineTimeDisplayOptions,
   refineZonedDateTimeDisplayOptions,
 } from './optionsDisplayRefine'
-import type {
-  CalendarDisplayOptions,
-  DateTimeDisplayOptions,
-  InstantDisplayOptions,
-  SubsecDigits,
-  TimeDisplayOptions,
-  ZonedDateTimeDisplayOptions,
-} from './optionsInput'
 import {
   CalendarDisplay,
   OffsetDisplay,
@@ -46,6 +39,7 @@ import {
   roundToMinute,
 } from './round'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
+import type { SubsecDigits } from './temporalSpecHelpers'
 import { TimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
 import {
@@ -58,13 +52,21 @@ import {
 } from './units'
 import { NumberSign, divModFloor, padNumber, padNumber2 } from './utils'
 
+type InstantDisplayOptions<
+  TZ extends Temporal.InstantToStringOptions['timeZone'],
+> = Omit<Temporal.InstantToStringOptions, 'timeZone'> & {
+  timeZone?: TZ | undefined
+}
+
 // Instant
 // -----------------------------------------------------------------------------
 
-export function formatInstantIso(
-  refineTimeZoneString: (timeZoneString: string) => string, // to timeZoneId
+export function formatInstantIso<
+  TZ extends Temporal.InstantToStringOptions['timeZone'],
+>(
+  refineTimeZoneString: (timeZone: NonNullable<TZ>) => string, // to timeZoneId
   instantSlots: EpochNanoFields,
-  options?: InstantDisplayOptions,
+  options?: InstantDisplayOptions<TZ>,
 ): string {
   const [timeZoneArg, roundingMode, nanoInc, subsecDigits] =
     refineInstantDisplayOptions(options)
@@ -72,7 +74,7 @@ export function formatInstantIso(
   const providedTimeZone = timeZoneArg !== undefined
   const timeZone = queryTimeZone(
     providedTimeZone
-      ? refineTimeZoneString(timeZoneArg)
+      ? refineTimeZoneString(timeZoneArg!)
       : (utcTimeZoneId as any),
   )
 
@@ -123,7 +125,7 @@ function formatEpochNanoIso(
 
 export function formatZonedDateTimeIso(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  options?: ZonedDateTimeDisplayOptions,
+  options?: Temporal.ZonedDateTimeToStringOptions,
 ): string {
   const displayOptions = refineZonedDateTimeDisplayOptions(options)
   return formatZonedEpochNanoIso(
@@ -191,7 +193,7 @@ function formatZonedEpochNanoIso(
 
 export function formatPlainDateTimeIso(
   plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
-  options?: DateTimeDisplayOptions,
+  options?: Temporal.PlainDateTimeToStringOptions,
 ): string {
   const displayOptions = refineDateTimeDisplayOptions(options)
   return formatDateTimeIso(
@@ -241,7 +243,7 @@ export function formatDateTimeIsoAuto(
 
 export function formatPlainDateIso(
   plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return formatDateIso(
     plainDateSlots.calendar,
@@ -276,7 +278,7 @@ export function formatDateIso(
 
 export function formatPlainYearMonthIso(
   plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return formatDateLikeIso(
     plainYearMonthSlots.calendar,
@@ -306,7 +308,7 @@ export function formatYearMonthIsoAuto(
 
 export function formatPlainMonthDayIso(
   plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return formatDateLikeIso(
     plainMonthDaySlots.calendar,
@@ -369,7 +371,7 @@ function formatDateLikeIso(
 
 export function formatPlainTimeIso(
   slots: TimeFields,
-  options?: TimeDisplayOptions,
+  options?: Temporal.PlainTimeToStringOptions,
 ): string {
   const displayOptions = refineTimeDisplayOptions(options)
   return formatTimeIso(slots, ...displayOptions)
@@ -396,7 +398,7 @@ function formatTimeIso(
 
 export function formatDurationIso(
   slots: DurationFields & { sign: NumberSign },
-  options?: TimeDisplayOptions,
+  options?: Temporal.DurationToStringOptions,
 ): string {
   const [roundingMode, nanoInc, subsecDigits] = refineTimeDisplayOptions(
     options,

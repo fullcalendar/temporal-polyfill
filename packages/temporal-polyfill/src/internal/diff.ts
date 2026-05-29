@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonthForYearMonth,
@@ -35,7 +36,6 @@ import {
   moveToDayOfMonthUnsafe,
   moveZonedEpochs,
 } from './move'
-import type { DiffOptions } from './optionsInput'
 import { Overflow, RoundingMode } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
 import {
@@ -54,16 +54,7 @@ import { checkIsoDateInBounds } from './temporalLimits'
 import { timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
-import {
-  DateUnitName,
-  DayTimeUnit,
-  TimeUnit,
-  TimeUnitName,
-  Unit,
-  UnitName,
-  YearMonthUnitName,
-  nanoInUtcDay,
-} from './units'
+import { DayTimeUnit, TimeUnit, Unit, nanoInUtcDay } from './units'
 import {
   NumberSign,
   bindArgs,
@@ -85,7 +76,7 @@ export function diffInstants(
   invert: boolean,
   instantSlots0: EpochNanoFields,
   instantSlots1: EpochNanoFields,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Second, Unit.Hour) as [
@@ -114,7 +105,9 @@ export function diffZonedDateTimes(
   calendar: CalendarSlot,
   slots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
   slots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour)
@@ -170,7 +163,9 @@ export function diffPlainDateTimes(
   calendar: CalendarSlot,
   plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
   plainDateTimeSlots1: CalendarDateTimeFields & { calendar: CalendarSlot },
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
@@ -225,7 +220,7 @@ export function diffPlainDates(
   calendar: CalendarSlot,
   plainDateSlots0: CalendarDateFields & { calendar: CalendarSlot },
   plainDateSlots1: CalendarDateFields & { calendar: CalendarSlot },
-  options?: DiffOptions<DateUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
@@ -247,7 +242,7 @@ export function diffPlainYearMonth(
   calendar: CalendarSlot,
   plainYearMonthSlots0: CalendarDateFields & { calendar: CalendarSlot },
   plainYearMonthSlots1: CalendarDateFields & { calendar: CalendarSlot },
-  options?: DiffOptions<YearMonthUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
@@ -343,7 +338,7 @@ export function diffPlainTimes(
   invert: boolean,
   plainTimeSlots0: TimeFields,
   plainTimeSlots1: TimeFields,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)

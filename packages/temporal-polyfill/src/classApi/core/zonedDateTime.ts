@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -45,15 +46,6 @@ import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedDateTime } from '../../internal/move'
 import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
-import type {
-  DiffOptions,
-  DirectionName,
-  DirectionOptions,
-  OverflowOptions,
-  RoundingOptions,
-  ZonedDateTimeDisplayOptions,
-  ZonedFieldOptions,
-} from '../../internal/optionsInput'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
@@ -70,7 +62,6 @@ import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
-import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepZonedDateTimeFormat } from '../intlFormatConfig'
 import {
@@ -122,7 +113,7 @@ export class ZonedDateTime {
 
   static from(
     arg: any,
-    options: ZonedFieldOptions | undefined = undefined,
+    options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(toZonedDateTimeSlots(arg, options))
   }
@@ -295,7 +286,7 @@ export class ZonedDateTime {
 
   with(
     mod: Partial<DateTimeFields>,
-    options: ZonedFieldOptions | undefined = undefined,
+    options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       mergeZonedDateTimeFields(
@@ -333,7 +324,7 @@ export class ZonedDateTime {
 
   add(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       moveZonedDateTime(
@@ -347,7 +338,7 @@ export class ZonedDateTime {
 
   subtract(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       moveZonedDateTime(
@@ -361,7 +352,11 @@ export class ZonedDateTime {
 
   until(
     otherArg: ZonedDateTimeArg,
-    options: DiffOptions<UnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<
+          Temporal.DateUnit | Temporal.TimeUnit
+        >
+      | undefined = undefined,
   ): Duration {
     const slots = getZonedDateTimeSlots(this)
     const other = toZonedDateTimeSlots(otherArg)
@@ -375,7 +370,11 @@ export class ZonedDateTime {
 
   since(
     otherArg: ZonedDateTimeArg,
-    options: DiffOptions<UnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<
+          Temporal.DateUnit | Temporal.TimeUnit
+        >
+      | undefined = undefined,
   ): Duration {
     const slots = getZonedDateTimeSlots(this)
     const other = toZonedDateTimeSlots(otherArg)
@@ -388,7 +387,9 @@ export class ZonedDateTime {
   }
 
   round(
-    options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+    options:
+      | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+      | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
   ): ZonedDateTime {
     return createZonedDateTime(
       roundZonedDateTime(getZonedDateTimeSlots(this), options),
@@ -443,7 +444,7 @@ export class ZonedDateTime {
   }
 
   toString(
-    options: ZonedDateTimeDisplayOptions | undefined = undefined,
+    options: Temporal.ZonedDateTimeToStringOptions | undefined = undefined,
   ): string {
     return formatZonedDateTimeIso(getZonedDateTimeSlots(this), options)
   }
@@ -453,7 +454,9 @@ export class ZonedDateTime {
   }
 
   getTimeZoneTransition(
-    options: DirectionOptions | DirectionName,
+    options:
+      | Temporal.TransitionOptions
+      | Temporal.TransitionOptions['direction'],
   ): ZonedDateTime | null {
     const slots = getZonedDateTimeSlots(this)
     const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
@@ -498,7 +501,7 @@ export function getZonedDateTimeSlotsIfPresent(
 
 export function toZonedDateTimeSlots(
   arg: ZonedDateTimeArg,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getZonedDateTimeSlotsIfPresent(arg)

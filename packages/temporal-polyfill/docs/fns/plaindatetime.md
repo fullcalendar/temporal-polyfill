@@ -1319,7 +1319,7 @@ const order = Temporal.PlainDateTime.compare(dateTime, otherDateTime)
 
 ## Rounding
 
-`RoundToOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToYear`
 
@@ -1328,7 +1328,7 @@ If `options` or `options.roundingMode` is omitted, the rounding mode defaults to
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1350,7 +1350,7 @@ const nextDateTime = roundToYear(dateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1372,7 +1372,7 @@ const nextDateTime = roundToMonth(dateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1394,7 +1394,7 @@ const nextDateTime = roundToWeek(dateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1414,7 +1414,7 @@ const nextDateTime = dateTime.round({ ...options, smallestUnit: 'day' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1434,7 +1434,7 @@ const nextDateTime = dateTime.round({ ...options, smallestUnit: 'hour' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1454,7 +1454,7 @@ const nextDateTime = dateTime.round({ ...options, smallestUnit: 'minute' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1474,7 +1474,7 @@ const nextDateTime = dateTime.round({ ...options, smallestUnit: 'second' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1494,7 +1494,7 @@ const nextDateTime = dateTime.round({ ...options, smallestUnit: 'millisecond' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:

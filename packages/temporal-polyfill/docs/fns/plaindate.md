@@ -875,14 +875,14 @@ const order = Temporal.PlainDate.compare(date, otherDate)
 ## Rounding
 
 If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
-`RoundToOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToYear`
 
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -904,7 +904,7 @@ const nextDate = roundToYear(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -926,7 +926,7 @@ const nextDate = roundToMonth(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:

@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -39,14 +40,8 @@ import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type {
-  CalendarDisplayOptions,
-  DiffOptions,
-  OverflowOptions,
-} from '../../internal/optionsInput'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
-import { DateUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainDateFormat } from '../intlFormatConfig'
 import {
@@ -108,7 +103,7 @@ export class PlainDate implements DateFields {
 
   static from(
     arg: any,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDate {
     return createPlainDate(toPlainDateSlots(arg, options))
   }
@@ -197,7 +192,7 @@ export class PlainDate implements DateFields {
 
   with(
     mod: Partial<DateFields>,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDate {
     const slots = getPlainDateSlots(this)
     return createPlainDate(
@@ -214,7 +209,7 @@ export class PlainDate implements DateFields {
 
   add(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDate {
     return createPlainDate(
       movePlainDate(
@@ -228,7 +223,7 @@ export class PlainDate implements DateFields {
 
   subtract(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDate {
     return createPlainDate(
       movePlainDate(
@@ -242,7 +237,9 @@ export class PlainDate implements DateFields {
 
   until(
     otherArg: PlainDateArg,
-    options: DiffOptions<DateUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainDateSlots(this)
     const other = toPlainDateSlots(otherArg)
@@ -254,7 +251,9 @@ export class PlainDate implements DateFields {
 
   since(
     otherArg: PlainDateArg,
-    options: DiffOptions<DateUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainDateSlots(this)
     const other = toPlainDateSlots(otherArg)
@@ -321,7 +320,9 @@ export class PlainDate implements DateFields {
     return format.format(epochMilli)
   }
 
-  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.PlainDateToStringOptions | undefined = undefined,
+  ): string {
     return formatPlainDateIso(getPlainDateSlots(this), options)
   }
 
@@ -359,7 +360,7 @@ export function getPlainDateSlotsIfPresent(
 
 export function toPlainDateSlots(
   arg: PlainDateArg,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainDateSlotsIfPresent(arg)

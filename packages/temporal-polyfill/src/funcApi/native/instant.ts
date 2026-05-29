@@ -1,19 +1,16 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  InstantDisplayOptions,
+  InstantStringTimeZoneDisplayOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
-} from '../../internal/optionsInput'
-import { TimeUnitName, UnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createNativeDateTimeFormat } from './dateTimeFormat'
 import {
@@ -226,7 +223,7 @@ export function subtractNanoseconds(
 export function diff(
   record: InstantNativeRecord,
   otherRecord: InstantNativeRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationNativeRecord {
   const native = getInstantNative(record)
   const otherNative = getInstantNative(otherRecord)
@@ -308,17 +305,17 @@ export function diffNanoseconds(
 
 function round(
   record: InstantNativeRecord,
-  options: UnitName | RoundingOptions<TimeUnitName>,
+  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): InstantNativeRecord {
   const native = getInstantNative(record)
-  const resNative = native.round(options as any) // !!!
+  const resNative = native.round(options)
   return createInstantNativeRecord(resNative)
 }
 
 function roundToUnit(
-  smallestUnit: TimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: InstantNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): InstantNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -373,9 +370,9 @@ export function toLocaleString(
 
 export function toString(
   record: InstantNativeRecord,
-  options?: InstantDisplayOptions,
+  options?: InstantStringTimeZoneDisplayOptions,
 ): string {
-  return getInstantNative(record).toString(options as any) // !!!
+  return getInstantNative(record).toString(options)
 }
 
 export function toSimpleString(record: InstantNativeRecord): string {

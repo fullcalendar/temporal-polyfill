@@ -10,7 +10,7 @@ Abbreviations used by the type pages:
 - `CalendarRecord` is the opaque calendar handle used by function APIs that
   accept calendar behavior.
 - `OverflowOptions` is the calendar-field overflow options bag.
-- `RoundToOptions` is the `RoundingMathOptions` object without `smallestUnit`.
+- `RoundingMathOptions` contains rounding increment and rounding mode options.
   The unit is implied by the `roundTo*` function name, and string shorthand is
   not accepted.
 

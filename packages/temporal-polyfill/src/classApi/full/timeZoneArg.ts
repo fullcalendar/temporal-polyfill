@@ -3,14 +3,14 @@ import * as errorMessages from '../../internal/errorMessages'
 import { parseTimeZoneId } from '../../internal/isoParse'
 import { resolveTimeZoneId } from '../../internal/timeZoneId'
 import { isObjectLike } from '../../internal/utils'
-import { ZonedDateTime, getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
+import { getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
 export type TimeZoneArg<ZonedDateTimeLike = any> = string | ZonedDateTimeLike
 
 /*
 Returns a timeZoneId.
 */
-export function refineTimeZoneArg(arg: TimeZoneArg<ZonedDateTime>): string {
+export function refineTimeZoneArg(arg: TimeZoneArg): string {
   if (isObjectLike(arg)) {
     const slots = getZonedDateTimeSlotsIfPresent(arg)
     if (!slots) {

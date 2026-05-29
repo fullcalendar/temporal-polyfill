@@ -12,10 +12,6 @@ import { timeFieldDefaults } from '../../internal/fieldNames'
 import { CalendarDateFields } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
-import type {
-  RoundingMathOptions,
-  RoundingModeName,
-} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
   MarkerToEpochNano,
@@ -26,6 +22,10 @@ import {
 } from '../../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
+import type {
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../../internal/temporalSpecHelpers'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'

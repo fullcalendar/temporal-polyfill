@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { toInteger, toString } from './cast'
 import { DurationFieldName, durationFieldIndexes } from './durationFields'
 import * as errorMessages from './errorMessages'
@@ -18,22 +19,12 @@ import {
   timeZoneDisplayMap,
   totalUnitStr,
 } from './optionsConfig'
-import type {
-  CalendarDisplayOptions,
-  DirectionOptions,
-  EpochDisambigOptions,
-  LargestUnitOptions,
-  OffsetDisambigOptions,
-  OffsetDisplayOptions,
-  OverflowOptions,
-  RoundingModeOptions,
-  SmallestUnitOptions,
-  SubsecDigits,
-  TimeZoneDisplayOptions,
-  TotalUnitOptions,
-} from './optionsInput'
 import { Overflow } from './optionsModel'
-import { StrictUnitName, Unit, UnitName, unitNameMap } from './units'
+import type {
+  FractionalSecondDigits,
+  SubsecDigits,
+} from './temporalSpecHelpers'
+import { Unit, unitNameMap } from './units'
 import { bindArgs, clampEntity } from './utils'
 
 /*
@@ -56,7 +47,7 @@ export function coerceRoundingIncInteger(options: {
 }
 
 export function coerceFractionalSecondDigits(options: {
-  fractionalSecondDigits?: SubsecDigits
+  fractionalSecondDigits?: FractionalSecondDigits
 }): SubsecDigits | undefined {
   let subsecDigits = options[subsecDigitsName]
 
@@ -102,7 +93,7 @@ export function coerceUnitOption<O>(
     return ensureDefined ? minUnit : null
   }
 
-  let unit = unitNameMap[unitStr as StrictUnitName]
+  let unit = unitNameMap[unitStr as keyof typeof unitNameMap]
 
   if (unit === undefined) {
     unit = durationFieldIndexes[unitStr as DurationFieldName]
@@ -143,56 +134,64 @@ export function coerceChoiceOption<O>(
 
 // generic. callers should type-narrow the results
 export const coerceSmallestUnit = bindArgs(
-  coerceUnitOption<SmallestUnitOptions<UnitName>>,
+  coerceUnitOption<
+    Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>
+  >,
   smallestUnitStr,
 )
 // generic. callers should type-narrow the results
 export const coerceLargestUnit = bindArgs(
-  coerceUnitOption<LargestUnitOptions<UnitName>>,
+  coerceUnitOption<
+    Temporal.RoundingOptionsWithLargestUnit<
+      Temporal.DateUnit | Temporal.TimeUnit
+    >
+  >,
   largestUnitStr,
 )
 export const coerceTotalUnit = bindArgs(
-  coerceUnitOption<TotalUnitOptions>,
+  coerceUnitOption<Pick<Temporal.DurationTotalOptions, 'unit'>>,
   totalUnitStr,
 )
 export const coerceOverflow = bindArgs(
-  coerceChoiceOption<OverflowOptions>,
+  coerceChoiceOption<Temporal.OverflowOptions>,
   'overflow',
   overflowMap,
 )
 export const coerceEpochDisambig = bindArgs(
-  coerceChoiceOption<EpochDisambigOptions>,
+  coerceChoiceOption<Temporal.DisambiguationOptions>,
   'disambiguation',
   epochDisambigMap,
 )
 export const coerceOffsetDisambig = bindArgs(
-  coerceChoiceOption<OffsetDisambigOptions>,
+  coerceChoiceOption<Temporal.ZonedDateTimeFromOptions>,
   'offset',
   offsetDisambigMap,
 )
 export const coerceCalendarDisplay = bindArgs(
-  coerceChoiceOption<CalendarDisplayOptions>,
+  coerceChoiceOption<Temporal.PlainDateToStringOptions>,
   'calendarName',
   calendarDisplayMap,
 )
 export const coerceTimeZoneDisplay = bindArgs(
-  coerceChoiceOption<TimeZoneDisplayOptions>,
+  coerceChoiceOption<Temporal.ZonedDateTimeToStringOptions>,
   'timeZoneName',
   timeZoneDisplayMap,
 )
 export const coerceOffsetDisplay = bindArgs(
-  coerceChoiceOption<OffsetDisplayOptions>,
+  coerceChoiceOption<Temporal.ZonedDateTimeToStringOptions>,
   'offset',
   offsetDisplayMap,
 )
 // Caller should always supply default.
 export const coerceRoundingMode = bindArgs(
-  coerceChoiceOption<RoundingModeOptions>,
+  coerceChoiceOption<
+    Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>
+  >,
   roundingModeName,
   roundingModeMap,
 )
 export const coerceDirection = bindArgs(
-  coerceChoiceOption<DirectionOptions>,
+  coerceChoiceOption<Temporal.TransitionOptions>,
   directionName,
   directionMap,
 )

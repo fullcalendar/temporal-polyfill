@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarIsoFieldsFromParts,
   computeCalendarMonthCodeParts,
@@ -27,7 +28,6 @@ import {
   isoEpochFirstLeapYear,
 } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
-import type { OverflowOptions } from './optionsInput'
 import { Overflow } from './optionsModel'
 import {
   createDateSlots,
@@ -62,7 +62,7 @@ export function createPlainDateTimeFromRefinedFields(
 export function createPlainDateFromFields(
   calendar: CalendarSlot,
   fields: Partial<DateFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const prepared = prepareDateFields(calendar, fields)
 
@@ -170,7 +170,7 @@ function prepareDateFields(
 export function createPlainYearMonthFromFields(
   calendar: CalendarSlot,
   fields: Partial<YearMonthFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
@@ -207,7 +207,7 @@ export function createPlainYearMonthFromFields(
 export function createPlainMonthDayFromFields(
   calendar: CalendarSlot,
   fields: Partial<DateFields>, // guaranteed `day`
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const isIso = calendar === isoCalendar
   const eraOrigins = getCalendarEraOrigins(calendar)

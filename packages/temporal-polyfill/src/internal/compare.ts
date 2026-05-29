@@ -8,7 +8,6 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import type { RelativeToOptions } from './optionsInput'
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
@@ -17,6 +16,7 @@ import {
   moveMarkerToEpochNano,
 } from './relativeMath'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
+import type { RelativeToOptions } from './temporalSpecHelpers'
 import { timeFieldsToNano } from './timeFieldMath'
 import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'

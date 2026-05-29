@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -22,16 +23,9 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatDurationIso } from '../../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
-import type {
-  DurationRoundingOptions,
-  DurationTotalOptions,
-  RelativeToOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
 import { RelativeToSlots } from '../../internal/relativeMath'
 import { createDateSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'
-import { UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveCoreCalendar } from './calendarResolver'
@@ -89,9 +83,7 @@ export class Duration implements DurationFields {
   static compare(
     durationArg0: DurationArg,
     durationArg1: DurationArg,
-    options:
-      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
-      | undefined = undefined,
+    options: Temporal.DurationRelativeToOptions | undefined = undefined,
   ): NumberSign {
     return compareDurations(
       refinePublicRelativeTo,
@@ -163,9 +155,7 @@ export class Duration implements DurationFields {
 
   add(
     otherArg: DurationArg,
-    options:
-      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
-      | undefined = undefined,
+    options: Temporal.DurationRelativeToOptions | undefined = undefined,
   ): Duration {
     return createDuration(
       addDurations(
@@ -180,9 +170,7 @@ export class Duration implements DurationFields {
 
   subtract(
     otherArg: DurationArg,
-    options:
-      | RelativeToOptions<PlainDateArg | ZonedDateTimeArg>
-      | undefined = undefined,
+    options: Temporal.DurationRelativeToOptions | undefined = undefined,
   ): Duration {
     return createDuration(
       addDurations(
@@ -195,21 +183,29 @@ export class Duration implements DurationFields {
     )
   }
 
+  round(roundTo: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): Duration
+  round(roundTo: Temporal.DurationRoundingOptions): Duration
   round(
-    options: DurationRoundingOptions<PlainDateArg | ZonedDateTimeArg>,
+    roundTo:
+      | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+      | Temporal.DurationRoundingOptions,
   ): Duration {
     return createDuration(
-      roundDuration(refinePublicRelativeTo, getDurationSlots(this), options),
+      roundDuration(refinePublicRelativeTo, getDurationSlots(this), roundTo),
     )
   }
 
+  total(totalOf: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): number
+  total(totalOf: Temporal.DurationTotalOptions): number
   total(
-    options: UnitName | DurationTotalOptions<PlainDateArg | ZonedDateTimeArg>,
+    totalOf:
+      | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+      | Temporal.DurationTotalOptions,
   ): number {
     return totalDuration(
       refinePublicRelativeTo,
       getDurationSlots(this),
-      options,
+      totalOf,
     )
   }
 
@@ -222,7 +218,9 @@ export class Duration implements DurationFields {
       : formatDurationIso(getDurationSlots(this), options)
   }
 
-  toString(options: TimeDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.DurationToStringOptions | undefined = undefined,
+  ): string {
     return formatDurationIso(getDurationSlots(this), options)
   }
 

@@ -1,4 +1,4 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 
 declare const __FORCE_SHIM_IMPLEMENTATION__: boolean | undefined
 

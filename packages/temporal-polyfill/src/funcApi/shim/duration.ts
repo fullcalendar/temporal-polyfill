@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
@@ -15,15 +16,13 @@ import {
 } from '../../internal/isoFormat'
 import { parseDuration } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
+import { RelativeToSlots } from '../../internal/relativeMath'
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
-import { RelativeToSlots } from '../../internal/relativeMath'
+} from '../../internal/temporalSpecHelpers'
 import { totalDuration } from '../../internal/total'
-import { UnitName } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -262,7 +261,9 @@ export function round(
 
 export function total(
   duration: DurationShimRecord,
-  options: UnitName | DurationTotalOptions<RelativeToShimRecord>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | DurationTotalOptions<RelativeToShimRecord>,
 ): number {
   return totalDuration(
     refineRelativeTo,
@@ -293,7 +294,7 @@ export function toLocaleString(
 
 export function toString(
   duration: DurationShimRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.DurationToStringOptions,
 ): string {
   return formatDurationIso(getDurationShimRecordSlots(duration), options)
 }

@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { requirePropDefined } from './cast'
 import * as errorMessages from './errorMessages'
 import {
@@ -14,14 +15,6 @@ import {
   smallestUnitStr,
   totalUnitStr,
 } from './optionsConfig'
-import type {
-  DiffOptions,
-  DurationRoundingOptions,
-  DurationTotalOptions,
-  RoundingMathOptions,
-  RoundingModeName,
-  RoundingOptions,
-} from './optionsInput'
 import { RoundingMode } from './optionsModel'
 import type {
   DiffTuple,
@@ -35,12 +28,13 @@ import {
   validateRoundingInc,
   validateUnitRange,
 } from './optionsValidate'
-import {
-  type DayTimeUnit,
-  type DayTimeUnitName,
-  Unit,
-  type UnitName,
-} from './units'
+import type {
+  DurationRoundingOptions,
+  DurationTotalOptions,
+  RoundingMathOptions,
+  RoundingModeName,
+} from './temporalSpecHelpers'
+import { type DayTimeUnit, Unit } from './units'
 
 /*
 High-level rounding, diff, and total option refinement.
@@ -58,9 +52,11 @@ function invertRoundingMode(roundingMode: RoundingMode): RoundingMode {
   return roundingMode
 }
 
-export function refineDiffOptions<UN extends UnitName>(
+export function refineDiffOptions<
+  UN extends Temporal.DateUnit | Temporal.TimeUnit,
+>(
   roundingModeInvert: boolean | undefined,
-  options: DiffOptions<UN> | undefined,
+  options: Temporal.RoundingOptionsWithLargestUnit<UN> | undefined,
   defaultLargestUnit: Unit,
   maxUnit = Unit.Year,
   minUnit = Unit.Nanosecond,
@@ -97,7 +93,9 @@ export function refineDiffOptions<UN extends UnitName>(
 }
 
 export function refineDurationRoundOptions<RA, R>(
-  options: DurationRoundingOptions<RA> | UnitName,
+  options:
+    | DurationRoundingOptions<RA>
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
   defaultLargestUnit: Unit,
   refineRelativeTo: (relativeTo?: RA) => R,
 ): DurationRoundingTuple<R> {
@@ -146,13 +144,13 @@ export function refineDurationRoundOptions<RA, R>(
   ]
 }
 
-export function refineRoundingOptions<UN extends DayTimeUnitName>(
-  options: RoundingOptions<UN> | UN,
+export function refineRoundingOptions<UN extends 'day' | Temporal.TimeUnit>(
+  options: Temporal.RoundingOptions<UN> | Temporal.PluralizeUnit<UN>,
   maxUnit: DayTimeUnit = Unit.Day,
   solarMode?: boolean,
 ): RoundingTuple {
   options = normalizeOptionsOrString<
-    RoundingOptions<UN>,
+    Temporal.RoundingOptions<UN>,
     typeof smallestUnitStr
   >(options, smallestUnitStr)
 
@@ -227,7 +225,9 @@ export function refineUnitRoundOptions(
 }
 
 export function refineTotalOptions<RA, R>(
-  options: UnitName | DurationTotalOptions<RA>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | DurationTotalOptions<RA>,
   refineRelativeTo: (relativeTo?: RA) => R | undefined,
 ): [Unit, R | undefined] {
   options = normalizeOptionsOrString<

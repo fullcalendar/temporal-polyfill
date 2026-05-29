@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -25,13 +26,12 @@ import {
   moveToDayOfMonthUnsafe,
 } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type { OverflowOptions } from '../../internal/optionsInput'
 import { clampEntity } from '../../internal/utils'
 
 export function reversedMove<S>(
-  f: (slots: S, units: number, options?: OverflowOptions) => S,
-): (slots: S, units: number, options?: OverflowOptions) => S {
-  return (slots, units, options?: OverflowOptions) => {
+  f: (slots: S, units: number, options?: Temporal.OverflowOptions) => S,
+): (slots: S, units: number, options?: Temporal.OverflowOptions) => S {
+  return (slots, units, options?: Temporal.OverflowOptions) => {
     return f(slots, -units, options)
   }
 }
@@ -46,7 +46,7 @@ export function reversedMove<S>(
 export function moveByYears(
   isoDate: CalendarDateFields & { calendar: CalendarSlot },
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
@@ -64,7 +64,7 @@ export function moveByYears(
 export function moveByMonths(
   isoDate: CalendarDateFields & { calendar: CalendarSlot },
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
@@ -99,7 +99,7 @@ export function moveByDaysStrict(
 export function moveToDayOfYear(
   isoDate: CalendarDateFields & { calendar: CalendarSlot },
   dayOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
@@ -122,7 +122,7 @@ export function moveToDayOfYear(
 export function moveToDayOfMonth(
   isoDate: CalendarDateFields & { calendar: CalendarSlot },
   day: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const { calendar } = isoDate
   const overflow = refineOverflowOptions(options)
@@ -148,7 +148,7 @@ export function moveToDayOfMonth(
 export function moveToDayOfWeek(
   isoDate: CalendarDateFields,
   dayOfWeek: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const normDayOfWeek = clampEntity(
@@ -164,7 +164,7 @@ export function moveToDayOfWeek(
 export function moveToWeekOfYear(
   isoDate: CalendarDateFields & { calendar: CalendarSlot },
   weekOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const overflow = refineOverflowOptions(options)
   const weekFields =

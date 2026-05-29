@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { type CalendarSlot, isoCalendar } from './calendarSlot'
@@ -26,7 +27,6 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { mergeCalendarFields } from './merge'
 import { refineEpochDisambigOptions } from './optionsFieldRefine'
-import type { EpochDisambigOptions, OverflowOptions } from './optionsInput'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
@@ -104,7 +104,7 @@ export function zonedDateTimeToPlainTime(
 export function plainDateTimeToZonedDateTime(
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
   timeZone: TimeZone,
-  options?: EpochDisambigOptions,
+  options?: Temporal.DisambiguationOptions,
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const epochNano = dateToEpochNano(timeZone, plainDateTimeSlots, options)
   return createZonedEpochNanoSlots(
@@ -117,7 +117,7 @@ export function plainDateTimeToZonedDateTime(
 function dateToEpochNano(
   timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
-  options?: EpochDisambigOptions,
+  options?: Temporal.DisambiguationOptions,
 ): bigint | undefined {
   const epochDisambig = refineEpochDisambigOptions(options)
   return getSingleInstantFor(timeZone, isoDateTime, epochDisambig)
@@ -232,7 +232,7 @@ export function convertToPlainMonthDay(
 export function convertToPlainYearMonth(
   calendar: CalendarSlot,
   input: { year: number; monthCode: string },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarSlot } {
   const validFieldNames = getCalendarFieldNames(
     calendar,

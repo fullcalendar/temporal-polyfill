@@ -40,7 +40,7 @@ export type DurationTimeFieldName =
   | 'milliseconds'
   | 'microseconds'
   | 'nanoseconds'
-export type DurationDayTimeFieldName = 'day' | DurationTimeFieldName
+export type DurationDayTimeFieldName = 'days' | DurationTimeFieldName
 export type DurationFieldName = DurationDateFieldName | DurationTimeFieldName
 
 export const durationFieldNamesAsc = unitNamesAsc.map(

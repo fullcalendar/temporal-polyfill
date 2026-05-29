@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarMonthCode,
@@ -19,10 +20,6 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
-import type {
-  CalendarDisplayOptions,
-  OverflowOptions,
-} from '../../internal/optionsInput'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -138,7 +135,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<MonthDayFields> & { calendar?: CalendarShimRecord },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainMonthDayShimRecord {
   const inputCalendar = fields.calendar
   const calendarSlot = refineCalendarShimArg(inputCalendar)
@@ -163,7 +160,7 @@ export function fromString(
 export function withFields(
   record: PlainMonthDayShimRecord,
   mod: Partial<MonthDayFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainMonthDayShimRecord {
   const slots = getPlainMonthDayShimRecordSlots(record)
   const resSlots = mergePlainMonthDayFields(
@@ -221,7 +218,7 @@ export function toLocaleString(
 
 export function toString(
   record: PlainMonthDayShimRecord,
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return formatPlainMonthDayIso(
     getPlainMonthDayShimRecordSlots(record),

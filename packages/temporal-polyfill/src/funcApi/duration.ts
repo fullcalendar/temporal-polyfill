@@ -1,12 +1,11 @@
+import type { Temporal } from 'temporal-spec'
 import { DurationFields } from '../internal/durationFields'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
-  TimeDisplayOptions,
-} from '../internal/optionsInput'
-import { UnitName } from '../internal/units'
+} from '../internal/temporalSpecHelpers'
 import { NumberSign } from '../internal/utils'
 import { NativeTemporal } from '../nativeSwitch'
 import { RelativeToRecord } from './commonTypes'
@@ -92,7 +91,9 @@ export const round: (
 
 export const total: (
   duration: DurationRecord,
-  options: UnitName | DurationTotalOptions<RelativeTo>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | DurationTotalOptions<RelativeTo>,
 ) => number = NativeTemporal ? Native.total : Shim.total
 
 export const compare: (
@@ -109,7 +110,7 @@ export const toLocaleString: (
 
 export const toString: (
   duration: DurationRecord,
-  options?: TimeDisplayOptions,
+  options?: Temporal.DurationToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (duration: DurationRecord) => string =

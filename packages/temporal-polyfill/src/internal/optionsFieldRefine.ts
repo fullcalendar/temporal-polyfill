@@ -1,14 +1,10 @@
+import type { Temporal } from 'temporal-spec'
 import { requireObjectLike } from './cast'
 import {
   coerceEpochDisambig,
   coerceOffsetDisambig,
   coerceOverflow,
 } from './optionsCoerce'
-import type {
-  EpochDisambigOptions,
-  OverflowOptions,
-  ZonedFieldOptions,
-} from './optionsInput'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import type { ZonedFieldTuple } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
@@ -23,7 +19,7 @@ depend on it.
 */
 
 export function refineOverflowOptions(
-  options: OverflowOptions | undefined,
+  options: Temporal.OverflowOptions | undefined,
 ): Overflow {
   return options === undefined
     ? Overflow.Constrain
@@ -31,7 +27,7 @@ export function refineOverflowOptions(
 }
 
 export function refineZonedFieldOptions(
-  options: ZonedFieldOptions | undefined,
+  options: Temporal.ZonedDateTimeFromOptions | undefined,
   defaultOffsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
 ): ZonedFieldTuple {
   options = normalizeOptions(options)
@@ -45,7 +41,7 @@ export function refineZonedFieldOptions(
 }
 
 export function refineEpochDisambigOptions(
-  options: EpochDisambigOptions | undefined,
+  options: Temporal.DisambiguationOptions | undefined,
 ): EpochDisambig {
   return coerceEpochDisambig(normalizeOptions(options))
 }

@@ -11,7 +11,6 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import type { DurationTotalOptions } from './optionsInput'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,
@@ -21,13 +20,16 @@ import {
   isUniformUnit,
   moveMarkerToEpochNano,
 } from './relativeMath'
-import { DayTimeUnit, Unit, UnitName, unitNanoMap } from './units'
+import type { DurationTotalOptions } from './temporalSpecHelpers'
+import { DayTimeUnit, Unit, unitNanoMap } from './units'
 import { NumberSign, compareBigInts, compareToHalfFraction } from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
   slots: DurationFields & { sign: NumberSign },
-  options: UnitName | DurationTotalOptions<RA>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | DurationTotalOptions<RA>,
 ): number {
   const maxDurationUnit = getMaxDurationUnit(slots)
   const [totalUnit, relativeToSlots] = refineTotalOptions(

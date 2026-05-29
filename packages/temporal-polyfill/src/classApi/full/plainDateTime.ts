@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -43,13 +44,6 @@ import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type {
-  DateTimeDisplayOptions,
-  DiffOptions,
-  EpochDisambigOptions,
-  OverflowOptions,
-  RoundingOptions,
-} from '../../internal/optionsInput'
 import { roundPlainDateTime } from '../../internal/round'
 import {
   createDateSlots,
@@ -58,7 +52,6 @@ import {
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../../internal/timeZone'
-import { DayTimeUnitName, UnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainDateTimeFormat } from '../intlFormatConfig'
 import {
@@ -131,7 +124,7 @@ export class PlainDateTime implements DateTimeFields {
 
   static from(
     arg: PlainDateTimeArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDateTime {
     return createPlainDateTime(toPlainDateTimeSlots(arg, options))
   }
@@ -246,7 +239,7 @@ export class PlainDateTime implements DateTimeFields {
 
   with(
     mod: Partial<DateTimeFields>,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDateTime {
     return createPlainDateTime(
       mergePlainDateTimeFields(
@@ -279,7 +272,7 @@ export class PlainDateTime implements DateTimeFields {
 
   add(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDateTime {
     return createPlainDateTime(
       movePlainDateTime(
@@ -293,7 +286,7 @@ export class PlainDateTime implements DateTimeFields {
 
   subtract(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainDateTime {
     return createPlainDateTime(
       movePlainDateTime(
@@ -307,7 +300,11 @@ export class PlainDateTime implements DateTimeFields {
 
   until(
     otherArg: PlainDateTimeArg,
-    options: DiffOptions<UnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<
+          Temporal.DateUnit | Temporal.TimeUnit
+        >
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainDateTimeSlots(this)
     const other = toPlainDateTimeSlots(otherArg)
@@ -319,7 +316,11 @@ export class PlainDateTime implements DateTimeFields {
 
   since(
     otherArg: PlainDateTimeArg,
-    options: DiffOptions<UnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<
+          Temporal.DateUnit | Temporal.TimeUnit
+        >
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainDateTimeSlots(this)
     const other = toPlainDateTimeSlots(otherArg)
@@ -330,7 +331,9 @@ export class PlainDateTime implements DateTimeFields {
   }
 
   round(
-    options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+    options:
+      | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+      | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
   ): PlainDateTime {
     return createPlainDateTime(
       roundPlainDateTime(getPlainDateTimeSlots(this), options),
@@ -346,7 +349,7 @@ export class PlainDateTime implements DateTimeFields {
 
   toZonedDateTime(
     timeZoneArg: TimeZoneArg,
-    options: EpochDisambigOptions | undefined = undefined,
+    options: Temporal.DisambiguationOptions | undefined = undefined,
   ): ZonedDateTime {
     return createZonedDateTime(
       plainDateTimeToZonedDateTime(
@@ -378,7 +381,9 @@ export class PlainDateTime implements DateTimeFields {
     return format.format(epochMilli)
   }
 
-  toString(options: DateTimeDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.PlainDateTimeToStringOptions | undefined = undefined,
+  ): string {
     return formatPlainDateTimeIso(getPlainDateTimeSlots(this), options)
   }
 
@@ -416,7 +421,7 @@ export function getPlainDateTimeSlotsIfPresent(
 
 export function toPlainDateTimeSlots(
   arg: PlainDateTimeArg,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainDateTimeSlotsIfPresent(arg)

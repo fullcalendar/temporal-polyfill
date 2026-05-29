@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -33,12 +34,6 @@ import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type {
-  CalendarDisplayOptions,
-  DiffOptions,
-  OverflowOptions,
-} from '../../internal/optionsInput'
-import { YearMonthUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
@@ -79,7 +74,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   static from(
     arg: PlainYearMonthArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(toPlainYearMonthSlots(arg, options))
   }
@@ -142,7 +137,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   with(
     mod: Partial<YearMonthFields>,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(
       mergePlainYearMonthFields(
@@ -155,7 +150,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   add(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(
       movePlainYearMonth(
@@ -169,7 +164,7 @@ export class PlainYearMonth implements YearMonthFields {
 
   subtract(
     durationArg: DurationArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainYearMonth {
     return createPlainYearMonth(
       movePlainYearMonth(
@@ -183,7 +178,9 @@ export class PlainYearMonth implements YearMonthFields {
 
   until(
     otherArg: PlainYearMonthArg,
-    options: DiffOptions<YearMonthUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainYearMonthSlots(this)
     const other = toPlainYearMonthSlots(otherArg)
@@ -195,7 +192,9 @@ export class PlainYearMonth implements YearMonthFields {
 
   since(
     otherArg: PlainYearMonthArg,
-    options: DiffOptions<YearMonthUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>
+      | undefined = undefined,
   ): Duration {
     const slots = getPlainYearMonthSlots(this)
     const other = toPlainYearMonthSlots(otherArg)
@@ -231,7 +230,9 @@ export class PlainYearMonth implements YearMonthFields {
     return format.format(epochMilli)
   }
 
-  toString(options: CalendarDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.PlainDateToStringOptions | undefined = undefined,
+  ): string {
     return formatPlainYearMonthIso(getPlainYearMonthSlots(this), options)
   }
 
@@ -271,7 +272,7 @@ export function getPlainYearMonthSlotsIfPresent(
 
 export function toPlainYearMonthSlots(
   arg: PlainYearMonthArg,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainYearMonthSlotsIfPresent(arg)

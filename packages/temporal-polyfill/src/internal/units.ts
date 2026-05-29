@@ -1,11 +1,3 @@
-import {
-  DurationDateFieldName,
-  DurationDayTimeFieldName,
-  DurationFieldName,
-  DurationTimeFieldName,
-  DurationYearMonthFieldName,
-} from './durationFields'
-
 export const enum Unit {
   Nanosecond = 0,
   Microsecond = 1,
@@ -28,31 +20,6 @@ export type TimeUnit =
   | Unit.Hour
 
 export type DayTimeUnit = Unit.Day | TimeUnit
-
-// Names
-// -----------------------------------------------------------------------------
-
-// singular
-export type StrictYearMonthUnitName = 'year' | 'month'
-export type StrictDateUnitName = StrictYearMonthUnitName | 'week' | 'day'
-export type StrictTimeUnitName =
-  | 'hour'
-  | 'minute'
-  | 'second'
-  | 'millisecond'
-  | 'microsecond'
-  | 'nanosecond'
-export type StrictDayTimeUnitName = 'day' | StrictTimeUnitName
-export type StrictUnitName = StrictDateUnitName | StrictTimeUnitName
-
-// singular OR plural
-export type YearMonthUnitName =
-  | StrictYearMonthUnitName
-  | DurationYearMonthFieldName
-export type DateUnitName = StrictDateUnitName | DurationDateFieldName
-export type TimeUnitName = StrictTimeUnitName | DurationTimeFieldName
-export type DayTimeUnitName = StrictDayTimeUnitName | DurationDayTimeFieldName
-export type UnitName = StrictUnitName | DurationFieldName
 
 export const unitNameMap = {
   nanosecond: Unit.Nanosecond,

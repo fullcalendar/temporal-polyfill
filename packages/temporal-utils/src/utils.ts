@@ -6,6 +6,14 @@ export type TimeObj = Temporal.PlainTime | DateTimeObj
 export type DateObj = Temporal.PlainDate | DateTimeObj
 export type YearMonthObj = Temporal.PlainYearMonth | DateObj
 
+type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
+type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
+
+export type RoundingMathOptions = Pick<
+  RoundingOptionBag,
+  'roundingIncrement' | 'roundingMode'
+>
+
 type Overflow = 'constrain' | 'reject'
 
 export interface OverflowOptions {

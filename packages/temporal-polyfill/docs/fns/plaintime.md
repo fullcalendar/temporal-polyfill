@@ -691,14 +691,14 @@ const order = Temporal.PlainTime.compare(time, otherTime)
 
 ## Rounding
 
-`RoundToOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` is object-only and must not include `smallestUnit`.
 
 ### `roundToHour`
 
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -718,7 +718,7 @@ const nextTime = time.round({ ...options, smallestUnit: 'hour' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -738,7 +738,7 @@ const nextTime = time.round({ ...options, smallestUnit: 'minute' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -758,7 +758,7 @@ const nextTime = time.round({ ...options, smallestUnit: 'second' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -778,7 +778,7 @@ const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundToOptions) => Record
+(record: Record, options?: RoundingMathOptions) => Record
 ```
 
 Fn API:

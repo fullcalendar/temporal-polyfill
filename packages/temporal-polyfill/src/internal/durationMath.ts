@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import { bigNanoInSec, bigNanoInUtcDay } from './bigNano'
 import {
   DurationFields,
@@ -8,7 +9,6 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
-import type { DurationRoundingOptions, RelativeToOptions } from './optionsInput'
 import { Overflow } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
@@ -21,6 +21,10 @@ import {
 } from './relativeMath'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { createDurationSlots } from './slots'
+import type {
+  DurationRoundingOptions,
+  RelativeToOptions,
+} from './temporalSpecHelpers'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
@@ -111,7 +115,9 @@ function addDayTimeDurations(
 export function roundDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
   slots: DurationFields & { sign: NumberSign }, // could get returned :(
-  options: DurationRoundingOptions<RA>,
+  options:
+    | DurationRoundingOptions<RA>
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
 ): DurationFields & { sign: NumberSign } {
   const durationLargestUnit = getMaxDurationUnit(slots)
   const [

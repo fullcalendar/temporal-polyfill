@@ -1,24 +1,16 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
-  DiffOptions,
-  DirectionName,
-  DirectionOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
-  ZonedDateTimeDisplayOptions,
-  ZonedFieldOptions,
-} from '../../internal/optionsInput'
-import { DayTimeUnitName, UnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -186,7 +178,7 @@ export function create(
 
 export function fromFields(
   fields: ZonedDateTimeNativeFields,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeNativeRecord {
   const calendar =
     fields.calendar === undefined
@@ -202,7 +194,7 @@ export function fromFields(
 export function fromString(
   s: string,
   getCalendar: CalendarNativeResolver,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = NativeTemporal!.ZonedDateTime.from(s, options)
   runCalendarNativeResolver(resNative.calendarId, getCalendar)
@@ -212,7 +204,7 @@ export function fromString(
 export function withFields(
   record: ZonedDateTimeNativeRecord,
   mod: Partial<DateTimeFields>,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
   const resNative = native.with(mod, options)
@@ -305,9 +297,9 @@ export function hoursInDay(record: ZonedDateTimeNativeRecord): number {
 
 export function toString(
   record: ZonedDateTimeNativeRecord,
-  options?: ZonedDateTimeDisplayOptions,
+  options?: Temporal.ZonedDateTimeToStringOptions,
 ): string {
-  return getZonedDateTimeNative(record).toString(options as any) // !!!
+  return getZonedDateTimeNative(record).toString(options)
 }
 
 export function toSimpleString(record: ZonedDateTimeNativeRecord): string {
@@ -317,7 +309,7 @@ export function toSimpleString(record: ZonedDateTimeNativeRecord): string {
 export function add(
   record: ZonedDateTimeNativeRecord,
   duration: DurationNativeRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
   const durationNative = getDurationNative(duration)
@@ -328,7 +320,7 @@ export function add(
 export function subtract(
   record: ZonedDateTimeNativeRecord,
   duration: DurationNativeRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
   const durationNative = getDurationNative(duration)
@@ -340,7 +332,9 @@ export function subtract(
 export function diff(
   record: ZonedDateTimeNativeRecord,
   otherRecord: ZonedDateTimeNativeRecord,
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ): DurationNativeRecord {
   const native = getZonedDateTimeNative(record)
   const otherNative = getZonedDateTimeNative(otherRecord)
@@ -350,10 +344,10 @@ export function diff(
 
 function round(
   record: ZonedDateTimeNativeRecord,
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+  options: Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
-  const resNative = native.round(options as any) // !!!
+  const resNative = native.round(options)
   return createZonedDateTimeNativeRecord(resNative)
 }
 
@@ -367,10 +361,12 @@ export function startOfDay(
 
 export function getTimeZoneTransition(
   record: ZonedDateTimeNativeRecord,
-  options: DirectionOptions | DirectionName,
+  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ): ZonedDateTimeNativeRecord | null {
   const native = getZonedDateTimeNative(record)
-  const resNative = native.getTimeZoneTransition(options as any) // !!!
+  const resNative = native.getTimeZoneTransition(
+    normalizeTransitionOptions(options),
+  )
   return resNative ? createZonedDateTimeNativeRecord(resNative) : null
 }
 
@@ -444,7 +440,7 @@ export function toLocaleString(
 export function withDayOfYear(
   record: ZonedDateTimeNativeRecord,
   dayOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.withDayOfYear(
@@ -458,7 +454,7 @@ export function withDayOfYear(
 export function withDayOfMonth(
   record: ZonedDateTimeNativeRecord,
   dayOfMonth: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).with(
     { day: dayOfMonth },
@@ -470,7 +466,7 @@ export function withDayOfMonth(
 export function withDayOfWeek(
   record: ZonedDateTimeNativeRecord,
   dayOfWeek: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.withDayOfWeek(
@@ -484,7 +480,7 @@ export function withDayOfWeek(
 export function withWeekOfYear(
   record: ZonedDateTimeNativeRecord,
   weekOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.withWeekOfYear(
@@ -501,7 +497,7 @@ export function withWeekOfYear(
 export function addYears(
   record: ZonedDateTimeNativeRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).add({ years }, options)
   return createZonedDateTimeNativeRecord(resNative)
@@ -509,7 +505,7 @@ export function addYears(
 export function addMonths(
   record: ZonedDateTimeNativeRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).add({ months }, options)
   return createZonedDateTimeNativeRecord(resNative)
@@ -573,7 +569,7 @@ export function addNanoseconds(
 export function subtractYears(
   record: ZonedDateTimeNativeRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).subtract({ years }, options)
   return createZonedDateTimeNativeRecord(resNative)
@@ -581,7 +577,7 @@ export function subtractYears(
 export function subtractMonths(
   record: ZonedDateTimeNativeRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = getZonedDateTimeNative(record).subtract({ months }, options)
   return createZonedDateTimeNativeRecord(resNative)
@@ -648,35 +644,47 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToYear(getZonedDateTimeNative(record), options as any), // !!!
+    TemporalUtils.roundToYear(getZonedDateTimeNative(record), options),
   )
 }
 export function roundToMonth(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options as any), // !!!
+    TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options),
   )
 }
 export function roundToWeek(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options as any), // !!!
+    TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options),
   )
 }
 
 function roundToDayTimeUnit(
-  smallestUnit: DayTimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+function normalizeTransitionOptions(
+  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
+): Temporal.TransitionOptions {
+  if (typeof options !== 'string') {
+    return options
+  }
+
+  const res: Temporal.TransitionOptions = Object.create(null)
+  res.direction = options
+  return res
 }
 
 export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')

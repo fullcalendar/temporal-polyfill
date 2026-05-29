@@ -1,22 +1,16 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
-  DateTimeDisplayOptions,
-  DiffOptions,
-  EpochDisambigOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-  RoundingOptions,
-} from '../../internal/optionsInput'
-import { DayTimeUnitName, UnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import {
   getPlainDateTimeSlots,
   setPlainDateTimeSlots,
@@ -204,7 +198,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<DateTimeFields> & { calendar?: CalendarNativeRecord },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const calendar =
     fields.calendar === undefined
@@ -239,7 +233,7 @@ export function withCalendar(
 export function withFields(
   record: PlainDateTimeNativeRecord,
   mod: Partial<DateTimeFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
   const resNative = native.with(mod, options)
@@ -302,7 +296,7 @@ export function inLeapYear(record: PlainDateTimeNativeRecord): boolean {
 export function add(
   record: PlainDateTimeNativeRecord,
   duration: DurationNativeRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
   const durationNative = getDurationNative(duration)
@@ -313,7 +307,7 @@ export function add(
 export function subtract(
   record: PlainDateTimeNativeRecord,
   duration: DurationNativeRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
   const durationNative = getDurationNative(duration)
@@ -325,7 +319,9 @@ export function subtract(
 export function diff(
   record: PlainDateTimeNativeRecord,
   otherRecord: PlainDateTimeNativeRecord,
-  options?: DiffOptions<UnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<
+    Temporal.DateUnit | Temporal.TimeUnit
+  >,
 ): DurationNativeRecord {
   const native = getPlainDateTimeNative(record)
   const otherNative = getPlainDateTimeNative(otherRecord)
@@ -335,10 +331,10 @@ export function diff(
 
 function round(
   record: PlainDateTimeNativeRecord,
-  options: DayTimeUnitName | RoundingOptions<DayTimeUnitName>,
+  options: Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): PlainDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
-  const resNative = native.round(options as any) // !!!
+  const resNative = native.round(options)
   return createPlainDateTimeNativeRecord(resNative)
 }
 
@@ -366,7 +362,7 @@ export function compare(
 export function toZonedDateTime(
   record: PlainDateTimeNativeRecord,
   timeZoneId: string,
-  options?: EpochDisambigOptions,
+  options?: Temporal.DisambiguationOptions,
 ): ZonedDateTimeNativeRecord {
   const native = getPlainDateTimeNative(record)
   const resNative = native.toZonedDateTime(timeZoneId, options)
@@ -404,9 +400,9 @@ export function toLocaleString(
 
 export function toString(
   record: PlainDateTimeNativeRecord,
-  options?: DateTimeDisplayOptions,
+  options?: Temporal.PlainDateTimeToStringOptions,
 ): string {
-  return getPlainDateTimeNative(record).toString(options as any) // !!!
+  return getPlainDateTimeNative(record).toString(options)
 }
 
 export function toSimpleString(record: PlainDateTimeNativeRecord): string {
@@ -419,7 +415,7 @@ export function toSimpleString(record: PlainDateTimeNativeRecord): string {
 export function withDayOfYear(
   record: PlainDateTimeNativeRecord,
   dayOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.withDayOfYear(
@@ -433,7 +429,7 @@ export function withDayOfYear(
 export function withDayOfMonth(
   record: PlainDateTimeNativeRecord,
   dayOfMonth: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).with(
     { day: dayOfMonth },
@@ -445,7 +441,7 @@ export function withDayOfMonth(
 export function withDayOfWeek(
   record: PlainDateTimeNativeRecord,
   dayOfWeek: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.withDayOfWeek(
@@ -459,7 +455,7 @@ export function withDayOfWeek(
 export function withWeekOfYear(
   record: PlainDateTimeNativeRecord,
   weekOfYear: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
     TemporalUtils.withWeekOfYear(
@@ -476,7 +472,7 @@ export function withWeekOfYear(
 export function addYears(
   record: PlainDateTimeNativeRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).add({ years }, options)
   return createPlainDateTimeNativeRecord(resNative)
@@ -485,7 +481,7 @@ export function addYears(
 export function addMonths(
   record: PlainDateTimeNativeRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).add({ months }, options)
   return createPlainDateTimeNativeRecord(resNative)
@@ -558,7 +554,7 @@ export function addNanoseconds(
 export function subtractYears(
   record: PlainDateTimeNativeRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).subtract({ years }, options)
   return createPlainDateTimeNativeRecord(resNative)
@@ -567,7 +563,7 @@ export function subtractYears(
 export function subtractMonths(
   record: PlainDateTimeNativeRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainDateTimeNativeRecord {
   const resNative = getPlainDateTimeNative(record).subtract({ months }, options)
   return createPlainDateTimeNativeRecord(resNative)
@@ -642,35 +638,35 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: PlainDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToYear(getPlainDateTimeNative(record), options as any),
+    TemporalUtils.roundToYear(getPlainDateTimeNative(record), options),
   )
 }
 
 export function roundToMonth(
   record: PlainDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToMonth(getPlainDateTimeNative(record), options as any),
+    TemporalUtils.roundToMonth(getPlainDateTimeNative(record), options),
   )
 }
 
 export function roundToWeek(
   record: PlainDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToWeek(getPlainDateTimeNative(record), options as any),
+    TemporalUtils.roundToWeek(getPlainDateTimeNative(record), options),
   )
 }
 
 function roundToDayTimeUnit(
-  smallestUnit: DayTimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: PlainDateTimeNativeRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

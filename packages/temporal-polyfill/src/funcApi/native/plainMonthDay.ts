@@ -1,10 +1,6 @@
-import { Temporal } from 'temporal-spec'
+import type { Temporal } from 'temporal-spec'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import type {
-  CalendarDisplayOptions,
-  OverflowOptions,
-} from '../../internal/optionsInput'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -117,7 +113,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<MonthDayFields> & { calendar?: CalendarNativeRecord },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainMonthDayNativeRecord {
   const calendar =
     fields.calendar === undefined
@@ -142,7 +138,7 @@ export function fromString(
 export function withFields(
   record: PlainMonthDayNativeRecord,
   mod: Partial<MonthDayFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainMonthDayNativeRecord {
   const native = getPlainMonthDayNative(record)
   const resNative = native.with(mod, options)
@@ -184,7 +180,7 @@ export function toLocaleString(
 
 export function toString(
   record: PlainMonthDayNativeRecord,
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return getPlainMonthDayNative(record).toString(options)
 }

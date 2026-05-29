@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -16,15 +17,8 @@ import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import type {
-  DiffOptions,
-  OverflowOptions,
-  RoundingOptions,
-  TimeDisplayOptions,
-} from '../../internal/optionsInput'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
-import { TimeUnitName } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { prepPlainTimeFormat } from '../intlFormatConfig'
 import {
@@ -65,7 +59,7 @@ export class PlainTime implements TimeFields {
 
   static from(
     arg: PlainTimeArg,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainTime {
     return createPlainTime(toPlainTimeSlots(arg, options))
   }
@@ -100,7 +94,7 @@ export class PlainTime implements TimeFields {
 
   with(
     mod: Partial<TimeFields>,
-    options: OverflowOptions | undefined = undefined,
+    options: Temporal.OverflowOptions | undefined = undefined,
   ): PlainTime {
     return createPlainTime(
       mergePlainTimeFields(this, rejectInvalidBag(mod), options),
@@ -129,7 +123,9 @@ export class PlainTime implements TimeFields {
 
   until(
     otherArg: PlainTimeArg,
-    options: DiffOptions<TimeUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       diffPlainTimes(
@@ -143,7 +139,9 @@ export class PlainTime implements TimeFields {
 
   since(
     otherArg: PlainTimeArg,
-    options: DiffOptions<TimeUnitName> | undefined = undefined,
+    options:
+      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+      | undefined = undefined,
   ): Duration {
     return createDuration(
       diffPlainTimes(
@@ -155,7 +153,11 @@ export class PlainTime implements TimeFields {
     )
   }
 
-  round(options: TimeUnitName | RoundingOptions<TimeUnitName>): PlainTime {
+  round(
+    options:
+      | Temporal.PluralizeUnit<Temporal.TimeUnit>
+      | Temporal.RoundingOptions<Temporal.TimeUnit>,
+  ): PlainTime {
     return createPlainTime(roundPlainTime(getPlainTimeSlots(this), options))
   }
 
@@ -175,7 +177,9 @@ export class PlainTime implements TimeFields {
     return format.format(epochMilli)
   }
 
-  toString(options: TimeDisplayOptions | undefined = undefined): string {
+  toString(
+    options: Temporal.PlainTimeToStringOptions | undefined = undefined,
+  ): string {
     return formatPlainTimeIso(getPlainTimeSlots(this), options)
   }
 
@@ -213,7 +217,7 @@ export function getPlainTimeSlotsIfPresent(
 
 export function toPlainTimeSlots(
   arg: PlainTimeArg,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): TimeFields {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainTimeSlotsIfPresent(arg)

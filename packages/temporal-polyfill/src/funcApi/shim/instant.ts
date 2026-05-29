@@ -26,13 +26,6 @@ import {
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
-import type {
-  DiffOptions,
-  InstantDisplayOptions,
-  RoundingMathOptions,
-  RoundingModeName,
-  RoundingOptions,
-} from '../../internal/optionsInput'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { roundBigNanoToInc, roundInstant } from '../../internal/round'
 import {
@@ -41,11 +34,15 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
+import type {
+  InstantStringTimeZoneDisplayOptions,
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
   TimeUnit,
-  TimeUnitName,
   Unit,
   nanoInHour,
   nanoInMicro,
@@ -56,7 +53,7 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, createRoundToOptions } from '../roundTo'
+import { createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormat } from './dateTimeFormat'
 import {
@@ -298,7 +295,7 @@ export function subtractNanoseconds(
 export function diff(
   record: InstantShimRecord,
   otherRecord: InstantShimRecord,
-  options?: DiffOptions<TimeUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
 ): DurationShimRecord {
   const slots = getInstantShimRecordSlots(record)
   const otherSlots = getInstantShimRecordSlots(otherRecord)
@@ -352,7 +349,9 @@ export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 function round(
   record: InstantShimRecord,
-  options: TimeUnitName | RoundingOptions<TimeUnitName>,
+  options:
+    | Temporal.PluralizeUnit<Temporal.TimeUnit>
+    | Temporal.RoundingOptions<Temporal.TimeUnit>,
 ): InstantShimRecord {
   const slots = getInstantShimRecordSlots(record)
   const resSlots = roundInstant(slots, options)
@@ -360,9 +359,9 @@ function round(
 }
 
 function roundToUnit(
-  smallestUnit: TimeUnitName,
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: InstantShimRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): InstantShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -431,7 +430,7 @@ export function toLocaleString(
 
 export function toString(
   record: InstantShimRecord,
-  options?: InstantDisplayOptions,
+  options?: InstantStringTimeZoneDisplayOptions,
 ): string {
   return formatInstantIso(
     refineTimeZoneId,

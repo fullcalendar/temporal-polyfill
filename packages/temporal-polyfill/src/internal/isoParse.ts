@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -30,7 +31,6 @@ import {
   parseOffsetNanoMaybe,
 } from './offsetParse'
 import { refineZonedFieldOptions } from './optionsFieldRefine'
-import type { ZonedFieldOptions } from './optionsInput'
 import { RelativeToSlots } from './relativeMath'
 import {
   EpochNanoFields,
@@ -143,7 +143,7 @@ export function parseRelativeToSlots(
 export function parseZonedDateTime(
   s: string,
   resolveCalendar: CalendarResolver,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const organized = parseDateTimeLike(requireString(s))
 
@@ -417,7 +417,7 @@ Unlike others, return slots
 function finalizeZonedDateTime(
   organized: ZonedDateTimeOrganized,
   resolveCalendar: CalendarResolver,
-  options?: ZonedFieldOptions,
+  options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
   const timeZone = queryTimeZone(timeZoneId)

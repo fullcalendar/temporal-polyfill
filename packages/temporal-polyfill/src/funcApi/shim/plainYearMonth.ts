@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonth,
@@ -32,19 +33,16 @@ import {
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
+import { createYearMonthSlots } from '../../internal/slots'
 import type {
-  CalendarDisplayOptions,
-  DiffOptions,
-  OverflowOptions,
   RoundingMathOptions,
   RoundingModeName,
-} from '../../internal/optionsInput'
-import { createYearMonthSlots } from '../../internal/slots'
-import { Unit, YearMonthUnitName } from '../../internal/units'
+} from '../../internal/temporalSpecHelpers'
+import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { RoundToOptions, refineRoundToOptions } from '../roundTo'
+import { refineRoundToOptions } from '../roundTo'
 import {
   getPlainYearMonthSlots,
   setPlainYearMonthSlots,
@@ -186,7 +184,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<YearMonthFields> & { calendar?: CalendarShimRecord },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const calendarSlot = refineCalendarShimArg(fields.calendar)
   const resSlots = refinePlainYearMonthObjectLike(
@@ -229,7 +227,7 @@ export function inLeapYear(record: PlainYearMonthShimRecord): boolean {
 export function withFields(
   record: PlainYearMonthShimRecord,
   mod: Partial<YearMonthFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const resSlots = mergePlainYearMonthFields(
@@ -243,7 +241,7 @@ export function withFields(
 export function add(
   record: PlainYearMonthShimRecord,
   durationRecord: DurationShimRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const durationSlots = getDurationShimRecordSlots(durationRecord)
@@ -254,7 +252,7 @@ export function add(
 export function addYears(
   record: PlainYearMonthShimRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const resSlots = movePlainYearMonth(
@@ -269,7 +267,7 @@ export function addYears(
 export function addMonths(
   record: PlainYearMonthShimRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const resSlots = movePlainYearMonth(
@@ -284,7 +282,7 @@ export function addMonths(
 export function subtract(
   record: PlainYearMonthShimRecord,
   durationRecord: DurationShimRecord,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const durationSlots = getDurationShimRecordSlots(durationRecord)
@@ -295,20 +293,20 @@ export function subtract(
 export const subtractYears: (
   record: PlainYearMonthShimRecord,
   years: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainYearMonthShimRecord = reversedMove(addYears)
 
 export const subtractMonths: (
   record: PlainYearMonthShimRecord,
   months: number,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainYearMonthShimRecord = reversedMove(addMonths)
 
 // this is equivalent to Temporal's `until`
 export function diff(
   record: PlainYearMonthShimRecord,
   otherRecord: PlainYearMonthShimRecord,
-  options?: DiffOptions<YearMonthUnitName>,
+  options?: Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>,
 ): DurationShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const otherSlots = getPlainYearMonthShimRecordSlots(otherRecord)
@@ -352,7 +350,7 @@ export function diffMonths(
 // non-ISO calendars aligned with the same semantics as PlainDate rounding.
 export function roundToYear(
   record: PlainYearMonthShimRecord,
-  options?: RoundToOptions,
+  options?: RoundingMathOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(Unit.Year, options)
@@ -446,7 +444,7 @@ export function toLocaleString(
 
 export function toString(
   record: PlainYearMonthShimRecord,
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ): string {
   return formatPlainYearMonthIso(
     getPlainYearMonthShimRecordSlots(record),

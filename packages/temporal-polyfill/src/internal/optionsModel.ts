@@ -1,4 +1,5 @@
-import { type SubsecDigits } from './optionsInput'
+import type { Temporal } from 'temporal-spec'
+import { type SubsecDigits } from './temporalSpecHelpers'
 import { Unit } from './units'
 
 /*
@@ -10,7 +11,7 @@ There are two internal shapes in this file:
 - `*Tuple` types are compact internal-only return values from the
   `refine*Options` helpers. User input should never be modeled as a tuple.
 
-Raw option-bag input shapes live in optionsInput.
+Raw option-bag input shapes live in temporalSpecHelpers.
 
 Keeping this model apart from normalization, coercion, validation, and
 call-site refinement avoids pulling implementation helpers into otherwise
@@ -115,4 +116,6 @@ export type ZonedDateTimeDisplayTuple = [
 
 export type DateTimeDisplayTuple = [CalendarDisplay, ...TimeDisplayTuple]
 
-export type InstantDisplayTuple = [string | undefined, ...TimeDisplayTuple]
+export type InstantDisplayTuple<
+  TZ extends Temporal.InstantToStringOptions['timeZone'],
+> = [TZ | undefined, ...TimeDisplayTuple]

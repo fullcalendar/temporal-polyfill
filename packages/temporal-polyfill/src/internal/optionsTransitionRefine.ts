@@ -1,7 +1,7 @@
+import type { Temporal } from 'temporal-spec'
 import * as errorMessages from './errorMessages'
 import { coerceDirection } from './optionsCoerce'
 import { directionName } from './optionsConfig'
-import type { DirectionName, DirectionOptions } from './optionsInput'
 import { Direction } from './optionsModel'
 import { normalizeOptionsOrString } from './optionsNormalize'
 
@@ -14,10 +14,10 @@ internal direction enum.
 */
 
 export function refineDirectionOptions(
-  options: DirectionOptions | DirectionName,
+  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ): Direction {
   const normalizedOptions = normalizeOptionsOrString<
-    DirectionOptions,
+    Temporal.TransitionOptions,
     typeof directionName
   >(options, directionName)
   const res = coerceDirection(normalizedOptions, 0)

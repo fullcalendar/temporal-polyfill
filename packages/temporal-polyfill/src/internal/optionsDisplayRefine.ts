@@ -1,3 +1,4 @@
+import type { Temporal } from 'temporal-spec'
 import {
   coerceCalendarDisplay,
   coerceFractionalSecondDigits,
@@ -7,14 +8,6 @@ import {
   coerceTimeZoneDisplay,
 } from './optionsCoerce'
 import { smallestUnitStr } from './optionsConfig'
-import type {
-  CalendarDisplayOptions,
-  DateTimeDisplayOptions,
-  InstantDisplayOptions,
-  SubsecDigits,
-  TimeDisplayOptions,
-  ZonedDateTimeDisplayOptions,
-} from './optionsInput'
 import { CalendarDisplay, RoundingMode } from './optionsModel'
 import type {
   DateTimeDisplayTuple,
@@ -24,7 +17,14 @@ import type {
 } from './optionsModel'
 import { normalizeOptions } from './optionsNormalize'
 import { validateUnitRange } from './optionsValidate'
+import type { SubsecDigits } from './temporalSpecHelpers'
 import { TimeUnit, Unit, unitNanoMap } from './units'
+
+type InstantDisplayOptions<
+  TZ extends Temporal.InstantToStringOptions['timeZone'],
+> = Omit<Temporal.InstantToStringOptions, 'timeZone'> & {
+  timeZone?: TZ | undefined
+}
 
 /*
 Display/toString option refinement.
@@ -35,7 +35,7 @@ operations, while using the generic option coercion and validation helpers.
 */
 
 function refineTimeDisplayTuple(
-  options: TimeDisplayOptions,
+  options: Temporal.PlainTimeToStringOptions,
   maxSmallestUnit: TimeUnit = Unit.Minute,
 ): TimeDisplayTuple {
   // alphabetical
@@ -57,7 +57,7 @@ function refineTimeDisplayTuple(
 }
 
 export function refineDateTimeDisplayOptions(
-  options: DateTimeDisplayOptions | undefined,
+  options: Temporal.PlainDateTimeToStringOptions | undefined,
 ): DateTimeDisplayTuple {
   options = normalizeOptions(options)
 
@@ -72,20 +72,20 @@ export function refineDateTimeDisplayOptions(
 }
 
 export function refineDateDisplayOptions(
-  options: CalendarDisplayOptions | undefined,
+  options: Temporal.PlainDateToStringOptions | undefined,
 ): CalendarDisplay {
   return coerceCalendarDisplay(normalizeOptions(options))
 }
 
 export function refineTimeDisplayOptions(
-  options: TimeDisplayOptions | undefined,
+  options: Temporal.PlainTimeToStringOptions | undefined,
   maxSmallestUnit?: TimeUnit,
 ): TimeDisplayTuple {
   return refineTimeDisplayTuple(normalizeOptions(options), maxSmallestUnit)
 }
 
 export function refineZonedDateTimeDisplayOptions(
-  options: ZonedDateTimeDisplayOptions | undefined,
+  options: Temporal.ZonedDateTimeToStringOptions | undefined,
 ): ZonedDateTimeDisplayTuple {
   options = normalizeOptions(options)
 
@@ -116,16 +116,16 @@ export function refineZonedDateTimeDisplayOptions(
   ]
 }
 
-export function refineInstantDisplayOptions(
-  options: InstantDisplayOptions | undefined,
-): InstantDisplayTuple {
+export function refineInstantDisplayOptions<
+  TZ extends Temporal.InstantToStringOptions['timeZone'],
+>(options: InstantDisplayOptions<TZ> | undefined): InstantDisplayTuple<TZ> {
   options = normalizeOptions(options)
 
   // alphabetical
   const subsecDigits = coerceFractionalSecondDigits(options)
   const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
-  const timeZoneArg: string | undefined = options.timeZone
+  const timeZoneArg = options.timeZone
 
   const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
     validateUnitRange(

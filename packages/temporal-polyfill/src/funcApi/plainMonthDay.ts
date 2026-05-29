@@ -1,9 +1,6 @@
+import type { Temporal } from 'temporal-spec'
 import { EraYearOrYear, MonthDayFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type {
-  CalendarDisplayOptions,
-  OverflowOptions,
-} from '../internal/optionsInput'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainMonthDay'
@@ -32,7 +29,7 @@ export function isRecord(arg: unknown): arg is Record {
 
 export const fromFields: (
   fields: Partial<MonthDayFields> & { calendar?: CalendarRecord },
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainMonthDayRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
@@ -43,7 +40,7 @@ export const fromString: (
 export const withFields: (
   record: PlainMonthDayRecord,
   mod: Partial<MonthDayFields>,
-  options?: OverflowOptions,
+  options?: Temporal.OverflowOptions,
 ) => PlainMonthDayRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const equals: (
@@ -71,7 +68,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainMonthDayRecord,
-  options?: CalendarDisplayOptions,
+  options?: Temporal.PlainDateToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainMonthDayRecord) => string =
