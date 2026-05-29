@@ -203,15 +203,15 @@ export function setDurationSlots(instance: object, slots: unknown) {
 
 function isTemporalRecord(record: unknown): boolean {
   return (
-    calendarMap.has(record as object) ||
-    instantMap.has(record as object) ||
-    zonedDateTimeMap.has(record as object) ||
-    plainDateTimeMap.has(record as object) ||
-    plainDateMap.has(record as object) ||
-    plainTimeMap.has(record as object) ||
-    plainYearMonthMap.has(record as object) ||
-    plainMonthDayMap.has(record as object) ||
-    durationMap.has(record as object)
+    isCalendarRecord(record) ||
+    isInstantRecord(record) ||
+    isZonedDateTimeRecord(record) ||
+    isPlainDateTimeRecord(record) ||
+    isPlainDateRecord(record) ||
+    isPlainTimeRecord(record) ||
+    isPlainYearMonthRecord(record) ||
+    isPlainMonthDayRecord(record) ||
+    isDurationRecord(record)
   )
 }
 
