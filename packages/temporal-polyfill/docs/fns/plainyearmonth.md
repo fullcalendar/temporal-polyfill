@@ -424,7 +424,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -441,14 +441,14 @@ import { diffYears } from 'temporal-utils'
 const years = diffYears(yearMonth, otherYearMonth, options)
 ```
 
-This should preserve exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMonths`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -465,7 +465,7 @@ import { diffMonths } from 'temporal-utils'
 const months = diffMonths(yearMonth, otherYearMonth, options)
 ```
 
-This should preserve exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `equals`
 

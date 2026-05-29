@@ -741,7 +741,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -758,15 +758,14 @@ import { diffYears } from 'temporal-utils'
 const years = diffYears(date, otherDate, options)
 ```
 
-This preserves the helper's exact fractional result when no rounding mode is
-provided. With rounding options, the result is rounded to whole years.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMonths`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -783,15 +782,14 @@ import { diffMonths } from 'temporal-utils'
 const months = diffMonths(date, otherDate, options)
 ```
 
-This preserves the helper's exact fractional result when no rounding mode is
-provided. With rounding options, the result is rounded to whole months.
+If `options` is omitted, no rounding occurs.
 
 ### `diffWeeks`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -808,15 +806,14 @@ import { diffWeeks } from 'temporal-utils'
 const weeks = diffWeeks(date, otherDate, options)
 ```
 
-This preserves the helper's exact fractional result when no rounding mode is
-provided. With rounding options, the result is rounded to whole weeks.
+If `options` is omitted, no rounding occurs.
 
 ### `diffDays`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -833,8 +830,7 @@ import { diffDays } from 'temporal-utils'
 const days = diffDays(date, otherDate, options)
 ```
 
-This keeps the helper behavior aligned with the other unit difference helpers;
-with rounding options, the result is rounded to whole days.
+If `options` is omitted, no rounding occurs.
 
 ### `equals`
 

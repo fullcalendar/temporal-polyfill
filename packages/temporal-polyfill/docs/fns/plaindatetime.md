@@ -1037,7 +1037,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1054,14 +1054,14 @@ import { diffYears } from 'temporal-utils'
 const years = diffYears(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMonths`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1078,14 +1078,14 @@ import { diffMonths } from 'temporal-utils'
 const months = diffMonths(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffWeeks`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1102,14 +1102,14 @@ import { diffWeeks } from 'temporal-utils'
 const weeks = diffWeeks(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffDays`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1126,14 +1126,14 @@ import { diffDays } from 'temporal-utils'
 const days = diffDays(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffHours`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1150,14 +1150,14 @@ import { diffHours } from 'temporal-utils'
 const hours = diffHours(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMinutes`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1174,14 +1174,14 @@ import { diffMinutes } from 'temporal-utils'
 const minutes = diffMinutes(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffSeconds`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1198,14 +1198,14 @@ import { diffSeconds } from 'temporal-utils'
 const seconds = diffSeconds(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMilliseconds`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1222,14 +1222,14 @@ import { diffMilliseconds } from 'temporal-utils'
 const milliseconds = diffMilliseconds(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffMicroseconds`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1246,14 +1246,14 @@ import { diffMicroseconds } from 'temporal-utils'
 const microseconds = diffMicroseconds(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `diffNanoseconds`
 
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundOptions) => number
+(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1270,7 +1270,7 @@ import { diffNanoseconds } from 'temporal-utils'
 const nanoseconds = diffNanoseconds(dateTime, otherDateTime, options)
 ```
 
-This preserves the helper behavior, including exact totals when no rounding mode is provided.
+If `options` is omitted, no rounding occurs.
 
 ### `equals`
 
