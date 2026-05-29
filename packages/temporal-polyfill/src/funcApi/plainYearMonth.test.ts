@@ -11,6 +11,21 @@ import {
 
 const gregoryCalendar = getGregoryCalendar()
 
+function expectRoundToYearEquals(
+  isoYear: number,
+  isoMonth: number,
+  expectedIsoYear: number,
+  expectedIsoMonth: number,
+) {
+  expectPlainYearMonthEquals(
+    PlainYearMonthFns.roundToYear(PlainYearMonthFns.create(isoYear, isoMonth)),
+    {
+      year: expectedIsoYear,
+      month: expectedIsoMonth,
+    },
+  )
+}
+
 describe('create', () => {
   it('works with a referenceDay', () => {
     const pym = PlainYearMonthFns.create(2024, 6, gregoryCalendar, 5)
@@ -448,6 +463,53 @@ describe('diffMonths', () => {
 
     expect(months).toBe(24)
     expect(monthsInc).toBe(36)
+  })
+})
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+describe('roundToYear', () => {
+  it('works without options', () => {
+    const pym = PlainYearMonthFns.create(2024, 8)
+    expectPlainYearMonthEquals(PlainYearMonthFns.roundToYear(pym), {
+      year: 2025,
+      month: 1,
+    })
+  })
+
+  it('works with single roundingMode arg', () => {
+    const pym = PlainYearMonthFns.create(2024, 8)
+    expectPlainYearMonthEquals(PlainYearMonthFns.roundToYear(pym, 'floor'), {
+      year: 2024,
+      month: 1,
+    })
+  })
+
+  it('works with options', () => {
+    const pym = PlainYearMonthFns.create(2024, 8)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.roundToYear(pym, {
+        roundingMode: 'floor',
+        roundingIncrement: 1,
+      }),
+      {
+        year: 2024,
+        month: 1,
+      },
+    )
+    expect(() => {
+      PlainYearMonthFns.roundToYear(pym, {
+        roundingMode: 'floor',
+        roundingIncrement: 2, // not allowed
+      })
+    }).toThrowError(RangeError)
+  })
+
+  it('matches canonical exact and midpoint-adjacent boundaries', () => {
+    expectRoundToYearEquals(2024, 1, 2024, 1)
+    expectRoundToYearEquals(2024, 7, 2024, 1)
+    expectRoundToYearEquals(2024, 8, 2025, 1)
   })
 })
 

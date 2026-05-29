@@ -285,6 +285,15 @@ export function diffMonths(
   )
 }
 
+export function roundToYear(
+  record: PlainYearMonthNativeRecord,
+  options?: RoundingModeName | RoundingMathOptions,
+): PlainYearMonthNativeRecord {
+  return createPlainYearMonthNativeRecord(
+    TemporalUtils.roundToYear(getPlainYearMonthNative(record), options as any),
+  )
+}
+
 export function equals(
   record: PlainYearMonthNativeRecord,
   otherRecord: PlainYearMonthNativeRecord,

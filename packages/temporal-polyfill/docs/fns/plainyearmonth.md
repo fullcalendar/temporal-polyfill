@@ -531,8 +531,6 @@ import { roundToYear } from 'temporal-utils'
 const nextYearMonth = roundToYear(yearMonth, options)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ## Start And End Of Unit
 
 ### `startOfYear`
