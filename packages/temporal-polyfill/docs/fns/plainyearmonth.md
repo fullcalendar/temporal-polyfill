@@ -555,8 +555,6 @@ import { startOfYear } from 'temporal-utils'
 const nextYearMonth = startOfYear(yearMonth)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `endOfYear`
 
 Signature:
@@ -580,8 +578,6 @@ import { endOfYear } from 'temporal-utils'
 
 const nextYearMonth = endOfYear(yearMonth)
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ## Conversion
 

@@ -513,6 +513,32 @@ describe('roundToYear', () => {
   })
 })
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+describe('startOfYear', () => {
+  it('works', () => {
+    const pym = PlainYearMonthFns.create(2024, 7)
+    expectPlainYearMonthEquals(PlainYearMonthFns.startOfYear(pym), {
+      year: 2024,
+      month: 1,
+    })
+  })
+})
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+describe('endOfYear', () => {
+  it('works', () => {
+    const pym = PlainYearMonthFns.create(2024, 7)
+    expectPlainYearMonthEquals(PlainYearMonthFns.endOfYear(pym), {
+      year: 2024,
+      month: 12,
+    })
+  })
+})
+
 describe('equals', () => {
   it('works', () => {
     const pym0 = PlainYearMonthFns.create(2024, 4)

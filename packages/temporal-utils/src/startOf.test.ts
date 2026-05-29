@@ -45,6 +45,15 @@ describe('startOfYear', () => {
       ).toBe(true)
     })
   })
+
+  describe('PlainYearMonth', () => {
+    it('works', () => {
+      const pym = Temporal.PlainYearMonth.from('2024-07')
+      expect(
+        startOfYear(pym).equals(Temporal.PlainYearMonth.from('2024-01')),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('startOfMonth', () => {

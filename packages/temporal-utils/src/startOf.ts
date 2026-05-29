@@ -11,6 +11,10 @@ const zeroTimeFields = {
 }
 
 export function startOfYear<T extends YearMonthObj>(date: T): T {
+  if ((date as DateObj).day === undefined) {
+    return date.with({ month: 1 }) as T
+  }
+
   return date.with({
     month: 1,
     day: 1,

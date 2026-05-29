@@ -43,6 +43,15 @@ describe('endOfYear', () => {
       expect(pd1.equals(pd2.subtract({ days: 1 }))).toBe(true)
     })
   })
+
+  describe('PlainYearMonth', () => {
+    it('works', () => {
+      const pym = Temporal.PlainYearMonth.from('2024-07')
+      expect(
+        endOfYear(pym).equals(Temporal.PlainYearMonth.from('2024-12')),
+      ).toBe(true)
+    })
+  })
 })
 
 describe('endOfMonth', () => {

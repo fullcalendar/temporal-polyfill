@@ -129,6 +129,15 @@ export const roundToYear: (
   ? Native.roundToYear
   : Shim.roundToYear
 
+export const startOfYear: (
+  record: PlainYearMonthRecord,
+) => PlainYearMonthRecord = NativeTemporal
+  ? Native.startOfYear
+  : Shim.startOfYear
+
+export const endOfYear: (record: PlainYearMonthRecord) => PlainYearMonthRecord =
+  NativeTemporal ? Native.endOfYear : Shim.endOfYear
+
 export const equals: (
   record: PlainYearMonthRecord,
   otherRecord: PlainYearMonthRecord,

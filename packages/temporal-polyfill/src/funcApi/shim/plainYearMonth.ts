@@ -69,7 +69,12 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
-import { computeYearInterval, roundDateTimeToInterval } from './roundUtils'
+import {
+  computeYearCeil,
+  computeYearFloor,
+  computeYearInterval,
+  roundDateTimeToInterval,
+} from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
@@ -358,6 +363,30 @@ export function roundToYear(
   )
   return createPlainYearMonthShimRecord(
     createYearMonthSlots(roundedIsoDateTime, slots.calendar),
+  )
+}
+
+export function startOfYear(
+  record: PlainYearMonthShimRecord,
+): PlainYearMonthShimRecord {
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  return createPlainYearMonthShimRecord(
+    createYearMonthSlots(computeYearFloor(slots), slots.calendar),
+  )
+}
+
+// PlainYearMonth has month precision, so the inclusive end of the year is the
+// month before the next calendar year's exclusive boundary.
+export function endOfYear(
+  record: PlainYearMonthShimRecord,
+): PlainYearMonthShimRecord {
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  const yearCeilSlots = createYearMonthSlots(
+    computeYearCeil(slots),
+    slots.calendar,
+  )
+  return createPlainYearMonthShimRecord(
+    movePlainYearMonth(true, yearCeilSlots, constructDurationSlots(0, 1)),
   )
 }
 

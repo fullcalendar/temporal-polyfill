@@ -20,9 +20,11 @@ export function endOfYear<T extends YearMonthObj>(date: T): T {
   return startOfYear(date)
     .add({ years: 1 })
     .subtract(
-      (date as DateTimeObj).nanosecond !== undefined
-        ? { nanoseconds: 1 }
-        : { days: 1 },
+      (date as DateObj).day === undefined
+        ? { months: 1 }
+        : (date as DateTimeObj).nanosecond !== undefined
+          ? { nanoseconds: 1 }
+          : { days: 1 },
     ) as T
 }
 

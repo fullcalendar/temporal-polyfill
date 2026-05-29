@@ -294,6 +294,22 @@ export function roundToYear(
   )
 }
 
+export function startOfYear(
+  record: PlainYearMonthNativeRecord,
+): PlainYearMonthNativeRecord {
+  return createPlainYearMonthNativeRecord(
+    TemporalUtils.startOfYear(getPlainYearMonthNative(record)),
+  )
+}
+
+export function endOfYear(
+  record: PlainYearMonthNativeRecord,
+): PlainYearMonthNativeRecord {
+  return createPlainYearMonthNativeRecord(
+    TemporalUtils.endOfYear(getPlainYearMonthNative(record)),
+  )
+}
+
 export function equals(
   record: PlainYearMonthNativeRecord,
   otherRecord: PlainYearMonthNativeRecord,
