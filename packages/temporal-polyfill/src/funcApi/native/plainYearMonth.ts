@@ -196,6 +196,24 @@ export function add(
   return createPlainYearMonthNativeRecord(resNative)
 }
 
+export function addYears(
+  record: PlainYearMonthNativeRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainYearMonthNative(record).add({ years }, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function addMonths(
+  record: PlainYearMonthNativeRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainYearMonthNative(record).add({ months }, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
 export function subtract(
   record: PlainYearMonthNativeRecord,
   duration: DurationNativeRecord,
@@ -204,6 +222,27 @@ export function subtract(
   const native = getPlainYearMonthNative(record)
   const durationNative = getDurationNative(duration)
   const resNative = native.subtract(durationNative, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function subtractYears(
+  record: PlainYearMonthNativeRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainYearMonthNative(record).subtract({ years }, options)
+  return createPlainYearMonthNativeRecord(resNative)
+}
+
+export function subtractMonths(
+  record: PlainYearMonthNativeRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainYearMonthNativeRecord {
+  const resNative = getPlainYearMonthNative(record).subtract(
+    { months },
+    options,
+  )
   return createPlainYearMonthNativeRecord(resNative)
 }
 

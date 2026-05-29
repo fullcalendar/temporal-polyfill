@@ -12,7 +12,10 @@ import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { constructYearMonthSlots } from '../../internal/construct'
+import {
+  constructDurationSlots,
+  constructYearMonthSlots,
+} from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
@@ -54,6 +57,7 @@ import {
   createDurationShimRecord,
   getDurationShimRecordSlots,
 } from './duration'
+import { reversedMove } from './moveUtils'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
   attachDebugString,
@@ -236,6 +240,36 @@ export function add(
   return createPlainYearMonthShimRecord(resSlots)
 }
 
+export function addYears(
+  record: PlainYearMonthShimRecord,
+  years: number,
+  options?: OverflowOptions,
+): PlainYearMonthShimRecord {
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  const resSlots = movePlainYearMonth(
+    false,
+    slots,
+    constructDurationSlots(years),
+    options,
+  )
+  return createPlainYearMonthShimRecord(resSlots)
+}
+
+export function addMonths(
+  record: PlainYearMonthShimRecord,
+  months: number,
+  options?: OverflowOptions,
+): PlainYearMonthShimRecord {
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  const resSlots = movePlainYearMonth(
+    false,
+    slots,
+    constructDurationSlots(0, months),
+    options,
+  )
+  return createPlainYearMonthShimRecord(resSlots)
+}
+
 export function subtract(
   record: PlainYearMonthShimRecord,
   durationRecord: DurationShimRecord,
@@ -246,6 +280,18 @@ export function subtract(
   const resSlots = movePlainYearMonth(true, slots, durationSlots, options)
   return createPlainYearMonthShimRecord(resSlots)
 }
+
+export const subtractYears: (
+  record: PlainYearMonthShimRecord,
+  years: number,
+  options?: OverflowOptions,
+) => PlainYearMonthShimRecord = reversedMove(addYears)
+
+export const subtractMonths: (
+  record: PlainYearMonthShimRecord,
+  months: number,
+  options?: OverflowOptions,
+) => PlainYearMonthShimRecord = reversedMove(addMonths)
 
 // this is equivalent to Temporal's `until`
 export function diff(

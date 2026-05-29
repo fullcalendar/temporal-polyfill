@@ -68,11 +68,39 @@ export const add: (
   options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.add : Shim.add
 
+export const addYears: (
+  record: PlainYearMonthRecord,
+  years: number,
+  options?: OverflowOptions,
+) => PlainYearMonthRecord = NativeTemporal ? Native.addYears : Shim.addYears
+
+export const addMonths: (
+  record: PlainYearMonthRecord,
+  months: number,
+  options?: OverflowOptions,
+) => PlainYearMonthRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
+
 export const subtract: (
   record: PlainYearMonthRecord,
   duration: DurationRecord,
   options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.subtract : Shim.subtract
+
+export const subtractYears: (
+  record: PlainYearMonthRecord,
+  years: number,
+  options?: OverflowOptions,
+) => PlainYearMonthRecord = NativeTemporal
+  ? Native.subtractYears
+  : Shim.subtractYears
+
+export const subtractMonths: (
+  record: PlainYearMonthRecord,
+  months: number,
+  options?: OverflowOptions,
+) => PlainYearMonthRecord = NativeTemporal
+  ? Native.subtractMonths
+  : Shim.subtractMonths
 
 export const diff: (
   record: PlainYearMonthRecord,

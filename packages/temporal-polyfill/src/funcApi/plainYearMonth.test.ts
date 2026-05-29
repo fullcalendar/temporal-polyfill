@@ -179,6 +179,76 @@ describe('add', () => {
   })
 })
 
+describe('addYears', () => {
+  it('works without options (and throws on non-integers)', () => {
+    const pym = PlainYearMonthFns.create(2024, 2)
+    expectPlainYearMonthEquals(PlainYearMonthFns.addYears(pym, 5), {
+      year: 2029,
+      month: 2,
+    })
+    expect(() => {
+      PlainYearMonthFns.addYears(pym, 5.5)
+    }).toThrowError(RangeError)
+  })
+
+  it('works with explicit constrain overflow option', () => {
+    const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.addYears(pym, 1, { overflow: 'constrain' }),
+      {
+        year: 2025,
+        month: 2,
+      },
+    )
+  })
+
+  it('ignores reject overflow option for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.addYears(pym, 1, { overflow: 'reject' }),
+      {
+        year: 2025,
+        month: 2,
+      },
+    )
+  })
+})
+
+describe('addMonths', () => {
+  it('works without options (and throws on non-integers)', () => {
+    const pym = PlainYearMonthFns.create(2024, 2)
+    expectPlainYearMonthEquals(PlainYearMonthFns.addMonths(pym, 5), {
+      year: 2024,
+      month: 7,
+    })
+    expect(() => {
+      PlainYearMonthFns.addMonths(pym, 5.5)
+    }).toThrowError(RangeError)
+  })
+
+  it('works with explicit constrain overflow option', () => {
+    const pym = PlainYearMonthFns.create(2024, 1, undefined, 31)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.addMonths(pym, 1, { overflow: 'constrain' }),
+      {
+        year: 2024,
+        month: 2,
+      },
+    )
+  })
+
+  it('ignores reject overflow option for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2024, 1, undefined, 31)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.addMonths(pym, 1, { overflow: 'reject' }),
+      {
+        year: 2024,
+        month: 2,
+      },
+    )
+  })
+})
+
 describe('subtract', () => {
   it('works', () => {
     const pym0 = PlainYearMonthFns.create(2024, 2)
@@ -227,6 +297,76 @@ describe('subtract', () => {
       {
         year: 275760,
         month: 8,
+      },
+    )
+  })
+})
+
+describe('subtractYears', () => {
+  it('works without options (and throws on non-integers)', () => {
+    const pym = PlainYearMonthFns.create(2024, 2)
+    expectPlainYearMonthEquals(PlainYearMonthFns.subtractYears(pym, 5), {
+      year: 2019,
+      month: 2,
+    })
+    expect(() => {
+      PlainYearMonthFns.subtractYears(pym, 5.5)
+    }).toThrowError(RangeError)
+  })
+
+  it('works with explicit constrain overflow option', () => {
+    const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtractYears(pym, 1, { overflow: 'constrain' }),
+      {
+        year: 2023,
+        month: 2,
+      },
+    )
+  })
+
+  it('ignores reject overflow option for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtractYears(pym, 1, { overflow: 'reject' }),
+      {
+        year: 2023,
+        month: 2,
+      },
+    )
+  })
+})
+
+describe('subtractMonths', () => {
+  it('works without options (and throws on non-integers)', () => {
+    const pym = PlainYearMonthFns.create(2024, 2)
+    expectPlainYearMonthEquals(PlainYearMonthFns.subtractMonths(pym, 5), {
+      year: 2023,
+      month: 9,
+    })
+    expect(() => {
+      PlainYearMonthFns.subtractMonths(pym, 5.5)
+    }).toThrowError(RangeError)
+  })
+
+  it('works with explicit constrain overflow option', () => {
+    const pym = PlainYearMonthFns.create(2024, 3, undefined, 31)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtractMonths(pym, 1, { overflow: 'constrain' }),
+      {
+        year: 2024,
+        month: 2,
+      },
+    )
+  })
+
+  it('ignores reject overflow option for ISO month arithmetic', () => {
+    const pym = PlainYearMonthFns.create(2024, 3, undefined, 31)
+    expectPlainYearMonthEquals(
+      PlainYearMonthFns.subtractMonths(pym, 1, { overflow: 'reject' }),
+      {
+        year: 2024,
+        month: 2,
       },
     )
   })

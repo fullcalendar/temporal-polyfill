@@ -313,8 +313,6 @@ Temporal API:
 const nextYearMonth = yearMonth.add({ years }, options)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `addMonths`
 
 Signature:
@@ -334,8 +332,6 @@ Temporal API:
 ```ts
 const nextYearMonth = yearMonth.add({ months }, options)
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ### `subtract`
 
@@ -379,8 +375,6 @@ Temporal API:
 const nextYearMonth = yearMonth.subtract({ years }, options)
 ```
 
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
-
 ### `subtractMonths`
 
 Signature:
@@ -400,8 +394,6 @@ Temporal API:
 ```ts
 const nextYearMonth = yearMonth.subtract({ months }, options)
 ```
-
-TODO: This helper does not exist yet in the functional API. The example assumes the intended future helper shape.
 
 ## Difference And Comparison
 
