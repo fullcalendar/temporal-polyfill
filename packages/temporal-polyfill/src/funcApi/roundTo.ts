@@ -4,7 +4,7 @@ import {
   coerceRoundingMode,
 } from '../internal/optionsCoerce'
 import { RoundingMathTuple, RoundingMode } from '../internal/optionsModel'
-import { normalizeOptions } from '../internal/optionsNormalize'
+import { getOptionsObject } from '../internal/optionsNormalize'
 import { validateRoundingInc } from '../internal/optionsValidate'
 import type { RoundingMathOptions } from '../internal/temporalSpecHelpers'
 import { Unit } from '../internal/units'
@@ -13,7 +13,7 @@ export function refineRoundToOptions(
   smallestUnit: Unit,
   options?: RoundingMathOptions,
 ): RoundingMathTuple {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   // alphabetical
   let roundingInc = coerceRoundingIncInteger(options)
@@ -30,6 +30,6 @@ export function createRoundToOptions<
   smallestUnit: UN,
   options?: O,
 ): { smallestUnit: UN } & O & RoundingMathOptions {
-  options = normalizeOptions(options) as O
+  options = getOptionsObject(options) as O
   return { ...options, smallestUnit }
 }

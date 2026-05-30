@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import { RoundingMathOptions, normalizeOptions } from './utils.js'
+import { RoundingMathOptions, getOptionsObject } from './utils.js'
 
 export function roundToYear<
   T extends
@@ -52,7 +52,7 @@ export function normalizeRoundingOptions(
   roundingMode: RoundingMathOptions['roundingMode']
   smallestUnit: any // HACK
 } {
-  const normOptions = normalizeOptions(options)
+  const normOptions = getOptionsObject(options)
 
   // This is just for units >day
   if (normOptions.roundingIncrement && normOptions.roundingIncrement !== 1) {

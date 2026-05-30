@@ -7,7 +7,7 @@ import {
 } from './optionsCoerce'
 import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import type { ZonedFieldTuple } from './optionsModel'
-import { normalizeOptions } from './optionsNormalize'
+import { getOptionsObject } from './optionsNormalize'
 
 /*
 High-level field-construction option refinement.
@@ -30,7 +30,7 @@ export function refineZonedFieldOptions(
   options: Temporal.ZonedDateTimeFromOptions | undefined,
   defaultOffsetDisambig: OffsetDisambig = OffsetDisambig.Reject,
 ): ZonedFieldTuple {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   // alphabetical
   const epochDisambig = coerceEpochDisambig(options) // "disambig"
@@ -43,5 +43,5 @@ export function refineZonedFieldOptions(
 export function refineEpochDisambigOptions(
   options: Temporal.DisambiguationOptions | undefined,
 ): EpochDisambig {
-  return coerceEpochDisambig(normalizeOptions(options))
+  return coerceEpochDisambig(getOptionsObject(options))
 }

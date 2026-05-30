@@ -32,8 +32,8 @@ import { utcTimeZoneId } from '../internal/timeZoneConfig'
 import { milliInDay } from '../internal/units'
 import {
   areNumberArraysEqual,
-  clampNumber,
   compareNumbers,
+  constrainToRange,
   memoize,
   modFloor,
 } from '../internal/utils'
@@ -284,7 +284,7 @@ function constrainIntlPlainMonthDay(
         : 30
   }
 
-  return maxDay === undefined ? undefined : clampNumber(day, 1, maxDay)
+  return maxDay === undefined ? undefined : constrainToRange(day, 1, maxDay)
 }
 
 // Caches

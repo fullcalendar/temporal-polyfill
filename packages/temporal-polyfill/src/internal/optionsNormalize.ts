@@ -1,4 +1,4 @@
-import { normalizeOptions as sharedNormalizeOptions } from 'temporal-utils'
+export { getOptionsObject } from 'temporal-utils'
 import { requireObjectLike } from './cast'
 
 /*
@@ -9,8 +9,6 @@ without reading individual Temporal option properties. That separation matters
 because option property access is observable, and the caller-specific
 `refine*Options` functions still own the exact read order and validation order.
 */
-
-export const normalizeOptions = sharedNormalizeOptions
 
 export function normalizeOptionsOrString<
   O extends {},

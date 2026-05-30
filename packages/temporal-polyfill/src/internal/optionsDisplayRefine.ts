@@ -15,7 +15,7 @@ import type {
   TimeDisplayTuple,
   ZonedDateTimeDisplayTuple,
 } from './optionsModel'
-import { normalizeOptions } from './optionsNormalize'
+import { getOptionsObject } from './optionsNormalize'
 import { validateUnitRange } from './optionsValidate'
 import type { SubsecDigits } from './temporalSpecHelpers'
 import { TimeUnit, Unit, unitNanoMap } from './units'
@@ -59,7 +59,7 @@ function refineTimeDisplayTuple(
 export function refineDateTimeDisplayOptions(
   options: Temporal.PlainDateTimeToStringOptions | undefined,
 ): DateTimeDisplayTuple {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   // Temporal.PlainDateTime.prototype.toString reads calendarName before the
   // time precision options. Keep this coercion outside refineTimeDisplayTuple
@@ -74,20 +74,20 @@ export function refineDateTimeDisplayOptions(
 export function refineDateDisplayOptions(
   options: Temporal.PlainDateToStringOptions | undefined,
 ): CalendarDisplay {
-  return coerceCalendarDisplay(normalizeOptions(options))
+  return coerceCalendarDisplay(getOptionsObject(options))
 }
 
 export function refineTimeDisplayOptions(
   options: Temporal.PlainTimeToStringOptions | undefined,
   maxSmallestUnit?: TimeUnit,
 ): TimeDisplayTuple {
-  return refineTimeDisplayTuple(normalizeOptions(options), maxSmallestUnit)
+  return refineTimeDisplayTuple(getOptionsObject(options), maxSmallestUnit)
 }
 
 export function refineZonedDateTimeDisplayOptions(
   options: Temporal.ZonedDateTimeToStringOptions | undefined,
 ): ZonedDateTimeDisplayTuple {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   // alphabetical
   const calendarDisplay = coerceCalendarDisplay(options)
@@ -119,7 +119,7 @@ export function refineZonedDateTimeDisplayOptions(
 export function refineInstantDisplayOptions<
   TZ extends Temporal.InstantToStringOptions['timeZone'],
 >(options: InstantDisplayOptions<TZ> | undefined): InstantDisplayTuple<TZ> {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   // alphabetical
   const subsecDigits = coerceFractionalSecondDigits(options)

@@ -5,7 +5,7 @@ import {
 import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
 import { type CalendarSlot, gregoryCalendar } from './calendarSlot'
-import { toInteger } from './cast'
+import { toIntegerWithTruncation } from './cast'
 import * as errorMessages from './errorMessages'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
@@ -49,10 +49,10 @@ export function resolveCalendarYear(
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {
-    year = toInteger(year as number, 'year')
+    year = toIntegerWithTruncation(year as number, 'year')
   }
   if (eraYear !== undefined) {
-    eraYear = toInteger(eraYear as number, 'eraYear')
+    eraYear = toIntegerWithTruncation(eraYear as number, 'eraYear')
   }
 
   if (era !== undefined || eraYear !== undefined) {

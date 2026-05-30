@@ -1,10 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 
-export const nanoInMicro = 1000
-export const nanoInMilli = 1000000
-export const nanoInSec = 1000000000
-export const nanoInMinute = 60000000000
-export const nanoInHour = 3600000000000
+export const nanosecondsInMicrosecond = 1000
+export const nanosecondsInMillisecond = 1000000
+export const nanosecondsInSecond = 1000000000
+export const nanosecondsInMinute = 60000000000
+export const nanosecondsInHour = 3600000000000
 
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
 type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
@@ -14,7 +14,7 @@ export type RoundingMathOptions = Pick<
   'roundingIncrement' | 'roundingMode'
 >
 
-export function normalizeOptions<O extends {}>(options: O | undefined): O {
+export function getOptionsObject<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
     return Object.create(null)
   }
@@ -24,7 +24,7 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
 // Input Validation
 // -----------------------------------------------------------------------------
 
-export function toNumber(arg: number, entityName = 'number'): number {
+export function toFiniteNumber(arg: number, entityName = 'number'): number {
   if (typeof arg === 'bigint') {
     throw new TypeError(`Cannot convert bigint to ${entityName}`)
   }
@@ -38,12 +38,21 @@ export function toNumber(arg: number, entityName = 'number'): number {
   return arg
 }
 
-export function toInteger(arg: number, entityName?: string): number {
-  return Math.trunc(toNumber(arg, entityName)) || 0 // ensure no -0
+export function toIntegerWithTruncation(
+  arg: number,
+  entityName?: string,
+): number {
+  return Math.trunc(toFiniteNumber(arg, entityName)) || 0 // ensure no -0
 }
 
-export function toPositiveInteger(arg: number, entityName?: string): number {
-  return requireNumberIsPositive(toInteger(arg, entityName), entityName)
+export function toPositiveIntegerWithTruncation(
+  arg: number,
+  entityName?: string,
+): number {
+  return requireNumberIsPositive(
+    toIntegerWithTruncation(arg, entityName),
+    entityName,
+  )
 }
 
 /*
@@ -59,9 +68,27 @@ function requireNumberIsPositive(num: number, entityName = 'number'): number {
 /*
 min/max are inclusive
 */
-export function clampNumber(num: number, min: number, max: number): number {
+export function constrainToRange(
+  num: number,
+  min: number,
+  max: number,
+): number {
   return Math.min(Math.max(num, min), max)
 }
+
+export function isObjectLike(arg: unknown): arg is {} {
+  return arg !== null && (typeof arg === 'object' || typeof arg === 'function')
+}
+
+export function requireObjectLike<O extends {}>(arg: O): O {
+  if (!isObjectLike(arg)) {
+    throw new TypeError('Options must be an object')
+  }
+  return arg
+}
+
+// Options-bag-parsing-adjacent
+// ----------------------------
 
 /*
 Already known to be number
@@ -72,7 +99,7 @@ export function normalizeNumberInRange(
   max: number, // inclusive
   options?: Temporal.OverflowOptions,
 ): number {
-  const clamped = clampNumber(num, min, max)
+  const clamped = constrainToRange(num, min, max)
 
   if (normalizeOverflow(options) === 'reject' && num !== clamped) {
     throw new RangeError(`Number must be between ${min}-${max}`)
@@ -89,7 +116,7 @@ for exact in-range input.
 function normalizeOverflow(
   options: Temporal.OverflowOptions | undefined,
 ): NonNullable<Temporal.OverflowOptions['overflow']> {
-  options = normalizeOptions(options)
+  options = getOptionsObject(options)
 
   const overflow = options.overflow
   if (overflow === undefined) {
@@ -99,15 +126,4 @@ function normalizeOverflow(
     return overflow
   }
   throw new RangeError('Invalid overflow option')
-}
-
-export function isObjectLike(arg: unknown): arg is {} {
-  return arg !== null && (typeof arg === 'object' || typeof arg === 'function')
-}
-
-export function requireObjectLike<O extends {}>(arg: O): O {
-  if (!isObjectLike(arg)) {
-    throw new TypeError('Options must be an object')
-  }
-  return arg
 }

@@ -40,7 +40,7 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
 } from './temporalLimits'
-import { clampNumber } from './utils'
+import { constrainToRange } from './utils'
 
 // Built-in *-from-fields
 // -----------------------------------------------------------------------------
@@ -350,7 +350,7 @@ export function createPlainMonthDayFromFields(
     // month-days. When a requested leap month-day is outside that table,
     // constrain it through the corresponding common month instead.
     isLeapMonth = false
-    day = clampNumber(
+    day = constrainToRange(
       fields.day,
       1,
       (calendar && calendar.plainMonthDayCommonMonthMaxDay) ?? Infinity,

@@ -47,11 +47,11 @@ export const secInDay = 86400
 export const milliInDay = 86400000
 export const milliInSec = 1000
 
-export const nanoInMicro = TemporalUtils.nanoInMicro
-export const nanoInMilli = TemporalUtils.nanoInMilli
-export const nanoInSec = TemporalUtils.nanoInSec
-export const nanoInMinute = TemporalUtils.nanoInMinute
-export const nanoInHour = TemporalUtils.nanoInHour
+export const nanoInMicro = TemporalUtils.nanosecondsInMicrosecond
+export const nanoInMilli = TemporalUtils.nanosecondsInMillisecond
+export const nanoInSec = TemporalUtils.nanosecondsInSecond
+export const nanoInMinute = TemporalUtils.nanosecondsInMinute
+export const nanoInHour = TemporalUtils.nanosecondsInHour
 export const nanoInUtcDay = 86_400_000_000_000
 
 export const unitNanoMap = [

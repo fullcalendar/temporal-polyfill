@@ -16,7 +16,7 @@ import {
 import { getTimeZonePeriodDays, minPossibleTransition } from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
 import { milliInSec, nanoInSec, secInDay } from './units'
-import { clampNumber, compareNumbers, memoize } from './utils'
+import { compareNumbers, constrainToRange, memoize } from './utils'
 
 export interface TimeZone {
   id: string
@@ -317,7 +317,7 @@ function computePeriod(epochSec: number, periodSec: number): [number, number] {
 }
 
 function clampIntlSampleEpochSec(epochSec: number): number {
-  return clampNumber(epochSec, -maxIntlSampleSec, maxIntlSampleSec)
+  return constrainToRange(epochSec, -maxIntlSampleSec, maxIntlSampleSec)
 }
 
 /*

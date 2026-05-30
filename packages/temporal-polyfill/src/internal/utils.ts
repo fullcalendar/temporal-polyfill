@@ -2,8 +2,11 @@ import * as TemporalUtils from 'temporal-utils'
 import * as errorMessages from './errorMessages'
 import { Overflow } from './optionsModel'
 
-export const clampNumber: (num: number, min: number, max: number) => number =
-  TemporalUtils.clampNumber
+export const constrainToRange: (
+  num: number,
+  min: number,
+  max: number,
+) => number = TemporalUtils.constrainToRange
 
 export const isObjectLike: (arg: unknown) => arg is {} =
   TemporalUtils.isObjectLike
@@ -45,7 +48,7 @@ export function clampEntity(
   overflow?: Overflow,
   choices?: string[],
 ): number {
-  const clamped = clampNumber(num, min, max)
+  const clamped = constrainToRange(num, min, max)
 
   if (overflow && num !== clamped) {
     throw new RangeError(

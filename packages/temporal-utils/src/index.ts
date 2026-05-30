@@ -1,17 +1,17 @@
 export {
-  clampNumber,
+  constrainToRange,
   isObjectLike,
-  nanoInHour,
-  nanoInMicro,
-  nanoInMilli,
-  nanoInMinute,
-  nanoInSec,
+  nanosecondsInHour,
+  nanosecondsInMicrosecond,
+  nanosecondsInMillisecond,
+  nanosecondsInMinute,
+  nanosecondsInSecond,
   normalizeNumberInRange,
-  normalizeOptions,
+  getOptionsObject,
   requireObjectLike,
-  toInteger,
-  toNumber,
-  toPositiveInteger,
+  toFiniteNumber,
+  toIntegerWithTruncation,
+  toPositiveIntegerWithTruncation,
 } from './utils.js'
 export type { RoundingMathOptions } from './utils.js'
 export * from './with.js'

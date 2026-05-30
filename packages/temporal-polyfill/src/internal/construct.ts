@@ -1,5 +1,5 @@
 import { type CalendarSlot } from './calendarSlot'
-import { toBigInt, toInteger, toStrictInteger } from './cast'
+import { toBigInt, toIntegerWithTruncation, toStrictInteger } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { timeFieldNamesAsc } from './fieldNames'
@@ -55,7 +55,9 @@ export function constructTimeSlots(
     microsecond,
     nanosecond,
   ])
-  return createTimeSlots(checkTimeFields(mapProps(toInteger, timeFields)))
+  return createTimeSlots(
+    checkTimeFields(mapProps(toIntegerWithTruncation, timeFields)),
+  )
 }
 
 export function constructDurationSlots(
@@ -115,15 +117,15 @@ export function constructDateTimeSlots<C>(
   nanosecond = 0,
   calendar?: C,
 ): CalendarDateTimeFields & { calendar: CalendarSlot } {
-  const isoYearInt = toInteger(isoYear)
-  const isoMonthInt = toInteger(isoMonth)
-  const isoDayInt = toInteger(isoDay)
-  const hourInt = toInteger(hour)
-  const minuteInt = toInteger(minute)
-  const secondInt = toInteger(second)
-  const millisecondInt = toInteger(millisecond)
-  const microsecondInt = toInteger(microsecond)
-  const nanosecondInt = toInteger(nanosecond)
+  const isoYearInt = toIntegerWithTruncation(isoYear)
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
+  const isoDayInt = toIntegerWithTruncation(isoDay)
+  const hourInt = toIntegerWithTruncation(hour)
+  const minuteInt = toIntegerWithTruncation(minute)
+  const secondInt = toIntegerWithTruncation(second)
+  const millisecondInt = toIntegerWithTruncation(millisecond)
+  const microsecondInt = toIntegerWithTruncation(microsecond)
+  const nanosecondInt = toIntegerWithTruncation(nanosecond)
   const isoDate = checkIsoDateFields({
     year: isoYearInt,
     month: isoMonthInt,
@@ -150,9 +152,9 @@ export function constructDateSlots<C>(
   isoDay: number,
   calendar?: C,
 ): CalendarDateFields & { calendar: CalendarSlot } {
-  const isoYearInt = toInteger(isoYear)
-  const isoMonthInt = toInteger(isoMonth)
-  const isoDayInt = toInteger(isoDay)
+  const isoYearInt = toIntegerWithTruncation(isoYear)
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
+  const isoDayInt = toIntegerWithTruncation(isoDay)
   return createDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields({
@@ -172,10 +174,10 @@ export function constructYearMonthSlots<C>(
   calendar?: C,
   referenceIsoDay = 1,
 ): CalendarDateFields & { calendar: CalendarSlot } {
-  const isoYearInt = toInteger(isoYear)
-  const isoMonthInt = toInteger(isoMonth)
+  const isoYearInt = toIntegerWithTruncation(isoYear)
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
   const calendarImpl = refineCalendarArg(calendar)
-  const isoDayInt = toInteger(referenceIsoDay)
+  const isoDayInt = toIntegerWithTruncation(referenceIsoDay)
   return createYearMonthSlots(
     checkIsoYearMonthInBounds(
       checkIsoDateFields({
@@ -195,10 +197,12 @@ export function constructMonthDaySlots<C>(
   calendar?: C,
   referenceIsoYear?: number,
 ): CalendarDateFields & { calendar: CalendarSlot } {
-  const isoMonthInt = toInteger(isoMonth)
-  const isoDayInt = toInteger(isoDay)
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
+  const isoDayInt = toIntegerWithTruncation(isoDay)
   const calendarImpl = refineCalendarArg(calendar)
-  const isoYearInt = toInteger(referenceIsoYear ?? isoEpochFirstLeapYear)
+  const isoYearInt = toIntegerWithTruncation(
+    referenceIsoYear ?? isoEpochFirstLeapYear,
+  )
   return createMonthDaySlots(
     checkIsoDateInBounds(
       checkIsoDateFields({

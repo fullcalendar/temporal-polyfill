@@ -1,7 +1,7 @@
 import {
   requireString,
-  toInteger,
-  toPositiveInteger,
+  toIntegerWithTruncation,
+  toPositiveIntegerWithTruncation,
   toStrictInteger,
   toStringViaPrimitive,
 } from './cast'
@@ -44,17 +44,20 @@ export const dateFieldRefiners = {
   // coerces them
   // after required-field checks and monthCode syntax parsing, preserving the
   // observable error order required by the from-fields algorithms.
-  month: toPositiveInteger,
+  month: toPositiveIntegerWithTruncation,
   // The monthCode refiner only validates type. Range validation is deferred to
   // createPlainDateFromFields/createPlainYearMonthFromFields/createPlainMonthDayFromFields so missing-field
   // TypeError precedes invalid-monthCode RangeError.
   monthCode(monthCode: unknown, entityName = 'monthCode') {
     return coerceMonthCodeString(monthCode, entityName)
   },
-  day: toPositiveInteger,
+  day: toPositiveIntegerWithTruncation,
 }
 
-export const timeFieldRefiners = zipPropsConst(timeFieldNamesAsc, toInteger)
+export const timeFieldRefiners = zipPropsConst(
+  timeFieldNamesAsc,
+  toIntegerWithTruncation,
+)
 
 export const durationFieldRefiners = zipPropsConst(
   durationFieldNamesAsc,

@@ -1,7 +1,8 @@
 import {
-  toInteger as sharedToInteger,
-  toNumber as sharedToNumber,
-  toPositiveInteger as sharedToPositiveInteger,
+  requireObjectLike,
+  toFiniteNumber,
+  toIntegerWithTruncation,
+  toPositiveIntegerWithTruncation,
 } from 'temporal-utils'
 import * as errorMessages from './errorMessages'
 import { Callable, bindArgs, isObjectLike } from './utils'
@@ -52,13 +53,6 @@ export function requirePropDefined<V>(
     throw new RangeError(errorMessages.missingField(optionName))
   }
   return optionVal
-}
-
-export function requireObjectLike<O extends {}>(arg: O): O {
-  if (!isObjectLike(arg)) {
-    throw new TypeError(errorMessages.invalidObject)
-  }
-  return arg
 }
 
 export const requireString = bindArgs(requireType<string>, 'string')
@@ -138,12 +132,16 @@ export function toBigInt(bi: bigint): bigint {
   return bi
 }
 
-export const toNumber = sharedToNumber
-
-export const toInteger = sharedToInteger
-
-export function toStrictInteger(arg: number, entityName?: string): number {
-  return requireNumberIsInteger(toNumber(arg, entityName), entityName)
+export {
+  requireObjectLike,
+  toFiniteNumber,
+  toIntegerWithTruncation,
+  toPositiveIntegerWithTruncation,
 }
 
-export const toPositiveInteger = sharedToPositiveInteger
+/*
+In official spec, this is called toIntegerIfIntegral
+*/
+export function toStrictInteger(arg: number, entityName?: string): number {
+  return requireNumberIsInteger(toFiniteNumber(arg, entityName), entityName)
+}

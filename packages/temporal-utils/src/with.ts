@@ -1,5 +1,5 @@
 import type { Temporal } from 'temporal-spec'
-import { normalizeNumberInRange, toInteger } from './utils.js'
+import { normalizeNumberInRange, toIntegerWithTruncation } from './utils.js'
 
 const isoCalendarId = 'iso8601'
 
@@ -10,7 +10,7 @@ export function withDayOfYear<
     | Temporal.ZonedDateTime,
 >(date: T, dayOfYear: number, options?: Temporal.OverflowOptions): T {
   const normDayOfYear = normalizeNumberInRange(
-    toInteger(dayOfYear),
+    toIntegerWithTruncation(dayOfYear),
     1,
     date.daysInYear,
     options,
@@ -27,7 +27,7 @@ export function withDayOfWeek<
     | Temporal.ZonedDateTime,
 >(date: T, dayOfWeek: number, options?: Temporal.OverflowOptions): T {
   const normDayOfWeek = normalizeNumberInRange(
-    toInteger(dayOfWeek),
+    toIntegerWithTruncation(dayOfWeek),
     1,
     date.daysInWeek,
     options,
@@ -50,7 +50,7 @@ export function withWeekOfYear<
   const currentWeekOfYear = date.weekOfYear!
   const currentYearOfWeek = date.yearOfWeek!
   const normWeekOfYear = normalizeNumberInRange(
-    toInteger(weekOfYear),
+    toIntegerWithTruncation(weekOfYear),
     1,
     computeIsoWeeksInYear(currentYearOfWeek),
     options,
