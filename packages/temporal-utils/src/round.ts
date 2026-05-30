@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import * as errorMessages from './errorMessages.js'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
 import { RoundingMathOptions, getOptionsObject } from './utils.js'
 
@@ -56,7 +57,7 @@ export function normalizeRoundingOptions(
 
   // This is just for units >day
   if (normOptions.roundingIncrement && normOptions.roundingIncrement !== 1) {
-    throw new RangeError('Non-1 roundingIncrement not allowed')
+    throw new RangeError(errorMessages.nonOneRoundingIncrement)
   }
 
   return {

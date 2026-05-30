@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import * as errorMessages from './errorMessages.js'
 import { normalizeNumberInRange, toIntegerWithTruncation } from './utils.js'
 
 const isoCalendarId = 'iso8601'
@@ -44,7 +45,7 @@ export function withWeekOfYear<
     | Temporal.ZonedDateTime,
 >(date: T, weekOfYear: number, options?: Temporal.OverflowOptions): T {
   if (date.calendarId !== isoCalendarId) {
-    throw new RangeError('Week numbers not supported')
+    throw new RangeError(errorMessages.unsupportedWeekNumbers)
   }
 
   const currentWeekOfYear = date.weekOfYear!

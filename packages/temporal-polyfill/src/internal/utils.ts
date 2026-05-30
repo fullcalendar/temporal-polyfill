@@ -1,4 +1,4 @@
-import * as TemporalUtils from 'temporal-utils'
+import * as TemporalUtils from 'temporal-utils/protected'
 import * as errorMessages from './errorMessages'
 import { Overflow } from './optionsModel'
 
@@ -52,7 +52,13 @@ export function clampEntity(
 
   if (overflow && num !== clamped) {
     throw new RangeError(
-      errorMessages.numberOutOfRange(entityName, num, min, max, choices),
+      errorMessages.numberOutOfRangeWithChoices(
+        entityName,
+        num,
+        min,
+        max,
+        choices,
+      ),
     )
   }
 

@@ -1,4 +1,4 @@
-import * as TemporalUtils from 'temporal-utils'
+import * as TemporalUtils from 'temporal-utils/protected'
 
 export const enum Unit {
   Nanosecond = 0,

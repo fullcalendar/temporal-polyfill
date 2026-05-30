@@ -1,11 +1,13 @@
 import {
+  isObjectLike,
+  requireNumberIsPositive,
   requireObjectLike,
   toFiniteNumber,
   toIntegerWithTruncation,
   toPositiveIntegerWithTruncation,
-} from 'temporal-utils'
+} from 'temporal-utils/protected'
 import * as errorMessages from './errorMessages'
-import { Callable, bindArgs, isObjectLike } from './utils'
+import { Callable, bindArgs } from './utils'
 
 // Require
 // -----------------------------------------------------------------------------
@@ -85,16 +87,6 @@ export function requireNumberIsInteger(
     throw new RangeError(errorMessages.expectedInteger(entityName, num))
   }
   return num || 0 // ensure no -0
-}
-
-/*
-Already known to be number
-*/
-function requireNumberIsPositive(num: number, entityName = 'number'): number {
-  if (num <= 0) {
-    throw new RangeError(errorMessages.expectedPositive(entityName, num))
-  }
-  return num
 }
 
 // Casting

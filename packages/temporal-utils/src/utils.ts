@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import * as errorMessages from './errorMessages.js'
 
 export const nanosecondsInMicrosecond = 1000
 export const nanosecondsInMillisecond = 1000000
@@ -21,18 +22,15 @@ export function getOptionsObject<O extends {}>(options: O | undefined): O {
   return requireObjectLike(options)
 }
 
-// Input Validation
-// -----------------------------------------------------------------------------
-
 export function toFiniteNumber(arg: number, entityName = 'number'): number {
   if (typeof arg === 'bigint') {
-    throw new TypeError(`Cannot convert bigint to ${entityName}`)
+    throw new TypeError(errorMessages.forbiddenBigIntToNumber(entityName))
   }
 
   arg = Number(arg)
 
   if (!Number.isFinite(arg)) {
-    throw new RangeError(`Expected finite ${entityName}`)
+    throw new RangeError(errorMessages.expectedFinite(entityName, arg))
   }
 
   return arg
@@ -56,11 +54,14 @@ export function toPositiveIntegerWithTruncation(
 }
 
 /*
-Already known to be number
+Already known to be number.
 */
-function requireNumberIsPositive(num: number, entityName = 'number'): number {
+export function requireNumberIsPositive(
+  num: number,
+  entityName = 'number',
+): number {
   if (num <= 0) {
-    throw new RangeError(`Expected positive ${entityName}`)
+    throw new RangeError(errorMessages.expectedPositive(entityName, num))
   }
   return num
 }
@@ -82,7 +83,7 @@ export function isObjectLike(arg: unknown): arg is {} {
 
 export function requireObjectLike<O extends {}>(arg: O): O {
   if (!isObjectLike(arg)) {
-    throw new TypeError('Options must be an object')
+    throw new TypeError(errorMessages.invalidObject)
   }
   return arg
 }
@@ -102,7 +103,9 @@ export function normalizeNumberInRange(
   const clamped = constrainToRange(num, min, max)
 
   if (normalizeOverflow(options) === 'reject' && num !== clamped) {
-    throw new RangeError(`Number must be between ${min}-${max}`)
+    throw new RangeError(
+      errorMessages.numberOutOfRange('number', num, min, max),
+    )
   }
 
   return clamped
@@ -125,5 +128,5 @@ function normalizeOverflow(
   if (overflow === 'constrain' || overflow === 'reject') {
     return overflow
   }
-  throw new RangeError('Invalid overflow option')
+  throw new RangeError(errorMessages.invalidOverflowOption)
 }

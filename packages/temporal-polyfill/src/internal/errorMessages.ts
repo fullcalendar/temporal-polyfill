@@ -1,18 +1,16 @@
+import * as baseErrorMessages from 'temporal-utils/protected-error-messages'
+
+export const invalidEntity = baseErrorMessages.invalidEntity
+export const unsupportedWeekNumbers = baseErrorMessages.unsupportedWeekNumbers
+
 // Low-Level
 export const expectedInteger = (entityName: string, num: number) =>
   `Non-integer ${entityName}: ${num}`
-export const expectedPositive = (entityName: string, num: number) =>
-  `Non-positive ${entityName}: ${num}`
-export const expectedFinite = (entityName: string, num: number) =>
-  `Non-finite ${entityName}: ${num}`
-export const forbiddenBigIntToNumber = (entityName: string) =>
-  `Cannot convert bigint to ${entityName}`
 export const invalidBigInt = (arg: any) => `Invalid bigint: ${arg}`
 export const forbiddenSymbolToString = 'Cannot convert Symbol to string'
 export const forbiddenNullish = 'Cannot be null or undefined'
-export const invalidObject = 'Invalid object'
 
-export const numberOutOfRange = (
+export const numberOutOfRangeWithChoices = (
   entityName: string,
   val: number | string,
   min: number | string,
@@ -20,17 +18,15 @@ export const numberOutOfRange = (
   choices?: string[],
 ): string =>
   choices
-    ? numberOutOfRange(
+    ? baseErrorMessages.numberOutOfRange(
         entityName,
         choices[val as number],
         choices[min as number],
         choices[max as number],
       )
-    : invalidEntity(entityName, val) + `; must be between ${min}-${max}`
+    : baseErrorMessages.numberOutOfRange(entityName, val, min, max)
 
 // Entity/Fields/Bags
-export const invalidEntity = (fieldName: string, val: any) =>
-  `Invalid ${fieldName}: ${val}`
 export const missingField = (fieldName: string) => `Missing ${fieldName}`
 export const noValidFields = (validFields: string[]) =>
   'No valid fields: ' + validFields.join()
@@ -41,7 +37,9 @@ export const invalidChoice = (
   val: string,
   choiceMap: Record<string, number>,
 ) =>
-  invalidEntity(fieldName, val) + '; must be ' + Object.keys(choiceMap).join()
+  baseErrorMessages.invalidEntity(fieldName, val) +
+  '; must be ' +
+  Object.keys(choiceMap).join()
 
 // Class-related
 export const forbiddenValueOf = 'Cannot use valueOf'
@@ -68,15 +66,14 @@ export const invalidProtocolResults = 'Invalid protocol results'
 
 // Calendar
 export const invalidCalendar = (calendarId: string) =>
-  invalidEntity('Calendar', calendarId)
+  baseErrorMessages.invalidEntity('Calendar', calendarId)
 export const exoticCalendarRequired = (calendarId: string, remedy: string) =>
   `Unknown calendar ${calendarId}; might need ${remedy}`
 export const mismatchingCalendars = 'Mismatching Calendars'
-export const unsupportedWeekNumbers = 'Calendar week operations forbidden'
 
 // TimeZone
 export const invalidTimeZone = (calendarId: string) =>
-  invalidEntity('TimeZone', calendarId)
+  baseErrorMessages.invalidEntity('TimeZone', calendarId)
 export const mismatchingTimeZones = 'Mismatching TimeZones'
 export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
