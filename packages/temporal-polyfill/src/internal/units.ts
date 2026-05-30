@@ -1,3 +1,5 @@
+import * as TemporalUtils from 'temporal-utils'
+
 export const enum Unit {
   Nanosecond = 0,
   Microsecond = 1,
@@ -45,11 +47,11 @@ export const secInDay = 86400
 export const milliInDay = 86400000
 export const milliInSec = 1000
 
-export const nanoInMicro = 1000 // consolidate with other 1000 units
-export const nanoInMilli = 1_000_000
-export const nanoInSec = 1_000_000_000
-export const nanoInMinute = 60_000_000_000
-export const nanoInHour = 3_600_000_000_000
+export const nanoInMicro = TemporalUtils.nanoInMicro
+export const nanoInMilli = TemporalUtils.nanoInMilli
+export const nanoInSec = TemporalUtils.nanoInSec
+export const nanoInMinute = TemporalUtils.nanoInMinute
+export const nanoInHour = TemporalUtils.nanoInHour
 export const nanoInUtcDay = 86_400_000_000_000
 
 export const unitNanoMap = [

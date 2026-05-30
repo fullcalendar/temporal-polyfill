@@ -29,8 +29,8 @@
     "tsc": "tsc --build tsconfig.build.json",
     "tsc:all": "tsc -p tsconfig.json --noEmit --tsBuildInfoFile dist/.tsbuildinfo.all",
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
-    "bundle": "./scripts/bundle.js",
-    "bundle:dev": "./scripts/bundle.js --dev",
+    "bundle": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js",
+    "bundle:dev": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js --dev",
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",
     "readme": "cp ../../README.md dist",
@@ -121,6 +121,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
     "@js-temporal/temporal-test262-runner": "github:fullcalendar/temporal-test262-runner#main",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@swc/core": "1.4.11",
     "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",

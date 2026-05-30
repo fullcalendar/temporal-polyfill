@@ -23,38 +23,44 @@ export function normalizeOptions<O extends {}>(options: O | undefined): O {
 
 // Input Validation
 // -----------------------------------------------------------------------------
-// TODO: make DRY with temporal-polyfill somehow!?
 
-function toNumber(arg: number): number {
+export function toNumber(arg: number, entityName = 'number'): number {
   if (typeof arg === 'bigint') {
-    throw new TypeError('Cannot convert bigint to number')
+    throw new TypeError(`Cannot convert bigint to ${entityName}`)
   }
 
   arg = Number(arg)
 
   if (!Number.isFinite(arg)) {
-    throw new RangeError('Cannot convert infinity to number')
+    throw new RangeError(`Expected finite ${entityName}`)
   }
 
   return arg
 }
 
-export function toInteger(arg: number): number {
-  return Math.trunc(toNumber(arg)) || 0 // ensure no -0
+export function toInteger(arg: number, entityName?: string): number {
+  return Math.trunc(toNumber(arg, entityName)) || 0 // ensure no -0
 }
 
-export function toPositiveInteger(arg: number): number {
-  return requireNumberIsPositive(toInteger(arg))
+export function toPositiveInteger(arg: number, entityName?: string): number {
+  return requireNumberIsPositive(toInteger(arg, entityName), entityName)
 }
 
 /*
 Already known to be number
 */
-function requireNumberIsPositive(num: number): number {
+function requireNumberIsPositive(num: number, entityName = 'number'): number {
   if (num <= 0) {
-    throw new RangeError('Expected positive number')
+    throw new RangeError(`Expected positive ${entityName}`)
   }
   return num
+}
+
+/*
+min/max are inclusive
+*/
+export function clampNumber(num: number, min: number, max: number): number {
+  return Math.min(Math.max(num, min), max)
 }
 
 /*
@@ -66,7 +72,7 @@ export function normalizeNumberInRange(
   max: number, // inclusive
   options?: Temporal.OverflowOptions,
 ): number {
-  const clamped = Math.min(Math.max(num, min), max)
+  const clamped = clampNumber(num, min, max)
 
   if (normalizeOverflow(options) === 'reject' && num !== clamped) {
     throw new RangeError(`Number must be between ${min}-${max}`)
@@ -95,8 +101,12 @@ function normalizeOverflow(
   throw new RangeError('Invalid overflow option')
 }
 
-function requireObjectLike<O extends {}>(arg: O): O {
-  if (arg === null || (typeof arg !== 'object' && typeof arg !== 'function')) {
+export function isObjectLike(arg: unknown): arg is {} {
+  return arg !== null && (typeof arg === 'object' || typeof arg === 'function')
+}
+
+export function requireObjectLike<O extends {}>(arg: O): O {
+  if (!isObjectLike(arg)) {
     throw new TypeError('Options must be an object')
   }
   return arg

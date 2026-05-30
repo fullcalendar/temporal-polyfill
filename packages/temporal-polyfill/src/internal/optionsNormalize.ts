@@ -1,3 +1,4 @@
+import { normalizeOptions as sharedNormalizeOptions } from 'temporal-utils'
 import { requireObjectLike } from './cast'
 
 /*
@@ -9,13 +10,7 @@ because option property access is observable, and the caller-specific
 `refine*Options` functions still own the exact read order and validation order.
 */
 
-export function normalizeOptions<O extends {}>(options: O | undefined): O {
-  if (options === undefined) {
-    // Avoid inherited option properties from Object.prototype pollution.
-    return Object.create(null)
-  }
-  return requireObjectLike(options)
-}
+export const normalizeOptions = sharedNormalizeOptions
 
 export function normalizeOptionsOrString<
   O extends {},

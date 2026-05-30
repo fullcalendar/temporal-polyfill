@@ -1,5 +1,12 @@
+import * as TemporalUtils from 'temporal-utils'
 import * as errorMessages from './errorMessages'
 import { Overflow } from './optionsModel'
+
+export const clampNumber: (num: number, min: number, max: number) => number =
+  TemporalUtils.clampNumber
+
+export const isObjectLike: (arg: unknown) => arg is {} =
+  TemporalUtils.isObjectLike
 
 // Types
 // -----------------------------------------------------------------------------
@@ -55,10 +62,6 @@ export function getDefinedProp(props: any, propName: string): any {
     throw new TypeError(errorMessages.missingField(propName))
   }
   return propVal
-}
-
-export function isObjectLike(arg: unknown): arg is {} {
-  return arg !== null && /object|function/.test(typeof arg)
 }
 
 // Cache
@@ -371,13 +374,6 @@ export function divFloorBigInt(num: bigint, denom: bigint): bigint {
   const whole = num / denom
   const remainder = num % denom
   return remainder < BigInt(0) ? whole - BigInt(1) : whole
-}
-
-/*
-min/max are inclusive
-*/
-export function clampNumber(num: number, min: number, max: number): number {
-  return Math.min(Math.max(num, min), max)
 }
 
 export function divModFloor(num: number, divisor: number): [number, number] {

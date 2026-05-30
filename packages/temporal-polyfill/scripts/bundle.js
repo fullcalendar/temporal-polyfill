@@ -8,6 +8,7 @@ import {
   resolve as resolvePath,
   sep as pathSep,
 } from 'path'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
@@ -73,6 +74,9 @@ async function buildConfigs(pkgDir, isDev) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const isExternalDependency = buildExternalDependencyResolver(pkgJson)
+  const isIifeExternalDependency = buildExternalDependencyResolver(pkgJson, {
+    bundleDependencies: true,
+  })
   const exportMap = pkgJson.buildConfig.exports
   const moduleInputs = {}
   const iifeConfigs = []
@@ -112,8 +116,9 @@ async function buildConfigs(pkgDir, isDev) {
       iifeConfigs.push({
         input: srcPath,
         onwarn,
-        external: isExternalDependency,
+        external: isIifeExternalDependency,
         plugins: [
+          nodeResolve(),
           definePlugin,
           // for reading sourcemaps from tsc
           isDev && sourcemaps(),
@@ -271,13 +276,15 @@ function onwarn(warning) {
   }
 }
 
-function buildExternalDependencyResolver(pkgJson) {
-  const dependencyNames = Object.keys(pkgJson.dependencies || {})
+function buildExternalDependencyResolver(pkgJson, options = {}) {
+  const dependencyNames = options.bundleDependencies
+    ? []
+    : Object.keys(pkgJson.dependencies || {})
 
   return (id) => {
-    // Bare package imports are runtime dependencies, not bundled source files.
-    // Mark them external explicitly so Rollup doesn't warn while preserving
-    // any package subpath imports the dependency might expose later.
+    // Bare package imports in dependencies are runtime dependencies unless this
+    // bundle opts into inlining them. Dev dependencies are build-time inputs and
+    // are always left for Rollup to resolve and bundle if imported.
     return dependencyNames.some((dependencyName) => {
       return id === dependencyName || id.startsWith(dependencyName + '/')
     })
@@ -295,7 +302,9 @@ async function buildTest262Config({
 }) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
-  const isExternalDependency = buildExternalDependencyResolver(pkgJson)
+  const isExternalDependency = buildExternalDependencyResolver(pkgJson, {
+    bundleDependencies: true,
+  })
   const globalInput = joinPaths(
     pkgDir,
     'dist',
@@ -310,15 +319,18 @@ async function buildTest262Config({
     input: test262ForceShim ? test262ForceShimInput : globalInput,
     onwarn,
     external: isExternalDependency,
-    plugins: test262ForceShim
-      ? [
-          buildTest262ForceShimEntryPlugin({
-            input: test262ForceShimInput,
-            pkgDir,
-            test262ClassApi,
-          }),
-        ]
-      : [],
+    plugins: [
+      nodeResolve(),
+      ...(test262ForceShim
+        ? [
+            buildTest262ForceShimEntryPlugin({
+              input: test262ForceShimInput,
+              pkgDir,
+              test262ClassApi,
+            }),
+          ]
+        : []),
+    ],
     output: {
       format: 'iife',
       name: 'TemporalPolyfillTest262',

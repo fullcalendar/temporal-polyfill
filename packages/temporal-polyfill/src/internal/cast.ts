@@ -1,3 +1,8 @@
+import {
+  toInteger as sharedToInteger,
+  toNumber as sharedToNumber,
+  toPositiveInteger as sharedToPositiveInteger,
+} from 'temporal-utils'
 import * as errorMessages from './errorMessages'
 import { Callable, bindArgs, isObjectLike } from './utils'
 
@@ -133,28 +138,12 @@ export function toBigInt(bi: bigint): bigint {
   return bi
 }
 
-export function toNumber(arg: number, entityName = 'number'): number {
-  if (typeof arg === 'bigint') {
-    throw new TypeError(errorMessages.forbiddenBigIntToNumber(entityName))
-  }
+export const toNumber = sharedToNumber
 
-  arg = Number(arg)
-
-  if (!Number.isFinite(arg)) {
-    throw new RangeError(errorMessages.expectedFinite(entityName, arg))
-  }
-
-  return arg
-}
-
-export function toInteger(arg: number, entityName?: string): number {
-  return Math.trunc(toNumber(arg, entityName)) || 0 // ensure no -0
-}
+export const toInteger = sharedToInteger
 
 export function toStrictInteger(arg: number, entityName?: string): number {
   return requireNumberIsInteger(toNumber(arg, entityName), entityName)
 }
 
-export function toPositiveInteger(arg: number, entityName?: string): number {
-  return requireNumberIsPositive(toInteger(arg, entityName), entityName)
-}
+export const toPositiveInteger = sharedToPositiveInteger
