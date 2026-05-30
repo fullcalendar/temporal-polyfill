@@ -1,6 +1,9 @@
 import { DateTimeFields } from '../internal/fieldTypes'
 
-export interface DateTimeFormatLike<R> {
+export type DateTimeFormatLike<R> = Omit<
+  Intl.DateTimeFormat,
+  'format' | 'formatToParts' | 'formatRange' | 'formatRangeToParts'
+> & {
   format(record: R): string
   formatToParts(record: R): Intl.DateTimeFormatPart[]
   formatRange(record0: R, record1: R): string
@@ -8,7 +11,6 @@ export interface DateTimeFormatLike<R> {
     record0: R,
     record1: R,
   ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']>
-  resolvedOptions(): Intl.ResolvedDateTimeFormatOptions
 }
 
 export type ToZonedDateTimeOptions<PlainTimeRecord> = {

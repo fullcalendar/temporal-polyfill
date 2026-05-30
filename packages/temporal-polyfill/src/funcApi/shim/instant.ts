@@ -55,7 +55,7 @@ import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
-import { createDateTimeFormat } from './dateTimeFormat'
+import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -403,17 +403,13 @@ export function toZonedDateTimeISO(
 
 const prepFormat = createFormatPrepper(instantConfig)
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createDateTimeFormat(
-    instantConfig,
-    getInstantShimRecordSlots,
-    locales,
-    options,
-  )
-}
+) => Format = createDateTimeFormatFactory(
+  instantConfig,
+  getInstantShimRecordSlots,
+)
 
 export function toLocaleString(
   record: InstantShimRecord,

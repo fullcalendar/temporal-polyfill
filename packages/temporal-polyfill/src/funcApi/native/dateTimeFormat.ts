@@ -1,35 +1,55 @@
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { DateTimeFormatLike } from '../commonTypes'
 
-export function createNativeDateTimeFormat<R>(
+type RawDateTimeFormatClass = new (
+  _locales?: LocalesArg,
+  _options?: Intl.DateTimeFormatOptions,
+) => {
+  format(date?: any): string
+  formatToParts(date?: any): Intl.DateTimeFormatPart[]
+  formatRange(startDate: any, endDate: any): string
+  formatRangeToParts(
+    startDate: any,
+    endDate: any,
+  ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']>
+}
+
+const RawDateTimeFormatClass =
+  RawDateTimeFormat as unknown as RawDateTimeFormatClass
+
+export function createNativeDateTimeFormatFactory<R>(
   getNative: (record: R) => any,
+): (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): DateTimeFormatLike<R> {
-  const format = new Intl.DateTimeFormat(locales, options)
-
-  return {
+) => DateTimeFormatLike<R> {
+  class NativeDateTimeFormat extends RawDateTimeFormatClass {
     format(record: R): string {
-      return format.format(getNative(record))
-    },
+      return super.format(getNative(record))
+    }
 
     formatToParts(record: R): Intl.DateTimeFormatPart[] {
-      return format.formatToParts(getNative(record))
-    },
+      return super.formatToParts(getNative(record))
+    }
 
     formatRange(record0: R, record1: R): string {
-      return format.formatRange(getNative(record0), getNative(record1))
-    },
+      return super.formatRange(getNative(record0), getNative(record1))
+    }
 
     formatRangeToParts(
       record0: R,
       record1: R,
     ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
-      return format.formatRangeToParts(getNative(record0), getNative(record1))
-    },
-
-    resolvedOptions(): Intl.ResolvedDateTimeFormatOptions {
-      return format.resolvedOptions()
-    },
+      return super.formatRangeToParts(getNative(record0), getNative(record1))
+    }
   }
+
+  return (
+    locales?: LocalesArg,
+    options?: Intl.DateTimeFormatOptions,
+  ): DateTimeFormatLike<R> =>
+    new NativeDateTimeFormat(
+      locales,
+      options,
+    ) as unknown as DateTimeFormatLike<R>
 }

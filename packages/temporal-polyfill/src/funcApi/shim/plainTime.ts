@@ -40,7 +40,7 @@ import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
-import { createDateTimeFormat } from './dateTimeFormat'
+import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -440,17 +440,13 @@ export function compare(
 
 const prepFormat = createFormatPrepper(timeConfig)
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createDateTimeFormat(
-    timeConfig,
-    getPlainTimeShimRecordSlots,
-    locales,
-    options,
-  )
-}
+) => Format = createDateTimeFormatFactory(
+  timeConfig,
+  getPlainTimeShimRecordSlots,
+)
 
 export function toLocaleString(
   record: PlainTimeShimRecord,

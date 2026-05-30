@@ -94,7 +94,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
-import { createDateTimeFormat } from './dateTimeFormat'
+import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
   diffZonedDays,
   diffZonedMonths,
@@ -584,17 +584,13 @@ export function toPlainTime(
 
 const prepFormat = createFormatPrepper(zonedConfig)
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createDateTimeFormat(
-    zonedConfig,
-    getZonedDateTimeShimRecordSlots,
-    locales,
-    options,
-  )
-}
+) => Format = createDateTimeFormatFactory(
+  zonedConfig,
+  getZonedDateTimeShimRecordSlots,
+)
 
 export function toLocaleString(
   record: ZonedDateTimeShimRecord,

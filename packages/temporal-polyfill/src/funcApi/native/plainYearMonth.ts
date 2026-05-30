@@ -20,7 +20,7 @@ import {
   getCalendarNativeRecordId,
   runCalendarNativeResolver,
 } from './calendar'
-import { createNativeDateTimeFormat } from './dateTimeFormat'
+import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -336,12 +336,10 @@ export function toPlainDate(
   return createPlainDateNativeRecord(resNative)
 }
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createNativeDateTimeFormat(getPlainYearMonthNative, locales, options)
-}
+) => Format = createNativeDateTimeFormatFactory(getPlainYearMonthNative)
 
 export function toLocaleString(
   record: PlainYearMonthNativeRecord,

@@ -615,6 +615,7 @@ describe('createFormat', () => {
       timeZone: 'America/New_York',
     })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(pdt)).toBe('Sunday, December 31, 2023 at 12:30:00 PM')
   })
 

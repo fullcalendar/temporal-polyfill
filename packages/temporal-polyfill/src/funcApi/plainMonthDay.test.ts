@@ -165,6 +165,7 @@ describe('createFormat', () => {
       calendar: 'iso8601',
     })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(pmd)).toBe('June 18')
   })
 

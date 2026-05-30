@@ -12,7 +12,7 @@ import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
-import { createNativeDateTimeFormat } from './dateTimeFormat'
+import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -353,12 +353,10 @@ export function toZonedDateTimeISO(
   return createZonedDateTimeNativeRecord(resNative)
 }
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createNativeDateTimeFormat(getInstantNative, locales, options)
-}
+) => Format = createNativeDateTimeFormatFactory(getInstantNative)
 
 export function toLocaleString(
   record: InstantNativeRecord,

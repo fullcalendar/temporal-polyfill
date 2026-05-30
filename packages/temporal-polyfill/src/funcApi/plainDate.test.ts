@@ -480,6 +480,7 @@ describe('createFormat', () => {
     const pd = PlainDateFns.create(2023, 12, 31)
     const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(pd)).toBe('Sunday, December 31, 2023')
   })
 

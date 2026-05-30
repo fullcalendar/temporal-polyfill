@@ -617,6 +617,7 @@ describe('createFormat', () => {
       calendar: 'iso8601',
     })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(pym)).toBe('2023 December')
   })
 

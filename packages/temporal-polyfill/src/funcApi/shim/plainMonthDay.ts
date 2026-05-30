@@ -32,7 +32,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
-import { createDateTimeFormat } from './dateTimeFormat'
+import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
 import {
   attachDebugString,
@@ -191,17 +191,13 @@ export function toPlainDate(
 
 const prepFormat = createFormatPrepper(monthDayConfig)
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createDateTimeFormat(
-    monthDayConfig,
-    getPlainMonthDayShimRecordSlots,
-    locales,
-    options,
-  )
-}
+) => Format = createDateTimeFormatFactory(
+  monthDayConfig,
+  getPlainMonthDayShimRecordSlots,
+)
 
 export function toLocaleString(
   record: PlainMonthDayShimRecord,

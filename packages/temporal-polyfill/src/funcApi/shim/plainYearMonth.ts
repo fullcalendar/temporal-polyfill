@@ -53,7 +53,7 @@ import {
   createCalendarShimStringResolver,
   refineCalendarShimArg,
 } from './calendar'
-import { createDateTimeFormat } from './dateTimeFormat'
+import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { diffPlainMonths, diffPlainYears } from './diffUtils'
 import {
   DurationShimRecord,
@@ -417,17 +417,13 @@ export function toPlainDate(
 
 const prepFormat = createFormatPrepper(yearMonthConfig)
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createDateTimeFormat(
-    yearMonthConfig,
-    getPlainYearMonthShimRecordSlots,
-    locales,
-    options,
-  )
-}
+) => Format = createDateTimeFormatFactory(
+  yearMonthConfig,
+  getPlainYearMonthShimRecordSlots,
+)
 
 export function toLocaleString(
   record: PlainYearMonthShimRecord,

@@ -479,6 +479,7 @@ describe('createFormat', () => {
       second: '2-digit',
     })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(pt)).toBe('12:30:00 PM')
   })
 

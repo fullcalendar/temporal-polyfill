@@ -12,7 +12,7 @@ import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
-import { createNativeDateTimeFormat } from './dateTimeFormat'
+import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -448,12 +448,10 @@ export function compare(
   return NativeTemporal!.PlainTime.compare(native, otherNative) as NumberSign
 }
 
-export function createFormat(
+export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-): Format {
-  return createNativeDateTimeFormat(getPlainTimeNative, locales, options)
-}
+) => Format = createNativeDateTimeFormatFactory(getPlainTimeNative)
 
 export function toLocaleString(
   record: PlainTimeNativeRecord,

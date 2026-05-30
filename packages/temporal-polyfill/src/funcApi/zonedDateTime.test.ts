@@ -783,6 +783,7 @@ describe('createFormat', () => {
       timeStyle: 'full',
     })
 
+    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
     expect(format.format(zdt)).toBe(
       'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
     )
