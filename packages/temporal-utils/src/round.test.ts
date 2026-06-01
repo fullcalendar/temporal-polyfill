@@ -26,9 +26,13 @@ describe('roundToYear', () => {
       ).toBe(true)
     })
 
-    it('rejects single roundingMode arg', () => {
+    it('accepts a roundingMode string shorthand', () => {
       const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
-      expect(() => roundToYear(pdt, 'floor' as any)).toThrow(TypeError)
+      expect(
+        roundToYear(pdt, 'floor').equals(
+          Temporal.PlainDateTime.from('2024-01-01T00:00:00'),
+        ),
+      ).toBe(true)
     })
   })
 
@@ -75,9 +79,13 @@ describe('roundToMonth', () => {
       ).toBe(true)
     })
 
-    it('rejects single roundingMode arg', () => {
+    it('accepts a roundingMode string shorthand', () => {
       const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
-      expect(() => roundToMonth(pdt, 'floor' as any)).toThrow(TypeError)
+      expect(
+        roundToMonth(pdt, 'floor').equals(
+          Temporal.PlainDateTime.from('2024-07-01T00:00:00'),
+        ),
+      ).toBe(true)
     })
   })
 
@@ -126,9 +134,13 @@ describe('roundToWeek', () => {
       ).toBe(true)
     })
 
-    it('rejects single roundingMode arg', () => {
-      const pdt = Temporal.PlainDateTime.from('2024-07-20T12:30:00')
-      expect(() => roundToWeek(pdt, 'floor' as any)).toThrow(TypeError)
+    it('accepts a roundingMode string shorthand', () => {
+      const pdt = Temporal.PlainDateTime.from('2024-07-20T12:30:00') // Saturday
+      expect(
+        roundToWeek(pdt, 'floor').equals(
+          Temporal.PlainDateTime.from('2024-07-15T00:00:00'), // this Monday
+        ),
+      ).toBe(true)
     })
   })
 

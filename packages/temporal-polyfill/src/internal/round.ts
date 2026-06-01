@@ -75,12 +75,31 @@ export function roundInstant(
     options,
     Unit.Hour,
     true, // solarMode
+  ) as [TimeUnit, number, RoundingModeEnum]
+  return roundInstantToUnit(
+    instantSlots,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
   )
+}
 
+/*
+Like roundInstant, but accepts an already-refined smallestUnit/inc/mode
+instead of a raw options bag. Lets callers that already hold a separate
+smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
+options object only to have it re-parsed.
+*/
+export function roundInstantToUnit(
+  instantSlots: EpochNanoFields,
+  smallestUnit: TimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): EpochNanoFields {
   return createEpochNanoSlots(
     roundBigNanoToUnit(
       instantSlots.epochNanoseconds,
-      smallestUnit as TimeUnit,
+      smallestUnit,
       roundingInc,
       roundingMode,
       true, // useDayOrigin
@@ -97,10 +116,31 @@ export function roundZonedDateTime(
     | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
     | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
 ): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
+    options,
+  ) as [DayTimeUnit, number, RoundingModeEnum]
+  return roundZonedDateTimeToUnit(
+    slots,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+  )
+}
+
+/*
+Like roundZonedDateTime, but accepts an already-refined smallestUnit/inc/mode
+instead of a raw options bag. Lets callers that already hold a separate
+smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
+options object only to have it re-parsed.
+*/
+export function roundZonedDateTimeToUnit(
+  slots: ZonedEpochNanoFields & { calendar: CalendarSlot }, // might get returned :(
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): ZonedEpochNanoFields & { calendar: CalendarSlot } {
   let { epochNanoseconds } = slots
   const { timeZone, calendar } = slots
-  const [smallestUnit, roundingInc, roundingMode] =
-    refineRoundingOptions(options)
 
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return slots
@@ -129,7 +169,7 @@ export function roundZonedDateTime(
 
     const roundedIsoDateTime = roundDateTimeToNano(
       isoDateTime,
-      computeNanoInc(smallestUnit as DayTimeUnit, roundingInc),
+      computeNanoInc(smallestUnit, roundingInc),
       roundingMode,
     )
     epochNanoseconds = getMatchingInstantFor(
@@ -157,6 +197,26 @@ export function roundPlainDateTime(
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
   ) as [DayTimeUnit, number, RoundingModeEnum]
+  return roundPlainDateTimeToUnit(
+    slots,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+  )
+}
+
+/*
+Like roundPlainDateTime, but accepts an already-refined smallestUnit/inc/mode
+instead of a raw options bag. Lets callers that already hold a separate
+smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
+options object only to have it re-parsed.
+*/
+export function roundPlainDateTimeToUnit(
+  slots: CalendarDateTimeFields & { calendar: CalendarSlot },
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const roundedIsoDateTime = roundDateTimeToNano(
     slots,
     computeNanoInc(smallestUnit, roundingInc),
@@ -175,6 +235,21 @@ export function roundPlainTime(
     options,
     Unit.Hour,
   ) as [TimeUnit, number, RoundingModeEnum]
+  return roundPlainTimeToUnit(slots, smallestUnit, roundingInc, roundingMode)
+}
+
+/*
+Like roundPlainTime, but accepts an already-refined smallestUnit/inc/mode
+instead of a raw options bag. Lets callers that already hold a separate
+smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
+options object only to have it re-parsed.
+*/
+export function roundPlainTimeToUnit(
+  slots: TimeFields,
+  smallestUnit: TimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): TimeFields {
   const roundedTimeFields = roundTimeToNano(
     slots,
     computeNanoInc(smallestUnit, roundingInc),

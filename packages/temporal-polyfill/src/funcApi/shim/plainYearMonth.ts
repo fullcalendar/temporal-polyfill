@@ -39,7 +39,6 @@ import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { refineRoundToOptions } from '../roundTo'
 import {
   getPlainYearMonthSlots,
   setPlainYearMonthSlots,
@@ -64,6 +63,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   computeYearCeil,
   computeYearFloor,

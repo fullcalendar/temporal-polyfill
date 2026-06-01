@@ -1,7 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as errorMessages from './errorMessages.js'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import { RoundingMathOptions, getOptionsObject } from './utils.js'
+import { RoundingMathOptions, RoundingMode, getOptionsObject } from './utils.js'
 
 export function roundToYear<
   T extends
@@ -9,7 +9,7 @@ export function roundToYear<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
->(date: T, options?: RoundingMathOptions): T {
+>(date: T, options?: RoundingMathOptions | RoundingMode): T {
   const start = startOfYear(date)
   const duration = start.until(
     date as any,
@@ -23,7 +23,7 @@ export function roundToMonth<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
->(date: T, options?: RoundingMathOptions): T {
+>(date: T, options?: RoundingMathOptions | RoundingMode): T {
   const start = startOfMonth(date)
   const duration = start.until(
     date as any,
@@ -37,7 +37,7 @@ export function roundToWeek<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
->(date: T, options?: RoundingMathOptions): T {
+>(date: T, options?: RoundingMathOptions | RoundingMode): T {
   const start = startOfWeek(date)
   const duration = start.until(
     date as any,
@@ -48,12 +48,16 @@ export function roundToWeek<
 
 export function normalizeRoundingOptions(
   forcedUnit: 'week' | 'month' | 'year',
-  options: RoundingMathOptions | undefined,
+  options: RoundingMathOptions | RoundingMode | undefined,
 ): {
   roundingMode: RoundingMathOptions['roundingMode']
   smallestUnit: any // HACK
 } {
-  const normOptions = getOptionsObject(options)
+  // Accept a bare roundingMode string as shorthand for { roundingMode }.
+  const normOptions: RoundingMathOptions =
+    typeof options === 'string'
+      ? { roundingMode: options }
+      : getOptionsObject(options)
 
   // This is just for units >day
   if (normOptions.roundingIncrement && normOptions.roundingIncrement !== 1) {

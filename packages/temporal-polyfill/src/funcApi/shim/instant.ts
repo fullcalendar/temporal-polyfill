@@ -29,7 +29,7 @@ import {
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
-import { roundBigNanoToInc, roundInstant } from '../../internal/round'
+import { roundBigNanoToInc, roundInstantToUnit } from '../../internal/round'
 import {
   createEpochNanoSlots,
   getEpochMilli,
@@ -51,7 +51,6 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions } from '../roundTo'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
@@ -64,6 +63,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   ZonedDateTimeShimRecord,
   createZonedDateTimeShimRecord,
@@ -345,30 +345,34 @@ export const diffMicroseconds = bindArgs(
 )
 export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
-function round(
-  record: InstantShimRecord,
-  options:
-    | Temporal.PluralizeUnit<Temporal.TimeUnit>
-    | Temporal.RoundingOptions<Temporal.TimeUnit>,
-): InstantShimRecord {
-  const slots = getInstantShimRecordSlots(record)
-  const resSlots = roundInstant(slots, options)
-  return createInstantShimRecord(resSlots)
-}
-
 function roundToUnit(
-  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
+  smallestUnit: TimeUnit,
   record: InstantShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): InstantShimRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
+  // We already hold smallestUnit as a separate arg, so refine the options
+  // directly instead of synthesizing a raw options bag for re-parsing.
+  // solarMode: Instant validates increments against a full UTC day.
+  const [roundingInc, roundingMode] = refineRoundToOptions(
+    smallestUnit,
+    options,
+    true, // solarMode
+  )
+  return createInstantShimRecord(
+    roundInstantToUnit(
+      getInstantShimRecordSlots(record),
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+    ),
+  )
 }
 
-export const roundToHour = bindArgs(roundToUnit, 'hour')
-export const roundToMinute = bindArgs(roundToUnit, 'minute')
-export const roundToSecond = bindArgs(roundToUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
+export const roundToHour = bindArgs(roundToUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
 
 export function equals(
   record: InstantShimRecord,

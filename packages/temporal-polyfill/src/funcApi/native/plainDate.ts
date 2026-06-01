@@ -10,7 +10,7 @@ import {
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { normalizeRoundToOptions } from '../roundTo'
+import { normalizeRoundToOptions } from '../roundToUtils'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarNativeRecord,

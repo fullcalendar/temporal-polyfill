@@ -50,7 +50,6 @@ import {
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { refineRoundToOptions } from '../roundTo'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarShimRecord,
@@ -99,6 +98,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   computeIsoWeekCeil,
   computeIsoWeekFloor,

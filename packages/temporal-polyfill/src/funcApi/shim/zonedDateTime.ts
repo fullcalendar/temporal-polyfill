@@ -52,7 +52,7 @@ import {
   alignZonedEpoch,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
-  roundZonedDateTime,
+  roundZonedDateTimeToUnit,
   roundZonedEpochToInterval,
 } from '../../internal/round'
 import {
@@ -70,6 +70,7 @@ import {
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
 import {
+  DayTimeUnit,
   Unit,
   nanoInHour,
   nanoInMicro,
@@ -80,7 +81,6 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions, refineRoundToOptions } from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -131,6 +131,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   computeDayCeil,
   computeHourFloor,
@@ -497,17 +498,6 @@ export function diff(
   return createDurationShimRecord(resSlots)
 }
 
-function round(
-  record: ZonedDateTimeShimRecord,
-  options:
-    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-): ZonedDateTimeShimRecord {
-  return createZonedDateTimeShimRecord(
-    roundZonedDateTime(getZonedDateTimeShimRecordSlots(record), options),
-  )
-}
-
 export function startOfDay(
   record: ZonedDateTimeShimRecord,
 ): ZonedDateTimeShimRecord {
@@ -657,19 +647,32 @@ export const roundToWeek = bindArgs(
 )
 
 function roundToDayTimeUnit(
-  smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
+  smallestUnit: DayTimeUnit,
   record: ZonedDateTimeShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeShimRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
+  // We already hold smallestUnit as a separate arg, so refine the options
+  // directly instead of synthesizing a raw options bag for re-parsing.
+  const [roundingInc, roundingMode] = refineRoundToOptions(
+    smallestUnit,
+    options,
+  )
+  return createZonedDateTimeShimRecord(
+    roundZonedDateTimeToUnit(
+      getZonedDateTimeShimRecordSlots(record),
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+    ),
+  )
 }
 
-export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
-export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
-export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
-export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
+export const roundToDay = bindArgs(roundToDayTimeUnit, Unit.Day)
+export const roundToHour = bindArgs(roundToDayTimeUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToDayTimeUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToDayTimeUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, Unit.Microsecond)
 
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------

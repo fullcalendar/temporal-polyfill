@@ -50,7 +50,7 @@ import { movePlainDateTime } from '../../internal/move'
 import {
   IsoDateTimeInterval,
   computeDayFloor,
-  roundPlainDateTime,
+  roundPlainDateTimeToUnit,
 } from '../../internal/round'
 import {
   createDateSlots,
@@ -61,6 +61,7 @@ import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRe
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
+  DayTimeUnit,
   Unit,
   nanoInHour,
   nanoInMicro,
@@ -71,7 +72,6 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions, refineRoundToOptions } from '../roundTo'
 import {
   getPlainDateTimeSlots,
   setPlainDateTimeSlots,
@@ -117,6 +117,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   computeDayCeil,
   computeHourFloor,
@@ -452,17 +453,6 @@ export function diff(
   return createDurationShimRecord(resSlots)
 }
 
-function round(
-  record: PlainDateTimeShimRecord,
-  options:
-    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-): PlainDateTimeShimRecord {
-  const slots = getPlainDateTimeShimRecordSlots(record)
-  const resSlots = roundPlainDateTime(slots, options)
-  return createPlainDateTimeShimRecord(resSlots)
-}
-
 export function equals(
   record: PlainDateTimeShimRecord,
   otherRecord: PlainDateTimeShimRecord,
@@ -710,19 +700,32 @@ export const roundToWeek = bindArgs(
 )
 
 function roundToDayTimeUnit(
-  smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
+  smallestUnit: DayTimeUnit,
   record: PlainDateTimeShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): PlainDateTimeShimRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
+  // We already hold smallestUnit as a separate arg, so refine the options
+  // directly instead of synthesizing a raw options bag for re-parsing.
+  const [roundingInc, roundingMode] = refineRoundToOptions(
+    smallestUnit,
+    options,
+  )
+  return createPlainDateTimeShimRecord(
+    roundPlainDateTimeToUnit(
+      getPlainDateTimeShimRecordSlots(record),
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+    ),
+  )
 }
 
-export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')
-export const roundToHour = bindArgs(roundToDayTimeUnit, 'hour')
-export const roundToMinute = bindArgs(roundToDayTimeUnit, 'minute')
-export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
+export const roundToDay = bindArgs(roundToDayTimeUnit, Unit.Day)
+export const roundToHour = bindArgs(roundToDayTimeUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToDayTimeUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToDayTimeUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToDayTimeUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, Unit.Microsecond)
 
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------

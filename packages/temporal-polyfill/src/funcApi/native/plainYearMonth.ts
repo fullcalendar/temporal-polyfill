@@ -7,7 +7,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { normalizeRoundToOptions } from '../roundTo'
+import { normalizeRoundToOptions } from '../roundToUtils'
 import {
   getPlainYearMonthSlots,
   setPlainYearMonthSlots,

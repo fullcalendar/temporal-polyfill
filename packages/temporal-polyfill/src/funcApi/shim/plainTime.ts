@@ -17,7 +17,7 @@ import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
-import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
+import { roundBigNanoToInc, roundPlainTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   nanoToTimeAndDay,
@@ -35,7 +35,6 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions } from '../roundTo'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
@@ -49,6 +48,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
@@ -290,30 +290,32 @@ export const diffMicroseconds = bindArgs(
 )
 export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
-function round(
-  record: PlainTimeShimRecord,
-  options:
-    | Temporal.PluralizeUnit<Temporal.TimeUnit>
-    | Temporal.RoundingOptions<Temporal.TimeUnit>,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord(
-    roundPlainTime(getPlainTimeShimRecordSlots(record), options),
-  )
-}
-
 function roundToUnit(
-  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
+  smallestUnit: TimeUnit,
   record: PlainTimeShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): PlainTimeShimRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
+  // We already hold smallestUnit as a separate arg, so refine the options
+  // directly instead of synthesizing a raw options bag for re-parsing.
+  const [roundingInc, roundingMode] = refineRoundToOptions(
+    smallestUnit,
+    options,
+  )
+  return createPlainTimeShimRecord(
+    roundPlainTimeToUnit(
+      getPlainTimeShimRecordSlots(record),
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+    ),
+  )
 }
 
-export const roundToHour = bindArgs(roundToUnit, 'hour')
-export const roundToMinute = bindArgs(roundToUnit, 'minute')
-export const roundToSecond = bindArgs(roundToUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
+export const roundToHour = bindArgs(roundToUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
 
 export function startOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
   return createPlainTimeShimRecord({

@@ -7,7 +7,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions, normalizeRoundToOptions } from '../roundTo'
+import { normalizeRoundToOptions } from '../roundToUtils'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -40,6 +40,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
+import { createRoundToOptions } from './roundUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 type Format = DateTimeFormatLike<ZonedDateTimeNativeRecord>
