@@ -3,24 +3,21 @@ import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
+import type * as CalendarFns from './calendar'
 import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
+import type * as DurationFns from './duration'
+import type * as InstantFns from './instant'
 import * as Native from './native/zonedDateTime'
-import type {
-  CalendarRecord,
-  DurationRecord,
-  InstantRecord,
-  PlainDateRecord,
-  PlainDateTimeRecord,
-  PlainTimeRecord,
-  ZonedDateTimeRecord as Record,
-} from './recordTypes'
+import type * as PlainDateFns from './plainDate'
+import type * as PlainDateTimeFns from './plainDateTime'
+import type * as PlainTimeFns from './plainTime'
+import type { ZonedDateTimeRecord as Record } from './recordTypes'
 import * as Shim from './shim/zonedDateTime'
 import { isZonedDateTimeRecord } from './temporalRecords'
 
 export type { Record }
 
-type ZonedDateTimeRecord = Record
-export type FromFields = ZonedDateTimeFields<CalendarRecord>
+export type FromFields = ZonedDateTimeFields<CalendarFns.Record>
 export type WithFields = Partial<DateTimeFields>
 type FromOptions = Temporal.ZonedDateTimeFromOptions
 type ToStringOptions = Temporal.ZonedDateTimeToStringOptions
@@ -36,633 +33,481 @@ type RoundingMode = TemporalSpecHelpers.RoundingMode
 export const create: (
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarRecord,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.create : Shim.create
+  calendar?: CalendarFns.Record,
+) => Record = NativeTemporal ? Native.create : Shim.create
 
 export const isRecord = isZonedDateTimeRecord as (arg: unknown) => arg is Record
 
-export const fromFields: (
-  fields: FromFields,
-  options?: FromOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
+export const fromFields: (fields: FromFields, options?: FromOptions) => Record =
+  NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
   s: string,
-  getCalendar: (calendarId: string) => CalendarRecord,
+  getCalendar: (calendarId: string) => CalendarFns.Record,
   options?: FromOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.fromString : Shim.fromString
+) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
 export const withFields: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   mod: WithFields,
   options?: FromOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.withFields : Shim.withFields
+) => Record = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const withCalendar: (
-  record: ZonedDateTimeRecord,
-  calendarRecord: CalendarRecord,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withCalendar
-  : Shim.withCalendar
+  record: Record,
+  calendarRecord: CalendarFns.Record,
+) => Record = NativeTemporal ? Native.withCalendar : Shim.withCalendar
 
-export const withTimeZone: (
-  record: ZonedDateTimeRecord,
-  timeZoneId: string,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withTimeZone
-  : Shim.withTimeZone
+export const withTimeZone: (record: Record, timeZoneId: string) => Record =
+  NativeTemporal ? Native.withTimeZone : Shim.withTimeZone
 
 export const withPlainTime: (
-  record: ZonedDateTimeRecord,
-  plainTimeRecord?: PlainTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withPlainTime
-  : Shim.withPlainTime
+  record: Record,
+  plainTimeRecord?: PlainTimeFns.Record,
+) => Record = NativeTemporal ? Native.withPlainTime : Shim.withPlainTime
 
-export const offsetNanoseconds: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.offsetNanoseconds : Shim.offsetNanoseconds
+export const offsetNanoseconds: (record: Record) => number = NativeTemporal
+  ? Native.offsetNanoseconds
+  : Shim.offsetNanoseconds
 
-export const offset: (record: ZonedDateTimeRecord) => string = NativeTemporal
+export const offset: (record: Record) => string = NativeTemporal
   ? Native.offset
   : Shim.offset
 
-export const dayOfWeek: (record: ZonedDateTimeRecord) => number = NativeTemporal
+export const dayOfWeek: (record: Record) => number = NativeTemporal
   ? Native.dayOfWeek
   : Shim.dayOfWeek
 
-export const daysInWeek: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.daysInWeek : Shim.daysInWeek
+export const daysInWeek: (record: Record) => number = NativeTemporal
+  ? Native.daysInWeek
+  : Shim.daysInWeek
 
-export const weekOfYear: (record: ZonedDateTimeRecord) => number | undefined =
-  NativeTemporal ? Native.weekOfYear : Shim.weekOfYear
+export const weekOfYear: (record: Record) => number | undefined = NativeTemporal
+  ? Native.weekOfYear
+  : Shim.weekOfYear
 
-export const yearOfWeek: (record: ZonedDateTimeRecord) => number | undefined =
-  NativeTemporal ? Native.yearOfWeek : Shim.yearOfWeek
+export const yearOfWeek: (record: Record) => number | undefined = NativeTemporal
+  ? Native.yearOfWeek
+  : Shim.yearOfWeek
 
-export const dayOfYear: (record: ZonedDateTimeRecord) => number = NativeTemporal
+export const dayOfYear: (record: Record) => number = NativeTemporal
   ? Native.dayOfYear
   : Shim.dayOfYear
 
-export const daysInMonth: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.daysInMonth : Shim.daysInMonth
+export const daysInMonth: (record: Record) => number = NativeTemporal
+  ? Native.daysInMonth
+  : Shim.daysInMonth
 
-export const daysInYear: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.daysInYear : Shim.daysInYear
+export const daysInYear: (record: Record) => number = NativeTemporal
+  ? Native.daysInYear
+  : Shim.daysInYear
 
-export const monthsInYear: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.monthsInYear : Shim.monthsInYear
+export const monthsInYear: (record: Record) => number = NativeTemporal
+  ? Native.monthsInYear
+  : Shim.monthsInYear
 
-export const inLeapYear: (record: ZonedDateTimeRecord) => boolean =
-  NativeTemporal ? Native.inLeapYear : Shim.inLeapYear
+export const inLeapYear: (record: Record) => boolean = NativeTemporal
+  ? Native.inLeapYear
+  : Shim.inLeapYear
 
-export const hoursInDay: (record: ZonedDateTimeRecord) => number =
-  NativeTemporal ? Native.hoursInDay : Shim.hoursInDay
+export const hoursInDay: (record: Record) => number = NativeTemporal
+  ? Native.hoursInDay
+  : Shim.hoursInDay
 
-export const toString: (
-  record: ZonedDateTimeRecord,
-  options?: ToStringOptions,
-) => string = NativeTemporal ? Native.toString : Shim.toString
+export const toString: (record: Record, options?: ToStringOptions) => string =
+  NativeTemporal ? Native.toString : Shim.toString
 
-export const toSimpleString: (record: ZonedDateTimeRecord) => string =
-  NativeTemporal ? Native.toSimpleString : Shim.toSimpleString
+export const toSimpleString: (record: Record) => string = NativeTemporal
+  ? Native.toSimpleString
+  : Shim.toSimpleString
 
 export const add: (
-  record: ZonedDateTimeRecord,
-  duration: DurationRecord,
+  record: Record,
+  duration: DurationFns.Record,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.add : Shim.add
+) => Record = NativeTemporal ? Native.add : Shim.add
 
 export const subtract: (
-  record: ZonedDateTimeRecord,
-  duration: DurationRecord,
+  record: Record,
+  duration: DurationFns.Record,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.subtract : Shim.subtract
+) => Record = NativeTemporal ? Native.subtract : Shim.subtract
 
 export const diff: (
-  record: ZonedDateTimeRecord,
-  otherRecord: ZonedDateTimeRecord,
+  record: Record,
+  otherRecord: Record,
   options?: DiffOptions,
-) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
+) => DurationFns.Record = NativeTemporal ? Native.diff : Shim.diff
 
-export const startOfDay: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.startOfDay : Shim.startOfDay
+export const startOfDay: (record: Record) => Record = NativeTemporal
+  ? Native.startOfDay
+  : Shim.startOfDay
 
 export const getTimeZoneTransition: {
-  (
-    record: ZonedDateTimeRecord,
-    direction: TransitionDirection,
-  ): ZonedDateTimeRecord | null
-  (
-    record: ZonedDateTimeRecord,
-    options: TransitionOptions,
-  ): ZonedDateTimeRecord | null
+  (record: Record, direction: TransitionDirection): Record | null
+  (record: Record, options: TransitionOptions): Record | null
 } = NativeTemporal ? Native.getTimeZoneTransition : Shim.getTimeZoneTransition
 
-export const equals: (
-  record: ZonedDateTimeRecord,
-  otherRecord: ZonedDateTimeRecord,
-) => boolean = NativeTemporal ? Native.equals : Shim.equals
+export const equals: (record: Record, otherRecord: Record) => boolean =
+  NativeTemporal ? Native.equals : Shim.equals
 
-export const compare: (
-  record: ZonedDateTimeRecord,
-  otherRecord: ZonedDateTimeRecord,
-) => number = NativeTemporal ? Native.compare : Shim.compare
+export const compare: (record: Record, otherRecord: Record) => number =
+  NativeTemporal ? Native.compare : Shim.compare
 
-export const toInstant: (record: ZonedDateTimeRecord) => InstantRecord =
-  NativeTemporal ? Native.toInstant : Shim.toInstant
+export const toInstant: (record: Record) => InstantFns.Record = NativeTemporal
+  ? Native.toInstant
+  : Shim.toInstant
 
-export const toPlainDateTime: (
-  record: ZonedDateTimeRecord,
-) => PlainDateTimeRecord = NativeTemporal
-  ? Native.toPlainDateTime
-  : Shim.toPlainDateTime
+export const toPlainDateTime: (record: Record) => PlainDateTimeFns.Record =
+  NativeTemporal ? Native.toPlainDateTime : Shim.toPlainDateTime
 
-export const toPlainDate: (record: ZonedDateTimeRecord) => PlainDateRecord =
+export const toPlainDate: (record: Record) => PlainDateFns.Record =
   NativeTemporal ? Native.toPlainDate : Shim.toPlainDate
 
-export const toPlainTime: (record: ZonedDateTimeRecord) => PlainTimeRecord =
+export const toPlainTime: (record: Record) => PlainTimeFns.Record =
   NativeTemporal ? Native.toPlainTime : Shim.toPlainTime
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<ZonedDateTimeRecord> = NativeTemporal
+) => DateTimeFormatLike<Record> = NativeTemporal
   ? Native.createFormat
   : Shim.createFormat
 
 export const toLocaleString: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
 
 export const withDayOfYear: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withDayOfYear
-  : Shim.withDayOfYear
+) => Record = NativeTemporal ? Native.withDayOfYear : Shim.withDayOfYear
 
 export const withDayOfMonth: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withDayOfMonth
-  : Shim.withDayOfMonth
+) => Record = NativeTemporal ? Native.withDayOfMonth : Shim.withDayOfMonth
 
 export const withDayOfWeek: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withDayOfWeek
-  : Shim.withDayOfWeek
+) => Record = NativeTemporal ? Native.withDayOfWeek : Shim.withDayOfWeek
 
 export const withWeekOfYear: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.withWeekOfYear
-  : Shim.withWeekOfYear
+) => Record = NativeTemporal ? Native.withWeekOfYear : Shim.withWeekOfYear
 
 export const addYears: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addYears : Shim.addYears
+) => Record = NativeTemporal ? Native.addYears : Shim.addYears
 
 export const addMonths: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
+) => Record = NativeTemporal ? Native.addMonths : Shim.addMonths
 
 export const addWeeks: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addWeeks : Shim.addWeeks
+) => Record = NativeTemporal ? Native.addWeeks : Shim.addWeeks
 
 export const addDays: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addDays : Shim.addDays
+) => Record = NativeTemporal ? Native.addDays : Shim.addDays
 
 export const addHours: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addHours : Shim.addHours
+) => Record = NativeTemporal ? Native.addHours : Shim.addHours
 
 export const addMinutes: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addMinutes : Shim.addMinutes
+) => Record = NativeTemporal ? Native.addMinutes : Shim.addMinutes
 
 export const addSeconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal ? Native.addSeconds : Shim.addSeconds
+) => Record = NativeTemporal ? Native.addSeconds : Shim.addSeconds
 
 export const addMilliseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.addMilliseconds
-  : Shim.addMilliseconds
+) => Record = NativeTemporal ? Native.addMilliseconds : Shim.addMilliseconds
 
 export const addMicroseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.addMicroseconds
-  : Shim.addMicroseconds
+) => Record = NativeTemporal ? Native.addMicroseconds : Shim.addMicroseconds
 
 export const addNanoseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.addNanoseconds
-  : Shim.addNanoseconds
+) => Record = NativeTemporal ? Native.addNanoseconds : Shim.addNanoseconds
 
 export const subtractYears: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractYears
-  : Shim.subtractYears
+) => Record = NativeTemporal ? Native.subtractYears : Shim.subtractYears
 
 export const subtractMonths: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractMonths
-  : Shim.subtractMonths
+) => Record = NativeTemporal ? Native.subtractMonths : Shim.subtractMonths
 
 export const subtractWeeks: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractWeeks
-  : Shim.subtractWeeks
+) => Record = NativeTemporal ? Native.subtractWeeks : Shim.subtractWeeks
 
 export const subtractDays: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractDays
-  : Shim.subtractDays
+) => Record = NativeTemporal ? Native.subtractDays : Shim.subtractDays
 
 export const subtractHours: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractHours
-  : Shim.subtractHours
+) => Record = NativeTemporal ? Native.subtractHours : Shim.subtractHours
 
 export const subtractMinutes: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractMinutes
-  : Shim.subtractMinutes
+) => Record = NativeTemporal ? Native.subtractMinutes : Shim.subtractMinutes
 
 export const subtractSeconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
-  ? Native.subtractSeconds
-  : Shim.subtractSeconds
+) => Record = NativeTemporal ? Native.subtractSeconds : Shim.subtractSeconds
 
 export const subtractMilliseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
+) => Record = NativeTemporal
   ? Native.subtractMilliseconds
   : Shim.subtractMilliseconds
 
 export const subtractMicroseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
+) => Record = NativeTemporal
   ? Native.subtractMicroseconds
   : Shim.subtractMicroseconds
 
 export const subtractNanoseconds: (
-  record: ZonedDateTimeRecord,
+  record: Record,
   value: number,
   options?: OverflowOptions,
-) => ZonedDateTimeRecord = NativeTemporal
+) => Record = NativeTemporal
   ? Native.subtractNanoseconds
   : Shim.subtractNanoseconds
 
 export const roundToYear: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToYear : Shim.roundToYear
 
 export const roundToMonth: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToMonth : Shim.roundToMonth
 
 export const roundToWeek: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
 
 export const roundToDay: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToDay : Shim.roundToDay
 
 export const roundToHour: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
 export const roundToMinute: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
 
 export const roundToSecond: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
 
 export const roundToMillisecond: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToMillisecond : Shim.roundToMillisecond
 
 export const roundToMicrosecond: {
-  (record: ZonedDateTimeRecord): ZonedDateTimeRecord
-  (record: ZonedDateTimeRecord, roundingMode: RoundingMode): ZonedDateTimeRecord
-  (
-    record: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): ZonedDateTimeRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToMicrosecond : Shim.roundToMicrosecond
 
-export const startOfYear: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.startOfYear : Shim.startOfYear
+export const startOfYear: (record: Record) => Record = NativeTemporal
+  ? Native.startOfYear
+  : Shim.startOfYear
 
-export const startOfMonth: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const startOfMonth: (record: Record) => Record = NativeTemporal
   ? Native.startOfMonth
   : Shim.startOfMonth
 
-export const startOfWeek: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.startOfWeek : Shim.startOfWeek
+export const startOfWeek: (record: Record) => Record = NativeTemporal
+  ? Native.startOfWeek
+  : Shim.startOfWeek
 
-export const startOfHour: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.startOfHour : Shim.startOfHour
+export const startOfHour: (record: Record) => Record = NativeTemporal
+  ? Native.startOfHour
+  : Shim.startOfHour
 
-export const startOfMinute: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const startOfMinute: (record: Record) => Record = NativeTemporal
   ? Native.startOfMinute
   : Shim.startOfMinute
 
-export const startOfSecond: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const startOfSecond: (record: Record) => Record = NativeTemporal
   ? Native.startOfSecond
   : Shim.startOfSecond
 
-export const startOfMillisecond: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const startOfMillisecond: (record: Record) => Record = NativeTemporal
   ? Native.startOfMillisecond
   : Shim.startOfMillisecond
 
-export const startOfMicrosecond: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const startOfMicrosecond: (record: Record) => Record = NativeTemporal
   ? Native.startOfMicrosecond
   : Shim.startOfMicrosecond
 
-export const endOfYear: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfYear : Shim.endOfYear
+export const endOfYear: (record: Record) => Record = NativeTemporal
+  ? Native.endOfYear
+  : Shim.endOfYear
 
-export const endOfMonth: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfMonth : Shim.endOfMonth
+export const endOfMonth: (record: Record) => Record = NativeTemporal
+  ? Native.endOfMonth
+  : Shim.endOfMonth
 
-export const endOfWeek: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfWeek : Shim.endOfWeek
+export const endOfWeek: (record: Record) => Record = NativeTemporal
+  ? Native.endOfWeek
+  : Shim.endOfWeek
 
-export const endOfDay: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfDay : Shim.endOfDay
+export const endOfDay: (record: Record) => Record = NativeTemporal
+  ? Native.endOfDay
+  : Shim.endOfDay
 
-export const endOfHour: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfHour : Shim.endOfHour
+export const endOfHour: (record: Record) => Record = NativeTemporal
+  ? Native.endOfHour
+  : Shim.endOfHour
 
-export const endOfMinute: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfMinute : Shim.endOfMinute
+export const endOfMinute: (record: Record) => Record = NativeTemporal
+  ? Native.endOfMinute
+  : Shim.endOfMinute
 
-export const endOfSecond: (record: ZonedDateTimeRecord) => ZonedDateTimeRecord =
-  NativeTemporal ? Native.endOfSecond : Shim.endOfSecond
+export const endOfSecond: (record: Record) => Record = NativeTemporal
+  ? Native.endOfSecond
+  : Shim.endOfSecond
 
-export const endOfMillisecond: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const endOfMillisecond: (record: Record) => Record = NativeTemporal
   ? Native.endOfMillisecond
   : Shim.endOfMillisecond
 
-export const endOfMicrosecond: (
-  record: ZonedDateTimeRecord,
-) => ZonedDateTimeRecord = NativeTemporal
+export const endOfMicrosecond: (record: Record) => Record = NativeTemporal
   ? Native.endOfMicrosecond
   : Shim.endOfMicrosecond
 
 export const diffYears: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const diffWeeks: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
 
 export const diffDays: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffDays : Shim.diffDays
 
 export const diffHours: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffHours : Shim.diffHours
 
 export const diffMinutes: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
 
 export const diffSeconds: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
 
 export const diffMilliseconds: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
 
 export const diffMicroseconds: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
 
 export const diffNanoseconds: {
-  (record0: ZonedDateTimeRecord, record1: ZonedDateTimeRecord): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: ZonedDateTimeRecord,
-    record1: ZonedDateTimeRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds

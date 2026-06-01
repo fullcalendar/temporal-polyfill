@@ -5,24 +5,21 @@ import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { RelativeToRecord } from './commonTypes'
 import * as Native from './native/duration'
-import type {
-  DurationRecord as Record,
-  PlainDateRecord,
-  PlainDateTimeRecord,
-  ZonedDateTimeRecord,
-} from './recordTypes'
+import type * as PlainDateFns from './plainDate'
+import type * as PlainDateTimeFns from './plainDateTime'
+import type { DurationRecord as Record } from './recordTypes'
 import * as Shim from './shim/duration'
 import { isDurationRecord } from './temporalRecords'
+import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
 
-type DurationRecord = Record
 export type FromFields = Partial<DurationFields>
 export type WithFields = Partial<DurationFields>
 type RelativeTo = RelativeToRecord<
-  ZonedDateTimeRecord,
-  PlainDateTimeRecord,
-  PlainDateRecord
+  ZonedDateTimeFns.Record,
+  PlainDateTimeFns.Record,
+  PlainDateFns.Record
 >
 type RelativeToOptions<R> = TemporalSpecHelpers.RelativeToOptions<R>
 type DurationRoundingOptions<R> = TemporalSpecHelpers.DurationRoundingOptions<R>
@@ -42,79 +39,75 @@ export const create: (
   milliseconds?: number,
   microseconds?: number,
   nanoseconds?: number,
-) => DurationRecord = NativeTemporal ? Native.create : Shim.create
+) => Record = NativeTemporal ? Native.create : Shim.create
 
 export const isRecord = isDurationRecord as (arg: unknown) => arg is Record
 
-export const fromFields: (fields: FromFields) => DurationRecord = NativeTemporal
+export const fromFields: (fields: FromFields) => Record = NativeTemporal
   ? Native.fromFields
   : Shim.fromFields
 
-export const fromString: (s: string) => DurationRecord = NativeTemporal
+export const fromString: (s: string) => Record = NativeTemporal
   ? Native.fromString
   : Shim.fromString
 
-export const sign: (duration: DurationRecord) => number = NativeTemporal
+export const sign: (duration: Record) => number = NativeTemporal
   ? Native.sign
   : Shim.sign
 
-export const blank: (duration: DurationRecord) => boolean = NativeTemporal
+export const blank: (duration: Record) => boolean = NativeTemporal
   ? Native.blank
   : Shim.blank
 
-export const withFields: (
-  duration: DurationRecord,
-  mod: WithFields,
-) => DurationRecord = NativeTemporal ? Native.withFields : Shim.withFields
+export const withFields: (duration: Record, mod: WithFields) => Record =
+  NativeTemporal ? Native.withFields : Shim.withFields
 
-export const negated: (duration: DurationRecord) => DurationRecord =
-  NativeTemporal ? Native.negated : Shim.negated
+export const negated: (duration: Record) => Record = NativeTemporal
+  ? Native.negated
+  : Shim.negated
 
-export const abs: (duration: DurationRecord) => DurationRecord = NativeTemporal
+export const abs: (duration: Record) => Record = NativeTemporal
   ? Native.abs
   : Shim.abs
 
 export const add: (
-  duration: DurationRecord,
-  otherDuration: DurationRecord,
+  duration: Record,
+  otherDuration: Record,
   options?: RelativeOptions,
-) => DurationRecord = NativeTemporal ? Native.add : Shim.add
+) => Record = NativeTemporal ? Native.add : Shim.add
 
 export const subtract: (
-  duration: DurationRecord,
-  otherDuration: DurationRecord,
+  duration: Record,
+  otherDuration: Record,
   options?: RelativeOptions,
-) => DurationRecord = NativeTemporal ? Native.subtract : Shim.subtract
+) => Record = NativeTemporal ? Native.subtract : Shim.subtract
 
-export const round: (
-  duration: DurationRecord,
-  options: RoundingOptions,
-) => DurationRecord = NativeTemporal ? Native.round : Shim.round
+export const round: (duration: Record, options: RoundingOptions) => Record =
+  NativeTemporal ? Native.round : Shim.round
 
 export const total: {
   (
-    duration: DurationRecord,
+    duration: Record,
     unit: Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
   ): number
-  (duration: DurationRecord, options: DurationTotalOptions<RelativeTo>): number
+  (duration: Record, options: DurationTotalOptions<RelativeTo>): number
 } = NativeTemporal ? Native.total : Shim.total
 
 export const compare: (
-  duration: DurationRecord,
-  otherDuration: DurationRecord,
+  duration: Record,
+  otherDuration: Record,
   options?: RelativeOptions,
 ) => number = NativeTemporal ? Native.compare : Shim.compare
 
 export const toLocaleString: (
-  duration: DurationRecord,
+  duration: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
 
-export const toString: (
-  duration: DurationRecord,
-  options?: ToStringOptions,
-) => string = NativeTemporal ? Native.toString : Shim.toString
+export const toString: (duration: Record, options?: ToStringOptions) => string =
+  NativeTemporal ? Native.toString : Shim.toString
 
-export const toSimpleString: (duration: DurationRecord) => string =
-  NativeTemporal ? Native.toSimpleString : Shim.toSimpleString
+export const toSimpleString: (duration: Record) => string = NativeTemporal
+  ? Native.toSimpleString
+  : Shim.toSimpleString

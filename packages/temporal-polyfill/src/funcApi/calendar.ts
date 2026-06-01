@@ -5,23 +5,24 @@ import {
 } from '../internal/intlCalendarConfig'
 import { NativeTemporal } from '../nativeSwitch'
 import * as Native from './native/calendar'
-import type { CalendarRecord } from './recordTypes'
+import type { CalendarRecord as Record } from './recordTypes'
 import * as Shim from './shim/calendar'
 
-export type { CalendarRecord }
+export type { Record }
 
-export const getIsoCalendar: () => CalendarRecord = NativeTemporal
+export const getIsoCalendar: () => Record = NativeTemporal
   ? Native.getIsoCalendar
   : Shim.getIsoCalendar
 
-export const getGregoryCalendar: () => CalendarRecord = NativeTemporal
+export const getGregoryCalendar: () => Record = NativeTemporal
   ? Native.getGregoryCalendar
   : Shim.getGregoryCalendar
 
-export const getIntlCalendar: (calendarId: string) => CalendarRecord =
-  NativeTemporal ? Native.getIntlCalendar : Shim.getIntlCalendar
+export const getIntlCalendar: (calendarId: string) => Record = NativeTemporal
+  ? Native.getIntlCalendar
+  : Shim.getIntlCalendar
 
-export function getCoreCalendar(calendarId: string): CalendarRecord {
+export function getCoreCalendar(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
     return getIsoCalendar()
   }
@@ -36,7 +37,7 @@ export function getCoreCalendar(calendarId: string): CalendarRecord {
   )
 }
 
-export function getAnyCalendar(calendarId: string): CalendarRecord {
+export function getAnyCalendar(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
     return getIsoCalendar()
   }

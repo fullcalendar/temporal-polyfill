@@ -3,21 +3,19 @@ import { DayFields, YearMonthFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
+import type * as CalendarFns from './calendar'
 import { DateTimeFormatLike } from './commonTypes'
+import type * as DurationFns from './duration'
 import * as Native from './native/plainYearMonth'
-import type {
-  CalendarRecord,
-  DurationRecord,
-  PlainDateRecord,
-  PlainYearMonthRecord as Record,
-} from './recordTypes'
+import type * as PlainDateFns from './plainDate'
+import type { PlainYearMonthRecord as Record } from './recordTypes'
 import * as Shim from './shim/plainYearMonth'
 import { isPlainYearMonthRecord } from './temporalRecords'
 
 export type { Record }
 
 export type FromFields = Partial<YearMonthFields> & {
-  calendar?: CalendarRecord
+  calendar?: CalendarFns.Record
 }
 export type WithFields = Partial<YearMonthFields>
 type OverflowOptions = Temporal.OverflowOptions
@@ -28,14 +26,12 @@ export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
 type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 type RoundingMode = TemporalSpecHelpers.RoundingMode
 
-type PlainYearMonthRecord = Record
-
 export const create: (
   isoYear: number,
   isoMonth: number,
-  calendar?: CalendarRecord,
+  calendar?: CalendarFns.Record,
   referenceIsoDay?: number,
-) => PlainYearMonthRecord = NativeTemporal ? Native.create : Shim.create
+) => Record = NativeTemporal ? Native.create : Shim.create
 
 export const isRecord = isPlainYearMonthRecord as (
   arg: unknown,
@@ -44,158 +40,132 @@ export const isRecord = isPlainYearMonthRecord as (
 export const fromFields: (
   fields: FromFields,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
+) => Record = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
   s: string,
-  getCalendar: (calendarId: string) => CalendarRecord,
-) => PlainYearMonthRecord = NativeTemporal ? Native.fromString : Shim.fromString
+  getCalendar: (calendarId: string) => CalendarFns.Record,
+) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
-export const daysInMonth: (record: PlainYearMonthRecord) => number =
-  NativeTemporal ? Native.daysInMonth : Shim.daysInMonth
+export const daysInMonth: (record: Record) => number = NativeTemporal
+  ? Native.daysInMonth
+  : Shim.daysInMonth
 
-export const daysInYear: (record: PlainYearMonthRecord) => number =
-  NativeTemporal ? Native.daysInYear : Shim.daysInYear
+export const daysInYear: (record: Record) => number = NativeTemporal
+  ? Native.daysInYear
+  : Shim.daysInYear
 
-export const monthsInYear: (record: PlainYearMonthRecord) => number =
-  NativeTemporal ? Native.monthsInYear : Shim.monthsInYear
+export const monthsInYear: (record: Record) => number = NativeTemporal
+  ? Native.monthsInYear
+  : Shim.monthsInYear
 
-export const inLeapYear: (record: PlainYearMonthRecord) => boolean =
-  NativeTemporal ? Native.inLeapYear : Shim.inLeapYear
+export const inLeapYear: (record: Record) => boolean = NativeTemporal
+  ? Native.inLeapYear
+  : Shim.inLeapYear
 
 export const withFields: (
-  record: PlainYearMonthRecord,
+  record: Record,
   mod: WithFields,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.withFields : Shim.withFields
+) => Record = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const add: (
-  record: PlainYearMonthRecord,
-  duration: DurationRecord,
+  record: Record,
+  duration: DurationFns.Record,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.add : Shim.add
+) => Record = NativeTemporal ? Native.add : Shim.add
 
 export const addYears: (
-  record: PlainYearMonthRecord,
+  record: Record,
   years: number,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.addYears : Shim.addYears
+) => Record = NativeTemporal ? Native.addYears : Shim.addYears
 
 export const addMonths: (
-  record: PlainYearMonthRecord,
+  record: Record,
   months: number,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
+) => Record = NativeTemporal ? Native.addMonths : Shim.addMonths
 
 export const subtract: (
-  record: PlainYearMonthRecord,
-  duration: DurationRecord,
+  record: Record,
+  duration: DurationFns.Record,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal ? Native.subtract : Shim.subtract
+) => Record = NativeTemporal ? Native.subtract : Shim.subtract
 
 export const subtractYears: (
-  record: PlainYearMonthRecord,
+  record: Record,
   years: number,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal
-  ? Native.subtractYears
-  : Shim.subtractYears
+) => Record = NativeTemporal ? Native.subtractYears : Shim.subtractYears
 
 export const subtractMonths: (
-  record: PlainYearMonthRecord,
+  record: Record,
   months: number,
   options?: OverflowOptions,
-) => PlainYearMonthRecord = NativeTemporal
-  ? Native.subtractMonths
-  : Shim.subtractMonths
+) => Record = NativeTemporal ? Native.subtractMonths : Shim.subtractMonths
 
 export const diff: (
-  record: PlainYearMonthRecord,
-  otherRecord: PlainYearMonthRecord,
+  record: Record,
+  otherRecord: Record,
   options?: DiffOptions,
-) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
+) => DurationFns.Record = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffYears: {
-  (record0: PlainYearMonthRecord, record1: PlainYearMonthRecord): number
-  (
-    record0: PlainYearMonthRecord,
-    record1: PlainYearMonthRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: PlainYearMonthRecord,
-    record1: PlainYearMonthRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: {
-  (record0: PlainYearMonthRecord, record1: PlainYearMonthRecord): number
-  (
-    record0: PlainYearMonthRecord,
-    record1: PlainYearMonthRecord,
-    roundingMode: RoundingMode,
-  ): number
-  (
-    record0: PlainYearMonthRecord,
-    record1: PlainYearMonthRecord,
-    options: RoundingMathOptions,
-  ): number
+  (record0: Record, record1: Record): number
+  (record0: Record, record1: Record, roundingMode: RoundingMode): number
+  (record0: Record, record1: Record, options: RoundingMathOptions): number
 } = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const roundToYear: {
-  (record: PlainYearMonthRecord): PlainYearMonthRecord
-  (
-    record: PlainYearMonthRecord,
-    roundingMode: RoundingMode,
-  ): PlainYearMonthRecord
-  (
-    record: PlainYearMonthRecord,
-    options: RoundingMathOptions,
-  ): PlainYearMonthRecord
+  (record: Record): Record
+  (record: Record, roundingMode: RoundingMode): Record
+  (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToYear : Shim.roundToYear
 
-export const startOfYear: (
-  record: PlainYearMonthRecord,
-) => PlainYearMonthRecord = NativeTemporal
+export const startOfYear: (record: Record) => Record = NativeTemporal
   ? Native.startOfYear
   : Shim.startOfYear
 
-export const endOfYear: (record: PlainYearMonthRecord) => PlainYearMonthRecord =
-  NativeTemporal ? Native.endOfYear : Shim.endOfYear
+export const endOfYear: (record: Record) => Record = NativeTemporal
+  ? Native.endOfYear
+  : Shim.endOfYear
 
-export const equals: (
-  record: PlainYearMonthRecord,
-  otherRecord: PlainYearMonthRecord,
-) => boolean = NativeTemporal ? Native.equals : Shim.equals
+export const equals: (record: Record, otherRecord: Record) => boolean =
+  NativeTemporal ? Native.equals : Shim.equals
 
-export const compare: (
-  record: PlainYearMonthRecord,
-  otherRecord: PlainYearMonthRecord,
-) => number = NativeTemporal ? Native.compare : Shim.compare
+export const compare: (record: Record, otherRecord: Record) => number =
+  NativeTemporal ? Native.compare : Shim.compare
 
 export const toPlainDate: (
-  record: PlainYearMonthRecord,
+  record: Record,
   fields: DayFields,
-) => PlainDateRecord = NativeTemporal ? Native.toPlainDate : Shim.toPlainDate
+) => PlainDateFns.Record = NativeTemporal
+  ? Native.toPlainDate
+  : Shim.toPlainDate
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<PlainYearMonthRecord> = NativeTemporal
+) => DateTimeFormatLike<Record> = NativeTemporal
   ? Native.createFormat
   : Shim.createFormat
 
 export const toLocaleString: (
-  record: PlainYearMonthRecord,
+  record: Record,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
 
-export const toString: (
-  record: PlainYearMonthRecord,
-  options?: ToStringOptions,
-) => string = NativeTemporal ? Native.toString : Shim.toString
+export const toString: (record: Record, options?: ToStringOptions) => string =
+  NativeTemporal ? Native.toString : Shim.toString
 
-export const toSimpleString: (record: PlainYearMonthRecord) => string =
-  NativeTemporal ? Native.toSimpleString : Shim.toSimpleString
+export const toSimpleString: (record: Record) => string = NativeTemporal
+  ? Native.toSimpleString
+  : Shim.toSimpleString
