@@ -219,9 +219,14 @@ export function subtract(
 
 export function round(
   duration: DurationNativeRecord,
-  options: DurationRoundingOptions<RelativeToNativeRecord>,
+  options:
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | DurationRoundingOptions<RelativeToNativeRecord>,
 ): DurationNativeRecord {
   const native = getDurationNative(duration)
+  if (typeof options === 'string') {
+    return createDurationNativeRecord(native.round(options))
+  }
   const resNative = native.round({
     ...options,
     relativeTo: refineRelativeTo(options?.relativeTo),

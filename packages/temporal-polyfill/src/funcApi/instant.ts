@@ -14,7 +14,8 @@ export type { Record }
 export type Format = DateTimeFormatLike<Record>
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-export type ToStringOptions = TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
+export type ToStringOptions =
+  TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
 
 // TODO: common types
 type RoundingMode = TemporalSpecHelpers.RoundingMode

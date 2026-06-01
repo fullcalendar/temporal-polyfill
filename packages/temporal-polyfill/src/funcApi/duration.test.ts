@@ -133,31 +133,10 @@ describe('add', () => {
     expectDurationEquals(sum, { days: 3, hours: 4 })
   })
 
-  it('advances larger units with PlainDate relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: 1, days: 1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const pd = PlainDateFns.create(2024, 1, 1)
-    const sum = DurationFns.add(d0, d1, { relativeTo: pd })
-    expectDurationEquals(sum, { months: 3, days: 4 })
-  })
-
-  it('advances larger units with PlainDateTime relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: 1, days: 1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const pdt = PlainDateTimeFns.create(2024, 1, 1, 12)
-    const sum = DurationFns.add(d0, d1, { relativeTo: pdt })
-    expectDurationEquals(sum, { months: 3, days: 4 })
-  })
-
-  it('advances larger units with ZonedDateTime relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: 1, days: 1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-01-01[America/New_York]',
-      getCoreCalendar,
-    )
-    const sum = DurationFns.add(d0, d1, { relativeTo: zdt })
-    expectDurationEquals(sum, { months: 3, days: 4 })
+  it('rejects units larger than days', () => {
+    const d0 = DurationFns.fromFields({ months: 1 })
+    const d1 = DurationFns.fromFields({ days: 3 })
+    expect(() => DurationFns.add(d0, d1)).toThrow(RangeError)
   })
 })
 
@@ -169,35 +148,20 @@ describe('subtract', () => {
     expectDurationEquals(diff, { days: -3, hours: -4 })
   })
 
-  it('advances larger units with PlainDate relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: -1, days: -1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const pd = PlainDateFns.create(2024, 1, 1)
-    const diff = DurationFns.subtract(d0, d1, { relativeTo: pd })
-    expectDurationEquals(diff, { months: -3, days: -4 })
-  })
-
-  it('advances larger units with PlainDateTime relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: -1, days: -1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const pdt = PlainDateTimeFns.create(2024, 1, 1, 12)
-    const diff = DurationFns.subtract(d0, d1, { relativeTo: pdt })
-    expectDurationEquals(diff, { months: -3, days: -4 })
-  })
-
-  it('advances larger units with ZonedDateTime relativeTo', () => {
-    const d0 = DurationFns.fromFields({ months: -1, days: -1 })
-    const d1 = DurationFns.fromFields({ months: 2, days: 3 })
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-01-01[America/New_York]',
-      getCoreCalendar,
-    )
-    const diff = DurationFns.subtract(d0, d1, { relativeTo: zdt })
-    expectDurationEquals(diff, { months: -3, days: -4 })
+  it('rejects units larger than days', () => {
+    const d0 = DurationFns.fromFields({ days: 3 })
+    const d1 = DurationFns.fromFields({ months: 1 })
+    expect(() => DurationFns.subtract(d0, d1)).toThrow(RangeError)
   })
 })
 
 describe('round', () => {
+  it('accepts a unit string as shorthand for smallestUnit', () => {
+    const dur = DurationFns.fromFields({ hours: 25 })
+    const rounded = DurationFns.round(dur, 'days')
+    expectDurationEquals(rounded, { days: 1 })
+  })
+
   it('rounds days without needing relativeTo', () => {
     const dur = DurationFns.fromFields({ days: 1, hours: 13 })
     const rounded = DurationFns.round(dur, { smallestUnit: 'days' })

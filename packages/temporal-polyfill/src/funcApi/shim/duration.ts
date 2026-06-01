@@ -5,7 +5,7 @@ import { refineDurationObjectLike } from '../../internal/createFromFields'
 import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
-  addDurations,
+  addDurationsWithoutRelativeTo,
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
@@ -219,40 +219,28 @@ export function abs(duration: DurationShimRecord): DurationShimRecord {
 export function add(
   duration: DurationShimRecord,
   otherDuration: DurationShimRecord,
-  options?: RelativeToOptions<RelativeToShimRecord>,
 ): DurationShimRecord {
   const slots = getDurationShimRecordSlots(duration)
   const otherSlots = getDurationShimRecordSlots(otherDuration)
-  const resSlots = addDurations(
-    refineRelativeTo,
-    false, // doSubtract
-    slots,
-    otherSlots,
-    options,
-  )
+  const resSlots = addDurationsWithoutRelativeTo(false, slots, otherSlots)
   return createDurationShimRecord(resSlots)
 }
 
 export function subtract(
   duration: DurationShimRecord,
   otherDuration: DurationShimRecord,
-  options?: RelativeToOptions<RelativeToShimRecord>,
 ): DurationShimRecord {
   const slots = getDurationShimRecordSlots(duration)
   const otherSlots = getDurationShimRecordSlots(otherDuration)
-  const resSlots = addDurations(
-    refineRelativeTo,
-    true, // doSubtract
-    slots,
-    otherSlots,
-    options,
-  )
+  const resSlots = addDurationsWithoutRelativeTo(true, slots, otherSlots)
   return createDurationShimRecord(resSlots)
 }
 
 export function round(
   duration: DurationShimRecord,
-  options: DurationRoundingOptions<RelativeToShimRecord>,
+  options:
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | DurationRoundingOptions<RelativeToShimRecord>,
 ): DurationShimRecord {
   const slots = getDurationShimRecordSlots(duration)
   const resSlots = roundDuration(refineRelativeTo, slots, options)

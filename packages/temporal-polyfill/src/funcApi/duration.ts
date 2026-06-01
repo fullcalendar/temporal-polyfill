@@ -17,10 +17,15 @@ export type FromFields = Partial<DurationFields>
 export type WithFields = Partial<DurationFields>
 export type ToStringOptions = Temporal.DurationToStringOptions
 export type RoundingUnit = Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-export type RoundingOptions = TemporalSpecHelpers.DurationRoundingOptions<RelativeTo>
-export type TotalUnit = Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
-export type DurationTotalOptions = TemporalSpecHelpers.DurationTotalOptions<RelativeTo>
-export type RelativeToOptions = TemporalSpecHelpers.RelativeToOptions<RelativeTo>
+export type RoundingOptions =
+  TemporalSpecHelpers.DurationRoundingOptions<RelativeTo>
+export type TotalUnit = Temporal.PluralizeUnit<
+  Temporal.DateUnit | Temporal.TimeUnit
+>
+export type DurationTotalOptions =
+  TemporalSpecHelpers.DurationTotalOptions<RelativeTo>
+export type RelativeToOptions =
+  TemporalSpecHelpers.RelativeToOptions<RelativeTo>
 
 type RelativeTo = RelativeToRecord<
   ZonedDateTimeFns.Record,
@@ -70,19 +75,12 @@ export const abs: (duration: Record) => Record = NativeTemporal
   ? Native.abs
   : Shim.abs
 
-// TODO: implementations should NOT accept options
-export const add: (
-  duration: Record,
-  otherDuration: Record,
-) => Record = NativeTemporal ? Native.add : Shim.add
+export const add: (duration: Record, otherDuration: Record) => Record =
+  NativeTemporal ? Native.add : Shim.add
 
-// TODO: implementations should NOT accept options
-export const subtract: (
-  duration: Record,
-  otherDuration: Record,
-) => Record = NativeTemporal ? Native.subtract : Shim.subtract
+export const subtract: (duration: Record, otherDuration: Record) => Record =
+  NativeTemporal ? Native.subtract : Shim.subtract
 
-// TODO: implementations should accept RoundingUnit
 export const round: {
   (duration: Record, unit: RoundingUnit): Record
   (duration: Record, options: RoundingOptions): Record

@@ -57,15 +57,11 @@ export function addDurations<RA>(
   ) as Unit
 
   if (isUniformUnit(maxUnit, relativeToSlots)) {
-    return createDurationSlots(
-      checkDurationUnits(
-        addDayTimeDurations(
-          slots,
-          otherSlots,
-          maxUnit as DayTimeUnit, // largestUnit
-          doSubtract,
-        ),
-      ),
+    return addDayTimeDurationsChecked(
+      doSubtract,
+      slots,
+      otherSlots,
+      maxUnit as DayTimeUnit,
     )
   }
 
@@ -87,6 +83,49 @@ export function addDurations<RA>(
   )
 
   return createDurationSlots(balancedDuration)
+}
+
+export function addDurationsWithoutRelativeTo(
+  doSubtract: boolean,
+  slots: DurationFields,
+  otherSlots: DurationFields,
+): DurationFields & { sign: NumberSign } {
+  const maxUnit = Math.max(
+    getMaxDurationUnit(slots),
+    getMaxDurationUnit(otherSlots),
+  ) as Unit
+
+  if (maxUnit > Unit.Day) {
+    throw new RangeError(errorMessages.invalidLargeUnits)
+  }
+
+  return addDayTimeDurationsChecked(
+    doSubtract,
+    slots,
+    otherSlots,
+    maxUnit as DayTimeUnit,
+  )
+}
+
+function addDayTimeDurationsChecked(
+  doSubtract: boolean,
+  slots: DurationFields,
+  otherSlots: DurationFields,
+  maxUnit: DayTimeUnit,
+): DurationFields & { sign: NumberSign } {
+  // With no relativeTo, only day-and-smaller units have fixed lengths.
+  // Calendar units have to stay on the relative path so months, years, and
+  // calendar-dependent weeks cannot silently collapse into fixed nanoseconds.
+  return createDurationSlots(
+    checkDurationUnits(
+      addDayTimeDurations(
+        slots,
+        otherSlots,
+        maxUnit as DayTimeUnit, // largestUnit
+        doSubtract,
+      ),
+    ),
+  )
 }
 
 function addDayTimeDurations(
