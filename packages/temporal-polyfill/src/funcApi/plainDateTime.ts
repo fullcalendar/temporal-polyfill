@@ -16,8 +16,6 @@ import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-
-// centralized types
 export type FromFields = Partial<DateTimeFields> & {
   calendar: CalendarFns.Record
 }
@@ -25,11 +23,13 @@ export type WithFields = Partial<DateTimeFields>
 export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   Temporal.DateUnit | Temporal.TimeUnit
 >
+export type ToStringOptions = Temporal.PlainDateTimeToStringOptions
+
+// TODO: common types
 type OverflowOptions = Temporal.OverflowOptions
-type DisambiguationOptions = Temporal.DisambiguationOptions
-type ToStringOptions = Temporal.PlainDateTimeToStringOptions
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 type RoundingMode = TemporalSpecHelpers.RoundingMode
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+type DisambiguationOptions = Temporal.DisambiguationOptions
 
 export const create: (
   isoYear: number,

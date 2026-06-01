@@ -12,15 +12,16 @@ import { isPlainTimeRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-
 export type FromFields = Partial<TimeFields>
 export type WithFields = Partial<TimeFields>
-type OverflowOptions = Temporal.OverflowOptions
-type ToStringOptions = Temporal.PlainTimeToStringOptions
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+export type ToStringOptions = Temporal.PlainTimeToStringOptions
+
+// TODO: common types
+type OverflowOptions = Temporal.OverflowOptions
 type RoundingMode = TemporalSpecHelpers.RoundingMode
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (
   hour?: number,

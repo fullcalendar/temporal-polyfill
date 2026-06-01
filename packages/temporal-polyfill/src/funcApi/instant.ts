@@ -12,14 +12,13 @@ import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-type InstantStringTimeZoneDisplayOptions =
-  TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+export type ToStringOptions = TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
+
+// TODO: common types
 type RoundingMode = TemporalSpecHelpers.RoundingMode
-type ToStringOptions = InstantStringTimeZoneDisplayOptions
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (epochNanoseconds: bigint) => Record = NativeTemporal
   ? Native.create

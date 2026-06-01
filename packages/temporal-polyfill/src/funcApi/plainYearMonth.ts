@@ -14,18 +14,19 @@ import { isPlainYearMonthRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-
 export type FromFields = Partial<YearMonthFields> & {
   calendar?: CalendarFns.Record
 }
 export type WithFields = Partial<YearMonthFields>
-type OverflowOptions = Temporal.OverflowOptions
-type ToStringOptions = Temporal.PlainDateToStringOptions
 export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   'year' | 'month'
 >
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+export type ToStringOptions = Temporal.PlainDateToStringOptions
+
+// TODO: common types
+type OverflowOptions = Temporal.OverflowOptions
 type RoundingMode = TemporalSpecHelpers.RoundingMode
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (
   isoYear: number,

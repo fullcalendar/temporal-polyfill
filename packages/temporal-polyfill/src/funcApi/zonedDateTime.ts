@@ -17,19 +17,20 @@ import { isZonedDateTimeRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-
 export type FromFields = ZonedDateTimeFields<CalendarFns.Record>
+export type FromOptions = Temporal.ZonedDateTimeFromOptions
 export type WithFields = Partial<DateTimeFields>
-type FromOptions = Temporal.ZonedDateTimeFromOptions
-type ToStringOptions = Temporal.ZonedDateTimeToStringOptions
-type OverflowOptions = Temporal.OverflowOptions
-type TransitionOptions = Temporal.TransitionOptions
-type TransitionDirection = Temporal.TransitionOptions['direction']
 export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   Temporal.DateUnit | Temporal.TimeUnit
 >
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+export type ToStringOptions = Temporal.ZonedDateTimeToStringOptions
+export type TransitionOptions = Temporal.TransitionOptions
+export type TransitionDirection = Temporal.TransitionOptions['direction']
+
+// TODO: common types
+type OverflowOptions = Temporal.OverflowOptions
 type RoundingMode = TemporalSpecHelpers.RoundingMode
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (
   epochNanoseconds: bigint,
