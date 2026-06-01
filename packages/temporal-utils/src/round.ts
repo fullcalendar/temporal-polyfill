@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import * as errorMessages from './errorMessages.js'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
 import { RoundingMathOptions, RoundingMode, getOptionsObject } from './utils.js'

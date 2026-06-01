@@ -37,15 +37,14 @@
     "lint:fix": "biome check --apply .",
     "test": "vitest run",
     "test:dev": "vitest dev",
-    "test:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000"
+    "test:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000",
+    "clean": "rm -rf dist"
   },
   "type": "module",
-  "dependencies": {
-    "temporal-spec": "workspace:0.3.1"
-  },
   "devDependencies": {
     "@biomejs/biome": "1.5.1",
     "@js-temporal/polyfill": "^0.5.1",
+    "temporal-spec": "workspace:0.3.1",
     "typescript": "~5.3.3",
     "vitest": "^1.2.2"
   }

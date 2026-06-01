@@ -11,6 +11,7 @@ next
 - fix: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 ([#74](https://github.com/fullcalendar/temporal-polyfill/issues/74)). This correct behavior is mostly covered by test262's broader Buddhist calendar conversion tests, including `test/intl402/Temporal/PlainDate/from/roundtrip-from-property-bag.js` and `test/intl402/Temporal/PlainDate/prototype/withCalendar/extreme-dates.js`, though not by this exact edge case.
 - fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` ([#73](https://github.com/fullcalendar/temporal-polyfill/issues/73)). The root cause is mostly covered by test262's `test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transitions-close-together.js` and `test/intl402/Temporal/ZonedDateTime/prototype/startOfDay/transitions-close-together.js`, though not by these exact string parsing cases.
 - fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 ([#49](https://github.com/fullcalendar/temporal-polyfill/issues/49)). No matching test262 coverage was found for this future-offset property-bag construction case.
+- No more temporal-spec
 
 
 v0.3.2 (2026-03-10)

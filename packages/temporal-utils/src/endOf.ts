@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import {
   startOfHour,
   startOfMicrosecond,

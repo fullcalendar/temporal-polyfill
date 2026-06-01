@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import * as errorMessages from './errorMessages.js'
 
 export const nanosecondsInMicrosecond = 1000

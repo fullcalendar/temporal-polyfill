@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import * as errorMessages from './errorMessages.js'
 import { normalizeNumberInRange, toIntegerWithTruncation } from './utils.js'
 
