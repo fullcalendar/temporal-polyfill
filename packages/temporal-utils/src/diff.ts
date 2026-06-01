@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { RoundingMode } from './utils'
 
 export type DiffFunc<
   T extends
@@ -14,7 +15,7 @@ export type DiffFunc<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
-> = (date0: T, date1: T, options?: RoundingModeEnum | DiffOptions) => number
+> = (date0: T, date1: T, options?: RoundingMode | DiffOptions) => number
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
   return (date0: any, date1: any, options) => {
@@ -124,9 +125,6 @@ export const diffNanoseconds = createDiffFunc('nanoseconds') as DiffFunc<
 // Options
 // -----------------------------------------------------------------------------
 
-type RoundingModeEnum = Temporal.RoundingOptions<
-  Temporal.DateUnit | Temporal.TimeUnit
->['roundingMode']
 type PluralOnlyUnit = 'years' | 'months' | 'weeks' | 'days' | TimeUnit
 
 type TimeUnit =
@@ -138,12 +136,12 @@ type TimeUnit =
   | 'nanoseconds'
 
 export type DiffOptions = {
-  roundingMode?: RoundingModeEnum
+  roundingMode?: RoundingMode
   roundingIncrement?: number
 }
 
 export function normalizeDiffOptions(
-  options: RoundingModeEnum | DiffOptions | undefined,
+  options: RoundingMode | DiffOptions | undefined,
 ): DiffOptions {
   return typeof options === 'string' ? { roundingMode: options } : options || {}
 }

@@ -14,6 +14,5 @@ export function createRoundToOptions<
   smallestUnit: UN,
   options?: RoundingMathOptions | RoundingMode,
 ): { smallestUnit: UN } & RoundingMathOptions {
-  options = normalizeRoundToOptions(options)
-  return { ...options, smallestUnit }
+  return { ...normalizeRoundToOptions(options), smallestUnit }
 }
