@@ -91,12 +91,13 @@ export const round: (
   options: RoundingOptions,
 ) => DurationRecord = NativeTemporal ? Native.round : Shim.round
 
-export const total: (
-  duration: DurationRecord,
-  options:
-    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
-    | DurationTotalOptions<RelativeTo>,
-) => number = NativeTemporal ? Native.total : Shim.total
+export const total: {
+  (
+    duration: DurationRecord,
+    unit: Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
+  ): number
+  (duration: DurationRecord, options: DurationTotalOptions<RelativeTo>): number
+} = NativeTemporal ? Native.total : Shim.total
 
 export const compare: (
   duration: DurationRecord,

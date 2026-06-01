@@ -494,7 +494,9 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -518,7 +520,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -542,7 +546,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -566,7 +572,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -590,7 +598,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -614,7 +624,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -683,7 +695,9 @@ string as shorthand for `options.roundingMode`.
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -707,7 +721,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToHour } from 'temporal-utils'
 
-const nextInstant = roundToHour(instant, optionsOrRoundingMode)
+const nextInstant = roundToHour(instant, roundingModeOrOptions)
 ```
 
 ### `roundToMinute`
@@ -715,7 +729,9 @@ const nextInstant = roundToHour(instant, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -739,7 +755,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMinute } from 'temporal-utils'
 
-const nextInstant = roundToMinute(instant, optionsOrRoundingMode)
+const nextInstant = roundToMinute(instant, roundingModeOrOptions)
 ```
 
 ### `roundToSecond`
@@ -747,7 +763,9 @@ const nextInstant = roundToMinute(instant, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -771,7 +789,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToSecond } from 'temporal-utils'
 
-const nextInstant = roundToSecond(instant, optionsOrRoundingMode)
+const nextInstant = roundToSecond(instant, roundingModeOrOptions)
 ```
 
 ### `roundToMillisecond`
@@ -779,7 +797,9 @@ const nextInstant = roundToSecond(instant, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -803,7 +823,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMillisecond } from 'temporal-utils'
 
-const nextInstant = roundToMillisecond(instant, optionsOrRoundingMode)
+const nextInstant = roundToMillisecond(instant, roundingModeOrOptions)
 ```
 
 ### `roundToMicrosecond`
@@ -811,7 +831,9 @@ const nextInstant = roundToMillisecond(instant, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -835,7 +857,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMicrosecond } from 'temporal-utils'
 
-const nextInstant = roundToMicrosecond(instant, optionsOrRoundingMode)
+const nextInstant = roundToMicrosecond(instant, roundingModeOrOptions)
 ```
 
 ## Conversion

@@ -330,7 +330,8 @@ Any `relativeTo` record in `options` needs its own record-to-Temporal transform.
 Signature:
 
 ```ts
-(duration: Record, options: UnitName | DurationTotalOptions<RelativeTo>) => number
+(duration: Record, unit: UnitName) => number
+(duration: Record, options: DurationTotalOptions<RelativeTo>) => number
 ```
 
 Fn API:

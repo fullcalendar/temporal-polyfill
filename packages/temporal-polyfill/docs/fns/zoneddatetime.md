@@ -1132,7 +1132,9 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1156,7 +1158,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1180,7 +1184,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1204,7 +1210,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1228,7 +1236,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1252,7 +1262,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1276,7 +1288,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1300,7 +1314,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1324,7 +1340,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1348,7 +1366,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -1419,7 +1439,9 @@ If `options` or `options.roundingMode` is omitted, the rounding mode defaults to
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1445,7 +1467,9 @@ const nextZonedDateTime = roundToYear(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1471,7 +1495,9 @@ const nextZonedDateTime = roundToMonth(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1497,7 +1523,9 @@ const nextZonedDateTime = roundToWeek(zonedDateTime, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1521,7 +1549,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToDay } from 'temporal-utils'
 
-const nextZonedDateTime = roundToDay(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToDay(zonedDateTime, roundingModeOrOptions)
 ```
 
 ### `roundToHour`
@@ -1529,7 +1557,9 @@ const nextZonedDateTime = roundToDay(zonedDateTime, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1553,7 +1583,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToHour } from 'temporal-utils'
 
-const nextZonedDateTime = roundToHour(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToHour(zonedDateTime, roundingModeOrOptions)
 ```
 
 ### `roundToMinute`
@@ -1561,7 +1591,9 @@ const nextZonedDateTime = roundToHour(zonedDateTime, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1585,7 +1617,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMinute } from 'temporal-utils'
 
-const nextZonedDateTime = roundToMinute(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToMinute(zonedDateTime, roundingModeOrOptions)
 ```
 
 ### `roundToSecond`
@@ -1593,7 +1625,9 @@ const nextZonedDateTime = roundToMinute(zonedDateTime, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1617,7 +1651,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToSecond } from 'temporal-utils'
 
-const nextZonedDateTime = roundToSecond(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToSecond(zonedDateTime, roundingModeOrOptions)
 ```
 
 ### `roundToMillisecond`
@@ -1625,7 +1659,9 @@ const nextZonedDateTime = roundToSecond(zonedDateTime, optionsOrRoundingMode)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1649,7 +1685,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMillisecond } from 'temporal-utils'
 
-const nextZonedDateTime = roundToMillisecond(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToMillisecond(zonedDateTime, roundingModeOrOptions)
 ```
 
 ### `roundToMicrosecond`
@@ -1657,7 +1693,9 @@ const nextZonedDateTime = roundToMillisecond(zonedDateTime, optionsOrRoundingMod
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1681,7 +1719,7 @@ Temporal API, generically, for second argument:
 ```ts
 import { roundToMicrosecond } from 'temporal-utils'
 
-const nextZonedDateTime = roundToMicrosecond(zonedDateTime, optionsOrRoundingMode)
+const nextZonedDateTime = roundToMicrosecond(zonedDateTime, roundingModeOrOptions)
 ```
 
 ## Start And End Of Unit
@@ -2105,7 +2143,8 @@ const nextZonedDateTime = endOfMicrosecond(zonedDateTime)
 Signature:
 
 ```ts
-(record: Record, options: DirectionOptions | DirectionName) => Record | null
+(record: Record, direction: DirectionName) => Record | null
+(record: Record, options: DirectionOptions) => Record | null
 ```
 
 Fn API:

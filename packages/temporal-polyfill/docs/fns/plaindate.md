@@ -741,7 +741,9 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -765,7 +767,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -789,7 +793,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -813,7 +819,9 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
+(record0: Record, record1: Record) => number
+(record0: Record, record1: Record, roundingMode: RoundingMode) => number
+(record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
 Fn API:
@@ -883,7 +891,9 @@ string as shorthand for `options.roundingMode`.
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -909,7 +919,9 @@ const nextDate = roundToYear(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -935,7 +947,9 @@ const nextDate = roundToMonth(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
+(record: Record) => Record
+(record: Record, roundingMode: RoundingMode) => Record
+(record: Record, options: RoundingMathOptions) => Record
 ```
 
 Fn API:
@@ -1103,7 +1117,8 @@ const nextDate = endOfWeek(date)
 Signature:
 
 ```ts
-(record: Record, options: string | ToZonedDateTimeOptions<PlainTimeRecord>) => ZonedDateTimeRecord
+(record: Record, timeZoneId: string) => ZonedDateTimeRecord
+(record: Record, options: ToZonedDateTimeOptions<PlainTimeRecord>) => ZonedDateTimeRecord
 ```
 
 Fn API:

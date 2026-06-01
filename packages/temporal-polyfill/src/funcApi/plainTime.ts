@@ -142,74 +142,119 @@ export const diff: (
   options?: DiffOptions,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
-export const diffHours: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffHours : Shim.diffHours
+export const diffHours: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffHours : Shim.diffHours
 
-export const diffMinutes: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
+export const diffMinutes: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
 
-export const diffSeconds: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
+export const diffSeconds: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
 
-export const diffMilliseconds: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
+export const diffMilliseconds: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
 
-export const diffMicroseconds: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
+export const diffMicroseconds: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
 
-export const diffNanoseconds: (
-  record0: PlainTimeRecord,
-  record1: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
+export const diffNanoseconds: {
+  (record0: PlainTimeRecord, record1: PlainTimeRecord): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    roundingMode: RoundingMode,
+  ): number
+  (
+    record0: PlainTimeRecord,
+    record1: PlainTimeRecord,
+    options: RoundingMathOptions,
+  ): number
+} = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
 
-export const roundToHour: (
-  record: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => PlainTimeRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
+export const roundToHour: {
+  (record: PlainTimeRecord): PlainTimeRecord
+  (record: PlainTimeRecord, roundingMode: RoundingMode): PlainTimeRecord
+  (record: PlainTimeRecord, options: RoundingMathOptions): PlainTimeRecord
+} = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
-export const roundToMinute: (
-  record: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => PlainTimeRecord = NativeTemporal
-  ? Native.roundToMinute
-  : Shim.roundToMinute
+export const roundToMinute: {
+  (record: PlainTimeRecord): PlainTimeRecord
+  (record: PlainTimeRecord, roundingMode: RoundingMode): PlainTimeRecord
+  (record: PlainTimeRecord, options: RoundingMathOptions): PlainTimeRecord
+} = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
 
-export const roundToSecond: (
-  record: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => PlainTimeRecord = NativeTemporal
-  ? Native.roundToSecond
-  : Shim.roundToSecond
+export const roundToSecond: {
+  (record: PlainTimeRecord): PlainTimeRecord
+  (record: PlainTimeRecord, roundingMode: RoundingMode): PlainTimeRecord
+  (record: PlainTimeRecord, options: RoundingMathOptions): PlainTimeRecord
+} = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
 
-export const roundToMillisecond: (
-  record: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => PlainTimeRecord = NativeTemporal
-  ? Native.roundToMillisecond
-  : Shim.roundToMillisecond
+export const roundToMillisecond: {
+  (record: PlainTimeRecord): PlainTimeRecord
+  (record: PlainTimeRecord, roundingMode: RoundingMode): PlainTimeRecord
+  (record: PlainTimeRecord, options: RoundingMathOptions): PlainTimeRecord
+} = NativeTemporal ? Native.roundToMillisecond : Shim.roundToMillisecond
 
-export const roundToMicrosecond: (
-  record: PlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-) => PlainTimeRecord = NativeTemporal
-  ? Native.roundToMicrosecond
-  : Shim.roundToMicrosecond
+export const roundToMicrosecond: {
+  (record: PlainTimeRecord): PlainTimeRecord
+  (record: PlainTimeRecord, roundingMode: RoundingMode): PlainTimeRecord
+  (record: PlainTimeRecord, options: RoundingMathOptions): PlainTimeRecord
+} = NativeTemporal ? Native.roundToMicrosecond : Shim.roundToMicrosecond
 
 export const startOfHour: (record: PlainTimeRecord) => PlainTimeRecord =
   NativeTemporal ? Native.startOfHour : Shim.startOfHour
