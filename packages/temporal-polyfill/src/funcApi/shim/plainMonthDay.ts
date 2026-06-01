@@ -56,24 +56,6 @@ class _PlainMonthDayShimRecord
 {
   declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
-  constructor(
-    isoMonth: number,
-    isoDay: number,
-    calendar?: CalendarShimRecord,
-    referenceIsoYear?: number,
-  ) {
-    setPlainMonthDayShimRecordSlots(
-      this,
-      constructMonthDaySlots(
-        refineCalendarShimArg,
-        isoMonth,
-        isoDay,
-        calendar,
-        referenceIsoYear,
-      ),
-    )
-  }
-
   get calendarId() {
     return getCalendarSlotId(getPlainMonthDayShimRecordSlots(this).calendar)
   }
@@ -125,11 +107,14 @@ export function create(
   calendar?: CalendarShimRecord,
   referenceIsoYear?: number,
 ): PlainMonthDayShimRecord {
-  return new PlainMonthDayShimRecord(
-    isoMonth,
-    isoDay,
-    calendar,
-    referenceIsoYear,
+  return createPlainMonthDayShimRecord(
+    constructMonthDaySlots(
+      refineCalendarShimArg,
+      isoMonth,
+      isoDay,
+      calendar,
+      referenceIsoYear,
+    ),
   )
 }
 

@@ -155,36 +155,6 @@ export const getPlainDateTimeShimRecordSlots: (
 class _PlainDateTimeShimRecord implements DateTimeFields, PlainDateTimeRecord {
   declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
 
-  constructor(
-    isoYear: number,
-    isoMonth: number,
-    isoDay: number,
-    hour?: number,
-    minute?: number,
-    second?: number,
-    millisecond?: number,
-    microsecond?: number,
-    nanosecond?: number,
-    calendar?: CalendarShimRecord,
-  ) {
-    setPlainDateTimeShimRecordSlots(
-      this,
-      constructDateTimeSlots(
-        refineCalendarShimArg,
-        isoYear,
-        isoMonth,
-        isoDay,
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-        calendar,
-      ),
-    )
-  }
-
   get calendarId() {
     return getCalendarSlotId(getPlainDateTimeShimRecordSlots(this).calendar)
   }
@@ -286,17 +256,20 @@ export function create(
   nanosecond?: number,
   calendar?: CalendarShimRecord,
 ): PlainDateTimeShimRecord {
-  return new PlainDateTimeShimRecord(
-    isoYear,
-    isoMonth,
-    isoDay,
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
-    calendar,
+  return createPlainDateTimeShimRecord(
+    constructDateTimeSlots(
+      refineCalendarShimArg,
+      isoYear,
+      isoMonth,
+      isoDay,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond,
+      calendar,
+    ),
   )
 }
 
@@ -733,12 +706,12 @@ export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, Unit.Microsecond)
 export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
-export const startOfDay = aligned(computeDayFloor)
-export const startOfHour = aligned(alignedTime(computeHourFloor))
-export const startOfMinute = aligned(alignedTime(computeMinuteFloor))
-export const startOfSecond = aligned(alignedTime(computeSecFloor))
-export const startOfMillisecond = aligned(alignedTime(computeMilliFloor))
-export const startOfMicrosecond = aligned(alignedTime(computeMicroFloor))
+export const startOfDay = alignedDateTimeStart(computeDayFloor)
+export const startOfHour = alignedTimeStart(computeHourFloor)
+export const startOfMinute = alignedTimeStart(computeMinuteFloor)
+export const startOfSecond = alignedTimeStart(computeSecFloor)
+export const startOfMillisecond = alignedTimeStart(computeMilliFloor)
+export const startOfMicrosecond = alignedTimeStart(computeMicroFloor)
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -906,6 +879,36 @@ function aligned(
       createPlainDateTimeFromRefinedFields(
         isoDateTime,
         isoDateTime,
+        slots.calendar,
+      ),
+    )
+  }
+}
+
+function alignedDateTimeStart(
+  computeAlignment: (slots: PlainDateTimeShimSlots) => CalendarDateTimeFields,
+): (record: PlainDateTimeShimRecord) => PlainDateTimeShimRecord {
+  return (record) => {
+    const slots = getPlainDateTimeShimRecordSlots(record)
+    // DateTime starts at or below the day unit only clear time fields on an
+    // already-valid PlainDateTime. The ISO date is unchanged, so no bounds
+    // check is needed.
+    return createPlainDateTimeShimRecord(
+      createDateTimeSlots(computeAlignment(slots), slots.calendar),
+    )
+  }
+}
+
+function alignedTimeStart(
+  computeAlignment: (time: TimeFields) => TimeFields,
+): (record: PlainDateTimeShimRecord) => PlainDateTimeShimRecord {
+  return (record) => {
+    const slots = getPlainDateTimeShimRecordSlots(record)
+    // Time floors only zero sub-hour/minute/etc. fields on an already-valid
+    // PlainDateTime. The ISO date is unchanged, so no bounds check is needed.
+    return createPlainDateTimeShimRecord(
+      createDateTimeSlots(
+        combineDateAndTime(slots, computeAlignment(slots)),
         slots.calendar,
       ),
     )

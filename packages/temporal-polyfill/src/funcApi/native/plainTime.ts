@@ -30,27 +30,6 @@ export const getPlainTimeNative: (record: unknown) => Temporal.PlainTime =
 class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
-  constructor(
-    hour = 0,
-    minute = 0,
-    second = 0,
-    millisecond = 0,
-    microsecond = 0,
-    nanosecond = 0,
-  ) {
-    setPlainTimeNative(
-      this,
-      new NativeTemporal!.PlainTime(
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-      ),
-    )
-  }
-
   get hour() {
     return getPlainTimeNative(this).hour
   }
@@ -111,13 +90,15 @@ export function create(
   microsecond?: number,
   nanosecond?: number,
 ): PlainTimeNativeRecord {
-  return new PlainTimeNativeRecord(
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
+  return createPlainTimeNativeRecord(
+    new NativeTemporal!.PlainTime(
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond,
+    ),
   )
 }
 

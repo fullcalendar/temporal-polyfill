@@ -35,10 +35,6 @@ export const getInstantNative: (record: unknown) => Temporal.Instant =
 class _InstantNativeRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
-  constructor(epochNanoseconds: bigint) {
-    setInstantNative(this, new NativeTemporal!.Instant(epochNanoseconds))
-  }
-
   get epochMilliseconds() {
     return getInstantNative(this).epochMilliseconds
   }
@@ -76,7 +72,9 @@ export const InstantNativeRecord = defineTemporalClass(
 )
 
 export function create(epochNanoseconds: bigint): InstantNativeRecord {
-  return new InstantNativeRecord(epochNanoseconds)
+  return createInstantNativeRecord(
+    new NativeTemporal!.Instant(epochNanoseconds),
+  )
 }
 
 export function fromEpochMilliseconds(

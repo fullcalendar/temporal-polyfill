@@ -50,35 +50,6 @@ export const getDurationShimRecordSlots: (
 class _DurationShimRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
-  constructor(
-    years?: number,
-    months?: number,
-    weeks?: number,
-    days?: number,
-    hours?: number,
-    minutes?: number,
-    seconds?: number,
-    milliseconds?: number,
-    microseconds?: number,
-    nanoseconds?: number,
-  ) {
-    setDurationShimRecordSlots(
-      this,
-      constructDurationSlots(
-        years,
-        months,
-        weeks,
-        days,
-        hours,
-        minutes,
-        seconds,
-        milliseconds,
-        microseconds,
-        nanoseconds,
-      ),
-    )
-  }
-
   get years() {
     return getDurationShimRecordSlots(this).years
   }
@@ -162,17 +133,19 @@ export function create(
   microseconds?: number,
   nanoseconds?: number,
 ): DurationShimRecord {
-  return new DurationShimRecord(
-    years,
-    months,
-    weeks,
-    days,
-    hours,
-    minutes,
-    seconds,
-    milliseconds,
-    microseconds,
-    nanoseconds,
+  return createDurationShimRecord(
+    constructDurationSlots(
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+      microseconds,
+      nanoseconds,
+    ),
   )
 }
 

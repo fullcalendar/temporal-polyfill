@@ -44,25 +44,6 @@ class _PlainYearMonthNativeRecord
 {
   declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
 
-  constructor(
-    isoYear: number,
-    isoMonth: number,
-    calendar?: CalendarNativeRecord,
-    referenceIsoDay?: number,
-  ) {
-    setPlainYearMonthNative(
-      this,
-      new NativeTemporal!.PlainYearMonth(
-        isoYear,
-        isoMonth,
-        calendar === undefined
-          ? undefined
-          : getCalendarNativeRecordId(calendar),
-        referenceIsoDay,
-      ),
-    )
-  }
-
   get calendarId() {
     return getPlainYearMonthNative(this).calendarId
   }
@@ -124,11 +105,13 @@ export function create(
   calendar?: CalendarNativeRecord,
   referenceIsoDay?: number,
 ): PlainYearMonthNativeRecord {
-  return new PlainYearMonthNativeRecord(
-    isoYear,
-    isoMonth,
-    calendar,
-    referenceIsoDay,
+  return createPlainYearMonthNativeRecord(
+    new NativeTemporal!.PlainYearMonth(
+      isoYear,
+      isoMonth,
+      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+      referenceIsoDay,
+    ),
   )
 }
 

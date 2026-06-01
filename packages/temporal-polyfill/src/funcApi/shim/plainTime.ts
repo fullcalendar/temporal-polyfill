@@ -63,27 +63,6 @@ export const getPlainTimeShimRecordSlots: (
 class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
-  constructor(
-    hour?: number,
-    minute?: number,
-    second?: number,
-    millisecond?: number,
-    microsecond?: number,
-    nanosecond?: number,
-  ) {
-    setPlainTimeShimRecordSlots(
-      this,
-      constructTimeSlots(
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-      ),
-    )
-  }
-
   get hour() {
     return getPlainTimeShimRecordSlots(this).hour
   }
@@ -147,13 +126,15 @@ export function create(
   microsecond?: number,
   nanosecond?: number,
 ): PlainTimeShimRecord {
-  return new PlainTimeShimRecord(
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
+  return createPlainTimeShimRecord(
+    constructTimeSlots(
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond,
+    ),
   )
 }
 

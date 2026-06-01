@@ -165,22 +165,6 @@ export const getZonedDateTimeShimRecordSlots: (
 class _ZonedDateTimeShimRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
-  constructor(
-    epochNanoseconds: bigint,
-    timeZoneId: string,
-    calendar?: CalendarShimRecord,
-  ) {
-    setZonedDateTimeShimRecordSlots(
-      this,
-      constructZonedEpochNanoSlots(
-        refineCalendarShimArg,
-        epochNanoseconds,
-        timeZoneId,
-        calendar,
-      ),
-    )
-  }
-
   get calendarId() {
     return getCalendarSlotId(getZonedDateTimeShimRecordSlots(this).calendar)
   }
@@ -290,7 +274,14 @@ export function create(
   timeZoneId: string,
   calendar?: CalendarShimRecord,
 ): ZonedDateTimeShimRecord {
-  return new ZonedDateTimeShimRecord(epochNanoseconds, timeZoneId, calendar)
+  return createZonedDateTimeShimRecord(
+    constructZonedEpochNanoSlots(
+      refineCalendarShimArg,
+      epochNanoseconds,
+      timeZoneId,
+      calendar,
+    ),
+  )
 }
 
 export function fromFields(

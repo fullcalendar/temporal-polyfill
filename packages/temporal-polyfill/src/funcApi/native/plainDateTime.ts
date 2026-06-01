@@ -54,37 +54,6 @@ class _PlainDateTimeNativeRecord
 {
   declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
 
-  constructor(
-    isoYear: number,
-    isoMonth: number,
-    isoDay: number,
-    hour = 0,
-    minute = 0,
-    second = 0,
-    millisecond = 0,
-    microsecond = 0,
-    nanosecond = 0,
-    calendar?: CalendarNativeRecord,
-  ) {
-    setPlainDateTimeNative(
-      this,
-      new NativeTemporal!.PlainDateTime(
-        isoYear,
-        isoMonth,
-        isoDay,
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-        calendar === undefined
-          ? undefined
-          : getCalendarNativeRecordId(calendar),
-      ),
-    )
-  }
-
   get calendarId() {
     return getPlainDateTimeNative(this).calendarId
   }
@@ -180,17 +149,19 @@ export function create(
   nanosecond?: number,
   calendar?: CalendarNativeRecord,
 ): PlainDateTimeNativeRecord {
-  return new PlainDateTimeNativeRecord(
-    isoYear,
-    isoMonth,
-    isoDay,
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
-    calendar,
+  return createPlainDateTimeNativeRecord(
+    new NativeTemporal!.PlainDateTime(
+      isoYear,
+      isoMonth,
+      isoDay,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond,
+      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+    ),
   )
 }
 

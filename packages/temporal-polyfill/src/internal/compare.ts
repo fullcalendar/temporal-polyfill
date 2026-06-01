@@ -1,4 +1,4 @@
-import { type CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { type CalendarSlot } from './calendarSlot'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import { isoDateToEpochMilli } from './epochMath'
@@ -138,7 +138,7 @@ export function zonedDateTimesEqual(
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
     zonedDateTimeSlots0.timeZone.compareKey ===
       zonedDateTimeSlots1.timeZone.compareKey &&
-    calendarsEqual(zonedDateTimeSlots0.calendar, zonedDateTimeSlots1.calendar)
+    zonedDateTimeSlots0.calendar === zonedDateTimeSlots1.calendar
   )
 }
 
@@ -148,7 +148,7 @@ export function plainDateTimesEqual(
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
-    calendarsEqual(plainDateTimeSlots0.calendar, plainDateTimeSlots1.calendar)
+    plainDateTimeSlots0.calendar === plainDateTimeSlots1.calendar
   )
 }
 
@@ -158,7 +158,7 @@ export function plainDatesEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
-    calendarsEqual(plainDateSlots0.calendar, plainDateSlots1.calendar)
+    plainDateSlots0.calendar === plainDateSlots1.calendar
   )
 }
 
@@ -168,7 +168,7 @@ export function plainYearMonthsEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
-    calendarsEqual(plainYearMonthSlots0.calendar, plainYearMonthSlots1.calendar)
+    plainYearMonthSlots0.calendar === plainYearMonthSlots1.calendar
   )
 }
 
@@ -178,19 +178,7 @@ export function plainMonthDaysEqual(
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&
-    calendarsEqual(plainMonthDaySlots0.calendar, plainMonthDaySlots1.calendar)
-  )
-}
-
-function calendarsEqual(
-  calendar0: CalendarSlot,
-  calendar1: CalendarSlot,
-): boolean {
-  return (
-    calendar0 === calendar1 ||
-    (!!calendar0 &&
-      !!calendar1 &&
-      getCalendarSlotId(calendar0) === getCalendarSlotId(calendar1))
+    plainMonthDaySlots0.calendar === plainMonthDaySlots1.calendar
   )
 }
 

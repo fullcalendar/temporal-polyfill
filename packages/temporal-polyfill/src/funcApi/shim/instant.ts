@@ -81,10 +81,6 @@ export const getInstantShimRecordSlots: (record: unknown) => InstantShimSlots =
 class _InstantShimRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
-  constructor(epochNanoseconds: bigint) {
-    setInstantShimRecordSlots(this, constructEpochNanoSlots(epochNanoseconds))
-  }
-
   get epochMilliseconds() {
     return getEpochMilli(getInstantShimRecordSlots(this))
   }
@@ -122,7 +118,7 @@ export const InstantShimRecord = defineTemporalClass(
 )
 
 export function create(epochNanoseconds: bigint): InstantShimRecord {
-  return new InstantShimRecord(epochNanoseconds)
+  return createInstantShimRecord(constructEpochNanoSlots(epochNanoseconds))
 }
 
 export function fromEpochMilliseconds(

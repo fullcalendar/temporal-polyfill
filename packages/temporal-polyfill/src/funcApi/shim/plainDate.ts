@@ -130,24 +130,6 @@ export const getPlainDateShimRecordSlots: (
 class _PlainDateShimRecord implements DateFields, PlainDateRecord {
   declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
 
-  constructor(
-    isoYear: number,
-    isoMonth: number,
-    isoDay: number,
-    calendar?: CalendarShimRecord,
-  ) {
-    setPlainDateShimRecordSlots(
-      this,
-      constructDateSlots(
-        refineCalendarShimArg,
-        isoYear,
-        isoMonth,
-        isoDay,
-        calendar,
-      ),
-    )
-  }
-
   get calendarId() {
     return getCalendarSlotId(getPlainDateShimRecordSlots(this).calendar)
   }
@@ -219,7 +201,15 @@ export function create(
   isoDay: number,
   calendar?: CalendarShimRecord,
 ): PlainDateShimRecord {
-  return new PlainDateShimRecord(isoYear, isoMonth, isoDay, calendar)
+  return createPlainDateShimRecord(
+    constructDateSlots(
+      refineCalendarShimArg,
+      isoYear,
+      isoMonth,
+      isoDay,
+      calendar,
+    ),
+  )
 }
 
 export function fromFields(

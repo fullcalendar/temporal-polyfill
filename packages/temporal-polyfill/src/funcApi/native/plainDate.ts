@@ -58,25 +58,6 @@ export const getPlainDateNative: (record: unknown) => Temporal.PlainDate =
 class _PlainDateNativeRecord implements DateFields, PlainDateRecord {
   declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
 
-  constructor(
-    isoYear: number,
-    isoMonth: number,
-    isoDay: number,
-    calendar?: CalendarNativeRecord,
-  ) {
-    setPlainDateNative(
-      this,
-      new NativeTemporal!.PlainDate(
-        isoYear,
-        isoMonth,
-        isoDay,
-        calendar === undefined
-          ? undefined
-          : getCalendarNativeRecordId(calendar),
-      ),
-    )
-  }
-
   get calendarId() {
     return getPlainDateNative(this).calendarId
   }
@@ -139,7 +120,14 @@ export function create(
   isoDay: number,
   calendar?: CalendarNativeRecord,
 ): PlainDateNativeRecord {
-  return new PlainDateNativeRecord(isoYear, isoMonth, isoDay, calendar)
+  return createPlainDateNativeRecord(
+    new NativeTemporal!.PlainDate(
+      isoYear,
+      isoMonth,
+      isoDay,
+      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+    ),
+  )
 }
 
 export function fromFields(

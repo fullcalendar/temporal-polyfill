@@ -31,35 +31,6 @@ export const getDurationNative: (record: unknown) => Temporal.Duration =
 class _DurationNativeRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
-  constructor(
-    years?: number,
-    months?: number,
-    weeks?: number,
-    days?: number,
-    hours?: number,
-    minutes?: number,
-    seconds?: number,
-    milliseconds?: number,
-    microseconds?: number,
-    nanoseconds?: number,
-  ) {
-    setDurationNative(
-      this,
-      new NativeTemporal!.Duration(
-        years,
-        months,
-        weeks,
-        days,
-        hours,
-        minutes,
-        seconds,
-        milliseconds,
-        microseconds,
-        nanoseconds,
-      ),
-    )
-  }
-
   get years() {
     return getDurationNative(this).years
   }
@@ -140,17 +111,19 @@ export function create(
   microseconds?: number,
   nanoseconds?: number,
 ): DurationNativeRecord {
-  return new DurationNativeRecord(
-    years,
-    months,
-    weeks,
-    days,
-    hours,
-    minutes,
-    seconds,
-    milliseconds,
-    microseconds,
-    nanoseconds,
+  return createDurationNativeRecord(
+    new NativeTemporal!.Duration(
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+      microseconds,
+      nanoseconds,
+    ),
   )
 }
 

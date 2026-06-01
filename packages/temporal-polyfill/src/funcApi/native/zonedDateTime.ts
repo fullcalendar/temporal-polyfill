@@ -58,23 +58,6 @@ export const getZonedDateTimeNative: (
 class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
-  constructor(
-    epochNanoseconds: bigint,
-    timeZoneId: string,
-    calendar?: CalendarNativeRecord,
-  ) {
-    setZonedDateTimeNative(
-      this,
-      new NativeTemporal!.ZonedDateTime(
-        epochNanoseconds,
-        timeZoneId,
-        calendar === undefined
-          ? undefined
-          : getCalendarNativeRecordId(calendar),
-      ),
-    )
-  }
-
   get calendarId() {
     return getZonedDateTimeNative(this).calendarId
   }
@@ -175,7 +158,13 @@ export function create(
   timeZoneId: string,
   calendar?: CalendarNativeRecord,
 ): ZonedDateTimeNativeRecord {
-  return new ZonedDateTimeNativeRecord(epochNanoseconds, timeZoneId, calendar)
+  return createZonedDateTimeNativeRecord(
+    new NativeTemporal!.ZonedDateTime(
+      epochNanoseconds,
+      timeZoneId,
+      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+    ),
+  )
 }
 
 export function fromFields(
