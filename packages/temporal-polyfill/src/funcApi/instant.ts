@@ -1,10 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type {
-  InstantStringTimeZoneDisplayOptions,
-  RoundingMathOptions,
-  RoundingModeName,
-} from '../internal/temporalSpecHelpers'
+import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/instant'
@@ -17,6 +13,14 @@ import * as Shim from './shim/instant'
 import { isInstantRecord } from './temporalRecords'
 
 export type { Record }
+
+export type DiffOptions =
+  Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+type InstantStringTimeZoneDisplayOptions =
+  TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+type RoundingModeName = TemporalSpecHelpers.RoundingModeName
+type ToStringOptions = InstantStringTimeZoneDisplayOptions
 
 type InstantRecord = Record
 
@@ -125,7 +129,7 @@ export const subtractNanoseconds: (
 export const diff: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+  options?: DiffOptions,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffHours: (
@@ -225,7 +229,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: InstantRecord,
-  options?: InstantStringTimeZoneDisplayOptions,
+  options?: ToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: InstantRecord) => string = NativeTemporal

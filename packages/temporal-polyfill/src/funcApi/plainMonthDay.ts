@@ -14,6 +14,13 @@ import { isPlainMonthDayRecord } from './temporalRecords'
 
 export type { Record }
 
+export type FromFields = Partial<MonthDayFields> & {
+  calendar?: CalendarRecord
+}
+export type WithFields = Partial<MonthDayFields>
+type OverflowOptions = Temporal.OverflowOptions
+type ToStringOptions = Temporal.PlainDateToStringOptions
+
 type PlainMonthDayRecord = Record
 
 export const create: (
@@ -26,8 +33,8 @@ export const create: (
 export const isRecord = isPlainMonthDayRecord as (arg: unknown) => arg is Record
 
 export const fromFields: (
-  fields: Partial<MonthDayFields> & { calendar?: CalendarRecord },
-  options?: Temporal.OverflowOptions,
+  fields: FromFields,
+  options?: OverflowOptions,
 ) => PlainMonthDayRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
@@ -37,8 +44,8 @@ export const fromString: (
 
 export const withFields: (
   record: PlainMonthDayRecord,
-  mod: Partial<MonthDayFields>,
-  options?: Temporal.OverflowOptions,
+  mod: WithFields,
+  options?: OverflowOptions,
 ) => PlainMonthDayRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const equals: (
@@ -66,7 +73,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainMonthDayRecord,
-  options?: Temporal.PlainDateToStringOptions,
+  options?: ToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainMonthDayRecord) => string =

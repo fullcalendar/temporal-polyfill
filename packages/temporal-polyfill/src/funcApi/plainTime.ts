@@ -1,10 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type {
-  RoundingMathOptions,
-  RoundingModeName,
-} from '../internal/temporalSpecHelpers'
+import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainTime'
@@ -13,6 +10,15 @@ import * as Shim from './shim/plainTime'
 import { isPlainTimeRecord } from './temporalRecords'
 
 export type { Record }
+
+export type FromFields = Partial<TimeFields>
+export type WithFields = Partial<TimeFields>
+type OverflowOptions = Temporal.OverflowOptions
+type ToStringOptions = Temporal.PlainTimeToStringOptions
+export type DiffOptions =
+  Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+type RoundingModeName = TemporalSpecHelpers.RoundingModeName
 
 type PlainTimeRecord = Record
 
@@ -28,8 +34,8 @@ export const create: (
 export const isRecord = isPlainTimeRecord as (arg: unknown) => arg is Record
 
 export const fromFields: (
-  fields: Partial<TimeFields>,
-  options?: Temporal.OverflowOptions,
+  fields: FromFields,
+  options?: OverflowOptions,
 ) => PlainTimeRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (s: string) => PlainTimeRecord = NativeTemporal
@@ -38,8 +44,8 @@ export const fromString: (s: string) => PlainTimeRecord = NativeTemporal
 
 export const withFields: (
   record: PlainTimeRecord,
-  mod: Partial<TimeFields>,
-  options?: Temporal.OverflowOptions,
+  mod: WithFields,
+  options?: OverflowOptions,
 ) => PlainTimeRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const add: (
@@ -133,7 +139,7 @@ export const subtractNanoseconds: (
 export const diff: (
   record: PlainTimeRecord,
   otherRecord: PlainTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+  options?: DiffOptions,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffHours: (
@@ -260,7 +266,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainTimeRecord,
-  options?: Temporal.PlainTimeToStringOptions,
+  options?: ToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainTimeRecord) => string =

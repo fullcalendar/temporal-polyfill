@@ -1,10 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type {
-  RoundingMathOptions,
-  RoundingModeName,
-} from '../internal/temporalSpecHelpers'
+import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainDateTime'
@@ -18,6 +15,18 @@ import type {
 } from './recordTypes'
 import * as Shim from './shim/plainDateTime'
 import { isPlainDateTimeRecord } from './temporalRecords'
+
+// centralized types
+export type FromFields = Partial<DateTimeFields> & { calendar: CalendarRecord }
+export type WithFields = Partial<DateTimeFields>
+type OverflowOptions = Temporal.OverflowOptions
+type DisambiguationOptions = Temporal.DisambiguationOptions
+type ToStringOptions = Temporal.PlainDateTimeToStringOptions
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+type RoundingModeName = TemporalSpecHelpers.RoundingModeName
+export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
+  Temporal.DateUnit | Temporal.TimeUnit
+>
 
 export type { Record }
 
@@ -39,8 +48,8 @@ export const create: (
 export const isRecord = isPlainDateTimeRecord as (arg: unknown) => arg is Record
 
 export const fromFields: (
-  fields: Partial<DateTimeFields> & { calendar: CalendarRecord },
-  options?: Temporal.OverflowOptions,
+  fields: FromFields,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
@@ -57,8 +66,8 @@ export const withCalendar: (
 
 export const withFields: (
   record: PlainDateTimeRecord,
-  mod: Partial<DateTimeFields>,
-  options?: Temporal.OverflowOptions,
+  mod: WithFields,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const withPlainTime: (
@@ -100,21 +109,19 @@ export const inLeapYear: (record: PlainDateTimeRecord) => boolean =
 export const add: (
   record: PlainDateTimeRecord,
   duration: DurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.add : Shim.add
 
 export const subtract: (
   record: PlainDateTimeRecord,
   duration: DurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.subtract : Shim.subtract
 
 export const diff: (
   record: PlainDateTimeRecord,
   otherRecord: PlainDateTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<
-    Temporal.DateUnit | Temporal.TimeUnit
-  >,
+  options?: DiffOptions,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const equals: (
@@ -130,7 +137,7 @@ export const compare: (
 export const toZonedDateTime: (
   record: PlainDateTimeRecord,
   timeZoneId: string,
-  options?: Temporal.DisambiguationOptions,
+  options?: DisambiguationOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.toZonedDateTime
   : Shim.toZonedDateTime
@@ -156,7 +163,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainDateTimeRecord,
-  options?: Temporal.PlainDateTimeToStringOptions,
+  options?: ToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainDateTimeRecord) => string =
@@ -165,7 +172,7 @@ export const toSimpleString: (record: PlainDateTimeRecord) => string =
 export const withDayOfYear: (
   record: PlainDateTimeRecord,
   dayOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.withDayOfYear
   : Shim.withDayOfYear
@@ -173,7 +180,7 @@ export const withDayOfYear: (
 export const withDayOfMonth: (
   record: PlainDateTimeRecord,
   dayOfMonth: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.withDayOfMonth
   : Shim.withDayOfMonth
@@ -181,7 +188,7 @@ export const withDayOfMonth: (
 export const withDayOfWeek: (
   record: PlainDateTimeRecord,
   dayOfWeek: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.withDayOfWeek
   : Shim.withDayOfWeek
@@ -189,7 +196,7 @@ export const withDayOfWeek: (
 export const withWeekOfYear: (
   record: PlainDateTimeRecord,
   weekOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.withWeekOfYear
   : Shim.withWeekOfYear
@@ -197,13 +204,13 @@ export const withWeekOfYear: (
 export const addYears: (
   record: PlainDateTimeRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.addYears : Shim.addYears
 
 export const addMonths: (
   record: PlainDateTimeRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
 
 export const addWeeks: (
@@ -255,7 +262,7 @@ export const addNanoseconds: (
 export const subtractYears: (
   record: PlainDateTimeRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.subtractYears
   : Shim.subtractYears
@@ -263,7 +270,7 @@ export const subtractYears: (
 export const subtractMonths: (
   record: PlainDateTimeRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.subtractMonths
   : Shim.subtractMonths

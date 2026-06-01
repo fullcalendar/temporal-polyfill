@@ -1,10 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import { DayFields, YearMonthFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type {
-  RoundingMathOptions,
-  RoundingModeName,
-} from '../internal/temporalSpecHelpers'
+import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import * as Native from './native/plainYearMonth'
@@ -18,6 +15,18 @@ import * as Shim from './shim/plainYearMonth'
 import { isPlainYearMonthRecord } from './temporalRecords'
 
 export type { Record }
+
+export type FromFields = Partial<YearMonthFields> & {
+  calendar?: CalendarRecord
+}
+export type WithFields = Partial<YearMonthFields>
+type OverflowOptions = Temporal.OverflowOptions
+type ToStringOptions = Temporal.PlainDateToStringOptions
+export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
+  'year' | 'month'
+>
+type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+type RoundingModeName = TemporalSpecHelpers.RoundingModeName
 
 type PlainYearMonthRecord = Record
 
@@ -33,8 +42,8 @@ export const isRecord = isPlainYearMonthRecord as (
 ) => arg is Record
 
 export const fromFields: (
-  fields: Partial<YearMonthFields> & { calendar?: CalendarRecord },
-  options?: Temporal.OverflowOptions,
+  fields: FromFields,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.fromFields : Shim.fromFields
 
 export const fromString: (
@@ -56,38 +65,38 @@ export const inLeapYear: (record: PlainYearMonthRecord) => boolean =
 
 export const withFields: (
   record: PlainYearMonthRecord,
-  mod: Partial<YearMonthFields>,
-  options?: Temporal.OverflowOptions,
+  mod: WithFields,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const add: (
   record: PlainYearMonthRecord,
   duration: DurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.add : Shim.add
 
 export const addYears: (
   record: PlainYearMonthRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.addYears : Shim.addYears
 
 export const addMonths: (
   record: PlainYearMonthRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.addMonths : Shim.addMonths
 
 export const subtract: (
   record: PlainYearMonthRecord,
   duration: DurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal ? Native.subtract : Shim.subtract
 
 export const subtractYears: (
   record: PlainYearMonthRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.subtractYears
   : Shim.subtractYears
@@ -95,7 +104,7 @@ export const subtractYears: (
 export const subtractMonths: (
   record: PlainYearMonthRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: OverflowOptions,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.subtractMonths
   : Shim.subtractMonths
@@ -103,7 +112,7 @@ export const subtractMonths: (
 export const diff: (
   record: PlainYearMonthRecord,
   otherRecord: PlainYearMonthRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>,
+  options?: DiffOptions,
 ) => DurationRecord = NativeTemporal ? Native.diff : Shim.diff
 
 export const diffYears: (
@@ -164,7 +173,7 @@ export const toLocaleString: (
 
 export const toString: (
   record: PlainYearMonthRecord,
-  options?: Temporal.PlainDateToStringOptions,
+  options?: ToStringOptions,
 ) => string = NativeTemporal ? Native.toString : Shim.toString
 
 export const toSimpleString: (record: PlainYearMonthRecord) => string =
