@@ -662,7 +662,7 @@ export const roundToWeek = bindArgs(
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -808,7 +808,7 @@ function roundToInterval(
   unit: Unit,
   computeInterval: (slots: any) => IsoDateTimeInterval,
   record: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

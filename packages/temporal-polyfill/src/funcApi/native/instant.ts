@@ -315,7 +315,7 @@ function round(
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: InstantNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): InstantNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

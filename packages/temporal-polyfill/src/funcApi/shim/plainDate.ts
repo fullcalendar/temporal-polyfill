@@ -558,7 +558,7 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Year,
@@ -567,7 +567,7 @@ export const roundToYear: (
 
 export const roundToMonth: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Month,
@@ -576,7 +576,7 @@ export const roundToMonth: (
 
 export const roundToWeek: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Week,
@@ -661,7 +661,7 @@ function roundToInterval(
     slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

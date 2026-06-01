@@ -13,6 +13,7 @@ export type DateTimeFormatLike<R> = Omit<
   ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']>
 }
 
+// temporal-spec can't be used as-is because plainTime is a *record* here
 export type ToZonedDateTimeOptions<PlainTimeRecord> = {
   timeZone: string
   plainTime?: PlainTimeRecord
@@ -24,6 +25,7 @@ export type RelativeToRecord<
   PlainDateRecord,
 > = ZonedDateTimeRecord | PlainDateTimeRecord | PlainDateRecord
 
+// temporal-spec can't be used as-is because calendar is a *record* here
 export type ZonedDateTimeFields<CalendarRecord> = Partial<DateTimeFields> & {
   calendar?: CalendarRecord
   offset?: string

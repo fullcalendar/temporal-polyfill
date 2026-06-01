@@ -10,7 +10,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions } from '../roundTo'
+import { createRoundToOptions, normalizeRoundToOptions } from '../roundTo'
 import {
   getPlainDateTimeSlots,
   setPlainDateTimeSlots,
@@ -636,35 +636,44 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToYear(getPlainDateTimeNative(record), options),
+    TemporalUtils.roundToYear(
+      getPlainDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 export function roundToMonth(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToMonth(getPlainDateTimeNative(record), options),
+    TemporalUtils.roundToMonth(
+      getPlainDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 export function roundToWeek(
   record: PlainDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return createPlainDateTimeNativeRecord(
-    TemporalUtils.roundToWeek(getPlainDateTimeNative(record), options),
+    TemporalUtils.roundToWeek(
+      getPlainDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: PlainDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

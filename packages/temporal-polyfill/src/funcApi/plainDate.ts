@@ -255,17 +255,17 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToYear : Shim.roundToYear
 
 export const roundToMonth: (
   record: PlainDateRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToMonth : Shim.roundToMonth
 
 export const roundToWeek: (
   record: PlainDateRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
 
 export const startOfYear: (record: PlainDateRecord) => PlainDateRecord =

@@ -255,12 +255,22 @@ describe('roundToHour', () => {
     const cases: [
       typeof PlainTimeFns.roundToHour,
       Partial<PlainTimeFns.Record>,
+      Partial<PlainTimeFns.Record>,
     ][] = [
-      [PlainTimeFns.roundToHour, { hour: 12 }],
-      [PlainTimeFns.roundToMinute, { hour: 12, minute: 34 }],
-      [PlainTimeFns.roundToSecond, { hour: 12, minute: 34, second: 56 }],
+      [PlainTimeFns.roundToHour, { hour: 12 }, { hour: 13 }],
+      [
+        PlainTimeFns.roundToMinute,
+        { hour: 12, minute: 34 },
+        { hour: 12, minute: 35 },
+      ],
+      [
+        PlainTimeFns.roundToSecond,
+        { hour: 12, minute: 34, second: 56 },
+        { hour: 12, minute: 34, second: 57 },
+      ],
       [
         PlainTimeFns.roundToMillisecond,
+        { hour: 12, minute: 34, second: 56, millisecond: 789 },
         { hour: 12, minute: 34, second: 56, millisecond: 789 },
       ],
       [
@@ -272,11 +282,23 @@ describe('roundToHour', () => {
           millisecond: 789,
           microsecond: 123,
         },
+        {
+          hour: 12,
+          minute: 34,
+          second: 56,
+          millisecond: 789,
+          microsecond: 123,
+        },
       ],
     ]
 
-    for (const [roundTo, expected] of cases) {
-      expectPlainTimeEquals(roundTo(pt, { roundingMode: 'floor' }), expected)
+    for (const [roundTo, floorExpected, halfExpandExpected] of cases) {
+      expectPlainTimeEquals(roundTo(pt), halfExpandExpected)
+      expectPlainTimeEquals(roundTo(pt, 'floor'), floorExpected)
+      expectPlainTimeEquals(
+        roundTo(pt, { roundingMode: 'floor' }),
+        floorExpected,
+      )
     }
   })
 })

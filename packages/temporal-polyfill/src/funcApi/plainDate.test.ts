@@ -909,6 +909,14 @@ describe('roundToYear', () => {
     )
   })
 
+  it('works with roundingMode string', () => {
+    const pd = PlainDateFns.fromString('2024-07-27', getCoreCalendar)
+    expectPlainDateEquals(
+      PlainDateFns.roundToYear(pd, 'floor'),
+      PlainDateFns.fromString('2024-01-01', getCoreCalendar),
+    )
+  })
+
   it('works with options', () => {
     const pd = PlainDateFns.fromString('2024-07-27', getCoreCalendar)
     expectPlainDateEquals(
@@ -951,6 +959,14 @@ describe('roundToMonth', () => {
     )
   })
 
+  it('works with roundingMode string', () => {
+    const pd = PlainDateFns.fromString('2024-07-27', getCoreCalendar)
+    expectPlainDateEquals(
+      PlainDateFns.roundToMonth(pd, 'floor'),
+      PlainDateFns.fromString('2024-07-01', getCoreCalendar),
+    )
+  })
+
   it('works with options', () => {
     const pd = PlainDateFns.fromString('2024-07-27', getCoreCalendar)
     expectPlainDateEquals(
@@ -989,6 +1005,14 @@ describe('roundToWeek', () => {
     const pd = PlainDateFns.fromString('2024-07-20', getCoreCalendar) // Saturday
     expectPlainDateEquals(
       PlainDateFns.roundToWeek(pd, { roundingMode: 'floor' }),
+      PlainDateFns.fromString('2024-07-15', getCoreCalendar), // this Monday
+    )
+  })
+
+  it('works with roundingMode string', () => {
+    const pd = PlainDateFns.fromString('2024-07-20', getCoreCalendar) // Saturday
+    expectPlainDateEquals(
+      PlainDateFns.roundToWeek(pd, 'floor'),
       PlainDateFns.fromString('2024-07-15', getCoreCalendar), // this Monday
     )
   })

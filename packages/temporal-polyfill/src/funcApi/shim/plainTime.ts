@@ -307,7 +307,7 @@ function round(
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: PlainTimeShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

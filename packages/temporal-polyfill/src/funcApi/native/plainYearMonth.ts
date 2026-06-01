@@ -10,6 +10,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { normalizeRoundToOptions } from '../roundTo'
 import {
   getPlainYearMonthSlots,
   setPlainYearMonthSlots,
@@ -283,10 +284,13 @@ export function diffMonths(
 
 export function roundToYear(
   record: PlainYearMonthNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainYearMonthNativeRecord {
   return createPlainYearMonthNativeRecord(
-    TemporalUtils.roundToYear(getPlainYearMonthNative(record), options),
+    TemporalUtils.roundToYear(
+      getPlainYearMonthNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 

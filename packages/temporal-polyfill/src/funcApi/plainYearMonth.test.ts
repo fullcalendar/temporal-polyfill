@@ -489,6 +489,14 @@ describe('roundToYear', () => {
     )
   })
 
+  it('works with roundingMode string', () => {
+    const pym = PlainYearMonthFns.create(2024, 8)
+    expectPlainYearMonthEquals(PlainYearMonthFns.roundToYear(pym, 'floor'), {
+      year: 2024,
+      month: 1,
+    })
+  })
+
   it('works with options', () => {
     const pym = PlainYearMonthFns.create(2024, 8)
     expectPlainYearMonthEquals(

@@ -368,61 +368,61 @@ export const subtractNanoseconds: (
 
 export const roundToYear: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear
 
 export const roundToMonth: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMonth
   : Shim.roundToMonth
 
 export const roundToWeek: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToWeek
   : Shim.roundToWeek
 
 export const roundToDay: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.roundToDay : Shim.roundToDay
 
 export const roundToHour: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToHour
   : Shim.roundToHour
 
 export const roundToMinute: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMinute
   : Shim.roundToMinute
 
 export const roundToSecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToSecond
   : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: ZonedDateTimeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => ZonedDateTimeRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond

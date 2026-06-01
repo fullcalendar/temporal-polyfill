@@ -350,7 +350,7 @@ export function diffMonths(
 // non-ISO calendars aligned with the same semantics as PlainDate rounding.
 export function roundToYear(
   record: PlainYearMonthShimRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(Unit.Year, options)

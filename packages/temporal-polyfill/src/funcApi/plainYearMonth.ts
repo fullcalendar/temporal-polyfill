@@ -120,7 +120,7 @@ export const diffMonths: (
 
 export const roundToYear: (
   record: PlainYearMonthRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear

@@ -10,6 +10,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
+import { normalizeRoundToOptions } from '../roundTo'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
 import {
   CalendarNativeRecord,
@@ -484,28 +485,37 @@ export function subtractDays(
 
 export function roundToYear(
   record: PlainDateNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToYear(getPlainDateNative(record), options),
+    TemporalUtils.roundToYear(
+      getPlainDateNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 export function roundToMonth(
   record: PlainDateNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToMonth(getPlainDateNative(record), options),
+    TemporalUtils.roundToMonth(
+      getPlainDateNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 export function roundToWeek(
   record: PlainDateNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
-    TemporalUtils.roundToWeek(getPlainDateNative(record), options),
+    TemporalUtils.roundToWeek(
+      getPlainDateNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 

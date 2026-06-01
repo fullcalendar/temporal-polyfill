@@ -510,7 +510,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -534,7 +534,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -558,7 +558,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -582,7 +582,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -606,7 +606,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -630,7 +630,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -691,26 +691,39 @@ const order = Temporal.PlainTime.compare(time, otherTime)
 
 ## Rounding
 
-`RoundingMathOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` must not include `smallestUnit`. Pass a `RoundingModeName`
+string as shorthand for `options.roundingMode`.
 
 ### `roundToHour`
 
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextTime = PlainTimeFns.roundToHour(time)
+const nextTime = PlainTimeFns.roundToHour(time, 'ceil')
 const nextTime = PlainTimeFns.roundToHour(time, options)
 ```
 
 Temporal API:
 
 ```ts
+const nextTime = time.round({ smallestUnit: 'hour' })
+const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'hour' })
 const nextTime = time.round({ ...options, smallestUnit: 'hour' })
+```
+
+Temporal API, generically, for second argument:
+
+```ts
+import { roundToHour } from 'temporal-utils'
+
+const nextTime = roundToHour(time, optionsOrRoundingMode)
 ```
 
 ### `roundToMinute`
@@ -718,19 +731,31 @@ const nextTime = time.round({ ...options, smallestUnit: 'hour' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextTime = PlainTimeFns.roundToMinute(time)
+const nextTime = PlainTimeFns.roundToMinute(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMinute(time, options)
 ```
 
 Temporal API:
 
 ```ts
+const nextTime = time.round({ smallestUnit: 'minute' })
+const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'minute' })
 const nextTime = time.round({ ...options, smallestUnit: 'minute' })
+```
+
+Temporal API, generically, for second argument:
+
+```ts
+import { roundToMinute } from 'temporal-utils'
+
+const nextTime = roundToMinute(time, optionsOrRoundingMode)
 ```
 
 ### `roundToSecond`
@@ -738,19 +763,31 @@ const nextTime = time.round({ ...options, smallestUnit: 'minute' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextTime = PlainTimeFns.roundToSecond(time)
+const nextTime = PlainTimeFns.roundToSecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToSecond(time, options)
 ```
 
 Temporal API:
 
 ```ts
+const nextTime = time.round({ smallestUnit: 'second' })
+const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'second' })
 const nextTime = time.round({ ...options, smallestUnit: 'second' })
+```
+
+Temporal API, generically, for second argument:
+
+```ts
+import { roundToSecond } from 'temporal-utils'
+
+const nextTime = roundToSecond(time, optionsOrRoundingMode)
 ```
 
 ### `roundToMillisecond`
@@ -758,19 +795,31 @@ const nextTime = time.round({ ...options, smallestUnit: 'second' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextTime = PlainTimeFns.roundToMillisecond(time)
+const nextTime = PlainTimeFns.roundToMillisecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMillisecond(time, options)
 ```
 
 Temporal API:
 
 ```ts
+const nextTime = time.round({ smallestUnit: 'millisecond' })
+const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'millisecond' })
 const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
+```
+
+Temporal API, generically, for second argument:
+
+```ts
+import { roundToMillisecond } from 'temporal-utils'
+
+const nextTime = roundToMillisecond(time, optionsOrRoundingMode)
 ```
 
 ### `roundToMicrosecond`
@@ -778,19 +827,31 @@ const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextTime = PlainTimeFns.roundToMicrosecond(time)
+const nextTime = PlainTimeFns.roundToMicrosecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMicrosecond(time, options)
 ```
 
 Temporal API:
 
 ```ts
+const nextTime = time.round({ smallestUnit: 'microsecond' })
+const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'microsecond' })
 const nextTime = time.round({ ...options, smallestUnit: 'microsecond' })
+```
+
+Temporal API, generically, for second argument:
+
+```ts
+import { roundToMicrosecond } from 'temporal-utils'
+
+const nextTime = roundToMicrosecond(time, optionsOrRoundingMode)
 ```
 
 ## Start And End Of Unit

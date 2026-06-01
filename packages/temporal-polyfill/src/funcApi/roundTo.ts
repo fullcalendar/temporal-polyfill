@@ -3,17 +3,26 @@ import {
   coerceRoundingIncInteger,
   coerceRoundingMode,
 } from '../internal/optionsCoerce'
+import { roundingModeName } from '../internal/optionsConfig'
 import { RoundingMathTuple, RoundingMode } from '../internal/optionsModel'
-import { getOptionsObject } from '../internal/optionsNormalize'
+import {
+  getOptionsObject,
+  normalizeOptionsOrString,
+} from '../internal/optionsNormalize'
 import { validateRoundingInc } from '../internal/optionsValidate'
-import type { RoundingMathOptions } from '../internal/temporalSpecHelpers'
+import type {
+  RoundingMathOptions,
+  RoundingModeName,
+} from '../internal/temporalSpecHelpers'
 import { Unit } from '../internal/units'
+
+export type RoundToOptions = RoundingModeName | RoundingMathOptions
 
 export function refineRoundToOptions(
   smallestUnit: Unit,
-  options?: RoundingMathOptions,
+  options?: RoundToOptions,
 ): RoundingMathTuple {
-  options = getOptionsObject(options)
+  options = normalizeRoundToOptions(options)
 
   // alphabetical
   let roundingInc = coerceRoundingIncInteger(options)
@@ -25,11 +34,22 @@ export function refineRoundToOptions(
 
 export function createRoundToOptions<
   UN extends Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
-  O extends RoundingMathOptions,
 >(
   smallestUnit: UN,
-  options?: O,
-): { smallestUnit: UN } & O & RoundingMathOptions {
-  options = getOptionsObject(options) as O
+  options?: RoundToOptions,
+): { smallestUnit: UN } & RoundingMathOptions {
+  options = normalizeRoundToOptions(options)
   return { ...options, smallestUnit }
+}
+
+export function normalizeRoundToOptions(
+  options?: RoundToOptions,
+): RoundingMathOptions {
+  if (options === undefined) {
+    return getOptionsObject(undefined)
+  }
+  return normalizeOptionsOrString<RoundingMathOptions, typeof roundingModeName>(
+    options,
+    roundingModeName,
+  )
 }

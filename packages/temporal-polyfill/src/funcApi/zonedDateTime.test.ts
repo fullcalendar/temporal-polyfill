@@ -571,25 +571,51 @@ describe('roundToDay', () => {
       getCoreCalendar,
     )
 
-    const cases: [string, typeof ZonedDateTimeFns.roundToDay][] = [
-      ['2024-07-20T00:00:00[America/New_York]', ZonedDateTimeFns.roundToDay],
-      ['2024-07-20T12:00:00[America/New_York]', ZonedDateTimeFns.roundToHour],
-      ['2024-07-20T12:34:00[America/New_York]', ZonedDateTimeFns.roundToMinute],
-      ['2024-07-20T12:34:56[America/New_York]', ZonedDateTimeFns.roundToSecond],
+    const cases: [string, string, typeof ZonedDateTimeFns.roundToDay][] = [
       [
+        '2024-07-20T00:00:00[America/New_York]',
+        '2024-07-21T00:00:00[America/New_York]',
+        ZonedDateTimeFns.roundToDay,
+      ],
+      [
+        '2024-07-20T12:00:00[America/New_York]',
+        '2024-07-20T13:00:00[America/New_York]',
+        ZonedDateTimeFns.roundToHour,
+      ],
+      [
+        '2024-07-20T12:34:00[America/New_York]',
+        '2024-07-20T12:35:00[America/New_York]',
+        ZonedDateTimeFns.roundToMinute,
+      ],
+      [
+        '2024-07-20T12:34:56[America/New_York]',
+        '2024-07-20T12:34:57[America/New_York]',
+        ZonedDateTimeFns.roundToSecond,
+      ],
+      [
+        '2024-07-20T12:34:56.789[America/New_York]',
         '2024-07-20T12:34:56.789[America/New_York]',
         ZonedDateTimeFns.roundToMillisecond,
       ],
       [
         '2024-07-20T12:34:56.789123[America/New_York]',
+        '2024-07-20T12:34:56.789123[America/New_York]',
         ZonedDateTimeFns.roundToMicrosecond,
       ],
     ]
 
-    for (const [expected, roundTo] of cases) {
+    for (const [floorExpected, halfExpandExpected, roundTo] of cases) {
+      expectZonedDateTimeEquals(
+        roundTo(zdt),
+        ZonedDateTimeFns.fromString(halfExpandExpected, getCoreCalendar),
+      )
+      expectZonedDateTimeEquals(
+        roundTo(zdt, 'floor'),
+        ZonedDateTimeFns.fromString(floorExpected, getCoreCalendar),
+      )
       expectZonedDateTimeEquals(
         roundTo(zdt, { roundingMode: 'floor' }),
-        ZonedDateTimeFns.fromString(expected, getCoreCalendar),
+        ZonedDateTimeFns.fromString(floorExpected, getCoreCalendar),
       )
     }
   })
@@ -1599,6 +1625,20 @@ describe('roundToYear', () => {
     )
   })
 
+  it('works with roundingMode string', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToYear(zdt, 'floor'),
+      ZonedDateTimeFns.fromString(
+        '2024-01-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
+    )
+  })
+
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
@@ -1707,6 +1747,20 @@ describe('roundToMonth', () => {
     )
   })
 
+  it('works with roundingMode string', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-07-27T12:30:00[America/New_York]',
+      getCoreCalendar,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToMonth(zdt, 'floor'),
+      ZonedDateTimeFns.fromString(
+        '2024-07-01T00:00:00[America/New_York]',
+        getCoreCalendar,
+      ),
+    )
+  })
+
   it('works with options', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-07-27T12:30:00[America/New_York]',
@@ -1772,6 +1826,20 @@ describe('roundToWeek', () => {
     )
     expectZonedDateTimeEquals(
       ZonedDateTimeFns.roundToWeek(zdt, { roundingMode: 'floor' }),
+      ZonedDateTimeFns.fromString(
+        '2024-07-15T00:00:00[America/New_York]',
+        getCoreCalendar, // this Monday
+      ),
+    )
+  })
+
+  it('works with roundingMode string', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-07-20T12:30:00[America/New_York]',
+      getCoreCalendar, // Saturday
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.roundToWeek(zdt, 'floor'),
       ZonedDateTimeFns.fromString(
         '2024-07-15T00:00:00[America/New_York]',
         getCoreCalendar, // this Monday

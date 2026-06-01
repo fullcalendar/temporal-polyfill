@@ -741,7 +741,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -765,7 +765,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -789,7 +789,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -813,7 +813,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingModeName | RoundingMathOptions) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
 ```
 
 Fn API:
@@ -875,19 +875,22 @@ const order = Temporal.PlainDate.compare(date, otherDate)
 ## Rounding
 
 If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
-`RoundingMathOptions` is object-only and must not include `smallestUnit`.
+`RoundingMathOptions` must not include `smallestUnit`. Pass a `RoundingModeName`
+string as shorthand for `options.roundingMode`.
 
 ### `roundToYear`
 
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextDate = PlainDateFns.roundToYear(date)
+const nextDate = PlainDateFns.roundToYear(date, 'ceil')
 const nextDate = PlainDateFns.roundToYear(date, options)
 ```
 
@@ -896,6 +899,8 @@ Temporal API:
 ```ts
 import { roundToYear } from 'temporal-utils'
 
+const nextDate = roundToYear(date)
+const nextDate = roundToYear(date, 'ceil')
 const nextDate = roundToYear(date, options)
 ```
 
@@ -904,12 +909,14 @@ const nextDate = roundToYear(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextDate = PlainDateFns.roundToMonth(date)
+const nextDate = PlainDateFns.roundToMonth(date, 'ceil')
 const nextDate = PlainDateFns.roundToMonth(date, options)
 ```
 
@@ -918,6 +925,8 @@ Temporal API:
 ```ts
 import { roundToMonth } from 'temporal-utils'
 
+const nextDate = roundToMonth(date)
+const nextDate = roundToMonth(date, 'ceil')
 const nextDate = roundToMonth(date, options)
 ```
 
@@ -926,12 +935,14 @@ const nextDate = roundToMonth(date, options)
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions) => Record
+(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
 ```
 
 Fn API:
 
 ```ts
+const nextDate = PlainDateFns.roundToWeek(date)
+const nextDate = PlainDateFns.roundToWeek(date, 'ceil')
 const nextDate = PlainDateFns.roundToWeek(date, options)
 ```
 
@@ -940,6 +951,8 @@ Temporal API:
 ```ts
 import { roundToWeek } from 'temporal-utils'
 
+const nextDate = roundToWeek(date)
+const nextDate = roundToWeek(date, 'ceil')
 const nextDate = roundToWeek(date, options)
 ```
 

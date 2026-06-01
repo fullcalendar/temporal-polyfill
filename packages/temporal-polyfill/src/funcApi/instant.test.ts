@@ -182,18 +182,42 @@ describe('roundToHour', () => {
   it('rounds to each named time unit', () => {
     const inst = InstantFns.fromString('2024-01-01T12:34:56.789123456Z')
 
-    const cases: [string, typeof InstantFns.roundToHour][] = [
-      ['2024-01-01T12:00:00Z', InstantFns.roundToHour],
-      ['2024-01-01T12:34:00Z', InstantFns.roundToMinute],
-      ['2024-01-01T12:34:56Z', InstantFns.roundToSecond],
-      ['2024-01-01T12:34:56.789Z', InstantFns.roundToMillisecond],
-      ['2024-01-01T12:34:56.789123Z', InstantFns.roundToMicrosecond],
+    const cases: [string, string, typeof InstantFns.roundToHour][] = [
+      ['2024-01-01T12:00:00Z', '2024-01-01T13:00:00Z', InstantFns.roundToHour],
+      [
+        '2024-01-01T12:34:00Z',
+        '2024-01-01T12:35:00Z',
+        InstantFns.roundToMinute,
+      ],
+      [
+        '2024-01-01T12:34:56Z',
+        '2024-01-01T12:34:57Z',
+        InstantFns.roundToSecond,
+      ],
+      [
+        '2024-01-01T12:34:56.789Z',
+        '2024-01-01T12:34:56.789Z',
+        InstantFns.roundToMillisecond,
+      ],
+      [
+        '2024-01-01T12:34:56.789123Z',
+        '2024-01-01T12:34:56.789123Z',
+        InstantFns.roundToMicrosecond,
+      ],
     ]
 
-    for (const [expected, roundTo] of cases) {
+    for (const [floorExpected, halfExpandExpected, roundTo] of cases) {
+      expectInstantEquals(
+        roundTo(inst),
+        InstantFns.fromString(halfExpandExpected).epochNanoseconds,
+      )
+      expectInstantEquals(
+        roundTo(inst, 'floor'),
+        InstantFns.fromString(floorExpected).epochNanoseconds,
+      )
       expectInstantEquals(
         roundTo(inst, { roundingMode: 'floor' }),
-        InstantFns.fromString(expected).epochNanoseconds,
+        InstantFns.fromString(floorExpected).epochNanoseconds,
       )
     }
   })

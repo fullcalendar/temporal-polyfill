@@ -10,7 +10,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { createRoundToOptions } from '../roundTo'
+import { createRoundToOptions, normalizeRoundToOptions } from '../roundTo'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,
@@ -642,33 +642,42 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToYear(getZonedDateTimeNative(record), options),
+    TemporalUtils.roundToYear(
+      getZonedDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 export function roundToMonth(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToMonth(getZonedDateTimeNative(record), options),
+    TemporalUtils.roundToMonth(
+      getZonedDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 export function roundToWeek(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
-    TemporalUtils.roundToWeek(getZonedDateTimeNative(record), options),
+    TemporalUtils.roundToWeek(
+      getZonedDateTimeNative(record),
+      normalizeRoundToOptions(options),
+    ),
   )
 }
 
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ): ZonedDateTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

@@ -168,29 +168,29 @@ export const diffNanoseconds: (
 
 export const roundToHour: (
   record: InstantRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
 export const roundToMinute: (
   record: InstantRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
 
 export const roundToSecond: (
   record: InstantRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => InstantRecord = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: InstantRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: InstantRecord,
-  options?: RoundingMathOptions,
+  options?: RoundingModeName | RoundingMathOptions,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond
