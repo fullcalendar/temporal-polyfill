@@ -8,12 +8,13 @@ projects and recombines those shapes for internal algorithms that need a
 smaller operation-specific view, or a local generic for refined records.
 */
 
-type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
-type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
-
 export type FractionalSecondDigits =
   Temporal.PlainTimeToStringOptions['fractionalSecondDigits']
 export type SubsecDigits = Exclude<NonNullable<FractionalSecondDigits>, 'auto'>
+
+// use ONLY for type scraping, not externally
+type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
+type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
 
 export type RoundingModeName = RoundingOptionBag['roundingMode']
 export type RoundingMathOptions = Pick<
