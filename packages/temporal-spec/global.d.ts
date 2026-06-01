@@ -1,4 +1,7 @@
 /*
+Derived from: https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.temporal.d.ts
+LICENSE: https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt
+
 NOTE: keep synced with all other definition files
 */
 
