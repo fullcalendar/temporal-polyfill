@@ -32,7 +32,7 @@ import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from './temporalSpecHelpers'
 import { type DayTimeUnit, Unit } from './units'
 
@@ -178,7 +178,7 @@ export function refineRoundingOptions<UN extends 'day' | Temporal.TimeUnit>(
 
 function refineRoundingMathOptions(
   smallestUnit: Unit,
-  options: RoundingMathOptions | RoundingModeName,
+  options: RoundingMathOptions | RoundingMode,
   allowManyLargeUnits?: boolean,
 ): RoundingMathTuple {
   options = normalizeOptionsOrString<
@@ -203,7 +203,7 @@ For funcApi
 */
 export function refineUnitDiffOptions(
   smallestUnit: Unit,
-  options: RoundingMathOptions | RoundingModeName,
+  options: RoundingMathOptions | RoundingMode,
 ): RoundingMathTuple | [undefined, undefined] {
   if (options !== undefined) {
     return refineRoundingMathOptions(smallestUnit, options, true)
@@ -216,7 +216,7 @@ For funcApi
 */
 export function refineUnitRoundOptions(
   smallestUnit: Unit,
-  options: RoundingMathOptions | RoundingModeName,
+  options: RoundingMathOptions | RoundingMode,
 ): RoundingMathTuple {
   if (options !== undefined) {
     return refineRoundingMathOptions(smallestUnit, options)

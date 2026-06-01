@@ -43,7 +43,7 @@ import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRe
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
@@ -558,7 +558,7 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Year,
@@ -567,7 +567,7 @@ export const roundToYear: (
 
 export const roundToMonth: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Month,
@@ -576,7 +576,7 @@ export const roundToMonth: (
 
 export const roundToWeek: (
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => PlainDateShimRecord = bindArgs(
   roundToInterval,
   Unit.Week,
@@ -610,7 +610,7 @@ export const endOfWeek: (record: PlainDateShimRecord) => PlainDateShimRecord =
 export function diffYears(
   record0: PlainDateShimRecord,
   record1: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainYears(
     getPlainDateShimRecordSlots(record0),
@@ -622,7 +622,7 @@ export function diffYears(
 export function diffMonths(
   record0: PlainDateShimRecord,
   record1: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainMonths(
     getPlainDateShimRecordSlots(record0),
@@ -634,7 +634,7 @@ export function diffMonths(
 export function diffWeeks(
   record0: PlainDateShimRecord,
   record1: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainWeeks(
     getPlainDateShimRecordSlots(record0),
@@ -646,7 +646,7 @@ export function diffWeeks(
 export function diffDays(
   record0: PlainDateShimRecord,
   record1: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainDays(
     getPlainDateShimRecordSlots(record0),
@@ -661,7 +661,7 @@ function roundToInterval(
     slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

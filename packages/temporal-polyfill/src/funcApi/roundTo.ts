@@ -12,13 +12,13 @@ import {
 import { validateRoundingInc } from '../internal/optionsValidate'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../internal/temporalSpecHelpers'
 import { Unit } from '../internal/units'
 
 export function refineRoundToOptions(
   smallestUnit: Unit,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): RoundingMathTuple {
   options = normalizeRoundToOptions(options)
 
@@ -34,14 +34,14 @@ export function createRoundToOptions<
   UN extends Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
 >(
   smallestUnit: UN,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): { smallestUnit: UN } & RoundingMathOptions {
   options = normalizeRoundToOptions(options)
   return { ...options, smallestUnit }
 }
 
 export function normalizeRoundToOptions(
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): RoundingMathOptions {
   if (options === undefined) {
     return getOptionsObject(undefined)

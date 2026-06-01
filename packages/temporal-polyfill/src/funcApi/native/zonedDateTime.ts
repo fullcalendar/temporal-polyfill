@@ -4,7 +4,7 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
@@ -642,7 +642,7 @@ export function subtractNanoseconds(
 
 export function roundToYear(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToYear(
@@ -653,7 +653,7 @@ export function roundToYear(
 }
 export function roundToMonth(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToMonth(
@@ -664,7 +664,7 @@ export function roundToMonth(
 }
 export function roundToWeek(
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     TemporalUtils.roundToWeek(
@@ -677,7 +677,7 @@ export function roundToWeek(
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeNativeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -794,7 +794,7 @@ export function endOfMicrosecond(record: ZonedDateTimeNativeRecord) {
 export function diffYears(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffYears(
     getZonedDateTimeNative(record0),
@@ -805,7 +805,7 @@ export function diffYears(
 export function diffMonths(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffMonths(
     getZonedDateTimeNative(record0),
@@ -816,7 +816,7 @@ export function diffMonths(
 export function diffWeeks(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffWeeks(
     getZonedDateTimeNative(record0),
@@ -827,7 +827,7 @@ export function diffWeeks(
 export function diffDays(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffDays(
     getZonedDateTimeNative(record0),
@@ -838,7 +838,7 @@ export function diffDays(
 export function diffHours(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffHours(
     getZonedDateTimeNative(record0),
@@ -849,7 +849,7 @@ export function diffHours(
 export function diffMinutes(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffMinutes(
     getZonedDateTimeNative(record0),
@@ -860,7 +860,7 @@ export function diffMinutes(
 export function diffSeconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffSeconds(
     getZonedDateTimeNative(record0),
@@ -871,7 +871,7 @@ export function diffSeconds(
 export function diffMilliseconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffMilliseconds(
     getZonedDateTimeNative(record0),
@@ -882,7 +882,7 @@ export function diffMilliseconds(
 export function diffMicroseconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffMicroseconds(
     getZonedDateTimeNative(record0),
@@ -893,7 +893,7 @@ export function diffMicroseconds(
 export function diffNanoseconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return TemporalUtils.diffNanoseconds(
     getZonedDateTimeNative(record0),

@@ -62,7 +62,7 @@ import {
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -662,7 +662,7 @@ export const roundToWeek = bindArgs(
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -714,7 +714,7 @@ export const endOfMicrosecond = alignedZonedTime(
 export function diffYears(
   record0: ZonedDateTimeShimRecord,
   record1: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedYears(
     getZonedDateTimeShimRecordSlots(record0),
@@ -726,7 +726,7 @@ export function diffYears(
 export function diffMonths(
   record0: ZonedDateTimeShimRecord,
   record1: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedMonths(
     getZonedDateTimeShimRecordSlots(record0),
@@ -738,7 +738,7 @@ export function diffMonths(
 export function diffWeeks(
   record0: ZonedDateTimeShimRecord,
   record1: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedWeeks(
     getZonedDateTimeShimRecordSlots(record0),
@@ -750,7 +750,7 @@ export function diffWeeks(
 export function diffDays(
   record0: ZonedDateTimeShimRecord,
   record1: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedDays(
     getZonedDateTimeShimRecordSlots(record0),
@@ -779,7 +779,7 @@ function diffTimeUnits(
   nanoInUnit: number,
   record0: ZonedDateTimeShimRecord,
   record1: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedTimeUnits(
     unit as any,
@@ -808,7 +808,7 @@ function roundToInterval(
   unit: Unit,
   computeInterval: (slots: any) => IsoDateTimeInterval,
   record: ZonedDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): ZonedDateTimeShimRecord {
   const slots = getZonedDateTimeShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

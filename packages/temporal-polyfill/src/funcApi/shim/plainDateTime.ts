@@ -59,7 +59,7 @@ import {
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -715,7 +715,7 @@ export const roundToWeek = bindArgs(
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
   record: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): PlainDateTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
@@ -768,7 +768,7 @@ export const endOfMicrosecond = aligned(
 export function diffYears(
   record0: PlainDateTimeShimRecord,
   record1: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainYears(
     getPlainDateTimeShimRecordSlots(record0),
@@ -780,7 +780,7 @@ export function diffYears(
 export function diffMonths(
   record0: PlainDateTimeShimRecord,
   record1: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainMonths(
     getPlainDateTimeShimRecordSlots(record0),
@@ -792,7 +792,7 @@ export function diffMonths(
 export function diffWeeks(
   record0: PlainDateTimeShimRecord,
   record1: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainWeeks(
     getPlainDateTimeShimRecordSlots(record0),
@@ -804,7 +804,7 @@ export function diffWeeks(
 export function diffDays(
   record0: PlainDateTimeShimRecord,
   record1: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainDays(
     getPlainDateTimeShimRecordSlots(record0),
@@ -833,7 +833,7 @@ function diffTimeUnits(
   nanoInUnit: number,
   record0: PlainDateTimeShimRecord,
   record1: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffPlainTimeUnits(
     unit as any,
@@ -869,7 +869,7 @@ function roundToInterval(
     slots: CalendarDateFields & { calendar: CalendarSlot },
   ) => IsoDateTimeInterval,
   record: PlainDateTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): PlainDateTimeShimRecord {
   const slots = getPlainDateTimeShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)

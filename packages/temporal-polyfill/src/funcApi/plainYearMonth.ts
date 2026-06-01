@@ -26,7 +26,7 @@ export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   'year' | 'month'
 >
 type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
-type RoundingModeName = TemporalSpecHelpers.RoundingModeName
+type RoundingMode = TemporalSpecHelpers.RoundingMode
 
 type PlainYearMonthRecord = Record
 
@@ -118,18 +118,18 @@ export const diff: (
 export const diffYears: (
   record0: PlainYearMonthRecord,
   record1: PlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: (
   record0: PlainYearMonthRecord,
   record1: PlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const roundToYear: (
   record: PlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear

@@ -24,7 +24,7 @@ import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
@@ -76,7 +76,7 @@ function diffZonedLargeUnits(
   unit: Unit,
   record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
   record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
@@ -101,7 +101,7 @@ function diffPlainLargeUnits<
   unit: Unit,
   record0: S,
   record1: S,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
@@ -149,7 +149,7 @@ function diffDateUnits(
   unit: Unit, // guaranteed Y/M/W
   marker0: MovableMarker,
   marker1: MovableMarker,
-  options: RoundingMathOptions | RoundingModeName | undefined,
+  options: RoundingMathOptions | RoundingMode | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const startEpochNano = markerToEpochNano(marker0)
@@ -185,7 +185,7 @@ function diffZonedDayLikeUnits(
   daysInUnit: number,
   record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
   record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  options?: RoundingMathOptions | RoundingModeName | undefined,
+  options?: RoundingMathOptions | RoundingMode | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 
@@ -223,7 +223,7 @@ function diffPlainDayLikeUnit(
   daysInUnit: number,
   record0: MovableMarker,
   record1: MovableMarker,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
@@ -247,7 +247,7 @@ function diffTimeUnit(
   nanoInUnit: number,
   record0: MovableMarker,
   record1: MovableMarker,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
 

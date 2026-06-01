@@ -37,7 +37,7 @@ import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type {
   InstantStringTimeZoneDisplayOptions,
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -311,7 +311,7 @@ function diffTimeUnit(
   nanoInUnit: number,
   record: InstantShimRecord,
   otherRecord: InstantShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const slots = getInstantShimRecordSlots(record)
@@ -361,7 +361,7 @@ function round(
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: InstantShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): InstantShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

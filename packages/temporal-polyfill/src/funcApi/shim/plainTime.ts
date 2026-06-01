@@ -20,7 +20,7 @@ import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import type {
   RoundingMathOptions,
-  RoundingModeName,
+  RoundingMode,
 } from '../../internal/temporalSpecHelpers'
 import {
   nanoToTimeAndDay,
@@ -257,7 +257,7 @@ function diffTimeUnit(
   nanoInUnit: number,
   record: PlainTimeShimRecord,
   otherRecord: PlainTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const nano0 = timeFieldsToNano(getPlainTimeShimRecordSlots(record))
@@ -307,7 +307,7 @@ function round(
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: PlainTimeShimRecord,
-  options?: RoundingMathOptions | RoundingModeName,
+  options?: RoundingMathOptions | RoundingMode,
 ): PlainTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

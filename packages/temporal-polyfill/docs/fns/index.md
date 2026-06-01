@@ -12,7 +12,7 @@ Abbreviations used by the type pages:
 - `OverflowOptions` is the calendar-field overflow options bag.
 - `RoundingMathOptions` contains rounding increment and rounding mode options.
   The unit is implied by the `roundTo*` function name. Round helpers also
-  accept a `RoundingModeName` string as shorthand for `options.roundingMode`.
+  accept a `RoundingMode` string as shorthand for `options.roundingMode`.
 
 ## Catalog
 

@@ -424,7 +424,7 @@ This helper is directional: it matches `until`, not `since`.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
 ```
 
 Fn API:
@@ -448,7 +448,7 @@ If `options` is omitted, no rounding occurs.
 Signature:
 
 ```ts
-(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingModeName) => number
+(record0: Record, record1: Record, options?: RoundingMathOptions | RoundingMode) => number
 ```
 
 Fn API:
@@ -510,7 +510,7 @@ const order = Temporal.PlainYearMonth.compare(yearMonth, otherYearMonth)
 ## Rounding
 
 If `options` or `options.roundingMode` is omitted, the rounding mode defaults to `'halfExpand'`.
-`RoundingMathOptions` must not include `smallestUnit`. Pass a `RoundingModeName`
+`RoundingMathOptions` must not include `smallestUnit`. Pass a `RoundingMode`
 string as shorthand for `options.roundingMode`.
 
 ### `roundToYear`
@@ -518,7 +518,7 @@ string as shorthand for `options.roundingMode`.
 Signature:
 
 ```ts
-(record: Record, options?: RoundingMathOptions | RoundingModeName) => Record
+(record: Record, options?: RoundingMathOptions | RoundingMode) => Record
 ```
 
 Fn API:

@@ -16,7 +16,7 @@ export type SubsecDigits = Exclude<NonNullable<FractionalSecondDigits>, 'auto'>
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
 type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
 
-export type RoundingModeName = RoundingOptionBag['roundingMode']
+export type RoundingMode = RoundingOptionBag['roundingMode']
 export type RoundingMathOptions = Pick<
   RoundingOptionBag,
   'roundingIncrement' | 'roundingMode'
