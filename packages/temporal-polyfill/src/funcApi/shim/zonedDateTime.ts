@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -60,10 +61,6 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {

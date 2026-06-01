@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonth,
@@ -34,10 +35,6 @@ import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { createYearMonthSlots } from '../../internal/slots'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'

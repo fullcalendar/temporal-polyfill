@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -57,10 +58,6 @@ import {
   createTimeSlots,
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {

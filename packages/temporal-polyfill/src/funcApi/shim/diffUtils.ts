@@ -1,3 +1,4 @@
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import { type CalendarSlot } from '../../internal/calendarSlot'
 import {
@@ -22,10 +23,6 @@ import {
 } from '../../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'

@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   bigNanoInUtcDay,
   divideBigNanoToExactNumber,
@@ -18,10 +19,6 @@ import { movePlainTime } from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { roundBigNanoToInc, roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import {
   nanoToTimeAndDay,
   timeFieldsToNano,

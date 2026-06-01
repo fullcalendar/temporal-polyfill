@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -41,10 +42,6 @@ import { IsoDateTimeInterval } from '../../internal/round'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../../internal/temporalSpecHelpers'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'

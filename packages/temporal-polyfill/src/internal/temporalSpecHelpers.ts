@@ -12,16 +12,6 @@ export type FractionalSecondDigits =
   Temporal.PlainTimeToStringOptions['fractionalSecondDigits']
 export type SubsecDigits = Exclude<NonNullable<FractionalSecondDigits>, 'auto'>
 
-// use ONLY for type scraping, not externally
-type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
-type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
-
-export type RoundingMode = RoundingOptionBag['roundingMode']
-export type RoundingMathOptions = Pick<
-  RoundingOptionBag,
-  'roundingIncrement' | 'roundingMode'
->
-
 export type RelativeToOptions<RA> = {
   relativeTo?: RA | undefined
 }

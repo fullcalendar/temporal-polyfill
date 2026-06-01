@@ -7,9 +7,11 @@ export const nanosecondsInSecond = 1000000000
 export const nanosecondsInMinute = 60000000000
 export const nanosecondsInHour = 3600000000000
 
+// just used to scrape types from temporal-spec
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
 type RoundingOptionBag = Temporal.RoundingOptions<RoundingUnit>
 
+export type RoundingMode = RoundingOptionBag['roundingMode']
 export type RoundingMathOptions = Pick<
   RoundingOptionBag,
   'roundingIncrement' | 'roundingMode'

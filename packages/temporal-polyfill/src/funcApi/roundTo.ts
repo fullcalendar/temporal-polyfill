@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   coerceRoundingIncInteger,
   coerceRoundingMode,
@@ -10,10 +11,6 @@ import {
   normalizeOptionsOrString,
 } from '../internal/optionsNormalize'
 import { validateRoundingInc } from '../internal/optionsValidate'
-import type {
-  RoundingMathOptions,
-  RoundingMode,
-} from '../internal/temporalSpecHelpers'
 import { Unit } from '../internal/units'
 
 export function refineRoundToOptions(

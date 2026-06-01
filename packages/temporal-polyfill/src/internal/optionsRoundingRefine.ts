@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { requirePropDefined } from './cast'
 import * as errorMessages from './errorMessages'
 import {
@@ -31,8 +32,6 @@ import {
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
-  RoundingMathOptions,
-  RoundingMode,
 } from './temporalSpecHelpers'
 import { type DayTimeUnit, Unit } from './units'
 

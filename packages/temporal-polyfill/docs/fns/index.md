@@ -16,13 +16,14 @@ Abbreviations used by the type pages:
 
 ## Catalog
 
-- [`Calendar`](calendar.md) - `CalendarRecord` factories and calendar resolver helpers.
-- [`Duration`](duration.md) - duration construction, arithmetic, rounding, totaling, comparison, and formatting.
-- [`Instant`](instant.md) - exact-time construction, epoch conversion, arithmetic, comparison, time-zone projection, and formatting.
-- [`Now`](now.md) - current-time helpers.
 - [`PlainDate`](plaindate.md) - date construction, fields, arithmetic, comparison, conversion, start/end helpers, differences, and formatting.
 - [`PlainDateTime`](plaindatetime.md) - date-time construction, fields, arithmetic, comparison, conversion, start/end helpers, differences, and formatting.
 - [`PlainMonthDay`](plainmonthday.md) - month-day construction, field replacement, comparison, conversion, and formatting.
 - [`PlainTime`](plaintime.md) - time construction, fields, arithmetic, comparison, conversion, differences, and formatting.
 - [`PlainYearMonth`](plainyearmonth.md) - year-month construction, fields, arithmetic, comparison, conversion, differences, and formatting.
 - [`ZonedDateTime`](zoneddatetime.md) - zoned date-time construction, fields, arithmetic, comparison, conversion, start/end helpers, differences, and formatting.
+- [`Instant`](instant.md) - exact-time construction, epoch conversion, arithmetic, comparison, time-zone projection, and formatting.
+- [`Now`](now.md) - current-time helpers.
+- [`Duration`](duration.md) - duration construction, arithmetic, rounding, totaling, comparison, and formatting.
+- [`Calendar`](calendar.md) - `CalendarRecord` factories and calendar resolver helpers.
+- [`Types`](types.md) - TypeScript-only exports and their codemod targets for the real Temporal API.

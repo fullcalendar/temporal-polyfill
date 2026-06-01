@@ -1,7 +1,7 @@
 import type { Temporal } from 'temporal-spec'
-import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
+import type * as TemporalUtils from 'temporal-utils'
 
 export type OverflowOptions = Temporal.OverflowOptions
-export type RoundingMode = TemporalSpecHelpers.RoundingMode
-export type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
+export type RoundingMode = TemporalUtils.RoundingMode
+export type RoundingMathOptions = TemporalUtils.RoundingMathOptions
 export type DisambiguationOptions = Temporal.DisambiguationOptions

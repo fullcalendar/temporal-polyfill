@@ -14,4 +14,3 @@ export {
   toIntegerWithTruncation,
   toPositiveIntegerWithTruncation,
 } from './utils.js'
-export type { RoundingMathOptions } from './utils.js'
