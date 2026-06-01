@@ -102,7 +102,73 @@ export function roundToWeek<
   return start.add(duration) as T
 }
 
-export function normalizeRoundingOptions(
+type NativeRoundFunc<T> = {
+  (date: T): T
+  (date: T, roundingMode: RoundingMode): T
+  (date: T, options: RoundingMathOptions): T
+}
+
+type NativeRoundUnit =
+  | 'day'
+  | 'hour'
+  | 'minute'
+  | 'second'
+  | 'millisecond'
+  | 'microsecond'
+
+type DayRoundable = Temporal.PlainDateTime | Temporal.ZonedDateTime
+
+type TimeRoundable =
+  | Temporal.Instant
+  | Temporal.PlainTime
+  | Temporal.PlainDateTime
+  | Temporal.ZonedDateTime
+
+export const roundToDay = ((date: DayRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('day', options),
+  )) as NativeRoundFunc<DayRoundable>
+
+export const roundToHour = ((date: TimeRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('hour', options),
+  )) as NativeRoundFunc<TimeRoundable>
+
+export const roundToMinute = ((date: TimeRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('minute', options),
+  )) as NativeRoundFunc<TimeRoundable>
+
+export const roundToSecond = ((date: TimeRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('second', options),
+  )) as NativeRoundFunc<TimeRoundable>
+
+export const roundToMillisecond = ((date: TimeRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('millisecond', options),
+  )) as NativeRoundFunc<TimeRoundable>
+
+export const roundToMicrosecond = ((date: TimeRoundable, options?: RoundArg) =>
+  date.round(
+    getNativeRoundOptions('microsecond', options),
+  )) as NativeRoundFunc<TimeRoundable>
+
+type RoundArg = RoundingMathOptions | RoundingMode
+
+function getNativeRoundOptions(
+  forcedUnit: NativeRoundUnit,
+  options: RoundArg | undefined,
+): any {
+  return {
+    ...(typeof options === 'string'
+      ? { roundingMode: options }
+      : getOptionsObject(options)),
+    smallestUnit: forcedUnit,
+  }
+}
+
+function normalizeRoundingOptions(
   forcedUnit: 'week' | 'month' | 'year',
   options: RoundingMathOptions | RoundingMode | undefined,
 ): {

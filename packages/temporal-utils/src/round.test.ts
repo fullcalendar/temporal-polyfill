@@ -1,6 +1,16 @@
 import { Temporal } from '@js-temporal/polyfill'
 import { describe, expect, it } from 'vitest'
-import { roundToMonth, roundToWeek, roundToYear } from '.'
+import {
+  roundToDay,
+  roundToHour,
+  roundToMicrosecond,
+  roundToMillisecond,
+  roundToMinute,
+  roundToMonth,
+  roundToSecond,
+  roundToWeek,
+  roundToYear,
+} from '.'
 
 describe('roundToYear', () => {
   describe('ZonedDateTime', () => {
@@ -162,5 +172,59 @@ describe('roundToWeek', () => {
         })
       }).toThrowError(RangeError)
     })
+  })
+})
+
+describe('native round codemod targets', () => {
+  it('rounds PlainDateTime to day', () => {
+    const pdt = Temporal.PlainDateTime.from('2024-07-20T12:30:00')
+    expect(
+      roundToDay(pdt, 'floor').equals(
+        Temporal.PlainDateTime.from('2024-07-20T00:00:00'),
+      ),
+    ).toBe(true)
+  })
+
+  it('rounds ZonedDateTime to hour', () => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '2024-07-20T12:30:00[America/New_York]',
+    )
+    expect(
+      roundToHour(zdt).equals(
+        Temporal.ZonedDateTime.from('2024-07-20T13:00:00[America/New_York]'),
+      ),
+    ).toBe(true)
+  })
+
+  it('rounds PlainTime to smaller units', () => {
+    const time = Temporal.PlainTime.from('12:30:44.400502003')
+
+    expect(
+      roundToMinute(time, { roundingMode: 'floor' }).equals(
+        Temporal.PlainTime.from('12:30:00'),
+      ),
+    ).toBe(true)
+    expect(
+      roundToSecond(time).equals(Temporal.PlainTime.from('12:30:44')),
+    ).toBe(true)
+    expect(
+      roundToMillisecond(time, 'ceil').equals(
+        Temporal.PlainTime.from('12:30:44.401'),
+      ),
+    ).toBe(true)
+    expect(
+      roundToMicrosecond(time).equals(
+        Temporal.PlainTime.from('12:30:44.400502'),
+      ),
+    ).toBe(true)
+  })
+
+  it('rounds Instant to smaller units', () => {
+    const instant = Temporal.Instant.from('2024-07-20T12:30:44.400502003Z')
+    expect(
+      roundToSecond(instant).equals(
+        Temporal.Instant.from('2024-07-20T12:30:44Z'),
+      ),
+    ).toBe(true)
   })
 })

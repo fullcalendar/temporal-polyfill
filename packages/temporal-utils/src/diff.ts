@@ -1,6 +1,6 @@
-import { RoundingMode } from './utils'
+import { RoundingMathOptions, RoundingMode } from './utils'
 
-export type DiffFunc<
+type DiffFunc<
   T extends
     | Temporal.Instant
     | Temporal.PlainTime
@@ -17,11 +17,15 @@ export type DiffFunc<
 > = {
   (date0: T, date1: T): number
   (date0: T, date1: T, roundingMode: RoundingMode): number
-  (date0: T, date1: T, options: DiffOptions): number
+  (date0: T, date1: T, options: RoundingMathOptions): number
 }
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
-  return (date0: any, date1: any, options?: RoundingMode | DiffOptions) => {
+  return (
+    date0: any,
+    date1: any,
+    options?: RoundingMode | RoundingMathOptions,
+  ) => {
     const normOptions = normalizeDiffOptions(options)
 
     // TODO: throw error if unit impossible for input-types?
@@ -138,13 +142,8 @@ type TimeUnit =
   | 'microseconds'
   | 'nanoseconds'
 
-export type DiffOptions = {
-  roundingMode?: RoundingMode
-  roundingIncrement?: number
-}
-
-export function normalizeDiffOptions(
-  options: RoundingMode | DiffOptions | undefined,
-): DiffOptions {
+function normalizeDiffOptions(
+  options: RoundingMode | RoundingMathOptions | undefined,
+): RoundingMathOptions {
   return typeof options === 'string' ? { roundingMode: options } : options || {}
 }
