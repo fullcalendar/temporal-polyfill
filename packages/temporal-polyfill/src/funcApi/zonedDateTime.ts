@@ -18,7 +18,7 @@ import type {
   ZonedDateTimeRecord as Record,
 } from './recordTypes'
 import * as Shim from './shim/zonedDateTime'
-import { getZonedDateTimeSlotsIfPresent } from './temporalRecords'
+import { isZonedDateTimeRecord } from './temporalRecords'
 
 export type { Record }
 
@@ -31,9 +31,7 @@ export const create: (
   calendar?: CalendarRecord,
 ) => ZonedDateTimeRecord = NativeTemporal ? Native.create : Shim.create
 
-export function isRecord(arg: unknown): arg is Record {
-  return !!getZonedDateTimeSlotsIfPresent(arg)
-}
+export const isRecord = isZonedDateTimeRecord as (arg: unknown) => arg is Record
 
 export const fromFields: (
   fields: ZonedFields,

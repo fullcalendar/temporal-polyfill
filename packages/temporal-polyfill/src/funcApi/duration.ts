@@ -16,7 +16,7 @@ import type {
   ZonedDateTimeRecord,
 } from './recordTypes'
 import * as Shim from './shim/duration'
-import { getDurationSlotsIfPresent } from './temporalRecords'
+import { isDurationRecord } from './temporalRecords'
 
 export type { Record }
 
@@ -40,9 +40,7 @@ export const create: (
   nanoseconds?: number,
 ) => DurationRecord = NativeTemporal ? Native.create : Shim.create
 
-export function isRecord(arg: unknown): arg is Record {
-  return !!getDurationSlotsIfPresent(arg)
-}
+export const isRecord = isDurationRecord as (arg: unknown) => arg is Record
 
 export const fromFields: (fields: Partial<DurationFields>) => DurationRecord =
   NativeTemporal ? Native.fromFields : Shim.fromFields
