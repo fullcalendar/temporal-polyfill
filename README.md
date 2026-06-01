@@ -9,6 +9,7 @@ Only 20 kB, [spec compliant](#spec-compliance)
 ## Table of Contents
 
 - [Installation](#installation)
+- [TypeScript Types](#typescript-types)
 - [Comparison with `@js-temporal/polyfill`](#comparison-with-js-temporalpolyfill)
 - [Spec Compliance](#spec-compliance)
 - [Browser Support](#browser-support)
@@ -46,6 +47,35 @@ Use a `<script>` tags with a CDN link:
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
 ```
+
+
+## TypeScript Types
+
+If using the global import (`import 'temporal-polyfill/global'`), you must worry about where your types are coming from. You can choose one of two options:
+
+**Options A)** If using TypeScript >= 6.0, modify your `tsconfig.json`:
+
+```diff
+{
+  "compilerOptions": {
++   "lib": ["esnext"],
+    // OR, more granularly:
++   "lib": ["esnext.temporal", "esnext.intl", "esnext.date"],
+    // ...
+  }
+}
+```
+
+**Options B)** If using TypeScript < 6.0, import types manually:
+
+```diff
+  import 'temporal-polyfill/global'
++ import 'temporal-polyfill/global-types'
+
+  console.log(Temporal.Now.zonedDateTimeISO().toString())
+```
+
+Other entry points (like `import {} from 'temporal-polyfill'`) will load types automatically.
 
 
 ## Comparison with `@js-temporal/polyfill`

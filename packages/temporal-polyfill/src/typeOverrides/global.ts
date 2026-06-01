@@ -1,1 +1,1 @@
-export * from 'temporal-spec/global'
+export {}

@@ -55,6 +55,9 @@
         "types": "typeOverrides/global",
         "iife": true
       },
+      "./global-types": {
+        "src": "global-types"
+      },
       "./shim": {
         "src": "classApi/core/shim"
       },
