@@ -5,7 +5,7 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { DateTimeFormatLike } from '../commonTypes'
+import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -783,7 +783,7 @@ export function diffYears(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffYears(
+  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -794,7 +794,7 @@ export function diffMonths(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMonths(
+  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -805,7 +805,7 @@ export function diffWeeks(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffWeeks(
+  return (TemporalUtils.diffWeeks as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -816,7 +816,7 @@ export function diffDays(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffDays(
+  return (TemporalUtils.diffDays as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -827,7 +827,7 @@ export function diffHours(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffHours(
+  return (TemporalUtils.diffHours as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -838,7 +838,7 @@ export function diffMinutes(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMinutes(
+  return (TemporalUtils.diffMinutes as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -849,7 +849,7 @@ export function diffSeconds(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffSeconds(
+  return (TemporalUtils.diffSeconds as NativeDiffFunc<Temporal.PlainDateTime>)(
     getPlainDateTimeNative(record0),
     getPlainDateTimeNative(record1),
     options,
@@ -860,31 +860,25 @@ export function diffMilliseconds(
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMilliseconds(
-    getPlainDateTimeNative(record0),
-    getPlainDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffMilliseconds as NativeDiffFunc<Temporal.PlainDateTime>
+  )(getPlainDateTimeNative(record0), getPlainDateTimeNative(record1), options)
 }
 export function diffMicroseconds(
   record0: PlainDateTimeNativeRecord,
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMicroseconds(
-    getPlainDateTimeNative(record0),
-    getPlainDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffMicroseconds as NativeDiffFunc<Temporal.PlainDateTime>
+  )(getPlainDateTimeNative(record0), getPlainDateTimeNative(record1), options)
 }
 export function diffNanoseconds(
   record0: PlainDateTimeNativeRecord,
   record1: PlainDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffNanoseconds(
-    getPlainDateTimeNative(record0),
-    getPlainDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffNanoseconds as NativeDiffFunc<Temporal.PlainDateTime>
+  )(getPlainDateTimeNative(record0), getPlainDateTimeNative(record1), options)
 }

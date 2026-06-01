@@ -9,6 +9,27 @@ export function roundToYear<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
+>(date: T): T
+export function roundToYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, roundingMode: RoundingMode): T
+export function roundToYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options: RoundingMathOptions): T
+export function roundToYear<
+  T extends
+    | Temporal.PlainYearMonth
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
 >(date: T, options?: RoundingMathOptions | RoundingMode): T {
   const start = startOfYear(date)
   const duration = start.until(
@@ -23,6 +44,24 @@ export function roundToMonth<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
+>(date: T): T
+export function roundToMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, roundingMode: RoundingMode): T
+export function roundToMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options: RoundingMathOptions): T
+export function roundToMonth<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
 >(date: T, options?: RoundingMathOptions | RoundingMode): T {
   const start = startOfMonth(date)
   const duration = start.until(
@@ -32,6 +71,24 @@ export function roundToMonth<
   return start.add(duration) as T
 }
 
+export function roundToWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T): T
+export function roundToWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, roundingMode: RoundingMode): T
+export function roundToWeek<
+  T extends
+    | Temporal.PlainDate
+    | Temporal.PlainDateTime
+    | Temporal.ZonedDateTime,
+>(date: T, options: RoundingMathOptions): T
 export function roundToWeek<
   T extends
     | Temporal.PlainDate

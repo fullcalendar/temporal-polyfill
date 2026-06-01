@@ -15,10 +15,14 @@ export type DiffFunc<
     | Temporal.PlainDate
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
-> = (date0: T, date1: T, options?: RoundingMode | DiffOptions) => number
+> = {
+  (date0: T, date1: T): number
+  (date0: T, date1: T, roundingMode: RoundingMode): number
+  (date0: T, date1: T, options: DiffOptions): number
+}
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
-  return (date0: any, date1: any, options) => {
+  return (date0: any, date1: any, options?: RoundingMode | DiffOptions) => {
     const normOptions = normalizeDiffOptions(options)
 
     // TODO: throw error if unit impossible for input-types?

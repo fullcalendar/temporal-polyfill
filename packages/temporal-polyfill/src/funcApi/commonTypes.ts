@@ -1,4 +1,5 @@
 import { DateTimeFields } from '../internal/fieldTypes'
+import type { RoundingMathOptions, RoundingMode } from './index'
 
 export type DateTimeFormatLike<R> = Omit<
   Intl.DateTimeFormat,
@@ -24,6 +25,12 @@ export type RelativeToRecord<
   PlainDateTimeRecord,
   PlainDateRecord,
 > = ZonedDateTimeRecord | PlainDateTimeRecord | PlainDateRecord
+
+export type NativeDiffFunc<T> = (
+  record0: T,
+  record1: T,
+  options?: RoundingMathOptions | RoundingMode,
+) => number
 
 // temporal-spec can't be used as-is because calendar is a *record* here
 export type ZonedDateTimeFields<CalendarRecord> = Partial<DateTimeFields> & {

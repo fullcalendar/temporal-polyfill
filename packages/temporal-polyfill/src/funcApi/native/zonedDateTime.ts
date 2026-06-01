@@ -5,7 +5,11 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
+import {
+  DateTimeFormatLike,
+  NativeDiffFunc,
+  ZonedDateTimeFields,
+} from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -794,7 +798,7 @@ export function diffYears(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffYears(
+  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -805,7 +809,7 @@ export function diffMonths(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMonths(
+  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -816,7 +820,7 @@ export function diffWeeks(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffWeeks(
+  return (TemporalUtils.diffWeeks as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -827,7 +831,7 @@ export function diffDays(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffDays(
+  return (TemporalUtils.diffDays as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -838,7 +842,7 @@ export function diffHours(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffHours(
+  return (TemporalUtils.diffHours as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -849,7 +853,7 @@ export function diffMinutes(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMinutes(
+  return (TemporalUtils.diffMinutes as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -860,7 +864,7 @@ export function diffSeconds(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffSeconds(
+  return (TemporalUtils.diffSeconds as NativeDiffFunc<Temporal.ZonedDateTime>)(
     getZonedDateTimeNative(record0),
     getZonedDateTimeNative(record1),
     options,
@@ -871,31 +875,25 @@ export function diffMilliseconds(
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMilliseconds(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffMilliseconds as NativeDiffFunc<Temporal.ZonedDateTime>
+  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
 }
 export function diffMicroseconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMicroseconds(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffMicroseconds as NativeDiffFunc<Temporal.ZonedDateTime>
+  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
 }
 export function diffNanoseconds(
   record0: ZonedDateTimeNativeRecord,
   record1: ZonedDateTimeNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffNanoseconds(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
-    options,
-  )
+  return (
+    TemporalUtils.diffNanoseconds as NativeDiffFunc<Temporal.ZonedDateTime>
+  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
 }

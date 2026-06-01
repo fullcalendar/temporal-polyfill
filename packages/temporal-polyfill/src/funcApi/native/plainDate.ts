@@ -7,6 +7,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import {
   DateTimeFormatLike,
+  NativeDiffFunc,
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -581,7 +582,7 @@ export function diffYears(
   record1: PlainDateNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffYears(
+  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.PlainDate>)(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
     options,
@@ -593,7 +594,7 @@ export function diffMonths(
   record1: PlainDateNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMonths(
+  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.PlainDate>)(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
     options,
@@ -605,7 +606,7 @@ export function diffWeeks(
   record1: PlainDateNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffWeeks(
+  return (TemporalUtils.diffWeeks as NativeDiffFunc<Temporal.PlainDate>)(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
     options,
@@ -617,7 +618,7 @@ export function diffDays(
   record1: PlainDateNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffDays(
+  return (TemporalUtils.diffDays as NativeDiffFunc<Temporal.PlainDate>)(
     getPlainDateNative(record0),
     getPlainDateNative(record1),
     options,

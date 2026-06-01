@@ -5,7 +5,7 @@ import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { DateTimeFormatLike } from '../commonTypes'
+import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -260,7 +260,7 @@ export function diffYears(
   record1: PlainYearMonthNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffYears(
+  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.PlainYearMonth>)(
     getPlainYearMonthNative(record0),
     getPlainYearMonthNative(record1),
     options,
@@ -272,7 +272,7 @@ export function diffMonths(
   record1: PlainYearMonthNativeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return TemporalUtils.diffMonths(
+  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.PlainYearMonth>)(
     getPlainYearMonthNative(record0),
     getPlainYearMonthNative(record1),
     options,
