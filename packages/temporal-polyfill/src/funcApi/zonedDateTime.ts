@@ -16,6 +16,7 @@ import * as Shim from './shim/zonedDateTime'
 import { isZonedDateTimeRecord } from './temporalRecords'
 
 export type { Record }
+export type Format = DateTimeFormatLike<Record>
 
 export type FromFields = ZonedDateTimeFields<CalendarFns.Record>
 export type WithFields = Partial<DateTimeFields>
@@ -170,9 +171,7 @@ export const toPlainTime: (record: Record) => PlainTimeFns.Record =
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<Record> = NativeTemporal
-  ? Native.createFormat
-  : Shim.createFormat
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,

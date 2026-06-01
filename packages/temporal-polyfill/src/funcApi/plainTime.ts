@@ -11,6 +11,7 @@ import * as Shim from './shim/plainTime'
 import { isPlainTimeRecord } from './temporalRecords'
 
 export type { Record }
+export type Format = DateTimeFormatLike<Record>
 
 export type FromFields = Partial<TimeFields>
 export type WithFields = Partial<TimeFields>
@@ -224,9 +225,7 @@ export const compare: (record: Record, otherRecord: Record) => number =
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<Record> = NativeTemporal
-  ? Native.createFormat
-  : Shim.createFormat
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,

@@ -11,6 +11,7 @@ import * as Shim from './shim/plainMonthDay'
 import { isPlainMonthDayRecord } from './temporalRecords'
 
 export type { Record }
+export type Format = DateTimeFormatLike<Record>
 
 export type FromFields = Partial<MonthDayFields> & {
   calendar?: CalendarFns.Record
@@ -57,9 +58,7 @@ export const toPlainDate: (
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<Record> = NativeTemporal
-  ? Native.createFormat
-  : Shim.createFormat
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,

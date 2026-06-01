@@ -17,6 +17,7 @@ import { isPlainDateRecord } from './temporalRecords'
 import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
+export type Format = DateTimeFormatLike<Record>
 
 export type FromFields = Partial<DateFields> & { calendar: CalendarFns.Record }
 export type WithFields = Partial<DateFields>
@@ -147,9 +148,7 @@ export const toPlainMonthDay: (record: Record) => PlainMonthDayFns.Record =
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<Record> = NativeTemporal
-  ? Native.createFormat
-  : Shim.createFormat
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,

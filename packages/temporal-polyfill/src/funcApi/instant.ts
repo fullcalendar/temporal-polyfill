@@ -11,6 +11,7 @@ import { isInstantRecord } from './temporalRecords'
 import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
+export type Format = DateTimeFormatLike<Record>
 
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
@@ -182,9 +183,7 @@ export const toZonedDateTimeISO: (
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => DateTimeFormatLike<Record> = NativeTemporal
-  ? Native.createFormat
-  : Shim.createFormat
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,
