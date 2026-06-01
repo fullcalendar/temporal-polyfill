@@ -530,7 +530,10 @@ export function roundNumberToInc(
   return roundWithMode(num / roundingInc, roundingMode) * roundingInc
 }
 
-export function roundWithMode(num: number, roundingMode: RoundingModeEnum): number {
+export function roundWithMode(
+  num: number,
+  roundingMode: RoundingModeEnum,
+): number {
   return roundingModeFuncs[roundingMode](num)
 }
 
