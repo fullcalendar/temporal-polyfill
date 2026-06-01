@@ -56,7 +56,7 @@ export const enum OffsetDisplay {
   Never = 1,
 }
 
-export const enum RoundingMode {
+export const enum RoundingModeEnum {
   // Modes that get inverted by optionsRoundingRefine.invertRoundingMode.
   // If this enum changes, update roundingModeMap and roundingModeFuncs in
   // optionsConfig so string coercion and rounding dispatch stay aligned.
@@ -91,7 +91,7 @@ export type ZonedFieldTuple = [Overflow, OffsetDisambig, EpochDisambig]
 // converted to internal enum values by the time these shapes are used.
 export type RoundingMathTuple = [
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ]
 
 export type RoundingTuple = [smallestUnit: Unit, ...RoundingMathTuple]
@@ -102,7 +102,7 @@ export type DurationRoundingTuple<R> = [...DiffTuple, R]
 
 // Refined internal tuples used by ISO string formatting.
 export type TimeDisplayTuple = [
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined, // TODO: change -1 to null?
 ]

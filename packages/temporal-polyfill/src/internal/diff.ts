@@ -36,7 +36,7 @@ import {
   moveToDayOfMonthUnsafe,
   moveZonedEpochs,
 } from './move'
-import { Overflow, RoundingMode } from './optionsModel'
+import { Overflow, RoundingModeEnum } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
 import {
   MarkerToEpochNano,
@@ -83,7 +83,7 @@ export function diffInstants(
       TimeUnit,
       TimeUnit,
       number,
-      RoundingMode,
+      RoundingModeEnum,
     ]
 
   const durationFields = diffEpochNanos(
@@ -279,7 +279,7 @@ function diffDateLike(
   largestUnit: Unit, // TODO: large field
   smallestUnit: Unit, // TODO: large field
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   smallestPrecision: Unit = Unit.Day,
 ): DurationFields & { sign: NumberSign } {
   const startEpochNano = isoDateToEpochNano(startIsoDate)
@@ -734,7 +734,7 @@ function diffEpochNanos(
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): DurationFields {
   return {
     ...durationFieldDefaults,

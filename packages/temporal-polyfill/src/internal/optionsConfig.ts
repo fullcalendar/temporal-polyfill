@@ -5,7 +5,7 @@ import {
   OffsetDisambig,
   OffsetDisplay,
   Overflow,
-  RoundingMode,
+  RoundingModeEnum,
   TimeZoneDisplay,
 } from './optionsModel'
 import {
@@ -71,20 +71,20 @@ export const offsetDisplayMap = {
   never: OffsetDisplay.Never,
 }
 
-// Keep this map in sync with RoundingMode in optionsModel.
+// Keep this map in sync with RoundingModeEnum in optionsModel.
 export const roundingModeMap = {
-  floor: RoundingMode.Floor,
-  halfFloor: RoundingMode.HalfFloor,
-  ceil: RoundingMode.Ceil,
-  halfCeil: RoundingMode.HalfCeil,
-  trunc: RoundingMode.Trunc,
-  halfTrunc: RoundingMode.HalfTrunc,
-  expand: RoundingMode.Expand,
-  halfExpand: RoundingMode.HalfExpand,
-  halfEven: RoundingMode.HalfEven,
+  floor: RoundingModeEnum.Floor,
+  halfFloor: RoundingModeEnum.HalfFloor,
+  ceil: RoundingModeEnum.Ceil,
+  halfCeil: RoundingModeEnum.HalfCeil,
+  trunc: RoundingModeEnum.Trunc,
+  halfTrunc: RoundingModeEnum.HalfTrunc,
+  expand: RoundingModeEnum.Expand,
+  halfExpand: RoundingModeEnum.HalfExpand,
+  halfEven: RoundingModeEnum.HalfEven,
 }
 
-// Keep this table index-aligned with RoundingMode in optionsModel.
+// Keep this table index-aligned with RoundingModeEnum in optionsModel.
 export const roundingModeFuncs = [
   Math.floor,
   roundHalfFloor,

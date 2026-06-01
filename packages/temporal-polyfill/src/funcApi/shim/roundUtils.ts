@@ -16,7 +16,7 @@ import {
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { addCalendarMonths, moveByDays } from '../../internal/move'
-import { RoundingMode } from '../../internal/optionsModel'
+import { RoundingModeEnum } from '../../internal/optionsModel'
 import { IsoDateTimeInterval, roundWithMode } from '../../internal/round'
 import { computeEpochNanoFrac } from '../../internal/total'
 import { TimeUnit, Unit } from '../../internal/units'
@@ -150,7 +150,7 @@ export function roundDateTimeToInterval<
 >(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): CalendarDateTimeFields {
   const [isoFields0, isoFields1] = computeInterval(slots)
   const time: TimeFields =

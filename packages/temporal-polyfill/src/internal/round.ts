@@ -21,7 +21,7 @@ import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
-import { EpochDisambig, OffsetDisambig, RoundingMode } from './optionsModel'
+import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
 import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,
@@ -156,7 +156,7 @@ export function roundPlainDateTime(
 ): CalendarDateTimeFields & { calendar: CalendarSlot } {
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
-  ) as [DayTimeUnit, number, RoundingMode]
+  ) as [DayTimeUnit, number, RoundingModeEnum]
   const roundedIsoDateTime = roundDateTimeToNano(
     slots,
     computeNanoInc(smallestUnit, roundingInc),
@@ -174,7 +174,7 @@ export function roundPlainTime(
   const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
     options,
     Unit.Hour,
-  ) as [TimeUnit, number, RoundingMode]
+  ) as [TimeUnit, number, RoundingModeEnum]
   const roundedTimeFields = roundTimeToNano(
     slots,
     computeNanoInc(smallestUnit, roundingInc),
@@ -247,7 +247,7 @@ export function roundZonedEpochToInterval(
   ) => IsoDateTimeInterval,
   timeZone: TimeZone,
   slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): bigint {
   const isoSlots = zonedEpochSlotsToIso(slots, timeZone)
   const [isoFields0, isoFields1] = computeInterval(isoSlots)
@@ -272,7 +272,7 @@ export function roundZonedEpochToInterval(
 export function roundDateTimeToNano(
   isoDateTime: CalendarDateTimeFields,
   nanoInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): CalendarDateTimeFields {
   // Time rounding can carry into the neighboring ISO date. Keep the original
   // date and time together here so the day delta is applied to the same
@@ -295,7 +295,7 @@ export function roundDateTimeToNano(
 export function roundTimeToNano(
   timeFields: TimeFields,
   nanoInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): [TimeFields, number] {
   return nanoToTimeAndDay(
     roundNumberToInc(timeFieldsToNano(timeFields), nanoInc, roundingMode),
@@ -307,7 +307,7 @@ Common operation
 Always uses halfExpand
 */
 export function roundToMinute(offsetNano: number): number {
-  return roundNumberToInc(offsetNano, nanoInMinute, RoundingMode.HalfExpand)
+  return roundNumberToInc(offsetNano, nanoInMinute, RoundingModeEnum.HalfExpand)
 }
 
 export function computeNanoInc(
@@ -343,7 +343,7 @@ Returns partial result, to be merged with other duration fields
 export function roundDayTimeDurationByInc(
   durationFields: DurationFields,
   nanoInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): Partial<DurationFields> {
   const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day) // force <= Day
   const bigNano = durationFieldsToBigNano(durationFields, maxUnit)
@@ -364,7 +364,7 @@ export function roundDayTimeDuration(
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): DurationFields {
   const bigNano = durationFieldsToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToUnit(
@@ -385,7 +385,7 @@ export function roundRelativeDuration(
   largestUnit: Unit,
   smallestUnit: Unit,
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   markerMoveOps: MarkerMoveOps,
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
@@ -440,7 +440,7 @@ export function roundBigNanoToUnit(
   bigNano: bigint,
   smallestUnit: DayTimeUnit,
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   useDayOrigin?: boolean,
 ): bigint {
   const bigNanoInc = BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
@@ -460,7 +460,7 @@ space avoids losing sub-increment remainders for large durations/epoch values.
 export function roundBigNanoToInc(
   bigNano: bigint,
   bigNanoInc: bigint,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): bigint {
   return roundBigNanoToIncWithTail(
     bigNano,
@@ -473,7 +473,7 @@ export function roundBigNanoToInc(
 export function roundBigNanoToDayOriginInc(
   bigNano: bigint,
   bigNanoInc: bigint,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): bigint {
   const day = divFloorBigInt(bigNano, bigNanoInUtcDay)
   const dayOriginNano = day * bigNanoInUtcDay
@@ -492,7 +492,7 @@ export function roundBigNanoToDayOriginInc(
 function roundBigNanoToIncWithTail(
   bigNano: bigint,
   bigNanoInc: bigint,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   quotientTail: bigint,
 ): bigint {
   const quotient = bigNano / bigNanoInc
@@ -525,12 +525,12 @@ Use computeNanoInc for that
 export function roundNumberToInc(
   num: number,
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): number {
   return roundWithMode(num / roundingInc, roundingMode) * roundingInc
 }
 
-export function roundWithMode(num: number, roundingMode: RoundingMode): number {
+export function roundWithMode(num: number, roundingMode: RoundingModeEnum): number {
   return roundingModeFuncs[roundingMode](num)
 }
 
@@ -548,7 +548,7 @@ function nudgeDayTimeDuration(
   largestUnit: DayTimeUnit,
   smallestUnit: DayTimeUnit, // always <=Day
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: bigint,
@@ -594,7 +594,7 @@ function nudgeZonedTimeDuration(
   _largestUnit: Unit,
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number, // always >=Day
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   markerMoveOps: MarkerMoveOps,
 ): [
   nudgedDurationFields: DurationFields,
@@ -647,7 +647,7 @@ function nudgeRelativeDuration(
   _largestUnit: Unit,
   smallestUnit: Unit, // always >Day
   roundingInc: number,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   markerMoveOps: MarkerMoveOps,
 ): [
   durationFields: DurationFields,

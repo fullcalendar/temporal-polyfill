@@ -4,7 +4,7 @@ import {
   coerceRoundingMode,
 } from '../internal/optionsCoerce'
 import { roundingModeName } from '../internal/optionsConfig'
-import { RoundingMathTuple, RoundingMode } from '../internal/optionsModel'
+import { RoundingMathTuple, RoundingModeEnum } from '../internal/optionsModel'
 import {
   getOptionsObject,
   normalizeOptionsOrString,
@@ -24,7 +24,7 @@ export function refineRoundToOptions(
 
   // alphabetical
   let roundingInc = coerceRoundingIncInteger(options)
-  const roundingMode = coerceRoundingMode(options, RoundingMode.HalfExpand)
+  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
 
   roundingInc = validateRoundingInc(roundingInc, smallestUnit)
   return [roundingInc, roundingMode]

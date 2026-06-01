@@ -8,7 +8,7 @@ import {
   coerceTimeZoneDisplay,
 } from './optionsCoerce'
 import { smallestUnitStr } from './optionsConfig'
-import { CalendarDisplay, RoundingMode } from './optionsModel'
+import { CalendarDisplay, RoundingModeEnum } from './optionsModel'
 import type {
   DateTimeDisplayTuple,
   InstantDisplayTuple,
@@ -40,7 +40,7 @@ function refineTimeDisplayTuple(
 ): TimeDisplayTuple {
   // alphabetical
   const subsecDigits = coerceFractionalSecondDigits(options)
-  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
 
   const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
@@ -93,7 +93,7 @@ export function refineZonedDateTimeDisplayOptions(
   const calendarDisplay = coerceCalendarDisplay(options)
   const subsecDigits = coerceFractionalSecondDigits(options)
   const offsetDisplay = coerceOffsetDisplay(options)
-  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
   const timeZoneDisplay = coerceTimeZoneDisplay(options)
 
@@ -123,7 +123,7 @@ export function refineInstantDisplayOptions<
 
   // alphabetical
   const subsecDigits = coerceFractionalSecondDigits(options)
-  const roundingMode = coerceRoundingMode(options, RoundingMode.Trunc)
+  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
   const timeZoneArg = options.timeZone
 

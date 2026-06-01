@@ -28,7 +28,7 @@ import {
 import {
   CalendarDisplay,
   OffsetDisplay,
-  RoundingMode,
+  RoundingModeEnum,
   TimeZoneDisplay,
 } from './optionsModel'
 import {
@@ -101,7 +101,7 @@ function formatEpochNanoIso(
   providedTimeZone: boolean,
   timeZone: TimeZone,
   epochNano: bigint,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
@@ -168,7 +168,7 @@ function formatZonedEpochNanoIso(
   calendarDisplay: CalendarDisplay,
   timeZoneDisplay: TimeZoneDisplay,
   offsetDisplay: OffsetDisplay,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
@@ -207,7 +207,7 @@ export function formatDateTimeIso(
   calendar: CalendarSlot,
   isoDateTime: CalendarDateTimeFields,
   calendarDisplay: CalendarDisplay,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
@@ -383,7 +383,7 @@ export function formatTimeIsoAuto(slots: TimeFields): string {
 
 function formatTimeIso(
   fields: TimeFields,
-  roundingMode: RoundingMode,
+  roundingMode: RoundingModeEnum,
   nanoInc: number,
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
