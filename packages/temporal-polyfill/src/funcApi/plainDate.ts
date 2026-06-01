@@ -253,17 +253,17 @@ export const subtractDays: (
 
 export const roundToYear: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToYear : Shim.roundToYear
 
 export const roundToMonth: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToMonth : Shim.roundToMonth
 
 export const roundToWeek: (
   record: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateRecord = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
 
 export const startOfYear: (record: PlainDateRecord) => PlainDateRecord =
@@ -287,23 +287,23 @@ export const endOfWeek: (record: PlainDateRecord) => PlainDateRecord =
 export const diffYears: (
   record0: PlainDateRecord,
   record1: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: (
   record0: PlainDateRecord,
   record1: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const diffWeeks: (
   record0: PlainDateRecord,
   record1: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
 
 export const diffDays: (
   record0: PlainDateRecord,
   record1: PlainDateRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffDays : Shim.diffDays

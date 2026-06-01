@@ -131,64 +131,64 @@ export const diff: (
 export const diffHours: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffHours : Shim.diffHours
 
 export const diffMinutes: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
 
 export const diffSeconds: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
 
 export const diffMilliseconds: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
 
 export const diffMicroseconds: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
 
 export const diffNanoseconds: (
   record: InstantRecord,
   otherRecord: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds
 
 export const roundToHour: (
   record: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => InstantRecord = NativeTemporal ? Native.roundToHour : Shim.roundToHour
 
 export const roundToMinute: (
   record: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => InstantRecord = NativeTemporal ? Native.roundToMinute : Shim.roundToMinute
 
 export const roundToSecond: (
   record: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => InstantRecord = NativeTemporal ? Native.roundToSecond : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: InstantRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => InstantRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond

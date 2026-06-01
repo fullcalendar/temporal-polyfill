@@ -326,61 +326,61 @@ export const subtractNanoseconds: (
 
 export const roundToYear: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear
 
 export const roundToMonth: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToMonth
   : Shim.roundToMonth
 
 export const roundToWeek: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToWeek
   : Shim.roundToWeek
 
 export const roundToDay: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal ? Native.roundToDay : Shim.roundToDay
 
 export const roundToHour: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToHour
   : Shim.roundToHour
 
 export const roundToMinute: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToMinute
   : Shim.roundToMinute
 
 export const roundToSecond: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToSecond
   : Shim.roundToSecond
 
 export const roundToMillisecond: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToMillisecond
   : Shim.roundToMillisecond
 
 export const roundToMicrosecond: (
   record: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainDateTimeRecord = NativeTemporal
   ? Native.roundToMicrosecond
   : Shim.roundToMicrosecond
@@ -463,59 +463,59 @@ export const endOfMicrosecond: (
 export const diffYears: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const diffWeeks: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffWeeks : Shim.diffWeeks
 
 export const diffDays: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffDays : Shim.diffDays
 
 export const diffHours: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffHours : Shim.diffHours
 
 export const diffMinutes: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMinutes : Shim.diffMinutes
 
 export const diffSeconds: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffSeconds : Shim.diffSeconds
 
 export const diffMilliseconds: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMilliseconds : Shim.diffMilliseconds
 
 export const diffMicroseconds: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMicroseconds : Shim.diffMicroseconds
 
 export const diffNanoseconds: (
   record0: PlainDateTimeRecord,
   record1: PlainDateTimeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffNanoseconds : Shim.diffNanoseconds

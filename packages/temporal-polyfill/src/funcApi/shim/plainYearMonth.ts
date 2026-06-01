@@ -324,7 +324,7 @@ export function diff(
 export function diffYears(
   record0: PlainYearMonthShimRecord,
   record1: PlainYearMonthShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return diffPlainYears(
     getPlainYearMonthShimRecordSlots(record0),
@@ -336,7 +336,7 @@ export function diffYears(
 export function diffMonths(
   record0: PlainYearMonthShimRecord,
   record1: PlainYearMonthShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return diffPlainMonths(
     getPlainYearMonthShimRecordSlots(record0),
@@ -350,7 +350,7 @@ export function diffMonths(
 // non-ISO calendars aligned with the same semantics as PlainDate rounding.
 export function roundToYear(
   record: PlainYearMonthShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(Unit.Year, options)

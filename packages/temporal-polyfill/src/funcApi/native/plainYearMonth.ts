@@ -261,7 +261,7 @@ export function diff(
 export function diffYears(
   record0: PlainYearMonthNativeRecord,
   record1: PlainYearMonthNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffYears(
     getPlainYearMonthNative(record0),
@@ -273,7 +273,7 @@ export function diffYears(
 export function diffMonths(
   record0: PlainYearMonthNativeRecord,
   record1: PlainYearMonthNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffMonths(
     getPlainYearMonthNative(record0),
@@ -284,7 +284,7 @@ export function diffMonths(
 
 export function roundToYear(
   record: PlainYearMonthNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainYearMonthNativeRecord {
   return createPlainYearMonthNativeRecord(
     TemporalUtils.roundToYear(

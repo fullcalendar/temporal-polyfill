@@ -257,7 +257,7 @@ function diffTimeUnit(
   nanoInUnit: number,
   record: PlainTimeShimRecord,
   otherRecord: PlainTimeShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const nano0 = timeFieldsToNano(getPlainTimeShimRecordSlots(record))
@@ -307,7 +307,7 @@ function round(
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
   record: PlainTimeShimRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainTimeShimRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }

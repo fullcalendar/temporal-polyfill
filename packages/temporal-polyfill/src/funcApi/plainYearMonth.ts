@@ -109,18 +109,18 @@ export const diff: (
 export const diffYears: (
   record0: PlainYearMonthRecord,
   record1: PlainYearMonthRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffYears : Shim.diffYears
 
 export const diffMonths: (
   record0: PlainYearMonthRecord,
   record1: PlainYearMonthRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => number = NativeTemporal ? Native.diffMonths : Shim.diffMonths
 
 export const roundToYear: (
   record: PlainYearMonthRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ) => PlainYearMonthRecord = NativeTemporal
   ? Native.roundToYear
   : Shim.roundToYear

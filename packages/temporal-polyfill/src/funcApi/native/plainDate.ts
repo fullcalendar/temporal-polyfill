@@ -485,7 +485,7 @@ export function subtractDays(
 
 export function roundToYear(
   record: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
     TemporalUtils.roundToYear(
@@ -497,7 +497,7 @@ export function roundToYear(
 
 export function roundToMonth(
   record: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
     TemporalUtils.roundToMonth(
@@ -509,7 +509,7 @@ export function roundToMonth(
 
 export function roundToWeek(
   record: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): PlainDateNativeRecord {
   return createPlainDateNativeRecord(
     TemporalUtils.roundToWeek(
@@ -579,7 +579,7 @@ export function endOfWeek(
 export function diffYears(
   record0: PlainDateNativeRecord,
   record1: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffYears(
     getPlainDateNative(record0),
@@ -591,7 +591,7 @@ export function diffYears(
 export function diffMonths(
   record0: PlainDateNativeRecord,
   record1: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffMonths(
     getPlainDateNative(record0),
@@ -603,7 +603,7 @@ export function diffMonths(
 export function diffWeeks(
   record0: PlainDateNativeRecord,
   record1: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffWeeks(
     getPlainDateNative(record0),
@@ -615,7 +615,7 @@ export function diffWeeks(
 export function diffDays(
   record0: PlainDateNativeRecord,
   record1: PlainDateNativeRecord,
-  options?: RoundingModeName | RoundingMathOptions,
+  options?: RoundingMathOptions | RoundingModeName,
 ): number {
   return TemporalUtils.diffDays(
     getPlainDateNative(record0),

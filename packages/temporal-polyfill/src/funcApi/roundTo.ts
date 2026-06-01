@@ -16,7 +16,7 @@ import type {
 } from '../internal/temporalSpecHelpers'
 import { Unit } from '../internal/units'
 
-export type RoundToOptions = RoundingModeName | RoundingMathOptions
+export type RoundToOptions = RoundingMathOptions | RoundingModeName
 
 export function refineRoundToOptions(
   smallestUnit: Unit,
