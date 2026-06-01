@@ -1118,7 +1118,7 @@ Signature:
 
 ```ts
 (record: Record, timeZoneId: string) => ZonedDateTimeRecord
-(record: Record, options: ToZonedDateTimeOptions<PlainTimeRecord>) => ZonedDateTimeRecord
+(record: Record, options: ToZonedDateTimeOptions) => ZonedDateTimeRecord
 ```
 
 Fn API:

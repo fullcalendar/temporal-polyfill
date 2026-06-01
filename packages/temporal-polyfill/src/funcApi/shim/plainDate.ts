@@ -48,7 +48,10 @@ import type {
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import {
+  DateTimeFormatLike,
+  PlainDateToZonedDateTimeOptions,
+} from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { refineRoundToOptions } from '../roundTo'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
@@ -362,7 +365,7 @@ export function compare(
 
 export function toZonedDateTime(
   record: PlainDateShimRecord,
-  options: string | ToZonedDateTimeOptions<PlainTimeShimRecord>,
+  options: string | PlainDateToZonedDateTimeOptions<PlainTimeShimRecord>,
 ): ZonedDateTimeShimRecord {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options

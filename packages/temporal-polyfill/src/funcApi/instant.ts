@@ -4,6 +4,7 @@ import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import type * as DurationFns from './duration'
+import type { RoundingMathOptions, RoundingMode } from './index'
 import * as Native from './native/instant'
 import type { InstantRecord as Record } from './recordTypes'
 import * as Shim from './shim/instant'
@@ -16,10 +17,6 @@ export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
 export type ToStringOptions =
   TemporalSpecHelpers.InstantStringTimeZoneDisplayOptions
-
-// TODO: common types
-type RoundingMode = TemporalSpecHelpers.RoundingMode
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (epochNanoseconds: bigint) => Record = NativeTemporal
   ? Native.create

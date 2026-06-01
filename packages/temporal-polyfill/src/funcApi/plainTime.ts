@@ -1,10 +1,14 @@
 import type { Temporal } from 'temporal-spec'
 import { TimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import { DateTimeFormatLike } from './commonTypes'
 import type * as DurationFns from './duration'
+import type {
+  OverflowOptions,
+  RoundingMathOptions,
+  RoundingMode,
+} from './index'
 import * as Native from './native/plainTime'
 import type { PlainTimeRecord as Record } from './recordTypes'
 import * as Shim from './shim/plainTime'
@@ -17,11 +21,6 @@ export type WithFields = Partial<TimeFields>
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
 export type ToStringOptions = Temporal.PlainTimeToStringOptions
-
-// TODO: common types
-type OverflowOptions = Temporal.OverflowOptions
-type RoundingMode = TemporalSpecHelpers.RoundingMode
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (
   hour?: number,

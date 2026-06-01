@@ -1,11 +1,15 @@
 import type { Temporal } from 'temporal-spec'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
 import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
 import type * as DurationFns from './duration'
+import type {
+  OverflowOptions,
+  RoundingMathOptions,
+  RoundingMode,
+} from './index'
 import type * as InstantFns from './instant'
 import * as Native from './native/zonedDateTime'
 import type * as PlainDateFns from './plainDate'
@@ -26,11 +30,6 @@ export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
 export type ToStringOptions = Temporal.ZonedDateTimeToStringOptions
 export type TransitionOptions = Temporal.TransitionOptions
 export type TransitionDirection = Temporal.TransitionOptions['direction']
-
-// TODO: common types
-type OverflowOptions = Temporal.OverflowOptions
-type RoundingMode = TemporalSpecHelpers.RoundingMode
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const create: (
   epochNanoseconds: bigint,

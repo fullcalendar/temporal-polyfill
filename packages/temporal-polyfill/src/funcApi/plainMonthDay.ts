@@ -4,6 +4,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
 import { DateTimeFormatLike } from './commonTypes'
+import type { OverflowOptions } from './index'
 import * as Native from './native/plainMonthDay'
 import type * as PlainDateFns from './plainDate'
 import type { PlainMonthDayRecord as Record } from './recordTypes'
@@ -17,9 +18,6 @@ export type FromFields = Partial<MonthDayFields> & {
 }
 export type WithFields = Partial<MonthDayFields>
 export type ToStringOptions = Temporal.PlainDateToStringOptions
-
-// TODO: common types
-type OverflowOptions = Temporal.OverflowOptions
 
 export const create: (
   isoMonth: number,

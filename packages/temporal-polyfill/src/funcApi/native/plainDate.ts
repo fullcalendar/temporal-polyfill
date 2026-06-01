@@ -8,7 +8,10 @@ import type {
 } from '../../internal/temporalSpecHelpers'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { DateTimeFormatLike, ToZonedDateTimeOptions } from '../commonTypes'
+import {
+  DateTimeFormatLike,
+  PlainDateToZonedDateTimeOptions,
+} from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundTo'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
@@ -287,7 +290,7 @@ export function compare(
 
 export function toZonedDateTime(
   record: PlainDateNativeRecord,
-  options: string | ToZonedDateTimeOptions<PlainTimeNativeRecord>,
+  options: string | PlainDateToZonedDateTimeOptions<PlainTimeNativeRecord>,
 ): ZonedDateTimeNativeRecord {
   const native = getPlainDateNative(record)
   const optionsObj =

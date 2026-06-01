@@ -14,7 +14,7 @@ export type DateTimeFormatLike<R> = Omit<
 }
 
 // temporal-spec can't be used as-is because plainTime is a *record* here
-export type ToZonedDateTimeOptions<PlainTimeRecord> = {
+export type PlainDateToZonedDateTimeOptions<PlainTimeRecord> = {
   timeZone: string
   plainTime?: PlainTimeRecord
 }

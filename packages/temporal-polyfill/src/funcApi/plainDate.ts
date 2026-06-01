@@ -1,11 +1,18 @@
 import type { Temporal } from 'temporal-spec'
 import { DateFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
-import { DateTimeFormatLike, ToZonedDateTimeOptions } from './commonTypes'
+import {
+  DateTimeFormatLike,
+  PlainDateToZonedDateTimeOptions,
+} from './commonTypes'
 import type * as DurationFns from './duration'
+import type {
+  OverflowOptions,
+  RoundingMathOptions,
+  RoundingMode,
+} from './index'
 import * as Native from './native/plainDate'
 import type * as PlainDateTimeFns from './plainDateTime'
 import type * as PlainMonthDayFns from './plainMonthDay'
@@ -22,12 +29,9 @@ export type FromFields = Partial<DateFields> & { calendar: CalendarFns.Record }
 export type WithFields = Partial<DateFields>
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>
+export type ToZonedDateTimeOptions =
+  PlainDateToZonedDateTimeOptions<PlainTimeFns.Record>
 export type ToStringOptions = Temporal.PlainDateToStringOptions
-
-// TODO: common types
-type OverflowOptions = Temporal.OverflowOptions
-type RoundingMode = TemporalSpecHelpers.RoundingMode
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
 
 export const isRecord = isPlainDateRecord as (arg: unknown) => arg is Record
 
@@ -121,10 +125,7 @@ export const compare: (record: Record, otherRecord: Record) => number =
 
 export const toZonedDateTime: {
   (record: Record, timeZoneId: string): ZonedDateTimeFns.Record
-  (
-    record: Record,
-    options: ToZonedDateTimeOptions<PlainTimeFns.Record>,
-  ): ZonedDateTimeFns.Record
+  (record: Record, options: ToZonedDateTimeOptions): ZonedDateTimeFns.Record
 } = NativeTemporal ? Native.toZonedDateTime : Shim.toZonedDateTime
 
 export const toPlainDateTime: (

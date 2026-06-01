@@ -1,11 +1,16 @@
 import type { Temporal } from 'temporal-spec'
 import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
-import type * as TemporalSpecHelpers from '../internal/temporalSpecHelpers'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
 import { DateTimeFormatLike } from './commonTypes'
 import type * as DurationFns from './duration'
+import type {
+  DisambiguationOptions,
+  OverflowOptions,
+  RoundingMathOptions,
+  RoundingMode,
+} from './index'
 import * as Native from './native/plainDateTime'
 import type * as PlainDateFns from './plainDate'
 import type * as PlainTimeFns from './plainTime'
@@ -24,12 +29,6 @@ export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   Temporal.DateUnit | Temporal.TimeUnit
 >
 export type ToStringOptions = Temporal.PlainDateTimeToStringOptions
-
-// TODO: common types
-type OverflowOptions = Temporal.OverflowOptions
-type RoundingMode = TemporalSpecHelpers.RoundingMode
-type RoundingMathOptions = TemporalSpecHelpers.RoundingMathOptions
-type DisambiguationOptions = Temporal.DisambiguationOptions
 
 export const create: (
   isoYear: number,

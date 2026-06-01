@@ -78,6 +78,9 @@
         "src": "classApi/full/implementation",
         "types": "typeOverrides/implementation"
       },
+      "./fns": {
+        "src": "funcApi/index"
+      },
       "./fns/calendar": {
         "src": "funcApi/calendar"
       },
