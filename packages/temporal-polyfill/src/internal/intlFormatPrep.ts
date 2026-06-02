@@ -139,9 +139,7 @@ const monthDayStyleConflictNames: OptionNames = [
 
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  // false means Temporal.prototype.toLocaleString; true means Intl
-  // DateTimeFormat formatting an already-created Temporal value.
-  strictOptions: boolean,
+  fromDateTimeFormatInstance: boolean,
 ) => Intl.DateTimeFormatOptions
 
 function createOptionsTransformer(
@@ -153,7 +151,10 @@ function createOptionsTransformer(
   const excludedNameSet = new Set(exclusions)
   const styleConflictNameSet = new Set(styleConflictNames)
 
-  return (options: Intl.DateTimeFormatOptions, strictOptions: boolean) => {
+  return (
+    options: Intl.DateTimeFormatOptions,
+    fromDateTimeFormatInstance: boolean,
+  ) => {
     const hasDateStyle = options.dateStyle !== undefined
     const hasTimeStyle = options.timeStyle !== undefined
     const hasAnyStyle = hasDateStyle || hasTimeStyle
@@ -177,14 +178,14 @@ function createOptionsTransformer(
     const hasHardExclusions = // HACK
       exclusions && hasAnyHardExclusion(options, exclusions)
 
-    if (!strictOptions && hasHardExclusions) {
+    if (!fromDateTimeFormatInstance && hasHardExclusions) {
       throw new TypeError(errorMessages.invalidFormatOptions)
     }
 
     options = excludePropsByName(excludedNameSet, options)
 
     if (!hasAnyDefinedPropsByName(options, standardNames)) {
-      if (strictOptions && hasHardExclusions) {
+      if (fromDateTimeFormatInstance && hasHardExclusions) {
         // TODO: more specific error about no overlapping options
         throw new TypeError(errorMessages.invalidFormatOptions)
       }
@@ -276,8 +277,11 @@ function createPartialDateStyleTransformer(
   styleFields: Record<string, Intl.DateTimeFormatOptions>,
   styleConflictNames: OptionNames,
 ): OptionsTransformer {
-  return (options: Intl.DateTimeFormatOptions, strictOptions: boolean) => {
-    if (options.timeStyle !== undefined && !strictOptions) {
+  return (
+    options: Intl.DateTimeFormatOptions,
+    fromDateTimeFormatInstance: boolean,
+  ) => {
+    if (options.timeStyle !== undefined && !fromDateTimeFormatInstance) {
       throw new TypeError(errorMessages.invalidFormatOptions)
     }
 
@@ -285,7 +289,7 @@ function createPartialDateStyleTransformer(
     if (dateStyle !== undefined) {
       throwIfStyleFieldConflicts(options, styleConflictNames)
 
-      if (strictOptions) {
+      if (fromDateTimeFormatInstance) {
         // Intl.DateTimeFormat formatting of partial plain dates ignores a
         // paired timeStyle once dateStyle has selected the date pattern.
         options = { ...options, timeStyle: undefined }
@@ -298,7 +302,7 @@ function createPartialDateStyleTransformer(
       }
     }
 
-    return baseTransformer(options, strictOptions)
+    return baseTransformer(options, fromDateTimeFormatInstance)
   }
 }
 
@@ -375,7 +379,7 @@ export type FormatQuerier = (
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
-  strictOptions: boolean,
+  fromDateTimeFormatInstance: boolean,
 ) => Intl.DateTimeFormat
 
 export function createFormatPrepper<S>(
@@ -383,7 +387,7 @@ export function createFormatPrepper<S>(
   queryFormat: FormatQuerier = createFormatForPrep,
   // false is the Temporal.prototype.toLocaleString option path. Intl
   // DateTimeFormat-with-Temporal-input callers pass true at their call sites.
-  strictOptions = false,
+  fromDateTimeFormatInstance = false,
 ): FormatPrepper<S> {
   const { transformOptions, getForcedTimeZoneId } = config
 
@@ -393,7 +397,7 @@ export function createFormatPrepper<S>(
       locales,
       options,
       transformOptions,
-      strictOptions,
+      fromDateTimeFormatInstance,
     )
 
     const resolvedOptions = subformat.resolvedOptions()
@@ -407,9 +411,9 @@ export function createFormatForPrep(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
-  strictOptions: boolean,
+  fromDateTimeFormatInstance: boolean,
 ): Intl.DateTimeFormat {
-  options = transformOptions(options, strictOptions)
+  options = transformOptions(options, fromDateTimeFormatInstance)
 
   if (forcedTimeZoneId) {
     if (options.timeZone !== undefined) {
@@ -467,7 +471,6 @@ export const instantConfig: ClassFormatConfig<EpochNanoFields> = {
 export const zonedConfig: ClassFormatConfig<ZonedEpochNanoFields> = {
   transformOptions: transformZonedOptions,
   slotsToEpochMilli: getEpochMilli,
-  strictCalendarChecks: false,
   getForcedTimeZoneId: getForcedCommonTimeZone,
 }
 

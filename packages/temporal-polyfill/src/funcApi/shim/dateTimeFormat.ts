@@ -45,7 +45,7 @@ export function createDateTimeFormatFactory<R, S>(
       // Func Format models Intl.DateTimeFormat formatting a Temporal value, so
       // each formatter owns reusable subformat state instead of toLocaleString.
       memoize(createFormatForPrep),
-      /* strictOptions = */ true,
+      /* fromDateTimeFormatInstance = */ true,
     )
     private readonly resolvedLocale: string
 

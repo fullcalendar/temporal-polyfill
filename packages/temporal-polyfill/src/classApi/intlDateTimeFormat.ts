@@ -18,6 +18,7 @@ import {
   pluckProps,
 } from '../internal/utils'
 import { classFormatConfigs } from './intlFormatConfig'
+
 // Temporal values are detected by internal slot branding at runtime, so this
 // shared Intl wrapper doesn't need to import branch-local public classes.
 export type TemporalFormattable = object
@@ -297,6 +298,6 @@ function createFormatPrepperForBranding(branding: string): FormatPrepper<any> {
     memoize(createFormatForPrep),
     // This is the Intl.DateTimeFormat-with-Temporal-input path, not the
     // Temporal.prototype.toLocaleString path.
-    /* strictOptions = */ true,
+    /* fromDateTimeFormatInstance = */ true,
   )
 }
