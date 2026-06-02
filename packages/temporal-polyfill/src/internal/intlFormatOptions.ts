@@ -1,109 +1,26 @@
 import * as errorMessages from './errorMessages'
-import { OptionNames } from './intlFormatUtils'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { excludePropsByName } from './utils'
 
-const numericStr = 'numeric'
-const timeZoneNameStrs: OptionNames = ['timeZoneName']
-const eraStrs: OptionNames = ['era']
+type OptionFields = Record<
+  string,
+  Intl.DateTimeFormatOptions[keyof Intl.DateTimeFormatOptions]
+>
+type DateStyleReplacementFields = Record<
+  NonNullable<Intl.DateTimeFormatOptions['dateStyle']>,
+  Intl.DateTimeFormatOptions
+>
 
-// Fallbacks
-// (Used if no Standard Options provided, after Exclusions)
+const modifierFieldNames = ['era']
 
-const monthDayFallbacks: Intl.DateTimeFormatOptions = {
-  month: numericStr,
-  day: numericStr,
+interface OptionsAnalysis {
+  dateStyle: Intl.DateTimeFormatOptions['dateStyle']
+  timeStyle: Intl.DateTimeFormatOptions['timeStyle']
+  granularShapeFields: OptionFields
+  modifierFields: OptionFields
+  otherFields: OptionFields
+  hasInvalidGranularShapeFields: boolean
+  hasInvalidStyleFields: boolean
 }
-const yearMonthFallbacks: Intl.DateTimeFormatOptions = {
-  year: numericStr,
-  month: numericStr,
-}
-const dateFallbacks: Intl.DateTimeFormatOptions = {
-  ...yearMonthFallbacks,
-  day: numericStr,
-}
-const timeFallbacks: Intl.DateTimeFormatOptions = {
-  hour: numericStr,
-  minute: numericStr,
-  second: numericStr,
-}
-const dateTimeFallbacks: Intl.DateTimeFormatOptions = {
-  ...dateFallbacks,
-  ...timeFallbacks,
-}
-const zonedFallbacks: Intl.DateTimeFormatOptions = {
-  ...dateTimeFallbacks,
-  timeZoneName: 'short',
-}
-
-const yearMonthFallbackNames = Object.keys(yearMonthFallbacks) as OptionNames
-const monthDayFallbackNames = Object.keys(monthDayFallbacks) as OptionNames
-const dateFallbackNames = Object.keys(dateFallbacks) as OptionNames
-const timeFallbackNames = Object.keys(timeFallbacks) as OptionNames
-
-// Standard Options
-// (See notes for Fallbacks and Exclusions)
-
-const dateStyleNames = ['dateStyle'] as OptionNames
-const timeStyleNames = ['timeStyle'] as OptionNames
-const yearMonthStandardNames = [...yearMonthFallbackNames, ...dateStyleNames]
-const monthDayStandardNames = [...monthDayFallbackNames, ...dateStyleNames]
-const dateStandardNames: OptionNames = [
-  ...dateFallbackNames,
-  ...dateStyleNames,
-  'weekday',
-]
-const timeStandardNames: OptionNames = [
-  ...timeFallbackNames,
-  'dayPeriod',
-  ...timeStyleNames,
-  'fractionalSecondDigits',
-]
-const dateTimeStandardNames: OptionNames = [
-  ...dateStandardNames,
-  ...timeStandardNames,
-]
-
-// Exclusions
-
-const timeZoneNameAndEraExclusions: OptionNames = [
-  ...timeZoneNameStrs,
-  ...eraStrs,
-]
-const yearMonthRejectingExclusions: OptionNames = [
-  'day',
-  'weekday',
-  ...timeStandardNames,
-]
-const monthDayRejectingExclusions: OptionNames = [
-  'year',
-  'weekday',
-  ...timeStandardNames,
-]
-
-// Style Conflict Names
-// (options that conflict with (date|time)Style)
-
-const dateStyleConflictNames: OptionNames = [
-  ...dateFallbackNames,
-  'weekday',
-  ...eraStrs,
-]
-const timeStyleConflictNames: OptionNames = [
-  'hour',
-  'minute',
-  'second',
-  'dayPeriod',
-  'fractionalSecondDigits',
-]
-const yearMonthStyleConflictNames: OptionNames = [
-  ...yearMonthFallbackNames,
-  ...eraStrs,
-]
-const monthDayStyleConflictNames: OptionNames = [
-  ...monthDayFallbackNames,
-  ...eraStrs,
-]
 
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
@@ -114,232 +31,283 @@ export type OptionsTransformer = (
   allowPartialOverlap: boolean,
 ) => Intl.DateTimeFormatOptions
 
+function analyzeOptions(
+  options: Intl.DateTimeFormatOptions,
+  shapeFieldNames: readonly string[],
+  invalidShapeFieldNames: readonly string[],
+  ignoredFieldNames: readonly string[],
+): OptionsAnalysis {
+  // TODO: cache these Sets somewhere first
+  const shapeFieldNameSet = new Set(shapeFieldNames)
+  const modifierFieldNameSet = new Set(modifierFieldNames)
+  const invalidShapeFieldNameSet = new Set(invalidShapeFieldNames)
+  const ignoredFieldNameSet = new Set(ignoredFieldNames)
+
+  const analysis: OptionsAnalysis = {
+    dateStyle: undefined,
+    timeStyle: undefined,
+    granularShapeFields: {},
+    modifierFields: {},
+    otherFields: {},
+    hasInvalidGranularShapeFields: false,
+    hasInvalidStyleFields: false,
+  }
+
+  for (const name of Object.keys(options)) {
+    const value = options[name as keyof Intl.DateTimeFormatOptions]
+
+    if (value === undefined || ignoredFieldNameSet.has(name)) {
+      continue
+    }
+
+    if (shapeFieldNameSet.has(name)) {
+      if (name === 'dateStyle') {
+        analysis.dateStyle = value as Intl.DateTimeFormatOptions['dateStyle']
+      } else if (name === 'timeStyle') {
+        analysis.timeStyle = value as Intl.DateTimeFormatOptions['timeStyle']
+      } else {
+        analysis.granularShapeFields[name] = value
+      }
+    } else if (modifierFieldNameSet.has(name)) {
+      analysis.modifierFields[name] = value
+    } else if (invalidShapeFieldNameSet.has(name)) {
+      if (name === 'dateStyle' || name === 'timeStyle') {
+        analysis.hasInvalidStyleFields = true
+      } else {
+        analysis.hasInvalidGranularShapeFields = true
+      }
+    } else {
+      analysis.otherFields[name] = value
+    }
+  }
+
+  return analysis
+}
+
 function createOptionsTransformer(
-  // Fields this Temporal type can actually format. If none of these are
-  // defined after excluded fields are stripped, the transformer adds fallbacks
-  // instead of passing an empty format shape to Intl.DateTimeFormat.
-  standardNames: OptionNames,
+  // Fields that define the visible output shape for this Temporal type.
+  shapeFieldNames: readonly string[],
 
-  // Fields to apply when none of the standard fields are defined.
-  fallbacks: Intl.DateTimeFormatOptions,
+  // Shape fields that belong to other Temporal types. These can be stripped on
+  // DateTimeFormat-created paths with partial overlap, but otherwise reject.
+  invalidShapeFieldNames: readonly string[],
 
-  // Fields this type cannot expose directly, and that should count as errors
-  // when they do not overlap with the target Temporal type. toLocaleString
-  // rejects them immediately; Intl.DateTimeFormat Temporal formatting strips
-  // them unless doing so leaves no standard field to format.
-  rejectingExclusions?: OptionNames,
+  // Fields to remove without treating them as caller errors.
+  ignoredFieldNames: readonly string[],
 
-  // Fields this type should strip without treating them as caller errors, such
-  // as timeZoneName output on Plain types or era output on types without a year.
-  silentExclusions?: OptionNames,
+  // Fields to inject when the caller selected no output shape.
+  defaultShapeFields: Intl.DateTimeFormatOptions,
 
   // Plain types need a neutral internal timeZone for Intl.DateTimeFormat, but
   // must not expose a meaningful time zone to callers.
-  suppressTimeZone?: boolean,
+  // TODO: move elsewehre
+  suppressTimeZone: boolean,
 
-  // Granular fields that cannot mix with dateStyle/timeStyle because style
-  // formats are complete patterns.
-  styleConflictNames?: OptionNames,
-
-  // For partial date types, expands dateStyle into the concrete fields that
-  // exist on the type, such as year/month or month/day.
-  partialDateStyleFields?: Record<string, Intl.DateTimeFormatOptions>,
-
-  // Granular fields that cannot mix with the original partial dateStyle before
-  // it is expanded into concrete fields.
-  partialDateStyleConflictNames?: OptionNames,
+  // Partial date types expand dateStyle to the concrete fields they support.
+  dateStyleReplacementFields?: DateStyleReplacementFields,
 ): OptionsTransformer {
-  // TODO: maybe define these originally with Set, then we don't need factory
-  // architecture, just bindArgs
-  const excludedNameSet = new Set([
-    ...(rejectingExclusions || []),
-    ...(silentExclusions || []),
-  ])
-  const styleConflictNameSet = new Set(styleConflictNames)
-
   return (
     options: Intl.DateTimeFormatOptions,
-
-    // Allows DateTimeFormat-created options to include fields for other
-    // Temporal types, so long as this Temporal type still has at least one
-    // compatible output field after exclusions are stripped.
     allowPartialOverlap: boolean,
-  ) => {
-    if (partialDateStyleFields) {
-      const dateStyle = options.dateStyle
-      if (dateStyle !== undefined) {
-        throwIfStyleFieldConflicts(options, partialDateStyleConflictNames!)
+  ): Intl.DateTimeFormatOptions => {
+    const analysis = analyzeOptions(
+      options,
+      shapeFieldNames,
+      invalidShapeFieldNames,
+      ignoredFieldNames,
+    )
 
-        if (allowPartialOverlap) {
-          // Intl.DateTimeFormat formatting of partial plain dates ignores a
-          // paired timeStyle once dateStyle has selected the date pattern.
-          options = { ...options, timeStyle: undefined }
-        }
-
-        options = {
-          ...options,
-          dateStyle: undefined,
-          ...partialDateStyleFields[dateStyle],
-        }
-      }
-    }
-
-    const hasDateStyle = options.dateStyle !== undefined
-    const hasTimeStyle = options.timeStyle !== undefined
+    const hasDateStyle = analysis.dateStyle !== undefined
+    const hasTimeStyle = analysis.timeStyle !== undefined
     const hasAnyStyle = hasDateStyle || hasTimeStyle
+    const hasGranularShapeFields =
+      Object.keys(analysis.granularShapeFields).length > 0
+    const hasInvalids =
+      analysis.hasInvalidGranularShapeFields || analysis.hasInvalidStyleFields
+    const hasShapeFields =
+      hasGranularShapeFields || hasDateStyle || hasTimeStyle
+    const hasModifierFields = Object.keys(analysis.modifierFields).length > 0
+    const hasStyleConflictFields =
+      hasGranularShapeFields ||
+      hasModifierFields ||
+      analysis.hasInvalidGranularShapeFields
 
-    if (hasAnyStyle && styleConflictNames) {
-      const propNames = Object.keys(options) as OptionNames
-
-      // Style formats are complete patterns. ECMA-402 rejects any defined
-      // granular field that would also participate in the style pattern.
-      for (let i = 0; i < propNames.length; i++) {
-        const propName = propNames[i]
-        if (
-          styleConflictNameSet.has(propName) &&
-          options[propName] !== undefined
-        ) {
-          throw new TypeError(errorMessages.invalidFormatOptions)
-        }
-      }
-    }
-
-    const hasRejectingExclusions =
-      rejectingExclusions &&
-      hasAnyDefinedPropsByName(options, rejectingExclusions)
-
-    if (!allowPartialOverlap && hasRejectingExclusions) {
-      // Temporal.prototype.toLocaleString owns this options bag directly. If
-      // the caller asks a Plain type to render an incompatible field, reject it
-      // here instead of silently dropping the field and applying fallbacks.
+    if (
+      (!allowPartialOverlap && hasInvalids) ||
+      (allowPartialOverlap && hasInvalids && !hasShapeFields) ||
+      (hasAnyStyle && hasStyleConflictFields)
+    ) {
       throw new TypeError(errorMessages.invalidFormatOptions)
     }
 
-    options = excludePropsByName(excludedNameSet, options)
+    const transformedOptions: Intl.DateTimeFormatOptions = {}
 
-    if (!hasAnyDefinedPropsByName(options, standardNames)) {
-      if (allowPartialOverlap && hasRejectingExclusions) {
-        // Intl.DateTimeFormat can be constructed with fields for multiple
-        // Temporal types. When formatting one Temporal value, drop incompatible
-        // fields if a compatible field remains, but reject a formatter whose
-        // configured shape has no overlap with the value being formatted.
-        // TODO: more specific error about no overlapping options
-        throw new TypeError(errorMessages.invalidFormatOptions)
+    if (!hasAnyStyle && !hasShapeFields) {
+      Object.assign(transformedOptions, defaultShapeFields)
+    }
+
+    Object.assign(
+      transformedOptions,
+      analysis.granularShapeFields,
+      analysis.modifierFields,
+      analysis.otherFields,
+    )
+
+    if (hasDateStyle) {
+      if (dateStyleReplacementFields) {
+        Object.assign(
+          transformedOptions,
+          dateStyleReplacementFields[analysis.dateStyle!],
+        )
+      } else {
+        transformedOptions.dateStyle = analysis.dateStyle
       }
+    }
 
-      // Add default output fields while preserving other Intl options and
-      // caller-provided values for fallback fields. For example, ZonedDateTime
-      // defaults timeZoneName to "short", but callers can still choose another
-      // timeZoneName style; getForcedTimeZoneId only handles the timeZone.
-      options = { ...fallbacks, ...options }
+    if (hasTimeStyle) {
+      transformedOptions.timeStyle = analysis.timeStyle
     }
 
     if (suppressTimeZone) {
-      // Plain types have no time zone, but Intl.DateTimeFormat needs one to
-      // turn the ISO fields into an epoch value. Use UTC as a neutral anchor.
-      options.timeZone = utcTimeZoneId
+      // Plain types have no time zone, but the later Intl formatting path
+      // still needs a neutral one to convert their ISO fields to an epoch.
+      transformedOptions.timeZone = utcTimeZoneId
 
-      // full/long timeStyle patterns include a time zone name, so downgrade
-      // them to keep Plain-type formatting from displaying one.
-      if (['full', 'long'].includes(options.timeStyle!)) {
-        options.timeStyle = 'medium'
+      // full/long timeStyle would expose a time zone name, so downgrade it.
+      if (['full', 'long'].includes(transformedOptions.timeStyle!)) {
+        transformedOptions.timeStyle = 'medium'
       }
     }
 
-    return options
+    return transformedOptions
   }
 }
 
-const yearMonthStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
-  full: { year: numericStr, month: 'long' },
-  long: { year: numericStr, month: 'long' },
-  medium: { year: numericStr, month: 'short' },
-  short: { year: '2-digit', month: numericStr },
-}
+// Shape fields are options that define the visible Temporal output shape.
+const dateShapeFieldNames = ['weekday', 'year', 'month', 'day', 'dateStyle']
+const timeShapeFieldNames = [
+  'dayPeriod',
+  'hour',
+  'minute',
+  'second',
+  'fractionalSecondDigits',
+  'timeStyle',
+]
+const dateTimeShapeFieldNames = [...dateShapeFieldNames, ...timeShapeFieldNames]
 
-const monthDayStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
-  full: { month: 'long', day: numericStr },
-  long: { month: 'long', day: numericStr },
-  medium: { month: 'short', day: numericStr },
-  short: { month: numericStr, day: numericStr },
+// Partial-date types accept only a subset of date fields, but still treat the
+// remaining date/time shape fields as meaningful conflicts.
+const yearMonthShapeFieldNames = ['year', 'month', 'dateStyle']
+const yearMonthInvalidShapeFieldNames = [
+  'weekday',
+  'day',
+  ...timeShapeFieldNames,
+]
+
+const monthDayShapeFieldNames = ['month', 'day', 'dateStyle']
+const monthDayInvalidShapeFieldNames = [
+  'weekday',
+  'year',
+  ...timeShapeFieldNames,
+]
+
+// These options are known DateTimeFormat shape-ish fields, but some Temporal
+// types intentionally remove them without treating them as caller errors.
+const timeZoneNameStrs = ['timeZoneName']
+const timeZoneNameAndEraStrs = ['timeZoneName', 'era']
+
+// Defaults are injected only when the caller did not select any shape fields.
+const dateDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+}
+const timeDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+}
+const dateTimeDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  ...dateDefaultShapeFields,
+  ...timeDefaultShapeFields,
+}
+const zonedDateTimeDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  ...dateTimeDefaultShapeFields,
+  timeZoneName: 'short',
+}
+const yearMonthDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'numeric',
+}
+const monthDayDefaultShapeFields: Intl.DateTimeFormatOptions = {
+  month: 'numeric',
+  day: 'numeric',
 }
 
 export const transformInstantOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  dateTimeFallbacks,
+  /* shapeFieldNames = */ dateTimeShapeFieldNames,
+  /* invalidShapeFieldNames = */ [],
+  /* ignoredFieldNames = */ [],
+  /* defaultShapeFields = */ dateTimeDefaultShapeFields,
+  /* suppressTimeZone = */ false,
 )
+
 export const transformZonedOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  zonedFallbacks,
+  /* shapeFieldNames = */ dateTimeShapeFieldNames,
+  /* invalidShapeFieldNames = */ [],
+  /* ignoredFieldNames = */ [],
+  /* defaultShapeFields = */ zonedDateTimeDefaultShapeFields,
+  /* suppressTimeZone = */ false,
 )
+
 export const transformDateTimeOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  dateTimeFallbacks,
-  /* rejectingExclusions = */ undefined,
-  /* silentExclusions = */ timeZoneNameStrs,
+  /* shapeFieldNames = */ dateTimeShapeFieldNames,
+  /* invalidShapeFieldNames = */ [],
+  /* ignoredFieldNames = */ timeZoneNameStrs,
+  /* defaultShapeFields = */ dateTimeDefaultShapeFields,
   /* suppressTimeZone = */ true,
 )
+
 export const transformDateOptions = createOptionsTransformer(
-  dateStandardNames,
-  dateFallbacks,
-  /* rejectingExclusions = */ timeStandardNames,
-  /* silentExclusions = */ timeZoneNameStrs,
+  /* shapeFieldNames = */ dateShapeFieldNames,
+  /* invalidShapeFieldNames = */ timeShapeFieldNames,
+  /* ignoredFieldNames = */ timeZoneNameStrs,
+  /* defaultShapeFields = */ dateDefaultShapeFields,
   /* suppressTimeZone = */ true,
-  /* styleConflictNames = */ dateStyleConflictNames,
 )
+
 export const transformTimeOptions = createOptionsTransformer(
-  timeStandardNames,
-  timeFallbacks,
-  /* rejectingExclusions = */ dateStandardNames,
-  /* silentExclusions = */ timeZoneNameAndEraExclusions,
+  /* shapeFieldNames = */ timeShapeFieldNames,
+  /* invalidShapeFieldNames = */ dateShapeFieldNames,
+  /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
+  /* defaultShapeFields = */ timeDefaultShapeFields,
   /* suppressTimeZone = */ true,
-  /* styleConflictNames = */ timeStyleConflictNames,
 )
+
 export const transformYearMonthOptions = createOptionsTransformer(
-  yearMonthStandardNames,
-  yearMonthFallbacks,
-  /* rejectingExclusions = */ yearMonthRejectingExclusions,
-  /* silentExclusions = */ timeZoneNameStrs,
+  /* shapeFieldNames = */ yearMonthShapeFieldNames,
+  /* invalidShapeFieldNames = */ yearMonthInvalidShapeFieldNames,
+  /* ignoredFieldNames = */ timeZoneNameStrs,
+  /* defaultShapeFields = */ yearMonthDefaultShapeFields,
   /* suppressTimeZone = */ true,
-  /* styleConflictNames = */ yearMonthFallbackNames,
-  /* partialDateStyleFields = */ yearMonthStyleFields,
-  /* partialDateStyleConflictNames = */ yearMonthStyleConflictNames,
+  /* dateStyleReplacementFields = */ {
+    full: { year: 'numeric', month: 'long' },
+    long: { year: 'numeric', month: 'long' },
+    medium: { year: 'numeric', month: 'short' },
+    short: { year: '2-digit', month: 'numeric' },
+  },
 )
+
 export const transformMonthDayOptions = createOptionsTransformer(
-  monthDayStandardNames,
-  monthDayFallbacks,
-  /* rejectingExclusions = */ monthDayRejectingExclusions,
-  /* silentExclusions = */ timeZoneNameAndEraExclusions,
+  /* shapeFieldNames = */ monthDayShapeFieldNames,
+  /* invalidShapeFieldNames = */ monthDayInvalidShapeFieldNames,
+  /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
+  /* defaultShapeFields = */ monthDayDefaultShapeFields,
   /* suppressTimeZone = */ true,
-  /* styleConflictNames = */ monthDayFallbackNames,
-  /* partialDateStyleFields = */ monthDayStyleFields,
-  /* partialDateStyleConflictNames = */ monthDayStyleConflictNames,
+  /* dateStyleReplacementFields = */ {
+    full: { month: 'long', day: 'numeric' },
+    long: { month: 'long', day: 'numeric' },
+    medium: { month: 'short', day: 'numeric' },
+    short: { month: 'numeric', day: 'numeric' },
+  },
 )
-
-function hasAnyDefinedPropsByName<P extends {}>(
-  props: P,
-  names: (keyof P)[],
-): boolean {
-  // Undefined style options are explicitly treated as absent by ECMA-402.
-  // Keep this separate from hasAnyPropsByName, whose "in" semantics are useful
-  // in option-ordering code elsewhere.
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i]
-    if (props[name] !== undefined) {
-      return true
-    }
-  }
-  return false
-}
-
-function throwIfStyleFieldConflicts(
-  options: Intl.DateTimeFormatOptions,
-  conflictNames: OptionNames,
-): void {
-  for (let i = 0; i < conflictNames.length; i++) {
-    const conflictName = conflictNames[i]
-    if (options[conflictName] !== undefined) {
-      throw new TypeError(errorMessages.invalidFormatOptions)
-    }
-  }
-}
