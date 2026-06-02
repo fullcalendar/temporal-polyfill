@@ -89,29 +89,24 @@ const dateTimeStandardNames: OptionNames = [
 ]
 
 // Exclusions
-// (Silently removed)
 
-const dateExclusions: OptionNames = [...timeZoneNameStrs, ...timeStandardNames]
-const timeExclusions: OptionNames = [
+const timeZoneNameAndEraExclusions: OptionNames = [
   ...timeZoneNameStrs,
-  ...dateStandardNames,
   ...eraStrs,
 ]
-const yearMonthExclusions: OptionNames = [
-  ...timeZoneNameStrs,
+const yearMonthRejectingExclusions: OptionNames = [
   'day',
   'weekday',
   ...timeStandardNames,
 ]
-const monthDayExclusions: OptionNames = [
-  ...timeZoneNameStrs,
-  ...eraStrs,
+const monthDayRejectingExclusions: OptionNames = [
   'year',
   'weekday',
   ...timeStandardNames,
 ]
-const silentExclusions: OptionNames = [...timeZoneNameStrs, ...eraStrs]
-const silentExclusionNames = new Set<OptionNames[number]>(silentExclusions)
+
+// Style Conflict Names
+// (options that conflict with (date|time)Style)
 
 const dateStyleConflictNames: OptionNames = [
   ...dateFallbackNames,
@@ -139,22 +134,83 @@ const monthDayStyleConflictNames: OptionNames = [
 
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
-  fromDateTimeFormatInstance: boolean,
+  // Allows an options bag to contain fields that do not apply to this Temporal
+  // type, as long as at least one compatible field remains after exclusions are
+  // stripped. Intl.DateTimeFormat-with-Temporal-input paths allow this;
+  // Temporal.prototype.toLocaleString paths do not.
+  allowPartialOverlap: boolean,
 ) => Intl.DateTimeFormatOptions
 
 function createOptionsTransformer(
+  // Fields this Temporal type can actually format. If none of these are
+  // defined after excluded fields are stripped, the transformer adds fallbacks
+  // instead of passing an empty format shape to Intl.DateTimeFormat.
   standardNames: OptionNames,
+
+  // Fields to apply when none of the standard fields are defined.
   fallbacks: Intl.DateTimeFormatOptions,
-  exclusions?: OptionNames,
+
+  // Fields this type cannot expose directly, and that should count as errors
+  // when they do not overlap with the target Temporal type. toLocaleString
+  // rejects them immediately; Intl.DateTimeFormat Temporal formatting strips
+  // them unless doing so leaves no standard field to format.
+  rejectingExclusions?: OptionNames,
+
+  // Fields this type should strip without treating them as caller errors, such
+  // as timeZoneName output on Plain types or era output on types without a year.
+  silentExclusions?: OptionNames,
+
+  // Plain types need a neutral internal timeZone for Intl.DateTimeFormat, but
+  // must not expose a meaningful time zone to callers.
+  suppressTimeZone?: boolean,
+
+  // Granular fields that cannot mix with dateStyle/timeStyle because style
+  // formats are complete patterns.
   styleConflictNames?: OptionNames,
+
+  // For partial date types, expands dateStyle into the concrete fields that
+  // exist on the type, such as year/month or month/day.
+  partialDateStyleFields?: Record<string, Intl.DateTimeFormatOptions>,
+
+  // Granular fields that cannot mix with the original partial dateStyle before
+  // it is expanded into concrete fields.
+  partialDateStyleConflictNames?: OptionNames,
 ): OptionsTransformer {
-  const excludedNameSet = new Set(exclusions)
+  // TODO: maybe define these originally with Set, then we don't need factory
+  // architecture, just bindArgs
+  const excludedNameSet = new Set([
+    ...(rejectingExclusions || []),
+    ...(silentExclusions || []),
+  ])
   const styleConflictNameSet = new Set(styleConflictNames)
 
   return (
     options: Intl.DateTimeFormatOptions,
-    fromDateTimeFormatInstance: boolean,
+
+    // Allows DateTimeFormat-created options to include fields for other
+    // Temporal types, so long as this Temporal type still has at least one
+    // compatible output field after exclusions are stripped.
+    allowPartialOverlap: boolean,
   ) => {
+    if (partialDateStyleFields) {
+      const dateStyle = options.dateStyle
+      if (dateStyle !== undefined) {
+        throwIfStyleFieldConflicts(options, partialDateStyleConflictNames!)
+
+        if (allowPartialOverlap) {
+          // Intl.DateTimeFormat formatting of partial plain dates ignores a
+          // paired timeStyle once dateStyle has selected the date pattern.
+          options = { ...options, timeStyle: undefined }
+        }
+
+        options = {
+          ...options,
+          dateStyle: undefined,
+          ...partialDateStyleFields[dateStyle],
+        }
+      }
+    }
+
     const hasDateStyle = options.dateStyle !== undefined
     const hasTimeStyle = options.timeStyle !== undefined
     const hasAnyStyle = hasDateStyle || hasTimeStyle
@@ -175,31 +231,43 @@ function createOptionsTransformer(
       }
     }
 
-    const hasHardExclusions = // HACK
-      exclusions && hasAnyHardExclusion(options, exclusions)
+    const hasRejectingExclusions =
+      rejectingExclusions &&
+      hasAnyDefinedPropsByName(options, rejectingExclusions)
 
-    if (!fromDateTimeFormatInstance && hasHardExclusions) {
+    if (!allowPartialOverlap && hasRejectingExclusions) {
+      // Temporal.prototype.toLocaleString owns this options bag directly. If
+      // the caller asks a Plain type to render an incompatible field, reject it
+      // here instead of silently dropping the field and applying fallbacks.
       throw new TypeError(errorMessages.invalidFormatOptions)
     }
 
     options = excludePropsByName(excludedNameSet, options)
 
     if (!hasAnyDefinedPropsByName(options, standardNames)) {
-      if (fromDateTimeFormatInstance && hasHardExclusions) {
+      if (allowPartialOverlap && hasRejectingExclusions) {
+        // Intl.DateTimeFormat can be constructed with fields for multiple
+        // Temporal types. When formatting one Temporal value, drop incompatible
+        // fields if a compatible field remains, but reject a formatter whose
+        // configured shape has no overlap with the value being formatted.
         // TODO: more specific error about no overlapping options
         throw new TypeError(errorMessages.invalidFormatOptions)
       }
 
-      // still allow options to override fallbacks if present
+      // Add default output fields while preserving other Intl options and
+      // caller-provided values for fallback fields. For example, ZonedDateTime
+      // defaults timeZoneName to "short", but callers can still choose another
+      // timeZoneName style; getForcedTimeZoneId only handles the timeZone.
       options = { ...fallbacks, ...options }
     }
 
-    // HACK: this condition is a proxy for whether this is a Plain type
-    // The Plain types are silently forced to UTC
-    if (exclusions) {
+    if (suppressTimeZone) {
+      // Plain types have no time zone, but Intl.DateTimeFormat needs one to
+      // turn the ISO fields into an epoch value. Use UTC as a neutral anchor.
       options.timeZone = utcTimeZoneId
 
-      // ensure timeStyle doesn't display time zone
+      // full/long timeStyle patterns include a time zone name, so downgrade
+      // them to keep Plain-type formatting from displaying one.
       if (['full', 'long'].includes(options.timeStyle!)) {
         options.timeStyle = 'medium'
       }
@@ -208,44 +276,6 @@ function createOptionsTransformer(
     return options
   }
 }
-
-const transformInstantOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  dateTimeFallbacks,
-)
-const transformZonedOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  zonedFallbacks,
-)
-const transformDateTimeOptions = createOptionsTransformer(
-  dateTimeStandardNames,
-  dateTimeFallbacks,
-  timeZoneNameStrs,
-)
-const transformDateOptions = createOptionsTransformer(
-  dateStandardNames,
-  dateFallbacks,
-  dateExclusions,
-  dateStyleConflictNames,
-)
-const transformTimeOptions = createOptionsTransformer(
-  timeStandardNames,
-  timeFallbacks,
-  timeExclusions,
-  timeStyleConflictNames,
-)
-const transformYearMonthBaseOptions = createOptionsTransformer(
-  yearMonthStandardNames,
-  yearMonthFallbacks,
-  yearMonthExclusions,
-  yearMonthFallbackNames,
-)
-const transformMonthDayBaseOptions = createOptionsTransformer(
-  monthDayStandardNames,
-  monthDayFallbacks,
-  monthDayExclusions,
-  monthDayFallbackNames,
-)
 
 const yearMonthStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
   full: { year: numericStr, month: 'long' },
@@ -261,50 +291,57 @@ const monthDayStyleFields: Record<string, Intl.DateTimeFormatOptions> = {
   short: { month: numericStr, day: numericStr },
 }
 
-const transformYearMonthOptions = createPartialDateStyleTransformer(
-  transformYearMonthBaseOptions,
-  yearMonthStyleFields,
-  yearMonthStyleConflictNames,
+const transformInstantOptions = createOptionsTransformer(
+  dateTimeStandardNames,
+  dateTimeFallbacks,
 )
-const transformMonthDayOptions = createPartialDateStyleTransformer(
-  transformMonthDayBaseOptions,
-  monthDayStyleFields,
-  monthDayStyleConflictNames,
+const transformZonedOptions = createOptionsTransformer(
+  dateTimeStandardNames,
+  zonedFallbacks,
 )
-
-function createPartialDateStyleTransformer(
-  baseTransformer: OptionsTransformer,
-  styleFields: Record<string, Intl.DateTimeFormatOptions>,
-  styleConflictNames: OptionNames,
-): OptionsTransformer {
-  return (
-    options: Intl.DateTimeFormatOptions,
-    fromDateTimeFormatInstance: boolean,
-  ) => {
-    if (options.timeStyle !== undefined && !fromDateTimeFormatInstance) {
-      throw new TypeError(errorMessages.invalidFormatOptions)
-    }
-
-    const dateStyle = options.dateStyle
-    if (dateStyle !== undefined) {
-      throwIfStyleFieldConflicts(options, styleConflictNames)
-
-      if (fromDateTimeFormatInstance) {
-        // Intl.DateTimeFormat formatting of partial plain dates ignores a
-        // paired timeStyle once dateStyle has selected the date pattern.
-        options = { ...options, timeStyle: undefined }
-      }
-
-      options = {
-        ...options,
-        dateStyle: undefined,
-        ...styleFields[dateStyle],
-      }
-    }
-
-    return baseTransformer(options, fromDateTimeFormatInstance)
-  }
-}
+const transformDateTimeOptions = createOptionsTransformer(
+  dateTimeStandardNames,
+  dateTimeFallbacks,
+  /* rejectingExclusions = */ undefined,
+  /* silentExclusions = */ timeZoneNameStrs,
+  /* suppressTimeZone = */ true,
+)
+const transformDateOptions = createOptionsTransformer(
+  dateStandardNames,
+  dateFallbacks,
+  /* rejectingExclusions = */ timeStandardNames,
+  /* silentExclusions = */ timeZoneNameStrs,
+  /* suppressTimeZone = */ true,
+  /* styleConflictNames = */ dateStyleConflictNames,
+)
+const transformTimeOptions = createOptionsTransformer(
+  timeStandardNames,
+  timeFallbacks,
+  /* rejectingExclusions = */ dateStandardNames,
+  /* silentExclusions = */ timeZoneNameAndEraExclusions,
+  /* suppressTimeZone = */ true,
+  /* styleConflictNames = */ timeStyleConflictNames,
+)
+const transformYearMonthOptions = createOptionsTransformer(
+  yearMonthStandardNames,
+  yearMonthFallbacks,
+  /* rejectingExclusions = */ yearMonthRejectingExclusions,
+  /* silentExclusions = */ timeZoneNameStrs,
+  /* suppressTimeZone = */ true,
+  /* styleConflictNames = */ yearMonthFallbackNames,
+  /* partialDateStyleFields = */ yearMonthStyleFields,
+  /* partialDateStyleConflictNames = */ yearMonthStyleConflictNames,
+)
+const transformMonthDayOptions = createOptionsTransformer(
+  monthDayStandardNames,
+  monthDayFallbacks,
+  /* rejectingExclusions = */ monthDayRejectingExclusions,
+  /* silentExclusions = */ timeZoneNameAndEraExclusions,
+  /* suppressTimeZone = */ true,
+  /* styleConflictNames = */ monthDayFallbackNames,
+  /* partialDateStyleFields = */ monthDayStyleFields,
+  /* partialDateStyleConflictNames = */ monthDayStyleConflictNames,
+)
 
 function hasAnyDefinedPropsByName<P extends {}>(
   props: P,
@@ -316,22 +353,6 @@ function hasAnyDefinedPropsByName<P extends {}>(
   for (let i = 0; i < names.length; i++) {
     const name = names[i]
     if (props[name] !== undefined) {
-      return true
-    }
-  }
-  return false
-}
-
-function hasAnyHardExclusion<P extends {}>(
-  props: P,
-  names: (keyof P)[],
-): boolean {
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i]
-    if (
-      !silentExclusionNames.has(name as OptionNames[number]) &&
-      props[name] !== undefined
-    ) {
       return true
     }
   }
@@ -353,11 +374,26 @@ function throwIfStyleFieldConflicts(
 // Config Utils
 // -----------------------------------------------------------------------------
 
+/*
+TODO: improve way range (2 args) is handled
+
+TODO: consider fn api `createFormat` more
+
+
+
+*/
+
+// !!!
 export type ClassFormatConfig<S> = {
   transformOptions: OptionsTransformer
   slotsToEpochMilli: EpochNanoConverter<S>
-  strictCalendarChecks?: boolean
+
+  // given slots (maybe 2 sets), intended to get timeZone and force into options
   getForcedTimeZoneId?: (...slotsList: S[]) => string
+
+  // given slots (maybe 2 sets), if enabled, checks to make sure final resolvedOptions
+  // not incompatible with slots
+  strictCalendarChecks?: boolean
 }
 
 export type EpochNanoConverter<S> = (
@@ -368,26 +404,28 @@ export type EpochNanoConverter<S> = (
 // stable reference for caching
 const emptyOptions: Intl.DateTimeFormatOptions = {}
 
+// !!!
 export type FormatPrepper<S> = (
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions | undefined,
   ...slotsList: S[]
 ) => [Intl.DateTimeFormat, ...number[]]
 
+// !!!
 export type FormatQuerier = (
   forcedTimeZoneId: string | undefined,
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
-  fromDateTimeFormatInstance: boolean,
+  allowPartialOverlap: boolean,
 ) => Intl.DateTimeFormat
 
 export function createFormatPrepper<S>(
   config: ClassFormatConfig<S>,
   queryFormat: FormatQuerier = createFormatForPrep,
-  // false is the Temporal.prototype.toLocaleString option path. Intl
-  // DateTimeFormat-with-Temporal-input callers pass true at their call sites.
-  fromDateTimeFormatInstance = false,
+  // Allows DateTimeFormat-with-Temporal-input callers to reuse one formatter
+  // across Temporal types with partially overlapping field sets.
+  allowPartialOverlap = false,
 ): FormatPrepper<S> {
   const { transformOptions, getForcedTimeZoneId } = config
 
@@ -397,7 +435,7 @@ export function createFormatPrepper<S>(
       locales,
       options,
       transformOptions,
-      fromDateTimeFormatInstance,
+      allowPartialOverlap,
     )
 
     const resolvedOptions = subformat.resolvedOptions()
@@ -411,9 +449,9 @@ export function createFormatForPrep(
   locales: LocalesArg | undefined,
   options: Intl.DateTimeFormatOptions,
   transformOptions: OptionsTransformer,
-  fromDateTimeFormatInstance: boolean,
+  allowPartialOverlap: boolean,
 ): Intl.DateTimeFormat {
-  options = transformOptions(options, fromDateTimeFormatInstance)
+  options = transformOptions(options, allowPartialOverlap)
 
   if (forcedTimeZoneId) {
     if (options.timeZone !== undefined) {
