@@ -1,4 +1,5 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { bigNanoInMilli } from '../../internal/bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarEpochMilli,
@@ -7,6 +8,7 @@ import { type CalendarSlot } from '../../internal/calendarSlot'
 import {
   epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
+  isoDateToEpochMilli,
 } from '../../internal/epochMath'
 import { timeFieldDefaults, timeFieldNamesAsc } from '../../internal/fieldNames'
 import {
@@ -154,20 +156,47 @@ export function computeIsoWeekInterval(
   return [isoFields0, isoFields1]
 }
 
-// TODO: split this instead of using 'hour' conditional
-export function roundDateTimeToInterval<
+export function roundDateToInterval<
   S extends CalendarDateFields & { calendar: CalendarSlot },
 >(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
   roundingMode: RoundingModeEnum,
 ): CalendarDateTimeFields {
+  return roundEpochNanoToInterval(
+    computeInterval,
+    slots,
+    BigInt(isoDateToEpochMilli(slots)!) * bigNanoInMilli,
+    roundingMode,
+  )
+}
+
+export function roundDateTimeToInterval<
+  S extends CalendarDateTimeFields & { calendar: CalendarSlot },
+>(
+  computeInterval: (slots: S) => IsoDateTimeInterval,
+  slots: S,
+  roundingMode: RoundingModeEnum,
+): CalendarDateTimeFields {
+  return roundEpochNanoToInterval(
+    computeInterval,
+    slots,
+    isoDateTimeToEpochNano(slots)!,
+    roundingMode,
+  )
+}
+
+function roundEpochNanoToInterval<
+  S extends CalendarDateFields & { calendar: CalendarSlot },
+>(
+  computeInterval: (slots: S) => IsoDateTimeInterval,
+  slots: S,
+  epochNano: bigint,
+  roundingMode: RoundingModeEnum,
+): CalendarDateTimeFields {
   const [isoFields0, isoFields1] = computeInterval(slots)
-  const time: TimeFields =
-    'hour' in slots ? (slots as unknown as TimeFields) : timeFieldDefaults
   const epochNano0 = isoDateTimeToEpochNano(isoFields0)!
   const epochNano1 = isoDateTimeToEpochNano(isoFields1)!
-  const epochNano = isoDateTimeToEpochNano(combineDateAndTime(slots, time))!
   const frac = computeEpochNanoFrac(epochNano, epochNano0, epochNano1)
   const grow = roundWithMode(frac, roundingMode)
   return grow ? isoFields1 : isoFields0

@@ -2044,13 +2044,24 @@ describe('startOfHour', () => {
   })
 
   it('preserves repeated-hour offset on a 25-hour day', () => {
-    const zdt = ZonedDateTimeFns.fromString(
+    const firstHour = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-04:00[America/New_York]',
+      getCoreCalendar,
+    )
+    const secondHour = ZonedDateTimeFns.fromString(
       '2024-11-03T01:30:00-05:00[America/New_York]',
       getCoreCalendar,
     )
 
     expectZonedDateTimeEquals(
-      ZonedDateTimeFns.startOfHour(zdt),
+      ZonedDateTimeFns.startOfHour(firstHour),
+      ZonedDateTimeFns.fromString(
+        '2024-11-03T01:00:00-04:00[America/New_York]',
+        getCoreCalendar,
+      ),
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.startOfHour(secondHour),
       ZonedDateTimeFns.fromString(
         '2024-11-03T01:00:00-05:00[America/New_York]',
         getCoreCalendar,
@@ -2315,6 +2326,34 @@ describe('endOfHour', () => {
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
     )
   })
+
+  it('preserves repeated-hour offset on a 25-hour day', () => {
+    const firstHour = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-04:00[America/New_York]',
+      getCoreCalendar,
+    )
+    const firstHourEnd = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:59:59.999999999-04:00[America/New_York]',
+      getCoreCalendar,
+    )
+    const secondHour = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:30:00-05:00[America/New_York]',
+      getCoreCalendar,
+    )
+    const secondHourEnd = ZonedDateTimeFns.fromString(
+      '2024-11-03T01:59:59.999999999-05:00[America/New_York]',
+      getCoreCalendar,
+    )
+
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.endOfHour(firstHour),
+      firstHourEnd,
+    )
+    expectZonedDateTimeEquals(
+      ZonedDateTimeFns.endOfHour(secondHour),
+      secondHourEnd,
+    )
+  })
 })
 
 describe('endOfMinute', () => {
@@ -2328,6 +2367,23 @@ describe('endOfMinute', () => {
       '2024-07-20T12:31:00[America/New_York]',
       getCoreCalendar,
     )
+    expectZonedDateTimeEquals(
+      zdt1,
+      ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),
+    )
+  })
+
+  it('uses the last real instant before a spring-forward gap', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2024-03-10T01:59:30-05:00[America/New_York]',
+      getCoreCalendar,
+    )
+    const zdt1 = ZonedDateTimeFns.endOfMinute(zdt0)
+    const zdt2 = ZonedDateTimeFns.fromString(
+      '2024-03-10T03:00:00-04:00[America/New_York]',
+      getCoreCalendar,
+    )
+
     expectZonedDateTimeEquals(
       zdt1,
       ZonedDateTimeFns.subtractNanoseconds(zdt2, 1),

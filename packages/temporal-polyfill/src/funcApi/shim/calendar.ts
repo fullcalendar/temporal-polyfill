@@ -25,10 +25,6 @@ export const getCalendarShimRecordInternal: (record: unknown) => CalendarSlot =
 class _CalendarShimRecord implements CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
-  constructor(calendarSlot: CalendarSlot) {
-    setCalendarShimRecordInternal(this, calendarSlot)
-  }
-
   toJSON() {
     return getCalendarSlotId(getCalendarShimRecordInternal(this))
   }

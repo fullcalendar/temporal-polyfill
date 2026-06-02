@@ -23,10 +23,6 @@ export const getCalendarNativeRecordId: (record: unknown) => string =
 class _CalendarNativeRecord implements CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
-  constructor(calendarId: string) {
-    setCalendarNativeRecordId(this, calendarId)
-  }
-
   toJSON() {
     return getCalendarNativeRecordId(this)
   }

@@ -39,9 +39,7 @@ import {
   createDateTimeSlots,
   createDurationSlots,
   createEpochNanoSlots,
-  createMonthDaySlots,
   createTimeSlots,
-  createYearMonthSlots,
   createZonedEpochNanoSlots,
 } from './slots'
 import {
@@ -192,7 +190,7 @@ export function parsePlainYearMonth(
 
   if (organized) {
     requireIsoCalendar(organized)
-    return createYearMonthSlots(
+    return createDateSlots(
       checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
       resolveCalendar(organized.calendarId),
     )
@@ -209,7 +207,7 @@ export function parsePlainYearMonth(
     dateSlots,
   )
 
-  return createYearMonthSlots(moveIsoSlots, calendar)
+  return createDateSlots(moveIsoSlots, calendar)
 }
 
 function requireIsoCalendar(organized: { calendarId: string }): void {
@@ -227,7 +225,7 @@ export function parsePlainMonthDay(
   if (organized) {
     requireIsoCalendar(organized)
 
-    return createMonthDaySlots(
+    return createDateSlots(
       checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
       resolveCalendar(organized.calendarId),
     )
@@ -261,7 +259,7 @@ export function parsePlainMonthDay(
     computeCalendarIsoFieldsFromParts(calendar, year, month, day),
   )
 
-  return createMonthDaySlots(isoDate, calendar)
+  return createDateSlots(isoDate, calendar)
 }
 
 export function parsePlainTime(s: string): TimeFields {

@@ -134,17 +134,12 @@ import {
 import { refineRoundToOptions } from './roundUtils'
 import {
   computeDayCeil,
-  computeHourFloor,
   computeIsoWeekCeil,
   computeIsoWeekFloor,
   computeIsoWeekInterval,
-  computeMicroFloor,
-  computeMilliFloor,
-  computeMinuteFloor,
   computeMonthCeil,
   computeMonthFloor,
   computeMonthInterval,
-  computeSecFloor,
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
@@ -671,11 +666,46 @@ export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, Unit.Microsecond)
 export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
-export const startOfHour = alignedZonedTime(computeHourFloor)
-export const startOfMinute = alignedZonedTime(computeMinuteFloor)
-export const startOfSecond = alignedZonedTime(computeSecFloor)
-export const startOfMillisecond = alignedZonedTime(computeMilliFloor)
-export const startOfMicrosecond = alignedZonedTime(computeMicroFloor)
+export const startOfHour = alignedZonedTime((slots) => ({
+  hour: slots.hour,
+  minute: 0,
+  second: 0,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMinute = alignedZonedTime((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: 0,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfSecond = alignedZonedTime((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMillisecond = alignedZonedTime((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMicrosecond = alignedZonedTime((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: slots.microsecond,
+  nanosecond: 0,
+}))
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -684,18 +714,59 @@ export const endOfYear = aligned(computeYearCeil, -1)
 export const endOfMonth = aligned(computeMonthCeil, -1)
 export const endOfWeek = aligned(computeIsoWeekCeil, -1)
 export const endOfDay = aligned(computeDayCeil, -1)
-export const endOfHour = alignedZonedTime(computeHourFloor, nanoInHour - 1)
+export const endOfHour = alignedZonedTime(
+  (slots) => ({
+    hour: slots.hour,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  }),
+  nanoInHour - 1,
+)
 export const endOfMinute = alignedZonedTime(
-  computeMinuteFloor,
+  (slots) => ({
+    hour: slots.hour,
+    minute: slots.minute,
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  }),
   nanoInMinute - 1,
 )
-export const endOfSecond = alignedZonedTime(computeSecFloor, nanoInSec - 1)
+export const endOfSecond = alignedZonedTime(
+  (slots) => ({
+    hour: slots.hour,
+    minute: slots.minute,
+    second: slots.second,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  }),
+  nanoInSec - 1,
+)
 export const endOfMillisecond = alignedZonedTime(
-  computeMilliFloor,
+  (slots) => ({
+    hour: slots.hour,
+    minute: slots.minute,
+    second: slots.second,
+    millisecond: slots.millisecond,
+    microsecond: 0,
+    nanosecond: 0,
+  }),
   nanoInMilli - 1,
 )
 export const endOfMicrosecond = alignedZonedTime(
-  computeMicroFloor,
+  (slots) => ({
+    hour: slots.hour,
+    minute: slots.minute,
+    second: slots.second,
+    millisecond: slots.millisecond,
+    microsecond: slots.microsecond,
+    nanosecond: 0,
+  }),
   nanoInMicro - 1,
 )
 

@@ -34,7 +34,7 @@ import {
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
-import { createYearMonthSlots } from '../../internal/slots'
+import { createDateSlots } from '../../internal/slots'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
@@ -68,7 +68,7 @@ import {
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
-  roundDateTimeToInterval,
+  roundDateToInterval,
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
@@ -336,13 +336,13 @@ export function roundToYear(
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(Unit.Year, options)
-  const roundedIsoDateTime = roundDateTimeToInterval(
+  const roundedIsoDateTime = roundDateToInterval(
     computeYearInterval,
     slots,
     roundingMode,
   )
   return createPlainYearMonthShimRecord(
-    createYearMonthSlots(roundedIsoDateTime, slots.calendar),
+    createDateSlots(roundedIsoDateTime, slots.calendar),
   )
 }
 
@@ -351,7 +351,7 @@ export function startOfYear(
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
   return createPlainYearMonthShimRecord(
-    createYearMonthSlots(computeYearFloor(slots), slots.calendar),
+    createDateSlots(computeYearFloor(slots), slots.calendar),
   )
 }
 
@@ -361,10 +361,7 @@ export function endOfYear(
   record: PlainYearMonthShimRecord,
 ): PlainYearMonthShimRecord {
   const slots = getPlainYearMonthShimRecordSlots(record)
-  const yearCeilSlots = createYearMonthSlots(
-    computeYearCeil(slots),
-    slots.calendar,
-  )
+  const yearCeilSlots = createDateSlots(computeYearCeil(slots), slots.calendar)
   return createPlainYearMonthShimRecord(
     movePlainYearMonth(true, yearCeilSlots, constructDurationSlots(0, 1)),
   )
