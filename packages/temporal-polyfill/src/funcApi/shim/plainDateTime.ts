@@ -74,6 +74,7 @@ import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
   getPlainDateTimeSlots,
+  getPlainTimeSlotsIfPresent,
   setPlainDateTimeSlots,
 } from '../temporalRecords'
 import {
@@ -84,11 +85,11 @@ import {
 } from './calendar'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
+  diffPlainDateTimeMonths,
+  diffPlainDateTimeYears,
   diffPlainDays,
-  diffPlainMonths,
   diffPlainTimeUnits,
   diffPlainWeeks,
-  diffPlainYears,
 } from './diffUtils'
 import {
   DurationShimRecord,
@@ -107,11 +108,8 @@ import {
   reversedMove,
 } from './moveUtils'
 import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
-import {
-  PlainTimeShimRecord,
-  createPlainTimeShimRecord,
-  getPlainTimeShimRecordSlots,
-} from './plainTime'
+import type { PlainTimeShimRecord } from './plainTime'
+import { createPlainTimeShimRecord } from './plainTime'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -119,18 +117,12 @@ import {
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
-  computeDayCeil,
-  computeHourFloor,
   computeIsoWeekCeil,
   computeIsoWeekFloor,
   computeIsoWeekInterval,
-  computeMicroFloor,
-  computeMilliFloor,
-  computeMinuteFloor,
   computeMonthCeil,
   computeMonthFloor,
   computeMonthInterval,
-  computeSecFloor,
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
@@ -322,9 +314,7 @@ export function withPlainTime(
 ): PlainDateTimeShimRecord {
   const slots = getPlainDateTimeShimRecordSlots(record)
   const timeFields =
-    plainTimeRecord instanceof PlainTimeShimRecord
-      ? getPlainTimeShimRecordSlots(plainTimeRecord)
-      : plainTimeRecord
+    getPlainTimeSlotsIfPresent<TimeFields>(plainTimeRecord) || plainTimeRecord
   const resSlots = createPlainDateTimeFromRefinedFields(
     slots,
     timeFields,
@@ -707,11 +697,46 @@ export const startOfYear = aligned(computeYearFloor)
 export const startOfMonth = aligned(computeMonthFloor)
 export const startOfWeek = aligned(computeIsoWeekFloor)
 export const startOfDay = alignedDateTimeStart(computeDayFloor)
-export const startOfHour = alignedTimeStart(computeHourFloor)
-export const startOfMinute = alignedTimeStart(computeMinuteFloor)
-export const startOfSecond = alignedTimeStart(computeSecFloor)
-export const startOfMillisecond = alignedTimeStart(computeMilliFloor)
-export const startOfMicrosecond = alignedTimeStart(computeMicroFloor)
+export const startOfHour = alignedTimeStart((slots) => ({
+  hour: slots.hour,
+  minute: 0,
+  second: 0,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMinute = alignedTimeStart((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: 0,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfSecond = alignedTimeStart((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMillisecond = alignedTimeStart((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: 0,
+  nanosecond: 0,
+}))
+export const startOfMicrosecond = alignedTimeStart((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: slots.microsecond,
+  nanosecond: 0,
+}))
 
 // Non-standard: End-of-Unit
 // -----------------------------------------------------------------------------
@@ -719,21 +744,54 @@ export const startOfMicrosecond = alignedTimeStart(computeMicroFloor)
 export const endOfYear = aligned(computeYearCeil, -1)
 export const endOfMonth = aligned(computeMonthCeil, -1)
 export const endOfWeek = aligned(computeIsoWeekCeil, -1)
-export const endOfDay = aligned(computeDayCeil, -1)
-export const endOfHour = aligned(alignedTime(computeHourFloor), nanoInHour - 1)
-export const endOfMinute = aligned(
-  alignedTime(computeMinuteFloor),
-  nanoInMinute - 1,
-)
-export const endOfSecond = aligned(alignedTime(computeSecFloor), nanoInSec - 1)
-export const endOfMillisecond = aligned(
-  alignedTime(computeMilliFloor),
-  nanoInMilli - 1,
-)
-export const endOfMicrosecond = aligned(
-  alignedTime(computeMicroFloor),
-  nanoInMicro - 1,
-)
+export const endOfDay = alignedTimeEnd(() => ({
+  hour: 23,
+  minute: 59,
+  second: 59,
+  millisecond: 999,
+  microsecond: 999,
+  nanosecond: 999,
+}))
+export const endOfHour = alignedTimeEnd((slots) => ({
+  hour: slots.hour,
+  minute: 59,
+  second: 59,
+  millisecond: 999,
+  microsecond: 999,
+  nanosecond: 999,
+}))
+export const endOfMinute = alignedTimeEnd((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: 59,
+  millisecond: 999,
+  microsecond: 999,
+  nanosecond: 999,
+}))
+export const endOfSecond = alignedTimeEnd((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: 999,
+  microsecond: 999,
+  nanosecond: 999,
+}))
+export const endOfMillisecond = alignedTimeEnd((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: 999,
+  nanosecond: 999,
+}))
+export const endOfMicrosecond = alignedTimeEnd((slots) => ({
+  hour: slots.hour,
+  minute: slots.minute,
+  second: slots.second,
+  millisecond: slots.millisecond,
+  microsecond: slots.microsecond,
+  nanosecond: 999,
+}))
 
 // Non-standard: Diffing
 // -----------------------------------------------------------------------------
@@ -743,7 +801,7 @@ export function diffYears(
   record1: PlainDateTimeShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainYears(
+  return diffPlainDateTimeYears(
     getPlainDateTimeShimRecordSlots(record0),
     getPlainDateTimeShimRecordSlots(record1),
     options,
@@ -755,7 +813,7 @@ export function diffMonths(
   record1: PlainDateTimeShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainMonths(
+  return diffPlainDateTimeMonths(
     getPlainDateTimeShimRecordSlots(record0),
     getPlainDateTimeShimRecordSlots(record1),
     options,
@@ -915,8 +973,19 @@ function alignedTimeStart(
   }
 }
 
-function alignedTime(
+function alignedTimeEnd(
   computeAlignment: (time: TimeFields) => TimeFields,
-): (slots: PlainDateTimeShimSlots) => CalendarDateTimeFields {
-  return (slots) => combineDateAndTime(slots, computeAlignment(slots))
+): (record: PlainDateTimeShimRecord) => PlainDateTimeShimRecord {
+  return (record) => {
+    const slots = getPlainDateTimeShimRecordSlots(record)
+    // Time ceilings at or below the day unit only set fields within an
+    // already-valid PlainDateTime. The ISO date is unchanged, so no epoch math
+    // or bounds check is needed.
+    return createPlainDateTimeShimRecord(
+      createDateTimeSlots(
+        combineDateAndTime(slots, computeAlignment(slots)),
+        slots.calendar,
+      ),
+    )
+  }
 }

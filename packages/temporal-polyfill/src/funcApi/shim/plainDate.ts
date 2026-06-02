@@ -18,13 +18,13 @@ import {
 } from '../../internal/calendarSlot'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
-import {
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
-  plainDateToZonedDateTime,
-} from '../../internal/convert'
+import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
+import {
+  diffEpochMilliDays,
+  isoDateToEpochMilli,
+} from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
@@ -38,9 +38,14 @@ import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { moveByDays, movePlainDate } from '../../internal/move'
-import { IsoDateTimeInterval } from '../../internal/round'
+import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
+import { IsoDateTimeInterval, roundNumberToInc } from '../../internal/round'
 import { createDateSlots } from '../../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import {
+  createPlainDateTimeFromRefinedFields,
+  createPlainMonthDayFromFields,
+  createPlainYearMonthFromFields,
+} from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
@@ -50,7 +55,12 @@ import {
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
-import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
+import {
+  getPlainDateSlots,
+  getPlainTimeSlots,
+  getPlainTimeSlotsIfPresent,
+  setPlainDateSlots,
+} from '../temporalRecords'
 import {
   CalendarShimRecord,
   CalendarShimResolver,
@@ -58,12 +68,7 @@ import {
   refineCalendarShimArg,
 } from './calendar'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
-import {
-  diffPlainDays,
-  diffPlainMonths,
-  diffPlainWeeks,
-  diffPlainYears,
-} from './diffUtils'
+import { diffPlainMonths, diffPlainYears } from './diffUtils'
 import {
   DurationShimRecord,
   createDurationShimRecord,
@@ -88,7 +93,7 @@ import {
   PlainMonthDayShimRecord,
   createPlainMonthDayShimRecord,
 } from './plainMonthDay'
-import { PlainTimeShimRecord, getPlainTimeShimRecordSlots } from './plainTime'
+import type { PlainTimeShimRecord } from './plainTime'
 import {
   PlainYearMonthShimRecord,
   createPlainYearMonthShimRecord,
@@ -109,7 +114,7 @@ import {
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
-  roundDateTimeToInterval,
+  roundDateToInterval,
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 import {
@@ -358,7 +363,7 @@ export function toZonedDateTime(
     typeof options === 'string' ? { timeZone: options } : options
   const resSlots = plainDateToZonedDateTime(
     refineTimeZoneId,
-    getPlainTimeShimRecordSlots,
+    getPlainTimeSlots,
     getPlainDateShimRecordSlots(record),
     optionsObj,
   )
@@ -371,9 +376,7 @@ export function toPlainDateTime(
 ): PlainDateTimeShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const timeFields =
-    plainTimeRecord instanceof PlainTimeShimRecord
-      ? getPlainTimeShimRecordSlots(plainTimeRecord)
-      : plainTimeRecord
+    getPlainTimeSlotsIfPresent<TimeFields>(plainTimeRecord) || plainTimeRecord
   const resSlots = createPlainDateTimeFromRefinedFields(
     slots,
     timeFields,
@@ -386,7 +389,11 @@ export function toPlainYearMonth(
   record: PlainDateShimRecord,
 ): PlainYearMonthShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const resSlots = convertToPlainYearMonth(slots.calendar, record)
+  const calendarDate = computeCalendarDateFields(slots.calendar, slots)
+  const resSlots = createPlainYearMonthFromFields(slots.calendar, {
+    year: calendarDate.year,
+    monthCode: computeCalendarMonthCode(slots.calendar, slots),
+  })
   return createPlainYearMonthShimRecord(resSlots)
 }
 
@@ -394,7 +401,11 @@ export function toPlainMonthDay(
   record: PlainDateShimRecord,
 ): PlainMonthDayShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
-  const resSlots = convertToPlainMonthDay(slots.calendar, record)
+  const calendarDate = computeCalendarDateFields(slots.calendar, slots)
+  const resSlots = createPlainMonthDayFromFields(slots.calendar, {
+    monthCode: computeCalendarMonthCode(slots.calendar, slots),
+    day: calendarDate.day,
+  })
   return createPlainMonthDayShimRecord(resSlots)
 }
 
@@ -626,11 +637,7 @@ export function diffWeeks(
   record1: PlainDateShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainWeeks(
-    getPlainDateShimRecordSlots(record0),
-    getPlainDateShimRecordSlots(record1),
-    options,
-  )
+  return diffPlainDateDayLikeUnit(Unit.Week, 7, record0, record1, options)
 }
 
 export function diffDays(
@@ -638,11 +645,33 @@ export function diffDays(
   record1: PlainDateShimRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDays(
-    getPlainDateShimRecordSlots(record0),
-    getPlainDateShimRecordSlots(record1),
-    options,
-  )
+  return diffPlainDateDayLikeUnit(Unit.Day, 1, record0, record1, options)
+}
+
+function diffPlainDateDayLikeUnit(
+  unit: Unit.Week | Unit.Day,
+  daysInUnit: number,
+  record0: PlainDateShimRecord,
+  record1: PlainDateShimRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const slots0 = getPlainDateShimRecordSlots(record0)
+  const slots1 = getPlainDateShimRecordSlots(record1)
+
+  // PlainDate day/week diffs are ISO day distances. Avoid the shared
+  // date/date-time/zoned marker converter used by the cross-type helper.
+  let res =
+    diffEpochMilliDays(
+      isoDateToEpochMilli(slots0)!,
+      isoDateToEpochMilli(slots1)!,
+    ) / daysInUnit
+
+  if (roundingInc) {
+    res = roundNumberToInc(res, roundingInc, roundingMode!)
+  }
+
+  return res
 }
 
 function roundToInterval(
@@ -655,7 +684,7 @@ function roundToInterval(
 ): PlainDateShimRecord {
   const slots = getPlainDateShimRecordSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)
-  const roundedIsoDateTime = roundDateTimeToInterval(
+  const roundedIsoDateTime = roundDateToInterval(
     computeInterval,
     slots,
     roundingMode,

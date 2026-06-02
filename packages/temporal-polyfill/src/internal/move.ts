@@ -40,7 +40,6 @@ import {
   createDateTimeSlots,
   createEpochNanoSlots,
   createTimeSlots,
-  createYearMonthSlots,
 } from './slots'
 import {
   checkEpochNanoInBounds,
@@ -158,7 +157,7 @@ export function movePlainYearMonth(
     overflow,
   )
 
-  return createYearMonthSlots(
+  return createDateSlots(
     moveToDayOfMonthUnsafe(getDay, movedIsoDateFields),
     calendar,
   )

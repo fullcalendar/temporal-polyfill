@@ -57,27 +57,6 @@ export function createDateSlots(
   }
 }
 
-// TODO: converge with createDateSlots
-export function createYearMonthSlots(
-  isoDate: CalendarDateFields,
-  calendar: CalendarSlot,
-): CalendarDateFields & { calendar: CalendarSlot } {
-  return {
-    calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
-  }
-}
-
-export function createMonthDaySlots(
-  isoDate: CalendarDateFields,
-  calendar: CalendarSlot,
-): CalendarDateFields & { calendar: CalendarSlot } {
-  return {
-    calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
-  }
-}
-
 export function createTimeSlots(time: TimeFields): TimeFields {
   return {
     ...pluckProps(timeFieldNamesAsc, time),

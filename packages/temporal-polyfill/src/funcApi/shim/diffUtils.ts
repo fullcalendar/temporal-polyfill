@@ -1,5 +1,8 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { divideBigNanoToExactNumber } from '../../internal/bigNano'
+import {
+  bigNanoInMilli,
+  divideBigNanoToExactNumber,
+} from '../../internal/bigNano'
 import { type CalendarSlot } from '../../internal/calendarSlot'
 import {
   diffCalendarDates,
@@ -8,9 +11,14 @@ import {
   prepareZonedEpochDiff,
 } from '../../internal/diff'
 import { DurationFields } from '../../internal/durationFields'
-import { isoDateTimeToEpochNano } from '../../internal/epochMath'
-import { timeFieldDefaults } from '../../internal/fieldNames'
-import { CalendarDateFields } from '../../internal/fieldTypes'
+import {
+  isoDateTimeToEpochNano,
+  isoDateToEpochMilli,
+} from '../../internal/epochMath'
+import {
+  CalendarDateFields,
+  CalendarDateTimeFields,
+} from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
@@ -19,24 +27,12 @@ import {
   MovableMarker,
   MoveMarker,
   createMarkerMoveOps,
-  isZonedEpochSlots,
 } from '../../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
-
-// TODO: Split the plain callers so each one passes a type-specific converter
-// instead of branching here between date-only, date-time, and epoch markers.
-function isoMarkerToEpochNano(marker: MovableMarker): bigint {
-  if (!isZonedEpochSlots(marker)) {
-    return isoDateTimeToEpochNano(
-      combineDateAndTime(marker, 'hour' in marker ? marker : timeFieldDefaults),
-    )!
-  }
-  return marker.epochNanoseconds
-}
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
@@ -47,23 +43,31 @@ export const diffZonedTimeUnits = bindArgs(
   getEpochNano as MarkerToEpochNano,
 )
 
-export const diffPlainYears = bindArgs(diffPlainLargeUnits, Unit.Year)
-export const diffPlainMonths = bindArgs(diffPlainLargeUnits, Unit.Month)
+export const diffPlainYears = bindArgs(diffPlainDateLargeUnits, Unit.Year)
+export const diffPlainMonths = bindArgs(diffPlainDateLargeUnits, Unit.Month)
+export const diffPlainDateTimeYears = bindArgs(
+  diffPlainDateTimeLargeUnits,
+  Unit.Year,
+)
+export const diffPlainDateTimeMonths = bindArgs(
+  diffPlainDateTimeLargeUnits,
+  Unit.Month,
+)
 export const diffPlainWeeks = bindArgs(
   diffPlainDayLikeUnit,
-  isoMarkerToEpochNano as MarkerToEpochNano,
+  isoDateTimeToEpochNano as MarkerToEpochNano,
   Unit.Week,
   7,
 )
 export const diffPlainDays = bindArgs(
   diffPlainDayLikeUnit,
-  isoMarkerToEpochNano as MarkerToEpochNano,
+  isoDateTimeToEpochNano as MarkerToEpochNano,
   Unit.Day,
   1,
 )
 export const diffPlainTimeUnits = bindArgs(
   diffTimeUnit,
-  isoMarkerToEpochNano as MarkerToEpochNano,
+  isoDateTimeToEpochNano as MarkerToEpochNano,
 )
 
 // Large Units (years, months)
@@ -91,24 +95,18 @@ function diffZonedLargeUnits(
   )
 }
 
-// TODO: split this instead of using 'hour' conditional
-function diffPlainLargeUnits<
-  S extends CalendarDateFields & { calendar: CalendarSlot },
->(
+function diffPlainDateLargeUnits(
   unit: Unit,
-  record0: S,
-  record1: S,
+  record0: CalendarDateFields & { calendar: CalendarSlot },
+  record1: CalendarDateFields & { calendar: CalendarSlot },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
   return diffDateUnits(
-    isoMarkerToEpochNano as MarkerToEpochNano,
+    isoDateToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(
-      'hour' in record0 ? moveDateTime : moveDate,
-      calendar,
-    ) as MoveMarker,
+    bindArgs(moveDate, calendar) as MoveMarker,
     // TODO: use bindArgs here too?
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
@@ -117,6 +115,32 @@ function diffPlainLargeUnits<
     record1,
     options,
   )
+}
+
+function diffPlainDateTimeLargeUnits(
+  unit: Unit,
+  record0: CalendarDateTimeFields & { calendar: CalendarSlot },
+  record1: CalendarDateTimeFields & { calendar: CalendarSlot },
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
+
+  return diffDateUnits(
+    isoDateTimeToEpochNano as MarkerToEpochNano,
+    identityMarkersToIsoFields as MarkersToIsoFields,
+    bindArgs(moveDateTime, calendar) as MoveMarker,
+    // TODO: use bindArgs here too?
+    (f0: CalendarDateFields, f1: CalendarDateFields) =>
+      diffCalendarDates(calendar, f0, f1, unit),
+    unit,
+    record0,
+    record1,
+    options,
+  )
+}
+
+function isoDateToEpochNano(marker: CalendarDateFields): bigint {
+  return BigInt(isoDateToEpochMilli(marker)!) * bigNanoInMilli
 }
 
 // Date Units (years, months, weeks, days)

@@ -29,12 +29,7 @@ import {
 } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow } from './optionsModel'
-import {
-  createDateSlots,
-  createDateTimeSlots,
-  createMonthDaySlots,
-  createYearMonthSlots,
-} from './slots'
+import { createDateSlots, createDateTimeSlots } from './slots'
 import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
@@ -201,7 +196,7 @@ export function createPlainYearMonthFromFields(
   )
   const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
 
-  return createYearMonthSlots(checkIsoYearMonthInBounds(isoDate), calendar)
+  return createDateSlots(checkIsoYearMonthInBounds(isoDate), calendar)
 }
 
 export function createPlainMonthDayFromFields(
@@ -392,7 +387,7 @@ export function createPlainMonthDayFromFields(
   }
   const { year: finalYear, month: finalMonth } = res
 
-  return createMonthDaySlots(
+  return createDateSlots(
     checkIsoDateInBounds(
       computeCalendarIsoFieldsFromParts(calendar, finalYear, finalMonth, day),
     ),

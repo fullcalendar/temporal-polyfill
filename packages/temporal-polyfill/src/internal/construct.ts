@@ -17,9 +17,7 @@ import {
   createDateTimeSlots,
   createDurationSlots,
   createEpochNanoSlots,
-  createMonthDaySlots,
   createTimeSlots,
-  createYearMonthSlots,
   createZonedEpochNanoSlots,
 } from './slots'
 import {
@@ -178,7 +176,7 @@ export function constructYearMonthSlots<C>(
   const isoMonthInt = toIntegerWithTruncation(isoMonth)
   const calendarImpl = refineCalendarArg(calendar)
   const isoDayInt = toIntegerWithTruncation(referenceIsoDay)
-  return createYearMonthSlots(
+  return createDateSlots(
     checkIsoYearMonthInBounds(
       checkIsoDateFields({
         year: isoYearInt,
@@ -203,7 +201,7 @@ export function constructMonthDaySlots<C>(
   const isoYearInt = toIntegerWithTruncation(
     referenceIsoYear ?? isoEpochFirstLeapYear,
   )
-  return createMonthDaySlots(
+  return createDateSlots(
     checkIsoDateInBounds(
       checkIsoDateFields({
         year: isoYearInt,
