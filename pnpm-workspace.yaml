@@ -3,4 +3,3 @@ packages:
   - ./packages/temporal-spec
   - ./packages/temporal-utils
   - ./packages/export-size
-  - ./examples/*
