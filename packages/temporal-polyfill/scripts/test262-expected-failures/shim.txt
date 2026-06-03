@@ -1,14 +1,14 @@
 ##
 ## In addition to the ignored tests below, see other files:
 ##
-##   - expected-failures-node-*.txt
+##   - shim-node-*.txt
 ##     Node-version-specific host Intl and runtime differences
 ##
-##   - expected-failures-descriptor.txt
+##   - shim-descriptor.txt
 ##     We construct our Temporal classes programmatically, not with ES6 `class`.
 ##     Thus, our property descriptors are not 100% compliant with the spec.
 ##
-##   - expected-failures-builtin-calls.txt
+##   - shim-builtin-calls.txt
 ##     Our polyfill calls methods like Array::push directly on objects,
 ##     which could be vulnerable to prototype pollution.
 ##     We are weighing cost/benefit of always calling static method references.
@@ -92,8 +92,8 @@ intl402/Temporal/ZonedDateTime/prototype/withCalendar/extreme-dates.js
 # We do not patch Intl.DateTimeFormat's constructor to more strictly validate
 # timeZone strings
 #
-# A) Rejecting legacy ICU time zones: see expected-failures-node-gte16.txt
-# B) Rejecting invalid minus sign:    see expected-failures-node-gte22.txt
+# A) Rejecting legacy ICU time zones: see shim-node-gte16.txt
+# B) Rejecting invalid minus sign:    see shim-node-gte22.txt
 
 ##
 ## Issues with environment, already ignored in proposal-temporal/polyfill

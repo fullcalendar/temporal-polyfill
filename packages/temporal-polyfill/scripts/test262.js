@@ -63,43 +63,39 @@ yargs(hideBin(process.argv))
       }
 
       const expectedFailureFiles = isNative
-        ? ['expected-failures-native.txt']
-        : [
-            'expected-failures.txt',
-            'expected-failures-builtin-calls.txt',
-            'expected-failures-descriptor.txt',
-          ]
+        ? ['native.txt']
+        : ['shim.txt', 'shim-builtin-calls.txt', 'shim-descriptor.txt']
 
       if (!isNative) {
         if (!isMinified) {
-          expectedFailureFiles.push('expected-failures-unminified.txt')
+          expectedFailureFiles.push('shim-unminified.txt')
         }
         if (currentNodeMajorVersion <= 16) {
-          expectedFailureFiles.push('expected-failures-node-lte16.txt')
+          expectedFailureFiles.push('shim-node-lte16.txt')
         }
         if (currentNodeMajorVersion <= 18) {
-          expectedFailureFiles.push('expected-failures-node-lte18.txt')
+          expectedFailureFiles.push('shim-node-lte18.txt')
         }
         if (currentNodeMajorVersion <= 20) {
-          expectedFailureFiles.push('expected-failures-node-lte20.txt')
+          expectedFailureFiles.push('shim-node-lte20.txt')
         }
         if (currentNodeMajorVersion <= 22) {
-          expectedFailureFiles.push('expected-failures-node-lte22.txt')
+          expectedFailureFiles.push('shim-node-lte22.txt')
         }
         if (currentNodeMajorVersion >= 16) {
-          expectedFailureFiles.push('expected-failures-node-gte16.txt')
+          expectedFailureFiles.push('shim-node-gte16.txt')
         }
         if (currentNodeMajorVersion >= 18) {
-          expectedFailureFiles.push('expected-failures-node-gte18.txt')
+          expectedFailureFiles.push('shim-node-gte18.txt')
         }
         if (currentNodeMajorVersion >= 18 && currentNodeMajorVersion <= 24) {
-          expectedFailureFiles.push('expected-failures-node-gte18-lte24.txt')
+          expectedFailureFiles.push('shim-node-gte18-lte24.txt')
         }
         if (currentNodeMajorVersion >= 22) {
-          expectedFailureFiles.push('expected-failures-node-gte22.txt')
+          expectedFailureFiles.push('shim-node-gte22.txt')
         }
         if (currentNodeMajorVersion >= 24) {
-          expectedFailureFiles.push('expected-failures-node-gte24.txt')
+          expectedFailureFiles.push('shim-node-gte24.txt')
         }
       }
 
@@ -117,7 +113,7 @@ yargs(hideBin(process.argv))
         test262Dir: joinPaths(monorepoDir, 'test262'),
         polyfillCodeFile: joinPaths(pkgDir, globalPolyfillPath),
         expectedFailureFiles: expectedFailureFiles.map((filename) =>
-          joinPaths(scriptsDir, 'test262-config', filename),
+          joinPaths(scriptsDir, 'test262-expected-failures', filename),
         ),
         testGlobs: options._,
         timeoutMsecs: options.timeout || 86400000,
