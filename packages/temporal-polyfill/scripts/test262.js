@@ -5,7 +5,7 @@ import { join as joinPaths } from 'path'
 import runTest262 from '@js-temporal/temporal-test262-runner'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { execLive } from './lib/utils.js'
+import { rerunUnderRequestedTestNode } from './lib/utils.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
@@ -37,30 +37,16 @@ yargs(hideBin(process.argv))
           description: 'Maximum allowed number of failures before aborting',
         }),
     async (options) => {
+      // Only the test runner needs the requested Node version. Build tools can
+      // stay on the repo's normal Node and delegate here through PNPM.
+      if (await rerunUnderRequestedTestNode(process.argv.slice(1))) {
+        return
+      }
+
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
       const isMinified = !!process.env.TEST262_MINIFIER
-      const requestedNodeVersion = process.env.TEST262_NODE_VERSION
-
-      // If different version of Node requested, spawn a new process
-      if (requestedNodeVersion && requestedNodeVersion !== currentNodeVersion) {
-        return await execLive(
-          ['pnpm', 'exec', 'node', ...process.argv.slice(1)],
-          {
-            cwd: process.cwd(),
-            env: {
-              ...filterEnv(process.env),
-
-              // Forces PNPM to use specific version (see .npmrc)
-              PNPM_NODE_VERSION: requestedNodeVersion,
-
-              // Clear requestedNodeVersion for spawned process
-              TEST262_NODE_VERSION: '',
-            },
-          },
-        )
-      }
 
       const expectedFailureFiles = isNative
         ? ['native.txt']
@@ -127,17 +113,3 @@ yargs(hideBin(process.argv))
   )
   .showHelpOnFail(false)
   .parse()
-
-// Filter away Node-related environment variables because prevents
-// PNPM's use-node-version from being reset
-function filterEnv(oldEnv) {
-  const newEnv = {}
-
-  for (const key in oldEnv) {
-    if (!/node|npm|nvm/i.test(key)) {
-      newEnv[key] = oldEnv[key]
-    }
-  }
-
-  return newEnv
-}

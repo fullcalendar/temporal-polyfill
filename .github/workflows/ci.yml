@@ -17,24 +17,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST262_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
+        TEST_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
         include:
-          - TEST262_NODE_VERSION: 16.20.0
+          - TEST_NODE_VERSION: 16.20.0
             TEST262_CLASS_API: full
             LINTING: 1
-          - TEST262_NODE_VERSION: 18.19.0
+          - TEST_NODE_VERSION: 18.19.0
             TEST262_CLASS_API: full
-          - TEST262_NODE_VERSION: 20.10.0
-            TEST262_CLASS_API: full
-            TEST262_MINIFIER: terser
-          - TEST262_NODE_VERSION: 22.14.0
+          - TEST_NODE_VERSION: 20.10.0
             TEST262_CLASS_API: full
             TEST262_MINIFIER: terser
-          - TEST262_NODE_VERSION: 24.16.0
+          - TEST_NODE_VERSION: 22.14.0
+            TEST262_CLASS_API: full
+            TEST262_MINIFIER: terser
+          - TEST_NODE_VERSION: 24.16.0
             TEST262_CLASS_API: full
             TEST262_MINIFIER: terser
             TEST262_FORCE_SHIM: 1
-          - TEST262_NODE_VERSION: 26.2.0
+          - TEST_NODE_VERSION: 26.2.0
             TEST262_CLASS_API: full
             TEST262_MINIFIER: terser
             TEST262_FORCE_SHIM: 1
@@ -65,7 +65,9 @@ jobs:
         run: pnpm run lint
 
       - name: Vitest
-        run: pnpm run vitest
+        run: >
+          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
+          pnpm run vitest
 
       - name: Build
         run: >
@@ -76,6 +78,6 @@ jobs:
 
       - name: Test 262
         run: >
-          TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
+          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
           pnpm run test262
