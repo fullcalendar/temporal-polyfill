@@ -1,6 +1,11 @@
 
 # ENV-ISSUE
 # Node <=18, native Intl.DateTimeFormat's formatRange/formatRangeToParts methods
-# incorrectly throw error when arguments' epoch-milliseconds are the same
+# incorrectly throw when arguments' epoch-milliseconds are the same, and in
+# some cases when the first argument is later than the second.
 intl402/DateTimeFormat/prototype/formatRange/date-x-greater-than-y-not-throws.js
+intl402/DateTimeFormat/prototype/formatRange/temporal-objects-ignore-timezone.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/chinese-calendar-dates.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/dangi-calendar-dates.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/date-x-greater-than-y-not-throws.js
+intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-ignore-timezone.js
