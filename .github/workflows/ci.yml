@@ -31,7 +31,7 @@ jobs:
             TEST262_MINIFIER: terser
           - TEST262_NODE_VERSION: 22.14.0
             TEST262_CLASS_API: full
-            TEST262_MINIFIER: swc
+            TEST262_MINIFIER: terser
 
     steps:
       - name: Checkout
