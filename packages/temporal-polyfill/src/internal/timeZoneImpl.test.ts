@@ -46,4 +46,16 @@ describe('queryTimeZone', () => {
       timeZone.getTransition(maxEpochNano, -1)
     }).not.toThrow()
   })
+
+  it('samples pre-modern named-zone offsets without asking Intl for BCE fields', () => {
+    const timeZone = queryTimeZone('America/Vancouver')
+
+    // This is the local-mean-time offset expected before North American
+    // standard-time zones. Some host Intl implementations return unreliable
+    // BCE date fields for the actual ancient instant, so the offset sampler
+    // clamps far-past dates to a safer pre-modern sample point.
+    expect(
+      timeZone.getOffsetNanosecondsFor(BigInt(-93_314_917_968) * bigNanoInSec),
+    ).toBe(-29_548_000_000_000)
+  })
 })

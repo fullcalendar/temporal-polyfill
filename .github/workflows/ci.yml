@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST262_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0]
+        TEST262_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
         include:
           - TEST262_NODE_VERSION: 16.20.0
             TEST262_CLASS_API: full
@@ -30,6 +30,14 @@ jobs:
           - TEST262_NODE_VERSION: 22.14.0
             TEST262_CLASS_API: full
             TEST262_MINIFIER: terser
+          - TEST262_NODE_VERSION: 24.16.0
+            TEST262_CLASS_API: full
+            TEST262_MINIFIER: terser
+            TEST262_FORCE_SHIM: 1
+          - TEST262_NODE_VERSION: 26.2.0
+            TEST262_CLASS_API: full
+            TEST262_MINIFIER: terser
+            TEST262_FORCE_SHIM: 1
 
     steps:
       - name: Checkout
@@ -60,6 +68,7 @@ jobs:
         run: >
           TEST262_CLASS_API=${{ matrix.TEST262_CLASS_API }}
           TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
+          TEST262_FORCE_SHIM=${{ matrix.TEST262_FORCE_SHIM }}
           pnpm run build
 
       - name: Test

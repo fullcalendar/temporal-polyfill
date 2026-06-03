@@ -213,9 +213,11 @@ export class Duration implements DurationFields {
     locales: LocalesArg | undefined = undefined,
     options?: any,
   ): string {
+    const slots = getDurationSlots(this)
+
     return (Intl as any).DurationFormat
-      ? new (Intl as any).DurationFormat(locales, options).format(this)
-      : formatDurationIso(getDurationSlots(this), options)
+      ? new (Intl as any).DurationFormat(locales, options).format(slots)
+      : formatDurationIso(slots, options)
   }
 
   toString(

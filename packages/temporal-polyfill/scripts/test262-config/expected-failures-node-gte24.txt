@@ -1,0 +1,32 @@
+
+# ENV-ISSUE
+# Node >=24's newer ICU data differs from the ICU4X-shaped calendar data that
+# these Temporal test262 cases expect. The failures are host Intl calendar field
+# disagreements, not pure Temporal arithmetic bugs in the polyfill.
+intl402/Temporal/PlainDate/from/non-positive-single-era-year.js
+intl402/Temporal/PlainDate/from/roundtrip-from-iso.js
+intl402/Temporal/PlainDate/from/roundtrip-from-property-bag.js
+intl402/Temporal/PlainDate/from/roundtrip-from-string.js
+intl402/Temporal/PlainDate/prototype/with/basic-coptic.js
+intl402/Temporal/PlainDate/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainDate/prototype/year/epoch-year.js
+intl402/Temporal/PlainDateTime/from/non-positive-single-era-year.js
+intl402/Temporal/PlainDateTime/from/roundtrip-from-property-bag.js
+intl402/Temporal/PlainDateTime/from/roundtrip-from-string.js
+intl402/Temporal/PlainDateTime/prototype/with/basic-coptic.js
+intl402/Temporal/PlainDateTime/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainDateTime/prototype/year/epoch-year.js
+intl402/Temporal/PlainYearMonth/from/non-positive-single-era-year.js
+intl402/Temporal/PlainYearMonth/from/roundtrip-from-property-bag.js
+intl402/Temporal/PlainYearMonth/prototype/with/basic-coptic.js
+intl402/Temporal/PlainYearMonth/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainYearMonth/prototype/year/epoch-year.js
+intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
+intl402/Temporal/ZonedDateTime/from/non-positive-single-era-year.js
+intl402/Temporal/ZonedDateTime/from/roundtrip-from-property-bag.js
+intl402/Temporal/ZonedDateTime/from/roundtrip-from-string.js
+intl402/Temporal/ZonedDateTime/prototype/since/argument-at-limits.js
+intl402/Temporal/ZonedDateTime/prototype/until/argument-at-limits.js
+intl402/Temporal/ZonedDateTime/prototype/with/basic-coptic.js
+intl402/Temporal/ZonedDateTime/prototype/year/arithmetic-year.js
+intl402/Temporal/ZonedDateTime/prototype/year/epoch-year.js

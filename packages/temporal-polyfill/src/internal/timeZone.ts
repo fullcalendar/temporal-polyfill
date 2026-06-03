@@ -48,7 +48,12 @@ const queryTimeZoneRecord = memoize(
 // must remain unbounded: distant-future dates still need their actual Intl
 // offset, even when public transition search would give up after this horizon.
 const transitionSearchSec = secInDay * 366 * 3
+
 const maxIntlSampleSec = maxMilli / milliInSec
+// Use a conservative lower sampling bound: around year 1653 CE, which is
+// old enough to precede known standard-time transitions but avoids the BCE date
+// fields where host Intl.DateTimeFormat can become unreliable.
+const minIntlSampleSec = -10_000_000_000
 
 // Fixed
 // -----------------------------------------------------------------------------
@@ -317,7 +322,7 @@ function computePeriod(epochSec: number, periodSec: number): [number, number] {
 }
 
 function clampIntlSampleEpochSec(epochSec: number): number {
-  return constrainToRange(epochSec, -maxIntlSampleSec, maxIntlSampleSec)
+  return constrainToRange(epochSec, minIntlSampleSec, maxIntlSampleSec)
 }
 
 /*

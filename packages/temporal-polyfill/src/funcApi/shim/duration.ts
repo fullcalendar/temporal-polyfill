@@ -248,9 +248,11 @@ export function toLocaleString(
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
+  const slots = getDurationShimRecordSlots(duration)
+
   return (Intl as any).DurationFormat
-    ? new (Intl as any).DurationFormat(locales, options).format(duration)
-    : toString(duration)
+    ? new (Intl as any).DurationFormat(locales, options).format(slots)
+    : formatDurationIso(slots, options)
 }
 
 export function toString(
