@@ -313,7 +313,11 @@ async function buildTest262Config({
       : 'global' + extensions.esmWhenIifePrefix + extensions.esm,
   )
   const test262ForceShimInput = 'virtual:test262-force-shim'
-  const outputFile = joinPaths(pkgDir, 'dist', '.test262.global.js')
+  const outputFile = joinPaths(
+    pkgDir,
+    'dist',
+    test262Minifier ? '.test262.global.min.js' : '.test262.global.js',
+  )
 
   return {
     input: test262ForceShim ? test262ForceShimInput : globalInput,

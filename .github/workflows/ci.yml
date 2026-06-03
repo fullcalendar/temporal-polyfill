@@ -74,4 +74,5 @@ jobs:
       - name: Test
         run: >
           TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
+          TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
           pnpm run test262

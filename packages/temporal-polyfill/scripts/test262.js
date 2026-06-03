@@ -40,7 +40,7 @@ yargs(hideBin(process.argv))
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
-      const isMinified = currentNodeMajorVersion >= 20 // HACK
+      const isMinified = !!process.env.TEST262_MINIFIER
       const requestedNodeVersion = process.env.TEST262_NODE_VERSION
 
       // If different version of Node requested, spawn a new process
@@ -105,7 +105,9 @@ yargs(hideBin(process.argv))
 
       const globalPolyfillPath = isNative
         ? './dist/global.js'
-        : './dist/.test262.global.js'
+        : isMinified
+          ? './dist/.test262.global.min.js'
+          : './dist/.test262.global.js'
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,
