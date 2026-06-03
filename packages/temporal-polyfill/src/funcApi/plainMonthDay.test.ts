@@ -8,6 +8,7 @@ import * as PlainMonthDayFns from './plainMonthDay'
 import {
   expectPlainDateEquals,
   expectPlainMonthDayEquals,
+  itSkipNative,
   testHotCache,
 } from './testUtils'
 
@@ -77,16 +78,22 @@ describe('fromFields', () => {
     })
   })
 
-  it('requires a year before reconciling non-iso month fields', () => {
-    expect(() =>
-      PlainMonthDayFns.fromFields({
-        calendar: islamicCivilCalendar,
-        monthCode: 'M04',
-        month: 5,
-        day: 1,
-      }),
-    ).toThrow(TypeError)
-  })
+  // Node 26 native PlainMonthDay.from accepts conflicting non-ISO month fields
+  // without a reference year. The shim requires the year before reconciliation,
+  // so keep that validation contract covered by the forced-shim project.
+  itSkipNative(
+    'requires a year before reconciling non-iso month fields',
+    () => {
+      expect(() =>
+        PlainMonthDayFns.fromFields({
+          calendar: islamicCivilCalendar,
+          monthCode: 'M04',
+          month: 5,
+          day: 1,
+        }),
+      ).toThrow(TypeError)
+    },
+  )
 })
 
 describe('calendar field getters', () => {

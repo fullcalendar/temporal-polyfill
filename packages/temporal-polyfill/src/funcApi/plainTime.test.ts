@@ -7,6 +7,29 @@ import {
   testHotCache,
 } from './testUtils'
 
+const timeFormatOptions = {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  timeZone: 'UTC',
+} satisfies Intl.DateTimeFormatOptions
+
+const timeRangeFormatOptions = {
+  timeStyle: 'medium',
+  timeZone: 'UTC',
+} satisfies Intl.DateTimeFormatOptions
+
+function createExpectedDate(hour: number, minute: number) {
+  // PlainTime formatting converts wall-clock fields to a neutral UTC epoch.
+  return new Date(Date.UTC(1970, 0, 1, hour, minute))
+}
+
+function createExpectedFormat(
+  options: Intl.DateTimeFormatOptions = timeFormatOptions,
+) {
+  return new Intl.DateTimeFormat('en', options)
+}
+
 describe('create', () => {
   it('works', () => {
     const pt = PlainTimeFns.create(12, 30)
@@ -495,73 +518,62 @@ describe('toLocaleString', () => {
 describe('createFormat', () => {
   it('formats records', () => {
     const pt = PlainTimeFns.create(12, 30)
-    const format = PlainTimeFns.createFormat('en', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
+    const format = PlainTimeFns.createFormat('en', timeFormatOptions)
+    const expectedFormat = createExpectedFormat()
+    const expectedDate = createExpectedDate(12, 30)
 
     expect(format).toBeInstanceOf(Intl.DateTimeFormat)
-    expect(format.format(pt)).toBe('12:30:00 PM')
+    expect(format.format(pt)).toBe(expectedFormat.format(expectedDate))
   })
 
   it('snapshots options at construction', () => {
     const pt = PlainTimeFns.create(12, 30)
     const options: Intl.DateTimeFormatOptions = { hour: '2-digit' }
     const format = PlainTimeFns.createFormat('en', options)
+    const expectedFormat = createExpectedFormat({
+      hour: '2-digit',
+      timeZone: 'UTC',
+    })
+    const expectedDate = createExpectedDate(12, 30)
 
     options.hour = 'numeric'
-    expect(format.format(pt)).toBe('12 PM')
+    expect(format.format(pt)).toBe(expectedFormat.format(expectedDate))
   })
 
   it('formats parts', () => {
     const pt = PlainTimeFns.create(12, 30)
-    const format = PlainTimeFns.createFormat('en', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
+    const format = PlainTimeFns.createFormat('en', timeFormatOptions)
+    const expectedFormat = createExpectedFormat()
+    const expectedDate = createExpectedDate(12, 30)
 
-    expect(format.formatToParts(pt)).toEqual([
-      { type: 'hour', value: '12' },
-      { type: 'literal', value: ':' },
-      { type: 'minute', value: '30' },
-      { type: 'literal', value: ':' },
-      { type: 'second', value: '00' },
-      { type: 'literal', value: ' ' },
-      { type: 'dayPeriod', value: 'PM' },
-    ])
+    expect(format.formatToParts(pt)).toEqual(
+      expectedFormat.formatToParts(expectedDate),
+    )
   })
 
   it('formats ranges', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
     const format = PlainTimeFns.createFormat('en', { timeStyle: 'long' })
+    const expectedFormat = createExpectedFormat(timeRangeFormatOptions)
+    const expectedDate0 = createExpectedDate(12, 30)
+    const expectedDate1 = createExpectedDate(14, 45)
 
-    expect(format.formatRange(pt0, pt1)).toBe('12:30:00 PM – 2:45:00 PM')
+    expect(format.formatRange(pt0, pt1)).toBe(
+      expectedFormat.formatRange(expectedDate0, expectedDate1),
+    )
   })
 
   it('formats range parts', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(14, 45)
     const format = PlainTimeFns.createFormat('en', { timeStyle: 'long' })
+    const expectedFormat = createExpectedFormat(timeRangeFormatOptions)
+    const expectedDate0 = createExpectedDate(12, 30)
+    const expectedDate1 = createExpectedDate(14, 45)
 
-    expect(format.formatRangeToParts(pt0, pt1)).toEqual([
-      { source: 'startRange', type: 'hour', value: '12' },
-      { source: 'startRange', type: 'literal', value: ':' },
-      { source: 'startRange', type: 'minute', value: '30' },
-      { source: 'startRange', type: 'literal', value: ':' },
-      { source: 'startRange', type: 'second', value: '00' },
-      { source: 'startRange', type: 'literal', value: ' ' },
-      { source: 'startRange', type: 'dayPeriod', value: 'PM' },
-      { source: 'shared', type: 'literal', value: ' – ' },
-      { source: 'endRange', type: 'hour', value: '2' },
-      { source: 'endRange', type: 'literal', value: ':' },
-      { source: 'endRange', type: 'minute', value: '45' },
-      { source: 'endRange', type: 'literal', value: ':' },
-      { source: 'endRange', type: 'second', value: '00' },
-      { source: 'endRange', type: 'literal', value: ' ' },
-      { source: 'endRange', type: 'dayPeriod', value: 'PM' },
-    ])
+    expect(format.formatRangeToParts(pt0, pt1)).toEqual(
+      expectedFormat.formatRangeToParts(expectedDate0, expectedDate1),
+    )
   })
 })

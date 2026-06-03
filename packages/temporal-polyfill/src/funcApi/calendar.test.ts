@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getGregoryCalendar, getIntlCalendar, getIsoCalendar } from './calendar'
 import * as PlainDateFns from './plainDate'
+import { itSkipNative } from './testUtils'
 
 describe('function calendar records', () => {
   it('returns stable calendar handles', () => {
@@ -25,7 +26,10 @@ describe('function calendar records', () => {
     expect(date.year).toBe(2567)
   })
 
-  it('rejects fallback-only Intl calendar IDs', () => {
+  // Node 26 native Temporal accepts broad Intl fallback calendar IDs like
+  // `islamic`. The shim rejects them because they are not concrete Temporal
+  // calendar IDs, so keep this assertion covered by the forced-shim project.
+  itSkipNative('rejects fallback-only Intl calendar IDs', () => {
     expect(() => getIntlCalendar('islamic')).toThrow(RangeError)
   })
 })

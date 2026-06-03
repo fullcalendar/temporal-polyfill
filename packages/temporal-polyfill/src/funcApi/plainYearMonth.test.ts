@@ -6,6 +6,7 @@ import {
   expectDurationEquals,
   expectPlainDateEquals,
   expectPlainYearMonthEquals,
+  itSkipNative,
   testHotCache,
 } from './testUtils'
 
@@ -166,7 +167,10 @@ describe('add', () => {
     })
   })
 
-  it('ignores overflow for ISO month arithmetic', () => {
+  // Node 26 native PlainYearMonth#add rejects the reference-day overflow for
+  // ISO month arithmetic. The func API treats that reference day as irrelevant
+  // once arithmetic resolves to a valid YearMonth, which forced-shim covers.
+  itSkipNative('ignores overflow for ISO month arithmetic', () => {
     const pym = PlainYearMonthFns.create(2023, 3)
 
     expectPlainYearMonthEquals(
@@ -189,24 +193,30 @@ describe('add', () => {
     )
   })
 
-  it('supports moving backward from the last representable month', () => {
-    const last = PlainYearMonthFns.create(275760, 9)
+  // Node 26 native PlainYearMonth#add reports the last representable month as
+  // out of ISO date-time bounds even when the duration moves backward from it.
+  // Forced-shim keeps coverage for that valid backward arithmetic path.
+  itSkipNative(
+    'supports moving backward from the last representable month',
+    () => {
+      const last = PlainYearMonthFns.create(275760, 9)
 
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.add(last, DurationFns.create(-1)),
-      {
-        year: 275759,
-        month: 9,
-      },
-    )
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.add(last, DurationFns.create(0, -1)),
-      {
-        year: 275760,
-        month: 8,
-      },
-    )
-  })
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.add(last, DurationFns.create(-1)),
+        {
+          year: 275759,
+          month: 9,
+        },
+      )
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.add(last, DurationFns.create(0, -1)),
+        {
+          year: 275760,
+          month: 8,
+        },
+      )
+    },
+  )
 })
 
 describe('addYears', () => {
@@ -289,7 +299,10 @@ describe('subtract', () => {
     })
   })
 
-  it('ignores overflow for ISO month arithmetic', () => {
+  // Node 26 native PlainYearMonth#subtract rejects the reference-day overflow
+  // for ISO month arithmetic. The func API treats that reference day as
+  // irrelevant once arithmetic resolves to a valid YearMonth.
+  itSkipNative('ignores overflow for ISO month arithmetic', () => {
     const pym = PlainYearMonthFns.create(2023, 3)
 
     expectPlainYearMonthEquals(
@@ -312,24 +325,30 @@ describe('subtract', () => {
     )
   })
 
-  it('supports moving backward from the last representable month', () => {
-    const last = PlainYearMonthFns.create(275760, 9)
+  // Node 26 native PlainYearMonth#subtract reports the last representable month
+  // as out of ISO date-time bounds even when the duration moves backward from
+  // it. Forced-shim keeps coverage for that valid backward arithmetic path.
+  itSkipNative(
+    'supports moving backward from the last representable month',
+    () => {
+      const last = PlainYearMonthFns.create(275760, 9)
 
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.subtract(last, DurationFns.create(1)),
-      {
-        year: 275759,
-        month: 9,
-      },
-    )
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.subtract(last, DurationFns.create(0, 1)),
-      {
-        year: 275760,
-        month: 8,
-      },
-    )
-  })
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.subtract(last, DurationFns.create(1)),
+        {
+          year: 275759,
+          month: 9,
+        },
+      )
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.subtract(last, DurationFns.create(0, 1)),
+        {
+          year: 275760,
+          month: 8,
+        },
+      )
+    },
+  )
 })
 
 describe('subtractYears', () => {
@@ -355,16 +374,22 @@ describe('subtractYears', () => {
     )
   })
 
-  it('ignores reject overflow option for ISO month arithmetic', () => {
-    const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.subtractYears(pym, 1, { overflow: 'reject' }),
-      {
-        year: 2023,
-        month: 2,
-      },
-    )
-  })
+  // Node 26 native PlainYearMonth#subtract rejects the stored reference-day
+  // overflow when subtracting a year with overflow: reject. The func API ignores
+  // that irrelevant day because the resulting YearMonth itself is valid.
+  itSkipNative(
+    'ignores reject overflow option for ISO month arithmetic',
+    () => {
+      const pym = PlainYearMonthFns.create(2024, 2, undefined, 29)
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.subtractYears(pym, 1, { overflow: 'reject' }),
+        {
+          year: 2023,
+          month: 2,
+        },
+      )
+    },
+  )
 })
 
 describe('subtractMonths', () => {
@@ -390,16 +415,22 @@ describe('subtractMonths', () => {
     )
   })
 
-  it('ignores reject overflow option for ISO month arithmetic', () => {
-    const pym = PlainYearMonthFns.create(2024, 3, undefined, 31)
-    expectPlainYearMonthEquals(
-      PlainYearMonthFns.subtractMonths(pym, 1, { overflow: 'reject' }),
-      {
-        year: 2024,
-        month: 2,
-      },
-    )
-  })
+  // Node 26 native PlainYearMonth#subtract rejects the stored reference-day
+  // overflow when subtracting a month with overflow: reject. The func API
+  // ignores that irrelevant day because the resulting YearMonth itself is valid.
+  itSkipNative(
+    'ignores reject overflow option for ISO month arithmetic',
+    () => {
+      const pym = PlainYearMonthFns.create(2024, 3, undefined, 31)
+      expectPlainYearMonthEquals(
+        PlainYearMonthFns.subtractMonths(pym, 1, { overflow: 'reject' }),
+        {
+          year: 2024,
+          month: 2,
+        },
+      )
+    },
+  )
 })
 
 describe('diff', () => {
