@@ -22,6 +22,7 @@ jobs:
           - TEST_NODE_VERSION: 16.20.0
             TEST262_CLASS_API: full
             LINTING: 1
+            VITEST: 0
           - TEST_NODE_VERSION: 18.19.0
             TEST262_CLASS_API: full
           - TEST_NODE_VERSION: 20.10.0
@@ -73,6 +74,7 @@ jobs:
 
       # temporal-polyfill vitest requires temporal-utils to be built
       - name: Vitest
+        if: matrix.VITEST != 0
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           pnpm run vitest

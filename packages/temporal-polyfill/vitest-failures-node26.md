@@ -1,0 +1,7 @@
+- [ ] Decide whether `funcApi-native` should reject fallback-only Intl calendar IDs (`islamic`) like the shim does, or loosen those tests for native behavior.
+- [ ] Investigate native `Duration.toString` dropping subsecond units (`P2DT12H` vs `P2DT12H0.5S`).
+- [ ] Fix or skip native `withDayOfYear` / `withDayOfWeek` non-ISO calendar paths that currently hit `Temporal error: Not yet implemented`.
+- [ ] Review native `PlainYearMonth.add/subtract` ISO month arithmetic differences around overflow and max representable month bounds.
+- [ ] Decide what to do with `funcApi/native` `ZonedDateTime.createFormat`; raw `Intl.DateTimeFormat#format` rejects native `Temporal.ZonedDateTime`.
+- [ ] Review native `ZonedDateTime.roundToYear` and `endOfDay` epoch differences against shim expectations.
+- [ ] Make remaining `PlainTime` and `PlainDateTime` createFormat tests compare against raw Intl output instead of hard-coded spacing literals.

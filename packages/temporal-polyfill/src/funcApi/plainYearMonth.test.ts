@@ -10,6 +10,21 @@ import {
 } from './testUtils'
 
 const gregoryCalendar = getGregoryCalendar()
+const localeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  calendar: 'iso8601',
+} satisfies Intl.DateTimeFormatOptions
+
+function createExpectedFormat(locales?: Intl.LocalesArgument) {
+  return new Intl.DateTimeFormat(locales, localeFormatOptions)
+}
+
+function createExpectedDate(year: number, month: number) {
+  // PlainYearMonth formatting delegates pattern choice to host Intl. Use a
+  // local Date so the repo-level TZ setting cannot roll UTC midnight backward.
+  return new Date(year, month - 1, 1)
+}
 
 function expectRoundToYearEquals(
   isoYear: number,
@@ -604,29 +619,25 @@ describe('toLocaleString', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.create(2023, 12)
     const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601', // required unfortunately
-    }
+    const options = localeFormatOptions
     const s = testHotCache(() =>
       PlainYearMonthFns.toLocaleString(pym, locale, options),
     )
-    expect(s).toBe('2023 December')
+    expect(s).toBe(
+      createExpectedFormat(locale).format(createExpectedDate(2023, 12)),
+    )
   })
 })
 
 describe('createFormat', () => {
   it('formats records', () => {
     const pym = PlainYearMonthFns.create(2023, 12)
-    const format = PlainYearMonthFns.createFormat('en', {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601',
-    })
+    const format = PlainYearMonthFns.createFormat('en', localeFormatOptions)
 
     expect(format).toBeInstanceOf(Intl.DateTimeFormat)
-    expect(format.format(pym)).toBe('2023 December')
+    expect(format.format(pym)).toBe(
+      createExpectedFormat('en').format(createExpectedDate(2023, 12)),
+    )
   })
 
   it('snapshots options at construction', () => {
@@ -643,46 +654,36 @@ describe('createFormat', () => {
 
   it('formats parts', () => {
     const pym = PlainYearMonthFns.create(2023, 12)
-    const format = PlainYearMonthFns.createFormat('en', {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601',
-    })
+    const format = PlainYearMonthFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatToParts(pym)).toEqual([
-      { type: 'year', value: '2023' },
-      { type: 'literal', value: ' ' },
-      { type: 'month', value: 'December' },
-    ])
+    expect(format.formatToParts(pym)).toEqual(
+      createExpectedFormat('en').formatToParts(createExpectedDate(2023, 12)),
+    )
   })
 
   it('formats ranges', () => {
     const pym0 = PlainYearMonthFns.create(2023, 10)
     const pym1 = PlainYearMonthFns.create(2023, 12)
-    const format = PlainYearMonthFns.createFormat('en', {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601',
-    })
+    const format = PlainYearMonthFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatRange(pym0, pym1)).toBe('2023 October–December')
+    expect(format.formatRange(pym0, pym1)).toBe(
+      createExpectedFormat('en').formatRange(
+        createExpectedDate(2023, 10),
+        createExpectedDate(2023, 12),
+      ),
+    )
   })
 
   it('formats range parts', () => {
     const pym0 = PlainYearMonthFns.create(2023, 10)
     const pym1 = PlainYearMonthFns.create(2023, 12)
-    const format = PlainYearMonthFns.createFormat('en', {
-      year: 'numeric',
-      month: 'long',
-      calendar: 'iso8601',
-    })
+    const format = PlainYearMonthFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatRangeToParts(pym0, pym1)).toEqual([
-      { source: 'shared', type: 'year', value: '2023' },
-      { source: 'shared', type: 'literal', value: ' ' },
-      { source: 'startRange', type: 'month', value: 'October' },
-      { source: 'shared', type: 'literal', value: '–' },
-      { source: 'endRange', type: 'month', value: 'December' },
-    ])
+    expect(format.formatRangeToParts(pym0, pym1)).toEqual(
+      createExpectedFormat('en').formatRangeToParts(
+        createExpectedDate(2023, 10),
+        createExpectedDate(2023, 12),
+      ),
+    )
   })
 })

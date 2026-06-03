@@ -13,6 +13,21 @@ import {
 
 const gregoryCalendar = getGregoryCalendar()
 const islamicCivilCalendar = getIntlCalendar('islamic-civil')
+const localeFormatOptions = {
+  month: 'long',
+  day: 'numeric',
+  calendar: 'iso8601',
+} satisfies Intl.DateTimeFormatOptions
+
+function createExpectedFormat(locales?: Intl.LocalesArgument) {
+  return new Intl.DateTimeFormat(locales, localeFormatOptions)
+}
+
+function createExpectedDate(month: number, day: number) {
+  // PlainMonthDay defaults to ISO leap year 1972. Compare to raw Intl output
+  // for that synthetic date so host-specific month/day patterns can vary.
+  return new Date(1972, month - 1, day)
+}
 
 describe('create', () => {
   it('works with a referenceYear', () => {
@@ -144,29 +159,25 @@ describe('toLocaleString', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     const locale = 'en'
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601', // required unfortunately
-    }
+    const options = localeFormatOptions
     const s = testHotCache(() =>
       PlainMonthDayFns.toLocaleString(pmd, locale, options),
     )
-    expect(s).toBe('June 18')
+    expect(s).toBe(
+      createExpectedFormat(locale).format(createExpectedDate(6, 18)),
+    )
   })
 })
 
 describe('createFormat', () => {
   it('formats records', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
-    const format = PlainMonthDayFns.createFormat('en', {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601',
-    })
+    const format = PlainMonthDayFns.createFormat('en', localeFormatOptions)
 
     expect(format).toBeInstanceOf(Intl.DateTimeFormat)
-    expect(format.format(pmd)).toBe('June 18')
+    expect(format.format(pmd)).toBe(
+      createExpectedFormat('en').format(createExpectedDate(6, 18)),
+    )
   })
 
   it('snapshots options at construction', () => {
@@ -178,53 +189,46 @@ describe('createFormat', () => {
     const format = PlainMonthDayFns.createFormat('en', options)
 
     options.month = 'numeric'
-    expect(format.format(pmd)).toBe('June')
+    expect(format.format(pmd)).toBe(
+      new Intl.DateTimeFormat('en', {
+        month: 'long',
+        calendar: 'iso8601',
+      }).format(createExpectedDate(6, 18)),
+    )
   })
 
   it('formats parts', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
-    const format = PlainMonthDayFns.createFormat('en', {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601',
-    })
+    const format = PlainMonthDayFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatToParts(pmd)).toEqual([
-      { type: 'month', value: 'June' },
-      { type: 'literal', value: ' ' },
-      { type: 'day', value: '18' },
-    ])
+    expect(format.formatToParts(pmd)).toEqual(
+      createExpectedFormat('en').formatToParts(createExpectedDate(6, 18)),
+    )
   })
 
   it('formats ranges', () => {
     const pmd0 = PlainMonthDayFns.create(6, 18)
     const pmd1 = PlainMonthDayFns.create(10, 3)
-    const format = PlainMonthDayFns.createFormat('en', {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601',
-    })
+    const format = PlainMonthDayFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatRange(pmd0, pmd1)).toBe('June 18 – October 3')
+    expect(format.formatRange(pmd0, pmd1)).toBe(
+      createExpectedFormat('en').formatRange(
+        createExpectedDate(6, 18),
+        createExpectedDate(10, 3),
+      ),
+    )
   })
 
   it('formats range parts', () => {
     const pmd0 = PlainMonthDayFns.create(6, 18)
     const pmd1 = PlainMonthDayFns.create(10, 3)
-    const format = PlainMonthDayFns.createFormat('en', {
-      month: 'long',
-      day: 'numeric',
-      calendar: 'iso8601',
-    })
+    const format = PlainMonthDayFns.createFormat('en', localeFormatOptions)
 
-    expect(format.formatRangeToParts(pmd0, pmd1)).toEqual([
-      { source: 'startRange', type: 'month', value: 'June' },
-      { source: 'startRange', type: 'literal', value: ' ' },
-      { source: 'startRange', type: 'day', value: '18' },
-      { source: 'shared', type: 'literal', value: ' – ' },
-      { source: 'endRange', type: 'month', value: 'October' },
-      { source: 'endRange', type: 'literal', value: ' ' },
-      { source: 'endRange', type: 'day', value: '3' },
-    ])
+    expect(format.formatRangeToParts(pmd0, pmd1)).toEqual(
+      createExpectedFormat('en').formatRangeToParts(
+        createExpectedDate(6, 18),
+        createExpectedDate(10, 3),
+      ),
+    )
   })
 })
