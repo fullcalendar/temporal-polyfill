@@ -64,17 +64,18 @@ jobs:
         if: matrix.LINTING
         run: pnpm run lint
 
-      - name: Vitest
-        run: >
-          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
-          pnpm run vitest
-
       - name: Build
         run: >
           TEST262_CLASS_API=${{ matrix.TEST262_CLASS_API }}
           TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
           TEST262_FORCE_SHIM=${{ matrix.TEST262_FORCE_SHIM }}
           pnpm run build
+
+      # temporal-polyfill vitest requires temporal-utils to be built
+      - name: Vitest
+        run: >
+          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
+          pnpm run vitest
 
       - name: Test 262
         run: >
