@@ -1,0 +1,10 @@
+
+# ENV-ISSUE
+# Node 18 through 24 format the plain Temporal date-times with an ordinary space
+# before the en-US day period, while the test expects the same narrow no-break
+# space that native Intl.DateTimeFormat("en-US", { timeStyle: "short" }) uses.
+# The wall-clock fields are otherwise correct; e.g. PlainDateTime
+# 2021-08-04T00:30:45 formats as "8/4/2021, 12:30:45 AM" instead of the
+# expected string with U+202F before AM. Node 26 now returns the expected
+# separator.
+intl402/DateTimeFormat/prototype/format/temporal-objects-resolved-time-zone.js

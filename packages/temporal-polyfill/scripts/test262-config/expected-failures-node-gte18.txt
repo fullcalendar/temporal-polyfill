@@ -4,5 +4,4 @@
 ## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
 ##
 
-intl402/DateTimeFormat/prototype/format/temporal-objects-resolved-time-zone.js
 intl402/DateTimeFormat/prototype/format/timedatestyle-en.js

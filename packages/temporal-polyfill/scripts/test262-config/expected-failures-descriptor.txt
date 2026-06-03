@@ -5,9 +5,6 @@ intl402/DateTimeFormat/prototype/formatRange/length.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/length.js
 intl402/DateTimeFormat/prototype/formatToParts/length.js
 
-# not-a-constructor
-built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
-
 # builtin
 intl402/DateTimeFormat/prototype/builtin.js
 intl402/DateTimeFormat/prototype/format/builtin.js

@@ -1,0 +1,10 @@
+
+# WONTFIX for real
+# Node <=24's native Intl.DateTimeFormat resolvedOptions() does not fully match
+# ECMA-402 expectations for Unicode extension key precedence. These tests check
+# whether calendar/numbering-system Unicode extensions and explicit options are
+# reflected in resolvedOptions() with the expected canonical values. The
+# polyfill delegates these option-resolution details to host Intl rather than
+# reimplementing DateTimeFormat, and Node 26 now matches the expected behavior.
+intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
+intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js

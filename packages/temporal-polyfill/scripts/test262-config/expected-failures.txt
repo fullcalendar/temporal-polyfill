@@ -101,10 +101,6 @@ intl402/Temporal/ZonedDateTime/prototype/withCalendar/extreme-dates.js
 ##
 
 # ENV-ISSUE
-# Fails until Intl.DurationFormat available in Node.js release
-intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
-
-# ENV-ISSUE
 # Temporal test262 runner does not support $262.createRealm()
 intl402/DateTimeFormat/proto-from-ctor-realm.js
 
@@ -163,14 +159,6 @@ intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 # real Temporal behavior.
 intl402/DateTimeFormat/constructor-options-calendar-islamic-fallback.js
 intl402/DateTimeFormat/prototype/formatToParts/era.js
-intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
-intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
-
-# WONTFIX for real
-# Node/ICU can preserve Antarctica/South_Pole instead of canonicalizing it to
-# Antarctica/McMurdo via Intl.DateTimeFormat resolvedOptions(). We intentionally
-# avoid a one-off IANA-link workaround in isTimeZoneIdsEqual().
-intl402/Temporal/ZonedDateTime/links.js
 
 # WONTFIX for real - TODO: combine with groups above
 # Chinese/lunisolar DateTimeFormat output follows the host ICU data.

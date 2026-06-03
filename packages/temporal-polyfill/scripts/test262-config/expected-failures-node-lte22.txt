@@ -1,0 +1,15 @@
+
+# ENV-ISSUE
+# Node <=22 does not provide Intl.DurationFormat. Duration#toLocaleString still
+# has an ISO-string fallback for useful behavior, but this ECMA-402 test compares
+# its output against new Intl.DurationFormat(...).format(...), which is only
+# available starting in newer Node releases.
+intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
+
+# WONTFIX for real
+# In Node <=22, host Intl.DateTimeFormat resolvedOptions().timeZone can preserve
+# the legacy IANA link Antarctica/South_Pole instead of canonicalizing it to
+# Antarctica/McMurdo. This only affects link-name equality/canonicalization in
+# the host data. We intentionally avoid a one-off IANA-link workaround in
+# isTimeZoneIdsEqual(); Node 24+ now returns the expected canonical shape.
+intl402/Temporal/ZonedDateTime/links.js
