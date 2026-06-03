@@ -22,6 +22,7 @@
     "lint": "pnpm -r run lint",
     "build": "pnpm -r run build",
     "test": "pnpm -r --stream run test",
+    "vitest": "pnpm -r --stream run vitest",
     "test262": "pnpm -r --stream run test262",
     "clean": "pnpm -r run clean"
   },

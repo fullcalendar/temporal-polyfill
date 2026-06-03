@@ -64,6 +64,9 @@ jobs:
         if: matrix.LINTING
         run: pnpm run lint
 
+      - name: Vitest
+        run: pnpm run vitest
+
       - name: Build
         run: >
           TEST262_CLASS_API=${{ matrix.TEST262_CLASS_API }}
@@ -71,7 +74,7 @@ jobs:
           TEST262_FORCE_SHIM=${{ matrix.TEST262_FORCE_SHIM }}
           pnpm run build
 
-      - name: Test
+      - name: Test 262
         run: >
           TEST262_NODE_VERSION=${{ matrix.TEST262_NODE_VERSION }}
           TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
