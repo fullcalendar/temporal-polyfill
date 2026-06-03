@@ -10,7 +10,6 @@ import { execLive } from './lib/utils.js'
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
 const monorepoDir = joinPaths(pkgDir, '../..')
-const globalPolyfillPath = './dist/.test262.global.js'
 
 yargs(hideBin(process.argv))
   .command(
@@ -40,6 +39,8 @@ yargs(hideBin(process.argv))
     async (options) => {
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
+      const isNative = currentNodeMajorVersion >= 26
+      const isMinified = currentNodeMajorVersion >= 20 // HACK
       const requestedNodeVersion = process.env.TEST262_NODE_VERSION
 
       // If different version of Node requested, spawn a new process
@@ -61,45 +62,50 @@ yargs(hideBin(process.argv))
         )
       }
 
-      const expectedFailureFiles = [
-        'expected-failures.txt',
-        'expected-failures-builtin-calls.txt',
-        'expected-failures-descriptor.txt',
-      ]
+      const expectedFailureFiles = isNative
+        ? ['expected-failures-native.txt']
+        : [
+            'expected-failures.txt',
+            'expected-failures-builtin-calls.txt',
+            'expected-failures-descriptor.txt',
+          ]
 
-      if (currentNodeMajorVersion <= 14) {
-        expectedFailureFiles.push('expected-failures-node-lte14.txt')
+      if (!isNative) {
+        if (!isMinified) {
+          expectedFailureFiles.push('expected-failures-unminified.txt')
+        }
+        if (currentNodeMajorVersion <= 16) {
+          expectedFailureFiles.push('expected-failures-node-lte16.txt')
+        }
+        if (currentNodeMajorVersion <= 18) {
+          expectedFailureFiles.push('expected-failures-node-lte18.txt')
+        }
+        if (currentNodeMajorVersion <= 20) {
+          expectedFailureFiles.push('expected-failures-node-lte20.txt')
+        }
+        if (currentNodeMajorVersion <= 22) {
+          expectedFailureFiles.push('expected-failures-node-lte22.txt')
+        }
+        if (currentNodeMajorVersion >= 16) {
+          expectedFailureFiles.push('expected-failures-node-gte16.txt')
+        }
+        if (currentNodeMajorVersion >= 18) {
+          expectedFailureFiles.push('expected-failures-node-gte18.txt')
+        }
+        if (currentNodeMajorVersion >= 18 && currentNodeMajorVersion <= 24) {
+          expectedFailureFiles.push('expected-failures-node-gte18-lte24.txt')
+        }
+        if (currentNodeMajorVersion >= 22) {
+          expectedFailureFiles.push('expected-failures-node-gte22.txt')
+        }
+        if (currentNodeMajorVersion >= 24) {
+          expectedFailureFiles.push('expected-failures-node-gte24.txt')
+        }
       }
-      if (currentNodeMajorVersion <= 16) {
-        expectedFailureFiles.push('expected-failures-node-lte16.txt')
-      }
-      if (currentNodeMajorVersion <= 18) {
-        expectedFailureFiles.push('expected-failures-node-lte18.txt')
-      }
-      if (currentNodeMajorVersion <= 20) {
-        expectedFailureFiles.push('expected-failures-node-lte20.txt')
-      }
-      if (currentNodeMajorVersion <= 22) {
-        expectedFailureFiles.push('expected-failures-node-lte22.txt')
-      }
-      if (currentNodeMajorVersion <= 24) {
-        expectedFailureFiles.push('expected-failures-node-lte24.txt')
-      }
-      if (currentNodeMajorVersion >= 16) {
-        expectedFailureFiles.push('expected-failures-node-gte16.txt')
-      }
-      if (currentNodeMajorVersion >= 18) {
-        expectedFailureFiles.push('expected-failures-node-gte18.txt')
-      }
-      if (currentNodeMajorVersion >= 18 && currentNodeMajorVersion <= 24) {
-        expectedFailureFiles.push('expected-failures-node-gte18-lte24.txt')
-      }
-      if (currentNodeMajorVersion >= 22) {
-        expectedFailureFiles.push('expected-failures-node-gte22.txt')
-      }
-      if (currentNodeMajorVersion >= 24) {
-        expectedFailureFiles.push('expected-failures-node-gte24.txt')
-      }
+
+      const globalPolyfillPath = isNative
+        ? './dist/global.js'
+        : './dist/.test262.global.js'
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,

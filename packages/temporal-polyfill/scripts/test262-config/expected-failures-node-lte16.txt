@@ -1,10 +1,5 @@
 
 # ENV-ISSUE
-# Node <=16 does not explicitly support the islamic-rgsa calendar,
-# and instead falls back to islamic, which is okay
-staging/Intl402/Temporal/old/islamic-calendars.js
-
-# ENV-ISSUE
 # Node <=16, native Intl.DateTimeFormat's timeZoneName does not accept
 # shortOffset/longOffset/shortGeneric/longGeneric. These Temporal integration
 # tests construct native formatters with those styles before they reach the
@@ -44,7 +39,6 @@ intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
 
 # ENV-ISSUE
 # Node <=16, native Intl.supportedValuesOf("calendar") not implemented
-staging/sm/Temporal/Calendar/compare-to-datetimeformat.js
 intl402/Temporal/PlainDate/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js

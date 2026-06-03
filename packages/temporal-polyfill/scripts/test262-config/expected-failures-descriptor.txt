@@ -11,8 +11,3 @@ intl402/DateTimeFormat/prototype/format/builtin.js
 intl402/DateTimeFormat/prototype/formatRange/builtin.js
 intl402/DateTimeFormat/prototype/formatRangeToParts/builtin.js
 intl402/DateTimeFormat/prototype/resolvedOptions/builtin.js
-
-# The shim installs Date.prototype.toTemporalInstant from a normal function
-# declaration, which is observably constructible via isConstructor(). Fixing this
-# would require changing the function shape, not Temporal arithmetic behavior.
-built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js

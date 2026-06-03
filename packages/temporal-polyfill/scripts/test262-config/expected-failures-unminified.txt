@@ -1,0 +1,7 @@
+
+# WONTFIX for real
+# The unminified test262 artifact installs Date.prototype.toTemporalInstant from
+# a normal function declaration, which is observably constructible via
+# isConstructor(). The terser artifact rewrites this as non-constructible method
+# syntax, so this failure depends on artifact shape rather than Node's runtime.
+built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js

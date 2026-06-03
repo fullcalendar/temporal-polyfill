@@ -2,7 +2,7 @@
 ## In addition to the ignored tests below, see other files:
 ##
 ##   - expected-failures-node-*.txt
-##     Shortcomings with native APIs, unrelated to our polyfill
+##     Node-version-specific host Intl and runtime differences
 ##
 ##   - expected-failures-descriptor.txt
 ##     We construct our Temporal classes programmatically, not with ES6 `class`.
@@ -158,6 +158,8 @@ intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 # and out of scope unless a future fix is small, local, and clearly improves
 # real Temporal behavior.
 intl402/DateTimeFormat/constructor-options-calendar-islamic-fallback.js
+intl402/DateTimeFormat/prototype/resolvedOptions/resolved-calendar-unicode-extensions-and-options.js
+intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
 intl402/DateTimeFormat/prototype/formatToParts/era.js
 
 # WONTFIX for real - TODO: combine with groups above
