@@ -1,4 +1,3 @@
-import { eraYearToYear } from '../../internal/calendarFields'
 import {
   type MonthCodeParts,
   monthCodeNumberToMonth,
@@ -17,7 +16,6 @@ import {
   type CalendarEraFields,
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
-import { normalizeEraName } from '../../internal/intlCalendarConfig'
 import {
   RawDateTimeFormat,
   formatEpochMilliToPartsRecord,
@@ -41,7 +39,7 @@ interface IntlDateFields {
   day: number
 }
 
-export interface IntlYearDataForOverride {
+interface IntlYearData {
   monthEpochMillis: number[]
   // Keep the ordered month labels exactly as Intl produced them. Some
   // calendars repeat the same label for common/leap months, so collapsing to a
@@ -49,101 +47,49 @@ export interface IntlYearDataForOverride {
   monthStrings: string[]
 }
 
-interface IntlYearData extends IntlYearDataForOverride {}
-
 type IntlYearDataCache = (year: number) => IntlYearData
 
-export interface IntlCalendarOverrideConfig {
-  eraOrigins?: Record<string, number>
-  eraRemaps?: Record<string, string>
-  defaultEra?: string
+export interface IntlScrapedCalendarConfig {
   leapMonthMeta?: number
   plainMonthDayLeapMonthMaxDays?: Record<number, number>
   plainMonthDayCommonMonthMaxDay?: number
-  computeYearFromEra?(
-    eraYear: number,
-    normalizedEra: string,
-    eraOrigin: number,
-  ): number
-  constrainPlainMonthDay?(
-    monthCodeNumber: number,
-    isLeapMonth: boolean,
-    day: number,
-  ): number | undefined
   getMonthDaySearchStartYear?(
     monthCodeNumber: number,
     isLeapMonth: boolean,
     day: number,
   ): number
-  hasYearDataOverrideCandidate?(year: number): boolean
-  applyYearDataOverrides?(
-    year: number,
-    scrapedYearData: IntlYearDataForOverride,
-  ): IntlYearDataForOverride
-  queryLeapMonthOverride?(year: number): number | undefined
 }
 
-export interface IntlCalendar extends ExoticCalendar {
+export interface IntlScrapedCalendar extends ExoticCalendar {
   id: string
-  overrideConfig: IntlCalendarOverrideConfig
+  config: IntlScrapedCalendarConfig
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
 }
 
 // -----------------------------------------------------------------------------
 
-export function createIntlCalendarWithOverrides(
+export function createIntlScrapedCalendar(
   normCalendarId: string,
-  overrideConfig: IntlCalendarOverrideConfig,
-): IntlCalendar {
+  config: IntlScrapedCalendarConfig,
+): IntlScrapedCalendar {
   const intlFormat = queryCalendarIntlFormat(normCalendarId)
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
     const intlParts = formatEpochMilliToPartsRecord(intlFormat, epochMilli)
-    return parseIntlDateFields(intlParts, overrideConfig)
+    return parseIntlDateFields(intlParts)
   }
 
-  const queryYearData = createIntlYearDataCache(
-    overrideConfig,
-    rawEpochMilliToIntlFields,
-  )
+  const queryYearData = createIntlYearDataCache(rawEpochMilliToIntlFields)
 
-  function epochMilliToIntlFields(epochMilli: number) {
-    return computeIntlFieldsFromCorrectedYearData(
-      overrideConfig,
-      queryYearData,
-      epochMilli,
-      rawEpochMilliToIntlFields(epochMilli),
-    )
-  }
-
-  const calendar: IntlCalendar = {
+  const calendar: IntlScrapedCalendar = {
     id: normCalendarId,
-    overrideConfig,
-    queryFields: createIntlFieldCache(epochMilliToIntlFields, queryYearData),
+    config,
+    queryFields: createIntlFieldCache(rawEpochMilliToIntlFields, queryYearData),
     queryYearData,
-    eraOrigins: overrideConfig.eraOrigins,
-    eraRemaps: overrideConfig.eraRemaps,
-    leapMonthMeta: overrideConfig.leapMonthMeta,
-    plainMonthDayLeapMonthMaxDays: overrideConfig.plainMonthDayLeapMonthMaxDays,
-    plainMonthDayCommonMonthMaxDay:
-      overrideConfig.plainMonthDayCommonMonthMaxDay,
-    computeYearFromEra(eraYear, normalizedEra, eraOrigin) {
-      return (
-        overrideConfig.computeYearFromEra?.(
-          eraYear,
-          normalizedEra,
-          eraOrigin,
-        ) ?? eraYearToYear(eraYear, eraOrigin)
-      )
-    },
-    constrainPlainMonthDay(monthCodeNumber, isLeapMonth, day) {
-      return overrideConfig.constrainPlainMonthDay?.(
-        monthCodeNumber,
-        isLeapMonth,
-        day,
-      )
-    },
+    leapMonthMeta: config.leapMonthMeta,
+    plainMonthDayLeapMonthMaxDays: config.plainMonthDayLeapMonthMaxDays,
+    plainMonthDayCommonMonthMaxDay: config.plainMonthDayCommonMonthMaxDay,
     computeDateFields(isoDate) {
       return calendar.queryFields(isoDate)
     },
@@ -234,7 +180,6 @@ function createIntlFieldCache(
 }
 
 function createIntlYearDataCache(
-  overrideConfig: IntlCalendarOverrideConfig,
   epochMilliToIntlFields: (epochMilli: number) => IntlDateFields,
 ): IntlYearDataCache {
   // Per-normalized-calendar cache, keyed only by numeric calendar year. This is
@@ -302,140 +247,13 @@ function createIntlYearDataCache(
       }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
-    const scrapedYearData = {
+    return {
       monthEpochMillis: millisReversed.reverse(),
       monthStrings: monthStringsReversed.reverse(),
     }
-
-    return correctIntlYearData(overrideConfig, year, scrapedYearData)
   }
 
   return memoize(buildYear)
-}
-
-// Corrected Year-Data Overrides
-// -----------------------------------------------------------------------------
-//
-// Keep the host-Intl scrape as the default data source, but pass the scraped
-// year data through a bounded override table before using it for both
-// calendar->ISO construction and ISO->calendar field access.
-
-function correctIntlYearData(
-  overrideConfig: IntlCalendarOverrideConfig,
-  year: number,
-  scrapedYearData: IntlYearData,
-): IntlYearData {
-  // Keep Intl scraping as the first step for every calendar. Known corrections
-  // are applied afterward so future host data can pass through unchanged when
-  // it already matches the canonical shape.
-  return (
-    overrideConfig.applyYearDataOverrides?.(year, scrapedYearData) ??
-    scrapedYearData
-  )
-}
-
-// Override Detection
-// -----------------------------------------------------------------------------
-//
-// A corrected year start changes both the starting year and the previous year's
-// closing interval, so either side of the candidate interval can make field
-// derivation necessary.
-
-function hasCorrectedIntlYearInterval(
-  overrideConfig: IntlCalendarOverrideConfig,
-  year: number,
-): boolean {
-  return (
-    overrideConfig.hasYearDataOverrideCandidate?.(year) ||
-    overrideConfig.hasYearDataOverrideCandidate?.(year + 1) ||
-    false
-  )
-}
-
-// ISO -> Calendar Fields From Corrected Year Data
-// -----------------------------------------------------------------------------
-
-function computeIntlFieldsFromCorrectedYearData(
-  overrideConfig: IntlCalendarOverrideConfig,
-  queryYearData: IntlYearDataCache,
-  epochMilli: number,
-  rawIntlFields: IntlDateFields,
-): IntlDateFields {
-  // Raw formatToParts output is normally authoritative. For a corrected year
-  // interval, derive Y/M/D from the same month-boundary table used for
-  // construction so ISO->calendar and calendar->ISO stay coherent.
-  const firstCandidateYear = rawIntlFields.year - 1
-
-  // Raw Intl is still a good hint; corrected boundaries only move by one day in
-  // the known data, so the containing corrected year must be the raw year or an
-  // immediate neighbor.
-  for (let yearMove = 0; yearMove < 3; yearMove++) {
-    const year = firstCandidateYear + yearMove
-
-    // Most years have no override table nearby. Skip those before querying
-    // extra year data so the normal raw-Intl path stays cheap.
-    if (!hasCorrectedIntlYearInterval(overrideConfig, year)) {
-      continue
-    }
-
-    const yearData = queryYearData(year)
-    const yearStart = yearData.monthEpochMillis[0]
-    const nextYearStart = queryYearData(year + 1).monthEpochMillis[0]
-
-    // Neighboring candidates can be checked even when they do not contain this
-    // ISO date. Only the corrected interval that actually contains epochMilli
-    // is allowed to replace raw formatToParts fields.
-    if (yearStart <= epochMilli && epochMilli < nextYearStart) {
-      const monthIndex = computeIntlYearDataMonthIndex(yearData, epochMilli)
-      const monthStart = yearData.monthEpochMillis[monthIndex]
-
-      return {
-        ...computeCorrectedIntlYearParts(
-          overrideConfig.defaultEra,
-          year,
-          rawIntlFields,
-        ),
-        month: monthIndex + 1,
-        monthString: yearData.monthStrings[monthIndex],
-        day: diffEpochMilliDays(monthStart, epochMilli) + 1,
-      }
-    }
-  }
-
-  return rawIntlFields
-}
-
-function computeCorrectedIntlYearParts(
-  defaultEra: string | undefined,
-  year: number,
-  rawIntlFields: IntlDateFields,
-): Pick<IntlDateFields, 'era' | 'eraYear' | 'year'> {
-  // Month/day can come entirely from corrected year data, but era labels still
-  // need to follow the normal Intl parsing path and calendar fallback rules.
-  const era = rawIntlFields.era || defaultEra
-
-  return {
-    era,
-    eraYear: era === undefined ? rawIntlFields.eraYear : year,
-    year,
-  }
-}
-
-function computeIntlYearDataMonthIndex(
-  yearData: IntlYearData,
-  epochMilli: number,
-): number {
-  const { monthEpochMillis } = yearData
-
-  // Month tables are tiny. Walk backward because most lookups are ordinary
-  // in-year dates, and the last matching boundary is the containing month.
-  for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
-    if (epochMilli >= monthEpochMillis[i]) {
-      return i
-    }
-  }
-
-  throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
 // DateTimeFormat Utils
@@ -443,52 +261,25 @@ function computeIntlYearDataMonthIndex(
 
 function parseIntlDateFields(
   intlParts: Record<string, string>,
-  overrideConfig: IntlCalendarOverrideConfig,
 ): IntlDateFields {
   return {
-    ...parseIntlYear(intlParts, overrideConfig),
+    ...parseIntlYear(intlParts),
     month: 0,
     monthString: intlParts.month,
     day: parseInt(intlParts.day),
   }
 }
 
-export function parseIntlYear(
-  intlParts: Record<string, string>,
-  overrideConfig: IntlCalendarOverrideConfig,
-): {
+function parseIntlYear(intlParts: Record<string, string>): {
   era: string | undefined
   eraYear: number | undefined
   year: number
 } {
-  const rawYear = parseInt(intlParts.year)
-  let year = parseInt(intlParts.relatedYear || intlParts.year)
-  let era: string | undefined
-  let eraYear: number | undefined
-  const eraOrigins = overrideConfig.eraOrigins
-
-  if (eraOrigins !== undefined) {
-    const eraRemaps = overrideConfig.eraRemaps || {}
-    const rawEra = intlParts.era && normalizeEraName(intlParts.era)
-    const fallbackEra = overrideConfig.defaultEra
-    const normalizedEra = rawEra
-      ? eraRemaps[rawEra] || rawEra
-      : fallbackEra && (eraRemaps[fallbackEra] || fallbackEra)
-
-    if (normalizedEra !== undefined) {
-      const eraOrigin = eraOrigins[normalizedEra]
-
-      if (eraOrigin === undefined) {
-        throw new RangeError(errorMessages.invalidProtocolResults)
-      }
-
-      era = normalizedEra
-      eraYear = rawEra ? rawYear : year
-      year = eraYearToYear(eraYear, eraOrigin)
-    }
+  return {
+    era: undefined,
+    eraYear: undefined,
+    year: parseInt(intlParts.relatedYear || intlParts.year),
   }
-
-  return { era, eraYear, year }
 }
 
 const calendarIntlFormatByNormId = new Map<string, Intl.DateTimeFormat>()
@@ -546,14 +337,14 @@ function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
 // -----------------------------------------------------------------------------
 
 export function computeIntlDateFields(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   isoDate: CalendarDateFields,
 ): CalendarDateFields {
   return intlCalendar.queryFields(isoDate)
 }
 
 export function computeIsoFieldsFromIntlParts(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
   month?: number,
   day?: number,
@@ -564,7 +355,7 @@ export function computeIsoFieldsFromIntlParts(
 }
 
 export function computeIntlEpochMilli(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
   month = 1,
   day = 1,
@@ -576,7 +367,7 @@ export function computeIntlEpochMilli(
 }
 
 export function computeIntlMonthCodeParts(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
 ): MonthCodeParts {
@@ -587,18 +378,12 @@ export function computeIntlMonthCodeParts(
 }
 
 export function computeIntlLeapMonth(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number | undefined {
   const leapMonthMeta = intlCalendar.leapMonthMeta
   if (leapMonthMeta === undefined) {
     return undefined
-  }
-
-  const leapMonthOverride =
-    intlCalendar.overrideConfig.queryLeapMonthOverride?.(year)
-  if (leapMonthOverride !== undefined) {
-    return leapMonthOverride
   }
 
   const currentMonthStrings = queryMonthStrings(intlCalendar, year)
@@ -640,7 +425,7 @@ export function computeIntlLeapMonth(
 }
 
 export function computeIntlInLeapYear(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
 ): boolean {
   if (intlCalendar.leapMonthMeta !== undefined) {
@@ -655,7 +440,7 @@ export function computeIntlInLeapYear(
 }
 
 export function computeIntlDaysInYear(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number {
   const milli = computeIntlEpochMilli(intlCalendar, year)
@@ -664,7 +449,7 @@ export function computeIntlDaysInYear(
 }
 
 export function computeIntlDaysInMonth(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
 ): number {
@@ -684,14 +469,14 @@ export function computeIntlDaysInMonth(
 }
 
 export function computeIntlMonthsInYear(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number {
   return intlCalendar.queryYearData(year).monthEpochMillis.length
 }
 
 export function computeIntlEraFields(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
   const intlFields = intlCalendar.queryFields(isoDate)
@@ -699,13 +484,13 @@ export function computeIntlEraFields(
 }
 
 export function computeIntlYearMonthFieldsForMonthDay(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   day: number,
 ): CalendarYearMonthFields | undefined {
   const startIsoYear =
-    intlCalendar.overrideConfig.getMonthDaySearchStartYear?.(
+    intlCalendar.config.getMonthDaySearchStartYear?.(
       monthCodeNumber,
       isLeapMonth,
       day,
@@ -760,7 +545,7 @@ export function computeIntlYearMonthFieldsForMonthDay(
 }
 
 export function addIntlMonths(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
   monthDelta: number,
@@ -791,7 +576,7 @@ export function addIntlMonths(
 }
 
 export function diffIntlMonthSlots(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   year0: number,
   month0: number,
   year1: number,
@@ -819,7 +604,7 @@ export function diffIntlMonthSlots(
 }
 
 function isConstrainedFinalIntercalaryMonthDiff(
-  intlCalendar: IntlCalendar,
+  intlCalendar: IntlScrapedCalendar,
   sign: number,
   year0: number,
   month0: number,
@@ -849,7 +634,10 @@ function isConstrainedFinalIntercalaryMonthDiff(
 
 // -----------------------------------------------------------------------------
 
-function queryMonthStrings(intlCalendar: IntlCalendar, year: number): string[] {
+function queryMonthStrings(
+  intlCalendar: IntlScrapedCalendar,
+  year: number,
+): string[] {
   return intlCalendar.queryYearData(year).monthStrings
 }
 

@@ -1,8 +1,8 @@
 import { memoize } from '../internal/utils'
 import {
-  type IntlCalendarOverrideConfig,
-  createIntlCalendarWithOverrides,
-} from './utils/intlCalendarWithOverrides'
+  type IntlScrapedCalendarConfig,
+  createIntlScrapedCalendar,
+} from './utils/intlScrapedCalendar'
 
 export const getChineseDangiCalendar = memoize(createChineseDangiCalendar)
 
@@ -24,7 +24,7 @@ const plainMonthDayLeapMonthMaxDays: Record<number, number> = {
 }
 
 function createChineseDangiCalendar(normCalendarId: string) {
-  return createIntlCalendarWithOverrides(normCalendarId, commonOverrideConfig)
+  return createIntlScrapedCalendar(normCalendarId, commonScrapedCalendarConfig)
 }
 
 function getChineseDangiMonthDaySearchStartYear(
@@ -65,7 +65,7 @@ function getChineseDangiMonthDaySearchStartYear(
   return 1972
 }
 
-const commonOverrideConfig: IntlCalendarOverrideConfig = {
+const commonScrapedCalendarConfig: IntlScrapedCalendarConfig = {
   leapMonthMeta: 13,
   plainMonthDayLeapMonthMaxDays,
   // When a Chinese/Dangi PlainMonthDay leap month-day falls outside the
