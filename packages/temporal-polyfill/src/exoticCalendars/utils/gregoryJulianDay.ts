@@ -9,9 +9,9 @@ import { milliInDay } from '../../internal/units'
 
 // Julian Day 2440588 is the civil day containing Unix epoch midnight.
 const unixEpochJulianDay = 2440588
-const gregorianJulianDayEpoch = 1721426
+const gregoryJulianDayEpoch = 1721426
 
-export function gregorianToJulianDay(
+export function gregoryToJulianDay(
   year: number,
   month: number,
   day: number,
@@ -19,21 +19,21 @@ export function gregorianToJulianDay(
   const epochMilli = isoArgsToEpochMilli(year, month, day)
 
   // Most conversions can use the package's Date-backed ISO bridge. Extreme
-  // Indian-calendar tests also need Gregorian year starts that sit just outside
+  // Indian-calendar tests also need Gregory year starts that sit just outside
   // Date's epoch range, so keep the direct field math as a narrow fallback.
   return epochMilli === undefined
-    ? gregorianToJulianDayMath(year, month, day)
+    ? gregoryToJulianDayMath(year, month, day)
     : diffEpochMilliDays(0, epochMilli) + unixEpochJulianDay
 }
 
-export function julianDayToGregorian(julianDay: number): CalendarDateFields {
+export function julianDayToGregory(julianDay: number): CalendarDateFields {
   const { year, month, day } = epochMilliToIsoDateTime(
     (julianDay - unixEpochJulianDay) * milliInDay,
   )
   return { year, month, day }
 }
 
-function gregorianToJulianDayMath(
+function gregoryToJulianDayMath(
   year: number,
   month: number,
   day: number,
@@ -47,7 +47,7 @@ function gregorianToJulianDayMath(
   }
 
   return (
-    gregorianJulianDayEpoch -
+    gregoryJulianDayEpoch -
     1 +
     365 * y1 +
     Math.floor(y1 / 4) -

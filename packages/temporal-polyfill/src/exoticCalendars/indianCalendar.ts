@@ -1,9 +1,9 @@
 import { computeIsoInLeapYear } from '../internal/isoCalendarMath'
 import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 import {
-  gregorianToJulianDay,
-  julianDayToGregorian,
-} from './utils/gregorianJulianDay'
+  gregoryToJulianDay,
+  julianDayToGregory,
+} from './utils/gregoryJulianDay'
 
 // Adapted from Adobe's @internationalized/date Indian calendar implementation
 // and ICU-style arithmetic calendar rules.
@@ -25,18 +25,18 @@ export function createIndianCalendar() {
     eraOrigins: indianEraOrigins,
     eraRemaps: indianEraRemaps,
     fromJulianDay(julianDay) {
-      const gregorian = julianDayToGregorian(julianDay)
-      let year = gregorian.year - indianEraStart
+      const gregory = julianDayToGregory(julianDay)
+      let year = gregory.year - indianEraStart
       let dayOfGregorianYear =
-        julianDay - gregorianToJulianDay(gregorian.year, 1, 1)
+        julianDay - gregoryToJulianDay(gregory.year, 1, 1)
       let firstMonthDays: number
 
       if (dayOfGregorianYear < indianYearStart) {
         year--
-        firstMonthDays = computeIsoInLeapYear(gregorian.year - 1) ? 31 : 30
+        firstMonthDays = computeIsoInLeapYear(gregory.year - 1) ? 31 : 30
         dayOfGregorianYear += firstMonthDays + 31 * 5 + 30 * 3 + 10
       } else {
-        firstMonthDays = computeIsoInLeapYear(gregorian.year) ? 31 : 30
+        firstMonthDays = computeIsoInLeapYear(gregory.year) ? 31 : 30
         dayOfGregorianYear -= indianYearStart
       }
 
@@ -61,15 +61,15 @@ export function createIndianCalendar() {
       }
     },
     toJulianDay(year, month, day) {
-      const gregorianYear = year + indianEraStart
+      const gregoryYear = year + indianEraStart
       let firstMonthDays: number
       let julianDay: number
-      if (computeIsoInLeapYear(gregorianYear)) {
+      if (computeIsoInLeapYear(gregoryYear)) {
         firstMonthDays = 31
-        julianDay = gregorianToJulianDay(gregorianYear, 3, 21)
+        julianDay = gregoryToJulianDay(gregoryYear, 3, 21)
       } else {
         firstMonthDays = 30
-        julianDay = gregorianToJulianDay(gregorianYear, 3, 22)
+        julianDay = gregoryToJulianDay(gregoryYear, 3, 22)
       }
 
       if (month === 1) {
