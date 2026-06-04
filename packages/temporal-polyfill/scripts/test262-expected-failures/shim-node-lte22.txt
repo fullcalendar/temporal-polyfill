@@ -6,10 +6,8 @@
 # available starting in newer Node releases.
 intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-DurationFormat.js
 
-# WONTFIX for real
-# In Node <=22, host Intl.DateTimeFormat resolvedOptions().timeZone can preserve
-# the legacy IANA link Antarctica/South_Pole instead of canonicalizing it to
-# Antarctica/McMurdo. This only affects link-name equality/canonicalization in
-# the host data. We intentionally avoid a one-off IANA-link workaround in
-# isTimeZoneIdsEqual(); Node 24+ now returns the expected canonical shape.
-intl402/Temporal/ZonedDateTime/links.js
+# ENV-ISSUE
+# Node <=22 host Intl.DateTimeFormat has a Hebrew/lunisolar formatToParts
+# mismatch with Temporal's calendar fields. Node 24+ no longer reproduces this
+# failure, so keep this out of the general shim expected-failure list.
+intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js

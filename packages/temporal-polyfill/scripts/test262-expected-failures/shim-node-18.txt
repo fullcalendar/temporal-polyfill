@@ -1,0 +1,6 @@
+# WONTFIX for real
+# In Node 18, host Intl.DateTimeFormat resolvedOptions().timeZone does not
+# equate the Asia/Choibalsan link with Asia/Ulaanbaatar. This only affects
+# link-name equality/canonicalization in the host data. We intentionally avoid
+# one-off IANA-link workarounds in isTimeZoneIdsEqual().
+intl402/Temporal/ZonedDateTime/links.js

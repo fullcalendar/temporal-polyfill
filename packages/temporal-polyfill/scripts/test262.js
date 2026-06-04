@@ -80,6 +80,18 @@ yargs(hideBin(process.argv))
         if (currentNodeMajorVersion <= 22) {
           expectedFailureFiles.push('shim-node-lte22.txt')
         }
+        if (currentNodeMajorVersion === 16) {
+          expectedFailureFiles.push('shim-node-16.txt')
+        }
+        if (currentNodeMajorVersion === 18) {
+          expectedFailureFiles.push('shim-node-18.txt')
+        }
+        if (currentNodeMajorVersion === 20) {
+          expectedFailureFiles.push('shim-node-20.txt')
+        }
+        if (currentNodeMajorVersion === 22) {
+          expectedFailureFiles.push('shim-node-22.txt')
+        }
         if (currentNodeMajorVersion >= 16) {
           expectedFailureFiles.push('shim-node-gte16.txt')
         }

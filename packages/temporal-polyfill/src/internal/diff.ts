@@ -526,23 +526,23 @@ export function diffCalendarDates(
         addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
       )
 
-      const anchorCompare = compareIsoDate(anchorIsoDate, endIsoDate)
+      // Decide whether the anchor overshot the end the same way the spec's
+      // ISODateSurpasses does: compare the anchor's (year, month) against the
+      // end using the *original* (un-constrained) start day-of-month, not the
+      // day the anchor was clamped to. A day that only shrank because it was
+      // constrained into a shorter target month is not an overshoot. Going
+      // forward, day0 > day1 means we passed the target (back off); going
+      // backward the sign flips, so the same constrained landing keeps its
+      // month slot. This is what lets a final intercalary month (e.g. a 30-day
+      // leap month diffed against a 29-day one) retain its month without a
+      // dedicated special case.
+      const anchorFields = computeCalendarDateFields(calendar, anchorIsoDate)
       if (
-        anchorCompare === sign ||
-        (anchorCompare === 0 &&
-          computeCalendarDateFields(calendar, anchorIsoDate).day !== day0 &&
-          !(
-            calendar &&
-            calendar.isConstrainedFinalIntercalaryMonthDiff(
-              sign,
-              year0,
-              month0,
-              day0,
-              year1,
-              month1,
-              day1,
-            )
-          ))
+        sign *
+          (compareNumbers(anchorFields.year, year1) ||
+            compareNumbers(anchorFields.month, month1) ||
+            compareNumbers(day0, day1)) >
+        0
       ) {
         months -= sign
         anchorIsoDate = epochMilliToIsoDateTime(
