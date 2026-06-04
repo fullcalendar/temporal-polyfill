@@ -11,3 +11,11 @@ intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-Durat
 # mismatch with Temporal's calendar fields. Node 24+ no longer reproduces this
 # failure, so keep this out of the general shim expected-failure list.
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
+
+# WONTFIX for real
+# Node <=22 host Intl.DateTimeFormat resolvedOptions().timeZone has IANA
+# link-name equality/canonicalization mismatches that vary by host data:
+# Node <=20 misses Asia/Choibalsan -> Asia/Ulaanbaatar, while Node 22 can
+# preserve Antarctica/South_Pole instead of canonicalizing to Antarctica/McMurdo.
+# We intentionally avoid one-off IANA-link workarounds in isTimeZoneIdsEqual().
+intl402/Temporal/ZonedDateTime/links.js

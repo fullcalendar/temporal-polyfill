@@ -7,7 +7,6 @@ intl402/DateTimeFormat/constructor-options-order-fractionalSecondDigits.js
 intl402/DateTimeFormat/constructor-options-order-timedate-style.js
 intl402/DateTimeFormat/constructor-options-order.js
 
-
 ##
 ## Issues with environment, already ignored in proposal-temporal/polyfill
 ## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt

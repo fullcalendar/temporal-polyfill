@@ -86,8 +86,7 @@ intl402/Temporal/PlainYearMonth/from/extreme-dates.js
 # We do not patch Intl.DateTimeFormat's constructor to more strictly validate
 # timeZone strings
 #
-# A) Rejecting legacy ICU time zones: see shim-node-gte16.txt
-# B) Rejecting invalid minus sign:    see shim-node-gte22.txt
+# Rejecting invalid minus sign: see shim-node-gte22.txt
 
 ##
 ## Issues with environment, already ignored in proposal-temporal/polyfill
