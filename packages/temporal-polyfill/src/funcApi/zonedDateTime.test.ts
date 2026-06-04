@@ -795,33 +795,6 @@ describe('toLocaleString', () => {
   })
 })
 
-describe('createFormat', () => {
-  // Node 26 exposes native Temporal, but its current Intl bridge rejects native
-  // Temporal.ZonedDateTime values passed to DateTimeFormat#format. The native
-  // funcApi adapter intentionally forwards to the host-native object here, so
-  // keep shim coverage for this behavior and skip only the native workspace
-  // until the formatter API is redesigned or the host conformance gap closes.
-  itSkipNative('formats records', () => {
-    const zdt = ZonedDateTimeFns.fromFields({
-      year: 2023,
-      month: 12,
-      day: 31,
-      hour: 12,
-      minute: 30,
-      timeZone: 'America/New_York',
-    })
-    const format = ZonedDateTimeFns.createFormat('en', {
-      dateStyle: 'full',
-      timeStyle: 'full',
-    })
-
-    expect(format).toBeInstanceOf(Intl.DateTimeFormat)
-    expect(format.format(zdt)).toBe(
-      'Sunday, December 31, 2023 at 12:30:00 PM Eastern Standard Time',
-    )
-  })
-})
-
 // Non-standard: With
 // -----------------------------------------------------------------------------
 

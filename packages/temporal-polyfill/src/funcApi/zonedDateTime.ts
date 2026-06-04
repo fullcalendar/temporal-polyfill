@@ -3,7 +3,7 @@ import { DateTimeFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
-import { DateTimeFormatLike, ZonedDateTimeFields } from './commonTypes'
+import { ZonedDateTimeFields } from './commonTypes'
 import type * as DurationFns from './duration'
 import type {
   OverflowOptions,
@@ -20,7 +20,6 @@ import * as Shim from './shim/zonedDateTime'
 import { isZonedDateTimeRecord } from './temporalRecords'
 
 export type { Record }
-export type Format = DateTimeFormatLike<Record>
 export type FromFields = ZonedDateTimeFields<CalendarFns.Record>
 export type FromOptions = Temporal.ZonedDateTimeFromOptions
 export type WithFields = Partial<DateTimeFields>
@@ -167,11 +166,6 @@ export const toPlainDate: (record: Record) => PlainDateFns.Record =
 
 export const toPlainTime: (record: Record) => PlainTimeFns.Record =
   NativeTemporal ? Native.toPlainTime : Shim.toPlainTime
-
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
 
 export const toLocaleString: (
   record: Record,

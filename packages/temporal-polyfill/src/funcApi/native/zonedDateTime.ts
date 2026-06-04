@@ -5,11 +5,7 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import {
-  DateTimeFormatLike,
-  NativeDiffFunc,
-  ZonedDateTimeFields,
-} from '../commonTypes'
+import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -22,7 +18,6 @@ import {
   getCalendarNativeRecordId,
   runCalendarNativeResolver,
 } from './calendar'
-import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -47,7 +42,6 @@ import {
 import { createRoundToOptions } from './roundUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
-type Format = DateTimeFormatLike<ZonedDateTimeNativeRecord>
 
 type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
@@ -409,11 +403,6 @@ export function toPlainTime(
   const resNative = getZonedDateTimeNative(record).toPlainTime()
   return createPlainTimeNativeRecord(resNative)
 }
-
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getZonedDateTimeNative)
 
 export function toLocaleString(
   record: ZonedDateTimeNativeRecord,

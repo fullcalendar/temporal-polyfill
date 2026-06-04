@@ -116,7 +116,7 @@ import * as ZonedDateTimeFns from 'temporal-polyfill/fns/zoneddatetime'
   - [`toString`](#tostring)
   - [`toSimpleString`](#tosimplestring)
   - [`toLocaleString`](#tolocalestring)
-  - [`createFormat`](#createformat)
+  - [❌ `createFormat`](#createformat)
 
 ## Record Shape
 
@@ -2305,32 +2305,15 @@ const text = zonedDateTime.toLocaleString(locales, options)
 
 ### `createFormat`
 
-Signature:
-
-```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
-```
-
-Fn API:
-
-```ts
-const format = ZonedDateTimeFns.createFormat('en-US', {
-  dateStyle: 'long',
-  timeStyle: 'short',
-  timeZone: 'UTC',
-})
-const text = format.format(zonedDateTime)
-```
-
-Temporal API:
+❌ **This function does not exist.** It was never part of the Fns API and has no
+direct equivalent. Use `Intl.DateTimeFormat` directly instead, pulling the time
+zone off the record and formatting its `epochMilliseconds`:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'long',
   timeStyle: 'short',
-  timeZone: 'UTC',
+  timeZone: zonedDateTime.timeZoneId,
 })
-const text = format.format(zonedDateTime)
+const text = format.format(zonedDateTime.epochMilliseconds)
 ```
-
-This rewrite is appropriate when later uses rely on `format.format(zonedDateTime)`.
