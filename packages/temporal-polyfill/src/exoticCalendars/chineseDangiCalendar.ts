@@ -1,33 +1,10 @@
-import { isoArgsToEpochMilli } from '../internal/epochMath'
-import { milliInDay } from '../internal/units'
-import { constrainToRange, memoize } from '../internal/utils'
+import { memoize } from '../internal/utils'
 import {
   type IntlCalendarOverrideConfig,
-  type IntlYearDataForOverride,
   createIntlCalendarWithOverrides,
 } from './utils/intlCalendarWithOverrides'
 
 export const getChineseDangiCalendar = memoize(createChineseDangiCalendar)
-
-type FirstMonthStartCorrection = [knownBadEpochMilli: number, dayOffset: number]
-
-// test262's Chinese year-length data implies two one-day new-year boundary
-// disagreements with the ICU4C data bundled in Node 22. Keep this table tiny
-// until a broader ICU4X-sourced data set is available.
-const chineseFirstMonthStartCorrections: Record<
-  number,
-  FirstMonthStartCorrection
-> = {
-  2027: [isoArgsToEpochMilli(2027, 2, 7)!, -1],
-  2030: [isoArgsToEpochMilli(2030, 2, 2)!, 1],
-}
-
-const chineseLeapMonthOverrides: Record<number, number> = {
-  // ICU's Chinese calendar data in Node 22 labels 1987 as having a leap M07
-  // (`Mo7bis`), while Temporal/test262 follows ICU4X data where the inserted
-  // slot is M06L. Return the concrete slot index for M06L.
-  1987: 7,
-}
 
 // PlainMonthDay stores a canonical reference date, not the user-supplied year.
 // For Chinese/Dangi leap months, Temporal uses a modern reference table rather
@@ -47,36 +24,7 @@ const plainMonthDayLeapMonthMaxDays: Record<number, number> = {
 }
 
 function createChineseDangiCalendar(normCalendarId: string) {
-  return createIntlCalendarWithOverrides(
-    normCalendarId,
-    getChineseDangiOverrideConfig(normCalendarId),
-  )
-}
-
-function getChineseDangiOverrideConfig(
-  normCalendarId: string,
-): IntlCalendarOverrideConfig {
-  return normCalendarId === 'chinese'
-    ? chineseOverrideConfig
-    : commonOverrideConfig
-}
-
-function constrainChinesePlainMonthDay(
-  monthCodeNumber: number,
-  isLeapMonth: boolean,
-  day: number,
-): number {
-  const maxDay =
-    isLeapMonth &&
-    (monthCodeNumber === 1 ||
-      monthCodeNumber === 9 ||
-      monthCodeNumber === 10 ||
-      monthCodeNumber === 11 ||
-      monthCodeNumber === 12)
-      ? 29
-      : 30
-
-  return constrainToRange(day, 1, maxDay)
+  return createIntlCalendarWithOverrides(normCalendarId, commonOverrideConfig)
 }
 
 function getChineseDangiMonthDaySearchStartYear(
@@ -125,56 +73,4 @@ const commonOverrideConfig: IntlCalendarOverrideConfig = {
   // corresponding common month. Common lunisolar months top out at 30 days.
   plainMonthDayCommonMonthMaxDay: 30,
   getMonthDaySearchStartYear: getChineseDangiMonthDaySearchStartYear,
-}
-
-const chineseOnlyOverrideConfig: Partial<IntlCalendarOverrideConfig> = {
-  constrainPlainMonthDay: constrainChinesePlainMonthDay,
-  hasYearDataOverrideCandidate(year) {
-    return hasChineseYearDataOverrideCandidate(year)
-  },
-  applyYearDataOverrides(year, scrapedYearData) {
-    return applyChineseYearDataOverrides(year, scrapedYearData)
-  },
-  queryLeapMonthOverride(year) {
-    return queryChineseLeapMonthOverride(year)
-  },
-}
-
-const chineseOverrideConfig: IntlCalendarOverrideConfig = {
-  ...commonOverrideConfig,
-  ...chineseOnlyOverrideConfig,
-}
-
-function hasChineseYearDataOverrideCandidate(year: number): boolean {
-  return chineseFirstMonthStartCorrections[year] !== undefined
-}
-
-function applyChineseYearDataOverrides(
-  year: number,
-  scrapedYearData: IntlYearDataForOverride,
-): IntlYearDataForOverride {
-  const firstMonthStartCorrection = chineseFirstMonthStartCorrections[year]
-
-  if (
-    firstMonthStartCorrection !== undefined &&
-    scrapedYearData.monthEpochMillis[0] === firstMonthStartCorrection[0]
-  ) {
-    const monthEpochMillis = scrapedYearData.monthEpochMillis.slice()
-
-    // Only the new-year boundary is known to disagree. Preserve the host's
-    // month labels and later month starts so leap-month detection stays tied to
-    // the same bounded ICU data that was scraped for the rest of the year.
-    monthEpochMillis[0] += firstMonthStartCorrection[1] * milliInDay
-
-    return {
-      monthEpochMillis,
-      monthStrings: scrapedYearData.monthStrings.slice(),
-    }
-  }
-
-  return scrapedYearData
-}
-
-function queryChineseLeapMonthOverride(year: number): number | undefined {
-  return chineseLeapMonthOverrides[year]
 }

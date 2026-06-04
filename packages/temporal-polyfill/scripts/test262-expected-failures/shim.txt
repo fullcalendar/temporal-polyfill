@@ -161,33 +161,18 @@ intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 
 # WONTFIX for real - TODO: combine with groups above
-# Chinese/lunisolar DateTimeFormat output follows the host ICU data.
-#
-# The core Temporal calendar fields already carry a small amount of
-# calendar-math correction where that is necessary for Temporal object
-# behavior. Formatting is different: this package delegates formatted strings
-# and formatToParts output to the host Intl.DateTimeFormat implementation. When
-# Node's ICU4C data disagrees with the ICU4X data used by current test262 for a
-# Chinese-calendar leap-month boundary, the formatted month part can imply the
-# host's monthCode instead of the Temporal object's monthCode.
-#
-# One representative case is Chinese 1987:
-#
-#   Temporal.PlainDate.from("1987-08-23").withCalendar("chinese").monthCode
-#   // "M06L" in this polyfill / test262 expectation
-#
-#   new Intl.DateTimeFormat("en", {
-#     calendar: "chinese",
-#     timeZone: "UTC",
-#     year: "numeric",
-#     month: "numeric",
-#     day: "numeric",
-#   }).formatToParts(Date.UTC(1987, 7, 23))
-#   // host ICU4C reports month "7", which test262's bridge infers as "M07"
-#
-# Papering over this would mean rewriting localized DateTimeFormat parts for
-# specific host ICU data quirks. That is brittle string-level Intl shimming, not
-# Temporal polyfill behavior. Keep this documented as an expected failure so
-# end users understand that Chinese/lunisolar formatting fidelity is bounded by
-# their runtime's Intl/ICU data.
-intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
+# Chinese/Dangi calendar math follows the host ICU data scraped from
+# Intl.DateTimeFormat. Current test262 uses ICU4X Chinese calendar data for a
+# few cases where Node's ICU4C disagrees, including the 1987 leap-month slot and
+# two Chinese new-year boundaries. We intentionally do not patch the scraped
+# Intl data for these mismatches; doing so would make Temporal fields diverge
+# from DateTimeFormat output in the same runtime.
+intl402/Temporal/PlainDate/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainDate/prototype/monthCode/chinese-calendar-dates.js
+intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainDateTime/prototype/monthCode/chinese-calendar-dates.js
+intl402/Temporal/PlainMonthDay/prototype/monthCode/chinese-calendar-dates.js
+intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/PlainYearMonth/prototype/monthCode/chinese-calendar-dates.js
+intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-chinese.js
+intl402/Temporal/ZonedDateTime/prototype/monthCode/chinese-calendar-dates.js
