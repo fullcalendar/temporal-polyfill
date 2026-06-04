@@ -5,8 +5,6 @@ import {
 } from './calendarSlot'
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
-import { isoCalendarId } from './intlCalendarConfig'
-import { RawDateTimeFormat } from './intlFormatUtils'
 import { ZonedEpochNanoFields } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
 
@@ -64,21 +62,3 @@ export function checkResolvedCalendarCompatible(
     throw new RangeError(errorMessages.mismatchingCalendars)
   }
 }
-
-/*
-Detect bug where explicitly specifying calendar:iso8601 results in calendar:gregory
-Happens in Node 14 and some version of V8 (Chrome version 80 at least)
-https://github.com/nodejs/node/issues/42440
-https://codepen.io/arshaw/pen/RNwVewm?editors=0010
-
-If buggy, relax strictCalendarChecks for PlainYearMonth/PlainMonthDay.
-*/
-// HACK for pureTopLevel
-function computeNonBuggyIsoResolve() {
-  return (
-    new RawDateTimeFormat(undefined, {
-      calendar: isoCalendarId,
-    }).resolvedOptions().calendar === isoCalendarId
-  )
-}
-export const strictPartialDateCalendarCheck = computeNonBuggyIsoResolve()

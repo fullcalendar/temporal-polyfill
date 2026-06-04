@@ -28,7 +28,6 @@ import {
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
-  strictPartialDateCalendarCheck,
 } from '../../internal/intlFormatArgs'
 import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
@@ -131,11 +130,7 @@ export class PlainMonthDay implements MonthDayFields {
         transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
       ),
     )
-    checkResolvedCalendarCompatible(
-      format,
-      slots,
-      strictPartialDateCalendarCheck,
-    )
+    checkResolvedCalendarCompatible(format, slots, true)
     return format.format(isoDateToEpochMilli(slots)!)
   }
 

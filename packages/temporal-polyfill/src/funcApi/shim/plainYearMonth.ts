@@ -26,7 +26,6 @@ import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
-  strictPartialDateCalendarCheck,
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
@@ -410,27 +409,15 @@ export const createFormat: (
     getArgsForSingle: (record) => {
       const slots = getPlainYearMonthShimRecordSlots(record)
       const format = internals.format
-      checkResolvedCalendarCompatible(
-        format,
-        slots,
-        strictPartialDateCalendarCheck,
-      )
+      checkResolvedCalendarCompatible(format, slots, true)
       return [format, isoDateToEpochMilli(slots)!]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getPlainYearMonthShimRecordSlots(record0)
       const slots1 = getPlainYearMonthShimRecordSlots(record1)
       const format = internals.format
-      checkResolvedCalendarCompatible(
-        format,
-        slots0,
-        strictPartialDateCalendarCheck,
-      )
-      checkResolvedCalendarCompatible(
-        format,
-        slots1,
-        strictPartialDateCalendarCheck,
-      )
+      checkResolvedCalendarCompatible(format, slots0, true)
+      checkResolvedCalendarCompatible(format, slots1, true)
       return [
         format,
         isoDateToEpochMilli(slots0)!,
@@ -452,7 +439,7 @@ export function toLocaleString(
       transformYearMonthOptions(options, /* allowPartialOverlap = */ false),
     ),
   )
-  checkResolvedCalendarCompatible(format, slots, strictPartialDateCalendarCheck)
+  checkResolvedCalendarCompatible(format, slots, true)
   return format.format(isoDateToEpochMilli(slots)!)
 }
 

@@ -32,7 +32,6 @@ import {
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
-  strictPartialDateCalendarCheck,
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
@@ -236,11 +235,7 @@ export class PlainYearMonth implements YearMonthFields {
         transformYearMonthOptions(options, /* allowPartialOverlap = */ false),
       ),
     )
-    checkResolvedCalendarCompatible(
-      format,
-      slots,
-      strictPartialDateCalendarCheck,
-    )
+    checkResolvedCalendarCompatible(format, slots, true)
     return format.format(isoDateToEpochMilli(slots)!)
   }
 

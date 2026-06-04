@@ -11,7 +11,6 @@ import {
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
-  strictPartialDateCalendarCheck,
 } from '../internal/intlFormatArgs'
 import {
   transformDateOptions,
@@ -32,16 +31,11 @@ export type TemporalFormattable = object
 
 export type Formattable = TemporalFormattable | RawFormattable
 export type TemporalBrandingAndSlots<S = object> = [branding: string, slots: S]
-export type TemporalBrandingAndSlotsGetter = (
-  obj: unknown,
-) => TemporalBrandingAndSlots | undefined
-// Intl.DateTimeFormat
-// -----------------------------------------------------------------------------
-
-export type DateTimeFormat = Intl.DateTimeFormat
 
 export function createDateTimeFormatClass(
-  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter,
+  getTemporalBrandingAndSlots: (
+    obj: unknown,
+  ) => TemporalBrandingAndSlots | undefined,
 ): typeof Intl.DateTimeFormat {
   const ShimDateTimeFormat = createDateTimeFormatShell<Formattable>({
     createArgsProvider(internals) {
@@ -204,11 +198,7 @@ function checkTemporalDateTimeFormatCompatible(
       return
     case 'PlainYearMonth':
     case 'PlainMonthDay':
-      checkResolvedCalendarCompatible(
-        format,
-        slots as any,
-        strictPartialDateCalendarCheck,
-      )
+      checkResolvedCalendarCompatible(format, slots as any, true)
       return
     default:
       throw new TypeError(errorMessages.invalidFormatType(branding))
