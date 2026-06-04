@@ -46,16 +46,12 @@ yargs(hideBin(process.argv))
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
-      const isMinified = !!process.env.TEST262_MINIFIER
 
       const expectedFailureFiles = isNative
         ? ['native.txt']
         : ['shim.txt', 'shim-builtin-calls.txt', 'shim-descriptor.txt']
 
       if (!isNative) {
-        if (!isMinified) {
-          expectedFailureFiles.push('shim-unminified.txt')
-        }
         if (currentNodeMajorVersion <= 16) {
           expectedFailureFiles.push('shim-node-lte16.txt')
         }
@@ -85,11 +81,7 @@ yargs(hideBin(process.argv))
         }
       }
 
-      const globalPolyfillPath = isNative
-        ? './dist/global.js'
-        : isMinified
-          ? './dist/.test262.global.min.js'
-          : './dist/.test262.global.js'
+      const globalPolyfillPath = './dist/full/global.js'
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,

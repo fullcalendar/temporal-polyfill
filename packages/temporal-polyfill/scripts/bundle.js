@@ -13,59 +13,17 @@ import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
-import { minify as swcMinify } from 'rollup-plugin-swc3'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
 import { terserSimple } from './lib/terser-simple.js'
 
 const argv = process.argv.slice(2)
 
-// These options only affect the Test262 artifact. Public dist always builds in
-// auto mode so the published files do not vary with Test262 matrix settings.
-const test262ForceShim = readBooleanFlag(
-  argv,
-  '--test262-force-shim',
-  'TEST262_FORCE_SHIM',
-  true,
-)
-const test262ClassApi = readEnumFlag(
-  argv,
-  '--test262-class-api',
-  'TEST262_CLASS_API',
-  ['full', 'core'],
-)
-const test262Minifier = readOptionalEnumFlag(
-  argv,
-  '--test262-minifier',
-  'TEST262_MINIFIER',
-  ['terser', 'swc'],
-)
+writeBundles(joinPaths(process.argv[1], '../..'), argv.includes('--dev'))
 
-writeBundles(
-  joinPaths(process.argv[1], '../..'),
-  argv.includes('--dev'),
-  test262ForceShim,
-  test262ClassApi,
-  test262Minifier,
-)
-
-async function writeBundles(
-  pkgDir,
-  isDev,
-  test262ForceShim,
-  test262ClassApi,
-  test262Minifier,
-) {
+async function writeBundles(pkgDir, isDev) {
   const configs = await buildConfigs(pkgDir, isDev)
   await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
-
-  const test262Config = await buildTest262Config({
-    pkgDir,
-    test262ForceShim,
-    test262ClassApi,
-    test262Minifier,
-  })
-  await buildWithConfigs([test262Config])
 }
 
 async function buildConfigs(pkgDir, isDev) {
@@ -87,10 +45,6 @@ async function buildConfigs(pkgDir, isDev) {
   const sourceDirectoryChunksPlugin = buildSourceDirectoryChunksPlugin(
     resolvePath(pkgDir, 'dist/.tsc'),
   )
-
-  const definePlugin = buildDefinePlugin({
-    __FORCE_SHIM_IMPLEMENTATION__: false,
-  })
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -119,7 +73,6 @@ async function buildConfigs(pkgDir, isDev) {
         external: isIifeExternalDependency,
         plugins: [
           nodeResolve(),
-          definePlugin,
           // for reading sourcemaps from tsc
           isDev && sourcemaps(),
         ],
@@ -185,7 +138,7 @@ async function buildConfigs(pkgDir, isDev) {
       input: moduleInputs,
       onwarn,
       external: isExternalDependency,
-      plugins: [definePlugin, sourceDirectoryChunksPlugin],
+      plugins: [sourceDirectoryChunksPlugin],
       output: {
         format: 'es',
         dir: 'dist',
@@ -288,92 +241,6 @@ function buildExternalDependencyResolver(pkgJson, options = {}) {
     return dependencyNames.some((dependencyName) => {
       return id === dependencyName || id.startsWith(dependencyName + '/')
     })
-  }
-}
-
-// Test262
-// -----------------------------------------------------------------------------
-
-async function buildTest262Config({
-  pkgDir,
-  test262ForceShim,
-  test262ClassApi,
-  test262Minifier,
-}) {
-  const pkgJsonPath = joinPaths(pkgDir, 'package.json')
-  const pkgJson = JSON.parse(await readFile(pkgJsonPath))
-  const isExternalDependency = buildExternalDependencyResolver(pkgJson, {
-    bundleDependencies: true,
-  })
-  const globalInput = joinPaths(
-    pkgDir,
-    'dist',
-    test262ClassApi === 'full'
-      ? 'full/global' + extensions.esmWhenIifePrefix + extensions.esm
-      : 'global' + extensions.esmWhenIifePrefix + extensions.esm,
-  )
-  const test262ForceShimInput = 'virtual:test262-force-shim'
-  const outputFile = joinPaths(
-    pkgDir,
-    'dist',
-    test262Minifier ? '.test262.global.min.js' : '.test262.global.js',
-  )
-
-  return {
-    input: test262ForceShim ? test262ForceShimInput : globalInput,
-    onwarn,
-    external: isExternalDependency,
-    plugins: [
-      nodeResolve(),
-      ...(test262ForceShim
-        ? [
-            buildTest262ForceShimEntryPlugin({
-              input: test262ForceShimInput,
-              pkgDir,
-              test262ClassApi,
-            }),
-          ]
-        : []),
-    ],
-    output: {
-      format: 'iife',
-      name: 'TemporalPolyfillTest262',
-      file: outputFile,
-      plugins: [
-        test262Minifier === 'swc' && swcMinify(),
-        test262Minifier === 'terser' && buildTerserPlugin({}),
-      ],
-    },
-  }
-}
-
-function buildTest262ForceShimEntryPlugin({ input, pkgDir, test262ClassApi }) {
-  const shimPath = joinPaths(
-    pkgDir,
-    'dist',
-    test262ClassApi === 'full' ? 'full/shim.js' : 'shim.js',
-  )
-
-  return {
-    name: 'test262-force-shim-entry',
-    resolveId(id) {
-      if (id === input) {
-        return input
-      }
-    },
-    load(id) {
-      if (id !== input) {
-        return
-      }
-
-      // The public shim entry intentionally has no install side effect. Test262
-      // needs a global Temporal, so this synthetic entry calls the unconditional
-      // installer while still bundling from production ESM.
-      return `import { installImplementation } from ${JSON.stringify(shimPath)}
-
-installImplementation()
-`
-    },
   }
 }
 
@@ -520,94 +387,6 @@ function resolveSourceDirectoryChunkName(id, sourceRoot, meta) {
   const sourceDir = dirname(relativePath(sourceRoot, id))
 
   return sourceDir === '.' ? 'root' : sourceDir.split(pathSep).join('-')
-}
-
-function buildDefinePlugin(defines) {
-  const replacements = Object.entries(defines).map(([key, value]) => [
-    key,
-    JSON.stringify(value),
-  ])
-
-  return {
-    name: 'define',
-    transform(code) {
-      let nextCode = code
-
-      for (const [key, value] of replacements) {
-        nextCode = nextCode.replaceAll(key, value)
-      }
-
-      if (nextCode !== code) {
-        return {
-          code: nextCode,
-          map: null,
-        }
-      }
-    },
-  }
-}
-
-// CLI Utils
-// -----------------------------------------------------------------------------
-
-function readArgValue(argv, flagName) {
-  const flagPrefix = flagName + '='
-
-  for (const arg of argv) {
-    if (arg.startsWith(flagPrefix)) {
-      return arg.substring(flagPrefix.length)
-    }
-  }
-}
-
-function readBooleanFlag(argv, flagName, envName, defaultValue = false) {
-  if (argv.includes(flagName)) {
-    return true
-  }
-
-  const envValue = process.env[envName]
-
-  if (envValue === undefined || envValue === '') {
-    return defaultValue
-  }
-  if (['1', 'true', 'yes'].includes(envValue)) {
-    return true
-  }
-  if (['0', 'false', 'no'].includes(envValue)) {
-    return false
-  }
-
-  throw new Error(
-    `Invalid ${envName} value "${envValue}". Expected 1, true, yes, 0, false, or no.`,
-  )
-}
-
-function readEnumFlag(argv, flagName, envName, values) {
-  const value =
-    readArgValue(argv, flagName) || process.env[envName] || values[0]
-
-  if (!values.includes(value)) {
-    throw new Error(
-      `Invalid ${envName} value "${value}". Expected ${values.join(' or ')}.`,
-    )
-  }
-
-  return value
-}
-
-function readOptionalEnumFlag(argv, flagName, envName, values) {
-  const value = readArgValue(argv, flagName) || process.env[envName]
-
-  if (value === undefined || value === '') {
-    return
-  }
-  if (!values.includes(value)) {
-    throw new Error(
-      `Invalid ${envName} value "${value}". Expected ${values.join(' or ')}.`,
-    )
-  }
-
-  return value
 }
 
 // Lang Utils
