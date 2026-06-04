@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-spec'
-import { getOrdinalForValue } from './ordinals'
+import { getOrdinalForValue } from './ordinals.js'
 
 // Regex to replace token string with actual values
 const REGEX_MATCHES =
@@ -74,7 +74,7 @@ const tokenMap: {
     options: {},
     property: 'weekday',
     transform: (_parts, date) => {
-      return date.weekOfYear.toString()
+      return date.weekOfYear!.toString()
     },
   },
   Do: {
@@ -88,8 +88,9 @@ const tokenMap: {
     options: {},
     property: 'weekday',
     transform: (_parts, date, locale) => {
+      const weekOfYear = date.weekOfYear!
       return (
-        date.weekOfYear + getOrdinalForValue(date.weekOfYear, 'weekday', locale)
+        weekOfYear + getOrdinalForValue(weekOfYear, 'weekday', locale)
       )
     },
   },
@@ -131,7 +132,7 @@ export class TokenDateTimeFormat {
   }
 
   format(dt: Temporal.PlainDateTime | Temporal.ZonedDateTime): string {
-    const timeZone = dt instanceof Temporal.ZonedDateTime ? dt.timeZone.id : 'UTC'
+    const timeZone = dt instanceof Temporal.ZonedDateTime ? dt.timeZoneId : 'UTC'
     const resolvedOptions = this.formatter.resolvedOptions()
 
     // Adjust formatter only if timeZone is different

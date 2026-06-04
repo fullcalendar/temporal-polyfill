@@ -15,22 +15,22 @@
     "directory": "packages/temporal-spec"
   },
   "type": "module",
-  "main": "./index.cjs",
+  "main": "./index.js",
   "types": "./index.d.ts",
-  "module": "./index.js",
   "scripts": {
+    "clean": "rm -rf dist",
     "lint": "biome check .",
     "lint:fix": "biome check --apply .",
-    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.cts.json"
+    "typecheck": "tsc -p tsconfig.json"
   },
   "exports": {
     ".": {
-      "require": "./index.cjs",
-      "import": "./index.js"
+      "types": "./index.d.ts",
+      "default": "./index.js"
     },
     "./global": {
-      "require": "./global.cjs",
-      "import": "./global.js"
+      "types": "./global.d.ts",
+      "default": "./global.js"
     }
   },
   "devDependencies": {

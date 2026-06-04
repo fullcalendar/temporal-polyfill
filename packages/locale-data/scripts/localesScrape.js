@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const { existsSync, readdirSync } = require('fs')
-const { readFile, writeFile } = require('fs/promises')
-const { resolve } = require('path')
-const merge = require('deepmerge')
-const yargs = require('yargs')
-const { hideBin } = require('yargs/helpers')
+import { existsSync, readdirSync } from 'fs'
+import { readFile, writeFile } from 'fs/promises'
+import { resolve } from 'path'
+import merge from 'deepmerge'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
-require('colors')
+import 'colors'
 const args = yargs(hideBin(process.argv)).boolean('v').argv
 
 const momentLocaleRoot = resolve(args.$0, '../data/moment/locale')

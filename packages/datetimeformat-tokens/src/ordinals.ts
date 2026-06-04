@@ -1,5 +1,5 @@
-import { localeOrdinals } from './localeOrdinals'
-import { localeOrdinalsSpecial } from './localeOrdinalsSpecial'
+import { localeOrdinals } from './localeOrdinals.js'
+import { localeOrdinalsSpecial } from './localeOrdinalsSpecial.js'
 
 export type Ordinals = string | { [key: string]: string }
 

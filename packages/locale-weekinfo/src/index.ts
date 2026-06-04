@@ -1,5 +1,5 @@
-import { getFirstDay } from './firstDay'
-import { getMinimalDays } from './minimalDays'
+import { getFirstDay } from './firstDay.js'
+import { getMinimalDays } from './minimalDays.js'
 
 type LocaleWeekInfo = {
   firstDay: number

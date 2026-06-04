@@ -16,16 +16,17 @@
   "license": "MIT",
   "copyright": "2026 Adam Shaw",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.mjs"
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
   },
   "files": ["/dist", "/src"],
   "scripts": {
-    "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.cjs",
+    "build": "tsc --build tsconfig.json",
+    "clean": "rm -rf dist",
+    "compile-localeOrdinalsData": "node ./scripts/compile-localeOrdinalsData.js",
     "locales-compile": "pnpm run compile-localeOrdinalsData"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "locale-data": "workspace:*",
-    "temporal-polyfill": "workspace:*"
+    "temporal-polyfill": "workspace:*",
+    "typescript": "~5.3.3"
   }
 }

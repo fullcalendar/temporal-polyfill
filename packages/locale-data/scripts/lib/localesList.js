@@ -1,17 +1,11 @@
-const { readFileSync, readdirSync } = require('fs')
-const { resolve } = require('path')
-const { fileURLToPath } = require('url')
+import { readFileSync, readdirSync } from 'fs'
+import { resolve } from 'path'
+import { fileURLToPath } from 'url'
 
 // Get localeRoot relative to this file
 const localeRoot = resolve(fileURLToPath(import.meta.url), '../../../locales')
 
-module.exports = {
-  listLocales,
-  getAllLocalesData,
-  mapLocaleProperty,
-}
-
-function listLocales() {
+export function listLocales() {
   const localeList = readdirSync(localeRoot)
 
   // Error out if no locales
@@ -23,7 +17,7 @@ function listLocales() {
   return localeList
 }
 
-function getAllLocalesData() {
+export function getAllLocalesData() {
   const obj = {}
 
   for (const fileName of listLocales()) {
@@ -43,7 +37,7 @@ function getAllLocalesData() {
  * Creates a map of locales with a property as keys
  * @param getProp {(locale: string, json: unknown) => string} Function to fetch property from json
  */
-function mapLocaleProperty(
+export function mapLocaleProperty(
   getProp = (locale) => locale,
 ) {
   const obj = {}

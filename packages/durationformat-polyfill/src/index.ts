@@ -1,28 +1,5 @@
 import { Temporal } from 'temporal-spec'
 
-// Unfortunately necessary as typescript does not include typings for ecma drafts
-// TODO: Remove when ListFormat becomes part of the official spec
-declare global {
-  namespace Intl {
-    interface ListFormatOptions {
-      localeMatcher?: 'best fit' | 'lookup'
-      type?: 'conjunction' | 'disjunction' | 'unit'
-      style?: 'long' | 'short' | 'narrow'
-    }
-
-    interface ListFormatPart<T = string> {
-      type: 'literal' | 'element'
-      value: T
-    }
-
-    class ListFormat {
-      constructor(locales?: string | string[], options?: Intl.ListFormatOptions)
-      public formatToParts: (elements: string[]) => Intl.ListFormatPart[]
-      public format: (items: [string?]) => string
-    }
-  }
-}
-
 function largestCommonString(a: string, b: string): string {
   const [short, long] = a.length < b.length ? [a, b] : [b, a]
 
@@ -40,8 +17,21 @@ function largestCommonString(a: string, b: string): string {
 }
 
 type DurationFormatOptions = { style: 'long' | 'short' | 'narrow' }
+type DurationField = keyof Pick<
+  Temporal.Duration,
+  | 'years'
+  | 'months'
+  | 'weeks'
+  | 'days'
+  | 'hours'
+  | 'minutes'
+  | 'seconds'
+  | 'milliseconds'
+  | 'microseconds'
+  | 'nanoseconds'
+>
 
-const durationFields: (keyof Temporal.DurationLike)[] = [
+const durationFields: DurationField[] = [
   'years',
   'months',
   'weeks',
@@ -108,7 +98,7 @@ function combinePartsArrays(
       combinedParts.push(...durationPartArrays[parseInt(listPart.value)])
     } else {
       // Otherwise, inject a literal
-      combinedParts.push(listPart)
+      combinedParts.push(listPart as Intl.RelativeTimeFormatPart)
     }
   }
 

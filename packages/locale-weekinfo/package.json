@@ -16,20 +16,22 @@
   "license": "MIT",
   "copyright": "2026 Adam Shaw",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.mjs"
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
   },
   "files": ["/dist", "/src"],
   "scripts": {
-    "compile-firstDays": "node ./scripts/compile-firstDays.cjs",
-    "compile-minimalDays": "node ./scripts/compile-minimalDays.cjs",
+    "build": "tsc --build tsconfig.json",
+    "clean": "rm -rf dist",
+    "compile-firstDays": "node ./scripts/compile-firstDays.js",
+    "compile-minimalDays": "node ./scripts/compile-minimalDays.js",
     "locales-compile": "pnpm compile-firstDays && pnpm compile-minimalDays"
   },
   "devDependencies": {
-    "locale-data": "workspace:*"
+    "locale-data": "workspace:*",
+    "typescript": "~5.3.3"
   }
 }

@@ -10,7 +10,12 @@ cleanPkg(
 
 async function cleanPkg(pkgDir, cleanTsc) {
   const distDir = joinPaths(pkgDir, 'dist')
-  const files = await readdir(distDir)
+  const files = await readdir(distDir).catch((error) => {
+    if (error.code === 'ENOENT') {
+      return []
+    }
+    throw error
+  })
 
   for (const file of files) {
     if (

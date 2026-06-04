@@ -1,19 +1,19 @@
-const { writeFileSync } = require('fs')
-const { resolve } = require('path')
-const { mapLocaleProperty } = require('../../../scripts/lib/localesList.cjs')
+import { writeFileSync } from 'fs'
+import { resolve } from 'path'
+import { mapLocaleProperty } from '../../locale-data/scripts/lib/localesList.js'
 
-const mdObj = mapLocaleProperty((_locale, json) => {
-  return json.week.minimalDays
+const fdObj = mapLocaleProperty((_locale, json) => {
+  return json.week.firstDay
 })
 
-const sortedMinimalDays = Object.entries(mdObj).sort(([, a], [, b]) => {
+const sortedFirstDays = Object.entries(fdObj).sort(([, a], [, b]) => {
   return b.length - a.length
 })
-const largest = sortedMinimalDays[0][0]
+const largest = sortedFirstDays[0][0]
 const condArr = []
 
-for (const [day, locales] of sortedMinimalDays) {
-  // Short circuit for largest minimalDay
+for (const [day, locales] of sortedFirstDays) {
+  // Short circuit for largest firstDay
   if (day === largest) {
     continue
   }
@@ -27,16 +27,15 @@ for (const [day, locales] of sortedMinimalDays) {
   condArr.push(templateConditional(day, noRepeatLocales))
 }
 
-writeFileSync(resolve('src/minimalDays.ts'), templateCode(condArr, largest), {
+writeFileSync(resolve('src/firstDay.ts'), templateCode(condArr, largest), {
   encoding: 'utf8',
   flag: 'w',
 })
-
-console.log('Wrote minimalDays.ts')
+console.log('Wrote firstDay.ts')
 
 function templateCode(conditionals, largest) {
   return `
-export function getMinimalDays(locale: string): number {
+export function getFirstDay(locale: string): number {
   ${conditionals.join('  } else ')}  }
 
   return ${largest}

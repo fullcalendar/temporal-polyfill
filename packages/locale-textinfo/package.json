@@ -16,19 +16,21 @@
   "license": "MIT",
   "copyright": "2026 Adam Shaw",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.mjs"
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
   },
   "files": ["/src", "/dist"],
   "scripts": {
-    "compile-directions": "node ./scripts/compile-directions.cjs",
+    "build": "tsc --build tsconfig.json",
+    "clean": "rm -rf dist",
+    "compile-directions": "node ./scripts/compile-directions.js",
     "locales-compile": "pnpm run compile-directions"
   },
   "devDependencies": {
-    "locale-data": "workspace:*"
+    "locale-data": "workspace:*",
+    "typescript": "~5.3.3"
   }
 }

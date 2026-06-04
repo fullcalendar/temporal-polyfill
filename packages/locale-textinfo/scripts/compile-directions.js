@@ -1,6 +1,6 @@
-const { writeFileSync } = require('fs')
-const { resolve } = require('path')
-const { getAllLocalesData } = require('../../../scripts/lib/localesList.cjs')
+import { writeFileSync } from 'fs'
+import { resolve } from 'path'
+import { getAllLocalesData } from '../../locale-data/scripts/lib/localesList.js'
 
 const locales = getAllLocalesData()
 const rtlArr = []

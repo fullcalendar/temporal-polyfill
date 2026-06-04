@@ -1,4 +1,9 @@
 packages:
+  # - ./packages/datetimeformat-tokens
+  # - ./packages/durationformat-polyfill
+  # - ./packages/locale-data
+  # - ./packages/locale-textinfo
+  # - ./packages/locale-weekinfo
   - ./packages/temporal-polyfill
   - ./packages/temporal-spec
   - ./packages/temporal-utils

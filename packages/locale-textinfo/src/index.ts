@@ -1,4 +1,4 @@
-import { getDirection } from './direction'
+import { getDirection } from './direction.js'
 
 type LocaleTextInfo = {
   direction: 'ltr' | 'rtl'

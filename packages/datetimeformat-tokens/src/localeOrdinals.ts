@@ -1,5 +1,5 @@
-import { localeOrdinalsData } from './localeOrdinalsData'
-import { Ordinals } from './ordinals'
+import { localeOrdinalsData } from './localeOrdinalsData.js'
+import { Ordinals } from './ordinals.js'
 
 function expandOrdinals(): { [key: string]: Ordinals } {
   const obj = {} as { [key: string]: Ordinals }
