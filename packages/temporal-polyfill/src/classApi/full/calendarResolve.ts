@@ -1,4 +1,4 @@
-import { getExoticCalendar } from '../../exoticCalendars/exoticCalendarProvider'
+import { getExoticCalendar } from '../../exoticCalendars/index'
 import { gregoryCalendar, isoCalendar } from '../../internal/calendarSlot'
 import type { CalendarSlot } from '../../internal/calendarSlot'
 import { requireString } from '../../internal/cast'

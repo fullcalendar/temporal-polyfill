@@ -1,4 +1,4 @@
-import { getExoticCalendar } from '../../exoticCalendars/exoticCalendarProvider'
+import { getExoticCalendar } from '../../exoticCalendars/index'
 import {
   CalendarSlot,
   getCalendarSlotId,
