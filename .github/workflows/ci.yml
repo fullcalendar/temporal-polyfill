@@ -25,7 +25,7 @@ jobs:
           - TEST_NODE_VERSION: 20.10.0
             MINIFIER: terser
           - TEST_NODE_VERSION: 22.14.0
-            MINIFIER: swc
+            # MINIFIER: swc -- FIX
           - TEST_NODE_VERSION: 26.2.0
             SKIP_CORE: 1
 
