@@ -134,26 +134,6 @@ export function createIntlScrapedCalendar(
     diffMonthSlots(year0, month0, year1, month1) {
       return diffIntlMonthSlots(calendar, year0, month0, year1, month1)
     },
-    isConstrainedFinalIntercalaryMonthDiff(
-      sign,
-      year0,
-      month0,
-      day0,
-      year1,
-      month1,
-      day1,
-    ) {
-      return isConstrainedFinalIntercalaryMonthDiff(
-        calendar,
-        sign,
-        year0,
-        month0,
-        day0,
-        year1,
-        month1,
-        day1,
-      )
-    },
   }
 
   return calendar
@@ -601,35 +581,6 @@ export function diffIntlMonthSlots(
   }
 
   return -diffIntlMonthSlots(intlCalendar, year1, month1, year0, month0)
-}
-
-function isConstrainedFinalIntercalaryMonthDiff(
-  intlCalendar: IntlScrapedCalendar,
-  sign: number,
-  year0: number,
-  month0: number,
-  day0: number,
-  year1: number,
-  month1: number,
-  day1: number,
-): boolean {
-  const monthsInYear0 = computeIntlMonthsInYear(intlCalendar, year0)
-  const monthsInYear1 = computeIntlMonthsInYear(intlCalendar, year1)
-
-  // Calendars with a real final intercalary month can constrain the final day
-  // across adjacent years without losing a full month slot. Ordinary end-of-
-  // month wrapping still backs off because it changes monthCode instead of
-  // staying on the same final intercalary month.
-  return (
-    sign < 0 &&
-    monthsInYear0 > isoMonthsInYear &&
-    monthsInYear1 > isoMonthsInYear &&
-    month0 === monthsInYear0 &&
-    month1 === monthsInYear1 &&
-    day0 === computeIntlDaysInMonth(intlCalendar, year0, month0) &&
-    day1 === computeIntlDaysInMonth(intlCalendar, year1, month1) &&
-    day0 > day1
-  )
 }
 
 // -----------------------------------------------------------------------------

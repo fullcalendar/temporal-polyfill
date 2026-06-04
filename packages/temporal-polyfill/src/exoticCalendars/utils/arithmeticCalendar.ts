@@ -203,26 +203,6 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     diffMonthSlots(year0, month0, year1, month1) {
       return diffArithmeticMonthSlots(calendar, year0, month0, year1, month1)
     },
-    isConstrainedFinalIntercalaryMonthDiff(
-      sign,
-      year0,
-      month0,
-      day0,
-      year1,
-      month1,
-      day1,
-    ) {
-      return isConstrainedFinalIntercalaryMonthDiff(
-        calendar,
-        sign,
-        year0,
-        month0,
-        day0,
-        year1,
-        month1,
-        day1,
-      )
-    },
   }
 
   return calendar
@@ -283,29 +263,4 @@ function diffArithmeticMonthSlots(
   }
 
   return -diffArithmeticMonthSlots(calendar, year1, month1, year0, month0)
-}
-
-function isConstrainedFinalIntercalaryMonthDiff(
-  calendar: ExoticCalendar,
-  sign: number,
-  year0: number,
-  month0: number,
-  day0: number,
-  year1: number,
-  month1: number,
-  day1: number,
-): boolean {
-  const monthsInYear0 = calendar.computeMonthsInYear(year0)
-  const monthsInYear1 = calendar.computeMonthsInYear(year1)
-
-  return (
-    sign < 0 &&
-    monthsInYear0 > isoMonthsInYear &&
-    monthsInYear1 > isoMonthsInYear &&
-    month0 === monthsInYear0 &&
-    month1 === monthsInYear1 &&
-    day0 === calendar.computeDaysInMonth(year0, month0) &&
-    day1 === calendar.computeDaysInMonth(year1, month1) &&
-    day0 > day1
-  )
 }

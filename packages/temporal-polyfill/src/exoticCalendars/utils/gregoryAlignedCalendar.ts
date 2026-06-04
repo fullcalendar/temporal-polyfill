@@ -117,8 +117,5 @@ export function createGregoryAlignedCalendar(
         month1,
       )
     },
-    isConstrainedFinalIntercalaryMonthDiff() {
-      return false
-    },
   }
 }

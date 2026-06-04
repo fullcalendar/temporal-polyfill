@@ -69,15 +69,6 @@ export interface ExoticCalendar {
     year1: number,
     month1: number,
   ): number
-  isConstrainedFinalIntercalaryMonthDiff(
-    sign: number,
-    year0: number,
-    month0: number,
-    day0: number,
-    year1: number,
-    month1: number,
-    day1: number,
-  ): boolean
 }
 
 export function getCalendarSlotId(calendar: CalendarSlot): string {
