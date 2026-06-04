@@ -15,6 +15,7 @@ import { dts } from 'rollup-plugin-dts'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
+import { buildTerserOptions } from './lib/terser-options.js'
 import { terserSimple } from './lib/terser-simple.js'
 
 const argv = process.argv.slice(2)
@@ -27,8 +28,6 @@ async function writeBundles(pkgDir, isDev) {
 }
 
 async function buildConfigs(pkgDir, isDev) {
-  const temporalReservedWords = await readTemporalReservedWords(pkgDir)
-
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const isExternalDependency = buildExternalDependencyResolver(pkgJson)
@@ -76,30 +75,18 @@ async function buildConfigs(pkgDir, isDev) {
           // for reading sourcemaps from tsc
           isDev && sourcemaps(),
         ],
-        output: [
-          {
-            format: 'iife',
-            file: joinPaths('dist', exportName + extensions.iife),
-            sourcemap: isDev,
-            sourcemapExcludeSources: true,
-            plugins: [
-              !isDev &&
-                buildTerserPlugin({
-                  humanReadable: true,
-                }),
-            ],
-          },
-          !isDev && {
-            format: 'iife',
-            file: joinPaths('dist', exportName + extensions.iifeMin),
-            plugins: [
+        output: {
+          format: 'iife',
+          file: joinPaths('dist', exportName + extensions.iife),
+          sourcemap: isDev,
+          sourcemapExcludeSources: true,
+          plugins: [
+            !isDev &&
               buildTerserPlugin({
-                mangleProps: true,
-                manglePropsExcept: temporalReservedWords,
+                humanReadable: true,
               }),
-            ],
-          },
-        ],
+          ],
+        },
       })
     }
   }
@@ -247,93 +234,20 @@ function buildExternalDependencyResolver(pkgJson, options = {}) {
 // Terser
 // -----------------------------------------------------------------------------
 
-const terserNameCache = {}
-
 function buildTerserPlugin({
   humanReadable = false,
   mangleProps = false,
   preserveAnnotations = false,
   manglePropsExcept,
 }) {
-  return terserSimple({
-    compress: {
-      ecma: 2018,
-      passes: 3, // enough to remove dead object assignment, get lower size
-      keep_fargs: true, // keep explicit =undefined params that define method .length
-      unsafe_arrows: true,
-      unsafe_methods: true,
-      booleans_as_integers: true,
-      hoist_funs: true,
-    },
-    mangle: mangleProps && {
-      properties: {
-        reserved: manglePropsExcept,
-        keep_quoted: true,
-      },
-      // Unfortunately can't just mangle props and nothing else, so retain:
-      keep_fnames: humanReadable,
-      keep_classnames: humanReadable,
-    },
-    nameCache: terserNameCache, // for consistent mangling across chunks/files
-    format: {
-      beautify: humanReadable,
-      braces: humanReadable,
-      indent_level: 2,
-      preserve_annotations: preserveAnnotations, // like PURE annotations
-    },
-  })
-}
-
-// Temporal Reserved Words
-// -----------------------------------------------------------------------------
-
-const startsWithLetterRegExp = /^[a-zA-Z]/
-
-async function readTemporalReservedWords(pkgDir) {
-  const code = await readFile(
-    joinPaths(pkgDir, '../temporal-spec/global.d.ts'),
-    'utf-8',
+  return terserSimple(
+    buildTerserOptions({
+      humanReadable,
+      mangleProps,
+      preserveAnnotations,
+      manglePropsExcept,
+    }),
   )
-  return code
-    .split(/\W+/)
-    .filter((symbol) => symbol && startsWithLetterRegExp.test(symbol))
-    .concat([
-      // exposed in func API
-      'branding',
-
-      // JS props Rollup doesn't know about
-      'resolvedOptions',
-      'useGrouping',
-      'relatedYear',
-
-      // Public Intl.DateTimeFormat option keys must survive property mangling.
-      // The Temporal formatters copy, transform, and fabricate option bags
-      // before handing them back to native Intl, so mangling these keys changes
-      // observable locale-formatting behavior.
-      'calendar',
-      'dateStyle',
-      'day',
-      'dayPeriod',
-      'era',
-      'fractionalSecondDigits',
-      'full',
-      'hour',
-      'hour12',
-      'hourCycle',
-      'localeMatcher',
-      'long',
-      'medium',
-      'minute',
-      'month',
-      'numberingSystem',
-      'second',
-      'short',
-      'timeStyle',
-      'timeZone',
-      'timeZoneName',
-      'weekday',
-      'year',
-    ])
 }
 
 // Rollup Utils

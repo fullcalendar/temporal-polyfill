@@ -31,6 +31,7 @@
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
     "bundle": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js",
     "bundle:dev": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js --dev",
+    "minify": "./scripts/minify.js",
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",
     "readme": "cp ../../README.md dist",
@@ -41,7 +42,7 @@
     "vitest:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000",
     "test262": "./scripts/test262.js",
     "clean": "./scripts/clean.js --tsc",
-    "size": "./scripts/size.js"
+    "size": "pnpm run minify && ./scripts/size.js"
   },
   "type": "module",
   "buildConfig": {
