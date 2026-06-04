@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - spec-stage-4-ci
+      - spec-stage-4
 
 env:
   TZ: "America/New_York"
