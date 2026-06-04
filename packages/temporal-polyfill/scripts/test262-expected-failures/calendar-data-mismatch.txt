@@ -1,6 +1,9 @@
 
-# Core global expected failures for Node <=22.
-
+# ENV-ISSUE
+# Node >=24's newer ICU data differs from the ICU4X-shaped calendar data that
+# these Temporal test262 cases expect. In the full lane, this only affects Node
+# >=24. In the core lane, global.js lacks the exotic-calendar implementation, so
+# the same tests are expected failures for every non-native Node version.
 intl402/Temporal/PlainDate/from/non-positive-single-era-year.js
 intl402/Temporal/PlainDate/from/roundtrip-from-iso.js
 intl402/Temporal/PlainDate/from/roundtrip-from-property-bag.js

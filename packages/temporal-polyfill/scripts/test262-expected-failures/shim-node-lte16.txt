@@ -36,11 +36,3 @@ intl402/Temporal/ZonedDateTime/prototype/equals/timezone-case-insensitive.js
 intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transition-at-instant-boundaries.js
 intl402/Temporal/ZonedDateTime/prototype/toString/timezone.js
 intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
-
-# ENV-ISSUE
-# Node <=16, native Intl.supportedValuesOf("calendar") not implemented
-intl402/Temporal/PlainDate/prototype/toLocaleString/calendar-mismatch.js
-intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
-intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
-intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
-intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js

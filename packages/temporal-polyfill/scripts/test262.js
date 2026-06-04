@@ -91,18 +91,16 @@ yargs(hideBin(process.argv))
         if (currentNodeMajorVersion >= 22) {
           expectedFailureFiles.push('shim-node-gte22.txt')
         }
-        if (currentNodeMajorVersion >= 24) {
-          expectedFailureFiles.push('shim-node-gte24.txt')
-        }
 
         if (classApi === 'core') {
-          expectedFailureFiles.push('core-global.txt')
-          if (currentNodeMajorVersion <= 22) {
-            expectedFailureFiles.push('core-global-node-lte22.txt')
-          }
-          if (currentNodeMajorVersion >= 18) {
-            expectedFailureFiles.push('core-global-node-gte18.txt')
-          }
+          expectedFailureFiles.push('calendar.txt')
+        }
+
+        if (classApi === 'core' || currentNodeMajorVersion >= 24) {
+          expectedFailureFiles.push('calendar-data-mismatch.txt')
+        }
+        if (classApi === 'core' || currentNodeMajorVersion <= 16) {
+          expectedFailureFiles.push('calendar-supported-values-of.txt')
         }
       }
 

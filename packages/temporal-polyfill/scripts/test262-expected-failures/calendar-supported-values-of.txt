@@ -1,6 +1,9 @@
 
-# Core global expected failures for Node >=18.
-
+# ENV-ISSUE / CORE-GLOBAL
+# Node <=16 lacks Intl.supportedValuesOf("calendar"), so these tests cannot run
+# in either lane there. On Node >=18, full/global.js passes, but global.js lacks
+# enough non-ISO/non-Gregory calendar support for the constructed mismatch
+# instances.
 intl402/Temporal/PlainDate/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
 intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
