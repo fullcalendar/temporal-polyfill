@@ -39,15 +39,19 @@ async function displaySizes(
     throw RangeError('Cannot debug output with multiple entry points')
   }
 
-  const globalIifePath = './dist/global.min.js'
-  console.log(`Size of ${globalIifePath} ...`)
-  await execLive([
-    'gzip-size',
-    '--include-original',
-    ...(rawSizes ? ['--raw'] : []),
-    globalIifePath,
-  ])
-  console.log()
+  for (const globalIifePath of [
+    './dist/global.min.js',
+    './dist/full/global.min.js',
+  ]) {
+    console.log(`Size of ${globalIifePath} ...`)
+    await execLive([
+      'gzip-size',
+      '--include-original',
+      ...(rawSizes ? ['--raw'] : []),
+      globalIifePath,
+    ])
+    console.log()
+  }
 
   const includedDependencies = await readPackageDependencyNames(
     './dist/package.json',
