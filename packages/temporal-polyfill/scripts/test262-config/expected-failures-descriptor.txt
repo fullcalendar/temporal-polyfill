@@ -1,18 +1,16 @@
 
-# length
-intl402/DateTimeFormat/prototype/format/format-function-length.js
-intl402/DateTimeFormat/prototype/formatRange/length.js
-intl402/DateTimeFormat/prototype/formatRangeToParts/length.js
-intl402/DateTimeFormat/prototype/formatToParts/length.js
-
 # not-a-constructor
 built-ins/Date/prototype/toTemporalInstant/not-a-constructor.js
 
 # builtin
+# Asserts Object.getPrototypeOf(Intl.DateTimeFormat.prototype) === Object.prototype.
+# Our Intl.DateTimeFormat subclasses native DateTimeFormat (class ShimDateTimeFormat
+# extends ...) so instances are genuine DTFs and `instanceof Intl.DateTimeFormat`
+# holds even in the func API, where we don't replace the global. That requires
+# native DateTimeFormat.prototype to stay in the chain, so our prototype's
+# [[Prototype]] is not Object.prototype and this assertion can't pass. Fixing it
+# would mean dropping the `extends` model (e.g. composition that holds a native
+# DTF in a slot), which would break the func API's instanceof guarantee.
 intl402/DateTimeFormat/prototype/builtin.js
-intl402/DateTimeFormat/prototype/format/builtin.js
-intl402/DateTimeFormat/prototype/formatRange/builtin.js
-intl402/DateTimeFormat/prototype/formatRangeToParts/builtin.js
-intl402/DateTimeFormat/prototype/resolvedOptions/builtin.js
 
 # prop-desc

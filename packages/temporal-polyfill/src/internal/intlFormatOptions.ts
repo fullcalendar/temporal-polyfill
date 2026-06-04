@@ -1,6 +1,4 @@
 import * as errorMessages from './errorMessages'
-import { utcTimeZoneId } from './timeZoneConfig'
-
 type OptionFields = Record<
   string,
   Intl.DateTimeFormatOptions[keyof Intl.DateTimeFormatOptions]
@@ -98,11 +96,6 @@ function createOptionsTransformer(
   // Fields to inject when the caller selected no output shape.
   defaultShapeFields: Intl.DateTimeFormatOptions,
 
-  // Plain types need a neutral internal timeZone for Intl.DateTimeFormat, but
-  // must not expose a meaningful time zone to callers.
-  // TODO: move elsewehre
-  suppressTimeZone: boolean,
-
   // Partial date types expand dateStyle to the concrete fields they support.
   dateStyleReplacementFields?: DateStyleReplacementFields,
 ): OptionsTransformer {
@@ -166,17 +159,6 @@ function createOptionsTransformer(
 
     if (hasTimeStyle) {
       transformedOptions.timeStyle = analysis.timeStyle
-    }
-
-    if (suppressTimeZone) {
-      // Plain types have no time zone, but the later Intl formatting path
-      // still needs a neutral one to convert their ISO fields to an epoch.
-      transformedOptions.timeZone = utcTimeZoneId
-
-      // full/long timeStyle would expose a time zone name, so downgrade it.
-      if (['full', 'long'].includes(transformedOptions.timeStyle!)) {
-        transformedOptions.timeStyle = 'medium'
-      }
     }
 
     return transformedOptions
@@ -249,7 +231,6 @@ export const transformInstantOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ [],
   /* ignoredFieldNames = */ [],
   /* defaultShapeFields = */ dateTimeDefaultShapeFields,
-  /* suppressTimeZone = */ false,
 )
 
 export const transformZonedOptions = createOptionsTransformer(
@@ -257,7 +238,6 @@ export const transformZonedOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ [],
   /* ignoredFieldNames = */ [],
   /* defaultShapeFields = */ zonedDateTimeDefaultShapeFields,
-  /* suppressTimeZone = */ false,
 )
 
 export const transformDateTimeOptions = createOptionsTransformer(
@@ -265,7 +245,6 @@ export const transformDateTimeOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ [],
   /* ignoredFieldNames = */ timeZoneNameStrs,
   /* defaultShapeFields = */ dateTimeDefaultShapeFields,
-  /* suppressTimeZone = */ true,
 )
 
 export const transformDateOptions = createOptionsTransformer(
@@ -273,7 +252,6 @@ export const transformDateOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ timeShapeFieldNames,
   /* ignoredFieldNames = */ timeZoneNameStrs,
   /* defaultShapeFields = */ dateDefaultShapeFields,
-  /* suppressTimeZone = */ true,
 )
 
 export const transformTimeOptions = createOptionsTransformer(
@@ -281,7 +259,6 @@ export const transformTimeOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ dateShapeFieldNames,
   /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
   /* defaultShapeFields = */ timeDefaultShapeFields,
-  /* suppressTimeZone = */ true,
 )
 
 export const transformYearMonthOptions = createOptionsTransformer(
@@ -289,7 +266,6 @@ export const transformYearMonthOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ yearMonthInvalidShapeFieldNames,
   /* ignoredFieldNames = */ timeZoneNameStrs,
   /* defaultShapeFields = */ yearMonthDefaultShapeFields,
-  /* suppressTimeZone = */ true,
   /* dateStyleReplacementFields = */ {
     full: { year: 'numeric', month: 'long' },
     long: { year: 'numeric', month: 'long' },
@@ -303,7 +279,6 @@ export const transformMonthDayOptions = createOptionsTransformer(
   /* invalidShapeFieldNames = */ monthDayInvalidShapeFieldNames,
   /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
   /* defaultShapeFields = */ monthDayDefaultShapeFields,
-  /* suppressTimeZone = */ true,
   /* dateStyleReplacementFields = */ {
     full: { month: 'long', day: 'numeric' },
     long: { month: 'long', day: 'numeric' },

@@ -8,12 +8,15 @@ import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
 import {
-  createFormatPrepper,
-  monthDayConfig,
-} from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+  strictPartialDateCalendarCheck,
+} from '../../internal/intlFormatArgs'
+import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
   formatMonthDayIsoAuto,
   formatPlainMonthDayIso,
@@ -174,27 +177,62 @@ export function toPlainDate(
   return createPlainDateShimRecord(resSlots)
 }
 
-const prepFormat = createFormatPrepper(monthDayConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  monthDayConfig,
-  getPlainMonthDayShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<PlainMonthDayShimRecord>({
+  transformOptions: (options) =>
+    applyPlainFormatTimeZone(
+      transformMonthDayOptions(options, /* allowPartialOverlap = */ true),
+    ),
+  createArgsProvider: (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getPlainMonthDayShimRecordSlots(record)
+      const format = internals.format
+      checkResolvedCalendarCompatible(
+        format,
+        slots,
+        strictPartialDateCalendarCheck,
+      )
+      return [format, isoDateToEpochMilli(slots)!]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getPlainMonthDayShimRecordSlots(record0)
+      const slots1 = getPlainMonthDayShimRecordSlots(record1)
+      const format = internals.format
+      checkResolvedCalendarCompatible(
+        format,
+        slots0,
+        strictPartialDateCalendarCheck,
+      )
+      checkResolvedCalendarCompatible(
+        format,
+        slots1,
+        strictPartialDateCalendarCheck,
+      )
+      return [
+        format,
+        isoDateToEpochMilli(slots0)!,
+        isoDateToEpochMilli(slots1)!,
+      ]
+    },
+  }),
+})
 
 export function toLocaleString(
   record: PlainMonthDayShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getPlainMonthDayShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getPlainMonthDayShimRecordSlots(record),
+    applyPlainFormatTimeZone(
+      transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
+    ),
   )
-  return format.format(epochMilli)
+  checkResolvedCalendarCompatible(format, slots, strictPartialDateCalendarCheck)
+  return format.format(isoDateToEpochMilli(slots)!)
 }
 
 export function toString(

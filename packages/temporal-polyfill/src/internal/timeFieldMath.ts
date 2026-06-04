@@ -2,7 +2,7 @@ import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
 import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
-import { Unit, nanoInUtcDay } from './units'
+import { Unit, nanoInMilli, nanoInUtcDay } from './units'
 import { clampProp, divModFloor, zipPropsDesc } from './utils'
 
 // Time Field Validation
@@ -32,6 +32,12 @@ export function constrainTimeFields(
 
 export function timeFieldsToNano(timeFields: TimeFields): number {
   return Number(givenFieldsToBigNano(timeFields, Unit.Hour, timeFieldNamesAsc))
+}
+
+// For Intl formatting: PlainTime has no UTC anchor, so we treat the time fields
+// as an offset from the Unix epoch (midnight, 1970-01-01 UTC).
+export function timeFieldsToMilli(timeFields: TimeFields): number {
+  return timeFieldsToNano(timeFields) / nanoInMilli
 }
 
 export function nanoToTimeAndDay(nano: number): [TimeFields, number] {

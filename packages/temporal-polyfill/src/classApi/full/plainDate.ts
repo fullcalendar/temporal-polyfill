@@ -26,24 +26,30 @@ import {
   zonedDateTimeToPlainDate,
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
-import { diffPlainDates, getCommonCalendar } from '../../internal/diff'
+import { diffPlainDates } from '../../internal/diff'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
   DateFields,
   DateLikeObject,
 } from '../../internal/fieldTypes'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+} from '../../internal/intlFormatArgs'
+import { transformDateOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { movePlainDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepPlainDateFormat } from '../intlFormatConfig'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -310,14 +316,17 @@ export class PlainDate implements DateFields {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepPlainDateFormat(
+    const slots = getPlainDateSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getPlainDateSlots(this),
+      applyPlainFormatTimeZone(
+        transformDateOptions(options, /* allowPartialOverlap = */ false),
+      ),
     )
-    return format.format(epochMilli)
+    checkResolvedCalendarCompatible(format, slots)
+    return format.format(isoDateToEpochMilli(slots)!)
   }
 
   toString(

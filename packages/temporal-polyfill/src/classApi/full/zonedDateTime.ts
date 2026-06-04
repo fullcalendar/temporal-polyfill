@@ -29,13 +29,18 @@ import {
   zonedDateTimeToPlainTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
+import { diffZonedDateTimes } from '../../internal/diff'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   DateTimeFields,
   ZonedDateTimeLikeObject,
 } from '../../internal/fieldTypes'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyZonedFormatTimeZone,
+  checkResolvedCalendarCompatible,
+} from '../../internal/intlFormatArgs'
+import { transformZonedOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatOffsetNano,
@@ -51,6 +56,7 @@ import {
   computeZonedStartOfDay,
   roundZonedDateTime,
 } from '../../internal/round'
+import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
@@ -63,7 +69,6 @@ import {
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepZonedDateTimeFormat } from '../intlFormatConfig'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -433,14 +438,18 @@ export class ZonedDateTime {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options: Intl.DateTimeFormatOptions | undefined = undefined,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepZonedDateTimeFormat(
+    const slots = getZonedDateTimeSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getZonedDateTimeSlots(this),
+      applyZonedFormatTimeZone(
+        transformZonedOptions(options, /* allowPartialOverlap = */ false),
+        getZonedTimeZoneId(slots),
+      ),
     )
-    return format.format(epochMilli)
+    checkResolvedCalendarCompatible(format, slots)
+    return format.format(getEpochMilli(slots))
   }
 
   toString(

@@ -20,13 +20,16 @@ import {
 } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
-import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
+import { diffPlainYearMonth } from '../../internal/diff'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
 import {
-  createFormatPrepper,
-  yearMonthConfig,
-} from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+  strictPartialDateCalendarCheck,
+} from '../../internal/intlFormatArgs'
+import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
   formatPlainYearMonthIso,
   formatYearMonthIsoAuto,
@@ -34,6 +37,7 @@ import {
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
+import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
@@ -394,27 +398,62 @@ export function toPlainDate(
   return createPlainDateShimRecord(resSlots)
 }
 
-const prepFormat = createFormatPrepper(yearMonthConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  yearMonthConfig,
-  getPlainYearMonthShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<PlainYearMonthShimRecord>({
+  transformOptions: (options) =>
+    applyPlainFormatTimeZone(
+      transformYearMonthOptions(options, /* allowPartialOverlap = */ true),
+    ),
+  createArgsProvider: (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getPlainYearMonthShimRecordSlots(record)
+      const format = internals.format
+      checkResolvedCalendarCompatible(
+        format,
+        slots,
+        strictPartialDateCalendarCheck,
+      )
+      return [format, isoDateToEpochMilli(slots)!]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getPlainYearMonthShimRecordSlots(record0)
+      const slots1 = getPlainYearMonthShimRecordSlots(record1)
+      const format = internals.format
+      checkResolvedCalendarCompatible(
+        format,
+        slots0,
+        strictPartialDateCalendarCheck,
+      )
+      checkResolvedCalendarCompatible(
+        format,
+        slots1,
+        strictPartialDateCalendarCheck,
+      )
+      return [
+        format,
+        isoDateToEpochMilli(slots0)!,
+        isoDateToEpochMilli(slots1)!,
+      ]
+    },
+  }),
+})
 
 export function toLocaleString(
   record: PlainYearMonthShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getPlainYearMonthShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getPlainYearMonthShimRecordSlots(record),
+    applyPlainFormatTimeZone(
+      transformYearMonthOptions(options, /* allowPartialOverlap = */ false),
+    ),
   )
-  return format.format(epochMilli)
+  checkResolvedCalendarCompatible(format, slots, strictPartialDateCalendarCheck)
+  return format.format(isoDateToEpochMilli(slots)!)
 }
 
 export function toString(

@@ -5,7 +5,7 @@ import {
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
-import { type CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { type CalendarSlot } from './calendarSlot'
 import { DurationFields, durationFieldDefaults } from './durationFields'
 import {
   nanoToDurationDayTimeFields,
@@ -44,6 +44,7 @@ import {
   createMarkerMoveOps,
 } from './relativeMath'
 import { roundBigNanoToUnit, roundRelativeDuration } from './round'
+import { getCommonTimeZone } from './slotUtils'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
@@ -761,25 +762,4 @@ function diffDays(
     isoDateToEpochMilli(startIsoDate)!,
     isoDateToEpochMilli(endIsoDate)!,
   )
-}
-
-// -----------------------------------------------------------------------------
-
-export function getCommonCalendar(
-  a: CalendarSlot,
-  b: CalendarSlot,
-): CalendarSlot {
-  if (getCalendarSlotId(a) !== getCalendarSlotId(b)) {
-    throw new RangeError(errorMessages.mismatchingCalendars)
-  }
-
-  return a
-}
-
-export function getCommonTimeZone(a: TimeZone, b: TimeZone): TimeZone {
-  if (a.compareKey !== b.compareKey) {
-    throw new RangeError(errorMessages.mismatchingTimeZones)
-  }
-
-  return a
 }

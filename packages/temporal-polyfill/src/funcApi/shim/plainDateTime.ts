@@ -21,9 +21,10 @@ import {
 import { constructDateTimeSlots } from '../../internal/construct'
 import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainDateTimes, getCommonCalendar } from '../../internal/diff'
+import { diffPlainDateTimes } from '../../internal/diff'
 import {
   epochNanoToIso,
+  isoDateTimeToEpochMilli,
   isoDateTimeToEpochNano,
 } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
@@ -35,10 +36,11 @@ import {
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import {
-  createFormatPrepper,
-  dateTimeConfig,
-} from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+} from '../../internal/intlFormatArgs'
+import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatDateTimeIsoAuto,
@@ -52,6 +54,7 @@ import {
   computeDayFloor,
   roundPlainDateTimeToUnit,
 } from '../../internal/round'
+import { getCommonCalendar } from '../../internal/slotUtils'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -462,27 +465,50 @@ export function toPlainTime(
   return createPlainTimeShimRecord(resSlots)
 }
 
-const prepFormat = createFormatPrepper(dateTimeConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  dateTimeConfig,
-  getPlainDateTimeShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<PlainDateTimeShimRecord>({
+  transformOptions: (options) =>
+    applyPlainFormatTimeZone(
+      transformDateTimeOptions(options, /* allowPartialOverlap = */ true),
+    ),
+  createArgsProvider: (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getPlainDateTimeShimRecordSlots(record)
+      const format = internals.format
+      checkResolvedCalendarCompatible(format, slots)
+      return [format, isoDateTimeToEpochMilli(slots)!]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getPlainDateTimeShimRecordSlots(record0)
+      const slots1 = getPlainDateTimeShimRecordSlots(record1)
+      const format = internals.format
+      checkResolvedCalendarCompatible(format, slots0)
+      checkResolvedCalendarCompatible(format, slots1)
+      return [
+        format,
+        isoDateTimeToEpochMilli(slots0)!,
+        isoDateTimeToEpochMilli(slots1)!,
+      ]
+    },
+  }),
+})
 
 export function toLocaleString(
   record: PlainDateTimeShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getPlainDateTimeShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getPlainDateTimeShimRecordSlots(record),
+    applyPlainFormatTimeZone(
+      transformDateTimeOptions(options, /* allowPartialOverlap = */ false),
+    ),
   )
-  return format.format(epochMilli)
+  checkResolvedCalendarCompatible(format, slots)
+  return format.format(isoDateTimeToEpochMilli(slots)!)
 }
 
 export function toString(

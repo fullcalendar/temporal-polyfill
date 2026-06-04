@@ -4,12 +4,7 @@ import {
   divideBigNanoToExactNumber,
 } from '../../internal/bigNano'
 import { type CalendarSlot } from '../../internal/calendarSlot'
-import {
-  diffCalendarDates,
-  getCommonCalendar,
-  getCommonTimeZone,
-  prepareZonedEpochDiff,
-} from '../../internal/diff'
+import { diffCalendarDates, prepareZonedEpochDiff } from '../../internal/diff'
 import { DurationFields } from '../../internal/durationFields'
 import {
   isoDateTimeToEpochNano,
@@ -29,6 +24,7 @@ import {
   createMarkerMoveOps,
 } from '../../internal/relativeMath'
 import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
+import { getCommonCalendar, getCommonTimeZone } from '../../internal/slotUtils'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'

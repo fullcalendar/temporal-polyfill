@@ -27,7 +27,8 @@ import {
   zonedDateTimeToPlainDateTime,
 } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainDateTimes, getCommonCalendar } from '../../internal/diff'
+import { diffPlainDateTimes } from '../../internal/diff'
+import { isoDateTimeToEpochMilli } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
@@ -37,7 +38,12 @@ import {
   DateTimeLikeObject,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+} from '../../internal/intlFormatArgs'
+import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
@@ -45,6 +51,7 @@ import { mergePlainDateTimeFields } from '../../internal/merge'
 import { movePlainDateTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainDateTime } from '../../internal/round'
+import { getCommonCalendar } from '../../internal/slotUtils'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -53,7 +60,6 @@ import {
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepPlainDateTimeFormat } from '../intlFormatConfig'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -371,14 +377,17 @@ export class PlainDateTime implements DateTimeFields {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepPlainDateTimeFormat(
+    const slots = getPlainDateTimeSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getPlainDateTimeSlots(this),
+      applyPlainFormatTimeZone(
+        transformDateTimeOptions(options, /* allowPartialOverlap = */ false),
+      ),
     )
-    return format.format(epochMilli)
+    checkResolvedCalendarCompatible(format, slots)
+    return format.format(isoDateTimeToEpochMilli(slots)!)
   }
 
   toString(

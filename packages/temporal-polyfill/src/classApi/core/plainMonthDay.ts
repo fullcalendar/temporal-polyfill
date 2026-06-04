@@ -17,6 +17,7 @@ import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
@@ -24,13 +25,18 @@ import {
   MonthDayLikeObject,
   YearFields,
 } from '../../internal/fieldTypes'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+  strictPartialDateCalendarCheck,
+} from '../../internal/intlFormatArgs'
+import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { isObjectLike } from '../../internal/utils'
-import { prepPlainMonthDayFormat } from '../intlFormatConfig'
 import { extractCalendarFromBag } from './calendarArg'
 import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -116,14 +122,21 @@ export class PlainMonthDay implements MonthDayFields {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepPlainMonthDayFormat(
+    const slots = getPlainMonthDaySlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getPlainMonthDaySlots(this),
+      applyPlainFormatTimeZone(
+        transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
+      ),
     )
-    return format.format(epochMilli)
+    checkResolvedCalendarCompatible(
+      format,
+      slots,
+      strictPartialDateCalendarCheck,
+    )
+    return format.format(isoDateToEpochMilli(slots)!)
   }
 
   toString(
