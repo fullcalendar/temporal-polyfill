@@ -1,0 +1,8 @@
+
+# Core global expected failures for Node >=18.
+
+intl402/Temporal/PlainDate/prototype/toLocaleString/calendar-mismatch.js
+intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
+intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
+intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
+intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js

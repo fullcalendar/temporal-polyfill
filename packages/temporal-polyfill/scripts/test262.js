@@ -35,6 +35,14 @@ yargs(hideBin(process.argv))
           default: 10,
           type: 'number',
           description: 'Maximum allowed number of failures before aborting',
+        })
+        .option('class-api', {
+          requiresArg: true,
+          default: process.env.TEST262_CLASS_API || 'full',
+          choices: ['full', 'core'],
+          type: 'string',
+          description:
+            'Which public global artifact to test: full/global.js or global.js',
         }),
     async (options) => {
       // Only the test runner needs the requested Node version. Build tools can
@@ -46,7 +54,14 @@ yargs(hideBin(process.argv))
       const currentNodeVersion = process.versions.node
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
+      const classApi = options.classApi
 
+      if (classApi === 'core' && isNative) {
+        throw new Error(
+          'The core global artifact cannot be tested under native Temporal. ' +
+            'Use TEST_NODE_VERSION <= 24.',
+        )
+      }
       const expectedFailureFiles = isNative
         ? ['native.txt']
         : ['shim.txt', 'shim-builtin-calls.txt', 'shim-descriptor.txt']
@@ -79,9 +94,20 @@ yargs(hideBin(process.argv))
         if (currentNodeMajorVersion >= 24) {
           expectedFailureFiles.push('shim-node-gte24.txt')
         }
+
+        if (classApi === 'core') {
+          expectedFailureFiles.push('core-global.txt')
+          if (currentNodeMajorVersion <= 22) {
+            expectedFailureFiles.push('core-global-node-lte22.txt')
+          }
+          if (currentNodeMajorVersion >= 18) {
+            expectedFailureFiles.push('core-global-node-gte18.txt')
+          }
+        }
       }
 
-      const globalPolyfillPath = './dist/full/global.js'
+      const globalPolyfillPath =
+        classApi === 'core' ? './dist/global.js' : './dist/full/global.js'
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,

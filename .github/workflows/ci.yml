@@ -11,7 +11,7 @@ env:
 
 jobs:
   ci:
-    name: CI
+    name: CI (${{ matrix.TEST_NODE_VERSION }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,25 +20,10 @@ jobs:
         TEST_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
         include:
           - TEST_NODE_VERSION: 16.20.0
-            TEST262_CLASS_API: full
             LINTING: 1
             SKIP_VITEST: 1
-          - TEST_NODE_VERSION: 18.19.0
-            TEST262_CLASS_API: full
-          - TEST_NODE_VERSION: 20.10.0
-            TEST262_CLASS_API: full
-            TEST262_MINIFIER: terser
-          - TEST_NODE_VERSION: 22.14.0
-            TEST262_CLASS_API: full
-            TEST262_MINIFIER: terser
-          - TEST_NODE_VERSION: 24.16.0
-            TEST262_CLASS_API: full
-            TEST262_MINIFIER: terser
-            TEST262_FORCE_SHIM: 1
           - TEST_NODE_VERSION: 26.2.0
-            TEST262_CLASS_API: full
-            TEST262_MINIFIER: terser
-            TEST262_FORCE_SHIM: 1
+            SKIP_CORE: 1
 
     steps:
       - name: Checkout
@@ -66,11 +51,7 @@ jobs:
         run: pnpm run lint
 
       - name: Build
-        run: >
-          TEST262_CLASS_API=${{ matrix.TEST262_CLASS_API }}
-          TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
-          TEST262_FORCE_SHIM=${{ matrix.TEST262_FORCE_SHIM }}
-          pnpm run build
+        run: pnpm run build
 
       # temporal-polyfill vitest requires temporal-utils to be built
       - name: Vitest
@@ -79,8 +60,15 @@ jobs:
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           pnpm run vitest
 
-      - name: Test 262
+      - name: Test 262 Full
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
-          TEST262_MINIFIER=${{ matrix.TEST262_MINIFIER }}
+          TEST262_CLASS_API=full
+          pnpm run test262
+
+      - name: Test 262 Core
+        if: matrix.SKIP_CORE != 1
+        run: >
+          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
+          TEST262_CLASS_API=core
           pnpm run test262
