@@ -55,6 +55,7 @@ yargs(hideBin(process.argv))
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
       const classApi = options.classApi
+      const useMinified = Boolean(process.env.TEST262_MINIFIED)
 
       if (classApi === 'core' && isNative) {
         throw new Error(
@@ -105,7 +106,9 @@ yargs(hideBin(process.argv))
       }
 
       const globalPolyfillPath =
-        classApi === 'core' ? './dist/global.js' : './dist/full/global.js'
+        classApi === 'core'
+          ? `./dist/global${useMinified ? '.min' : ''}.js`
+          : `./dist/full/global${useMinified ? '.min' : ''}.js`
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,

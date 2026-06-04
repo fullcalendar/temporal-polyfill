@@ -39,6 +39,22 @@ export function buildTerserOptions({
   }
 }
 
+export function buildSwcMinifyOptions() {
+  return {
+    compress: {
+      ecma: 2018,
+      passes: 3,
+      keep_fargs: true,
+      unsafe_arrows: true,
+      unsafe_methods: true,
+      booleans_as_integers: true,
+      hoist_funs: true,
+    },
+    mangle: true,
+    ecma: 2018,
+  }
+}
+
 export async function readTemporalReservedWords(pkgDir) {
   const code = await readFile(
     joinPaths(pkgDir, '../temporal-spec/global.d.ts'),

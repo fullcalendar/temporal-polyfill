@@ -2,9 +2,10 @@
 
 import { join as joinPaths } from 'path'
 import { readFile, writeFile } from 'fs/promises'
-import { minify } from 'terser'
+import { minify as minifyWithTerser } from 'terser'
 import { extensions } from './lib/config.js'
 import {
+  buildSwcMinifyOptions,
   buildTerserOptions,
   readTemporalReservedWords,
 } from './lib/terser-options.js'
@@ -14,7 +15,11 @@ minifyIifeFiles(joinPaths(process.argv[1], '../..'))
 async function minifyIifeFiles(pkgDir) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
-  const temporalReservedWords = await readTemporalReservedWords(pkgDir)
+  const minifier = process.env.MINIFIER || 'terser'
+  const temporalReservedWords =
+    minifier === 'terser' ? await readTemporalReservedWords(pkgDir) : undefined
+
+  console.log(`Using ${minifier} minifier`)
 
   for (const exportPath in pkgJson.buildConfig.exports) {
     const exportConfig = pkgJson.buildConfig.exports[exportPath]
@@ -25,16 +30,30 @@ async function minifyIifeFiles(pkgDir) {
       const inputPath = joinPaths('dist', exportName + extensions.iife)
       const outputPath = joinPaths('dist', exportName + extensions.iifeMin)
       const code = await readFile(joinPaths(pkgDir, inputPath), 'utf-8')
-      const result = await minify(
-        code,
-        buildTerserOptions({
-          mangleProps: true,
-          manglePropsExcept: temporalReservedWords,
-        }),
-      )
+      const result = await minifyCode(code, minifier, temporalReservedWords)
 
       await writeFile(joinPaths(pkgDir, outputPath), result.code)
-      console.log(`Minified ${inputPath}`)
+      console.log(`Minified ${inputPath} with ${minifier}`)
     }
   }
+}
+
+async function minifyCode(code, minifier, temporalReservedWords) {
+  if (minifier === 'swc') {
+    const { minify: minifyWithSwc } = await import('@swc/core')
+
+    return minifyWithSwc(code, buildSwcMinifyOptions())
+  }
+
+  if (minifier === 'terser') {
+    return minifyWithTerser(
+      code,
+      buildTerserOptions({
+        mangleProps: true,
+        manglePropsExcept: temporalReservedWords,
+      }),
+    )
+  }
+
+  throw new Error(`Unsupported MINIFIER: ${minifier}`)
 }

@@ -22,6 +22,10 @@ jobs:
           - TEST_NODE_VERSION: 16.20.0
             LINTING: 1
             SKIP_VITEST: 1
+          - TEST_NODE_VERSION: 20.10.0
+            MINIFIER: terser
+          - TEST_NODE_VERSION: 22.14.0
+            MINIFIER: swc
           - TEST_NODE_VERSION: 26.2.0
             SKIP_CORE: 1
 
@@ -53,6 +57,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Minify
+        if: matrix.MINIFIER
+        env:
+          MINIFIER: ${{ matrix.MINIFIER }}
+        run: pnpm run minify
+
       # temporal-polyfill vitest requires temporal-utils to be built
       - name: Vitest
         if: matrix.SKIP_VITEST != 1
@@ -64,6 +74,7 @@ jobs:
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_CLASS_API=full
+          TEST262_MINIFIED=${{ matrix.MINIFIER }}
           pnpm run test262
 
       - name: Test 262 Core
@@ -71,4 +82,5 @@ jobs:
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_CLASS_API=core
+          TEST262_MINIFIED=${{ matrix.MINIFIER }}
           pnpm run test262
