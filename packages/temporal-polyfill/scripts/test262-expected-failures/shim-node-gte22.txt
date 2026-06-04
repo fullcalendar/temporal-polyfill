@@ -1,0 +1,6 @@
+# ENV-ISSUE
+# Node >=22 rejects offset time zones containing a Unicode minus sign in native
+# Intl.DateTimeFormat before the polyfill's Temporal bridge behavior is under
+# test. Older Node versions accept this input, so keep this host-Intl failure
+# out of the shared shim expected-failure list.
+intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js

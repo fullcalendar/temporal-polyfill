@@ -21,21 +21,28 @@ import {
 import { constructYearMonthSlots } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
-import { diffPlainYearMonth, getCommonCalendar } from '../../internal/diff'
+import { diffPlainYearMonth } from '../../internal/diff'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
   YearMonthFields,
   YearMonthLikeObject,
 } from '../../internal/fieldTypes'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+  strictPartialDateCalendarCheck,
+} from '../../internal/intlFormatArgs'
+import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { getCommonCalendar } from '../../internal/slotUtils'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepPlainYearMonthFormat } from '../intlFormatConfig'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
 import {
@@ -220,14 +227,21 @@ export class PlainYearMonth implements YearMonthFields {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepPlainYearMonthFormat(
+    const slots = getPlainYearMonthSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getPlainYearMonthSlots(this),
+      applyPlainFormatTimeZone(
+        transformYearMonthOptions(options, /* allowPartialOverlap = */ false),
+      ),
     )
-    return format.format(epochMilli)
+    checkResolvedCalendarCompatible(
+      format,
+      slots,
+      strictPartialDateCalendarCheck,
+    )
+    return format.format(isoDateToEpochMilli(slots)!)
   }
 
   toString(

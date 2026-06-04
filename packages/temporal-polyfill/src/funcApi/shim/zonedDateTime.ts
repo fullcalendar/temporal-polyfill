@@ -26,7 +26,7 @@ import {
   zonedDateTimeToPlainTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffZonedDateTimes, getCommonCalendar } from '../../internal/diff'
+import { diffZonedDateTimes } from '../../internal/diff'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -34,8 +34,12 @@ import {
   TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
-import { createFormatPrepper, zonedConfig } from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import {
+  applyZonedFormatTimeZone,
+  checkResolvedCalendarCompatible,
+} from '../../internal/intlFormatArgs'
+import { transformZonedOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatOffsetNano,
@@ -55,6 +59,11 @@ import {
   roundZonedDateTimeToUnit,
   roundZonedEpochToInterval,
 } from '../../internal/round'
+import {
+  getCommonCalendar,
+  getCommonZonedRangeTimeZoneId,
+  getZonedTimeZoneId,
+} from '../../internal/slotUtils'
 import {
   createZonedEpochNanoSlots,
   getEpochMilli,
@@ -78,7 +87,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../../internal/units'
-import { NumberSign, bindArgs } from '../../internal/utils'
+import { NumberSign, bindArgs, memoize } from '../../internal/utils'
 import { DateTimeFormatLike, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -555,27 +564,61 @@ export function toPlainTime(
   return createPlainTimeShimRecord(resSlots)
 }
 
-const prepFormat = createFormatPrepper(zonedConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  zonedConfig,
-  getZonedDateTimeShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<ZonedDateTimeShimRecord>({
+  transformOptions: (options) =>
+    transformZonedOptions(options, /* allowPartialOverlap = */ true),
+  createArgsProvider: (internals) => {
+    // One Intl.DateTimeFormat per distinct time zone id; ZonedDateTime records
+    // with different time zones share a format locale+options but need separate
+    // formatter objects because the time zone is baked into each one.
+    const getFormat = memoize(
+      (timeZoneId: string): Intl.DateTimeFormat =>
+        new RawDateTimeFormat(
+          internals.resolvedLocale,
+          applyZonedFormatTimeZone(
+            { ...internals.transformedOptions },
+            timeZoneId,
+          ),
+        ),
+    )
+
+    return {
+      getArgsForSingle: (record) => {
+        const slots = getZonedDateTimeShimRecordSlots(record)
+        const format = getFormat(getZonedTimeZoneId(slots))
+        checkResolvedCalendarCompatible(format, slots)
+        return [format, getEpochMilli(slots)]
+      },
+      getArgsForRange: (record0, record1) => {
+        const slots0 = getZonedDateTimeShimRecordSlots(record0)
+        const slots1 = getZonedDateTimeShimRecordSlots(record1)
+        const format = getFormat(getCommonZonedRangeTimeZoneId(slots0, slots1))
+        checkResolvedCalendarCompatible(format, slots0)
+        checkResolvedCalendarCompatible(format, slots1)
+        return [format, getEpochMilli(slots0), getEpochMilli(slots1)]
+      },
+    }
+  },
+})
 
 export function toLocaleString(
   record: ZonedDateTimeShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getZonedDateTimeShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getZonedDateTimeShimRecordSlots(record),
+    applyZonedFormatTimeZone(
+      transformZonedOptions(options, /* allowPartialOverlap = */ false),
+      getZonedTimeZoneId(slots),
+    ),
   )
-  return format.format(epochMilli)
+  checkResolvedCalendarCompatible(format, slots)
+  return format.format(getEpochMilli(slots))
 }
 
 // Non-standard: With

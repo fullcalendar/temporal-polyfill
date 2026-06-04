@@ -17,11 +17,8 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
-import {
-  createFormatPrepper,
-  instantConfig,
-} from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { transformInstantOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
   formatInstantIso,
   formatInstantIsoAuto,
@@ -399,27 +396,36 @@ export function toZonedDateTimeISO(
   return createZonedDateTimeShimRecord(resSlots)
 }
 
-const prepFormat = createFormatPrepper(instantConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  instantConfig,
-  getInstantShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<InstantShimRecord>({
+  transformOptions: (options) =>
+    transformInstantOptions(options, /* allowPartialOverlap = */ true),
+  createArgsProvider: (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getInstantShimRecordSlots(record)
+      return [internals.format, getEpochMilli(slots)]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getInstantShimRecordSlots(record0)
+      const slots1 = getInstantShimRecordSlots(record1)
+      return [internals.format, getEpochMilli(slots0), getEpochMilli(slots1)]
+    },
+  }),
+})
 
 export function toLocaleString(
   record: InstantShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getInstantShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getInstantShimRecordSlots(record),
+    transformInstantOptions(options, /* allowPartialOverlap = */ false),
   )
-  return format.format(epochMilli)
+  return format.format(getEpochMilli(slots))
 }
 
 export function toString(

@@ -1,23 +1,30 @@
+import {
+  isoDateTimeToEpochMilli,
+  isoDateToEpochMilli,
+} from '../internal/epochMath'
 import * as errorMessages from '../internal/errorMessages'
 import {
-  FormatPrepper,
-  createFormatForPrep,
-  createFormatPrepper,
-} from '../internal/intlFormatPrep'
+  DateTimeFormatRangeArgs,
+  DateTimeFormatShellInternals,
+  createDateTimeFormatShell,
+} from '../internal/intlDateTimeFormatShell'
 import {
-  LocalesArg,
-  OptionNames,
-  RawDateTimeFormat,
-  RawFormattable,
-} from '../internal/intlFormatUtils'
-import { refineTimeZoneId } from '../internal/timeZoneId'
+  applyPlainFormatTimeZone,
+  checkResolvedCalendarCompatible,
+  strictPartialDateCalendarCheck,
+} from '../internal/intlFormatArgs'
 import {
-  Classlike,
-  createNameDescriptors,
-  memoize,
-  pluckProps,
-} from '../internal/utils'
-import { classFormatConfigs } from './intlFormatConfig'
+  transformDateOptions,
+  transformDateTimeOptions,
+  transformInstantOptions,
+  transformMonthDayOptions,
+  transformTimeOptions,
+  transformYearMonthOptions,
+} from '../internal/intlFormatOptions'
+import { RawDateTimeFormat, RawFormattable } from '../internal/intlFormatUtils'
+import { getEpochMilli } from '../internal/slots'
+import { timeFieldsToMilli } from '../internal/timeFieldMath'
+import { memoize } from '../internal/utils'
 
 // Temporal values are detected by internal slot branding at runtime, so this
 // shared Intl wrapper doesn't need to import branch-local public classes.
@@ -28,275 +35,199 @@ export type TemporalBrandingAndSlots<S = object> = [branding: string, slots: S]
 export type TemporalBrandingAndSlotsGetter = (
   obj: unknown,
 ) => TemporalBrandingAndSlots | undefined
-
 // Intl.DateTimeFormat
 // -----------------------------------------------------------------------------
 
 export type DateTimeFormat = Intl.DateTimeFormat
 
-const internalsMap = new WeakMap<Intl.DateTimeFormat, DateTimeFormatInternals>()
-
 export function createDateTimeFormatClass(
   getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter,
 ): typeof Intl.DateTimeFormat {
-  // The Intl.DateTimeFormat object
-  // More versatile because accommodates
-  // `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()`
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#return_value
-  function DateTimeFormatFunc(
-    this: any,
-    locales?: LocalesArg,
-    options?: Intl.DateTimeFormatOptions,
-  ) {
-    return new (DateTimeFormatNew as Classlike)(locales, options)
-  }
+  const ShimDateTimeFormat = createDateTimeFormatShell<Formattable>({
+    createArgsProvider(internals) {
+      // One Intl.DateTimeFormat per Temporal type branding; each type needs
+      // distinct option filtering (e.g. dates drop time fields, times drop date
+      // fields) so they can't share a single formatter.
+      const getTemporalFormat = memoize(
+        (branding: string): Intl.DateTimeFormat =>
+          createUncachedTemporalDateTimeFormat(internals, branding),
+      )
 
-  // All calls to `new Intl.DateTimeFormat()` and `Intl.DateTimeFormat()` return
-  // an instance of this class.
-  function DateTimeFormatNew(
-    this: any,
-    locales: LocalesArg | undefined,
-    options: Intl.DateTimeFormatOptions = Object.create(null), // protect against prototype pollution,
-  ) {
-    internalsMap.set(
-      this as DateTimeFormat,
-      createDateTimeFormatInternals(
-        locales,
-        options,
-        getTemporalBrandingAndSlots,
-      ),
-    )
-  }
+      return {
+        getArgsForSingle(formattable) {
+          if (formattable === undefined) {
+            // .format(undefined) and .formatToParts(undefined) match native Intl
+            // and format the current time.
+            return [internals.format]
+          }
 
-  const members = RawDateTimeFormat.prototype
-  const memberDescriptors: Record<string, PropertyDescriptor> =
-    Object.getOwnPropertyDescriptors(members)
-  const classDescriptors = Object.getOwnPropertyDescriptors(RawDateTimeFormat)
+          const brandingAndSlots = getTemporalBrandingAndSlots(formattable)
+          if (!brandingAndSlots) {
+            return [internals.format, Number(formattable)]
+          }
 
-  // Start from the host's descriptors so ordinary property attributes and
-  // Symbol.toStringTag continue to look like native Intl.DateTimeFormat. Only
-  // the members that need Temporal-aware behavior are swapped out below.
-  memberDescriptors['constructor'].value = DateTimeFormatFunc // expose more versatile
-  memberDescriptors.format.get = createFormatGetter('format')
-  memberDescriptors.resolvedOptions.value = createResolvedOptionsMethod()
+          const [branding, slots] = brandingAndSlots
+          const format = getTemporalFormat(branding)
+          checkTemporalDateTimeFormatCompatible(format, branding, slots)
+          return [format, temporalDateTimeToEpochMilli(branding, slots)]
+        },
+        getArgsForRange(start, end): DateTimeFormatRangeArgs {
+          if (start === undefined || end === undefined) {
+            // ECMA-402 requires both range endpoints before it can check type
+            // compatibility. Use the same error as mixed Temporal/non-Temporal input.
+            throw new TypeError(errorMessages.mismatchingFormatTypes)
+          }
 
-  for (const memberName of [
-    'formatRange',
-    'formatToParts',
-    'formatRangeToParts',
-  ]) {
-    if (memberDescriptors[memberName]) {
-      memberDescriptors[memberName].value = createFormatMethod(memberName)
-    }
-  }
+          const startBrandingAndSlots = getTemporalBrandingAndSlots(start)
+          const startEpochMilli = startBrandingAndSlots
+            ? undefined
+            : Number(start)
+          const endBrandingAndSlots = getTemporalBrandingAndSlots(end)
+          const endEpochMilli = endBrandingAndSlots ? undefined : Number(end)
 
-  // Both share prototype so they're both `instanceof` eachother
-  classDescriptors.prototype.value = // eventually for DateTimeFormatFunc
-    DateTimeFormatNew.prototype = Object.create({}, memberDescriptors)
+          if (!startBrandingAndSlots && !endBrandingAndSlots) {
+            return [internals.format, startEpochMilli!, endEpochMilli!]
+          }
 
-  // Define static methods on the eventual Intl.DateTimeFormat
-  Object.defineProperties(DateTimeFormatFunc, classDescriptors)
+          if (!startBrandingAndSlots || !endBrandingAndSlots) {
+            // ToDateTimeFormattable first converts all non-Temporal values.
+            // Only after that can range formatting reject mixed
+            // Temporal/non-Temporal input.
+            throw new TypeError(errorMessages.mismatchingFormatTypes)
+          }
 
-  return DateTimeFormatFunc as Classlike
-}
+          const [startBranding, startSlots] = startBrandingAndSlots
+          const [endBranding, endSlots] = endBrandingAndSlots
 
-function createFormatGetter(methodName: string) {
-  const formatMethod = createFormatMethod(methodName)
+          if (startBranding !== endBranding) {
+            throw new TypeError(errorMessages.mismatchingFormatTypes)
+          }
 
-  // .format is a getter whose returned function is bound to this instance.
-  // Querying it must reject fake instances such as
-  // Object.create(Intl.DateTimeFormat.prototype) before returning a callable.
-  const getter = function (this: DateTimeFormat) {
-    if (!internalsMap.has(this)) {
-      throw new TypeError(errorMessages.invalidCallingContext)
-    }
-
-    // Don't use Function::bind, because it gives a different .name shape from
-    // the anonymous bound function expected here.
-    return (...args: any[]) => formatMethod.apply(this, args)
-  }
-
-  return Object.defineProperties(getter, createNameDescriptors('get format'))
-}
-
-function createFormatMethod(methodName: string) {
-  const isRange = methodName.includes('Range')
-  const func = function (this: DateTimeFormat, ...formattables: Formattable[]) {
-    const [format, ...rawFormattables] = prepDateTimeFormatCall(
-      getDateTimeFormatInternals(this),
-      isRange,
-      formattables,
-    )
-    return (format as any)[methodName](...rawFormattables)
-  }
-
-  return Object.defineProperties(func, createNameDescriptors(methodName))
-}
-
-function createResolvedOptionsMethod() {
-  const func = function (this: DateTimeFormat) {
-    const internals = getDateTimeFormatInternals(this)
-    const resolvedOptions = internals.rawFormat.resolvedOptions()
-    const timeZone = internals.timeZone || resolvedOptions.timeZone
-
-    return timeZone === resolvedOptions.timeZone
-      ? resolvedOptions
-      : { ...resolvedOptions, timeZone }
-  }
-
-  return Object.defineProperties(func, createNameDescriptors('resolvedOptions'))
-}
-
-// Internals
-// -----------------------------------------------------------------------------
-
-type DateTimeFormatInternals = {
-  rawFormat: Intl.DateTimeFormat
-  resolvedLocale: string
-  copiedOptions: Intl.DateTimeFormatOptions
-  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter
-  queryFormatPrepperForBranding: (branding: string) => FormatPrepper<any>
-
-  // Only set for public Intl.DateTimeFormat wrapper instances that received a
-  // timeZone option. Internal time-zone probes use RawDateTimeFormat directly,
-  // because they need the host's canonical target for offset calculations.
-  timeZone?: string
-}
-
-function getDateTimeFormatInternals(
-  format: DateTimeFormat,
-): DateTimeFormatInternals {
-  const internals = internalsMap.get(format)
-  if (!internals) {
-    throw new TypeError(errorMessages.invalidCallingContext)
-  }
-  return internals
-}
-
-function createDateTimeFormatInternals(
-  locales: LocalesArg | undefined,
-  options: Intl.DateTimeFormatOptions,
-  getTemporalBrandingAndSlots: TemporalBrandingAndSlotsGetter,
-): DateTimeFormatInternals {
-  const rawFormat = new RawDateTimeFormat(locales, options)
-  const resolvedOptions = rawFormat.resolvedOptions()
-  const timeZone = readOwnDataTimeZoneOption(options)
-
-  // Copy original options in an unobservable way, using resolveOptions' data
-  // Necessary because options will be reaccessed later when making brand-specific
-  // formatters, and prop access can't be observable
-  // NOTE: pluckProps protects against prototype pollution (only function that does!)
-  // view Object.create(null)
-  const copiedOptions = pluckProps(
-    Object.keys(options) as OptionNames,
-    resolvedOptions as Intl.DateTimeFormatOptions,
-  )
-
-  return {
-    rawFormat,
-    resolvedLocale: resolvedOptions.locale,
-    copiedOptions,
-    getTemporalBrandingAndSlots,
-    // Reuse each Temporal-brand-specific prepper so this formatter's copied DTF
-    // options are transformed into a subformat at most once per Temporal type.
-    queryFormatPrepperForBranding: memoize(createFormatPrepperForBranding),
-    timeZone,
-  }
-}
-
-function prepDateTimeFormatCall(
-  internals: DateTimeFormatInternals,
-  isRange: boolean,
-  formattables: Formattable[],
-): [Intl.DateTimeFormat, ...RawFormattable[]] {
-  const formattableCnt = isRange ? 2 : 1
-
-  if (isRange) {
-    if (formattables[0] === undefined || formattables[1] === undefined) {
-      // ECMA-402 requires both range endpoints before it can check type
-      // compatibility. Use the same error as mixed Temporal/non-Temporal input.
-      throw new TypeError(errorMessages.mismatchingFormatTypes)
-    }
-  } else if (formattables[0] === undefined) {
-    // .format(undefined) and .formatToParts(undefined) match native Intl and
-    // format the current time, so there is no Temporal adaptation to perform.
-    return [internals.rawFormat]
-  }
-
-  let branding: string | undefined
-  let hasMismatchingBranding = false
-  let hasTemporalFormattable = false
-  let hasRawFormattable = false
-  const rawFormattables: RawFormattable[] = []
-  const slotsList: object[] = []
-
-  for (let i = 0; i < formattableCnt; i++) {
-    const brandingAndSlots = internals.getTemporalBrandingAndSlots(
-      formattables[i],
-    )
-
-    if (brandingAndSlots) {
-      const [temporalBranding, slots] = brandingAndSlots
-      if (branding !== undefined && temporalBranding !== branding) {
-        hasMismatchingBranding = true
+          const format = getTemporalFormat(startBranding)
+          checkTemporalDateTimeFormatCompatible(
+            format,
+            startBranding,
+            startSlots,
+          )
+          checkTemporalDateTimeFormatCompatible(format, startBranding, endSlots)
+          return [
+            format,
+            temporalDateTimeToEpochMilli(startBranding, startSlots),
+            temporalDateTimeToEpochMilli(startBranding, endSlots),
+          ]
+        },
       }
-      branding = temporalBranding
-      hasTemporalFormattable = true
-      slotsList[i] = slots
-    } else {
-      hasRawFormattable = true
-      rawFormattables[i] = Number(formattables[i])
-    }
-  }
+    },
+  })
 
-  if (hasMismatchingBranding || (hasTemporalFormattable && hasRawFormattable)) {
-    // ToDateTimeFormattable first converts all non-Temporal values. Only after
-    // that can range formatting reject mixed or mismatched Temporal types.
-    throw new TypeError(errorMessages.mismatchingFormatTypes)
-  }
-
-  if (branding !== undefined) {
-    return internals.queryFormatPrepperForBranding(branding)(
-      internals.resolvedLocale,
-      internals.copiedOptions,
-      ...slotsList,
-    )
-  }
-
-  return [internals.rawFormat, ...rawFormattables]
+  return ShimDateTimeFormat as unknown as typeof Intl.DateTimeFormat
 }
 
-function readOwnDataTimeZoneOption(
-  options: Intl.DateTimeFormatOptions,
-): string | undefined {
-  const descriptor = Object.getOwnPropertyDescriptor(options, 'timeZone')
+function createUncachedTemporalDateTimeFormat(
+  internals: DateTimeFormatShellInternals,
+  branding: string,
+): Intl.DateTimeFormat {
+  // Permit fields for other Temporal types if this type still has overlap with
+  // the formatter's copied options.
+  const allowPartialOverlap = true
+  let options: Intl.DateTimeFormatOptions
 
-  if (
-    !descriptor ||
-    !('value' in descriptor) ||
-    descriptor.value === undefined
-  ) {
-    return undefined
+  switch (branding) {
+    case 'Instant':
+      options = transformInstantOptions(
+        internals.copiedOptions,
+        /* allowPartialOverlap = */ allowPartialOverlap,
+      )
+      break
+    case 'PlainDateTime':
+      options = applyPlainFormatTimeZone(
+        transformDateTimeOptions(
+          internals.copiedOptions,
+          /* allowPartialOverlap = */ allowPartialOverlap,
+        ),
+      )
+      break
+    case 'PlainDate':
+      options = applyPlainFormatTimeZone(
+        transformDateOptions(
+          internals.copiedOptions,
+          /* allowPartialOverlap = */ allowPartialOverlap,
+        ),
+      )
+      break
+    case 'PlainTime':
+      options = applyPlainFormatTimeZone(
+        transformTimeOptions(
+          internals.copiedOptions,
+          /* allowPartialOverlap = */ allowPartialOverlap,
+        ),
+      )
+      break
+    case 'PlainYearMonth':
+      options = applyPlainFormatTimeZone(
+        transformYearMonthOptions(
+          internals.copiedOptions,
+          /* allowPartialOverlap = */ allowPartialOverlap,
+        ),
+      )
+      break
+    case 'PlainMonthDay':
+      options = applyPlainFormatTimeZone(
+        transformMonthDayOptions(
+          internals.copiedOptions,
+          /* allowPartialOverlap = */ allowPartialOverlap,
+        ),
+      )
+      break
+    default:
+      // Direct Intl.DateTimeFormat formatting deliberately rejects
+      // ZonedDateTime; ZonedDateTime.prototype.toLocaleString formats through
+      // an Instant instead.
+      throw new TypeError(errorMessages.invalidFormatType(branding))
   }
 
-  // Native Intl has already performed the observable GetOption sequence. Reuse
-  // only an own data-property value here; accessor options must not be invoked a
-  // second time just so older engines can preserve the caller's exact zone ID in
-  // resolvedOptions().
-  return refineTimeZoneId(descriptor.value)
+  return new RawDateTimeFormat(internals.resolvedLocale, options)
 }
 
-function createFormatPrepperForBranding(branding: string): FormatPrepper<any> {
-  const config = classFormatConfigs[branding]
-  if (!config) {
-    throw new TypeError(errorMessages.invalidFormatType(branding))
+function checkTemporalDateTimeFormatCompatible(
+  format: Intl.DateTimeFormat,
+  branding: string,
+  slots: object,
+): void {
+  switch (branding) {
+    case 'Instant':
+    case 'PlainTime':
+      return
+    case 'PlainDateTime':
+    case 'PlainDate':
+      checkResolvedCalendarCompatible(format, slots as any)
+      return
+    case 'PlainYearMonth':
+    case 'PlainMonthDay':
+      checkResolvedCalendarCompatible(
+        format,
+        slots as any,
+        strictPartialDateCalendarCheck,
+      )
+      return
+    default:
+      throw new TypeError(errorMessages.invalidFormatType(branding))
   }
+}
 
-  return createFormatPrepper(
-    config,
-    // a generator that conveniently caches by the first arg: forcedTimeZoneId
-    memoize(createFormatForPrep),
-    // Permit fields for other Temporal types if this type still has overlap.
-    /* allowPartialOverlap = */ true,
-  )
+function temporalDateTimeToEpochMilli(branding: string, slots: object): number {
+  switch (branding) {
+    case 'Instant':
+      return getEpochMilli(slots as any)
+    case 'PlainDateTime':
+      return isoDateTimeToEpochMilli(slots as any)!
+    case 'PlainDate':
+    case 'PlainYearMonth':
+    case 'PlainMonthDay':
+      return isoDateToEpochMilli(slots as any)!
+    case 'PlainTime':
+      return timeFieldsToMilli(slots as any)
+    default:
+      throw new TypeError(errorMessages.invalidFormatType(branding))
+  }
 }

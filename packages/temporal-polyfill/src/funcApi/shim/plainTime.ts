@@ -10,8 +10,9 @@ import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
 import { TimeFields } from '../../internal/fieldTypes'
-import { createFormatPrepper, timeConfig } from '../../internal/intlFormatPrep'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
+import { transformTimeOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
@@ -21,6 +22,7 @@ import { roundBigNanoToInc, roundPlainTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   nanoToTimeAndDay,
+  timeFieldsToMilli,
   timeFieldsToNano,
 } from '../../internal/timeFieldMath'
 import {
@@ -418,27 +420,44 @@ export function compare(
   return compareTimeFields(slots, otherSlots)
 }
 
-const prepFormat = createFormatPrepper(timeConfig)
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory(
-  timeConfig,
-  getPlainTimeShimRecordSlots,
-)
+) => Format = createDateTimeFormatFactory<PlainTimeShimRecord>({
+  transformOptions: (options) =>
+    applyPlainFormatTimeZone(
+      transformTimeOptions(options, /* allowPartialOverlap = */ true),
+    ),
+  createArgsProvider: (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getPlainTimeShimRecordSlots(record)
+      return [internals.format, timeFieldsToMilli(slots)]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getPlainTimeShimRecordSlots(record0)
+      const slots1 = getPlainTimeShimRecordSlots(record1)
+      return [
+        internals.format,
+        timeFieldsToMilli(slots0),
+        timeFieldsToMilli(slots1),
+      ]
+    },
+  }),
+})
 
 export function toLocaleString(
   record: PlainTimeShimRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const [format, epochMilli] = prepFormat(
+  const slots = getPlainTimeShimRecordSlots(record)
+  const format = new RawDateTimeFormat(
     locales,
-    options,
-    getPlainTimeShimRecordSlots(record),
+    applyPlainFormatTimeZone(
+      transformTimeOptions(options, /* allowPartialOverlap = */ false),
+    ),
   )
-  return format.format(epochMilli)
+  return format.format(timeFieldsToMilli(slots))
 }
 
 export function toString(

@@ -69,7 +69,6 @@ of treating the whole bucket as one opaque change.
 ## Test262 Notes
 
 - IMPORTANT: Always run `pnpm run build` before running `pnpm run test262`. The test262 runner tests against the built output in `dist/global.js`, not the source files.
-- For observability failures, avoid converting internal tuple/array paths back to spread, destructuring, or `for...of` when the code intentionally uses index access. Those constructs can observe `Array.prototype[Symbol.iterator]`.
 - When fabricating internal option bags, prefer null-prototype objects to avoid observing `Object.prototype` pollution.
 - For option-ordering tests, read and coerce all relevant options first, then do algorithmic validation.
 - `PlainYearMonth.add/subtract` has special lower-unit validation: `overflow` must be read before rejecting units below month.

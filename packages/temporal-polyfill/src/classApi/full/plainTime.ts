@@ -11,7 +11,9 @@ import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
 import * as errorMessages from '../../internal/errorMessages'
 import { TimeFields } from '../../internal/fieldTypes'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
+import { transformTimeOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
@@ -19,8 +21,8 @@ import { movePlainTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
+import { timeFieldsToMilli } from '../../internal/timeFieldMath'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepPlainTimeFormat } from '../intlFormatConfig'
 import {
   Duration,
   DurationArg,
@@ -167,14 +169,16 @@ export class PlainTime implements TimeFields {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepPlainTimeFormat(
+    const slots = getPlainTimeSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getPlainTimeSlots(this),
+      applyPlainFormatTimeZone(
+        transformTimeOptions(options, /* allowPartialOverlap = */ false),
+      ),
     )
-    return format.format(epochMilli)
+    return format.format(timeFieldsToMilli(slots))
   }
 
   toString(

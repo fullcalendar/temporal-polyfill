@@ -15,7 +15,8 @@ import {
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
 import * as errorMessages from '../../internal/errorMessages'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { transformInstantOptions } from '../../internal/intlFormatOptions'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
@@ -28,7 +29,6 @@ import {
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { prepInstantFormat } from '../intlFormatConfig'
 import {
   Duration,
   DurationArg,
@@ -142,14 +142,14 @@ export class Instant {
 
   toLocaleString(
     locales: LocalesArg | undefined = undefined,
-    options?: Intl.DateTimeFormatOptions,
+    options: Intl.DateTimeFormatOptions = {},
   ): string {
-    const [format, epochMilli] = prepInstantFormat(
+    const slots = getInstantSlots(this)
+    const format = new RawDateTimeFormat(
       locales,
-      options,
-      getInstantSlots(this),
+      transformInstantOptions(options, /* allowPartialOverlap = */ false),
     )
-    return format.format(epochMilli)
+    return format.format(getEpochMilli(slots))
   }
 
   toString(
