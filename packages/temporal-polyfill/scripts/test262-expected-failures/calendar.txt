@@ -2,6 +2,7 @@
 # This artifact intentionally supports only the ISO 8601 and Gregorian
 # calendars. These tests require exotic-calendar support and fail across
 # every non-native Temporal test Node version.
+intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal.js
 intl402/DateTimeFormat/prototype/formatToParts/dangi-calendar-dates.js
 intl402/Temporal/PlainDate/canonicalize-calendar.js
@@ -25,8 +26,12 @@ intl402/Temporal/PlainDate/from/hebrew-keviah.js
 intl402/Temporal/PlainDate/from/japanese-pre-meiji.js
 intl402/Temporal/PlainDate/from/leap-months-hebrew.js
 intl402/Temporal/PlainDate/from/leap-year-hebrew.js
+intl402/Temporal/PlainDate/from/non-positive-single-era-year.js
 intl402/Temporal/PlainDate/from/persian-new-year-dates.js
 intl402/Temporal/PlainDate/from/remapping-era.js
+intl402/Temporal/PlainDate/from/roundtrip-from-iso.js
+intl402/Temporal/PlainDate/from/roundtrip-from-property-bag.js
+intl402/Temporal/PlainDate/from/roundtrip-from-string.js
 intl402/Temporal/PlainDate/prototype/add/basic-buddhist.js
 intl402/Temporal/PlainDate/prototype/add/basic-chinese.js
 intl402/Temporal/PlainDate/prototype/add/basic-coptic.js
@@ -341,6 +346,7 @@ intl402/Temporal/PlainDate/prototype/until/wrapping-at-end-of-month-persian.js
 intl402/Temporal/PlainDate/prototype/until/wrapping-at-end-of-month-roc.js
 intl402/Temporal/PlainDate/prototype/weekOfYear/non-iso-week-of-year.js
 intl402/Temporal/PlainDate/prototype/with/basic-buddhist.js
+intl402/Temporal/PlainDate/prototype/with/basic-coptic.js
 intl402/Temporal/PlainDate/prototype/with/basic-ethioaa.js
 intl402/Temporal/PlainDate/prototype/with/basic-ethiopic.js
 intl402/Temporal/PlainDate/prototype/with/basic-hebrew.js
@@ -406,8 +412,11 @@ intl402/Temporal/PlainDate/prototype/with/wrapping-at-end-of-month-ethiopic.js
 intl402/Temporal/PlainDate/prototype/with/wrapping-at-end-of-month-japanese.js
 intl402/Temporal/PlainDate/prototype/withCalendar/calendar-time-string.js
 intl402/Temporal/PlainDate/prototype/withCalendar/canonicalize-calendar.js
+intl402/Temporal/PlainDate/prototype/withCalendar/extreme-dates.js
 intl402/Temporal/PlainDate/prototype/withCalendar/roundtrip-from-iso8601.js
 intl402/Temporal/PlainDate/prototype/withPlainTime/basic-roc.js
+intl402/Temporal/PlainDate/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainDate/prototype/year/epoch-year.js
 intl402/Temporal/PlainDate/prototype/yearOfWeek/non-iso-week-of-year.js
 intl402/Temporal/PlainDateTime/canonicalize-calendar.js
 intl402/Temporal/PlainDateTime/from/basic-hebrew.js
@@ -426,6 +435,9 @@ intl402/Temporal/PlainDateTime/from/era-boundary-roc.js
 intl402/Temporal/PlainDateTime/from/era-japanese.js
 intl402/Temporal/PlainDateTime/from/leap-months-hebrew.js
 intl402/Temporal/PlainDateTime/from/leap-year-hebrew.js
+intl402/Temporal/PlainDateTime/from/non-positive-single-era-year.js
+intl402/Temporal/PlainDateTime/from/roundtrip-from-property-bag.js
+intl402/Temporal/PlainDateTime/from/roundtrip-from-string.js
 intl402/Temporal/PlainDateTime/prototype/add/basic-buddhist.js
 intl402/Temporal/PlainDateTime/prototype/add/basic-chinese.js
 intl402/Temporal/PlainDateTime/prototype/add/basic-coptic.js
@@ -734,6 +746,7 @@ intl402/Temporal/PlainDateTime/prototype/until/wrapping-at-end-of-month-persian.
 intl402/Temporal/PlainDateTime/prototype/until/wrapping-at-end-of-month-roc.js
 intl402/Temporal/PlainDateTime/prototype/weekOfYear/non-iso-week-of-year.js
 intl402/Temporal/PlainDateTime/prototype/with/basic-buddhist.js
+intl402/Temporal/PlainDateTime/prototype/with/basic-coptic.js
 intl402/Temporal/PlainDateTime/prototype/with/basic-ethioaa.js
 intl402/Temporal/PlainDateTime/prototype/with/basic-ethiopic.js
 intl402/Temporal/PlainDateTime/prototype/with/basic-hebrew.js
@@ -798,7 +811,10 @@ intl402/Temporal/PlainDateTime/prototype/with/wrapping-at-end-of-month-ethiopic.
 intl402/Temporal/PlainDateTime/prototype/with/wrapping-at-end-of-month-japanese.js
 intl402/Temporal/PlainDateTime/prototype/withCalendar/calendar-time-string.js
 intl402/Temporal/PlainDateTime/prototype/withCalendar/canonicalize-calendar.js
+intl402/Temporal/PlainDateTime/prototype/withCalendar/extreme-dates.js
 intl402/Temporal/PlainDateTime/prototype/withCalendar/roundtrip-from-iso8601.js
+intl402/Temporal/PlainDateTime/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainDateTime/prototype/year/epoch-year.js
 intl402/Temporal/PlainDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
 intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
 intl402/Temporal/PlainMonthDay/from/buddhist-month-codes.js
@@ -855,10 +871,12 @@ intl402/Temporal/PlainYearMonth/from/era-boundary-roc.js
 intl402/Temporal/PlainYearMonth/from/era-japanese.js
 intl402/Temporal/PlainYearMonth/from/leap-months-hebrew.js
 intl402/Temporal/PlainYearMonth/from/leap-year-hebrew.js
+intl402/Temporal/PlainYearMonth/from/non-positive-single-era-year.js
 intl402/Temporal/PlainYearMonth/from/reference-day-chinese.js
 intl402/Temporal/PlainYearMonth/from/reference-day-hebrew.js
 intl402/Temporal/PlainYearMonth/from/reference-day-japanese.js
 intl402/Temporal/PlainYearMonth/from/remapping-era.js
+intl402/Temporal/PlainYearMonth/from/roundtrip-from-property-bag.js
 intl402/Temporal/PlainYearMonth/prototype/add/basic-buddhist.js
 intl402/Temporal/PlainYearMonth/prototype/add/basic-chinese.js
 intl402/Temporal/PlainYearMonth/prototype/add/basic-coptic.js
@@ -1063,6 +1081,7 @@ intl402/Temporal/PlainYearMonth/prototype/until/leap-months-chinese.js
 intl402/Temporal/PlainYearMonth/prototype/until/leap-months-dangi.js
 intl402/Temporal/PlainYearMonth/prototype/until/leap-months-hebrew.js
 intl402/Temporal/PlainYearMonth/prototype/with/basic-buddhist.js
+intl402/Temporal/PlainYearMonth/prototype/with/basic-coptic.js
 intl402/Temporal/PlainYearMonth/prototype/with/basic-ethioaa.js
 intl402/Temporal/PlainYearMonth/prototype/with/basic-ethiopic.js
 intl402/Temporal/PlainYearMonth/prototype/with/basic-hebrew.js
@@ -1097,6 +1116,8 @@ intl402/Temporal/PlainYearMonth/prototype/with/mutually-exclusive-fields-japanes
 intl402/Temporal/PlainYearMonth/prototype/with/mutually-exclusive-fields-persian.js
 intl402/Temporal/PlainYearMonth/prototype/with/mutually-exclusive-fields-roc.js
 intl402/Temporal/PlainYearMonth/prototype/with/non-iso-calendar-fields.js
+intl402/Temporal/PlainYearMonth/prototype/year/arithmetic-year.js
+intl402/Temporal/PlainYearMonth/prototype/year/epoch-year.js
 intl402/Temporal/ZonedDateTime/canonicalize-calendar.js
 intl402/Temporal/ZonedDateTime/compare/disregards-calendar-if-exact-times-equal.js
 intl402/Temporal/ZonedDateTime/from/basic-hebrew.js
@@ -1115,6 +1136,9 @@ intl402/Temporal/ZonedDateTime/from/era-boundary-roc.js
 intl402/Temporal/ZonedDateTime/from/era-japanese.js
 intl402/Temporal/ZonedDateTime/from/leap-months-hebrew.js
 intl402/Temporal/ZonedDateTime/from/leap-year-hebrew.js
+intl402/Temporal/ZonedDateTime/from/non-positive-single-era-year.js
+intl402/Temporal/ZonedDateTime/from/roundtrip-from-property-bag.js
+intl402/Temporal/ZonedDateTime/from/roundtrip-from-string.js
 intl402/Temporal/ZonedDateTime/prototype/add/basic-buddhist.js
 intl402/Temporal/ZonedDateTime/prototype/add/basic-chinese.js
 intl402/Temporal/ZonedDateTime/prototype/add/basic-coptic.js
@@ -1425,6 +1449,7 @@ intl402/Temporal/ZonedDateTime/prototype/until/wrapping-at-end-of-month-persian.
 intl402/Temporal/ZonedDateTime/prototype/until/wrapping-at-end-of-month-roc.js
 intl402/Temporal/ZonedDateTime/prototype/weekOfYear/non-iso-week-of-year.js
 intl402/Temporal/ZonedDateTime/prototype/with/basic-buddhist.js
+intl402/Temporal/ZonedDateTime/prototype/with/basic-coptic.js
 intl402/Temporal/ZonedDateTime/prototype/with/basic-ethioaa.js
 intl402/Temporal/ZonedDateTime/prototype/with/basic-ethiopic.js
 intl402/Temporal/ZonedDateTime/prototype/with/basic-hebrew.js
@@ -1491,6 +1516,9 @@ intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
 intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
 intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
 intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
+intl402/Temporal/ZonedDateTime/prototype/withCalendar/extreme-dates.js
 intl402/Temporal/ZonedDateTime/prototype/withCalendar/preserves-instant.js
 intl402/Temporal/ZonedDateTime/prototype/withCalendar/preserves-time-zone.js
+intl402/Temporal/ZonedDateTime/prototype/year/arithmetic-year.js
+intl402/Temporal/ZonedDateTime/prototype/year/epoch-year.js
 intl402/Temporal/ZonedDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
