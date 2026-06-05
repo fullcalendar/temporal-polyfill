@@ -1,10 +1,6 @@
 import { join as joinPaths } from 'path'
 import { readFile } from 'fs/promises'
 
-/*
-TODO: rename file
-*/
-
 // If property mangling comes back, do not add `nameCache` here without
 // re-testing the official Rollup Terser plugin. Older experiments with
 // cross-chunk nameCache produced invalid ESM.

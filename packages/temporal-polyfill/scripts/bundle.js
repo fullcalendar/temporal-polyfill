@@ -15,7 +15,7 @@ import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
-import { buildTerserReadableOptions } from './lib/terser-options.js'
+import { buildTerserReadableOptions } from './lib/minify-options.js'
 
 const argv = process.argv.slice(2)
 

@@ -7,7 +7,7 @@ import { extensions } from './lib/config.js'
 import {
   buildSwcMinifyOptions,
   buildTerserMinifyOptions,
-} from './lib/terser-options.js'
+} from './lib/minify-options.js'
 
 minifyIifeFiles(joinPaths(process.argv[1], '../..'))
 
