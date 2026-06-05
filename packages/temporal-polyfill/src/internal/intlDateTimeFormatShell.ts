@@ -1,6 +1,6 @@
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import { pluckProps } from './utils'
+import { createNameDescriptors, pluckProps } from './utils'
 
 export type DateTimeFormatSingleArgs =
   | [format: Intl.DateTimeFormat]
@@ -176,6 +176,10 @@ export function createDateTimeFormatShell<R>({
   // from the function's existing descriptor), plus `supportedLocalesOf`,
   // `constructor`, and @@toStringTag copied verbatim from the native objects.
   const { prototype } = ShimDateTimeFormat
+  Object.defineProperties(
+    DateTimeFormat,
+    createNameDescriptors('DateTimeFormat'),
+  )
   Object.defineProperty(DateTimeFormat, 'prototype', {
     value: prototype,
     writable: false,

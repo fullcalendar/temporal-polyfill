@@ -1,10 +1,14 @@
 import * as errorMessages from '../internal/errorMessages'
-import { createStringTagDescriptors } from '../internal/utils'
+import {
+  createNameDescriptors,
+  createStringTagDescriptors,
+} from '../internal/utils'
 
 export function defineTemporalClass<C extends { prototype: object }>(
   cls: C,
   branding: string,
 ): C {
+  Object.defineProperties(cls, createNameDescriptors(branding))
   Object.defineProperties(
     cls.prototype,
     createStringTagDescriptors('Temporal.' + branding),

@@ -128,6 +128,7 @@
     "@biomejs/biome": "1.5.1",
     "@js-temporal/temporal-test262-runner": "github:fullcalendar/temporal-test262-runner#main",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^1.0.0",
     "@swc/core": "1.4.11",
     "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",
@@ -137,7 +138,7 @@
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "temporal-spec": "workspace:0.3.1",
-    "terser": "^5.27.0",
+    "terser": "^5.48.0",
     "typescript": "~5.3.3",
     "vitest": "^1.2.2",
     "yargs": "^17.7.2"

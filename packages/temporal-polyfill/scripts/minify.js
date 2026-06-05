@@ -6,8 +6,7 @@ import { minify as minifyWithTerser } from 'terser'
 import { extensions } from './lib/config.js'
 import {
   buildSwcMinifyOptions,
-  buildTerserOptions,
-  readTemporalReservedWords,
+  buildTerserMinifyOptions,
 } from './lib/terser-options.js'
 
 minifyIifeFiles(joinPaths(process.argv[1], '../..'))
@@ -16,8 +15,6 @@ async function minifyIifeFiles(pkgDir) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const minifier = process.env.MINIFIER || 'terser'
-  const temporalReservedWords =
-    minifier === 'terser' ? await readTemporalReservedWords(pkgDir) : undefined
 
   console.log(`Using ${minifier} minifier`)
 
@@ -30,7 +27,7 @@ async function minifyIifeFiles(pkgDir) {
       const inputPath = joinPaths('dist', exportName + extensions.iife)
       const outputPath = joinPaths('dist', exportName + extensions.iifeMin)
       const code = await readFile(joinPaths(pkgDir, inputPath), 'utf-8')
-      const result = await minifyCode(code, minifier, temporalReservedWords)
+      const result = await minifyCode(code, minifier)
 
       await writeFile(joinPaths(pkgDir, outputPath), result.code)
       console.log(`Minified ${inputPath} with ${minifier}`)
@@ -38,7 +35,7 @@ async function minifyIifeFiles(pkgDir) {
   }
 }
 
-async function minifyCode(code, minifier, temporalReservedWords) {
+async function minifyCode(code, minifier) {
   if (minifier === 'swc') {
     const { minify: minifyWithSwc } = await import('@swc/core')
 
@@ -46,13 +43,7 @@ async function minifyCode(code, minifier, temporalReservedWords) {
   }
 
   if (minifier === 'terser') {
-    return minifyWithTerser(
-      code,
-      buildTerserOptions({
-        mangleProps: true,
-        manglePropsExcept: temporalReservedWords,
-      }),
-    )
+    return minifyWithTerser(code, buildTerserMinifyOptions())
   }
 
   throw new Error(`Unsupported MINIFIER: ${minifier}`)

@@ -9,42 +9,67 @@ import {
   sep as pathSep,
 } from 'path'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
+import terser from '@rollup/plugin-terser'
 import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
-import sourcemaps from 'rollup-plugin-sourcemaps'
 import { extensions } from './lib/config.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
-import { buildTerserOptions } from './lib/terser-options.js'
-import { terserSimple } from './lib/terser-simple.js'
+import { buildTerserReadableOptions } from './lib/terser-options.js'
 
 const argv = process.argv.slice(2)
 
 writeBundles(joinPaths(process.argv[1], '../..'), argv.includes('--dev'))
 
 async function writeBundles(pkgDir, isDev) {
-  const configs = await buildConfigs(pkgDir, isDev)
-  await (isDev ? watchWithConfigs : buildWithConfigs)(configs)
-}
-
-async function buildConfigs(pkgDir, isDev) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
+  const moduleAndDtsConfigs = buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev)
+
+  if (isDev) {
+    await watchWithConfigs(moduleAndDtsConfigs.moduleConfigs)
+  } else {
+    await buildWithConfigs([
+      ...moduleAndDtsConfigs.moduleConfigs,
+      ...moduleAndDtsConfigs.dtsConfigs,
+    ])
+    await buildWithConfigs(buildIifeConfigs(pkgDir, pkgJson))
+  }
+}
+
+function buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev) {
   const isExternalDependency = buildExternalDependencyResolver(pkgJson)
-  const isIifeExternalDependency = buildExternalDependencyResolver(pkgJson, {
-    bundleDependencies: true,
-  })
   const exportMap = pkgJson.buildConfig.exports
-  const moduleInputs = {}
-  const iifeConfigs = []
-  const dtsInputs = {}
-  const dtsConfigs = []
   const chunkNamesEnabled = true // isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const sourceDirectoryChunksPlugin = buildSourceDirectoryChunksPlugin(
     resolvePath(pkgDir, 'dist/.tsc'),
   )
+  const moduleInputs = buildModuleInputs(pkgDir, exportMap)
+  const dtsInputs = buildDtsInputs(pkgDir, exportMap)
 
+  return {
+    moduleConfigs: buildModuleConfigs({
+      exportMap,
+      external: isExternalDependency,
+      input: moduleInputs,
+      isDev,
+      chunkBase,
+      sourceDirectoryChunksPlugin,
+    }),
+    dtsConfigs: isDev
+      ? []
+      : buildDtsConfigs({
+          external: isExternalDependency,
+          input: dtsInputs,
+          chunkBase,
+          sourceDirectoryChunksPlugin,
+        }),
+  }
+}
+
+function buildModuleInputs(pkgDir, exportMap) {
+  const inputs = {}
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     const exportName =
@@ -56,75 +81,115 @@ async function buildConfigs(pkgDir, isDev) {
       'dist/.tsc',
       (exportConfig.src || exportName) + '.js',
     )
-    const dtsPath = joinPaths(
+
+    inputs[exportName] = srcPath
+  }
+
+  return inputs
+}
+
+function buildDtsInputs(pkgDir, exportMap) {
+  const inputs = {}
+
+  for (const exportPath in exportMap) {
+    const exportConfig = exportMap[exportPath]
+    const exportName =
+      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+
+    inputs[exportName] = joinPaths(
       pkgDir,
       'dist/.tsc',
       (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
     )
+  }
 
-    moduleInputs[exportName] = srcPath
-    dtsInputs[exportName] = dtsPath
+  return inputs
+}
 
+function buildIifeConfigs(pkgDir, pkgJson) {
+  const exportMap = pkgJson.buildConfig.exports
+  const isIifeExternalDependency = buildExternalDependencyResolver(pkgJson, {
+    bundleDependencies: true,
+  })
+  const configs = []
+
+  for (const exportPath in exportMap) {
+    const exportConfig = exportMap[exportPath]
     if (exportConfig.iife) {
-      iifeConfigs.push({
-        input: srcPath,
+      const exportName =
+        exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+      const esmExtension = extensions.esmWhenIifePrefix + extensions.esm
+
+      configs.push({
+        input: joinPaths(pkgDir, 'dist', exportName + esmExtension),
         onwarn,
         external: isIifeExternalDependency,
-        plugins: [
-          nodeResolve(),
-          // for reading sourcemaps from tsc
-          isDev && sourcemaps(),
-        ],
+        plugins: [nodeResolve()],
         output: {
           format: 'iife',
           file: joinPaths('dist', exportName + extensions.iife),
-          sourcemap: isDev,
+          sourcemap: false,
           sourcemapExcludeSources: true,
-          plugins: [
-            !isDev &&
-              buildTerserPlugin({
-                humanReadable: true,
-              }),
-          ],
+          plugins: [terser(buildTerserReadableOptions())],
         },
       })
     }
   }
 
-  if (!isDev && Object.keys(dtsInputs).length) {
-    dtsConfigs.push({
-      input: dtsInputs,
-      onwarn,
-      external: isExternalDependency,
-      plugins: [
-        // Will not bundle external packages by default
-        dts(),
+  return configs
+}
 
+function buildDtsConfigs({
+  external,
+  input,
+  chunkBase,
+  sourceDirectoryChunksPlugin,
+}) {
+  return Object.keys(input).length
+    ? [
         {
-          // WORKAROUND: dts plugin was including empty import statements,
-          // despite attempting hoistTransitiveImports:false. Especially bad
-          // because temporal-spec/global was being imported from index.
-          renderChunk(code) {
-            return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
+          input,
+          onwarn,
+          external,
+          plugins: [
+            // Will not bundle external packages by default
+            dts(),
+
+            {
+              // WORKAROUND: dts plugin was including empty import statements,
+              // despite attempting hoistTransitiveImports:false. Especially bad
+              // because temporal-spec/global was being imported from index.
+              renderChunk(code) {
+                return code.replace(/^import ['"][^'"]*['"](;|$)/gm, '')
+              },
+            },
+            sourceDirectoryChunksPlugin,
+          ],
+          output: {
+            format: 'es',
+            dir: 'dist',
+            entryFileNames: '[name]' + extensions.dts,
+            chunkFileNames: chunkBase + extensions.dts,
+            minifyInternalExports: false,
           },
         },
-        sourceDirectoryChunksPlugin,
-      ],
-      output: {
-        format: 'es',
-        dir: 'dist',
-        entryFileNames: '[name]' + extensions.dts,
-        chunkFileNames: chunkBase + extensions.dts,
-        minifyInternalExports: false,
-      },
-    })
-  }
+      ]
+    : []
+}
 
+function buildModuleConfigs({
+  exportMap,
+  external,
+  input,
+  isDev,
+  chunkBase,
+  sourceDirectoryChunksPlugin,
+}) {
   return [
     {
-      input: moduleInputs,
+      input,
       onwarn,
-      external: isExternalDependency,
+      external,
       plugins: [sourceDirectoryChunksPlugin],
       output: {
         format: 'es',
@@ -148,21 +213,10 @@ async function buildConfigs(pkgDir, isDev) {
         //// sourcemapExcludeSources: true,
         plugins: [
           !isDev && pureTopLevel(),
-          !isDev &&
-            buildTerserPlugin({
-              humanReadable: true,
-
-              //// NOTE: temporarily disable while we figure out tree-shaking problems
-              // mangleProps: true,
-              // manglePropsExcept: temporalReservedWords,
-
-              preserveAnnotations: true,
-            }),
+          !isDev && terser(buildTerserReadableOptions()),
         ],
       },
     },
-    ...iifeConfigs,
-    ...dtsConfigs,
   ]
 }
 
@@ -229,25 +283,6 @@ function buildExternalDependencyResolver(pkgJson, options = {}) {
       return id === dependencyName || id.startsWith(dependencyName + '/')
     })
   }
-}
-
-// Terser
-// -----------------------------------------------------------------------------
-
-function buildTerserPlugin({
-  humanReadable = false,
-  mangleProps = false,
-  preserveAnnotations = false,
-  manglePropsExcept,
-}) {
-  return terserSimple(
-    buildTerserOptions({
-      humanReadable,
-      mangleProps,
-      preserveAnnotations,
-      manglePropsExcept,
-    }),
-  )
 }
 
 // Rollup Utils
