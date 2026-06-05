@@ -61,7 +61,7 @@ jobs:
         if: matrix.MINIFIER
         env:
           MINIFIER: ${{ matrix.MINIFIER }}
-        run: pnpm run minify
+        run: cd packages/temporal-polyfill && pnpm run minify
 
       # temporal-polyfill vitest requires temporal-utils to be built
       - name: Vitest
