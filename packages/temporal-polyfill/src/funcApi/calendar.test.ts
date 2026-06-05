@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { getGregoryCalendar, getIntlCalendar, getIsoCalendar } from './calendar'
+import {
+  getExoticCalendar,
+  getGregoryCalendar,
+  getIsoCalendar,
+} from './calendar'
 import * as PlainDateFns from './plainDate'
 import { itSkipNative } from './testUtils'
 
@@ -7,8 +11,8 @@ describe('function calendar records', () => {
   it('returns stable calendar handles', () => {
     expect(getIsoCalendar()).toBe(getIsoCalendar())
     expect(getGregoryCalendar()).toBe(getGregoryCalendar())
-    expect(getIntlCalendar('buddhist')).toBe(getIntlCalendar('buddhist'))
-    expect(getIntlCalendar('BUDDHIST')).toBe(getIntlCalendar('buddhist'))
+    expect(getExoticCalendar('buddhist')).toBe(getExoticCalendar('buddhist'))
+    expect(getExoticCalendar('BUDDHIST')).toBe(getExoticCalendar('buddhist'))
   })
 
   it('creates core calendar handles for function APIs', () => {
@@ -20,7 +24,7 @@ describe('function calendar records', () => {
   })
 
   it('creates Intl calendar handles for function APIs', () => {
-    const date = PlainDateFns.create(2024, 1, 1, getIntlCalendar('buddhist'))
+    const date = PlainDateFns.create(2024, 1, 1, getExoticCalendar('buddhist'))
 
     expect(date.calendarId).toBe('buddhist')
     expect(date.year).toBe(2567)
@@ -30,6 +34,6 @@ describe('function calendar records', () => {
   // `islamic`. The shim rejects them because they are not concrete Temporal
   // calendar IDs, so keep this assertion covered by the forced-shim project.
   itSkipNative('rejects fallback-only Intl calendar IDs', () => {
-    expect(() => getIntlCalendar('islamic')).toThrow(RangeError)
+    expect(() => getExoticCalendar('islamic')).toThrow(RangeError)
   })
 })

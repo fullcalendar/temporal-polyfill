@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   getCoreCalendar,
+  getExoticCalendar,
   getGregoryCalendar,
-  getIntlCalendar,
 } from './calendar'
 import * as PlainMonthDayFns from './plainMonthDay'
 import {
@@ -13,7 +13,7 @@ import {
 } from './testUtils'
 
 const gregoryCalendar = getGregoryCalendar()
-const islamicCivilCalendar = getIntlCalendar('islamic-civil')
+const islamicCivilCalendar = getExoticCalendar('islamic-civil')
 const localeFormatOptions = {
   month: 'long',
   day: 'numeric',

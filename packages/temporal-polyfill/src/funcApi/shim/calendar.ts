@@ -1,4 +1,4 @@
-import { getExoticCalendar } from '../../exoticCalendars/index'
+import { getExoticCalendarImpl } from '../../exoticCalendars/index'
 import {
   CalendarSlot,
   getCalendarSlotId,
@@ -58,8 +58,8 @@ export const CalendarShimRecord = defineTemporalClass(
 
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)
-const getIntlCalendarRecord = memoize((calendarId: string) =>
-  createCalendarShimRecord(getExoticCalendar(calendarId)),
+const getExoticCalendarRecord = memoize((calendarId: string) =>
+  createCalendarShimRecord(getExoticCalendarImpl(calendarId)),
 )
 
 // Function APIs accept an omitted calendar as ISO. Massage that not-defined
@@ -91,6 +91,6 @@ export function getGregoryCalendar(): CalendarShimRecord {
   return gregoryCalendarRecord
 }
 
-export function getIntlCalendar(calendarId: string): CalendarShimRecord {
-  return getIntlCalendarRecord(calendarId.toLowerCase())
+export function getExoticCalendar(calendarId: string): CalendarShimRecord {
+  return getExoticCalendarRecord(calendarId.toLowerCase())
 }

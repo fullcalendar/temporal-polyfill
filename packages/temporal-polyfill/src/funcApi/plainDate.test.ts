@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   getCoreCalendar,
+  getExoticCalendar,
   getGregoryCalendar,
-  getIntlCalendar,
 } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
@@ -19,7 +19,7 @@ import {
 } from './testUtils'
 
 const gregoryCalendar = getGregoryCalendar()
-const hebrewCalendar = getIntlCalendar('hebrew')
+const hebrewCalendar = getExoticCalendar('hebrew')
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
@@ -64,7 +64,7 @@ describe('fromString', () => {
   it('works', () => {
     const pd = PlainDateFns.fromString(
       '2024-01-01[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateEquals(pd, {
       calendarId: 'hebrew',
@@ -101,7 +101,7 @@ describe('fromFields', () => {
   // `islamic`. The shim rejects them because they are not concrete Temporal
   // calendar IDs, so keep this assertion covered by the forced-shim project.
   itSkipNative('rejects fallback-only islamic calendar IDs', () => {
-    expect(() => getIntlCalendar('islamic')).toThrow(RangeError)
+    expect(() => getExoticCalendar('islamic')).toThrow(RangeError)
   })
 })
 
@@ -584,11 +584,11 @@ describe('withDayOfYear', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const pd = PlainDateFns.fromString(
       '2024-02-27[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, 5),
-      PlainDateFns.fromString('2023-09-20[u-ca=hebrew]', getIntlCalendar),
+      PlainDateFns.fromString('2023-09-20[u-ca=hebrew]', getExoticCalendar),
     )
   })
 
@@ -647,11 +647,11 @@ describe('withDayOfWeek', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const pd = PlainDateFns.fromString(
       '2024-02-27[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, 4),
-      PlainDateFns.fromString('2024-02-29[u-ca=hebrew]', getIntlCalendar),
+      PlainDateFns.fromString('2024-02-29[u-ca=hebrew]', getExoticCalendar),
     )
   })
 
@@ -697,7 +697,7 @@ describe('withWeekOfYear', () => {
   it('errors on calendars that do not support week numbers', () => {
     const pd = PlainDateFns.fromString(
       '2024-02-27[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(() => {
       PlainDateFns.withWeekOfYear(pd, 27)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCoreCalendar, getIntlCalendar } from './calendar'
+import { getCoreCalendar, getExoticCalendar } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainTimeFns from './plainTime'
 import {
@@ -13,7 +13,7 @@ import {
 } from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
-const hebrewCalendar = getIntlCalendar('hebrew')
+const hebrewCalendar = getExoticCalendar('hebrew')
 
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectZonedDateTimeEquals(
@@ -101,7 +101,7 @@ describe('fromString', () => {
   it('can parse with a timeZone and calendar', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectZonedDateTimeEquals(zdt, {
       calendarId: 'hebrew',
@@ -296,7 +296,7 @@ describe('weekOfYear', () => {
   it('returns undefined for calendars without defined weeks', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(ZonedDateTimeFns.weekOfYear(zdt)).toBe(undefined)
   })
@@ -322,7 +322,7 @@ describe('yearOfWeek', () => {
   it('returns undefined for calendars without defined weeks', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(ZonedDateTimeFns.yearOfWeek(zdt)).toBe(undefined)
   })
@@ -378,7 +378,7 @@ describe('monthsInYear', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(ZonedDateTimeFns.monthsInYear(zdt)).toBe(13)
   })
@@ -388,7 +388,7 @@ describe('inLeapYear', () => {
   it('works', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(ZonedDateTimeFns.inLeapYear(zdt)).toBe(true)
   })
@@ -823,11 +823,11 @@ describe('withDayOfYear', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const zdtExp = ZonedDateTimeFns.fromString(
       '2023-09-20T12:30:00-04:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
 
     const zdt1 = ZonedDateTimeFns.withDayOfYear(zdt0, 5)
@@ -925,11 +925,11 @@ describe('withDayOfWeek', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const zdtExp = ZonedDateTimeFns.fromString(
       '2024-02-29T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
 
     const zdt1 = ZonedDateTimeFns.withDayOfWeek(zdt0, 4)
@@ -995,7 +995,7 @@ describe('withWeekOfYear', () => {
   it('errors on calendars that do not support week numbers', () => {
     const zdt = ZonedDateTimeFns.fromString(
       '2024-02-27T12:30:00[America/New_York][u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(() => {
       ZonedDateTimeFns.withWeekOfYear(zdt, 27)

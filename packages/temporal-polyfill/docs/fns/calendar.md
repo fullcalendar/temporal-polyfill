@@ -19,7 +19,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
 - [Calendar Records](#calendar-records)
   - [`getIsoCalendar`](#getisocalendar)
   - [`getGregoryCalendar`](#getgregorycalendar)
-  - [`getIntlCalendar`](#getintlcalendar)
+  - [`getExoticCalendar`](#getexoticcalendar)
   - [`getCoreCalendar`](#getcorecalendar)
   - [`getAnyCalendar`](#getanycalendar)
 
@@ -36,7 +36,7 @@ The record has no public calendar fields. It is a branded handle that lets the
 functional API keep calendar behavior tree-shakeable without exposing the
 full Temporal object model.
 
-Calendar records are memoized. Calendar IDs passed through `getIntlCalendar`
+Calendar records are memoized. Calendar IDs passed through `getExoticCalendar`
 are normalized to lowercase, and `toJSON()` returns the normalized calendar ID.
 
 Codemods should usually replace a `CalendarRecord` value with the equivalent
@@ -89,7 +89,7 @@ const calendar = 'gregory'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getIntlCalendar`
+### `getExoticCalendar`
 
 Signature:
 
@@ -100,7 +100,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIntlCalendar('buddhist')
+const calendar = CalendarFns.getExoticCalendar('buddhist')
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -118,7 +118,7 @@ const calendar = calendarId
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-`getIntlCalendar` validates that the calendar is one of the functional API's
+`getExoticCalendar` validates that the calendar is one of the functional API's
 supported Intl-backed calendars. A direct rewrite to a string preserves the
 calendar choice, but it does not preserve that eager validation boundary.
 
@@ -182,6 +182,6 @@ const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=buddhist]')
 ```
 
 `getAnyCalendar` returns the shared ISO or Gregorian records for core calendar
-IDs, and otherwise falls through to `getIntlCalendar`. A direct rewrite to a
+IDs, and otherwise falls through to `getExoticCalendar`. A direct rewrite to a
 calendar identifier string keeps the calendar selection but drops the functional
 API's memoized handle and Intl-calendar validation.

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   getCoreCalendar,
+  getExoticCalendar,
   getGregoryCalendar,
-  getIntlCalendar,
 } from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -18,7 +18,7 @@ import {
 } from './testUtils'
 
 const gregoryCalendar = getGregoryCalendar()
-const hebrewCalendar = getIntlCalendar('hebrew')
+const hebrewCalendar = getExoticCalendar('hebrew')
 const dateTimeFormatOptions = {
   dateStyle: 'full',
   timeStyle: 'medium',
@@ -99,7 +99,7 @@ describe('fromString', () => {
   it('works', () => {
     const pd = PlainDateTimeFns.fromString(
       '2024-01-01T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateTimeEquals(pd, {
       calendarId: 'hebrew',
@@ -248,7 +248,7 @@ describe('withCalendar', () => {
   it('works', () => {
     const pdt0 = PlainDateTimeFns.fromString(
       '2024-01-01T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const pdt1 = PlainDateTimeFns.withCalendar(pdt0, gregoryCalendar)
     expectPlainDateTimeEquals(pdt1, {
@@ -266,7 +266,7 @@ describe('dayOfWeek', () => {
   it('works', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.dayOfWeek(pdt)).toBe(2)
   })
@@ -276,7 +276,7 @@ describe('daysInWeek', () => {
   it('works', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.daysInWeek(pdt)).toBe(7)
   })
@@ -286,7 +286,7 @@ describe('weekOfYear', () => {
   it('returns undefined for calendars without defined weeks', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2023-01-01T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.weekOfYear(pdt)).toBe(undefined)
   })
@@ -312,7 +312,7 @@ describe('yearOfWeek', () => {
   it('returns undefined for calendars without defined weeks', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2023-01-01T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.yearOfWeek(pdt)).toBe(undefined)
   })
@@ -368,7 +368,7 @@ describe('monthsInYear', () => {
   it('works', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.monthsInYear(pdt)).toBe(13)
   })
@@ -378,7 +378,7 @@ describe('inLeapYear', () => {
   it('works', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(PlainDateTimeFns.inLeapYear(pdt)).toBe(true)
   })
@@ -567,7 +567,7 @@ describe('toZonedDateTime', () => {
   it('works without disambiguation options', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const zdt = PlainDateTimeFns.toZonedDateTime(pdt, 'America/New_York')
     expectZonedDateTimeEquals(zdt, {
@@ -580,7 +580,7 @@ describe('toZonedDateTime', () => {
   it('works with disambiguation options', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const zdt = PlainDateTimeFns.toZonedDateTime(pdt, 'America/New_York', {
       disambiguation: 'later',
@@ -597,7 +597,7 @@ describe('toPlainDate', () => {
   it('works', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     const pd = PlainDateTimeFns.toPlainDate(pdt)
     expectPlainDateEquals(pd, {
@@ -765,13 +765,13 @@ describe('withDayOfYear', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfYear(pdt, 5),
       PlainDateTimeFns.fromString(
         '2023-09-20T12:30:00[u-ca=hebrew]',
-        getIntlCalendar,
+        getExoticCalendar,
       ),
     )
   })
@@ -842,13 +842,13 @@ describe('withDayOfWeek', () => {
   itSkipNative('works with non-ISO calendar', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expectPlainDateTimeEquals(
       PlainDateTimeFns.withDayOfWeek(pdt, 4),
       PlainDateTimeFns.fromString(
         '2024-02-29T12:30:00[u-ca=hebrew]',
-        getIntlCalendar,
+        getExoticCalendar,
       ),
     )
   })
@@ -906,7 +906,7 @@ describe('withWeekOfYear', () => {
   it('errors on calendars that do not support week numbers', () => {
     const pdt = PlainDateTimeFns.fromString(
       '2024-02-27T12:30:00[u-ca=hebrew]',
-      getIntlCalendar,
+      getExoticCalendar,
     )
     expect(() => {
       PlainDateTimeFns.withWeekOfYear(pdt, 27)

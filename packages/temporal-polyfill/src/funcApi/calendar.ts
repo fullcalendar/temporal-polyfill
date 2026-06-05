@@ -18,9 +18,9 @@ export const getGregoryCalendar: () => Record = NativeTemporal
   ? Native.getGregoryCalendar
   : Shim.getGregoryCalendar
 
-export const getIntlCalendar: (calendarId: string) => Record = NativeTemporal
-  ? Native.getIntlCalendar
-  : Shim.getIntlCalendar
+export const getExoticCalendar: (calendarId: string) => Record = NativeTemporal
+  ? Native.getExoticCalendar
+  : Shim.getExoticCalendar
 
 export function getCoreCalendar(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
@@ -32,7 +32,7 @@ export function getCoreCalendar(calendarId: string): Record {
   throw new RangeError(
     errorMessages.exoticCalendarRequired(
       calendarId,
-      'getIntlCalendar or getAnyCalendar',
+      'getExoticCalendar or getAnyCalendar',
     ),
   )
 }
@@ -44,5 +44,5 @@ export function getAnyCalendar(calendarId: string): Record {
   if (calendarId === gregoryCalendarId) {
     return getGregoryCalendar()
   }
-  return getIntlCalendar(calendarId)
+  return getExoticCalendar(calendarId)
 }

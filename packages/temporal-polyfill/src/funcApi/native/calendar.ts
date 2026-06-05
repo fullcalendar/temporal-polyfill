@@ -53,7 +53,7 @@ export const CalendarNativeRecord = defineTemporalClass(
 
 const isoCalendarRecord = createCalendarNativeRecord(isoCalendarId)
 const gregoryCalendarRecord = createCalendarNativeRecord(gregoryCalendarId)
-const getIntlCalendarRecord = memoize((calendarId: string) =>
+const getExoticCalendarRecord = memoize((calendarId: string) =>
   createCalendarNativeRecord(calendarId),
 )
 
@@ -76,6 +76,6 @@ export function getGregoryCalendar(): CalendarNativeRecord {
   return gregoryCalendarRecord
 }
 
-export function getIntlCalendar(calendarId: string): CalendarNativeRecord {
-  return getIntlCalendarRecord(calendarId.toLowerCase())
+export function getExoticCalendar(calendarId: string): CalendarNativeRecord {
+  return getExoticCalendarRecord(calendarId.toLowerCase())
 }
