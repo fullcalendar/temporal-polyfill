@@ -14,8 +14,12 @@ import { readFile } from 'fs/promises'
 import { rollup as rollupBuild, watch as rollupWatch } from 'rollup'
 import { dts } from 'rollup-plugin-dts'
 import { extensions } from './lib/config.js'
+import { mangler } from './lib/mangler.js'
+import {
+  buildTerserReadableOptions,
+  readTemporalReservedWords,
+} from './lib/minify-options.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
-import { buildTerserReadableOptions } from './lib/minify-options.js'
 
 const argv = process.argv.slice(2)
 
@@ -24,7 +28,11 @@ writeBundles(joinPaths(process.argv[1], '../..'), argv.includes('--dev'))
 async function writeBundles(pkgDir, isDev) {
   const pkgJsonPath = joinPaths(pkgDir, 'package.json')
   const pkgJson = JSON.parse(await readFile(pkgJsonPath))
-  const moduleAndDtsConfigs = buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev)
+  const moduleAndDtsConfigs = await buildModuleAndDtsConfigs(
+    pkgDir,
+    pkgJson,
+    isDev,
+  )
 
   if (isDev) {
     await watchWithConfigs(moduleAndDtsConfigs.moduleConfigs)
@@ -37,9 +45,12 @@ async function writeBundles(pkgDir, isDev) {
   }
 }
 
-function buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev) {
+async function buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev) {
   const isExternalDependency = buildExternalDependencyResolver(pkgJson)
   const exportMap = pkgJson.buildConfig.exports
+  const temporalReservedWords = isDev
+    ? []
+    : await readTemporalReservedWords(pkgDir)
   const chunkNamesEnabled = true // isDev
   const chunkBase = 'chunks/' + (chunkNamesEnabled ? '[name]' : '[hash]')
   const sourceDirectoryChunksPlugin = buildSourceDirectoryChunksPlugin(
@@ -56,6 +67,7 @@ function buildModuleAndDtsConfigs(pkgDir, pkgJson, isDev) {
       isDev,
       chunkBase,
       sourceDirectoryChunksPlugin,
+      temporalReservedWords,
     }),
     dtsConfigs: isDev
       ? []
@@ -184,6 +196,7 @@ function buildModuleConfigs({
   isDev,
   chunkBase,
   sourceDirectoryChunksPlugin,
+  temporalReservedWords,
 }) {
   return [
     {
@@ -214,6 +227,7 @@ function buildModuleConfigs({
         plugins: [
           !isDev && pureTopLevel(),
           !isDev && terser(buildTerserReadableOptions()),
+          !isDev && mangler({ reserved: temporalReservedWords }),
         ],
       },
     },

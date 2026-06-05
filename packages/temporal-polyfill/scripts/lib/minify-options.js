@@ -48,45 +48,9 @@ function buildTerserCompressOptions() {
   }
 }
 
-export async function getReservedWords(pkgDir) {
-  return (await readTemporalReservedWords(pkgDir)).concat([
-    // JS props Rollup doesn't know about
-    // TODO: audit this list. maybe newer terser knows about them
-    'name', // really?
-    // Intl.DateTimeFormat
-    'resolvedOptions',
-    'supportedLocalesOf',
-    'useGrouping',
-    'relatedYear',
-    'calendar',
-    'dateStyle',
-    'day',
-    'dayPeriod',
-    'era',
-    'fractionalSecondDigits',
-    'full',
-    'hour',
-    'hour12',
-    'hourCycle',
-    'localeMatcher',
-    'long',
-    'medium',
-    'minute',
-    'month',
-    'numberingSystem',
-    'second',
-    'short',
-    'timeStyle',
-    'timeZone',
-    'timeZoneName',
-    'weekday',
-    'year',
-  ])
-}
-
 const startsWithLetterRegExp = /^[a-zA-Z]/
 
-async function readTemporalReservedWords(pkgDir) {
+export async function readTemporalReservedWords(pkgDir) {
   const code = await readFile(
     joinPaths(pkgDir, '../temporal-spec/global.d.ts'),
     'utf-8',
