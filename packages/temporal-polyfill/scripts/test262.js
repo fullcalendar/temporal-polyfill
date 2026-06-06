@@ -55,7 +55,8 @@ yargs(hideBin(process.argv))
       const currentNodeMajorVersion = parseInt(currentNodeVersion.split('.')[0])
       const isNative = currentNodeMajorVersion >= 26
       const classApi = options.classApi
-      const useMinified = Boolean(process.env.TEST262_MINIFIED)
+      const minifier = process.env.TEST262_MINIFIER || null
+      const useMinified = Boolean(minifier)
 
       if (classApi === 'core' && isNative) {
         throw new Error(
@@ -97,6 +98,12 @@ yargs(hideBin(process.argv))
         if (classApi === 'core' || currentNodeMajorVersion <= 16) {
           expectedFailureFiles.push('calendar-supported-values-of.txt')
         }
+      }
+
+      // We turn keep_fargs:false because of SWC bug
+      // See note int minify-options.js
+      if (minifier === 'swc') {
+        expectedFailureFiles.push('minified-function-length.txt')
       }
 
       const globalPolyfillPath =

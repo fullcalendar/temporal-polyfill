@@ -7,7 +7,15 @@ import { readFile } from 'fs/promises'
 
 export function buildTerserReadableOptions() {
   return {
-    compress: buildTerserCompressOptions(),
+    compress: {
+      ecma: 2018,
+      passes: 3, // enough to remove dead object assignment, get lower size
+      keep_fargs: true, // keep explicit =undefined params that define method .length
+      unsafe_arrows: true,
+      unsafe_methods: true,
+      booleans_as_integers: true,
+      hoist_funs: true,
+    },
     mangle: false,
     format: {
       beautify: true,
@@ -20,31 +28,35 @@ export function buildTerserReadableOptions() {
 
 export function buildTerserMinifyOptions() {
   return {
-    compress: buildTerserCompressOptions(),
-    mangle: true,
-    format: {
-      indent_level: 2,
+    compress: {
+      ecma: 2018,
+      passes: 3, // enough to remove dead object assignment, get lower size
+      keep_fargs: true, // keep explicit =undefined params that define method .length
+      unsafe_arrows: true,
+      unsafe_methods: true,
+      booleans_as_integers: true,
+      hoist_funs: true,
     },
+    mangle: true,
   }
 }
 
 export function buildSwcMinifyOptions() {
   return {
-    compress: buildTerserCompressOptions(), // SWC is compatible with terser
-    mangle: true,
-    ecma: 2018,
-  }
-}
+    compress: {
+      ecma: 2018,
+      passes: 3, // enough to remove dead object assignment, get lower size
 
-function buildTerserCompressOptions() {
-  return {
-    ecma: 2018,
-    passes: 3, // enough to remove dead object assignment, get lower size
-    keep_fargs: true, // keep explicit =undefined params that define method .length
-    unsafe_arrows: true,
-    unsafe_methods: true,
-    booleans_as_integers: true,
-    hoist_funs: true,
+      // SWC erroneously removes =undefined params, so explicitly turn off,
+      // and rely on expected-failures/minified-function-length.txt
+      keep_fargs: false,
+
+      unsafe_arrows: true,
+      unsafe_methods: true,
+      booleans_as_integers: true,
+      hoist_funs: true,
+    },
+    mangle: true,
   }
 }
 

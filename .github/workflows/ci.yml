@@ -74,7 +74,7 @@ jobs:
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_CLASS_API=full
-          TEST262_MINIFIED=${{ matrix.MINIFIER }}
+          TEST262_MINIFIER=${{ matrix.MINIFIER }}
           pnpm run test262
 
       - name: Test 262 Core
@@ -82,5 +82,5 @@ jobs:
         run: >
           TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_CLASS_API=core
-          TEST262_MINIFIED=${{ matrix.MINIFIER }}
+          TEST262_MINIFIER=${{ matrix.MINIFIER }}
           pnpm run test262
