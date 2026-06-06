@@ -2,6 +2,7 @@
 
 import { getExportsSize, readableSize } from 'export-size'
 import { readFile } from 'fs/promises'
+import { minifyPathMap } from './lib/config.js'
 import { execLive, popFlag } from './lib/utils.js'
 
 const argv = process.argv.slice(2)
@@ -39,10 +40,9 @@ async function displaySizes(
     throw RangeError('Cannot debug output with multiple entry points')
   }
 
-  for (const globalIifePath of [
-    './dist/global.min.js',
-    './dist/full/global.min.js',
-  ]) {
+  for (const minifiedIifePath of Object.values(minifyPathMap)) {
+    const globalIifePath = './' + minifiedIifePath
+
     console.log(`Size of ${globalIifePath} ...`)
     await execLive([
       'gzip-size',

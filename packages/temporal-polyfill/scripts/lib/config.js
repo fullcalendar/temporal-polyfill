@@ -9,3 +9,8 @@ export const extensions = {
   iifeMin: '.min.js',
   dts: '.d.ts',
 }
+
+export const minifyPathMap = {
+  'dist/global.js': 'dist/.global.min.js',
+  'dist/full/global.js': 'dist/full/.global.min.js',
+}

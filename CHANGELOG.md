@@ -14,6 +14,7 @@ next
 - No more temporal-spec?
 - Calendars more conformant
 - Removed Node 14 support
+- global.min.js no longer part of published dist (use jsdelivr)
 
 
 v0.3.2 (2026-03-10)

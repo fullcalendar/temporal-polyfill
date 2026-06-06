@@ -3,7 +3,7 @@
 import { join as joinPaths } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 import { minify as minifyWithTerser } from 'terser'
-import { extensions } from './lib/config.js'
+import { minifyPathMap } from './lib/config.js'
 import {
   buildSwcMinifyOptions,
   buildTerserMinifyOptions,
@@ -12,26 +12,16 @@ import {
 minifyIifeFiles(joinPaths(process.argv[1], '../..'))
 
 async function minifyIifeFiles(pkgDir) {
-  const pkgJsonPath = joinPaths(pkgDir, 'package.json')
-  const pkgJson = JSON.parse(await readFile(pkgJsonPath))
   const minifier = process.env.MINIFIER || 'terser'
 
   console.log(`Using ${minifier} minifier`)
 
-  for (const exportPath in pkgJson.buildConfig.exports) {
-    const exportConfig = pkgJson.buildConfig.exports[exportPath]
+  for (const [inputPath, outputPath] of Object.entries(minifyPathMap)) {
+    const code = await readFile(joinPaths(pkgDir, inputPath), 'utf-8')
+    const result = await minifyCode(code, minifier)
 
-    if (exportConfig.iife) {
-      const exportName =
-        exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
-      const inputPath = joinPaths('dist', exportName + extensions.iife)
-      const outputPath = joinPaths('dist', exportName + extensions.iifeMin)
-      const code = await readFile(joinPaths(pkgDir, inputPath), 'utf-8')
-      const result = await minifyCode(code, minifier)
-
-      await writeFile(joinPaths(pkgDir, outputPath), result.code)
-      console.log(`Minified ${inputPath} with ${minifier}`)
-    }
+    await writeFile(joinPaths(pkgDir, outputPath), result.code)
+    console.log(`Minified ${inputPath} with ${minifier}`)
   }
 }
 

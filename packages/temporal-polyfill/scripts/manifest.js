@@ -22,7 +22,6 @@ async function writePkgJson(pkgDir, isDev) {
 
   let rootEsmPath
   let rootTypesPath
-  let rootIifeMinPath
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
@@ -50,27 +49,14 @@ async function writePkgJson(pkgDir, isDev) {
     }
 
     if (exportConfig.iife) {
-      sideEffectsList.push(
-        './' + exportName + esmExtension,
-        './' + exportName + extensions.iife,
-        './' + exportName + extensions.iifeMin,
-      )
-
-      if (!rootIifeMinPath) {
-        rootIifeMinPath = './' + exportName + extensions.iifeMin
-      }
+      const iifePath = './' + exportName + extensions.iife
+      sideEffectsList.push(iifePath, esmPath)
     }
   }
 
-  distManifest.main = rootEsmPath
   distManifest.types = rootTypesPath
-  distManifest.module = rootEsmPath
+  distManifest.main = rootEsmPath
   distManifest.exports = distExportMap
-
-  if (rootIifeMinPath) {
-    distManifest.unpkg = distManifest.jsdelivr = rootIifeMinPath
-  }
-
   distManifest.sideEffects = sideEffectsList.length ? sideEffectsList : false
 
   delete distManifest.private

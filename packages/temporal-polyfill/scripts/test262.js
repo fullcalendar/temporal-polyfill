@@ -111,8 +111,8 @@ yargs(hideBin(process.argv))
 
       const globalPolyfillPath =
         classApi === 'core'
-          ? `./dist/global${useMinified ? '.min' : ''}.js`
-          : `./dist/full/global${useMinified ? '.min' : ''}.js`
+          ? `./dist/${useMinified ? '.global.min' : 'global'}.js`
+          : `./dist/full/${useMinified ? '.global.min' : 'global'}.js`
 
       console.log(
         `Testing ${globalPolyfillPath} with Node ${currentNodeVersion} ...`,
