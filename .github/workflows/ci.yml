@@ -11,7 +11,7 @@ env:
 
 jobs:
   ci:
-    name: CI (${{ matrix.TEST_NODE_VERSION }})
+    name: CI (${{ matrix.TEST_NODE_VERSION }}) ${{ matrix.MINIFIER }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,14 +20,14 @@ jobs:
         TEST_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
         include:
           - TEST_NODE_VERSION: 16.20.0
-            LINTING: 1
-            SKIP_VITEST: 1
+            LINT: 1
+            VITEST_SKIP: 1
           - TEST_NODE_VERSION: 20.10.0
             MINIFIER: terser
           - TEST_NODE_VERSION: 22.14.0
             MINIFIER: swc
           - TEST_NODE_VERSION: 26.2.0
-            SKIP_CORE: 1
+            TEST262_CORE_SKIP: 1
 
     steps:
       - name: Checkout
@@ -51,7 +51,7 @@ jobs:
         run: pnpm install
 
       - name: Lint
-        if: matrix.LINTING
+        if: matrix.LINT
         run: pnpm run lint
 
       - name: Build
@@ -65,22 +65,22 @@ jobs:
 
       # temporal-polyfill vitest requires temporal-utils to be built
       - name: Vitest
-        if: matrix.SKIP_VITEST != 1
+        if: matrix.VITEST_SKIP != 1
         run: >
-          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
+          VITEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           pnpm run vitest
 
       - name: Test 262 Full
         run: >
-          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
-          TEST262_CLASS_API=full
+          TEST262_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_MINIFIER=${{ matrix.MINIFIER }}
+          TEST262_CLASS_API=full
           pnpm run test262
 
       - name: Test 262 Core
-        if: matrix.SKIP_CORE != 1
+        if: matrix.TEST262_CORE_SKIP != 1
         run: >
-          TEST_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
-          TEST262_CLASS_API=core
+          TEST262_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_MINIFIER=${{ matrix.MINIFIER }}
+          TEST262_CLASS_API=core
           pnpm run test262

@@ -47,7 +47,7 @@ yargs(hideBin(process.argv))
     async (options) => {
       if (
         await rerunUnderRequestedTestNode(
-          process.env.TEST_NODE_VERSION,
+          process.env.TEST262_NODE_VERSION,
           process.argv.slice(1),
         )
       ) {
@@ -64,7 +64,7 @@ yargs(hideBin(process.argv))
       if (classApi === 'core' && isNative) {
         throw new Error(
           'The core global artifact cannot be tested under native Temporal. ' +
-            'Use TEST_NODE_VERSION <= 24.',
+            'Use TEST262_NODE_VERSION <= 24.',
         )
       }
       const expectedFailureFiles = isNative

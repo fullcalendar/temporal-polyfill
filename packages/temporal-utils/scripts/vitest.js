@@ -7,7 +7,7 @@ import {
 
 if (
   !(await rerunUnderRequestedTestNode(
-    process.env.TEST_NODE_VERSION,
+    process.env.VITEST_NODE_VERSION,
     process.argv.slice(1),
   ))
 ) {
