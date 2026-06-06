@@ -191,6 +191,12 @@ Temporal API:
 const date = Temporal.PlainDate.from(value)
 ```
 
+Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
+`CalendarRecord`. Most callers supply
+[`getCoreCalendar`](calendar.md#getcorecalendar) (ISO and Gregorian only) or
+[`getAnyCalendar`](calendar.md#getanycalendar) (also exotic calendars); see the
+[Calendar docs](calendar.md) for the full set of resolvers.
+
 The resolver argument has no direct counterpart and can usually be dropped once
 its import or local binding is unused.
 
