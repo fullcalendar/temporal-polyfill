@@ -18,7 +18,6 @@ import {
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import type { RelativeToOptions } from './temporalSpecHelpers'
 import { timeFieldsToNano } from './timeFieldMath'
-import { resolveTimeZoneRecord } from './timeZoneId'
 import { Unit } from './units'
 import {
   NumberSign,
@@ -187,32 +186,4 @@ export function plainTimesEqual(
   plainTimeSlots1: TimeFields,
 ): boolean {
   return !compareTimeFields(plainTimeSlots0, plainTimeSlots1)
-}
-
-// TimeZone
-// -----------------------------------------------------------------------------
-
-/*
-NOTE: our minifier converts true/false to 1/0, which impares this function's
-ability to return true/false literals. So, resign to returning loose truthy values
-and make the caller responsible for casting to a boolean.
-*/
-export function isTimeZoneIdsEqual(
-  a: string,
-  b: string,
-): number | boolean | undefined {
-  if (a === b) {
-    return 1
-  }
-
-  // If either is an unresolvable, return false
-  // Unfortunately, can only be detected with try/catch because `new Intl.DateTimeFormat` throws
-  try {
-    return (
-      resolveTimeZoneRecord(a).compareKey ===
-      resolveTimeZoneRecord(b).compareKey
-    )
-  } catch {}
-
-  // If reaching here, there was an error, so NOT equal
 }

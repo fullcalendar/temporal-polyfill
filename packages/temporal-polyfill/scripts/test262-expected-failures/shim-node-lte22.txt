@@ -17,5 +17,5 @@ intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 # link-name equality/canonicalization mismatches that vary by host data:
 # Node <=20 misses Asia/Choibalsan -> Asia/Ulaanbaatar, while Node 22 can
 # preserve Antarctica/South_Pole instead of canonicalizing to Antarctica/McMurdo.
-# We intentionally avoid one-off IANA-link workarounds in isTimeZoneIdsEqual().
+# We intentionally avoid one-off IANA-link workarounds for host Intl data.
 intl402/Temporal/ZonedDateTime/links.js

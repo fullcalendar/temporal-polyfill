@@ -13,7 +13,6 @@ export function buildTerserReadableOptions() {
       keep_fargs: true, // keep explicit =undefined params that define method .length
       unsafe_arrows: true,
       unsafe_methods: true,
-      booleans_as_integers: true, // good idea?
       hoist_funs: true,
     },
     mangle: false,
