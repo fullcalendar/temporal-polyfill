@@ -5,7 +5,7 @@ Public functions exported for `Duration`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as DurationFns from 'temporal-polyfill/fns/duration'
+import * as DurationFns from 'temporal-polyfill/fns/Duration'
 ```
 
 ## Contents

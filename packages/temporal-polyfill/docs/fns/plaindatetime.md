@@ -5,7 +5,7 @@ Public functions exported for `PlainDateTime`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as PlainDateTimeFns from 'temporal-polyfill/fns/plaindatetime'
+import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
 ```
 
 ## Contents
@@ -222,7 +222,7 @@ Signature:
 Fn API:
 
 ```ts
-import * as CalendarFns from 'temporal-polyfill/fns/calendar'
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const dateTime = PlainDateTimeFns.fromString(
   '2024-05-01T12:30:00[u-ca=gregory]',

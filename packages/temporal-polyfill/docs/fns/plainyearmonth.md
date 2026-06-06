@@ -5,7 +5,7 @@ Public functions exported for `PlainYearMonth`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as PlainYearMonthFns from 'temporal-polyfill/fns/plainyearmonth'
+import * as PlainYearMonthFns from 'temporal-polyfill/fns/PlainYearMonth'
 ```
 
 ## Contents
@@ -154,7 +154,7 @@ Signature:
 Fn API:
 
 ```ts
-import * as CalendarFns from 'temporal-polyfill/fns/calendar'
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const yearMonth = PlainYearMonthFns.fromString(
   '2024-05[u-ca=gregory]',

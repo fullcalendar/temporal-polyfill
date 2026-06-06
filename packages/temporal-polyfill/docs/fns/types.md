@@ -7,7 +7,7 @@ Examples use the functional API import paths:
 
 ```ts
 import type { OverflowOptions } from 'temporal-polyfill/fns'
-import type { Record as PlainDateRecord } from 'temporal-polyfill/fns/plaindate'
+import type { Record as PlainDateRecord } from 'temporal-polyfill/fns/PlainDate'
 ```
 
 After a codemod, functional records and option aliases should generally be
@@ -150,7 +150,7 @@ single-unit rounding and diff utilities outside the functional API.
 Import path:
 
 ```ts
-import type { Record } from 'temporal-polyfill/fns/calendar'
+import type { Record } from 'temporal-polyfill/fns/Calendar'
 ```
 
 Temporal API type:

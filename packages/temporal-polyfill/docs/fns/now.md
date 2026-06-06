@@ -5,7 +5,7 @@ Public functions exported for `Now`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as NowFns from 'temporal-polyfill/fns/now'
+import * as NowFns from 'temporal-polyfill/fns/Now'
 ```
 
 ## Contents

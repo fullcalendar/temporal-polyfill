@@ -85,34 +85,34 @@
       "./fns": {
         "src": "funcApi/index"
       },
-      "./fns/calendar": {
+      "./fns/Calendar": {
         "src": "funcApi/calendar"
       },
-      "./fns/instant": {
+      "./fns/Instant": {
         "src": "funcApi/instant"
       },
-      "./fns/zoneddatetime": {
+      "./fns/ZonedDateTime": {
         "src": "funcApi/zonedDateTime"
       },
-      "./fns/plaindatetime": {
+      "./fns/PlainDateTime": {
         "src": "funcApi/plainDateTime"
       },
-      "./fns/plaindate": {
+      "./fns/PlainDate": {
         "src": "funcApi/plainDate"
       },
-      "./fns/plaintime": {
+      "./fns/PlainTime": {
         "src": "funcApi/plainTime"
       },
-      "./fns/plainyearmonth": {
+      "./fns/PlainYearMonth": {
         "src": "funcApi/plainYearMonth"
       },
-      "./fns/plainmonthday": {
+      "./fns/PlainMonthDay": {
         "src": "funcApi/plainMonthDay"
       },
-      "./fns/duration": {
+      "./fns/Duration": {
         "src": "funcApi/duration"
       },
-      "./fns/now": {
+      "./fns/Now": {
         "src": "funcApi/now"
       }
     }

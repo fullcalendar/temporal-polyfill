@@ -9,8 +9,8 @@ calendar identifier string itself.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as CalendarFns from 'temporal-polyfill/fns/calendar'
-import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 ```
 
 ## Contents

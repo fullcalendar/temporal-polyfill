@@ -5,7 +5,7 @@ Public functions exported for `ZonedDateTime`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as ZonedDateTimeFns from 'temporal-polyfill/fns/zoneddatetime'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
 ```
 
 ## Contents
@@ -232,7 +232,7 @@ Signature:
 Fn API:
 
 ```ts
-import * as CalendarFns from 'temporal-polyfill/fns/calendar'
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const zonedDateTime = ZonedDateTimeFns.fromString(
   '2024-05-01T12:30:00-04:00[America/New_York][u-ca=gregory]',

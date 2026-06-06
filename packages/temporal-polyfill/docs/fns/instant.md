@@ -5,7 +5,7 @@ Public functions exported for `Instant`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as InstantFns from 'temporal-polyfill/fns/instant'
+import * as InstantFns from 'temporal-polyfill/fns/Instant'
 ```
 
 ## Contents

@@ -5,7 +5,7 @@ Public functions exported for `PlainTime`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as PlainTimeFns from 'temporal-polyfill/fns/plaintime'
+import * as PlainTimeFns from 'temporal-polyfill/fns/PlainTime'
 ```
 
 ## Contents

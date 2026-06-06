@@ -5,7 +5,7 @@ Public functions exported for `PlainMonthDay`.
 Examples assume the functional API is imported as:
 
 ```ts
-import * as PlainMonthDayFns from 'temporal-polyfill/fns/plainmonthday'
+import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
 ```
 
 ## Contents
@@ -133,7 +133,7 @@ Signature:
 Fn API:
 
 ```ts
-import * as CalendarFns from 'temporal-polyfill/fns/calendar'
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const monthDay = PlainMonthDayFns.fromString(
   '1972-05-01[u-ca=gregory]',
