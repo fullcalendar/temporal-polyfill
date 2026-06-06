@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCoreCalendar } from './calendar'
+import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
@@ -192,7 +192,7 @@ describe('round', () => {
     const dur = DurationFns.fromFields({ months: 1, days: 15 })
     const zdt = ZonedDateTimeFns.fromString(
       '2024-01-01[America/New_York]',
-      getCoreCalendar,
+      CalendarFns.getCore,
     )
     const rounded = DurationFns.round(dur, {
       smallestUnit: 'months',
@@ -227,7 +227,7 @@ describe('total', () => {
     const dur = DurationFns.fromFields({ months: 1, days: 14 })
     const zdt = ZonedDateTimeFns.fromString(
       '2023-01-01[America/New_York]',
-      getCoreCalendar,
+      CalendarFns.getCore,
     )
     const total = DurationFns.total(dur, { unit: 'months', relativeTo: zdt })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
@@ -263,7 +263,7 @@ describe('compare', () => {
     const d1 = DurationFns.fromFields({ months: 2, days: 1 })
     const zdt = ZonedDateTimeFns.fromString(
       '2024-01-01[America/New_York]',
-      getCoreCalendar,
+      CalendarFns.getCore,
     )
     expect(DurationFns.compare(d0, d1, { relativeTo: zdt })).toBe(-1)
     expect(DurationFns.compare(d1, d0, { relativeTo: zdt })).toBe(1)

@@ -40,7 +40,7 @@ const deprecatedCalendarIdMap = {
   'islamicc': 'islamic-civil',
 } as const
 
-export function getExoticCalendarImpl(lowerRawCalendarId: string) {
+export function getExoticCalendar(lowerRawCalendarId: string) {
   // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
   // true aliases like `islamicc`, but rejects broad Intl fallbacks.
   if (

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCoreCalendar, getGregoryCalendar } from './calendar'
+import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainYearMonthFns from './plainYearMonth'
 import {
@@ -10,7 +10,7 @@ import {
   testHotCache,
 } from './testUtils'
 
-const gregoryCalendar = getGregoryCalendar()
+const gregoryCalendar = CalendarFns.getGregory()
 const localeFormatOptions = {
   year: 'numeric',
   month: 'long',
@@ -68,7 +68,7 @@ describe('fromString', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.fromString(
       '2024-06-01[u-ca=gregory]',
-      getCoreCalendar,
+      CalendarFns.getCore,
     )
     expectPlainYearMonthEquals(pym, {
       calendarId: 'gregory',

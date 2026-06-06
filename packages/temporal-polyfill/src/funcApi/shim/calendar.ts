@@ -1,4 +1,4 @@
-import { getExoticCalendarImpl } from '../../exoticCalendars/index'
+import { getExoticCalendar } from '../../exoticCalendars/index'
 import {
   CalendarSlot,
   getCalendarSlotId,
@@ -55,7 +55,7 @@ export const CalendarShimRecord = defineTemporalClass(
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)
 const getExoticCalendarRecord = memoize((calendarId: string) =>
-  createCalendarShimRecord(getExoticCalendarImpl(calendarId)),
+  createCalendarShimRecord(getExoticCalendar(calendarId)),
 )
 
 // Function APIs accept an omitted calendar as ISO. Massage that not-defined
@@ -70,7 +70,7 @@ export function refineCalendarShimArg(
 
 // Adapt a public shim resolver (id -> CalendarShimRecord) into the internal
 // CalendarResolver signature (id -> CalendarSlot) that the parser expects.
-// The public resolver — typically getCoreCalendar or getAnyCalendar — owns the
+// The public resolver — typically getCore or getAny — owns the
 // iso/gregory/Intl policy, so all this wrapper does is brand-unwrap.
 export function createCalendarShimStringResolver(
   getCalendar: CalendarShimResolver,
@@ -79,14 +79,14 @@ export function createCalendarShimStringResolver(
     getCalendarShimRecordInternal(getCalendar(calendarId.toLowerCase()))
 }
 
-export function getIsoCalendar(): CalendarShimRecord {
+export function getIso(): CalendarShimRecord {
   return isoCalendarRecord
 }
 
-export function getGregoryCalendar(): CalendarShimRecord {
+export function getGregory(): CalendarShimRecord {
   return gregoryCalendarRecord
 }
 
-export function getExoticCalendar(calendarId: string): CalendarShimRecord {
+export function getExotic(calendarId: string): CalendarShimRecord {
   return getExoticCalendarRecord(calendarId.toLowerCase())
 }

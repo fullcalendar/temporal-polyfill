@@ -1,4 +1,4 @@
-import { getExoticCalendarImpl } from '../../exoticCalendars/index'
+import { getExoticCalendar } from '../../exoticCalendars/index'
 import { gregoryCalendar, isoCalendar } from '../../internal/calendarSlot'
 import type { CalendarSlot } from '../../internal/calendarSlot'
 import { requireString } from '../../internal/cast'
@@ -17,7 +17,7 @@ export function resolveAnyCalendar(rawCalendarId: string): CalendarSlot {
     return gregoryCalendar
   }
 
-  return getExoticCalendarImpl(lowerRawCalendarId)
+  return getExoticCalendar(lowerRawCalendarId)
 }
 
 // Allows an undefined calendar argument, which defaults to ISO.

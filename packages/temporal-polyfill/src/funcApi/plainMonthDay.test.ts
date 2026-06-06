@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getCoreCalendar,
-  getExoticCalendar,
-  getGregoryCalendar,
-} from './calendar'
+import * as CalendarFns from './calendar'
 import * as PlainMonthDayFns from './plainMonthDay'
 import {
   expectPlainDateEquals,
@@ -12,8 +8,8 @@ import {
   testHotCache,
 } from './testUtils'
 
-const gregoryCalendar = getGregoryCalendar()
-const islamicCivilCalendar = getExoticCalendar('islamic-civil')
+const gregoryCalendar = CalendarFns.getGregory()
+const islamicCivilCalendar = CalendarFns.getExotic('islamic-civil')
 const localeFormatOptions = {
   month: 'long',
   day: 'numeric',
@@ -54,7 +50,7 @@ describe('fromString', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.fromString(
       '2024-06-18[u-ca=gregory]',
-      getCoreCalendar,
+      CalendarFns.getCore,
     )
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',

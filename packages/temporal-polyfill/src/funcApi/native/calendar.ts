@@ -64,14 +64,14 @@ export function runCalendarNativeResolver(
   getCalendarNativeRecordId(getCalendar(calendarId.toLowerCase()))
 }
 
-export function getIsoCalendar(): CalendarNativeRecord {
+export function getIso(): CalendarNativeRecord {
   return isoCalendarRecord
 }
 
-export function getGregoryCalendar(): CalendarNativeRecord {
+export function getGregory(): CalendarNativeRecord {
   return gregoryCalendarRecord
 }
 
-export function getExoticCalendar(calendarId: string): CalendarNativeRecord {
+export function getExotic(calendarId: string): CalendarNativeRecord {
   return getExoticCalendarRecord(calendarId.toLowerCase())
 }

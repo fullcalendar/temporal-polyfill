@@ -133,19 +133,24 @@ Signature:
 Fn API:
 
 ```ts
-const monthDay = PlainMonthDayFns.fromString(value, getCalendar)
+import * as CalendarFns from 'temporal-polyfill/fns/calendar'
+
+const monthDay = PlainMonthDayFns.fromString(
+  '1972-05-01[u-ca=gregory]',
+  CalendarFns.getCore,
+)
 ```
 
 Temporal API:
 
 ```ts
-const monthDay = Temporal.PlainMonthDay.from(value)
+const monthDay = Temporal.PlainMonthDay.from('1972-05-01[u-ca=gregory]')
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
 `CalendarRecord`. Most callers supply
-[`getCoreCalendar`](calendar.md#getcorecalendar) (ISO and Gregorian only) or
-[`getAnyCalendar`](calendar.md#getanycalendar) (also exotic calendars); see the
+[`getCore`](calendar.md#getcore) (ISO and Gregorian only) or
+[`getAny`](calendar.md#getany) (also exotic calendars); see the
 [Calendar docs](calendar.md) for the full set of resolvers.
 
 The resolver argument has no direct counterpart and can usually be dropped once

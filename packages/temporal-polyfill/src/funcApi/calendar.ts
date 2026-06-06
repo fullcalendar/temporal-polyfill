@@ -10,39 +10,34 @@ import * as Shim from './shim/calendar'
 
 export type { Record }
 
-export const getIsoCalendar: () => Record = NativeTemporal
-  ? Native.getIsoCalendar
-  : Shim.getIsoCalendar
+export const getIso: () => Record = NativeTemporal ? Native.getIso : Shim.getIso
 
-export const getGregoryCalendar: () => Record = NativeTemporal
-  ? Native.getGregoryCalendar
-  : Shim.getGregoryCalendar
+export const getGregory: () => Record = NativeTemporal
+  ? Native.getGregory
+  : Shim.getGregory
 
-export const getExoticCalendar: (calendarId: string) => Record = NativeTemporal
-  ? Native.getExoticCalendar
-  : Shim.getExoticCalendar
+export const getExotic: (calendarId: string) => Record = NativeTemporal
+  ? Native.getExotic
+  : Shim.getExotic
 
-export function getCoreCalendar(calendarId: string): Record {
+export function getCore(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
-    return getIsoCalendar()
+    return getIso()
   }
   if (calendarId === gregoryCalendarId) {
-    return getGregoryCalendar()
+    return getGregory()
   }
   throw new RangeError(
-    errorMessages.exoticCalendarRequired(
-      calendarId,
-      'getExoticCalendar or getAnyCalendar',
-    ),
+    errorMessages.exoticCalendarRequired(calendarId, 'getExotic or getAny'),
   )
 }
 
-export function getAnyCalendar(calendarId: string): Record {
+export function getAny(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
-    return getIsoCalendar()
+    return getIso()
   }
   if (calendarId === gregoryCalendarId) {
-    return getGregoryCalendar()
+    return getGregory()
   }
-  return getExoticCalendar(calendarId)
+  return getExotic(calendarId)
 }

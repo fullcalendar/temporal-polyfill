@@ -17,26 +17,26 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
 
 - [Record Shape](#record-shape)
 - [Core & Aggregator Records](#core--aggregator-records)
-  - [`getIsoCalendar`](#getisocalendar)
-  - [`getGregoryCalendar`](#getgregorycalendar)
-  - [`getCoreCalendar`](#getcorecalendar)
-  - [`getExoticCalendar`](#getexoticcalendar)
-  - [`getAnyCalendar`](#getanycalendar)
+  - [`getIso`](#getiso)
+  - [`getGregory`](#getgregory)
+  - [`getCore`](#getcore)
+  - [`getExotic`](#getexotic)
+  - [`getAny`](#getany)
 - [Individual Calendar Records](#individual-calendar-records)
-  - [`getBuddhistCalendar`](#getbuddhistcalendar)
-  - [`getChineseCalendar`](#getchinesecalendar)
-  - [`getDangiCalendar`](#getdangicalendar)
-  - [`getCopticCalendar`](#getcopticcalendar)
-  - [`getEthiopicCalendar`](#getethiopiccalendar)
-  - [`getEthiopicAmeteAlemCalendar`](#getethiopicametealemcalendar)
-  - [`getHebrewCalendar`](#gethebrewcalendar)
-  - [`getIndianCalendar`](#getindiancalendar)
-  - [`getJapaneseCalendar`](#getjapanesecalendar)
-  - [`getIslamicCivilCalendar`](#getislamiccivilcalendar)
-  - [`getIslamicTabularCalendar`](#getislamictabularcalendar)
-  - [`getIslamicUmmAlQuraCalendar`](#getislamicummalquracalendar)
-  - [`getPersianCalendar`](#getpersiancalendar)
-  - [`getRocCalendar`](#getroccalendar)
+  - [`getBuddhist`](#getbuddhist)
+  - [`getChinese`](#getchinese)
+  - [`getDangi`](#getdangi)
+  - [`getCoptic`](#getcoptic)
+  - [`getEthiopic`](#getethiopic)
+  - [`getEthiopicAmeteAlem`](#getethiopicametealem)
+  - [`getHebrew`](#gethebrew)
+  - [`getIndian`](#getindian)
+  - [`getJapanese`](#getjapanese)
+  - [`getIslamicCivil`](#getislamiccivil)
+  - [`getIslamicTabular`](#getislamictabular)
+  - [`getIslamicUmmAlQura`](#getislamicummalqura)
+  - [`getPersian`](#getpersian)
+  - [`getRoc`](#getroc)
 
 ## Record Shape
 
@@ -51,7 +51,7 @@ The record has no public calendar fields. It is a branded handle that lets the
 functional API keep calendar behavior tree-shakeable without exposing the
 full Temporal object model.
 
-Calendar records are memoized. Calendar IDs passed through `getExoticCalendar`
+Calendar records are memoized. Calendar IDs passed through `getExotic`
 are normalized to lowercase, and both `toJSON()` and `valueOf()` return the
 normalized calendar ID.
 
@@ -68,7 +68,7 @@ aggregators that accept a calendar ID at runtime. For a calendar that is known
 at the call site, prefer one of the [individual calendar
 records](#individual-calendar-records) instead.
 
-### `getIsoCalendar`
+### `getIso`
 
 Signature:
 
@@ -79,7 +79,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIsoCalendar()
+const calendar = CalendarFns.getIso()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -90,7 +90,7 @@ const calendar = 'iso8601'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getGregoryCalendar`
+### `getGregory`
 
 Signature:
 
@@ -101,7 +101,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getGregoryCalendar()
+const calendar = CalendarFns.getGregory()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -112,7 +112,7 @@ const calendar = 'gregory'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getCoreCalendar`
+### `getCore`
 
 Signature:
 
@@ -123,11 +123,11 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getCoreCalendar('gregory')
+const calendar = CalendarFns.getCore('gregory')
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 const parsed = PlainDateFns.fromString(
   '2024-05-01[u-ca=gregory]',
-  CalendarFns.getCoreCalendar,
+  CalendarFns.getCore,
 )
 ```
 
@@ -139,12 +139,12 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=gregory]')
 ```
 
-`getCoreCalendar` accepts only `iso8601` and `gregory`. When it is passed as a
+`getCore` accepts only `iso8601` and `gregory`. When it is passed as a
 resolver, the real Temporal parser owns the calendar annotation directly, as the
 example above shows. Note that the bare string form has no equivalent of
-`getCoreCalendar`'s up-front check that the calendar is one of the two core IDs.
+`getCore`'s up-front check that the calendar is one of the two core IDs.
 
-### `getExoticCalendar`
+### `getExotic`
 
 Signature:
 
@@ -155,7 +155,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getExoticCalendar('buddhist')
+const calendar = CalendarFns.getExotic('buddhist')
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -173,26 +173,26 @@ const calendar = calendarId
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-`getExoticCalendar` validates that `name` is one of the functional API's
+`getExotic` validates that `name` is one of the functional API's
 supported Intl-backed calendars. It is the aggregator behind the [individual
 calendar records](#individual-calendar-records) — each one takes no arguments
-and returns the same memoized record as `getExoticCalendar` pinned to a fixed
+and returns the same memoized record as `getExotic` pinned to a fixed
 calendar ID.
 
-Because `getExoticCalendar` is reached with a runtime `name`, a bundler cannot
+Because `getExotic` is reached with a runtime `name`, a bundler cannot
 tell which calendar you will ask for, so it must keep the implementations of
 *every* supported exotic calendar. The individual getters name a single calendar
 statically, letting the bundler tree-shake away the calendars you never
 reference. Prefer an individual getter when the calendar is known at the call
-site, and reserve `getExoticCalendar(name)` for when the ID is only known
+site, and reserve `getExotic(name)` for when the ID is only known
 dynamically.
 
 The bare string form preserves the calendar choice, but not that eager
-validation: `getExoticCalendar(name)` throws immediately if `name` is
+validation: `getExotic(name)` throws immediately if `name` is
 unsupported, whereas a bare string is not checked until Temporal actually uses
 it to build or parse a value.
 
-### `getAnyCalendar`
+### `getAny`
 
 Signature:
 
@@ -203,11 +203,11 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getAnyCalendar(calendarId)
+const calendar = CalendarFns.getAny(calendarId)
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 const parsed = PlainDateFns.fromString(
   '2024-05-01[u-ca=buddhist]',
-  CalendarFns.getAnyCalendar,
+  CalendarFns.getAny,
 )
 ```
 
@@ -219,23 +219,23 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=buddhist]')
 ```
 
-`getAnyCalendar` returns the shared ISO or Gregorian records for core calendar
-IDs, and otherwise falls through to `getExoticCalendar`. Because it can route to
+`getAny` returns the shared ISO or Gregorian records for core calendar
+IDs, and otherwise falls through to `getExotic`. Because it can route to
 any exotic calendar at runtime, it carries the same bundle cost as
-`getExoticCalendar` — every supported calendar is retained. Prefer
-`getCoreCalendar` or an individual calendar record when the ID is known, and
-reserve `getAnyCalendar` for fully dynamic IDs. The bare string form keeps the
+`getExotic` — every supported calendar is retained. Prefer
+`getCore` or an individual calendar record when the ID is known, and
+reserve `getAny` for fully dynamic IDs. The bare string form keeps the
 calendar selection but drops the functional API's memoized handle and
 Intl-calendar validation.
 
 ## Individual Calendar Records
 
 Each of these getters takes no arguments and returns the same memoized record as
-`getExoticCalendar` pinned to a fixed calendar ID. Because they name a single
+`getExotic` pinned to a fixed calendar ID. Because they name a single
 calendar statically, a bundler can tree-shake away every other calendar's
 implementation — prefer them whenever the calendar is known at the call site.
 
-### `getBuddhistCalendar`
+### `getBuddhist`
 
 Signature:
 
@@ -246,7 +246,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getBuddhistCalendar()
+const calendar = CalendarFns.getBuddhist()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -257,7 +257,7 @@ const calendar = 'buddhist'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getChineseCalendar`
+### `getChinese`
 
 Signature:
 
@@ -268,7 +268,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getChineseCalendar()
+const calendar = CalendarFns.getChinese()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -279,7 +279,7 @@ const calendar = 'chinese'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getDangiCalendar`
+### `getDangi`
 
 Signature:
 
@@ -290,7 +290,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getDangiCalendar()
+const calendar = CalendarFns.getDangi()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -301,7 +301,7 @@ const calendar = 'dangi'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getCopticCalendar`
+### `getCoptic`
 
 Signature:
 
@@ -312,7 +312,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getCopticCalendar()
+const calendar = CalendarFns.getCoptic()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -323,7 +323,7 @@ const calendar = 'coptic'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getEthiopicCalendar`
+### `getEthiopic`
 
 Signature:
 
@@ -334,7 +334,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getEthiopicCalendar()
+const calendar = CalendarFns.getEthiopic()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -345,7 +345,7 @@ const calendar = 'ethiopic'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getEthiopicAmeteAlemCalendar`
+### `getEthiopicAmeteAlem`
 
 Signature:
 
@@ -356,7 +356,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getEthiopicAmeteAlemCalendar()
+const calendar = CalendarFns.getEthiopicAmeteAlem()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -367,7 +367,7 @@ const calendar = 'ethioaa'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getHebrewCalendar`
+### `getHebrew`
 
 Signature:
 
@@ -378,7 +378,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getHebrewCalendar()
+const calendar = CalendarFns.getHebrew()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -389,7 +389,7 @@ const calendar = 'hebrew'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getIndianCalendar`
+### `getIndian`
 
 Signature:
 
@@ -400,7 +400,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIndianCalendar()
+const calendar = CalendarFns.getIndian()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -411,7 +411,7 @@ const calendar = 'indian'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getJapaneseCalendar`
+### `getJapanese`
 
 Signature:
 
@@ -422,7 +422,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getJapaneseCalendar()
+const calendar = CalendarFns.getJapanese()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -433,7 +433,7 @@ const calendar = 'japanese'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getIslamicCivilCalendar`
+### `getIslamicCivil`
 
 Signature:
 
@@ -444,7 +444,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIslamicCivilCalendar()
+const calendar = CalendarFns.getIslamicCivil()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -455,7 +455,7 @@ const calendar = 'islamic-civil'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getIslamicTabularCalendar`
+### `getIslamicTabular`
 
 Signature:
 
@@ -466,7 +466,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIslamicTabularCalendar()
+const calendar = CalendarFns.getIslamicTabular()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -477,7 +477,7 @@ const calendar = 'islamic-tbla'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getIslamicUmmAlQuraCalendar`
+### `getIslamicUmmAlQura`
 
 Signature:
 
@@ -488,7 +488,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIslamicUmmAlQuraCalendar()
+const calendar = CalendarFns.getIslamicUmmAlQura()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -499,7 +499,7 @@ const calendar = 'islamic-umalqura'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getPersianCalendar`
+### `getPersian`
 
 Signature:
 
@@ -510,7 +510,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getPersianCalendar()
+const calendar = CalendarFns.getPersian()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
@@ -521,7 +521,7 @@ const calendar = 'persian'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getRocCalendar`
+### `getRoc`
 
 Signature:
 
@@ -532,7 +532,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getRocCalendar()
+const calendar = CalendarFns.getRoc()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
