@@ -16,13 +16,14 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
 ## Contents
 
 - [Record Shape](#record-shape)
-- [Basic & Aggregator Records](#basic--aggregator-records)
-  - [`getIso`](#getiso)
-  - [`getGregory`](#getgregory)
+- [Resolvers (by ID)](#resolvers-by-id)
   - [`getBasic`](#getbasic)
   - [`getExotic`](#getexotic)
   - [`getAny`](#getany)
-- [Individual Calendar Records](#individual-calendar-records)
+- [Basic Calendars](#basic-calendars)
+  - [`getIso`](#getiso)
+  - [`getGregory`](#getgregory)
+- [Exotic Calendars](#exotic-calendars)
   - [`getBuddhist`](#getbuddhist)
   - [`getChinese`](#getchinese)
   - [`getDangi`](#getdangi)
@@ -61,56 +62,14 @@ Temporal API code, for readers curious how the two line up. In the real API a
 surrounding date, date-time, month-day, year-month, or zoned-date-time
 operation.
 
-## Basic & Aggregator Records
+## Resolvers (by ID)
 
-These getters cover the two built-in basic calendars plus the resolvers and
-aggregators that accept a calendar ID at runtime. For a calendar that is known
-at the call site, prefer one of the [individual calendar
-records](#individual-calendar-records) instead.
-
-### `getIso`
-
-Signature:
-
-```ts
-() => CalendarRecord
-```
-
-Fn API:
-
-```ts
-const calendar = CalendarFns.getIso()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
-```
-
-Temporal API:
-
-```ts
-const calendar = 'iso8601'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
-```
-
-### `getGregory`
-
-Signature:
-
-```ts
-() => CalendarRecord
-```
-
-Fn API:
-
-```ts
-const calendar = CalendarFns.getGregory()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
-```
-
-Temporal API:
-
-```ts
-const calendar = 'gregory'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
-```
+These getters take a calendar ID string at runtime and resolve it to a record.
+Because the ID is only known at runtime, a bundler cannot tell which calendar
+you will ask for and must retain the implementations of every calendar the
+resolver might return. When the calendar is known at the call site, prefer a
+statically-named getter from [Basic Calendars](#basic-calendars) or [Exotic
+Calendars](#exotic-calendars) instead.
 
 ### `getBasic`
 
@@ -174,8 +133,8 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
 `getExotic` validates that `name` is one of the functional API's
-supported Intl-backed calendars. It is the aggregator behind the [individual
-calendar records](#individual-calendar-records) — each one takes no arguments
+supported Intl-backed calendars. It is the aggregator behind the [exotic
+calendars](#exotic-calendars) — each individual getter takes no arguments
 and returns the same memoized record as `getExotic` pinned to a fixed
 calendar ID.
 
@@ -223,12 +182,62 @@ const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=buddhist]')
 IDs, and otherwise falls through to `getExotic`. Because it can route to
 any exotic calendar at runtime, it carries the same bundle cost as
 `getExotic` — every supported calendar is retained. Prefer
-`getBasic` or an individual calendar record when the ID is known, and
+`getBasic` or an individual exotic getter when the ID is known, and
 reserve `getAny` for fully dynamic IDs. The bare string form keeps the
 calendar selection but drops the functional API's memoized handle and
 Intl-calendar validation.
 
-## Individual Calendar Records
+## Basic Calendars
+
+The two built-in basic calendars. Each takes no arguments and returns a shared,
+memoized record. When the calendar ID is only known at runtime, use
+[`getBasic`](#getbasic) instead.
+
+### `getIso`
+
+Signature:
+
+```ts
+() => CalendarRecord
+```
+
+Fn API:
+
+```ts
+const calendar = CalendarFns.getIso()
+const date = PlainDateFns.create(2024, 5, 1, calendar)
+```
+
+Temporal API:
+
+```ts
+const calendar = 'iso8601'
+const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+```
+
+### `getGregory`
+
+Signature:
+
+```ts
+() => CalendarRecord
+```
+
+Fn API:
+
+```ts
+const calendar = CalendarFns.getGregory()
+const date = PlainDateFns.create(2024, 5, 1, calendar)
+```
+
+Temporal API:
+
+```ts
+const calendar = 'gregory'
+const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+```
+
+## Exotic Calendars
 
 Each of these getters takes no arguments and returns the same memoized record as
 `getExotic` pinned to a fixed calendar ID. Because they name a single
