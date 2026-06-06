@@ -56,9 +56,6 @@
         "types": "typeOverrides/global",
         "iife": true
       },
-      "./global-types": {
-        "src": "global-types"
-      },
       "./shim": {
         "src": "classApi/basic/shim"
       },
@@ -81,6 +78,9 @@
       "./full/implementation": {
         "src": "classApi/full/implementation",
         "types": "typeOverrides/implementation"
+      },
+      "./types/global": {
+        "src": "classApi/globalTypes"
       },
       "./fns": {
         "src": "funcApi/index"
