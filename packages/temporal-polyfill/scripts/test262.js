@@ -45,9 +45,12 @@ yargs(hideBin(process.argv))
             'Which public global artifact to test: full/global.js or global.js',
         }),
     async (options) => {
-      // Only the test runner needs the requested Node version. Build tools can
-      // stay on the repo's normal Node and delegate here through PNPM.
-      if (await rerunUnderRequestedTestNode(process.argv.slice(1))) {
+      if (
+        await rerunUnderRequestedTestNode(
+          process.env.TEST_NODE_VERSION,
+          process.argv.slice(1),
+        )
+      ) {
         return
       }
 
