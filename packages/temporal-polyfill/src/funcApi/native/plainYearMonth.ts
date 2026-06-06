@@ -15,7 +15,7 @@ import {
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
-  getCalendarNativeRecordId,
+  getCalendarNativeId,
   runCalendarNativeResolver,
 } from './calendar'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
@@ -109,7 +109,7 @@ export function create(
     new NativeTemporal!.PlainYearMonth(
       isoYear,
       isoMonth,
-      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+      calendar === undefined ? undefined : getCalendarNativeId(calendar),
       referenceIsoDay,
     ),
   )
@@ -122,7 +122,7 @@ export function fromFields(
   const calendar =
     fields.calendar === undefined
       ? undefined
-      : getCalendarNativeRecordId(fields.calendar)
+      : getCalendarNativeId(fields.calendar)
   const resNative = NativeTemporal!.PlainYearMonth.from(
     { ...fields, calendar },
     options,

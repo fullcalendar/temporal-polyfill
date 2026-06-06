@@ -3,42 +3,33 @@ import {
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 import { memoize } from '../../internal/utils'
-import type * as RecordTypes from '../recordTypes'
+import { CalendarRecord, CalendarRecordBrand } from '../recordTypes'
 import { getCalendarSlots, setCalendarSlots } from '../temporalRecords'
 import { attachDebugString, defineTemporalClass } from './recordUtils'
 
-export type CalendarNativeResolver = (
-  calendarId: string,
-) => CalendarNativeRecord
+// Slot Getter / Setter
+// --------------------
 
-type CalendarRecord = RecordTypes.CalendarRecord
+export const getCalendarNativeId: (record: unknown) => string = getCalendarSlots
 
-export const getCalendarNativeRecordId: (record: unknown) => string =
-  getCalendarSlots
+function setCalendarNativeId(instance: object, rawCalendarId: string) {
+  setCalendarSlots(instance, rawCalendarId)
+  attachDebugString(instance, rawCalendarId, (slots) => slots)
+}
+
+// Record
+// ------
 
 class _CalendarNativeRecord implements CalendarRecord {
-  declare readonly [RecordTypes.CalendarRecordBrand]: undefined
+  declare readonly [CalendarRecordBrand]: undefined
 
   toJSON() {
-    return getCalendarNativeRecordId(this)
+    return getCalendarNativeId(this)
   }
 
   valueOf() {
-    return getCalendarNativeRecordId(this)
+    return getCalendarNativeId(this)
   }
-}
-
-function setCalendarNativeRecordId(instance: object, calendarId: string) {
-  setCalendarSlots(instance, calendarId)
-  attachDebugString(instance, calendarId, (slots) => slots)
-}
-
-export function createCalendarNativeRecord(
-  calendarId: string,
-): CalendarNativeRecord {
-  const instance = Object.create(CalendarNativeRecord.prototype)
-  setCalendarNativeRecordId(instance, calendarId)
-  return instance
 }
 
 export type CalendarNativeRecord = _CalendarNativeRecord
@@ -47,22 +38,20 @@ export const CalendarNativeRecord = defineTemporalClass(
   'Calendar',
 )
 
+export function createCalendarNativeRecord(
+  rawCalendarId: string,
+): CalendarNativeRecord {
+  const instance = Object.create(CalendarNativeRecord.prototype)
+  setCalendarNativeId(instance, rawCalendarId)
+  return instance
+}
+
+// Factory
+// -------
+
+// basic singletons
 const isoCalendarRecord = createCalendarNativeRecord(isoCalendarId)
 const gregoryCalendarRecord = createCalendarNativeRecord(gregoryCalendarId)
-const getExoticCalendarRecord = memoize((calendarId: string) =>
-  createCalendarNativeRecord(calendarId),
-)
-
-// Native Temporal owns string parsing in this branch, but the fns API still
-// owns the calendar add-on boundary. After native parsing succeeds, hand the
-// parsed calendar id off to the public resolver and validate that what comes
-// back is one of this API's calendar records, not an arbitrary value.
-export function runCalendarNativeResolver(
-  calendarId: string,
-  getCalendar: CalendarNativeResolver,
-): void {
-  getCalendarNativeRecordId(getCalendar(calendarId.toLowerCase()))
-}
 
 export function getISO(): CalendarNativeRecord {
   return isoCalendarRecord
@@ -72,6 +61,23 @@ export function getGregory(): CalendarNativeRecord {
   return gregoryCalendarRecord
 }
 
-export function getExotic(calendarId: string): CalendarNativeRecord {
-  return getExoticCalendarRecord(calendarId.toLowerCase())
+// exotic cache
+export const getExotic = memoize((rawCalendarId: string) =>
+  createCalendarNativeRecord(rawCalendarId.toLowerCase()),
+)
+
+// Resolver
+// --------
+
+export type CalendarNativeResolver = (
+  calendarId: string,
+) => CalendarNativeRecord
+
+// Validate a native parse result against the public fns resolver. Native
+// parsing canonicalizes the calendar ID before it reaches this point.
+export function runCalendarNativeResolver(
+  canonicalCalendarId: string,
+  resolveCalendar: CalendarNativeResolver,
+): void {
+  getCalendarNativeId(resolveCalendar(canonicalCalendarId))
 }

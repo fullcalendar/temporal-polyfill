@@ -15,7 +15,7 @@ import {
 import {
   CalendarNativeRecord,
   CalendarNativeResolver,
-  getCalendarNativeRecordId,
+  getCalendarNativeId,
   runCalendarNativeResolver,
 } from './calendar'
 import {
@@ -156,7 +156,7 @@ export function create(
     new NativeTemporal!.ZonedDateTime(
       epochNanoseconds,
       timeZoneId,
-      calendar === undefined ? undefined : getCalendarNativeRecordId(calendar),
+      calendar === undefined ? undefined : getCalendarNativeId(calendar),
     ),
   )
 }
@@ -168,7 +168,7 @@ export function fromFields(
   const calendar =
     fields.calendar === undefined
       ? undefined
-      : getCalendarNativeRecordId(fields.calendar)
+      : getCalendarNativeId(fields.calendar)
   const resNative = NativeTemporal!.ZonedDateTime.from(
     { ...fields, calendar } as any, // !!! TODO - day is required
     options,
@@ -201,7 +201,7 @@ export function withCalendar(
   calendarRecord: CalendarNativeRecord,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
-  const calendarId = getCalendarNativeRecordId(calendarRecord)
+  const calendarId = getCalendarNativeId(calendarRecord)
   const resNative = native.withCalendar(calendarId)
   return createZonedDateTimeNativeRecord(resNative)
 }

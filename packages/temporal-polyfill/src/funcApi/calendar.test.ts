@@ -10,7 +10,7 @@ describe('function calendar records', () => {
     expect(CalendarFns.getExotic('buddhist')).toBe(
       CalendarFns.getExotic('buddhist'),
     )
-    expect(CalendarFns.getExotic('BUDDHIST')).toBe(
+    expect(CalendarFns.getExotic('BUDDHIST')).not.toBe(
       CalendarFns.getExotic('buddhist'),
     )
   })
@@ -43,7 +43,8 @@ describe('function calendar records', () => {
   it('returns the calendar id from valueOf', () => {
     expect(CalendarFns.getISO().valueOf()).toBe('iso8601')
     expect(CalendarFns.getGregory().valueOf()).toBe('gregory')
-    expect(CalendarFns.getExotic('BUDDHIST').valueOf()).toBe('buddhist')
+    expect(CalendarFns.getExotic('BUDDHIST').valueOf()).toBe('BUDDHIST')
+    expect(CalendarFns.getExotic('BUDDHIST').toJSON()).toBe('BUDDHIST')
   })
 
   // Node 26 native Temporal accepts broad Intl fallback calendar IDs like

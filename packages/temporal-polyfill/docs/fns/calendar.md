@@ -52,9 +52,9 @@ The record has no public calendar fields. It is a branded handle that lets the
 functional API keep calendar behavior tree-shakeable without exposing the
 full Temporal object model.
 
-Calendar records are memoized. Calendar IDs passed through `getExotic`
-are normalized to lowercase, and both `toJSON()` and `valueOf()` return the
-normalized calendar ID.
+Calendar records are memoized. The `getExotic` cache keys by the exact string
+passed in. Both `toJSON()` and `valueOf()` also return that exact string, while
+internal calendar behavior still uses the normalized calendar ID.
 
 Each getter below pairs its functional-API usage with the equivalent real
 Temporal API code, for readers curious how the two line up. In the real API a

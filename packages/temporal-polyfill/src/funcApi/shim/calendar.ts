@@ -15,34 +15,53 @@ export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
 
 type CalendarRecord = RecordTypes.CalendarRecord
 
-export const getCalendarShimRecordInternal: (record: unknown) => CalendarSlot =
-  getCalendarSlots
+interface CalendarShimRecordSlots {
+  internal: CalendarSlot
+  id: string
+}
+
+const getSlots: (record: unknown) => CalendarShimRecordSlots = getCalendarSlots
+
+function getInternal(record: unknown): CalendarSlot {
+  return getSlots(record).internal
+}
+
+function getPublicId(record: unknown): string {
+  return getSlots(record).id
+}
 
 class _CalendarShimRecord implements CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
   toJSON() {
-    return getCalendarSlotId(getCalendarShimRecordInternal(this))
+    return getPublicId(this)
   }
 
   valueOf() {
-    return getCalendarSlotId(getCalendarShimRecordInternal(this))
+    return getPublicId(this)
   }
 }
 
 function setCalendarShimRecordInternal(
   instance: object,
   calendarSlot: CalendarSlot,
+  calendarId = getCalendarSlotId(calendarSlot),
 ) {
-  setCalendarSlots(instance, calendarSlot)
-  attachDebugString(instance, calendarSlot, getCalendarSlotId)
+  setCalendarSlots(instance, {
+    // Internal behavior must see the normalized compact calendar sentinel.
+    internal: calendarSlot,
+    // Public record identity preserves the original ID that created the record.
+    id: calendarId,
+  })
+  attachDebugString(instance, calendarId, (slots) => slots)
 }
 
 export function createCalendarShimRecord(
   calendarSlot: CalendarSlot,
+  calendarId?: string,
 ): CalendarShimRecord {
   const instance = Object.create(CalendarShimRecord.prototype)
-  setCalendarShimRecordInternal(instance, calendarSlot)
+  setCalendarShimRecordInternal(instance, calendarSlot, calendarId)
   return instance
 }
 
@@ -55,7 +74,10 @@ export const CalendarShimRecord = defineTemporalClass(
 const isoCalendarRecord = createCalendarShimRecord(isoCalendar)
 const gregoryCalendarRecord = createCalendarShimRecord(gregoryCalendar)
 const getExoticCalendarRecord = memoize((calendarId: string) =>
-  createCalendarShimRecord(getExoticCalendar(calendarId)),
+  createCalendarShimRecord(
+    getExoticCalendar(calendarId.toLowerCase()),
+    calendarId,
+  ),
 )
 
 // Function APIs accept an omitted calendar as ISO. Massage that not-defined
@@ -63,9 +85,7 @@ const getExoticCalendarRecord = memoize((calendarId: string) =>
 export function refineCalendarShimArg(
   calendar?: CalendarShimRecord,
 ): CalendarSlot {
-  return calendar === undefined
-    ? isoCalendar
-    : getCalendarShimRecordInternal(calendar)
+  return calendar === undefined ? isoCalendar : getInternal(calendar)
 }
 
 // Adapt a public shim resolver (id -> CalendarShimRecord) into the internal
@@ -76,7 +96,7 @@ export function createCalendarShimStringResolver(
   getCalendar: CalendarShimResolver,
 ): CalendarResolver {
   return (calendarId: string) =>
-    getCalendarShimRecordInternal(getCalendar(calendarId.toLowerCase()))
+    getInternal(getCalendar(calendarId.toLowerCase()))
 }
 
 export function getISO(): CalendarShimRecord {
@@ -88,5 +108,5 @@ export function getGregory(): CalendarShimRecord {
 }
 
 export function getExotic(calendarId: string): CalendarShimRecord {
-  return getExoticCalendarRecord(calendarId.toLowerCase())
+  return getExoticCalendarRecord(calendarId)
 }
