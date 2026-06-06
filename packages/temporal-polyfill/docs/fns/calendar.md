@@ -43,7 +43,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
 ```ts
 type CalendarRecord = {
   toJSON(): string
-  valueOf(): never
+  valueOf(): string
 }
 ```
 
@@ -52,7 +52,8 @@ functional API keep calendar behavior tree-shakeable without exposing the
 full Temporal object model.
 
 Calendar records are memoized. Calendar IDs passed through `getExoticCalendar`
-are normalized to lowercase, and `toJSON()` returns the normalized calendar ID.
+are normalized to lowercase, and both `toJSON()` and `valueOf()` return the
+normalized calendar ID.
 
 Each getter below pairs its functional-API usage with the equivalent real
 Temporal API code, for readers curious how the two line up. In the real API a

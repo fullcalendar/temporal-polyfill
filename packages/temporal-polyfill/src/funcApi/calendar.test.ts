@@ -30,6 +30,12 @@ describe('function calendar records', () => {
     expect(date.year).toBe(2567)
   })
 
+  it('returns the calendar id from valueOf', () => {
+    expect(getIsoCalendar().valueOf()).toBe('iso8601')
+    expect(getGregoryCalendar().valueOf()).toBe('gregory')
+    expect(getExoticCalendar('BUDDHIST').valueOf()).toBe('buddhist')
+  })
+
   // Node 26 native Temporal accepts broad Intl fallback calendar IDs like
   // `islamic`. The shim rejects them because they are not concrete Temporal
   // calendar IDs, so keep this assertion covered by the forced-shim project.

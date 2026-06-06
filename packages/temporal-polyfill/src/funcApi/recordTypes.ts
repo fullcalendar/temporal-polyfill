@@ -13,7 +13,7 @@ export declare const DurationRecordBrand: unique symbol
 export type CalendarRecord = {
   readonly [CalendarRecordBrand]: undefined
   toJSON(): string
-  valueOf(): never
+  valueOf(): string
 }
 
 export type PlainDateRecord = {

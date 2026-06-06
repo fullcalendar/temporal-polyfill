@@ -5,11 +5,7 @@ import {
 import { memoize } from '../../internal/utils'
 import type * as RecordTypes from '../recordTypes'
 import { getCalendarSlots, setCalendarSlots } from '../temporalRecords'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
+import { attachDebugString, defineTemporalClass } from './recordUtils'
 
 export type CalendarNativeResolver = (
   calendarId: string,
@@ -28,7 +24,7 @@ class _CalendarNativeRecord implements CalendarRecord {
   }
 
   valueOf() {
-    return forbiddenValueOf()
+    return getCalendarNativeRecordId(this)
   }
 }
 

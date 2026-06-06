@@ -9,11 +9,7 @@ import type { CalendarResolver } from '../../internal/isoParse'
 import { memoize } from '../../internal/utils'
 import type * as RecordTypes from '../recordTypes'
 import { getCalendarSlots, setCalendarSlots } from '../temporalRecords'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
+import { attachDebugString, defineTemporalClass } from './recordUtils'
 
 export type CalendarShimResolver = (calendarId: string) => CalendarShimRecord
 
@@ -30,7 +26,7 @@ class _CalendarShimRecord implements CalendarRecord {
   }
 
   valueOf() {
-    return forbiddenValueOf()
+    return getCalendarSlotId(getCalendarShimRecordInternal(this))
   }
 }
 
