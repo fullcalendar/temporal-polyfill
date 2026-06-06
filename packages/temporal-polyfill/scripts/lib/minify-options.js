@@ -8,12 +8,12 @@ import { readFile } from 'fs/promises'
 export function buildTerserReadableOptions() {
   return {
     compress: {
-      ecma: 2018,
+      ecma: 2020,
       passes: 3, // enough to remove dead object assignment, get lower size
       keep_fargs: true, // keep explicit =undefined params that define method .length
       unsafe_arrows: true,
       unsafe_methods: true,
-      booleans_as_integers: true,
+      booleans_as_integers: true, // good idea?
       hoist_funs: true,
     },
     mangle: false,
@@ -28,35 +28,20 @@ export function buildTerserReadableOptions() {
 
 export function buildTerserMinifyOptions() {
   return {
-    compress: {
-      ecma: 2018,
-      passes: 3, // enough to remove dead object assignment, get lower size
-      keep_fargs: true, // keep explicit =undefined params that define method .length
-      unsafe_arrows: true,
-      unsafe_methods: true,
-      booleans_as_integers: true,
-      hoist_funs: true,
-    },
-    mangle: true,
+    // Simular what jsdelivr does by simply using Terser defaults,
+    // which implies mangle: true. Ticket with more info:
+    // https://github.com/jsdelivr/jsdelivr/issues/18185
   }
 }
 
 export function buildSwcMinifyOptions() {
   return {
     compress: {
-      ecma: 2018,
-      passes: 3, // enough to remove dead object assignment, get lower size
-
       // SWC erroneously removes =undefined params, so explicitly turn off,
       // and rely on expected-failures/minified-function-length.txt
       keep_fargs: false,
-
-      unsafe_arrows: true,
-      unsafe_methods: true,
-      booleans_as_integers: true,
-      hoist_funs: true,
     },
-    mangle: true,
+    mangle: true, // don't assume default
   }
 }
 
