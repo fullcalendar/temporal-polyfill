@@ -25,7 +25,7 @@ import * as PlainMonthDayFns from 'temporal-polyfill/fns/plainmonthday'
   - [`toPlainDate`](#toplaindate)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -244,7 +244,7 @@ Temporal API:
 const text = monthDay.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -255,7 +255,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = PlainMonthDayFns.toSimpleString(monthDay)
+const text = PlainMonthDayFns.toBasicString(monthDay)
 ```
 
 Temporal API:

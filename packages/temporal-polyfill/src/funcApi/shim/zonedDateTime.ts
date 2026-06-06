@@ -440,7 +440,7 @@ export function toString(
   )
 }
 
-export function toSimpleString(record: ZonedDateTimeShimRecord): string {
+export function toBasicString(record: ZonedDateTimeShimRecord): string {
   return formatZonedDateTimeIsoAuto(getZonedDateTimeShimRecordSlots(record))
 }
 

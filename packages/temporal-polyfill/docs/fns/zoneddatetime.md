@@ -114,7 +114,7 @@ import * as ZonedDateTimeFns from 'temporal-polyfill/fns/zoneddatetime'
   - [`toPlainTime`](#toplaintime)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [❌ `createFormat`](#createformat)
 
@@ -2276,7 +2276,7 @@ Temporal API:
 const text = zonedDateTime.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -2287,7 +2287,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = ZonedDateTimeFns.toSimpleString(zonedDateTime)
+const text = ZonedDateTimeFns.toBasicString(zonedDateTime)
 ```
 
 Temporal API:

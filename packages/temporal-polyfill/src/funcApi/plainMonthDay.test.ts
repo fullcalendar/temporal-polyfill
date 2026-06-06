@@ -148,7 +148,7 @@ describe('toString', () => {
 
   it('has a simple no-options variant', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
-    expect(PlainMonthDayFns.toSimpleString(pmd)).toBe('06-18')
+    expect(PlainMonthDayFns.toBasicString(pmd)).toBe('06-18')
   })
 
   it('works with options', () => {

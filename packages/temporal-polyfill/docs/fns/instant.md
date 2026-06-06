@@ -53,7 +53,7 @@ import * as InstantFns from 'temporal-polyfill/fns/instant'
   - [`toZonedDateTimeISO`](#tozoneddatetimeiso)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -904,7 +904,7 @@ Temporal API:
 const text = instant.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -915,7 +915,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = InstantFns.toSimpleString(instant)
+const text = InstantFns.toBasicString(instant)
 ```
 
 Temporal API:

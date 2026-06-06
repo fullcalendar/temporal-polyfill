@@ -521,7 +521,7 @@ export function toString(
   )
 }
 
-export function toSimpleString(record: PlainDateTimeShimRecord): string {
+export function toBasicString(record: PlainDateTimeShimRecord): string {
   return formatDateTimeIsoAuto(getPlainDateTimeShimRecordSlots(record))
 }
 

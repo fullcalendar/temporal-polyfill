@@ -46,7 +46,7 @@ import * as PlainYearMonthFns from 'temporal-polyfill/fns/plainyearmonth'
   - [`toPlainDate`](#toplaindate)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -648,7 +648,7 @@ Temporal API:
 const text = yearMonth.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -659,7 +659,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = PlainYearMonthFns.toSimpleString(yearMonth)
+const text = PlainYearMonthFns.toBasicString(yearMonth)
 ```
 
 Temporal API:

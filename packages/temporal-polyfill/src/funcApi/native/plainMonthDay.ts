@@ -166,6 +166,6 @@ export function toString(
   return getPlainMonthDayNative(record).toString(options)
 }
 
-export function toSimpleString(record: PlainMonthDayNativeRecord): string {
+export function toBasicString(record: PlainMonthDayNativeRecord): string {
   return getPlainMonthDayNative(record).toString()
 }

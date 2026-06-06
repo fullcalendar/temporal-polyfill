@@ -106,6 +106,6 @@ export const toLocaleString: (
 export const toString: (duration: Record, options?: ToStringOptions) => string =
   NativeTemporal ? Native.toString : Shim.toString
 
-export const toSimpleString: (duration: Record) => string = NativeTemporal
-  ? Native.toSimpleString
-  : Shim.toSimpleString
+export const toBasicString: (duration: Record) => string = NativeTemporal
+  ? Native.toBasicString
+  : Shim.toBasicString

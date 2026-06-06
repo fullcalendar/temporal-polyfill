@@ -467,6 +467,6 @@ export function toString(
   return formatPlainTimeIso(getPlainTimeShimRecordSlots(record), options)
 }
 
-export function toSimpleString(record: PlainTimeShimRecord): string {
+export function toBasicString(record: PlainTimeShimRecord): string {
   return formatTimeIsoAuto(getPlainTimeShimRecordSlots(record))
 }

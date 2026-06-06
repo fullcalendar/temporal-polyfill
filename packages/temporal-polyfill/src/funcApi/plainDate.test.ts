@@ -442,7 +442,7 @@ describe('toString', () => {
 
   it('has a simple no-options variant', () => {
     const pd = PlainDateFns.create(2024, 2, 27)
-    expect(PlainDateFns.toSimpleString(pd)).toBe('2024-02-27')
+    expect(PlainDateFns.toBasicString(pd)).toBe('2024-02-27')
   })
 
   it('works with options', () => {

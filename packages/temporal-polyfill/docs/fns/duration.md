@@ -34,7 +34,7 @@ import * as DurationFns from 'temporal-polyfill/fns/duration'
   - [`compare`](#compare)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
 
 ## Record Shape
@@ -396,7 +396,7 @@ Temporal API:
 const text = duration.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -407,7 +407,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = DurationFns.toSimpleString(duration)
+const text = DurationFns.toBasicString(duration)
 ```
 
 Temporal API:

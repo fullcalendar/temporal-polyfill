@@ -467,7 +467,7 @@ export function toString(
   return formatPlainDateIso(getPlainDateShimRecordSlots(record), options)
 }
 
-export function toSimpleString(record: PlainDateShimRecord): string {
+export function toBasicString(record: PlainDateShimRecord): string {
   return formatDateIsoAuto(getPlainDateShimRecordSlots(record))
 }
 

@@ -340,7 +340,7 @@ export function toString(
   return getPlainDateNative(record).toString(options)
 }
 
-export function toSimpleString(record: PlainDateNativeRecord): string {
+export function toBasicString(record: PlainDateNativeRecord): string {
   return getPlainDateNative(record).toString()
 }
 

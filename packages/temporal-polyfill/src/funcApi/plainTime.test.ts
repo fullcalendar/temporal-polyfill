@@ -490,12 +490,12 @@ describe('toString', () => {
   })
 })
 
-describe('toSimpleString', () => {
+describe('toBasicString', () => {
   it('uses automatic fractional-second formatting', () => {
     const pt0 = PlainTimeFns.create(12, 30)
     const pt1 = PlainTimeFns.create(12, 30, 0, 123)
-    expect(PlainTimeFns.toSimpleString(pt0)).toBe('12:30:00')
-    expect(PlainTimeFns.toSimpleString(pt1)).toBe('12:30:00.123')
+    expect(PlainTimeFns.toBasicString(pt0)).toBe('12:30:00')
+    expect(PlainTimeFns.toBasicString(pt1)).toBe('12:30:00.123')
   })
 })
 

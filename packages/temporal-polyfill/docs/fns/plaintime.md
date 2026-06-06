@@ -63,7 +63,7 @@ import * as PlainTimeFns from 'temporal-polyfill/fns/plaintime'
   - [`endOfMicrosecond`](#endofmicrosecond)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -1130,7 +1130,7 @@ Temporal API:
 const text = time.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -1141,7 +1141,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = PlainTimeFns.toSimpleString(time)
+const text = PlainTimeFns.toBasicString(time)
 ```
 
 Temporal API:

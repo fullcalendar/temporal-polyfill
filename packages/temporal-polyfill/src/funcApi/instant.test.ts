@@ -256,7 +256,7 @@ describe('toString', () => {
 
   it('has a simple no-options variant', () => {
     const inst = InstantFns.create(1704063600000000001n)
-    expect(InstantFns.toSimpleString(inst)).toBe(
+    expect(InstantFns.toBasicString(inst)).toBe(
       '2023-12-31T23:00:00.000000001Z',
     )
   })

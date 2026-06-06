@@ -161,9 +161,9 @@ export const toLocaleString: (
 export const toString: (record: Record, options?: ToStringOptions) => string =
   NativeTemporal ? Native.toString : Shim.toString
 
-export const toSimpleString: (record: Record) => string = NativeTemporal
-  ? Native.toSimpleString
-  : Shim.toSimpleString
+export const toBasicString: (record: Record) => string = NativeTemporal
+  ? Native.toBasicString
+  : Shim.toBasicString
 
 export const withDayOfYear: (
   record: Record,

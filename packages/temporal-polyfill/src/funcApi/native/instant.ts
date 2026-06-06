@@ -368,6 +368,6 @@ export function toString(
   return getInstantNative(record).toString(options)
 }
 
-export function toSimpleString(record: InstantNativeRecord): string {
+export function toBasicString(record: InstantNativeRecord): string {
   return getInstantNative(record).toString()
 }

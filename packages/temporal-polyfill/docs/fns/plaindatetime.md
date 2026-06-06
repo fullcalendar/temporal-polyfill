@@ -107,7 +107,7 @@ import * as PlainDateTimeFns from 'temporal-polyfill/fns/plaindatetime'
   - [`toPlainTime`](#toplaintime)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -2143,7 +2143,7 @@ Temporal API:
 const text = dateTime.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -2154,7 +2154,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = PlainDateTimeFns.toSimpleString(dateTime)
+const text = PlainDateTimeFns.toBasicString(dateTime)
 ```
 
 Temporal API:

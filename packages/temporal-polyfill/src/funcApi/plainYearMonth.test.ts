@@ -636,7 +636,7 @@ describe('toString', () => {
 
   it('has a simple no-options variant', () => {
     const pym = PlainYearMonthFns.create(2024, 2)
-    expect(PlainYearMonthFns.toSimpleString(pym)).toBe('2024-02')
+    expect(PlainYearMonthFns.toBasicString(pym)).toBe('2024-02')
   })
 
   it('works with options', () => {

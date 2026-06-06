@@ -71,7 +71,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
   - [`toPlainMonthDay`](#toplainmonthday)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
-  - [`toSimpleString`](#tosimplestring)
+  - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 
@@ -1230,7 +1230,7 @@ Temporal API:
 const text = date.toString(options)
 ```
 
-### `toSimpleString`
+### `toBasicString`
 
 Signature:
 
@@ -1241,7 +1241,7 @@ Signature:
 Fn API:
 
 ```ts
-const text = PlainDateFns.toSimpleString(date)
+const text = PlainDateFns.toBasicString(date)
 ```
 
 Temporal API:

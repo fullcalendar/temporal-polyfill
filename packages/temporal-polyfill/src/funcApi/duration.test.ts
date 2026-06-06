@@ -279,7 +279,7 @@ describe('toString', () => {
 
   it('has a simple no-options variant', () => {
     const dur = DurationFns.fromFields({ days: 2, hours: 12 })
-    expect(DurationFns.toSimpleString(dur)).toBe('P2DT12H')
+    expect(DurationFns.toBasicString(dur)).toBe('P2DT12H')
   })
 
   // Node 26 native Duration#toString() drops subsecond-only seconds when no
