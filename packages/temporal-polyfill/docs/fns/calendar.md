@@ -21,7 +21,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
   - [`getExotic`](#getexotic)
   - [`getAny`](#getany)
 - [Basic Calendars](#basic-calendars)
-  - [`getIso`](#getiso)
+  - [`getISO`](#getISO)
   - [`getGregory`](#getgregory)
 - [Exotic Calendars](#exotic-calendars)
   - [`getBuddhist`](#getbuddhist)
@@ -193,7 +193,7 @@ The two built-in basic calendars. Each takes no arguments and returns a shared,
 memoized record. When the calendar ID is only known at runtime, use
 [`getBasic`](#getbasic) instead.
 
-### `getIso`
+### `getISO`
 
 Signature:
 
@@ -204,7 +204,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getIso()
+const calendar = CalendarFns.getISO()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 

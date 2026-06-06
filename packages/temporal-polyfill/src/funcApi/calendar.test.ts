@@ -5,7 +5,7 @@ import { itSkipNative } from './testUtils'
 
 describe('function calendar records', () => {
   it('returns stable calendar handles', () => {
-    expect(CalendarFns.getIso()).toBe(CalendarFns.getIso())
+    expect(CalendarFns.getISO()).toBe(CalendarFns.getISO())
     expect(CalendarFns.getGregory()).toBe(CalendarFns.getGregory())
     expect(CalendarFns.getExotic('buddhist')).toBe(
       CalendarFns.getExotic('buddhist'),
@@ -16,7 +16,7 @@ describe('function calendar records', () => {
   })
 
   it('creates basic calendar handles for function APIs', () => {
-    const isoDate = PlainDateFns.create(2024, 1, 1, CalendarFns.getIso())
+    const isoDate = PlainDateFns.create(2024, 1, 1, CalendarFns.getISO())
     const gregoryDate = PlainDateFns.create(
       2024,
       1,
@@ -41,7 +41,7 @@ describe('function calendar records', () => {
   })
 
   it('returns the calendar id from valueOf', () => {
-    expect(CalendarFns.getIso().valueOf()).toBe('iso8601')
+    expect(CalendarFns.getISO().valueOf()).toBe('iso8601')
     expect(CalendarFns.getGregory().valueOf()).toBe('gregory')
     expect(CalendarFns.getExotic('BUDDHIST').valueOf()).toBe('buddhist')
   })

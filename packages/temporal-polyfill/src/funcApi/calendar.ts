@@ -10,7 +10,7 @@ import * as Shim from './shim/calendar'
 
 export type { Record }
 
-export const getIso: () => Record = NativeTemporal ? Native.getIso : Shim.getIso
+export const getISO: () => Record = NativeTemporal ? Native.getISO : Shim.getISO
 
 export const getGregory: () => Record = NativeTemporal
   ? Native.getGregory
@@ -22,7 +22,7 @@ export const getExotic: (calendarId: string) => Record = NativeTemporal
 
 export function getBasic(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
-    return getIso()
+    return getISO()
   }
   if (calendarId === gregoryCalendarId) {
     return getGregory()
@@ -34,7 +34,7 @@ export function getBasic(calendarId: string): Record {
 
 export function getAny(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
-    return getIso()
+    return getISO()
   }
   if (calendarId === gregoryCalendarId) {
     return getGregory()

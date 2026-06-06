@@ -64,7 +64,7 @@ export function runCalendarNativeResolver(
   getCalendarNativeRecordId(getCalendar(calendarId.toLowerCase()))
 }
 
-export function getIso(): CalendarNativeRecord {
+export function getISO(): CalendarNativeRecord {
   return isoCalendarRecord
 }
 

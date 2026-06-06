@@ -79,7 +79,7 @@ export function createCalendarShimStringResolver(
     getCalendarShimRecordInternal(getCalendar(calendarId.toLowerCase()))
 }
 
-export function getIso(): CalendarShimRecord {
+export function getISO(): CalendarShimRecord {
   return isoCalendarRecord
 }
 
