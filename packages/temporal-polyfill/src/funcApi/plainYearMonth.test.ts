@@ -68,7 +68,7 @@ describe('fromString', () => {
   it('works', () => {
     const pym = PlainYearMonthFns.fromString(
       '2024-06-01[u-ca=gregory]',
-      CalendarFns.getCore,
+      CalendarFns.getBasic,
     )
     expectPlainYearMonthEquals(pym, {
       calendarId: 'gregory',

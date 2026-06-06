@@ -37,7 +37,10 @@ import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { isObjectLike } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
-import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
+import {
+  resolveBasicCalendar,
+  resolveBasicCalendarArg,
+} from './calendarResolver'
 import { PlainDate, createPlainDate } from './plainDate'
 import { rejectInvalidBag } from './temporalSlots'
 
@@ -57,7 +60,7 @@ export class PlainMonthDay implements MonthDayFields {
     initPlainMonthDay(
       this,
       constructMonthDaySlots(
-        resolveCoreCalendarArg,
+        resolveBasicCalendarArg,
         isoMonth,
         isoDay,
         calendar,
@@ -195,7 +198,7 @@ export function toPlainMonthDaySlots(
     )
   }
 
-  const res = parsePlainMonthDay(arg, resolveCoreCalendar)
+  const res = parsePlainMonthDay(arg, resolveBasicCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

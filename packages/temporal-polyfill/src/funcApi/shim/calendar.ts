@@ -70,7 +70,7 @@ export function refineCalendarShimArg(
 
 // Adapt a public shim resolver (id -> CalendarShimRecord) into the internal
 // CalendarResolver signature (id -> CalendarSlot) that the parser expects.
-// The public resolver — typically getCore or getAny — owns the
+// The public resolver — typically getBasic or getAny — owns the
 // iso/gregory/Intl policy, so all this wrapper does is brand-unwrap.
 export function createCalendarShimStringResolver(
   getCalendar: CalendarShimResolver,

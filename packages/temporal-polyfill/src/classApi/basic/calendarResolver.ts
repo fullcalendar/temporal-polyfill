@@ -10,10 +10,10 @@ import {
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 
-// classApi-only policy: the core bundle ships just ISO + Gregory; any other
+// classApi-only policy: the basic bundle ships just ISO + Gregory; any other
 // calendar id is a request for the "full" build and is rejected here. funcApi
 // resolves via its own shim that can route through exotic calendars.
-export function resolveCoreCalendar(rawCalendarId: string): CalendarSlot {
+export function resolveBasicCalendar(rawCalendarId: string): CalendarSlot {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
   if (lowerRawCalendarId === isoCalendarId) {
@@ -32,8 +32,8 @@ export function resolveCoreCalendar(rawCalendarId: string): CalendarSlot {
 }
 
 // Allows an undefined calendar argument, which defaults to ISO.
-export function resolveCoreCalendarArg(
+export function resolveBasicCalendarArg(
   rawCalendarId = isoCalendarId,
 ): CalendarSlot {
-  return resolveCoreCalendar(rawCalendarId)
+  return resolveBasicCalendar(rawCalendarId)
 }

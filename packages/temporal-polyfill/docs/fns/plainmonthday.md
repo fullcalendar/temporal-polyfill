@@ -137,7 +137,7 @@ import * as CalendarFns from 'temporal-polyfill/fns/calendar'
 
 const monthDay = PlainMonthDayFns.fromString(
   '1972-05-01[u-ca=gregory]',
-  CalendarFns.getCore,
+  CalendarFns.getBasic,
 )
 ```
 
@@ -149,7 +149,7 @@ const monthDay = Temporal.PlainMonthDay.from('1972-05-01[u-ca=gregory]')
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
 `CalendarRecord`. Most callers supply
-[`getCore`](calendar.md#getcore) (ISO and Gregorian only) or
+[`getBasic`](calendar.md#getbasic) (ISO and Gregorian only) or
 [`getAny`](calendar.md#getany) (also exotic calendars); see the
 [Calendar docs](calendar.md) for the full set of resolvers.
 

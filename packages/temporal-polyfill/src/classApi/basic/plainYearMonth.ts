@@ -43,7 +43,10 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
+import {
+  resolveBasicCalendar,
+  resolveBasicCalendarArg,
+} from './calendarResolver'
 import {
   Duration,
   DurationArg,
@@ -69,7 +72,7 @@ export class PlainYearMonth implements YearMonthFields {
     initPlainYearMonth(
       this,
       constructYearMonthSlots(
-        resolveCoreCalendarArg,
+        resolveBasicCalendarArg,
         isoYear,
         isoMonth,
         calendar,
@@ -295,7 +298,7 @@ export function toPlainYearMonthSlots(
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
-  const res = parsePlainYearMonth(arg, resolveCoreCalendar)
+  const res = parsePlainYearMonth(arg, resolveBasicCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

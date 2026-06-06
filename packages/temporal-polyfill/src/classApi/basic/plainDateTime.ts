@@ -65,7 +65,10 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
+import {
+  resolveBasicCalendar,
+  resolveBasicCalendarArg,
+} from './calendarResolver'
 import {
   Duration,
   DurationArg,
@@ -113,7 +116,7 @@ export class PlainDateTime implements DateTimeFields {
     initPlainDateTime(
       this,
       constructDateTimeSlots(
-        resolveCoreCalendarArg,
+        resolveBasicCalendarArg,
         isoYear,
         isoMonth,
         isoDay,
@@ -465,7 +468,7 @@ export function toPlainDateTimeSlots(
     )
   }
 
-  const res = parsePlainDateTime(arg, resolveCoreCalendar)
+  const res = parsePlainDateTime(arg, resolveBasicCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }

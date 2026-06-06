@@ -27,7 +27,7 @@ jobs:
           - TEST_NODE_VERSION: 22.14.0
             MINIFIER: swc
           - TEST_NODE_VERSION: 26.2.0
-            TEST262_CORE_SKIP: 1
+            TEST262_BASIC_SKIP: 1
 
     steps:
       - name: Checkout
@@ -77,10 +77,10 @@ jobs:
           TEST262_CLASS_API=full
           pnpm run test262
 
-      - name: Test 262 Core
-        if: matrix.TEST262_CORE_SKIP != 1
+      - name: Test 262 Basic
+        if: matrix.TEST262_BASIC_SKIP != 1
         run: >
           TEST262_NODE_VERSION=${{ matrix.TEST_NODE_VERSION }}
           TEST262_MINIFIER=${{ matrix.MINIFIER }}
-          TEST262_CLASS_API=core
+          TEST262_CLASS_API=basic
           pnpm run test262

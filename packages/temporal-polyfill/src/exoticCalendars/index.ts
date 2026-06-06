@@ -34,7 +34,7 @@ const specificCalendarIds: Record<string, true> = {
 }
 
 // These aliases are Temporal-recognized legacy calendar IDs. Keep them in the
-// addon so core validation does not need to ask Intl about non-core calendars.
+// addon so basic validation does not need to ask Intl about non-basic calendars.
 const deprecatedCalendarIdMap = {
   'ethiopic-amete-alem': 'ethioaa',
   'islamicc': 'islamic-civil',

@@ -110,7 +110,7 @@ export function parseInstant(s: string): EpochNanoFields {
 }
 
 // Public APIs (classApi/funcApi) supply different policies for turning a raw
-// calendar id string into a CalendarSlot — core-only, exotic-aware, etc. The
+// calendar id string into a CalendarSlot — basic-only, exotic-aware, etc. The
 // parser stays agnostic and just calls back through this signature.
 export type CalendarResolver = (rawCalendarId: string) => CalendarSlot
 

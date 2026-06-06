@@ -50,7 +50,7 @@ describe('fromString', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.fromString(
       '2024-06-18[u-ca=gregory]',
-      CalendarFns.getCore,
+      CalendarFns.getBasic,
     )
     expectPlainMonthDayEquals(pmd, {
       calendarId: 'gregory',

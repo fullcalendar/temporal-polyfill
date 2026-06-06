@@ -15,7 +15,7 @@ describe('function calendar records', () => {
     )
   })
 
-  it('creates core calendar handles for function APIs', () => {
+  it('creates basic calendar handles for function APIs', () => {
     const isoDate = PlainDateFns.create(2024, 1, 1, CalendarFns.getIso())
     const gregoryDate = PlainDateFns.create(
       2024,

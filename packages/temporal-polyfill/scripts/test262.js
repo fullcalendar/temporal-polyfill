@@ -39,7 +39,7 @@ yargs(hideBin(process.argv))
         .option('class-api', {
           requiresArg: true,
           default: process.env.TEST262_CLASS_API || 'full',
-          choices: ['full', 'core'],
+          choices: ['full', 'basic'],
           type: 'string',
           description:
             'Which public global artifact to test: full/global.js or global.js',
@@ -61,9 +61,9 @@ yargs(hideBin(process.argv))
       const minifier = process.env.TEST262_MINIFIER || null
       const useMinified = Boolean(minifier)
 
-      if (classApi === 'core' && isNative) {
+      if (classApi === 'basic' && isNative) {
         throw new Error(
-          'The core global artifact cannot be tested under native Temporal. ' +
+          'The basic global artifact cannot be tested under native Temporal. ' +
             'Use TEST262_NODE_VERSION <= 24.',
         )
       }
@@ -91,14 +91,14 @@ yargs(hideBin(process.argv))
           expectedFailureFiles.push('shim-node-gte22.txt')
         }
 
-        if (classApi === 'core') {
+        if (classApi === 'basic') {
           expectedFailureFiles.push('calendar.txt')
         }
 
-        if (classApi === 'core' || currentNodeMajorVersion >= 24) {
+        if (classApi === 'basic' || currentNodeMajorVersion >= 24) {
           expectedFailureFiles.push('calendar-data-mismatch.txt')
         }
-        if (classApi === 'core' || currentNodeMajorVersion <= 16) {
+        if (classApi === 'basic' || currentNodeMajorVersion <= 16) {
           expectedFailureFiles.push('calendar-supported-values-of.txt')
         }
       }
@@ -110,7 +110,7 @@ yargs(hideBin(process.argv))
       }
 
       const globalPolyfillPath =
-        classApi === 'core'
+        classApi === 'basic'
           ? `./dist/${useMinified ? '.global.min' : 'global'}.js`
           : `./dist/full/${useMinified ? '.global.min' : 'global'}.js`
 

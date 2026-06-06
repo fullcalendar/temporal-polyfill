@@ -16,10 +16,10 @@ import * as PlainDateFns from 'temporal-polyfill/fns/plaindate'
 ## Contents
 
 - [Record Shape](#record-shape)
-- [Core & Aggregator Records](#core--aggregator-records)
+- [Basic & Aggregator Records](#basic--aggregator-records)
   - [`getIso`](#getiso)
   - [`getGregory`](#getgregory)
-  - [`getCore`](#getcore)
+  - [`getBasic`](#getbasic)
   - [`getExotic`](#getexotic)
   - [`getAny`](#getany)
 - [Individual Calendar Records](#individual-calendar-records)
@@ -61,9 +61,9 @@ Temporal API code, for readers curious how the two line up. In the real API a
 surrounding date, date-time, month-day, year-month, or zoned-date-time
 operation.
 
-## Core & Aggregator Records
+## Basic & Aggregator Records
 
-These getters cover the two built-in core calendars plus the resolvers and
+These getters cover the two built-in basic calendars plus the resolvers and
 aggregators that accept a calendar ID at runtime. For a calendar that is known
 at the call site, prefer one of the [individual calendar
 records](#individual-calendar-records) instead.
@@ -112,7 +112,7 @@ const calendar = 'gregory'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getCore`
+### `getBasic`
 
 Signature:
 
@@ -123,11 +123,11 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getCore('gregory')
+const calendar = CalendarFns.getBasic('gregory')
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 const parsed = PlainDateFns.fromString(
   '2024-05-01[u-ca=gregory]',
-  CalendarFns.getCore,
+  CalendarFns.getBasic,
 )
 ```
 
@@ -139,10 +139,10 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=gregory]')
 ```
 
-`getCore` accepts only `iso8601` and `gregory`. When it is passed as a
+`getBasic` accepts only `iso8601` and `gregory`. When it is passed as a
 resolver, the real Temporal parser owns the calendar annotation directly, as the
 example above shows. Note that the bare string form has no equivalent of
-`getCore`'s up-front check that the calendar is one of the two core IDs.
+`getBasic`'s up-front check that the calendar is one of the two basic IDs.
 
 ### `getExotic`
 
@@ -219,11 +219,11 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=buddhist]')
 ```
 
-`getAny` returns the shared ISO or Gregorian records for core calendar
+`getAny` returns the shared ISO or Gregorian records for basic calendar
 IDs, and otherwise falls through to `getExotic`. Because it can route to
 any exotic calendar at runtime, it carries the same bundle cost as
 `getExotic` — every supported calendar is retained. Prefer
-`getCore` or an individual calendar record when the ID is known, and
+`getBasic` or an individual calendar record when the ID is known, and
 reserve `getAny` for fully dynamic IDs. The bare string form keeps the
 calendar selection but drops the functional API's memoized handle and
 Intl-calendar validation.

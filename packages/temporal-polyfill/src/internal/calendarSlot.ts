@@ -12,7 +12,7 @@ export const gregoryCalendar = 0 as const
 // Calendar ids remain the public/storage shape. Dense internal paths use this
 // compact discriminant so repeated calendar operations can branch on a tiny
 // local value: undefined for ISO, a falsy sentinel for gregory, or an external
-// calendar object for non-core implementations. The `isoCalendar` alias keeps
+// calendar object for non-basic implementations. The `isoCalendar` alias keeps
 // callers from passing a bare `undefined` when they intentionally mean ISO.
 export type CalendarSlot =
   | typeof isoCalendar

@@ -74,7 +74,10 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
+import {
+  resolveBasicCalendar,
+  resolveBasicCalendarArg,
+} from './calendarResolver'
 import {
   Duration,
   DurationArg,
@@ -108,7 +111,7 @@ export class ZonedDateTime {
     initZonedDateTime(
       this,
       constructZonedEpochNanoSlots(
-        resolveCoreCalendarArg,
+        resolveBasicCalendarArg,
         epochNanoseconds,
         timeZoneId,
         calendar,
@@ -530,7 +533,7 @@ export function toZonedDateTimeSlots(
     )
   }
 
-  return parseZonedDateTime(arg, resolveCoreCalendar, options)
+  return parseZonedDateTime(arg, resolveBasicCalendar, options)
 }
 
 function initZonedDateTime(

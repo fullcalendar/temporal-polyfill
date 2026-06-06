@@ -21,8 +21,8 @@ export function isCalendarRecord(record: unknown): boolean {
   return calendarMap.has(record as object)
 }
 
-// Core calendar slots are intentionally falsy: ISO is undefined and gregory is
-// 0. Use map membership instead of slot truthiness to distinguish a real core
+// Basic calendar slots are intentionally falsy: ISO is undefined and gregory is
+// 0. Use map membership instead of slot truthiness to distinguish a real basic
 // calendar record from a missing record.
 export function getCalendarSlots<S>(record: unknown): S {
   return isCalendarRecord(record as object)

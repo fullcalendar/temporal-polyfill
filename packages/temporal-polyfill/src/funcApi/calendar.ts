@@ -20,7 +20,7 @@ export const getExotic: (calendarId: string) => Record = NativeTemporal
   ? Native.getExotic
   : Shim.getExotic
 
-export function getCore(calendarId: string): Record {
+export function getBasic(calendarId: string): Record {
   if (calendarId === isoCalendarId) {
     return getIso()
   }

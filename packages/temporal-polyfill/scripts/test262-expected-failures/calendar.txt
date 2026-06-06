@@ -1,4 +1,4 @@
-# Expected failures unique to the public core global artifact (`dist/global.js`).
+# Expected failures unique to the public basic global artifact (`dist/global.js`).
 # This artifact intentionally supports only the ISO 8601 and Gregorian
 # calendars. These tests require exotic-calendar support and fail across
 # every non-native Temporal test Node version.

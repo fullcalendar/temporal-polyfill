@@ -20,27 +20,27 @@ const hebrewCalendar = CalendarFns.getExotic('hebrew')
 function expectRoundToYearEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
     PlainDateFns.roundToYear(
-      PlainDateFns.fromString(isoString, CalendarFns.getCore),
+      PlainDateFns.fromString(isoString, CalendarFns.getBasic),
     ),
-    PlainDateFns.fromString(expected, CalendarFns.getCore),
+    PlainDateFns.fromString(expected, CalendarFns.getBasic),
   )
 }
 
 function expectRoundToMonthEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
     PlainDateFns.roundToMonth(
-      PlainDateFns.fromString(isoString, CalendarFns.getCore),
+      PlainDateFns.fromString(isoString, CalendarFns.getBasic),
     ),
-    PlainDateFns.fromString(expected, CalendarFns.getCore),
+    PlainDateFns.fromString(expected, CalendarFns.getBasic),
   )
 }
 
 function expectRoundToWeekEquals(isoString: string, expected: string) {
   expectPlainDateEquals(
     PlainDateFns.roundToWeek(
-      PlainDateFns.fromString(isoString, CalendarFns.getCore),
+      PlainDateFns.fromString(isoString, CalendarFns.getBasic),
     ),
-    PlainDateFns.fromString(expected, CalendarFns.getCore),
+    PlainDateFns.fromString(expected, CalendarFns.getBasic),
   )
 }
 
@@ -72,7 +72,7 @@ describe('fromString', () => {
 
   it('requires an explicit resolver for intl calendar strings', () => {
     expect(() =>
-      PlainDateFns.fromString('2024-01-01[u-ca=hebrew]', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01[u-ca=hebrew]', CalendarFns.getBasic),
     ).toThrow(RangeError)
   })
 })
@@ -563,14 +563,14 @@ describe('createFormat', () => {
 
 describe('withDayOfYear', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, 5),
-      PlainDateFns.fromString('2024-01-05', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-05', CalendarFns.getBasic),
     )
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, '5.5' as any),
-      PlainDateFns.fromString('2024-01-05', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-05', CalendarFns.getBasic),
     )
   })
 
@@ -589,11 +589,11 @@ describe('withDayOfYear', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
 
     expectPlainDateEquals(
       PlainDateFns.withDayOfYear(pd, -5),
-      PlainDateFns.fromString('2024-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01', CalendarFns.getBasic),
     )
     expect(() => {
       PlainDateFns.withDayOfYear(pd, -Infinity as any)
@@ -612,7 +612,7 @@ describe('withDayOfYear', () => {
 
 describe('withDayOfMonth', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.withDayOfMonth(pd, 5),
       PlainDateFns.withFields(pd, { day: 5 }),
@@ -626,14 +626,14 @@ describe('withDayOfMonth', () => {
 
 describe('withDayOfWeek', () => {
   it('works with ISO calendar (and coerces to integer)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, 4),
-      PlainDateFns.fromString('2024-02-29', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-02-29', CalendarFns.getBasic),
     )
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, '4.5' as any),
-      PlainDateFns.fromString('2024-02-29', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-02-29', CalendarFns.getBasic),
     )
   })
 
@@ -652,11 +652,11 @@ describe('withDayOfWeek', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
 
     expectPlainDateEquals(
       PlainDateFns.withDayOfWeek(pd, -5),
-      PlainDateFns.fromString('2024-02-26', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-02-26', CalendarFns.getBasic),
     )
     expect(() => {
       PlainDateFns.withDayOfWeek(pd, -Infinity as any)
@@ -676,8 +676,8 @@ describe('withDayOfWeek', () => {
 describe('withWeekOfYear', () => {
   it('works with ISO calendar (and coercing to integer)', () => {
     // weekOfYear:9, yearOfWeek:2024
-    const pd0 = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
-    const pdExp = PlainDateFns.fromString('2024-07-02', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
+    const pdExp = PlainDateFns.fromString('2024-07-02', CalendarFns.getBasic)
     const yearExp = 2024
 
     const pd1 = PlainDateFns.withWeekOfYear(pd0, 27)
@@ -701,11 +701,11 @@ describe('withWeekOfYear', () => {
   })
 
   it('matches canonical coercion and error types', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
 
     expectPlainDateEquals(
       PlainDateFns.withWeekOfYear(pd, -5),
-      PlainDateFns.fromString('2024-01-02', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-02', CalendarFns.getBasic),
     )
     expect(() => {
       PlainDateFns.withWeekOfYear(pd, -Infinity as any)
@@ -727,7 +727,7 @@ describe('withWeekOfYear', () => {
 
 describe('addYears', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.addYears(pd, 5),
       PlainDateFns.add(pd, DurationFns.fromFields({ years: 5 })),
@@ -738,7 +738,7 @@ describe('addYears', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getCore) // leap day
+    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getBasic) // leap day
     expectPlainDateEquals(
       PlainDateFns.addYears(pd, 5, { overflow: 'constrain' }),
       PlainDateFns.add(pd, DurationFns.fromFields({ years: 5 })),
@@ -746,7 +746,7 @@ describe('addYears', () => {
   })
 
   it('can throw error with reject overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getCore) // leap day
+    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getBasic) // leap day
     expect(() => {
       PlainDateFns.addYears(pd, 1, { overflow: 'reject' })
     }).toThrowError(RangeError)
@@ -755,7 +755,7 @@ describe('addYears', () => {
 
 describe('addMonths', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.addMonths(pd, 5),
       PlainDateFns.add(pd, DurationFns.fromFields({ months: 5 })),
@@ -766,7 +766,7 @@ describe('addMonths', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-01-31', CalendarFns.getCore) // 31 days
+    const pd = PlainDateFns.fromString('2024-01-31', CalendarFns.getBasic) // 31 days
     expectPlainDateEquals(
       PlainDateFns.addMonths(pd, 1, { overflow: 'constrain' }),
       PlainDateFns.add(pd, DurationFns.fromFields({ months: 1 })),
@@ -774,7 +774,7 @@ describe('addMonths', () => {
   })
 
   it('can throw error with reject overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-01-31', CalendarFns.getCore) // 31 days
+    const pd = PlainDateFns.fromString('2024-01-31', CalendarFns.getBasic) // 31 days
     expect(() => {
       PlainDateFns.addMonths(pd, 1, { overflow: 'reject' })
     }).toThrowError(RangeError)
@@ -783,7 +783,7 @@ describe('addMonths', () => {
 
 describe('addWeeks', () => {
   it('works (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.addWeeks(pd, 300),
       PlainDateFns.add(pd, DurationFns.fromFields({ weeks: 300 })),
@@ -796,7 +796,7 @@ describe('addWeeks', () => {
 
 describe('addDays (and throws on non-integers)', () => {
   it('works', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.addDays(pd, 300),
       PlainDateFns.add(pd, DurationFns.fromFields({ days: 300 })),
@@ -812,7 +812,7 @@ describe('addDays (and throws on non-integers)', () => {
 
 describe('subtractYears', () => {
   it('works without options (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.subtractYears(pd, 5),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ years: 5 })),
@@ -823,7 +823,7 @@ describe('subtractYears', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getCore) // leap day
+    const pd = PlainDateFns.fromString('2024-02-29', CalendarFns.getBasic) // leap day
     expectPlainDateEquals(
       PlainDateFns.subtractYears(pd, 5, { overflow: 'constrain' }),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ years: 5 })),
@@ -833,7 +833,7 @@ describe('subtractYears', () => {
   it('can throw error with reject overflow option', () => {
     const pd = PlainDateFns.fromString(
       '2024-02-29',
-      CalendarFns.getCore, // leap day
+      CalendarFns.getBasic, // leap day
     )
     expect(() => {
       PlainDateFns.subtractYears(pd, 1, { overflow: 'reject' })
@@ -843,7 +843,7 @@ describe('subtractYears', () => {
 
 describe('subtractMonths', () => {
   it('works (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.subtractMonths(pd, 5),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ months: 5 })),
@@ -854,7 +854,7 @@ describe('subtractMonths', () => {
   })
 
   it('works with explicit constrain overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-03-31', CalendarFns.getCore) // 31 days
+    const pd = PlainDateFns.fromString('2024-03-31', CalendarFns.getBasic) // 31 days
     expectPlainDateEquals(
       PlainDateFns.subtractMonths(pd, 1, { overflow: 'constrain' }),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ months: 1 })),
@@ -862,7 +862,7 @@ describe('subtractMonths', () => {
   })
 
   it('can throw error with reject overflow option', () => {
-    const pd = PlainDateFns.fromString('2024-03-31', CalendarFns.getCore) // 31 days
+    const pd = PlainDateFns.fromString('2024-03-31', CalendarFns.getBasic) // 31 days
     expect(() => {
       PlainDateFns.subtractMonths(pd, 1, { overflow: 'reject' })
     }).toThrowError(RangeError)
@@ -871,7 +871,7 @@ describe('subtractMonths', () => {
 
 describe('subtractWeeks', () => {
   it('works (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.subtractWeeks(pd, 300),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ weeks: 300 })),
@@ -884,7 +884,7 @@ describe('subtractWeeks', () => {
 
 describe('subtractDays', () => {
   it('works (and throws on non-integers)', () => {
-    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-02-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.subtractDays(pd, 300),
       PlainDateFns.subtract(pd, DurationFns.fromFields({ days: 300 })),
@@ -900,37 +900,37 @@ describe('subtractDays', () => {
 
 describe('roundToYear', () => {
   it('works without options', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToYear(pd),
-      PlainDateFns.fromString('2025-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2025-01-01', CalendarFns.getBasic),
     )
   })
 
   it('works with roundingMode option', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToYear(pd, { roundingMode: 'floor' }),
-      PlainDateFns.fromString('2024-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01', CalendarFns.getBasic),
     )
   })
 
   it('works with roundingMode string', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToYear(pd, 'floor'),
-      PlainDateFns.fromString('2024-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01', CalendarFns.getBasic),
     )
   })
 
   it('works with options', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToYear(pd, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateFns.fromString('2024-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01', CalendarFns.getBasic),
     )
     expect(() => {
       PlainDateFns.roundToYear(pd, {
@@ -950,37 +950,37 @@ describe('roundToYear', () => {
 
 describe('roundToMonth', () => {
   it('works without options', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToMonth(pd),
-      PlainDateFns.fromString('2024-08-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-08-01', CalendarFns.getBasic),
     )
   })
 
   it('works with roundingMode option', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToMonth(pd, { roundingMode: 'floor' }),
-      PlainDateFns.fromString('2024-07-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-07-01', CalendarFns.getBasic),
     )
   })
 
   it('works with roundingMode string', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToMonth(pd, 'floor'),
-      PlainDateFns.fromString('2024-07-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-07-01', CalendarFns.getBasic),
     )
   })
 
   it('works with options', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.roundToMonth(pd, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateFns.fromString('2024-07-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-07-01', CalendarFns.getBasic),
     )
     expect(() => {
       PlainDateFns.roundToMonth(pd, {
@@ -1000,37 +1000,37 @@ describe('roundToMonth', () => {
 
 describe('roundToWeek', () => {
   it('works without options', () => {
-    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     expectPlainDateEquals(
       PlainDateFns.roundToWeek(pd),
-      PlainDateFns.fromString('2024-07-22', CalendarFns.getCore), // next Monday
+      PlainDateFns.fromString('2024-07-22', CalendarFns.getBasic), // next Monday
     )
   })
 
   it('works with roundingMode option', () => {
-    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     expectPlainDateEquals(
       PlainDateFns.roundToWeek(pd, { roundingMode: 'floor' }),
-      PlainDateFns.fromString('2024-07-15', CalendarFns.getCore), // this Monday
+      PlainDateFns.fromString('2024-07-15', CalendarFns.getBasic), // this Monday
     )
   })
 
   it('works with roundingMode string', () => {
-    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     expectPlainDateEquals(
       PlainDateFns.roundToWeek(pd, 'floor'),
-      PlainDateFns.fromString('2024-07-15', CalendarFns.getCore), // this Monday
+      PlainDateFns.fromString('2024-07-15', CalendarFns.getBasic), // this Monday
     )
   })
 
   it('works with options', () => {
-    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     expectPlainDateEquals(
       PlainDateFns.roundToWeek(pd, {
         roundingMode: 'floor',
         roundingIncrement: 1,
       }),
-      PlainDateFns.fromString('2024-07-15', CalendarFns.getCore), // this Monday
+      PlainDateFns.fromString('2024-07-15', CalendarFns.getBasic), // this Monday
     )
     expect(() => {
       PlainDateFns.roundToWeek(pd, {
@@ -1053,30 +1053,30 @@ describe('roundToWeek', () => {
 
 describe('startOfYear', () => {
   it('works', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.startOfYear(pd),
-      PlainDateFns.fromString('2024-01-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-01-01', CalendarFns.getBasic),
     )
   })
 })
 
 describe('startOfMonth', () => {
   it('works', () => {
-    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     expectPlainDateEquals(
       PlainDateFns.startOfMonth(pd),
-      PlainDateFns.fromString('2024-07-01', CalendarFns.getCore),
+      PlainDateFns.fromString('2024-07-01', CalendarFns.getBasic),
     )
   })
 })
 
 describe('startOfWeek', () => {
   it('works', () => {
-    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     expectPlainDateEquals(
       PlainDateFns.startOfWeek(pd),
-      PlainDateFns.fromString('2024-07-15', CalendarFns.getCore), // this Monday
+      PlainDateFns.fromString('2024-07-15', CalendarFns.getBasic), // this Monday
     )
   })
 })
@@ -1086,27 +1086,27 @@ describe('startOfWeek', () => {
 
 describe('endOfYear', () => {
   it('works', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     const pd1 = PlainDateFns.endOfYear(pd0)
-    const pd2 = PlainDateFns.fromString('2025-01-01', CalendarFns.getCore)
+    const pd2 = PlainDateFns.fromString('2025-01-01', CalendarFns.getBasic)
     expectPlainDateEquals(pd1, PlainDateFns.subtractDays(pd2, 1))
   })
 })
 
 describe('endOfMonth', () => {
   it('works', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-27', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-07-27', CalendarFns.getBasic)
     const pd1 = PlainDateFns.endOfMonth(pd0)
-    const pd2 = PlainDateFns.fromString('2024-08-01', CalendarFns.getCore)
+    const pd2 = PlainDateFns.fromString('2024-08-01', CalendarFns.getBasic)
     expectPlainDateEquals(pd1, PlainDateFns.subtractDays(pd2, 1))
   })
 })
 
 describe('endOfWeek', () => {
   it('works', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore) // Saturday
+    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic) // Saturday
     const pd1 = PlainDateFns.endOfWeek(pd0)
-    const pd2 = PlainDateFns.fromString('2024-07-22', CalendarFns.getCore) // next Monday
+    const pd2 = PlainDateFns.fromString('2024-07-22', CalendarFns.getBasic) // next Monday
     expectPlainDateEquals(pd1, PlainDateFns.subtractDays(pd2, 1))
   })
 })
@@ -1116,22 +1116,22 @@ describe('endOfWeek', () => {
 
 describe('diffYears', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getBasic)
     const years = PlainDateFns.diffYears(pd0, pd1)
     expect(years).toBeCloseTo(1.75) // b/c nanosecond arithmetics, not month-based
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getBasic)
     const years = PlainDateFns.diffYears(pd0, pd1, 'floor')
     expect(years).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-07-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2026-04-20', CalendarFns.getBasic)
     const years = PlainDateFns.diffYears(pd0, pd1, {
       roundingMode: 'floor',
     })
@@ -1146,22 +1146,22 @@ describe('diffYears', () => {
 
 describe('diffMonths', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getBasic)
     const months = PlainDateFns.diffMonths(pd0, pd1)
     expect(months).toBeCloseTo(1.677)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getBasic)
     const months = PlainDateFns.diffMonths(pd0, pd1, 'floor')
     expect(months).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-02-20', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-04-10', CalendarFns.getBasic)
     const months = PlainDateFns.diffMonths(pd0, pd1, {
       roundingMode: 'floor',
     })
@@ -1176,22 +1176,22 @@ describe('diffMonths', () => {
 
 describe('diffWeeks', () => {
   it('gives exact result when no options/roundingMode specified', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getBasic)
     const weeks = PlainDateFns.diffWeeks(pd0, pd1)
     expect(weeks).toBeCloseTo(1.571)
   })
 
   it('gives rounded result with roundingMode single arg', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getBasic)
     const weeks = PlainDateFns.diffWeeks(pd0, pd1, 'floor')
     expect(weeks).toBe(1)
   })
 
   it('gives rounded result with options object', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-16', CalendarFns.getBasic)
     const weeks = PlainDateFns.diffWeeks(pd0, pd1, {
       roundingMode: 'floor',
     })
@@ -1206,22 +1206,22 @@ describe('diffWeeks', () => {
 
 describe('diffDays', () => {
   it('gives integer result when no options/roundingMode specified', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getBasic)
     const days = PlainDateFns.diffDays(pd0, pd1)
     expect(days).toBe(10)
   })
 
   it('gives integer result with roundingMode single arg', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getBasic)
     const days = PlainDateFns.diffDays(pd0, pd1, 'floor')
     expect(days).toBe(10)
   })
 
   it('gives rounded result with options object', () => {
-    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getCore)
-    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getCore)
+    const pd0 = PlainDateFns.fromString('2024-03-05', CalendarFns.getBasic)
+    const pd1 = PlainDateFns.fromString('2024-03-15', CalendarFns.getBasic)
     const days = PlainDateFns.diffDays(pd0, pd1, {
       roundingMode: 'floor',
     })

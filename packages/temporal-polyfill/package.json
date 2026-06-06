@@ -48,11 +48,11 @@
   "buildConfig": {
     "exports": {
       ".": {
-        "src": "classApi/core/index",
+        "src": "classApi/basic/index",
         "types": "typeOverrides/index"
       },
       "./global": {
-        "src": "classApi/core/global",
+        "src": "classApi/basic/global",
         "types": "typeOverrides/global",
         "iife": true
       },
@@ -60,10 +60,10 @@
         "src": "global-types"
       },
       "./shim": {
-        "src": "classApi/core/shim"
+        "src": "classApi/basic/shim"
       },
       "./implementation": {
-        "src": "classApi/core/implementation",
+        "src": "classApi/basic/implementation",
         "types": "typeOverrides/implementation"
       },
       "./full": {

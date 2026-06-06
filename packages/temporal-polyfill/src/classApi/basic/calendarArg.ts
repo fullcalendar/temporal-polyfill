@@ -4,7 +4,7 @@ import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
 import { parseCalendarId } from '../../internal/isoParse'
 import { isObjectLike } from '../../internal/utils'
-import { resolveCoreCalendar } from './calendarResolver'
+import { resolveBasicCalendar } from './calendarResolver'
 import { PlainDate, getPlainDateSlotsIfPresent } from './plainDate'
 import { PlainDateTime, getPlainDateTimeSlotsIfPresent } from './plainDateTime'
 import { PlainMonthDay, getPlainMonthDaySlotsIfPresent } from './plainMonthDay'
@@ -60,8 +60,8 @@ export function refineCalendarArg(arg: CalendarArg): CalendarSlot {
 }
 
 /*
-Like resolveCoreCalendar, but allows different string formats, like datetime string
+Like resolveBasicCalendar, but allows different string formats, like datetime string
 */
 function refineCalendarString(arg: string): CalendarSlot {
-  return resolveCoreCalendar(parseCalendarId(requireString(arg)))
+  return resolveBasicCalendar(parseCalendarId(requireString(arg)))
 }

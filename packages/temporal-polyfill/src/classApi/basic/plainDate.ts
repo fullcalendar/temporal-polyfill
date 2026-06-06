@@ -55,7 +55,10 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveCoreCalendar, resolveCoreCalendarArg } from './calendarResolver'
+import {
+  resolveBasicCalendar,
+  resolveBasicCalendarArg,
+} from './calendarResolver'
 import {
   Duration,
   DurationArg,
@@ -98,7 +101,7 @@ export class PlainDate implements DateFields {
     initPlainDate(
       this,
       constructDateSlots(
-        resolveCoreCalendarArg,
+        resolveBasicCalendarArg,
         isoYear,
         isoMonth,
         isoDay,
@@ -397,7 +400,7 @@ export function toPlainDateSlots(
     return refinePlainDateObjectLike(calendar, arg as DateLikeObject, options)
   }
 
-  const res = parsePlainDate(arg, resolveCoreCalendar)
+  const res = parsePlainDate(arg, resolveBasicCalendar)
   refineOverflowOptions(options) // parse unused options
   return res
 }
