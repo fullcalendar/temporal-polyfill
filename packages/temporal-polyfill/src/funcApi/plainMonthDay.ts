@@ -13,9 +13,11 @@ import { isPlainMonthDayRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-export type FromFields = Partial<MonthDayFields> & {
-  calendar?: CalendarFns.Record
-}
+export type FromFields = Partial<
+  MonthDayFields & {
+    calendar: CalendarFns.Record
+  }
+>
 export type WithFields = Partial<MonthDayFields>
 export type ToStringOptions = Temporal.PlainDateToStringOptions
 

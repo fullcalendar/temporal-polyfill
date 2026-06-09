@@ -1,10 +1,16 @@
 import { invalidRecordType } from '../apiHelpers/classStyle'
+import { CalendarImpl } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
+
+export type CalendarSlots = {
+  id: string
+  getImpl: (() => CalendarImpl) | undefined // caller should cache
+}
 
 /*
 Might contain a slot object (if shim) or a single native object (if native)
 */
-const calendarMap = new WeakMap<object, unknown>()
+const calendarMap = new WeakMap<object, CalendarSlots>()
 const instantMap = new WeakMap<object, unknown>()
 const zonedDateTimeMap = new WeakMap<object, unknown>()
 const plainDateTimeMap = new WeakMap<object, unknown>()
@@ -14,27 +20,24 @@ const plainYearMonthMap = new WeakMap<object, unknown>()
 const plainMonthDayMap = new WeakMap<object, unknown>()
 const durationMap = new WeakMap<object, unknown>()
 
-// Calendar
+// Calendar (the only "known" type)
 // --------
 
 export function isCalendarRecord(record: unknown): boolean {
-  return calendarMap.has(record as object)
+  return !!getCalendarSlotsIfPresent(record)
 }
 
-// Basic calendar slots are intentionally falsy: ISO is undefined and gregory is
-// 0. Use map membership instead of slot truthiness to distinguish a real basic
-// calendar record from a missing record.
-export function getCalendarSlots<S>(record: unknown): S {
-  return isCalendarRecord(record as object)
-    ? (calendarMap.get(record as object) as S)
-    : invalidRecordType()
+export function getCalendarSlots(record: unknown): CalendarSlots {
+  return getCalendarSlotsIfPresent(record) || invalidRecordType()
 }
 
-export function getCalendarSlotsIfPresent<S>(record: unknown): S | undefined {
-  return calendarMap.get(record as object) as S | undefined
+export function getCalendarSlotsIfPresent(
+  record: unknown,
+): CalendarSlots | undefined {
+  return calendarMap.get(record as object)
 }
 
-export function setCalendarSlots(instance: object, slots: unknown) {
+export function setCalendarSlots(instance: object, slots: CalendarSlots) {
   calendarMap.set(instance, slots)
 }
 

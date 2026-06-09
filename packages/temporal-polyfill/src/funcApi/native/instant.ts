@@ -52,16 +52,12 @@ class _InstantNativeRecord implements InstantRecord {
   }
 }
 
-function setInstantNative(instance: object, native: Temporal.Instant) {
-  setInstantSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
-}
-
 export function createInstantNativeRecord(
   native: Temporal.Instant,
 ): InstantNativeRecord {
   const instance = Object.create(InstantNativeRecord.prototype)
-  setInstantNative(instance, native)
+  setInstantSlots(instance, native)
+  attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 

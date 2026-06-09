@@ -17,7 +17,7 @@ const localeFormatOptions = {
   calendar: 'iso8601',
 } satisfies Intl.DateTimeFormatOptions
 
-function createExpectedFormat(locales?: Intl.LocalesArgument) {
+function createExpectedFormat(locales?: string | string[]) {
   return new Intl.DateTimeFormat(locales, localeFormatOptions)
 }
 

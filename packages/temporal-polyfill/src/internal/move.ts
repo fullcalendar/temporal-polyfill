@@ -7,8 +7,8 @@ import {
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
+import { type CalendarImpl } from './calendarImpl'
 import { monthCodeNumberToMonth } from './calendarMonthCode'
-import { type CalendarSlot } from './calendarSlot'
 import {
   DurationFields,
   durationFieldNamesAsc,
@@ -71,10 +71,10 @@ export function moveInstant(
 
 export function moveZonedDateTime(
   doSubtract: boolean,
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   durationSlots: DurationFields,
   options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   return {
     ...zonedDateTimeSlots, // retain timeZone/calendar, order
     ...moveZonedEpochs(
@@ -89,10 +89,10 @@ export function moveZonedDateTime(
 
 export function movePlainDateTime(
   doSubtract: boolean,
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
   durationSlots: DurationFields,
   options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): CalendarDateTimeFields & { calendar: CalendarSlot } {
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
   const { calendar } = plainDateTimeSlots
   return createDateTimeSlots(
     moveDateTime(
@@ -107,10 +107,10 @@ export function movePlainDateTime(
 
 export function movePlainDate(
   doSubtract: boolean,
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
   durationSlots: DurationFields,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = plainDateSlots
   return createDateSlots(
     moveDate(
@@ -125,10 +125,10 @@ export function movePlainDate(
 
 export function movePlainYearMonth(
   doSubtract: boolean,
-  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarImpl },
   durationSlots: DurationFields & { sign: NumberSign },
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   /*
   PlainYearMonth has one awkward ordering rule: overflow must be read before
   rejecting units below months. Date arithmetic normally reads overflow inside
@@ -198,8 +198,8 @@ through keeps repeated offset/transition work on one memoized implementation.
 */
 export function moveZonedEpochs(
   timeZone: TimeZone,
-  calendar: CalendarSlot,
-  slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  calendar: CalendarImpl,
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
 ): EpochNanoFields {
@@ -233,7 +233,7 @@ export function moveZonedEpochs(
 }
 
 export function moveDateTime(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDateTimeFields: CalendarDateTimeFields,
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
@@ -267,7 +267,7 @@ export function moveDateTime(
 Skips calendar if moving days only
 */
 export function moveDate(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
@@ -332,7 +332,7 @@ export function moveByDays(
 }
 
 function dateAddWithOverflow(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDateFields: CalendarDateFields,
   durationFields: DurationFields,
   overflow: Overflow,
@@ -364,7 +364,7 @@ function dateAddWithOverflow(
 }
 
 export function addCalendarMonths(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month: number,
   monthDelta: number,
@@ -375,7 +375,7 @@ export function addCalendarMonths(
 }
 
 export function addDateMonths(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDateFields: CalendarDateFields,
   years: number,
   months: number,
@@ -426,7 +426,7 @@ export function addDateMonths(
 }
 
 export function computeYearMovedMonth(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   monthCodeNumber: number,
   isLeapMonth: boolean,
   targetLeapMonth: number | undefined,

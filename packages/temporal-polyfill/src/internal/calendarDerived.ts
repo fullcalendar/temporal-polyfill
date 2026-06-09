@@ -1,5 +1,9 @@
+import {
+  type CalendarImpl,
+  gregoryCalendarImpl,
+  isoCalendarImpl,
+} from './calendarImpl'
 import { MonthCodeParts, formatMonthCode } from './calendarMonthCode'
-import { type CalendarSlot, gregoryCalendar, isoCalendar } from './calendarSlot'
 import {
   diffEpochMilliDays,
   isoArgsToEpochMilli,
@@ -19,14 +23,14 @@ import {
 } from './isoCalendarMath'
 
 export function computeCalendarDateFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): CalendarDateFields {
   return calendar ? calendar.computeDateFields(isoDate) : isoDate
 }
 
 export function computeCalendarMonthCodeParts(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month: number,
 ): MonthCodeParts {
@@ -36,10 +40,10 @@ export function computeCalendarMonthCodeParts(
 }
 
 export function computeCalendarEraFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
-  return calendar === gregoryCalendar
+  return calendar === gregoryCalendarImpl
     ? computeGregoryEraFields(isoDate)
     : calendar
       ? calendar.computeEraFields(isoDate)
@@ -47,7 +51,7 @@ export function computeCalendarEraFields(
 }
 
 export function computeCalendarIsoFieldsFromParts(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month: number,
   day: number,
@@ -58,7 +62,7 @@ export function computeCalendarIsoFieldsFromParts(
 }
 
 export function computeCalendarEpochMilli(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month?: number,
   day?: number,
@@ -69,14 +73,14 @@ export function computeCalendarEpochMilli(
 }
 
 export function computeCalendarMonthsInYearForYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
 ): number {
   return calendar ? calendar.computeMonthsInYear(year) : isoMonthsInYear
 }
 
 export function computeCalendarDaysInMonthForYearMonth(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month: number,
 ): number {
@@ -86,7 +90,7 @@ export function computeCalendarDaysInMonthForYearMonth(
 }
 
 export function computeCalendarMonthCode(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): string {
   const { year, month } = computeCalendarDateFields(calendar, isoDate)
@@ -99,7 +103,7 @@ export function computeCalendarMonthCode(
 }
 
 export function computeCalendarInLeapYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): boolean {
   const { year } = computeCalendarDateFields(calendar, isoDate)
@@ -109,7 +113,7 @@ export function computeCalendarInLeapYear(
 }
 
 export function computeCalendarMonthsInYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number {
   const { year } = computeCalendarDateFields(calendar, isoDate)
@@ -117,7 +121,7 @@ export function computeCalendarMonthsInYear(
 }
 
 export function computeCalendarDaysInMonth(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number {
   const { year, month } = computeCalendarDateFields(calendar, isoDate)
@@ -125,7 +129,7 @@ export function computeCalendarDaysInMonth(
 }
 
 export function computeCalendarDaysInYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number {
   const { year } = computeCalendarDateFields(calendar, isoDate)
@@ -135,7 +139,7 @@ export function computeCalendarDaysInYear(
 }
 
 export function computeCalendarDayOfYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number {
   if (!calendar) {
@@ -147,19 +151,19 @@ export function computeCalendarDayOfYear(
 }
 
 export function computeCalendarWeekOfYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number | undefined {
-  return calendar === isoCalendar
+  return calendar === isoCalendarImpl
     ? computeIsoWeekFields(isoDate).weekOfYear
     : undefined
 }
 
 export function computeCalendarYearOfWeek(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   isoDate: CalendarDateFields,
 ): number | undefined {
-  return calendar === isoCalendar
+  return calendar === isoCalendarImpl
     ? computeIsoWeekFields(isoDate).yearOfWeek
     : undefined
 }

@@ -9,8 +9,8 @@ import {
   resolveCalendarMonth,
   resolveCalendarYear,
 } from './calendarFields'
+import { type CalendarImpl, isoCalendarImpl } from './calendarImpl'
 import { type MonthCodeParts, parseMonthCode } from './calendarMonthCode'
-import { type CalendarSlot, isoCalendar } from './calendarSlot'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import { type DateOptionsRefiner, DateOptionsTuple } from './fieldRefine'
@@ -44,8 +44,8 @@ export function createPlainDateTimeFromRefinedFields(
   isoDate: CalendarDateFields,
   // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
   time: TimeFields | undefined = timeFieldDefaults,
-  calendar: CalendarSlot,
-): CalendarDateTimeFields & { calendar: CalendarSlot } {
+  calendar: CalendarImpl,
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
   // Calendar/date pipelines and time pipelines resolve their own fields before
   // reaching this point. The only cross-field validation left is whether the
   // combined PlainDateTime is inside Temporal's supported ISO range.
@@ -55,10 +55,10 @@ export function createPlainDateTimeFromRefinedFields(
 }
 
 export function createPlainDateFromFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const prepared = prepareDateFields(calendar, fields)
 
   // The normal overflow path reads options at the same phase as the callback
@@ -71,10 +71,10 @@ export function createPlainDateFromFields(
 export function createPlainDateFromFieldsWithOptionsRefiner<
   T extends DateOptionsTuple,
 >(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>,
   refineOptions: DateOptionsRefiner<T>,
-): [slots: CalendarDateFields & { calendar: CalendarSlot }, ...options: T] {
+): [slots: CalendarDateFields & { calendar: CalendarImpl }, ...options: T] {
   const prepared = prepareDateFields(calendar, fields)
 
   // Options are deliberately read after all observable calendar fields,
@@ -94,11 +94,11 @@ export function createPlainDateFromFieldsWithOptionsRefiner<
 }
 
 function createPlainDateFromPreparedFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>,
   prepared: PreparedDateFields,
   overflow: Overflow,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   // The tuple is private plumbing. Index reads keep the built output from
   // carrying internal-only property names while preserving the field-read phase
   // that happens before overflow options are observed.
@@ -139,7 +139,7 @@ function parseMonthCodeField(
 }
 
 function prepareDateFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>,
 ): PreparedDateFields {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
@@ -163,10 +163,10 @@ function prepareDateFields(
 }
 
 export function createPlainYearMonthFromFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<YearMonthFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   const eraOrigins = getCalendarEraOrigins(calendar)
@@ -200,11 +200,11 @@ export function createPlainYearMonthFromFields(
 }
 
 export function createPlainMonthDayFromFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>, // guaranteed `day`
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
-  const isIso = calendar === isoCalendar
+): CalendarDateFields & { calendar: CalendarImpl } {
+  const isIso = calendar === isoCalendarImpl
   const eraOrigins = getCalendarEraOrigins(calendar)
 
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE

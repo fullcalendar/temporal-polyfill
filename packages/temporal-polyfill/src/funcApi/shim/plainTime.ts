@@ -98,19 +98,12 @@ class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
   }
 }
 
-function setPlainTimeShimRecordSlots(
-  instance: object,
-  slots: PlainTimeShimSlots,
-) {
-  setPlainTimeSlots(instance, slots)
-  attachDebugString(instance, slots, formatTimeIsoAuto)
-}
-
 export function createPlainTimeShimRecord(
   slots: PlainTimeShimSlots,
 ): PlainTimeShimRecord {
   const instance = Object.create(PlainTimeShimRecord.prototype)
-  setPlainTimeShimRecordSlots(instance, slots)
+  setPlainTimeSlots(instance, slots)
+  attachDebugString(instance, slots, formatTimeIsoAuto)
   return instance
 }
 

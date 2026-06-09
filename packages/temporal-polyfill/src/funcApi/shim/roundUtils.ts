@@ -4,7 +4,7 @@ import {
   computeCalendarDateFields,
   computeCalendarEpochMilli,
 } from '../../internal/calendarDerived'
-import { type CalendarSlot } from '../../internal/calendarSlot'
+import { type CalendarImpl } from '../../internal/calendarImpl'
 import {
   epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
@@ -43,7 +43,7 @@ const clearTimeFields = bindArgs(
 // -----------------------------------------------------------------------------
 
 export function computeYearFloor(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): CalendarDateTimeFields & { year: number } {
   const { calendar } = slots
   const { year: year0 } = computeCalendarDateFields(calendar, slots)
@@ -54,7 +54,7 @@ export function computeYearFloor(
 }
 
 export function computeMonthFloor(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): CalendarDateTimeFields & { year: number; month: number } {
   const { calendar } = slots
   const { year: year0, month: month0 } = computeCalendarDateFields(
@@ -87,13 +87,13 @@ export const computeMicroFloor = bindArgs(clearTimeFields, Unit.Microsecond)
 // -----------------------------------------------------------------------------
 
 export function computeYearCeil(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): CalendarDateTimeFields {
   return computeYearInterval(slots)[1]
 }
 
 export function computeMonthCeil(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): CalendarDateTimeFields {
   return computeMonthInterval(slots)[1]
 }
@@ -117,7 +117,7 @@ export function computeDayCeil(
 // -----------------------------------------------------------------------------
 
 export function computeYearInterval(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): IsoDateTimeInterval {
   const { calendar } = slots
   const isoFields0 = computeYearFloor(slots)
@@ -129,7 +129,7 @@ export function computeYearInterval(
 }
 
 export function computeMonthInterval(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): IsoDateTimeInterval {
   const { calendar } = slots
   const isoFields0 = computeMonthFloor(slots)
@@ -146,7 +146,7 @@ export function computeMonthInterval(
 }
 
 export function computeIsoWeekInterval(
-  slots: CalendarDateFields & { calendar: CalendarSlot },
+  slots: CalendarDateFields & { calendar: CalendarImpl },
 ): IsoDateTimeInterval {
   const isoFields0 = computeIsoWeekFloor(slots)
   const isoFields1 = combineDateAndTime(
@@ -157,7 +157,7 @@ export function computeIsoWeekInterval(
 }
 
 export function roundDateToInterval<
-  S extends CalendarDateFields & { calendar: CalendarSlot },
+  S extends CalendarDateFields & { calendar: CalendarImpl },
 >(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
@@ -172,7 +172,7 @@ export function roundDateToInterval<
 }
 
 export function roundDateTimeToInterval<
-  S extends CalendarDateTimeFields & { calendar: CalendarSlot },
+  S extends CalendarDateTimeFields & { calendar: CalendarImpl },
 >(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,
@@ -187,7 +187,7 @@ export function roundDateTimeToInterval<
 }
 
 function roundEpochNanoToInterval<
-  S extends CalendarDateFields & { calendar: CalendarSlot },
+  S extends CalendarDateFields & { calendar: CalendarImpl },
 >(
   computeInterval: (slots: S) => IsoDateTimeInterval,
   slots: S,

@@ -11,7 +11,7 @@
     "**/*.code-search": true,
     "packages/locale-data/data/**": true
   },
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsdk": "packages/temporal-polyfill/node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsdk.path": "packages/temporal-polyfill/node_modules/typescript/lib",
   "biome.lspBin": "packages/temporal-polyfill/node_modules/@biomejs/biome/bin/biome"
 }

@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import { getCalendarFieldNames } from './calendarFields'
-import { type CalendarSlot } from './calendarSlot'
+import { type CalendarImpl } from './calendarImpl'
 import {
   DurationFields,
   durationFieldDefaults,
@@ -78,7 +78,7 @@ through the built-in calendar/time-zone implementation, and return slots.
 // Input could be ZonedDateTime OR PlainDate fields (for relativeTo).
 export function refineMaybeZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   bag: ZonedDateTimeLikeObject, // i think this needs type change
 ): RelativeToSlots {
   const validFieldNames = getCalendarFieldNames(
@@ -117,10 +117,10 @@ export function refineMaybeZonedDateTimeObjectLike(
 
 export function refineZonedDateTimeObjectLike(
   refineTimeZoneString: (timeZoneString: string) => string,
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   bag: ZonedDateTimeLikeObject,
   options: Temporal.ZonedDateTimeFromOptions | undefined,
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeAndZoneFieldNamesAlpha,
@@ -157,10 +157,10 @@ export function refineZonedDateTimeObjectLike(
 }
 
 export function refinePlainDateTimeObjectLike(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   bag: Partial<DateTimeFields>,
   options: Temporal.OverflowOptions | undefined,
-): CalendarDateTimeFields & { calendar: CalendarSlot } {
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
@@ -188,11 +188,11 @@ export function refinePlainDateTimeObjectLike(
 }
 
 export function refinePlainDateObjectLike(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   bag: Partial<DateFields>,
   options: Temporal.OverflowOptions | undefined,
   requireFields: string[] = [],
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,
@@ -209,11 +209,11 @@ export function refinePlainDateObjectLike(
 }
 
 export function refinePlainYearMonthObjectLike(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   bag: Partial<YearMonthFields>,
   options: Temporal.OverflowOptions | undefined,
   requireFields?: string[],
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     yearMonthFieldNamesAlpha,
@@ -230,11 +230,11 @@ export function refinePlainYearMonthObjectLike(
 }
 
 export function refinePlainMonthDayObjectLike(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   calendarAbsent: boolean,
   bag: Partial<MonthDayFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateFieldNamesAlpha,

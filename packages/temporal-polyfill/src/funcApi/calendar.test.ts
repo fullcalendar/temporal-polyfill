@@ -3,6 +3,23 @@ import * as CalendarFns from './calendar'
 import * as PlainDateFns from './plainDate'
 import { itSkipNative } from './testUtils'
 
+const exoticCalendarGetters = [
+  ['buddhist', CalendarFns.getBuddhist],
+  ['chinese', CalendarFns.getChinese],
+  ['dangi', CalendarFns.getDangi],
+  ['coptic', CalendarFns.getCoptic],
+  ['ethiopic', CalendarFns.getEthiopic],
+  ['ethioaa', CalendarFns.getEthiopicAmeteAlem],
+  ['hebrew', CalendarFns.getHebrew],
+  ['indian', CalendarFns.getIndian],
+  ['japanese', CalendarFns.getJapanese],
+  ['islamic-civil', CalendarFns.getIslamicCivil],
+  ['islamic-tbla', CalendarFns.getIslamicTabular],
+  ['islamic-umalqura', CalendarFns.getIslamicUmmAlQura],
+  ['persian', CalendarFns.getPersian],
+  ['roc', CalendarFns.getRoc],
+] as const
+
 describe('function calendar records', () => {
   it('returns stable calendar handles', () => {
     expect(CalendarFns.getISO()).toBe(CalendarFns.getISO())
@@ -13,6 +30,11 @@ describe('function calendar records', () => {
     expect(CalendarFns.getExotic('BUDDHIST')).not.toBe(
       CalendarFns.getExotic('buddhist'),
     )
+
+    for (const [calendarId, getCalendar] of exoticCalendarGetters) {
+      expect(getCalendar()).toBe(getCalendar())
+      expect(getCalendar()).toBe(CalendarFns.getExotic(calendarId))
+    }
   })
 
   it('creates basic calendar handles for function APIs', () => {
@@ -45,6 +67,11 @@ describe('function calendar records', () => {
     expect(CalendarFns.getGregory().valueOf()).toBe('gregory')
     expect(CalendarFns.getExotic('BUDDHIST').valueOf()).toBe('BUDDHIST')
     expect(CalendarFns.getExotic('BUDDHIST').toJSON()).toBe('BUDDHIST')
+
+    for (const [calendarId, getCalendar] of exoticCalendarGetters) {
+      expect(getCalendar().valueOf()).toBe(calendarId)
+      expect(getCalendar().toJSON()).toBe(calendarId)
+    }
   })
 
   // Node 26 native Temporal accepts broad Intl fallback calendar IDs like

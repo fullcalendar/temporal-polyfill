@@ -1,4 +1,4 @@
-import { type ExoticCalendar } from '../../internal/calendarSlot'
+import { type ExoticCalendar } from '../../internal/calendarImpl'
 import { isoArgsToEpochMilli } from '../../internal/epochMath'
 import {
   type CalendarDateFields,

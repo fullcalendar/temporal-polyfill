@@ -277,8 +277,8 @@ describe('roundToHour', () => {
 
     const cases: [
       typeof PlainTimeFns.roundToHour,
-      Partial<PlainTimeFns.Record>,
-      Partial<PlainTimeFns.Record>,
+      Partial<PlainTimeFns.FromFields>,
+      Partial<PlainTimeFns.FromFields>,
     ][] = [
       [PlainTimeFns.roundToHour, { hour: 12 }, { hour: 13 }],
       [

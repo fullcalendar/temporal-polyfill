@@ -1,10 +1,15 @@
-import { memoize } from '../internal/utils'
 import {
   type IntlScrapedCalendarConfig,
   createIntlScrapedCalendar,
 } from './utils/intlScrapedCalendar'
 
-export const getChineseDangiCalendar = memoize(createChineseDangiCalendar)
+export function createChineseCalendar() {
+  return createChineseDangiCalendar('chinese')
+}
+
+export function createDangiCalendar() {
+  return createChineseDangiCalendar('dangi')
+}
 
 // PlainMonthDay stores a canonical reference date, not the user-supplied year.
 // For Chinese/Dangi leap months, Temporal uses a modern reference table rather

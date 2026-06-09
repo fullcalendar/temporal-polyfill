@@ -1,4 +1,4 @@
-import { type CalendarSlot } from './calendarSlot'
+import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
 import { epochNanoToMilli } from './epochMath'
@@ -24,8 +24,8 @@ export function createEpochNanoSlots(epochNano: bigint): EpochNanoFields {
 export function createZonedEpochNanoSlots(
   epochNano: bigint,
   timeZone: TimeZone,
-  calendar?: CalendarSlot,
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+  calendar?: CalendarImpl,
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,
@@ -36,8 +36,8 @@ export function createZonedEpochNanoSlots(
 
 export function createDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
-  calendar?: CalendarSlot,
-): CalendarDateTimeFields & { calendar: CalendarSlot } {
+  calendar?: CalendarImpl,
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,
@@ -48,8 +48,8 @@ export function createDateTimeSlots(
 
 export function createDateSlots(
   isoDate: CalendarDateFields,
-  calendar?: CalendarSlot,
-): CalendarDateFields & { calendar: CalendarSlot } {
+  calendar?: CalendarImpl,
+): CalendarDateFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return {
     calendar,

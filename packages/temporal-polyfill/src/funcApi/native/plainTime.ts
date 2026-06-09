@@ -63,16 +63,12 @@ class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   }
 }
 
-function setPlainTimeNative(instance: object, native: Temporal.PlainTime) {
-  setPlainTimeSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
-}
-
 export function createPlainTimeNativeRecord(
   native: Temporal.PlainTime,
 ): PlainTimeNativeRecord {
   const instance = Object.create(PlainTimeNativeRecord.prototype)
-  setPlainTimeNative(instance, native)
+  setPlainTimeSlots(instance, native)
+  attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 

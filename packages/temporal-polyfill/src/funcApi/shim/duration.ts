@@ -99,19 +99,12 @@ class _DurationShimRecord implements DurationFields, DurationRecord {
   }
 }
 
-function setDurationShimRecordSlots(
-  instance: object,
-  slots: DurationShimSlots,
-) {
-  setDurationSlots(instance, slots)
-  attachDebugString(instance, slots, formatDurationIsoAuto)
-}
-
 export function createDurationShimRecord(
   slots: DurationShimSlots,
 ): DurationShimRecord {
   const instance = Object.create(DurationShimRecord.prototype)
-  setDurationShimRecordSlots(instance, slots)
+  setDurationSlots(instance, slots)
+  attachDebugString(instance, slots, formatDurationIsoAuto)
   return instance
 }
 

@@ -18,9 +18,11 @@ import { isPlainYearMonthRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-export type FromFields = Partial<YearMonthFields> & {
-  calendar?: CalendarFns.Record
-}
+export type FromFields = Partial<
+  YearMonthFields & {
+    calendar: CalendarFns.Record
+  }
+>
 export type WithFields = Partial<YearMonthFields>
 export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   'year' | 'month'

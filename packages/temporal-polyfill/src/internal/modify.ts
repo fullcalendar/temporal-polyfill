@@ -1,8 +1,8 @@
 import {
-  type CalendarSlot,
+  type CalendarImpl,
   getCalendarSlotId,
-  isoCalendar,
-} from './calendarSlot'
+  isoCalendarImpl,
+} from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import {
@@ -27,9 +27,9 @@ import {
 // -----------------------------------------------------------------------------
 
 export function zonedDateTimeWithPlainTime(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   plainTimeFields: TimeFields | undefined,
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
@@ -60,9 +60,9 @@ export function zonedDateTimeWithPlainTime(
 }
 
 export function zonedDateTimeWithPlainDate(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
   const { offsetNanoseconds } = isoDateTime
@@ -86,8 +86,8 @@ export function zonedDateTimeWithPlainDate(
 Only used by funcApi
 */
 export function plainDateTimeWithPlainDate(
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
 ) {
   return createDateTimeSlots(
     combineDateAndTime(plainDateSlots, plainDateTimeSlots),
@@ -97,15 +97,15 @@ export function plainDateTimeWithPlainDate(
 
 // -----------------------------------------------------------------------------
 
-function getPreferredCalendar(a: CalendarSlot, b: CalendarSlot): CalendarSlot {
+function getPreferredCalendar(a: CalendarImpl, b: CalendarImpl): CalendarImpl {
   if (a === b) {
     return a
   }
 
-  if (a === isoCalendar) {
+  if (a === isoCalendarImpl) {
     return b
   }
-  if (b === isoCalendar) {
+  if (b === isoCalendarImpl) {
     return a
   }
 

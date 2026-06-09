@@ -1,10 +1,10 @@
-import type { CalendarSlot } from '../../internal/calendarSlot'
-import { isoCalendar } from '../../internal/calendarSlot'
+import type { CalendarImpl } from '../../internal/calendarImpl'
+import { isoCalendarImpl } from '../../internal/calendarImpl'
 import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
 import { parseCalendarId } from '../../internal/isoParse'
 import { isObjectLike } from '../../internal/utils'
-import { resolveAnyCalendar } from './calendarResolve'
+import { resolveAnyCalendarId } from './calendarResolve'
 import { PlainDate, getPlainDateSlotsIfPresent } from './plainDate'
 import { PlainDateTime, getPlainDateTimeSlotsIfPresent } from './plainDateTime'
 import { PlainMonthDay, getPlainMonthDaySlotsIfPresent } from './plainMonthDay'
@@ -24,13 +24,13 @@ export type CalendarArg =
 
 export function getCalendarFromBag(bag: {
   calendar?: CalendarArg
-}): CalendarSlot {
+}): CalendarImpl {
   const calendar = extractCalendarFromBag(bag)
-  return calendar === undefined ? isoCalendar : calendar
+  return calendar === undefined ? isoCalendarImpl : calendar
 }
 
 export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
-  | CalendarSlot
+  | CalendarImpl
   | undefined {
   const { calendar: calendarArg } = bag
   if (calendarArg !== undefined) {
@@ -39,9 +39,9 @@ export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
 }
 
 /*
-Returns an CalendarSlot
+Returns an CalendarImpl
 */
-export function refineCalendarArg(arg: CalendarArg): CalendarSlot {
+export function refineCalendarArg(arg: CalendarArg): CalendarImpl {
   if (isObjectLike(arg)) {
     const slots =
       getPlainDateSlotsIfPresent(arg) ||
@@ -60,8 +60,8 @@ export function refineCalendarArg(arg: CalendarArg): CalendarSlot {
 }
 
 /*
-Like resolveAnyCalendar, but allows different string formats, like datetime string
+Like resolveAnyCalendarId, but allows different string formats, like datetime string
 */
-function refineCalendarString(arg: string): CalendarSlot {
-  return resolveAnyCalendar(parseCalendarId(requireString(arg)))
+function refineCalendarString(arg: string): CalendarImpl {
+  return resolveAnyCalendarId(parseCalendarId(requireString(arg)))
 }

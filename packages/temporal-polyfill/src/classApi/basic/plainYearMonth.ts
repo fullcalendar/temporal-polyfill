@@ -13,7 +13,7 @@ import {
   computeCalendarMonthCode,
   computeCalendarMonthsInYear,
 } from '../../internal/calendarDerived'
-import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -44,9 +44,9 @@ import { getCommonCalendar } from '../../internal/slotUtils'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import {
-  resolveBasicCalendar,
   resolveBasicCalendarArg,
-} from './calendarResolver'
+  resolveBasicCalendarId,
+} from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -58,7 +58,7 @@ import { rejectInvalidBag } from './temporalSlots'
 
 export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 
-type PlainYearMonthSlots = CalendarDateFields & { calendar: CalendarSlot }
+type PlainYearMonthSlots = CalendarDateFields & { calendar: CalendarImpl }
 
 const plainYearMonthSlotsMap = new WeakMap<object, PlainYearMonthSlots>()
 
@@ -298,7 +298,7 @@ export function toPlainYearMonthSlots(
     return refinePlainYearMonthObjectLike(calendar, arg as any, options)
   }
 
-  const res = parsePlainYearMonth(arg, resolveBasicCalendar)
+  const res = parsePlainYearMonth(arg, resolveBasicCalendarId)
   refineOverflowOptions(options) // parse unused options
   return res
 }

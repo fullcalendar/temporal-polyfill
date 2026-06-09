@@ -1,14 +1,14 @@
 import {
-  type CalendarSlot,
+  type CalendarImpl,
   getCalendarSlotId,
-  isoCalendar,
-} from './calendarSlot'
+  isoCalendarImpl,
+} from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { ZonedEpochNanoFields } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
 
-type CalendarFormatSlots<S> = S & { calendar: CalendarSlot }
+type CalendarFormatSlots<S> = S & { calendar: CalendarImpl }
 
 export type CalendarDateFormatSlots = CalendarFormatSlots<CalendarDateFields>
 export type CalendarDateTimeFormatSlots =
@@ -50,13 +50,13 @@ export function applyZonedFormatTimeZone(
 
 export function checkResolvedCalendarCompatible(
   format: Intl.DateTimeFormat,
-  slots: { calendar: CalendarSlot },
+  slots: { calendar: CalendarImpl },
   strictCalendarCheck?: boolean,
 ): void {
   const resolvedCalendarId = format.resolvedOptions().calendar
 
   if (
-    (strictCalendarCheck || slots.calendar !== isoCalendar) &&
+    (strictCalendarCheck || slots.calendar !== isoCalendarImpl) &&
     getCalendarSlotId(slots.calendar) !== resolvedCalendarId
   ) {
     throw new RangeError(errorMessages.mismatchingCalendars)

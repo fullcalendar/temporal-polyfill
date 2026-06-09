@@ -28,7 +28,7 @@ import { createDateSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
-import { resolveBasicCalendar } from './calendarResolver'
+import { resolveBasicCalendarId } from './calendarResolve'
 import { PlainDateArg, getPlainDateSlotsIfPresent } from './plainDate'
 import {
   PlainDateTimeArg,
@@ -305,7 +305,7 @@ function refinePublicRelativeTo(
       return res
     }
 
-    return parseRelativeToSlots(relativeTo, resolveBasicCalendar)
+    return parseRelativeToSlots(relativeTo, resolveBasicCalendarId)
   }
 }
 

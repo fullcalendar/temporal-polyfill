@@ -80,16 +80,12 @@ class _DurationNativeRecord implements DurationFields, DurationRecord {
   }
 }
 
-function setDurationNative(instance: object, native: Temporal.Duration): void {
-  setDurationSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
-}
-
 export function createDurationNativeRecord(
   native: Temporal.Duration,
 ): DurationNativeRecord {
   const instance = Object.create(DurationNativeRecord.prototype)
-  setDurationNative(instance, native)
+  setDurationSlots(instance, native)
+  attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 

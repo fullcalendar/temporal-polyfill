@@ -3,7 +3,7 @@ import {
   bigNanoInMilli,
   divideBigNanoToExactNumber,
 } from '../../internal/bigNano'
-import { type CalendarSlot } from '../../internal/calendarSlot'
+import { type CalendarImpl } from '../../internal/calendarImpl'
 import { diffCalendarDates, prepareZonedEpochDiff } from '../../internal/diff'
 import { DurationFields } from '../../internal/durationFields'
 import {
@@ -71,8 +71,8 @@ export const diffPlainTimeUnits = bindArgs(
 
 function diffZonedLargeUnits(
   unit: Unit,
-  record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  record0: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  record1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
@@ -93,8 +93,8 @@ function diffZonedLargeUnits(
 
 function diffPlainDateLargeUnits(
   unit: Unit,
-  record0: CalendarDateFields & { calendar: CalendarSlot },
-  record1: CalendarDateFields & { calendar: CalendarSlot },
+  record0: CalendarDateFields & { calendar: CalendarImpl },
+  record1: CalendarDateFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
@@ -115,8 +115,8 @@ function diffPlainDateLargeUnits(
 
 function diffPlainDateTimeLargeUnits(
   unit: Unit,
-  record0: CalendarDateTimeFields & { calendar: CalendarSlot },
-  record1: CalendarDateTimeFields & { calendar: CalendarSlot },
+  record0: CalendarDateTimeFields & { calendar: CalendarImpl },
+  record1: CalendarDateTimeFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
@@ -200,8 +200,8 @@ function diffDateUnits(
 function diffZonedDayLikeUnits(
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  record1: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  record0: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  record1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)

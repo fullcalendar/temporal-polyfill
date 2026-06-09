@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay } from './bigNano'
-import { type CalendarSlot } from './calendarSlot'
+import { type CalendarImpl } from './calendarImpl'
 import { epochNanoToIso, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
@@ -22,7 +22,7 @@ export type PossibleInstantsOp = (
 ) => bigint[]
 
 export type FixedIsoZonedFields = CalendarDateTimeFields & {
-  calendar: CalendarSlot
+  calendar: CalendarImpl
   offsetNanoseconds: number
 }
 
@@ -32,7 +32,7 @@ export type ZonedDateTimeFields = DateTimeFields & { offset: string }
 // -----------------------------------------------------------------------------
 
 export function getTimeZoneTransitionEpochNanoseconds(
-  slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ): bigint | undefined {
   return slots.timeZone.getTransition(
@@ -50,7 +50,7 @@ export const zonedEpochSlotsToIso = memoize(
 ) as typeof _zonedEpochSlotsToIso
 
 function _zonedEpochSlotsToIso(
-  slots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   timeZone: TimeZone = slots.timeZone,
 ): FixedIsoZonedFields {
   const { epochNanoseconds } = slots

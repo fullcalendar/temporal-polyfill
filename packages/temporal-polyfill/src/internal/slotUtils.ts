@@ -1,4 +1,4 @@
-import { type CalendarSlot, getCalendarSlotId } from './calendarSlot'
+import { type CalendarImpl, getCalendarSlotId } from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { type ZonedEpochNanoFields } from './slots'
 import { type TimeZone } from './timeZone'
@@ -7,9 +7,9 @@ import { type TimeZone } from './timeZone'
 // tying that logic to a specific caller like diffing or Intl formatting.
 
 export function getCommonCalendar(
-  a: CalendarSlot,
-  b: CalendarSlot,
-): CalendarSlot {
+  a: CalendarImpl,
+  b: CalendarImpl,
+): CalendarImpl {
   if (getCalendarSlotId(a) !== getCalendarSlotId(b)) {
     throw new RangeError(errorMessages.mismatchingCalendars)
   }

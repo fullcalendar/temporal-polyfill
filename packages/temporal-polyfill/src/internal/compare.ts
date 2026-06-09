@@ -1,4 +1,4 @@
-import { type CalendarSlot } from './calendarSlot'
+import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
 import { isoDateToEpochMilli } from './epochMath'
@@ -40,8 +40,8 @@ export function compareInstants(
 }
 
 export function compareZonedDateTimes(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): NumberSign {
   return compareBigInts(
     zonedDateTimeSlots0.epochNanoseconds,
@@ -130,8 +130,8 @@ export function instantsEqual(
 }
 
 export function zonedDateTimesEqual(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarSlot },
-  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): boolean {
   return (
     !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
@@ -142,8 +142,8 @@ export function zonedDateTimesEqual(
 }
 
 export function plainDateTimesEqual(
-  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarSlot },
-  plainDateTimeSlots1: CalendarDateTimeFields & { calendar: CalendarSlot },
+  plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarImpl },
+  plainDateTimeSlots1: CalendarDateTimeFields & { calendar: CalendarImpl },
 ): boolean {
   return (
     !compareIsoDateTimeFields(plainDateTimeSlots0, plainDateTimeSlots1) &&
@@ -152,8 +152,8 @@ export function plainDateTimesEqual(
 }
 
 export function plainDatesEqual(
-  plainDateSlots0: CalendarDateFields & { calendar: CalendarSlot },
-  plainDateSlots1: CalendarDateFields & { calendar: CalendarSlot },
+  plainDateSlots0: CalendarDateFields & { calendar: CalendarImpl },
+  plainDateSlots1: CalendarDateFields & { calendar: CalendarImpl },
 ): boolean {
   return (
     !compareIsoDateFields(plainDateSlots0, plainDateSlots1) &&
@@ -162,8 +162,8 @@ export function plainDatesEqual(
 }
 
 export function plainYearMonthsEqual(
-  plainYearMonthSlots0: CalendarDateFields & { calendar: CalendarSlot },
-  plainYearMonthSlots1: CalendarDateFields & { calendar: CalendarSlot },
+  plainYearMonthSlots0: CalendarDateFields & { calendar: CalendarImpl },
+  plainYearMonthSlots1: CalendarDateFields & { calendar: CalendarImpl },
 ): boolean {
   return (
     !compareIsoDateFields(plainYearMonthSlots0, plainYearMonthSlots1) &&
@@ -172,8 +172,8 @@ export function plainYearMonthsEqual(
 }
 
 export function plainMonthDaysEqual(
-  plainMonthDaySlots0: CalendarDateFields & { calendar: CalendarSlot },
-  plainMonthDaySlots1: CalendarDateFields & { calendar: CalendarSlot },
+  plainMonthDaySlots0: CalendarDateFields & { calendar: CalendarImpl },
+  plainMonthDaySlots1: CalendarDateFields & { calendar: CalendarImpl },
 ): boolean {
   return (
     !compareIsoDateFields(plainMonthDaySlots0, plainMonthDaySlots1) &&

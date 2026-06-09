@@ -2,6 +2,7 @@ import type { Temporal } from 'temporal-spec'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
+import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -9,11 +10,9 @@ import {
   setPlainMonthDaySlots,
 } from '../temporalRecords'
 import {
-  CalendarNativeRecord,
-  CalendarNativeResolver,
-  getCalendarNativeId,
+  refineCalendarNativeArgMaybe,
   runCalendarNativeResolver,
-} from './calendar'
+} from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
 import {
@@ -56,19 +55,12 @@ class _PlainMonthDayNativeRecord
   }
 }
 
-function setPlainMonthDayNative(
-  instance: object,
-  native: Temporal.PlainMonthDay,
-) {
-  setPlainMonthDaySlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
-}
-
 export function createPlainMonthDayNativeRecord(
   native: Temporal.PlainMonthDay,
 ): PlainMonthDayNativeRecord {
   const instance = Object.create(PlainMonthDayNativeRecord.prototype)
-  setPlainMonthDayNative(instance, native)
+  setPlainMonthDaySlots(instance, native)
+  attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
@@ -81,27 +73,24 @@ export const PlainMonthDayNativeRecord = defineTemporalClass(
 export function create(
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarNativeRecord,
+  calendar?: CalendarRecord,
   referenceIsoYear?: number,
 ): PlainMonthDayNativeRecord {
   return createPlainMonthDayNativeRecord(
     new NativeTemporal!.PlainMonthDay(
       isoMonth,
       isoDay,
-      calendar === undefined ? undefined : getCalendarNativeId(calendar),
+      refineCalendarNativeArgMaybe(calendar),
       referenceIsoYear,
     ),
   )
 }
 
 export function fromFields(
-  fields: Partial<MonthDayFields> & { calendar?: CalendarNativeRecord },
+  fields: Partial<MonthDayFields & { calendar: CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): PlainMonthDayNativeRecord {
-  const calendar =
-    fields.calendar === undefined
-      ? undefined
-      : getCalendarNativeId(fields.calendar)
+  const calendar = refineCalendarNativeArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.PlainMonthDay.from(
     { ...fields, calendar } as any, // !!! TODO - day is required
     options,
@@ -111,10 +100,10 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendar: CalendarNativeResolver,
+  getCalendarRecord: (id: string) => CalendarRecord,
 ): PlainMonthDayNativeRecord {
   const resNative = NativeTemporal!.PlainMonthDay.from(s)
-  runCalendarNativeResolver(resNative.calendarId, getCalendar)
+  runCalendarNativeResolver(resNative.calendarId, getCalendarRecord)
   return createPlainMonthDayNativeRecord(resNative)
 }
 

@@ -16,7 +16,7 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
-import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
@@ -74,7 +74,7 @@ import {
   getCalendarFromBag,
   refineCalendarArg,
 } from './calendarArg'
-import { resolveAnyCalendar, resolveAnyCalendarArg } from './calendarResolve'
+import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -95,7 +95,7 @@ import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
 
-type ZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarSlot }
+type ZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarImpl }
 
 const zonedDateTimeSlotsMap = new WeakMap<object, ZonedDateTimeSlots>()
 
@@ -530,7 +530,7 @@ export function toZonedDateTimeSlots(
     )
   }
 
-  return parseZonedDateTime(arg, resolveAnyCalendar, options)
+  return parseZonedDateTime(arg, resolveAnyCalendarId, options)
 }
 
 function initZonedDateTime(

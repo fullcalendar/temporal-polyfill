@@ -9,10 +9,10 @@ import {
   computeCalendarMonthCode,
 } from '../../internal/calendarDerived'
 import {
-  CalendarSlot,
+  CalendarImpl,
   getCalendarSlotId,
-  isoCalendar,
-} from '../../internal/calendarSlot'
+  isoCalendarImpl,
+} from '../../internal/calendarImpl'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
@@ -38,15 +38,15 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { isObjectLike } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import {
-  resolveBasicCalendar,
   resolveBasicCalendarArg,
-} from './calendarResolver'
+  resolveBasicCalendarId,
+} from './calendarResolve'
 import { PlainDate, createPlainDate } from './plainDate'
 import { rejectInvalidBag } from './temporalSlots'
 
 export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
 
-type PlainMonthDaySlots = CalendarDateFields & { calendar: CalendarSlot }
+type PlainMonthDaySlots = CalendarDateFields & { calendar: CalendarImpl }
 
 const plainMonthDaySlotsMap = new WeakMap<object, PlainMonthDaySlots>()
 
@@ -188,7 +188,8 @@ export function toPlainMonthDaySlots(
     }
 
     const calendarMaybe = extractCalendarFromBag(arg as { calendar?: any })
-    const calendar = calendarMaybe === undefined ? isoCalendar : calendarMaybe
+    const calendar =
+      calendarMaybe === undefined ? isoCalendarImpl : calendarMaybe
 
     return refinePlainMonthDayObjectLike(
       calendar,
@@ -198,7 +199,7 @@ export function toPlainMonthDaySlots(
     )
   }
 
-  const res = parsePlainMonthDay(arg, resolveBasicCalendar)
+  const res = parsePlainMonthDay(arg, resolveBasicCalendarId)
   refineOverflowOptions(options) // parse unused options
   return res
 }

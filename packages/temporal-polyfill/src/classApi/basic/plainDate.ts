@@ -16,7 +16,7 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
-import { CalendarSlot, getCalendarSlotId } from '../../internal/calendarSlot'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
 import {
@@ -56,9 +56,9 @@ import {
   refineCalendarArg,
 } from './calendarArg'
 import {
-  resolveBasicCalendar,
   resolveBasicCalendarArg,
-} from './calendarResolver'
+  resolveBasicCalendarId,
+} from './calendarResolve'
 import {
   Duration,
   DurationArg,
@@ -87,7 +87,7 @@ import {
 
 export type PlainDateArg = PlainDate | DateLikeObject | string
 
-type PlainDateSlots = CalendarDateFields & { calendar: CalendarSlot }
+type PlainDateSlots = CalendarDateFields & { calendar: CalendarImpl }
 
 const plainDateSlotsMap = new WeakMap<object, PlainDateSlots>()
 
@@ -400,7 +400,7 @@ export function toPlainDateSlots(
     return refinePlainDateObjectLike(calendar, arg as DateLikeObject, options)
   }
 
-  const res = parsePlainDate(arg, resolveBasicCalendar)
+  const res = parsePlainDate(arg, resolveBasicCalendarId)
   refineOverflowOptions(options) // parse unused options
   return res
 }

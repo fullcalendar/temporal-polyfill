@@ -2,9 +2,9 @@ import {
   computeCalendarDaysInMonthForYearMonth,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
+import { type CalendarImpl, gregoryCalendarImpl } from './calendarImpl'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { monthCodeNumberToMonth, parseMonthCode } from './calendarMonthCode'
-import { type CalendarSlot, gregoryCalendar } from './calendarSlot'
 import { toIntegerWithTruncation } from './cast'
 import * as errorMessages from './errorMessages'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
@@ -13,9 +13,9 @@ import { Overflow } from './optionsModel'
 import { clampEntity, clampProp } from './utils'
 
 export function getCalendarEraOrigins(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
 ): Record<string, number> | undefined {
-  return calendar === gregoryCalendar
+  return calendar === gregoryCalendarImpl
     ? gregoryEraOrigins
     : calendar
       ? calendar.eraOrigins
@@ -23,7 +23,7 @@ export function getCalendarEraOrigins(
 }
 
 export function getCalendarFieldNames(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fieldNames: string[],
   fieldNamesWithEra: string[] = fieldNames,
 ): string[] {
@@ -40,7 +40,7 @@ happen before those deferred coercions.
 */
 
 export function resolveCalendarYear(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<DateFields>,
 ): number {
   const exoticCalendar = calendar || undefined
@@ -91,7 +91,7 @@ export function resolveCalendarYear(
 }
 
 export function resolveCalendarMonth(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: Partial<MonthFields>,
   year: number,
   overflow: Overflow,
@@ -128,7 +128,7 @@ export function resolveCalendarMonth(
 }
 
 export function resolveCalendarDay(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   fields: DayFields,
   month: number,
   year: number,
@@ -144,7 +144,7 @@ export function resolveCalendarDay(
 }
 
 function resolveMonthCode(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   monthCode: string,
   year: number,
   overflow: Overflow,

@@ -1,28 +1,31 @@
-import { getExoticCalendar } from '../../exoticCalendars/index'
-import { gregoryCalendar, isoCalendar } from '../../internal/calendarSlot'
-import type { CalendarSlot } from '../../internal/calendarSlot'
+import { getExoticCalendarById } from '../../exoticCalendars/index'
+import {
+  gregoryCalendarImpl,
+  isoCalendarImpl,
+} from '../../internal/calendarImpl'
+import type { CalendarImpl } from '../../internal/calendarImpl'
 import { requireString } from '../../internal/cast'
 import {
   gregoryCalendarId,
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 
-export function resolveAnyCalendar(rawCalendarId: string): CalendarSlot {
+export function resolveAnyCalendarId(rawCalendarId: string): CalendarImpl {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
   if (lowerRawCalendarId === isoCalendarId) {
-    return isoCalendar
+    return isoCalendarImpl
   }
   if (lowerRawCalendarId === gregoryCalendarId) {
-    return gregoryCalendar
+    return gregoryCalendarImpl
   }
 
-  return getExoticCalendar(lowerRawCalendarId)
+  return getExoticCalendarById(lowerRawCalendarId)
 }
 
 // Allows an undefined calendar argument, which defaults to ISO.
 export function resolveAnyCalendarArg(
   rawCalendarId = isoCalendarId,
-): CalendarSlot {
-  return resolveAnyCalendar(rawCalendarId)
+): CalendarImpl {
+  return resolveAnyCalendarId(rawCalendarId)
 }

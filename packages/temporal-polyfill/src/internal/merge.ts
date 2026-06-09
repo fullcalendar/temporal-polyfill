@@ -4,8 +4,8 @@ import {
   computeCalendarMonthCodeParts,
 } from './calendarDerived'
 import { getCalendarEraOrigins, getCalendarFieldNames } from './calendarFields'
+import { type CalendarImpl } from './calendarImpl'
 import { formatMonthCode } from './calendarMonthCode'
-import { type CalendarSlot } from './calendarSlot'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
 import { checkDurationUnits } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
@@ -65,7 +65,7 @@ import { getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { NumberSign, pluckProps } from './utils'
 
 export function mergeCalendarFields(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   baseFields: Record<string, unknown>,
   additionalFields: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -129,10 +129,10 @@ function spliceFields(
 // -----------------------------------------------------------------------------
 
 export function mergeZonedDateTimeFields(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarSlot },
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   modFields: Partial<DateTimeFields>,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedEpochNanoFields & { calendar: CalendarSlot } {
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { calendar, timeZone } = zonedDateTimeSlots
 
   const validFieldNames = getCalendarFieldNames(
@@ -211,10 +211,10 @@ export function mergeZonedDateTimeFields(
 }
 
 export function mergePlainDateTimeFields(
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarSlot },
+  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
   modFields: Partial<DateTimeFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateTimeFields & { calendar: CalendarSlot } {
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
   const { calendar } = plainDateTimeSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -273,10 +273,10 @@ export function mergePlainDateTimeFields(
 }
 
 export function mergePlainDateFields(
-  plainDateSlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<DateFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = plainDateSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -308,10 +308,10 @@ export function mergePlainDateFields(
 }
 
 export function mergePlainYearMonthFields(
-  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<YearMonthFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = plainYearMonthSlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -342,10 +342,10 @@ export function mergePlainYearMonthFields(
 }
 
 export function mergePlainMonthDayFields(
-  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarSlot },
+  plainMonthDaySlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<MonthDayFields>,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarSlot } {
+): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = plainMonthDaySlots
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -425,7 +425,7 @@ function mergeDurationBag(
 }
 
 function computeMonthCode(
-  calendar: CalendarSlot,
+  calendar: CalendarImpl,
   year: number,
   month: number,
 ): string {

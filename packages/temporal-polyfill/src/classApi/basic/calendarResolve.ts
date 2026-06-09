@@ -1,8 +1,8 @@
 import {
-  type CalendarSlot,
-  gregoryCalendar,
-  isoCalendar,
-} from '../../internal/calendarSlot'
+  type CalendarImpl,
+  gregoryCalendarImpl,
+  isoCalendarImpl,
+} from '../../internal/calendarImpl'
 import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
 import {
@@ -10,17 +10,14 @@ import {
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
 
-// classApi-only policy: the basic bundle ships just ISO + Gregory; any other
-// calendar id is a request for the "full" build and is rejected here. funcApi
-// resolves via its own shim that can route through exotic calendars.
-export function resolveBasicCalendar(rawCalendarId: string): CalendarSlot {
+export function resolveBasicCalendarId(rawCalendarId: string): CalendarImpl {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
   if (lowerRawCalendarId === isoCalendarId) {
-    return isoCalendar
+    return isoCalendarImpl
   }
   if (lowerRawCalendarId === gregoryCalendarId) {
-    return gregoryCalendar
+    return gregoryCalendarImpl
   }
 
   throw new RangeError(
@@ -34,6 +31,6 @@ export function resolveBasicCalendar(rawCalendarId: string): CalendarSlot {
 // Allows an undefined calendar argument, which defaults to ISO.
 export function resolveBasicCalendarArg(
   rawCalendarId = isoCalendarId,
-): CalendarSlot {
-  return resolveBasicCalendar(rawCalendarId)
+): CalendarImpl {
+  return resolveBasicCalendarId(rawCalendarId)
 }

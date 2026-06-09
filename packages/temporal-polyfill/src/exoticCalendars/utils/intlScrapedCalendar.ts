@@ -1,9 +1,9 @@
+import { type ExoticCalendar } from '../../internal/calendarImpl'
 import {
   type MonthCodeParts,
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from '../../internal/calendarMonthCode'
-import { type ExoticCalendar } from '../../internal/calendarSlot'
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,

@@ -5,6 +5,7 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
+import { CalendarRecord } from '../calendarRecord'
 import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
@@ -13,11 +14,10 @@ import {
   setZonedDateTimeSlots,
 } from '../temporalRecords'
 import {
-  CalendarNativeRecord,
-  CalendarNativeResolver,
-  getCalendarNativeId,
+  getValidatedCalendarId,
+  refineCalendarNativeArgMaybe,
   runCalendarNativeResolver,
-} from './calendar'
+} from './calendarResolve'
 import {
   DurationNativeRecord,
   createDurationNativeRecord,
@@ -42,8 +42,6 @@ import {
 import { createRoundToOptions } from './roundUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
-
-type ZonedDateTimeNativeFields = ZonedDateTimeFields<CalendarNativeRecord>
 
 export const getZonedDateTimeNative: (
   record: unknown,
@@ -125,19 +123,12 @@ class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   }
 }
 
-function setZonedDateTimeNative(
-  instance: object,
-  native: Temporal.ZonedDateTime,
-) {
-  setZonedDateTimeSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
-}
-
 export function createZonedDateTimeNativeRecord(
   native: Temporal.ZonedDateTime,
 ): ZonedDateTimeNativeRecord {
   const instance = Object.create(ZonedDateTimeNativeRecord.prototype)
-  setZonedDateTimeNative(instance, native)
+  setZonedDateTimeSlots(instance, native)
+  attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
@@ -150,25 +141,22 @@ export const ZonedDateTimeNativeRecord = defineTemporalClass(
 export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarNativeRecord,
+  calendar?: CalendarRecord,
 ): ZonedDateTimeNativeRecord {
   return createZonedDateTimeNativeRecord(
     new NativeTemporal!.ZonedDateTime(
       epochNanoseconds,
       timeZoneId,
-      calendar === undefined ? undefined : getCalendarNativeId(calendar),
+      refineCalendarNativeArgMaybe(calendar),
     ),
   )
 }
 
 export function fromFields(
-  fields: ZonedDateTimeNativeFields,
+  fields: ZonedDateTimeFields<CalendarRecord>,
   options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeNativeRecord {
-  const calendar =
-    fields.calendar === undefined
-      ? undefined
-      : getCalendarNativeId(fields.calendar)
+  const calendar = refineCalendarNativeArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.ZonedDateTime.from(
     { ...fields, calendar } as any, // !!! TODO - day is required
     options,
@@ -178,11 +166,11 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendar: CalendarNativeResolver,
+  getCalendarRecord: (id: string) => CalendarRecord,
   options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedDateTimeNativeRecord {
   const resNative = NativeTemporal!.ZonedDateTime.from(s, options)
-  runCalendarNativeResolver(resNative.calendarId, getCalendar)
+  runCalendarNativeResolver(resNative.calendarId, getCalendarRecord)
   return createZonedDateTimeNativeRecord(resNative)
 }
 
@@ -198,10 +186,10 @@ export function withFields(
 
 export function withCalendar(
   record: ZonedDateTimeNativeRecord,
-  calendarRecord: CalendarNativeRecord,
+  calendarRecord: CalendarRecord,
 ): ZonedDateTimeNativeRecord {
   const native = getZonedDateTimeNative(record)
-  const calendarId = getCalendarNativeId(calendarRecord)
+  const calendarId = getValidatedCalendarId(calendarRecord)
   const resNative = native.withCalendar(calendarId)
   return createZonedDateTimeNativeRecord(resNative)
 }

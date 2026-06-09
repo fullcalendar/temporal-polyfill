@@ -52,7 +52,19 @@ const umalquraYearStarts = (() => {
   return starts
 })()
 
-export function createIslamicCalendar(id: IslamicCalendarId) {
+export function createIslamicCivilCalendar() {
+  return createIslamicCalendar('islamic-civil')
+}
+
+export function createIslamicTabularCalendar() {
+  return createIslamicCalendar('islamic-tbla')
+}
+
+export function createIslamicUmmAlQuraCalendar() {
+  return createIslamicCalendar('islamic-umalqura')
+}
+
+function createIslamicCalendar(id: IslamicCalendarId) {
   const epoch =
     id === 'islamic-tbla' ? astronomicalIslamicEpoch : civilIslamicEpoch
 

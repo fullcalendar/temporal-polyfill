@@ -95,16 +95,12 @@ class _InstantShimRecord implements InstantRecord {
   }
 }
 
-function setInstantShimRecordSlots(instance: object, slots: InstantShimSlots) {
-  setInstantSlots(instance, slots)
-  attachDebugString(instance, slots, formatInstantIsoAuto)
-}
-
 export function createInstantShimRecord(
   slots: InstantShimSlots,
 ): InstantShimRecord {
   const instance = Object.create(InstantShimRecord.prototype)
-  setInstantShimRecordSlots(instance, slots)
+  setInstantSlots(instance, slots)
+  attachDebugString(instance, slots, formatInstantIsoAuto)
   return instance
 }
 

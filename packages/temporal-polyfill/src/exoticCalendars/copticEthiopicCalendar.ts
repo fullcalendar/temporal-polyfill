@@ -39,12 +39,12 @@ export function createCopticCalendar() {
   return createCopticFamilyCalendar('coptic', copticEpoch)
 }
 
-export function createEthiopicCalendar(isAmeteAlem: boolean) {
-  return createCopticFamilyCalendar(
-    isAmeteAlem ? 'ethioaa' : 'ethiopic',
-    ethiopicEpoch,
-    isAmeteAlem,
-  )
+export function createEthiopicCalendar() {
+  return createCopticFamilyCalendar('ethiopic', ethiopicEpoch)
+}
+
+export function createEthiopicAmeteAlemCalendar() {
+  return createCopticFamilyCalendar('ethioaa', ethiopicEpoch, true)
 }
 
 function createCopticFamilyCalendar(
