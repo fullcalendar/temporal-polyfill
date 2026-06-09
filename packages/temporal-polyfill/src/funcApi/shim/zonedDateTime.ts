@@ -92,9 +92,9 @@ import {
   setZonedDateTimeSlots,
 } from '../temporalRecords'
 import {
-  createCalendarShimStringResolver,
+  createShimCalendarStringResolver,
   getCalendarRecordImpl,
-  refineCalendarShimArgMaybe,
+  refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import {
   diffZonedDays,
@@ -104,11 +104,11 @@ import {
   diffZonedYears,
 } from './diffUtils'
 import {
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
+  ShimDurationRecord,
+  createShimDurationRecord,
+  getShimDurationSlots,
 } from './duration'
-import { InstantShimRecord, createInstantShimRecord } from './instant'
+import { ShimInstantRecord, createShimInstantRecord } from './instant'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -120,15 +120,15 @@ import {
   moveToWeekOfYear,
   reversedMove,
 } from './moveUtils'
-import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
-  PlainDateTimeShimRecord,
-  createPlainDateTimeShimRecord,
+  ShimPlainDateTimeRecord,
+  createShimPlainDateTimeRecord,
 } from './plainDateTime'
 import {
-  PlainTimeShimRecord,
-  createPlainTimeShimRecord,
-  getPlainTimeShimRecordSlots,
+  ShimPlainTimeRecord,
+  createShimPlainTimeRecord,
+  getShimPlainTimeSlots,
 } from './plainTime'
 import {
   attachDebugString,
@@ -152,92 +152,89 @@ import { rejectInvalidBag } from './temporalRecords'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 
-type ZonedDateTimeShimFields = ZonedDateTimeFields<CalendarRecord>
+type ShimZonedDateTimeFields = ZonedDateTimeFields<CalendarRecord>
 
-type ZonedDateTimeShimSlots = ReturnType<typeof constructZonedEpochNanoSlots>
+type ShimZonedDateTimeSlots = ReturnType<typeof constructZonedEpochNanoSlots>
 
-export const getZonedDateTimeShimRecordSlots: (
+export const getShimZonedDateTimeSlots: (
   record: unknown,
-) => ZonedDateTimeShimSlots = getZonedDateTimeSlots
+) => ShimZonedDateTimeSlots = getZonedDateTimeSlots
 
-class _ZonedDateTimeShimRecord implements ZonedDateTimeRecord {
+class _ShimZonedDateTimeRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
   get calendarId() {
-    return getCalendarSlotId(getZonedDateTimeShimRecordSlots(this).calendar)
+    return getCalendarSlotId(getShimZonedDateTimeSlots(this).calendar)
   }
 
   get epochMilliseconds() {
-    return getEpochMilli(getZonedDateTimeShimRecordSlots(this))
+    return getEpochMilli(getShimZonedDateTimeSlots(this))
   }
 
   get epochNanoseconds() {
-    return getEpochNano(getZonedDateTimeShimRecordSlots(this))
+    return getEpochNano(getShimZonedDateTimeSlots(this))
   }
 
   get timeZoneId() {
-    return getZonedDateTimeShimRecordSlots(this).timeZone.id
+    return getShimZonedDateTimeSlots(this).timeZone.id
   }
 
   get era() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarEraFields(slots.calendar, slots).era
   }
 
   get eraYear() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarEraFields(slots.calendar, slots).eraYear
   }
 
   get year() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarDateFields(slots.calendar, slots).year
   }
 
   get month() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarDateFields(slots.calendar, slots).month
   }
 
   get monthCode() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarMonthCode(slots.calendar, slots)
   }
 
   get day() {
-    const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
+    const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
     return computeCalendarDateFields(slots.calendar, slots).day
   }
 
   get hour() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this)).hour
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).hour
   }
 
   get minute() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this)).minute
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).minute
   }
 
   get second() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this)).second
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).second
   }
 
   get millisecond() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
-      .millisecond
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).millisecond
   }
 
   get microsecond() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
-      .microsecond
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).microsecond
   }
 
   get nanosecond() {
-    return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(this))
-      .nanosecond
+    return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).nanosecond
   }
 
   toJSON() {
-    return formatZonedDateTimeIsoAuto(getZonedDateTimeShimRecordSlots(this))
+    return formatZonedDateTimeIsoAuto(getShimZonedDateTimeSlots(this))
   }
 
   valueOf() {
@@ -245,18 +242,18 @@ class _ZonedDateTimeShimRecord implements ZonedDateTimeRecord {
   }
 }
 
-export function createZonedDateTimeShimRecord(
-  slots: ZonedDateTimeShimSlots,
-): ZonedDateTimeShimRecord {
-  const instance = Object.create(ZonedDateTimeShimRecord.prototype)
+export function createShimZonedDateTimeRecord(
+  slots: ShimZonedDateTimeSlots,
+): ShimZonedDateTimeRecord {
+  const instance = Object.create(ShimZonedDateTimeRecord.prototype)
   setZonedDateTimeSlots(instance, slots)
   attachDebugString(instance, slots, formatZonedDateTimeIsoAuto)
   return instance
 }
 
-export type ZonedDateTimeShimRecord = _ZonedDateTimeShimRecord
-export const ZonedDateTimeShimRecord = defineTemporalClass(
-  _ZonedDateTimeShimRecord,
+export type ShimZonedDateTimeRecord = _ShimZonedDateTimeRecord
+export const ShimZonedDateTimeRecord = defineTemporalClass(
+  _ShimZonedDateTimeRecord,
   'ZonedDateTime',
 )
 
@@ -264,10 +261,10 @@ export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
   calendar?: CalendarRecord,
-): ZonedDateTimeShimRecord {
-  return createZonedDateTimeShimRecord(
+): ShimZonedDateTimeRecord {
+  return createShimZonedDateTimeRecord(
     constructZonedEpochNanoSlots(
-      refineCalendarShimArgMaybe,
+      refineShimCalendarArgMaybe,
       epochNanoseconds,
       timeZoneId,
       calendar,
@@ -276,55 +273,55 @@ export function create(
 }
 
 export function fromFields(
-  fields: ZonedDateTimeShimFields,
+  fields: ShimZonedDateTimeFields,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeShimRecord {
+): ShimZonedDateTimeRecord {
   const inputCalendar = fields.calendar
-  const calendarImpl = refineCalendarShimArgMaybe(inputCalendar)
+  const calendarImpl = refineShimCalendarArgMaybe(inputCalendar)
   const resSlots = refineZonedDateTimeObjectLike(
     refineTimeZoneId,
     calendarImpl,
     fields as any,
     options,
   )
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
 export function fromString(
   s: string,
   getCalendarRecord: (id: string) => CalendarRecord,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeShimRecord {
-  return createZonedDateTimeShimRecord(
+): ShimZonedDateTimeRecord {
+  return createShimZonedDateTimeRecord(
     parseZonedDateTime(
       s,
-      createCalendarShimStringResolver(getCalendarRecord),
+      createShimCalendarStringResolver(getCalendarRecord),
       options,
     ),
   )
 }
 
 export function withFields(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   mod: Partial<DateTimeFields>,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   const resSlots = mergeZonedDateTimeFields(
     slots,
     rejectInvalidBag(mod),
     options,
   )
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
 export function withCalendar(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   inputCalendar: CalendarRecord,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   const calendarImpl = getCalendarRecordImpl(inputCalendar)
-  return createZonedDateTimeShimRecord(
+  return createShimZonedDateTimeRecord(
     createZonedEpochNanoSlots(
       slots.epochNanoseconds,
       slots.timeZone,
@@ -334,11 +331,11 @@ export function withCalendar(
 }
 
 export function withTimeZone(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   timeZoneId: string,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  return createZonedDateTimeShimRecord(
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
+  return createShimZonedDateTimeRecord(
     createZonedEpochNanoSlots(
       slots.epochNanoseconds,
       queryTimeZone(refineTimeZoneId(timeZoneId)),
@@ -348,127 +345,124 @@ export function withTimeZone(
 }
 
 export function withPlainTime(
-  record: ZonedDateTimeShimRecord,
-  plainTimeRecord?: PlainTimeShimRecord,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+  record: ShimZonedDateTimeRecord,
+  plainTimeRecord?: ShimPlainTimeRecord,
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   const plainTimeSlots =
     plainTimeRecord === undefined
       ? undefined
-      : getPlainTimeShimRecordSlots(plainTimeRecord)
+      : getShimPlainTimeSlots(plainTimeRecord)
   const resSlots = zonedDateTimeWithPlainTime(slots, plainTimeSlots)
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
-export function offsetNanoseconds(record: ZonedDateTimeShimRecord): number {
-  return zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function offsetNanoseconds(record: ShimZonedDateTimeRecord): number {
+  return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
     .offsetNanoseconds
 }
 
-export function offset(record: ZonedDateTimeShimRecord): string {
+export function offset(record: ShimZonedDateTimeRecord): string {
   return formatOffsetNano(offsetNanoseconds(record))
 }
 
-export function dayOfWeek(record: ZonedDateTimeShimRecord): number {
+export function dayOfWeek(record: ShimZonedDateTimeRecord): number {
   return computeIsoDayOfWeek(
-    zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record)),
+    zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record)),
   )
 }
 
-export function daysInWeek(record: ZonedDateTimeShimRecord): number {
-  getZonedDateTimeShimRecordSlots(record)
+export function daysInWeek(record: ShimZonedDateTimeRecord): number {
+  getShimZonedDateTimeSlots(record)
   return 7
 }
 
 export function weekOfYear(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
 ): number | undefined {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarWeekOfYear(slots.calendar, slots)
 }
 
 export function yearOfWeek(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
 ): number | undefined {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarYearOfWeek(slots.calendar, slots)
 }
 
-export function dayOfYear(record: ZonedDateTimeShimRecord): number {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function dayOfYear(record: ShimZonedDateTimeRecord): number {
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarDayOfYear(slots.calendar, slots)
 }
 
-export function daysInMonth(record: ZonedDateTimeShimRecord): number {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function daysInMonth(record: ShimZonedDateTimeRecord): number {
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarDaysInMonth(slots.calendar, slots)
 }
 
-export function daysInYear(record: ZonedDateTimeShimRecord): number {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function daysInYear(record: ShimZonedDateTimeRecord): number {
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarDaysInYear(slots.calendar, slots)
 }
 
-export function monthsInYear(record: ZonedDateTimeShimRecord): number {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function monthsInYear(record: ShimZonedDateTimeRecord): number {
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarMonthsInYear(slots.calendar, slots)
 }
 
-export function inLeapYear(record: ZonedDateTimeShimRecord): boolean {
-  const slots = zonedEpochSlotsToIso(getZonedDateTimeShimRecordSlots(record))
+export function inLeapYear(record: ShimZonedDateTimeRecord): boolean {
+  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
   return computeCalendarInLeapYear(slots.calendar, slots)
 }
 
-export function hoursInDay(record: ZonedDateTimeShimRecord): number {
-  return computeZonedHoursInDay(getZonedDateTimeShimRecordSlots(record))
+export function hoursInDay(record: ShimZonedDateTimeRecord): number {
+  return computeZonedHoursInDay(getShimZonedDateTimeSlots(record))
 }
 
 export function toString(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   options?: Temporal.ZonedDateTimeToStringOptions,
 ): string {
-  return formatZonedDateTimeIso(
-    getZonedDateTimeShimRecordSlots(record),
-    options,
-  )
+  return formatZonedDateTimeIso(getShimZonedDateTimeSlots(record), options)
 }
 
-export function toBasicString(record: ZonedDateTimeShimRecord): string {
-  return formatZonedDateTimeIsoAuto(getZonedDateTimeShimRecordSlots(record))
+export function toBasicString(record: ShimZonedDateTimeRecord): string {
+  return formatZonedDateTimeIsoAuto(getShimZonedDateTimeSlots(record))
 }
 
 export function add(
-  record: ZonedDateTimeShimRecord,
-  durationRecord: DurationShimRecord,
+  record: ShimZonedDateTimeRecord,
+  durationRecord: ShimDurationRecord,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveZonedDateTime(false, slots, durationSlots, options)
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
 export function subtract(
-  record: ZonedDateTimeShimRecord,
-  durationRecord: DurationShimRecord,
+  record: ShimZonedDateTimeRecord,
+  durationRecord: ShimDurationRecord,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveZonedDateTime(true, slots, durationSlots, options)
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: ZonedDateTimeShimRecord,
-  otherRecord: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
+  otherRecord: ShimZonedDateTimeRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<
     Temporal.DateUnit | Temporal.TimeUnit
   >,
-): DurationShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const otherSlots = getZonedDateTimeShimRecordSlots(otherRecord)
+): ShimDurationRecord {
+  const slots = getShimZonedDateTimeSlots(record)
+  const otherSlots = getShimZonedDateTimeSlots(otherRecord)
   const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
   const resSlots = diffZonedDateTimes(
     false,
@@ -477,86 +471,80 @@ export function diff(
     otherSlots,
     options,
   )
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
 export function startOfDay(
-  record: ZonedDateTimeShimRecord,
-): ZonedDateTimeShimRecord {
-  return createZonedDateTimeShimRecord(
-    computeZonedStartOfDay(getZonedDateTimeShimRecordSlots(record)),
+  record: ShimZonedDateTimeRecord,
+): ShimZonedDateTimeRecord {
+  return createShimZonedDateTimeRecord(
+    computeZonedStartOfDay(getShimZonedDateTimeSlots(record)),
   )
 }
 
 export function getTimeZoneTransition(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
-): ZonedDateTimeShimRecord | null {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+): ShimZonedDateTimeRecord | null {
+  const slots = getShimZonedDateTimeSlots(record)
   const epochNanoseconds = getTimeZoneTransitionEpochNanoseconds(slots, options)
   return epochNanoseconds
-    ? createZonedDateTimeShimRecord({ ...slots, epochNanoseconds })
+    ? createShimZonedDateTimeRecord({ ...slots, epochNanoseconds })
     : null
 }
 
 export function equals(
-  record: ZonedDateTimeShimRecord,
-  otherRecord: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
+  otherRecord: ShimZonedDateTimeRecord,
 ): boolean {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const otherSlots = getZonedDateTimeShimRecordSlots(otherRecord)
+  const slots = getShimZonedDateTimeSlots(record)
+  const otherSlots = getShimZonedDateTimeSlots(otherRecord)
   return zonedDateTimesEqual(slots, otherSlots)
 }
 
 export function compare(
-  record: ZonedDateTimeShimRecord,
-  otherRecord: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
+  otherRecord: ShimZonedDateTimeRecord,
 ): NumberSign {
-  const slots = getZonedDateTimeShimRecordSlots(record)
-  const otherSlots = getZonedDateTimeShimRecordSlots(otherRecord)
+  const slots = getShimZonedDateTimeSlots(record)
+  const otherSlots = getShimZonedDateTimeSlots(otherRecord)
   return compareZonedDateTimes(slots, otherSlots)
 }
 
-export function toInstant(record: ZonedDateTimeShimRecord): InstantShimRecord {
-  const resSlots = zonedDateTimeToInstant(
-    getZonedDateTimeShimRecordSlots(record),
-  )
-  return createInstantShimRecord(resSlots)
+export function toInstant(record: ShimZonedDateTimeRecord): ShimInstantRecord {
+  const resSlots = zonedDateTimeToInstant(getShimZonedDateTimeSlots(record))
+  return createShimInstantRecord(resSlots)
 }
 
 export function toPlainDateTime(
-  record: ZonedDateTimeShimRecord,
-): PlainDateTimeShimRecord {
+  record: ShimZonedDateTimeRecord,
+): ShimPlainDateTimeRecord {
   const resSlots = zonedDateTimeToPlainDateTime(
-    getZonedDateTimeShimRecordSlots(record),
+    getShimZonedDateTimeSlots(record),
   )
-  return createPlainDateTimeShimRecord(resSlots)
+  return createShimPlainDateTimeRecord(resSlots)
 }
 
 export function toPlainDate(
-  record: ZonedDateTimeShimRecord,
-): PlainDateShimRecord {
-  const resSlots = zonedDateTimeToPlainDate(
-    getZonedDateTimeShimRecordSlots(record),
-  )
-  return createPlainDateShimRecord(resSlots)
+  record: ShimZonedDateTimeRecord,
+): ShimPlainDateRecord {
+  const resSlots = zonedDateTimeToPlainDate(getShimZonedDateTimeSlots(record))
+  return createShimPlainDateRecord(resSlots)
 }
 
 export function toPlainTime(
-  record: ZonedDateTimeShimRecord,
-): PlainTimeShimRecord {
-  const resSlots = zonedDateTimeToPlainTime(
-    getZonedDateTimeShimRecordSlots(record),
-  )
-  return createPlainTimeShimRecord(resSlots)
+  record: ShimZonedDateTimeRecord,
+): ShimPlainTimeRecord {
+  const resSlots = zonedDateTimeToPlainTime(getShimZonedDateTimeSlots(record))
+  return createShimPlainTimeRecord(resSlots)
 }
 
 export function toLocaleString(
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   locales: LocalesArg | undefined = undefined,
   options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+  const slots = getShimZonedDateTimeSlots(record)
   const format = new RawDateTimeFormat(
     locales,
     applyZonedFormatTimeZone(
@@ -624,18 +612,18 @@ export const roundToWeek = bindArgs(
 
 function roundToDayTimeUnit(
   smallestUnit: DayTimeUnit,
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeShimRecord {
+): ShimZonedDateTimeRecord {
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   const [roundingInc, roundingMode] = refineRoundToOptions(
     smallestUnit,
     options,
   )
-  return createZonedDateTimeShimRecord(
+  return createShimZonedDateTimeRecord(
     roundZonedDateTimeToUnit(
-      getZonedDateTimeShimRecordSlots(record),
+      getShimZonedDateTimeSlots(record),
       smallestUnit,
       roundingInc,
       roundingMode,
@@ -764,49 +752,49 @@ export const endOfMicrosecond = alignedZonedTime(
 // -----------------------------------------------------------------------------
 
 export function diffYears(
-  record0: ZonedDateTimeShimRecord,
-  record1: ZonedDateTimeShimRecord,
+  record0: ShimZonedDateTimeRecord,
+  record1: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedYears(
-    getZonedDateTimeShimRecordSlots(record0),
-    getZonedDateTimeShimRecordSlots(record1),
+    getShimZonedDateTimeSlots(record0),
+    getShimZonedDateTimeSlots(record1),
     options,
   )
 }
 
 export function diffMonths(
-  record0: ZonedDateTimeShimRecord,
-  record1: ZonedDateTimeShimRecord,
+  record0: ShimZonedDateTimeRecord,
+  record1: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedMonths(
-    getZonedDateTimeShimRecordSlots(record0),
-    getZonedDateTimeShimRecordSlots(record1),
+    getShimZonedDateTimeSlots(record0),
+    getShimZonedDateTimeSlots(record1),
     options,
   )
 }
 
 export function diffWeeks(
-  record0: ZonedDateTimeShimRecord,
-  record1: ZonedDateTimeShimRecord,
+  record0: ShimZonedDateTimeRecord,
+  record1: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedWeeks(
-    getZonedDateTimeShimRecordSlots(record0),
-    getZonedDateTimeShimRecordSlots(record1),
+    getShimZonedDateTimeSlots(record0),
+    getShimZonedDateTimeSlots(record1),
     options,
   )
 }
 
 export function diffDays(
-  record0: ZonedDateTimeShimRecord,
-  record1: ZonedDateTimeShimRecord,
+  record0: ShimZonedDateTimeRecord,
+  record1: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedDays(
-    getZonedDateTimeShimRecordSlots(record0),
-    getZonedDateTimeShimRecordSlots(record1),
+    getShimZonedDateTimeSlots(record0),
+    getShimZonedDateTimeSlots(record1),
     options,
   )
 }
@@ -829,28 +817,28 @@ export const diffNanoseconds = bindArgs(diffTimeUnits, Unit.Nanosecond, 1)
 function diffTimeUnits(
   unit: Unit,
   nanoInUnit: number,
-  record0: ZonedDateTimeShimRecord,
-  record1: ZonedDateTimeShimRecord,
+  record0: ShimZonedDateTimeRecord,
+  record1: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return diffZonedTimeUnits(
     unit as any,
     nanoInUnit,
-    getZonedDateTimeShimRecordSlots(record0),
-    getZonedDateTimeShimRecordSlots(record1),
+    getShimZonedDateTimeSlots(record0),
+    getShimZonedDateTimeSlots(record1),
     options,
   )
 }
 
 function moveByTimeUnit(
   nanoInUnit: number,
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   units: number,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   const epochNanoseconds =
     slots.epochNanoseconds + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
-  return createZonedDateTimeShimRecord({
+  return createShimZonedDateTimeRecord({
     ...slots,
     epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
   })
@@ -859,10 +847,10 @@ function moveByTimeUnit(
 function roundToInterval(
   unit: Unit,
   computeInterval: (slots: any) => IsoDateTimeInterval,
-  record: ZonedDateTimeShimRecord,
+  record: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeShimRecord {
-  const slots = getZonedDateTimeShimRecordSlots(record)
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   const [, roundingMode] = refineRoundToOptions(unit, options)
   const epochNanoseconds = roundZonedEpochToInterval(
     computeInterval,
@@ -870,7 +858,7 @@ function roundToInterval(
     slots,
     roundingMode,
   )
-  return createZonedDateTimeShimRecord({
+  return createShimZonedDateTimeRecord({
     ...slots,
     epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
   })
@@ -879,13 +867,13 @@ function roundToInterval(
 function aligned(
   computeAlignment: (record: any) => CalendarDateTimeFields,
   nanoDelta = 0,
-): (record: ZonedDateTimeShimRecord) => ZonedDateTimeShimRecord {
+): (record: ShimZonedDateTimeRecord) => ShimZonedDateTimeRecord {
   return (record) => {
-    const slots = getZonedDateTimeShimRecordSlots(record)
+    const slots = getShimZonedDateTimeSlots(record)
     const epochNanoseconds =
       alignZonedEpoch(computeAlignment, slots.timeZone, slots) +
       BigInt(nanoDelta)
-    return createZonedDateTimeShimRecord({
+    return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
     })
@@ -895,9 +883,9 @@ function aligned(
 function alignedZonedTime(
   computeAlignment: (time: TimeFields) => TimeFields,
   nanoDelta = 0,
-): (record: ZonedDateTimeShimRecord) => ZonedDateTimeShimRecord {
+): (record: ShimZonedDateTimeRecord) => ShimZonedDateTimeRecord {
   return (record) => {
-    const slots = getZonedDateTimeShimRecordSlots(record)
+    const slots = getShimZonedDateTimeSlots(record)
     const { timeZone } = slots
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
 
@@ -921,7 +909,7 @@ function alignedZonedTime(
         EpochDisambig.Compat,
         true,
       ) + BigInt(nanoDelta)
-    return createZonedDateTimeShimRecord({
+    return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
     })
@@ -930,9 +918,9 @@ function alignedZonedTime(
 
 function zonedTransform<A extends any[]>(
   transformIsoDate: (isoDate: any, ...args: A) => CalendarDateFields,
-): (record: ZonedDateTimeShimRecord, ...args: A) => ZonedDateTimeShimRecord {
+): (record: ShimZonedDateTimeRecord, ...args: A) => ShimZonedDateTimeRecord {
   return (record, ...args) => {
-    const slots = getZonedDateTimeShimRecordSlots(record)
+    const slots = getShimZonedDateTimeSlots(record)
     const { timeZone } = slots
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
     const isoDate = transformIsoDate(isoDateTime, ...args)
@@ -942,7 +930,7 @@ function zonedTransform<A extends any[]>(
       timeZone,
       combineDateAndTime(isoDate, isoDateTime),
     )
-    return createZonedDateTimeShimRecord({
+    return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
     })

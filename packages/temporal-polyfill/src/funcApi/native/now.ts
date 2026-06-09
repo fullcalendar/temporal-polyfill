@@ -1,48 +1,48 @@
 import { NativeTemporal } from '../../nativeSwitch'
-import { InstantNativeRecord, createInstantNativeRecord } from './instant'
-import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
+import { NativeInstantRecord, createNativeInstantRecord } from './instant'
+import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
-  PlainDateTimeNativeRecord,
-  createPlainDateTimeNativeRecord,
+  NativePlainDateTimeRecord,
+  createNativePlainDateTimeRecord,
 } from './plainDateTime'
-import { PlainTimeNativeRecord, createPlainTimeNativeRecord } from './plainTime'
+import { NativePlainTimeRecord, createNativePlainTimeRecord } from './plainTime'
 import {
-  ZonedDateTimeNativeRecord,
-  createZonedDateTimeNativeRecord,
+  NativeZonedDateTimeRecord,
+  createNativeZonedDateTimeRecord,
 } from './zonedDateTime'
 
 export function timeZoneId(): string {
   return NativeTemporal!.Now.timeZoneId()
 }
 
-export function instant(): InstantNativeRecord {
-  return createInstantNativeRecord(NativeTemporal!.Now.instant())
+export function instant(): NativeInstantRecord {
+  return createNativeInstantRecord(NativeTemporal!.Now.instant())
 }
 
 export function zonedDateTimeISO(
   timeZoneId?: string,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     NativeTemporal!.Now.zonedDateTimeISO(timeZoneId),
   )
 }
 
 export function plainDateTimeISO(
   timeZoneId?: string,
-): PlainDateTimeNativeRecord {
-  return createPlainDateTimeNativeRecord(
+): NativePlainDateTimeRecord {
+  return createNativePlainDateTimeRecord(
     NativeTemporal!.Now.plainDateTimeISO(timeZoneId),
   )
 }
 
-export function plainDateISO(timeZoneId?: string): PlainDateNativeRecord {
-  return createPlainDateNativeRecord(
+export function plainDateISO(timeZoneId?: string): NativePlainDateRecord {
+  return createNativePlainDateRecord(
     NativeTemporal!.Now.plainDateISO(timeZoneId),
   )
 }
 
-export function plainTimeISO(timeZoneId?: string): PlainTimeNativeRecord {
-  return createPlainTimeNativeRecord(
+export function plainTimeISO(timeZoneId?: string): NativePlainTimeRecord {
+  return createNativePlainTimeRecord(
     NativeTemporal!.Now.plainTimeISO(timeZoneId),
   )
 }

@@ -12,29 +12,29 @@ import {
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import { InstantShimRecord, createInstantShimRecord } from './instant'
-import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import { ShimInstantRecord, createShimInstantRecord } from './instant'
+import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
-  PlainDateTimeShimRecord,
-  createPlainDateTimeShimRecord,
+  ShimPlainDateTimeRecord,
+  createShimPlainDateTimeRecord,
 } from './plainDateTime'
-import { PlainTimeShimRecord, createPlainTimeShimRecord } from './plainTime'
+import { ShimPlainTimeRecord, createShimPlainTimeRecord } from './plainTime'
 import {
-  ZonedDateTimeShimRecord,
-  createZonedDateTimeShimRecord,
+  ShimZonedDateTimeRecord,
+  createShimZonedDateTimeRecord,
 } from './zonedDateTime'
 
 export const timeZoneId = getCurrentTimeZoneId
 
-export function instant(): InstantShimRecord {
-  return createInstantShimRecord(createEpochNanoSlots(getCurrentEpochNano()))
+export function instant(): ShimInstantRecord {
+  return createShimInstantRecord(createEpochNanoSlots(getCurrentEpochNano()))
 }
 
 export function zonedDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): ZonedDateTimeShimRecord {
+): ShimZonedDateTimeRecord {
   const timeZone = queryTimeZone(refineTimeZoneId(timeZoneId))
-  return createZonedDateTimeShimRecord(
+  return createShimZonedDateTimeRecord(
     // Omitting calendar constructs ISO-calendar slots.
     createZonedEpochNanoSlots(getCurrentEpochNano(), timeZone),
   )
@@ -42,11 +42,11 @@ export function zonedDateTimeISO(
 
 export function plainDateTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateTimeShimRecord {
+): ShimPlainDateTimeRecord {
   const isoDateTime = getCurrentIsoDateTime(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createPlainDateTimeShimRecord(
+  return createShimPlainDateTimeRecord(
     // Omitting calendar constructs ISO-calendar slots.
     createDateTimeSlots(isoDateTime),
   )
@@ -54,11 +54,11 @@ export function plainDateTimeISO(
 
 export function plainDateISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainDateShimRecord {
+): ShimPlainDateRecord {
   const isoDateTime = getCurrentIsoDateTime(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createPlainDateShimRecord(
+  return createShimPlainDateRecord(
     // Omitting calendar constructs ISO-calendar slots.
     createDateSlots(isoDateTime),
   )
@@ -66,9 +66,9 @@ export function plainDateISO(
 
 export function plainTimeISO(
   timeZoneId: string = getCurrentTimeZoneId(),
-): PlainTimeShimRecord {
+): ShimPlainTimeRecord {
   const isoDateTime = getCurrentIsoDateTime(
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createPlainTimeShimRecord(createTimeSlots(isoDateTime))
+  return createShimPlainTimeRecord(createTimeSlots(isoDateTime))
 }

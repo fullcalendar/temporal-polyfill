@@ -41,57 +41,56 @@ import {
 
 type DurationRecord = RecordTypes.DurationRecord
 
-type DurationShimSlots = ReturnType<typeof constructDurationSlots>
+type ShimDurationSlots = ReturnType<typeof constructDurationSlots>
 
-export const getDurationShimRecordSlots: (
-  record: unknown,
-) => DurationShimSlots = getDurationSlots
+export const getShimDurationSlots: (record: unknown) => ShimDurationSlots =
+  getDurationSlots
 
-class _DurationShimRecord implements DurationFields, DurationRecord {
+class _ShimDurationRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
   get years() {
-    return getDurationShimRecordSlots(this).years
+    return getShimDurationSlots(this).years
   }
 
   get months() {
-    return getDurationShimRecordSlots(this).months
+    return getShimDurationSlots(this).months
   }
 
   get weeks() {
-    return getDurationShimRecordSlots(this).weeks
+    return getShimDurationSlots(this).weeks
   }
 
   get days() {
-    return getDurationShimRecordSlots(this).days
+    return getShimDurationSlots(this).days
   }
 
   get hours() {
-    return getDurationShimRecordSlots(this).hours
+    return getShimDurationSlots(this).hours
   }
 
   get minutes() {
-    return getDurationShimRecordSlots(this).minutes
+    return getShimDurationSlots(this).minutes
   }
 
   get seconds() {
-    return getDurationShimRecordSlots(this).seconds
+    return getShimDurationSlots(this).seconds
   }
 
   get milliseconds() {
-    return getDurationShimRecordSlots(this).milliseconds
+    return getShimDurationSlots(this).milliseconds
   }
 
   get microseconds() {
-    return getDurationShimRecordSlots(this).microseconds
+    return getShimDurationSlots(this).microseconds
   }
 
   get nanoseconds() {
-    return getDurationShimRecordSlots(this).nanoseconds
+    return getShimDurationSlots(this).nanoseconds
   }
 
   toJSON() {
-    return formatDurationIsoAuto(getDurationShimRecordSlots(this))
+    return formatDurationIsoAuto(getShimDurationSlots(this))
   }
 
   valueOf() {
@@ -99,18 +98,18 @@ class _DurationShimRecord implements DurationFields, DurationRecord {
   }
 }
 
-export function createDurationShimRecord(
-  slots: DurationShimSlots,
-): DurationShimRecord {
-  const instance = Object.create(DurationShimRecord.prototype)
+export function createShimDurationRecord(
+  slots: ShimDurationSlots,
+): ShimDurationRecord {
+  const instance = Object.create(ShimDurationRecord.prototype)
   setDurationSlots(instance, slots)
   attachDebugString(instance, slots, formatDurationIsoAuto)
   return instance
 }
 
-export type DurationShimRecord = _DurationShimRecord
-export const DurationShimRecord = defineTemporalClass(
-  _DurationShimRecord,
+export type ShimDurationRecord = _ShimDurationRecord
+export const ShimDurationRecord = defineTemporalClass(
+  _ShimDurationRecord,
   'Duration',
 )
 
@@ -125,8 +124,8 @@ export function create(
   milliseconds?: number,
   microseconds?: number,
   nanoseconds?: number,
-): DurationShimRecord {
-  return createDurationShimRecord(
+): ShimDurationRecord {
+  return createShimDurationRecord(
     constructDurationSlots(
       years,
       months,
@@ -144,104 +143,104 @@ export function create(
 
 export function fromFields(
   fields: Partial<DurationFields>,
-): DurationShimRecord {
-  return createDurationShimRecord(refineDurationObjectLike(fields))
+): ShimDurationRecord {
+  return createShimDurationRecord(refineDurationObjectLike(fields))
 }
 
-export function fromString(s: string): DurationShimRecord {
-  return createDurationShimRecord(parseDuration(s))
+export function fromString(s: string): ShimDurationRecord {
+  return createShimDurationRecord(parseDuration(s))
 }
 
-export function sign(duration: DurationShimRecord): NumberSign {
-  const slots = getDurationShimRecordSlots(duration)
+export function sign(duration: ShimDurationRecord): NumberSign {
+  const slots = getShimDurationSlots(duration)
   return slots.sign
 }
 
-export function blank(duration: DurationShimRecord): boolean {
-  const slots = getDurationShimRecordSlots(duration)
+export function blank(duration: ShimDurationRecord): boolean {
+  const slots = getShimDurationSlots(duration)
   return !slots.sign
 }
 
 export function withFields(
-  duration: DurationShimRecord,
+  duration: ShimDurationRecord,
   mod: Partial<DurationFields>,
-): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
+): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
   const resSlots = mergeDurationFields(slots, mod)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
-export function negated(duration: DurationShimRecord): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
+export function negated(duration: ShimDurationRecord): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
   const resSlots = negateDuration(slots)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
-export function abs(duration: DurationShimRecord): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
-  return createDurationShimRecord(absDuration(slots))
+export function abs(duration: ShimDurationRecord): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
+  return createShimDurationRecord(absDuration(slots))
 }
 
 export function add(
-  duration: DurationShimRecord,
-  otherDuration: DurationShimRecord,
-): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
-  const otherSlots = getDurationShimRecordSlots(otherDuration)
+  duration: ShimDurationRecord,
+  otherDuration: ShimDurationRecord,
+): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
+  const otherSlots = getShimDurationSlots(otherDuration)
   const resSlots = addDurationsWithoutRelativeTo(false, slots, otherSlots)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
 export function subtract(
-  duration: DurationShimRecord,
-  otherDuration: DurationShimRecord,
-): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
-  const otherSlots = getDurationShimRecordSlots(otherDuration)
+  duration: ShimDurationRecord,
+  otherDuration: ShimDurationRecord,
+): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
+  const otherSlots = getShimDurationSlots(otherDuration)
   const resSlots = addDurationsWithoutRelativeTo(true, slots, otherSlots)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
 export function round(
-  duration: DurationShimRecord,
+  duration: ShimDurationRecord,
   options:
     | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | DurationRoundingOptions<RelativeToShimRecord>,
-): DurationShimRecord {
-  const slots = getDurationShimRecordSlots(duration)
+    | DurationRoundingOptions<ShimRelativeToRecord>,
+): ShimDurationRecord {
+  const slots = getShimDurationSlots(duration)
   const resSlots = roundDuration(refineRelativeTo, slots, options)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
 export function total(
-  duration: DurationShimRecord,
+  duration: ShimDurationRecord,
   options:
     | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
-    | DurationTotalOptions<RelativeToShimRecord>,
+    | DurationTotalOptions<ShimRelativeToRecord>,
 ): number {
   return totalDuration(
     refineRelativeTo,
-    getDurationShimRecordSlots(duration),
+    getShimDurationSlots(duration),
     options,
   )
 }
 
 export function compare(
-  duration: DurationShimRecord,
-  otherDuration: DurationShimRecord,
-  options?: RelativeToOptions<RelativeToShimRecord>,
+  duration: ShimDurationRecord,
+  otherDuration: ShimDurationRecord,
+  options?: RelativeToOptions<ShimRelativeToRecord>,
 ): NumberSign {
-  const slots = getDurationShimRecordSlots(duration)
-  const otherSlots = getDurationShimRecordSlots(otherDuration)
+  const slots = getShimDurationSlots(duration)
+  const otherSlots = getShimDurationSlots(otherDuration)
   return compareDurations(refineRelativeTo, slots, otherSlots, options)
 }
 
 export function toLocaleString(
-  duration: DurationShimRecord,
+  duration: ShimDurationRecord,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const slots = getDurationShimRecordSlots(duration)
+  const slots = getShimDurationSlots(duration)
 
   return (Intl as any).DurationFormat
     ? new (Intl as any).DurationFormat(locales, options).format(slots)
@@ -249,27 +248,27 @@ export function toLocaleString(
 }
 
 export function toString(
-  duration: DurationShimRecord,
+  duration: ShimDurationRecord,
   options?: Temporal.DurationToStringOptions,
 ): string {
-  return formatDurationIso(getDurationShimRecordSlots(duration), options)
+  return formatDurationIso(getShimDurationSlots(duration), options)
 }
 
-export function toBasicString(duration: DurationShimRecord): string {
-  return formatDurationIsoAuto(getDurationShimRecordSlots(duration))
+export function toBasicString(duration: ShimDurationRecord): string {
+  return formatDurationIsoAuto(getShimDurationSlots(duration))
 }
 
 // Util
 // ----
 
-type RelativeToShimRecord = RelativeToRecord<
+type ShimRelativeToRecord = RelativeToRecord<
   RecordTypes.ZonedDateTimeRecord,
   RecordTypes.PlainDateTimeRecord,
   RecordTypes.PlainDateRecord
 >
 
 function refineRelativeTo(
-  arg?: RelativeToShimRecord,
+  arg?: ShimRelativeToRecord,
 ): RelativeToSlots | undefined {
   if (arg) {
     const slots =

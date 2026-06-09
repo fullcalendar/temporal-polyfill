@@ -40,9 +40,9 @@ import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
+  ShimDurationRecord,
+  createShimDurationRecord,
+  getShimDurationSlots,
 } from './duration'
 import { reversedMove } from './moveUtils'
 import {
@@ -54,43 +54,42 @@ import { refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
-type Format = DateTimeFormatLike<PlainTimeShimRecord>
+type Format = DateTimeFormatLike<ShimPlainTimeRecord>
 
-type PlainTimeShimSlots = ReturnType<typeof constructTimeSlots>
+type ShimPlainTimeSlots = ReturnType<typeof constructTimeSlots>
 
-export const getPlainTimeShimRecordSlots: (
-  record: unknown,
-) => PlainTimeShimSlots = getPlainTimeSlots
+export const getShimPlainTimeSlots: (record: unknown) => ShimPlainTimeSlots =
+  getPlainTimeSlots
 
-class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
+class _ShimPlainTimeRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
   get hour() {
-    return getPlainTimeShimRecordSlots(this).hour
+    return getShimPlainTimeSlots(this).hour
   }
 
   get minute() {
-    return getPlainTimeShimRecordSlots(this).minute
+    return getShimPlainTimeSlots(this).minute
   }
 
   get second() {
-    return getPlainTimeShimRecordSlots(this).second
+    return getShimPlainTimeSlots(this).second
   }
 
   get millisecond() {
-    return getPlainTimeShimRecordSlots(this).millisecond
+    return getShimPlainTimeSlots(this).millisecond
   }
 
   get microsecond() {
-    return getPlainTimeShimRecordSlots(this).microsecond
+    return getShimPlainTimeSlots(this).microsecond
   }
 
   get nanosecond() {
-    return getPlainTimeShimRecordSlots(this).nanosecond
+    return getShimPlainTimeSlots(this).nanosecond
   }
 
   toJSON() {
-    return formatTimeIsoAuto(getPlainTimeShimRecordSlots(this))
+    return formatTimeIsoAuto(getShimPlainTimeSlots(this))
   }
 
   valueOf() {
@@ -98,18 +97,18 @@ class _PlainTimeShimRecord implements TimeFields, PlainTimeRecord {
   }
 }
 
-export function createPlainTimeShimRecord(
-  slots: PlainTimeShimSlots,
-): PlainTimeShimRecord {
-  const instance = Object.create(PlainTimeShimRecord.prototype)
+export function createShimPlainTimeRecord(
+  slots: ShimPlainTimeSlots,
+): ShimPlainTimeRecord {
+  const instance = Object.create(ShimPlainTimeRecord.prototype)
   setPlainTimeSlots(instance, slots)
   attachDebugString(instance, slots, formatTimeIsoAuto)
   return instance
 }
 
-export type PlainTimeShimRecord = _PlainTimeShimRecord
-export const PlainTimeShimRecord = defineTemporalClass(
-  _PlainTimeShimRecord,
+export type ShimPlainTimeRecord = _ShimPlainTimeRecord
+export const ShimPlainTimeRecord = defineTemporalClass(
+  _ShimPlainTimeRecord,
   'PlainTime',
 )
 
@@ -120,8 +119,8 @@ export function create(
   millisecond?: number,
   microsecond?: number,
   nanosecond?: number,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord(
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord(
     constructTimeSlots(
       hour,
       minute,
@@ -136,50 +135,50 @@ export function create(
 export function fromFields(
   fields: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord(refinePlainTimeObjectLike(fields, options))
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord(refinePlainTimeObjectLike(fields, options))
 }
 
-export function fromString(s: string): PlainTimeShimRecord {
-  return createPlainTimeShimRecord(parsePlainTime(s))
+export function fromString(s: string): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord(parsePlainTime(s))
 }
 
 export function withFields(
-  record: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
   mod: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
-): PlainTimeShimRecord {
-  const slots = getPlainTimeShimRecordSlots(record)
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
   const resSlots = mergePlainTimeFields(slots, rejectInvalidBag(mod), options)
-  return createPlainTimeShimRecord(resSlots)
+  return createShimPlainTimeRecord(resSlots)
 }
 
 export function add(
-  record: PlainTimeShimRecord,
-  durationRecord: DurationShimRecord,
-): PlainTimeShimRecord {
-  const slots = getPlainTimeShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+  record: ShimPlainTimeRecord,
+  durationRecord: ShimDurationRecord,
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = movePlainTime(false, slots, durationSlots)
-  return createPlainTimeShimRecord(resSlots)
+  return createShimPlainTimeRecord(resSlots)
 }
 
 export function subtract(
-  record: PlainTimeShimRecord,
-  durationRecord: DurationShimRecord,
-): PlainTimeShimRecord {
-  const slots = getPlainTimeShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+  record: ShimPlainTimeRecord,
+  durationRecord: ShimDurationRecord,
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = movePlainTime(true, slots, durationSlots)
-  return createPlainTimeShimRecord(resSlots)
+  return createShimPlainTimeRecord(resSlots)
 }
 
 function moveByTimeUnit(
   nanoInUnit: number,
-  record: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
   units: number,
-): PlainTimeShimRecord {
-  const slots = getPlainTimeShimRecordSlots(record)
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
   const movedNano =
     BigInt(timeFieldsToNano(slots)) +
     BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
@@ -191,7 +190,7 @@ function moveByTimeUnit(
   const wrappedNano =
     ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
 
-  return createPlainTimeShimRecord(
+  return createShimPlainTimeRecord(
     createTimeSlots(nanoToTimeAndDay(Number(wrappedNano))[0]),
   )
 }
@@ -212,13 +211,13 @@ export const subtractNanoseconds = reversedMove(addNanoseconds)
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: PlainTimeShimRecord,
-  otherRecord: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
+  otherRecord: ShimPlainTimeRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): DurationShimRecord {
-  const slots = getPlainTimeShimRecordSlots(record)
-  const otherSlots = getPlainTimeShimRecordSlots(otherRecord)
-  return createDurationShimRecord(
+): ShimDurationRecord {
+  const slots = getShimPlainTimeSlots(record)
+  const otherSlots = getShimPlainTimeSlots(otherRecord)
+  return createShimDurationRecord(
     diffPlainTimes(false, slots, otherSlots, options),
   )
 }
@@ -228,13 +227,13 @@ export function diff(
 function diffTimeUnit(
   unit: TimeUnit,
   nanoInUnit: number,
-  record: PlainTimeShimRecord,
-  otherRecord: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
+  otherRecord: ShimPlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-  const nano0 = timeFieldsToNano(getPlainTimeShimRecordSlots(record))
-  const nano1 = timeFieldsToNano(getPlainTimeShimRecordSlots(otherRecord))
+  const nano0 = timeFieldsToNano(getShimPlainTimeSlots(record))
+  const nano1 = timeFieldsToNano(getShimPlainTimeSlots(otherRecord))
 
   let nanoDiff = BigInt(nano1 - nano0)
 
@@ -268,18 +267,18 @@ export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 function roundToUnit(
   smallestUnit: TimeUnit,
-  record: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): PlainTimeShimRecord {
+): ShimPlainTimeRecord {
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   const [roundingInc, roundingMode] = refineRoundToOptions(
     smallestUnit,
     options,
   )
-  return createPlainTimeShimRecord(
+  return createShimPlainTimeRecord(
     roundPlainTimeToUnit(
-      getPlainTimeShimRecordSlots(record),
+      getShimPlainTimeSlots(record),
       smallestUnit,
       roundingInc,
       roundingMode,
@@ -293,9 +292,9 @@ export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
 export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
 export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
 
-export function startOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+export function startOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     minute: 0,
     second: 0,
     millisecond: 0,
@@ -305,10 +304,10 @@ export function startOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
 }
 
 export function startOfMinute(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     second: 0,
     millisecond: 0,
     microsecond: 0,
@@ -317,10 +316,10 @@ export function startOfMinute(
 }
 
 export function startOfSecond(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     millisecond: 0,
     microsecond: 0,
     nanosecond: 0,
@@ -328,27 +327,27 @@ export function startOfSecond(
 }
 
 export function startOfMillisecond(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     microsecond: 0,
     nanosecond: 0,
   })
 }
 
 export function startOfMicrosecond(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     nanosecond: 0,
   })
 }
 
-export function endOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+export function endOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     minute: 59,
     second: 59,
     millisecond: 999,
@@ -357,9 +356,9 @@ export function endOfHour(record: PlainTimeShimRecord): PlainTimeShimRecord {
   })
 }
 
-export function endOfMinute(record: PlainTimeShimRecord): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+export function endOfMinute(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     second: 59,
     millisecond: 999,
     microsecond: 999,
@@ -367,9 +366,9 @@ export function endOfMinute(record: PlainTimeShimRecord): PlainTimeShimRecord {
   })
 }
 
-export function endOfSecond(record: PlainTimeShimRecord): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+export function endOfSecond(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     millisecond: 999,
     microsecond: 999,
     nanosecond: 999,
@@ -377,58 +376,58 @@ export function endOfSecond(record: PlainTimeShimRecord): PlainTimeShimRecord {
 }
 
 export function endOfMillisecond(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     microsecond: 999,
     nanosecond: 999,
   })
 }
 
 export function endOfMicrosecond(
-  record: PlainTimeShimRecord,
-): PlainTimeShimRecord {
-  return createPlainTimeShimRecord({
-    ...getPlainTimeShimRecordSlots(record),
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
     nanosecond: 999,
   })
 }
 
 export function equals(
-  record: PlainTimeShimRecord,
-  otherRecord: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
+  otherRecord: ShimPlainTimeRecord,
 ): boolean {
-  const slots = getPlainTimeShimRecordSlots(record)
-  const otherSlots = getPlainTimeShimRecordSlots(otherRecord)
+  const slots = getShimPlainTimeSlots(record)
+  const otherSlots = getShimPlainTimeSlots(otherRecord)
   return plainTimesEqual(slots, otherSlots)
 }
 
 export function compare(
-  record: PlainTimeShimRecord,
-  otherRecord: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
+  otherRecord: ShimPlainTimeRecord,
 ): NumberSign {
-  const slots = getPlainTimeShimRecordSlots(record)
-  const otherSlots = getPlainTimeShimRecordSlots(otherRecord)
+  const slots = getShimPlainTimeSlots(record)
+  const otherSlots = getShimPlainTimeSlots(otherRecord)
   return compareTimeFields(slots, otherSlots)
 }
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<PlainTimeShimRecord>({
+) => Format = createDateTimeFormatFactory<ShimPlainTimeRecord>({
   transformOptions: (options) =>
     applyPlainFormatTimeZone(
       transformTimeOptions(options, /* allowPartialOverlap = */ true),
     ),
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
-      const slots = getPlainTimeShimRecordSlots(record)
+      const slots = getShimPlainTimeSlots(record)
       return [internals.format, timeFieldsToMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
-      const slots0 = getPlainTimeShimRecordSlots(record0)
-      const slots1 = getPlainTimeShimRecordSlots(record1)
+      const slots0 = getShimPlainTimeSlots(record0)
+      const slots1 = getShimPlainTimeSlots(record1)
       return [
         internals.format,
         timeFieldsToMilli(slots0),
@@ -439,11 +438,11 @@ export const createFormat: (
 })
 
 export function toLocaleString(
-  record: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
   locales: LocalesArg | undefined = undefined,
   options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const slots = getPlainTimeShimRecordSlots(record)
+  const slots = getShimPlainTimeSlots(record)
   const format = new RawDateTimeFormat(
     locales,
     applyPlainFormatTimeZone(
@@ -454,12 +453,12 @@ export function toLocaleString(
 }
 
 export function toString(
-  record: PlainTimeShimRecord,
+  record: ShimPlainTimeRecord,
   options?: Temporal.PlainTimeToStringOptions,
 ): string {
-  return formatPlainTimeIso(getPlainTimeShimRecordSlots(record), options)
+  return formatPlainTimeIso(getShimPlainTimeSlots(record), options)
 }
 
-export function toBasicString(record: PlainTimeShimRecord): string {
-  return formatTimeIsoAuto(getPlainTimeShimRecordSlots(record))
+export function toBasicString(record: ShimPlainTimeRecord): string {
+  return formatTimeIsoAuto(getShimPlainTimeSlots(record))
 }

@@ -25,54 +25,54 @@ import {
 
 type DurationRecord = RecordTypes.DurationRecord
 
-export const getDurationNative: (record: unknown) => Temporal.Duration =
+export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
 
-class _DurationNativeRecord implements DurationFields, DurationRecord {
+class _NativeDurationRecord implements DurationFields, DurationRecord {
   declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
   get years() {
-    return getDurationNative(this).years
+    return getNativeDuration(this).years
   }
 
   get months() {
-    return getDurationNative(this).months
+    return getNativeDuration(this).months
   }
 
   get weeks() {
-    return getDurationNative(this).weeks
+    return getNativeDuration(this).weeks
   }
 
   get days() {
-    return getDurationNative(this).days
+    return getNativeDuration(this).days
   }
 
   get hours() {
-    return getDurationNative(this).hours
+    return getNativeDuration(this).hours
   }
 
   get minutes() {
-    return getDurationNative(this).minutes
+    return getNativeDuration(this).minutes
   }
 
   get seconds() {
-    return getDurationNative(this).seconds
+    return getNativeDuration(this).seconds
   }
 
   get milliseconds() {
-    return getDurationNative(this).milliseconds
+    return getNativeDuration(this).milliseconds
   }
 
   get microseconds() {
-    return getDurationNative(this).microseconds
+    return getNativeDuration(this).microseconds
   }
 
   get nanoseconds() {
-    return getDurationNative(this).nanoseconds
+    return getNativeDuration(this).nanoseconds
   }
 
   toJSON() {
-    return getDurationNative(this).toString()
+    return getNativeDuration(this).toString()
   }
 
   valueOf() {
@@ -80,18 +80,18 @@ class _DurationNativeRecord implements DurationFields, DurationRecord {
   }
 }
 
-export function createDurationNativeRecord(
+export function createNativeDurationRecord(
   native: Temporal.Duration,
-): DurationNativeRecord {
-  const instance = Object.create(DurationNativeRecord.prototype)
+): NativeDurationRecord {
+  const instance = Object.create(NativeDurationRecord.prototype)
   setDurationSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
-export type DurationNativeRecord = _DurationNativeRecord
-export const DurationNativeRecord = defineTemporalClass(
-  _DurationNativeRecord,
+export type NativeDurationRecord = _NativeDurationRecord
+export const NativeDurationRecord = defineTemporalClass(
+  _NativeDurationRecord,
   'Duration',
 )
 
@@ -106,8 +106,8 @@ export function create(
   milliseconds?: number,
   microseconds?: number,
   nanoseconds?: number,
-): DurationNativeRecord {
-  return createDurationNativeRecord(
+): NativeDurationRecord {
+  return createNativeDurationRecord(
     new NativeTemporal!.Duration(
       years,
       months,
@@ -125,91 +125,91 @@ export function create(
 
 export function fromFields(
   fields: Partial<DurationFields>,
-): DurationNativeRecord {
+): NativeDurationRecord {
   const resNative = NativeTemporal!.Duration.from(fields)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
-export function fromString(s: string): DurationNativeRecord {
+export function fromString(s: string): NativeDurationRecord {
   const resNative = NativeTemporal!.Duration.from(s)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
-export function sign(duration: DurationNativeRecord): NumberSign {
-  const native = getDurationNative(duration)
+export function sign(duration: NativeDurationRecord): NumberSign {
+  const native = getNativeDuration(duration)
   return native.sign as NumberSign // !!!
 }
 
-export function blank(duration: DurationNativeRecord): boolean {
-  const native = getDurationNative(duration)
+export function blank(duration: NativeDurationRecord): boolean {
+  const native = getNativeDuration(duration)
   return native.blank
 }
 
 export function withFields(
-  duration: DurationNativeRecord,
+  duration: NativeDurationRecord,
   mod: Partial<DurationFields>,
-): DurationNativeRecord {
-  const native = getDurationNative(duration)
+): NativeDurationRecord {
+  const native = getNativeDuration(duration)
   const resNative = native.with(mod)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
-export function negated(duration: DurationNativeRecord): DurationNativeRecord {
-  const native = getDurationNative(duration)
+export function negated(duration: NativeDurationRecord): NativeDurationRecord {
+  const native = getNativeDuration(duration)
   const resNative = native.negated()
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
-export function abs(duration: DurationNativeRecord): DurationNativeRecord {
-  const native = getDurationNative(duration)
+export function abs(duration: NativeDurationRecord): NativeDurationRecord {
+  const native = getNativeDuration(duration)
   const resNative = native.abs()
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function add(
-  duration: DurationNativeRecord,
-  otherDuration: DurationNativeRecord,
-): DurationNativeRecord {
-  const native = getDurationNative(duration)
-  const otherNative = getDurationNative(otherDuration)
+  duration: NativeDurationRecord,
+  otherDuration: NativeDurationRecord,
+): NativeDurationRecord {
+  const native = getNativeDuration(duration)
+  const otherNative = getNativeDuration(otherDuration)
   const resNative = native.add(otherNative)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function subtract(
-  duration: DurationNativeRecord,
-  otherDuration: DurationNativeRecord,
-): DurationNativeRecord {
-  const native = getDurationNative(duration)
-  const otherNative = getDurationNative(otherDuration)
+  duration: NativeDurationRecord,
+  otherDuration: NativeDurationRecord,
+): NativeDurationRecord {
+  const native = getNativeDuration(duration)
+  const otherNative = getNativeDuration(otherDuration)
   const resNative = native.subtract(otherNative)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function round(
-  duration: DurationNativeRecord,
+  duration: NativeDurationRecord,
   options:
     | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | DurationRoundingOptions<RelativeToNativeRecord>,
-): DurationNativeRecord {
-  const native = getDurationNative(duration)
+    | DurationRoundingOptions<NativeRelativeToRecord>,
+): NativeDurationRecord {
+  const native = getNativeDuration(duration)
   if (typeof options === 'string') {
-    return createDurationNativeRecord(native.round(options))
+    return createNativeDurationRecord(native.round(options))
   }
   const resNative = native.round({
     ...options,
     relativeTo: refineRelativeTo(options?.relativeTo),
   })
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function total(
-  duration: DurationNativeRecord,
+  duration: NativeDurationRecord,
   options:
     | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
-    | DurationTotalOptions<RelativeToNativeRecord>,
+    | DurationTotalOptions<NativeRelativeToRecord>,
 ): number {
-  const native = getDurationNative(duration)
+  const native = getNativeDuration(duration)
 
   // TODO: better pattern for this?
   if (typeof options === 'string') {
@@ -224,12 +224,12 @@ export function total(
 }
 
 export function compare(
-  duration: DurationNativeRecord,
-  otherDuration: DurationNativeRecord,
-  options?: RelativeToOptions<RelativeToNativeRecord>,
+  duration: NativeDurationRecord,
+  otherDuration: NativeDurationRecord,
+  options?: RelativeToOptions<NativeRelativeToRecord>,
 ): NumberSign {
-  const native = getDurationNative(duration)
-  const otherNative = getDurationNative(otherDuration)
+  const native = getNativeDuration(duration)
+  const otherNative = getNativeDuration(otherDuration)
   return NativeTemporal!.Duration.compare(native, otherNative, {
     ...options,
     relativeTo: refineRelativeTo(options?.relativeTo),
@@ -237,7 +237,7 @@ export function compare(
 }
 
 export function toLocaleString(
-  duration: DurationNativeRecord,
+  duration: NativeDurationRecord,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
@@ -247,33 +247,33 @@ export function toLocaleString(
 }
 
 export function toString(
-  duration: DurationNativeRecord,
+  duration: NativeDurationRecord,
   options?: Temporal.DurationToStringOptions,
 ): string {
-  return getDurationNative(duration).toString(options)
+  return getNativeDuration(duration).toString(options)
 }
 
-export function toBasicString(duration: DurationNativeRecord): string {
-  return getDurationNative(duration).toString()
+export function toBasicString(duration: NativeDurationRecord): string {
+  return getNativeDuration(duration).toString()
 }
 
 // Util
 // ----
 
-type RelativeToNativeRecord = RelativeToRecord<
+type NativeRelativeToRecord = RelativeToRecord<
   RecordTypes.ZonedDateTimeRecord,
   RecordTypes.PlainDateTimeRecord,
   RecordTypes.PlainDateRecord
 >
 
-type RelativeToNative =
+type NativeRelativeTo =
   | Temporal.ZonedDateTime
   | Temporal.PlainDateTime
   | Temporal.PlainDate
 
 function refineRelativeTo(
-  arg?: RelativeToNativeRecord,
-): RelativeToNative | undefined {
+  arg?: NativeRelativeToRecord,
+): NativeRelativeTo | undefined {
   if (arg) {
     const native =
       getZonedDateTimeSlotsIfPresent(arg) ||
@@ -281,7 +281,7 @@ function refineRelativeTo(
       getPlainDateSlotsIfPresent(arg)
 
     if (native) {
-      return native as RelativeToNative
+      return native as NativeRelativeTo
     }
     // otherwise, throw error?
   }

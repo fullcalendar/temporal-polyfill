@@ -7,7 +7,7 @@ import * as errorMessages from '../internal/errorMessages'
 import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
-class _CalendarShimRecord implements RecordTypes.CalendarRecord {
+class _CalendarRecord implements RecordTypes.CalendarRecord {
   declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
   toJSON() {
@@ -19,11 +19,8 @@ class _CalendarShimRecord implements RecordTypes.CalendarRecord {
   }
 }
 
-export type CalendarRecord = _CalendarShimRecord
-export const CalendarRecord = defineTemporalClass(
-  _CalendarShimRecord,
-  'Calendar',
-)
+export type CalendarRecord = _CalendarRecord
+export const CalendarRecord = defineTemporalClass(_CalendarRecord, 'Calendar')
 
 /*
 TODO: accept slots object like sibling files?

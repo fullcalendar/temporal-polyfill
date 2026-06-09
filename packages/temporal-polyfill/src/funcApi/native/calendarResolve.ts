@@ -4,7 +4,7 @@ import {
 } from '../calendarRecord'
 import { CalendarRecord } from '../recordTypes'
 
-export function refineCalendarNativeArgMaybe(
+export function refineNativeCalendarArgMaybe(
   calendarRecord: CalendarRecord | undefined,
 ): string | undefined {
   // not specified?
@@ -17,7 +17,7 @@ export function refineCalendarNativeArgMaybe(
 
 // Validate a native parse result against the public fns resolver. Native
 // parsing canonicalizes the calendar ID before it reaches this point.
-export function runCalendarNativeResolver(
+export function runNativeCalendarResolver(
   canonicalCalendarId: string,
   getCalendarRecord: (id: string) => CalendarRecord,
 ): void {

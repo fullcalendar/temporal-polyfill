@@ -10,9 +10,9 @@ import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  DurationNativeRecord,
-  createDurationNativeRecord,
-  getDurationNative,
+  NativeDurationRecord,
+  createNativeDurationRecord,
+  getNativeDuration,
 } from './duration'
 import {
   attachDebugString,
@@ -22,40 +22,40 @@ import {
 import { createRoundToOptions } from './roundUtils'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
-type Format = DateTimeFormatLike<PlainTimeNativeRecord>
+type Format = DateTimeFormatLike<NativePlainTimeRecord>
 
-export const getPlainTimeNative: (record: unknown) => Temporal.PlainTime =
+export const getNativePlainTime: (record: unknown) => Temporal.PlainTime =
   getPlainTimeSlots
 
-class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
+class _NativePlainTimeRecord implements TimeFields, PlainTimeRecord {
   declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
   get hour() {
-    return getPlainTimeNative(this).hour
+    return getNativePlainTime(this).hour
   }
 
   get minute() {
-    return getPlainTimeNative(this).minute
+    return getNativePlainTime(this).minute
   }
 
   get second() {
-    return getPlainTimeNative(this).second
+    return getNativePlainTime(this).second
   }
 
   get millisecond() {
-    return getPlainTimeNative(this).millisecond
+    return getNativePlainTime(this).millisecond
   }
 
   get microsecond() {
-    return getPlainTimeNative(this).microsecond
+    return getNativePlainTime(this).microsecond
   }
 
   get nanosecond() {
-    return getPlainTimeNative(this).nanosecond
+    return getNativePlainTime(this).nanosecond
   }
 
   toJSON() {
-    return getPlainTimeNative(this).toString()
+    return getNativePlainTime(this).toString()
   }
 
   valueOf() {
@@ -63,18 +63,18 @@ class _PlainTimeNativeRecord implements TimeFields, PlainTimeRecord {
   }
 }
 
-export function createPlainTimeNativeRecord(
+export function createNativePlainTimeRecord(
   native: Temporal.PlainTime,
-): PlainTimeNativeRecord {
-  const instance = Object.create(PlainTimeNativeRecord.prototype)
+): NativePlainTimeRecord {
+  const instance = Object.create(NativePlainTimeRecord.prototype)
   setPlainTimeSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
-export type PlainTimeNativeRecord = _PlainTimeNativeRecord
-export const PlainTimeNativeRecord = defineTemporalClass(
-  _PlainTimeNativeRecord,
+export type NativePlainTimeRecord = _NativePlainTimeRecord
+export const NativePlainTimeRecord = defineTemporalClass(
+  _NativePlainTimeRecord,
   'PlainTime',
 )
 
@@ -85,8 +85,8 @@ export function create(
   millisecond?: number,
   microsecond?: number,
   nanosecond?: number,
-): PlainTimeNativeRecord {
-  return createPlainTimeNativeRecord(
+): NativePlainTimeRecord {
+  return createNativePlainTimeRecord(
     new NativeTemporal!.PlainTime(
       hour,
       minute,
@@ -101,240 +101,240 @@ export function create(
 export function fromFields(
   fields: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
-): PlainTimeNativeRecord {
+): NativePlainTimeRecord {
   const resNative = NativeTemporal!.PlainTime.from(fields, options)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
-export function fromString(s: string): PlainTimeNativeRecord {
+export function fromString(s: string): NativePlainTimeRecord {
   const resNative = NativeTemporal!.PlainTime.from(s)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function withFields(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   mod: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
-): PlainTimeNativeRecord {
-  const native = getPlainTimeNative(record)
+): NativePlainTimeRecord {
+  const native = getNativePlainTime(record)
   const resNative = native.with(mod, options)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function add(
-  record: PlainTimeNativeRecord,
-  duration: DurationNativeRecord,
-): PlainTimeNativeRecord {
-  const native = getPlainTimeNative(record)
-  const durationNative = getDurationNative(duration)
+  record: NativePlainTimeRecord,
+  duration: NativeDurationRecord,
+): NativePlainTimeRecord {
+  const native = getNativePlainTime(record)
+  const durationNative = getNativeDuration(duration)
   const resNative = native.add(durationNative)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addHours(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   hours: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ hours })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ hours })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addMinutes(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   minutes: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ minutes })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ minutes })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addSeconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   seconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ seconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ seconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addMilliseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   milliseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ milliseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ milliseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addMicroseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   microseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ microseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ microseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function addNanoseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   nanoseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).add({ nanoseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).add({ nanoseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtract(
-  record: PlainTimeNativeRecord,
-  duration: DurationNativeRecord,
-): PlainTimeNativeRecord {
-  const native = getPlainTimeNative(record)
-  const durationNative = getDurationNative(duration)
+  record: NativePlainTimeRecord,
+  duration: NativeDurationRecord,
+): NativePlainTimeRecord {
+  const native = getNativePlainTime(record)
+  const durationNative = getNativeDuration(duration)
   const resNative = native.subtract(durationNative)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractHours(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   hours: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ hours })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ hours })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractMinutes(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   minutes: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ minutes })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ minutes })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractSeconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   seconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ seconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ seconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractMilliseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   milliseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ milliseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ milliseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractMicroseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   microseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ microseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ microseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function subtractNanoseconds(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   nanoseconds: number,
-): PlainTimeNativeRecord {
-  const resNative = getPlainTimeNative(record).subtract({ nanoseconds })
-  return createPlainTimeNativeRecord(resNative)
+): NativePlainTimeRecord {
+  const resNative = getNativePlainTime(record).subtract({ nanoseconds })
+  return createNativePlainTimeRecord(resNative)
 }
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: PlainTimeNativeRecord,
-  otherRecord: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): DurationNativeRecord {
-  const native = getPlainTimeNative(record)
-  const otherNative = getPlainTimeNative(otherRecord)
+): NativeDurationRecord {
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
   const resNative = native.until(otherNative, options)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function diffHours(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffHours as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 export function diffMinutes(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMinutes as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 export function diffSeconds(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffSeconds as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 export function diffMilliseconds(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMilliseconds as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 export function diffMicroseconds(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMicroseconds as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 export function diffNanoseconds(
-  record0: PlainTimeNativeRecord,
-  record1: PlainTimeNativeRecord,
+  record0: NativePlainTimeRecord,
+  record1: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffNanoseconds as NativeDiffFunc<Temporal.PlainTime>)(
-    getPlainTimeNative(record0),
-    getPlainTimeNative(record1),
+    getNativePlainTime(record0),
+    getNativePlainTime(record1),
     options,
   )
 }
 
 function round(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   options: Temporal.RoundingOptions<Temporal.TimeUnit>,
-): PlainTimeNativeRecord {
-  const native = getPlainTimeNative(record)
+): NativePlainTimeRecord {
+  const native = getNativePlainTime(record)
   const resNative = native.round(options)
-  return createPlainTimeNativeRecord(resNative)
+  return createNativePlainTimeRecord(resNative)
 }
 
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): PlainTimeNativeRecord {
+): NativePlainTimeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
 
@@ -344,104 +344,104 @@ export const roundToSecond = bindArgs(roundToUnit, 'second')
 export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
 export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
 
-export function startOfHour(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.startOfHour(getPlainTimeNative(record)),
+export function startOfHour(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfHour(getNativePlainTime(record)),
   )
 }
 
-export function startOfMinute(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.startOfMinute(getPlainTimeNative(record)),
+export function startOfMinute(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMinute(getNativePlainTime(record)),
   )
 }
 
-export function startOfSecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.startOfSecond(getPlainTimeNative(record)),
+export function startOfSecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfSecond(getNativePlainTime(record)),
   )
 }
 
-export function startOfMillisecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.startOfMillisecond(getPlainTimeNative(record)),
+export function startOfMillisecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMillisecond(getNativePlainTime(record)),
   )
 }
 
-export function startOfMicrosecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.startOfMicrosecond(getPlainTimeNative(record)),
+export function startOfMicrosecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMicrosecond(getNativePlainTime(record)),
   )
 }
 
-export function endOfHour(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.endOfHour(getPlainTimeNative(record)),
+export function endOfHour(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfHour(getNativePlainTime(record)),
   )
 }
 
-export function endOfMinute(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.endOfMinute(getPlainTimeNative(record)),
+export function endOfMinute(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMinute(getNativePlainTime(record)),
   )
 }
 
-export function endOfSecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.endOfSecond(getPlainTimeNative(record)),
+export function endOfSecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfSecond(getNativePlainTime(record)),
   )
 }
 
-export function endOfMillisecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.endOfMillisecond(getPlainTimeNative(record)),
+export function endOfMillisecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMillisecond(getNativePlainTime(record)),
   )
 }
 
-export function endOfMicrosecond(record: PlainTimeNativeRecord) {
-  return createPlainTimeNativeRecord(
-    TemporalUtils.endOfMicrosecond(getPlainTimeNative(record)),
+export function endOfMicrosecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMicrosecond(getNativePlainTime(record)),
   )
 }
 
 export function equals(
-  record: PlainTimeNativeRecord,
-  otherRecord: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
 ): boolean {
-  const native = getPlainTimeNative(record)
-  const otherNative = getPlainTimeNative(otherRecord)
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
   return native.equals(otherNative)
 }
 
 export function compare(
-  record: PlainTimeNativeRecord,
-  otherRecord: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
 ): NumberSign {
-  const native = getPlainTimeNative(record)
-  const otherNative = getPlainTimeNative(otherRecord)
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
   return NativeTemporal!.PlainTime.compare(native, otherNative) as NumberSign
 }
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getPlainTimeNative)
+) => Format = createNativeDateTimeFormatFactory(getNativePlainTime)
 
 export function toLocaleString(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return getPlainTimeNative(record).toLocaleString(locales, options)
+  return getNativePlainTime(record).toLocaleString(locales, options)
 }
 
 export function toString(
-  record: PlainTimeNativeRecord,
+  record: NativePlainTimeRecord,
   options?: Temporal.PlainTimeToStringOptions,
 ): string {
-  return getPlainTimeNative(record).toString(options)
+  return getNativePlainTime(record).toString(options)
 }
 
-export function toBasicString(record: PlainTimeNativeRecord): string {
-  return getPlainTimeNative(record).toString()
+export function toBasicString(record: NativePlainTimeRecord): string {
+  return getNativePlainTime(record).toString()
 }

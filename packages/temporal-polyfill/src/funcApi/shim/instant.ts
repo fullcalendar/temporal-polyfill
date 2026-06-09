@@ -51,9 +51,9 @@ import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  DurationShimRecord,
-  createDurationShimRecord,
-  getDurationShimRecordSlots,
+  ShimDurationRecord,
+  createShimDurationRecord,
+  getShimDurationSlots,
 } from './duration'
 import {
   attachDebugString,
@@ -62,32 +62,32 @@ import {
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
-  ZonedDateTimeShimRecord,
-  createZonedDateTimeShimRecord,
+  ShimZonedDateTimeRecord,
+  createShimZonedDateTimeRecord,
 } from './zonedDateTime'
 
 type InstantRecord = RecordTypes.InstantRecord
 
-type Format = DateTimeFormatLike<InstantShimRecord>
+type Format = DateTimeFormatLike<ShimInstantRecord>
 
-type InstantShimSlots = ReturnType<typeof constructEpochNanoSlots>
+type ShimInstantSlots = ReturnType<typeof constructEpochNanoSlots>
 
-export const getInstantShimRecordSlots: (record: unknown) => InstantShimSlots =
+export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
   getInstantSlots
 
-class _InstantShimRecord implements InstantRecord {
+class _ShimInstantRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
   get epochMilliseconds() {
-    return getEpochMilli(getInstantShimRecordSlots(this))
+    return getEpochMilli(getShimInstantSlots(this))
   }
 
   get epochNanoseconds() {
-    return getEpochNano(getInstantShimRecordSlots(this))
+    return getEpochNano(getShimInstantSlots(this))
   }
 
   toJSON() {
-    return formatInstantIsoAuto(getInstantShimRecordSlots(this))
+    return formatInstantIsoAuto(getShimInstantSlots(this))
   }
 
   valueOf() {
@@ -95,79 +95,79 @@ class _InstantShimRecord implements InstantRecord {
   }
 }
 
-export function createInstantShimRecord(
-  slots: InstantShimSlots,
-): InstantShimRecord {
-  const instance = Object.create(InstantShimRecord.prototype)
+export function createShimInstantRecord(
+  slots: ShimInstantSlots,
+): ShimInstantRecord {
+  const instance = Object.create(ShimInstantRecord.prototype)
   setInstantSlots(instance, slots)
   attachDebugString(instance, slots, formatInstantIsoAuto)
   return instance
 }
 
-export type InstantShimRecord = _InstantShimRecord
-export const InstantShimRecord = defineTemporalClass(
-  _InstantShimRecord,
+export type ShimInstantRecord = _ShimInstantRecord
+export const ShimInstantRecord = defineTemporalClass(
+  _ShimInstantRecord,
   'Instant',
 )
 
-export function create(epochNanoseconds: bigint): InstantShimRecord {
-  return createInstantShimRecord(constructEpochNanoSlots(epochNanoseconds))
+export function create(epochNanoseconds: bigint): ShimInstantRecord {
+  return createShimInstantRecord(constructEpochNanoSlots(epochNanoseconds))
 }
 
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   const resSlots = epochMilliToInstant(epochMilliseconds)
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
 export function fromEpochNanoseconds(
   epochNanoseconds: bigint,
-): InstantShimRecord {
+): ShimInstantRecord {
   const resSlots = epochNanoToInstant(epochNanoseconds)
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
-export function fromString(s: string): InstantShimRecord {
+export function fromString(s: string): ShimInstantRecord {
   const resSlots = parseInstant(s)
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
 export function add(
-  record: InstantShimRecord,
-  durationRecord: DurationShimRecord,
-): InstantShimRecord {
-  const slots = getInstantShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+  record: ShimInstantRecord,
+  durationRecord: ShimDurationRecord,
+): ShimInstantRecord {
+  const slots = getShimInstantSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveInstant(false, slots, durationSlots)
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
 export function subtract(
-  record: InstantShimRecord,
-  durationRecord: DurationShimRecord,
-): InstantShimRecord {
-  const slots = getInstantShimRecordSlots(record)
-  const durationSlots = getDurationShimRecordSlots(durationRecord)
+  record: ShimInstantRecord,
+  durationRecord: ShimDurationRecord,
+): ShimInstantRecord {
+  const slots = getShimInstantSlots(record)
+  const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveInstant(true, slots, durationSlots)
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
 function moveByNanoseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   nanoseconds: bigint,
-): InstantShimRecord {
-  const slots = getInstantShimRecordSlots(record)
+): ShimInstantRecord {
+  const slots = getShimInstantSlots(record)
   const resSlots = createEpochNanoSlots(
     checkEpochNanoInBounds(slots.epochNanoseconds + nanoseconds),
   )
-  return createInstantShimRecord(resSlots)
+  return createShimInstantRecord(resSlots)
 }
 
 export function addHours(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   hours: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     BigInt(toStrictInteger(hours)) * bigNanoInHour,
@@ -175,9 +175,9 @@ export function addHours(
 }
 
 export function addMinutes(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   minutes: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     BigInt(toStrictInteger(minutes)) * bigNanoInMinute,
@@ -185,9 +185,9 @@ export function addMinutes(
 }
 
 export function addSeconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   seconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     BigInt(toStrictInteger(seconds)) * bigNanoInSec,
@@ -195,9 +195,9 @@ export function addSeconds(
 }
 
 export function addMilliseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   milliseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     BigInt(toStrictInteger(milliseconds)) * bigNanoInMilli,
@@ -205,9 +205,9 @@ export function addMilliseconds(
 }
 
 export function addMicroseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   microseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     BigInt(toStrictInteger(microseconds)) * bigNanoInMicro,
@@ -215,16 +215,16 @@ export function addMicroseconds(
 }
 
 export function addNanoseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   nanoseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(record, BigInt(toStrictInteger(nanoseconds)))
 }
 
 export function subtractHours(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   hours: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     -BigInt(toStrictInteger(hours)) * bigNanoInHour,
@@ -232,9 +232,9 @@ export function subtractHours(
 }
 
 export function subtractMinutes(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   minutes: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     -BigInt(toStrictInteger(minutes)) * bigNanoInMinute,
@@ -242,9 +242,9 @@ export function subtractMinutes(
 }
 
 export function subtractSeconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   seconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     -BigInt(toStrictInteger(seconds)) * bigNanoInSec,
@@ -252,9 +252,9 @@ export function subtractSeconds(
 }
 
 export function subtractMilliseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   milliseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     -BigInt(toStrictInteger(milliseconds)) * bigNanoInMilli,
@@ -262,9 +262,9 @@ export function subtractMilliseconds(
 }
 
 export function subtractMicroseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   microseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(
     record,
     -BigInt(toStrictInteger(microseconds)) * bigNanoInMicro,
@@ -272,22 +272,22 @@ export function subtractMicroseconds(
 }
 
 export function subtractNanoseconds(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   nanoseconds: number,
-): InstantShimRecord {
+): ShimInstantRecord {
   return moveByNanoseconds(record, -BigInt(toStrictInteger(nanoseconds)))
 }
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: InstantShimRecord,
-  otherRecord: InstantShimRecord,
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): DurationShimRecord {
-  const slots = getInstantShimRecordSlots(record)
-  const otherSlots = getInstantShimRecordSlots(otherRecord)
+): ShimDurationRecord {
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
   const resSlots = diffInstants(false, slots, otherSlots, options)
-  return createDurationShimRecord(resSlots)
+  return createShimDurationRecord(resSlots)
 }
 
 // Instants have no calendar or time-zone balancing, so unit diffs are exact
@@ -296,13 +296,13 @@ export function diff(
 function diffTimeUnit(
   unit: TimeUnit,
   nanoInUnit: number,
-  record: InstantShimRecord,
-  otherRecord: InstantShimRecord,
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-  const slots = getInstantShimRecordSlots(record)
-  const otherSlots = getInstantShimRecordSlots(otherRecord)
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
 
   let nanoDiff = otherSlots.epochNanoseconds - slots.epochNanoseconds
 
@@ -336,9 +336,9 @@ export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
 
 function roundToUnit(
   smallestUnit: TimeUnit,
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
-): InstantShimRecord {
+): ShimInstantRecord {
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   // solarMode: Instant validates increments against a full UTC day.
@@ -347,9 +347,9 @@ function roundToUnit(
     options,
     true, // solarMode
   )
-  return createInstantShimRecord(
+  return createShimInstantRecord(
     roundInstantToUnit(
-      getInstantShimRecordSlots(record),
+      getShimInstantSlots(record),
       smallestUnit,
       roundingInc,
       roundingMode,
@@ -364,59 +364,59 @@ export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
 export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
 
 export function equals(
-  record: InstantShimRecord,
-  otherRecord: InstantShimRecord,
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
 ): boolean {
-  const slots = getInstantShimRecordSlots(record)
-  const otherSlots = getInstantShimRecordSlots(otherRecord)
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
   return instantsEqual(slots, otherSlots)
 }
 
 export function compare(
-  record: InstantShimRecord,
-  otherRecord: InstantShimRecord,
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
 ): NumberSign {
-  const slots = getInstantShimRecordSlots(record)
-  const otherSlots = getInstantShimRecordSlots(otherRecord)
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
   return compareInstants(slots, otherSlots)
 }
 
 export function toZonedDateTimeISO(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   timeZoneId: string,
-): ZonedDateTimeShimRecord {
+): ShimZonedDateTimeRecord {
   const resSlots = instantToZonedDateTime(
-    getInstantShimRecordSlots(record),
+    getShimInstantSlots(record),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
   )
-  return createZonedDateTimeShimRecord(resSlots)
+  return createShimZonedDateTimeRecord(resSlots)
 }
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<InstantShimRecord>({
+) => Format = createDateTimeFormatFactory<ShimInstantRecord>({
   transformOptions: (options) =>
     transformInstantOptions(options, /* allowPartialOverlap = */ true),
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
-      const slots = getInstantShimRecordSlots(record)
+      const slots = getShimInstantSlots(record)
       return [internals.format, getEpochMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
-      const slots0 = getInstantShimRecordSlots(record0)
-      const slots1 = getInstantShimRecordSlots(record1)
+      const slots0 = getShimInstantSlots(record0)
+      const slots1 = getShimInstantSlots(record1)
       return [internals.format, getEpochMilli(slots0), getEpochMilli(slots1)]
     },
   }),
 })
 
 export function toLocaleString(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   locales: LocalesArg | undefined = undefined,
   options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const slots = getInstantShimRecordSlots(record)
+  const slots = getShimInstantSlots(record)
   const format = new RawDateTimeFormat(
     locales,
     transformInstantOptions(options, /* allowPartialOverlap = */ false),
@@ -425,16 +425,16 @@ export function toLocaleString(
 }
 
 export function toString(
-  record: InstantShimRecord,
+  record: ShimInstantRecord,
   options?: InstantStringTimeZoneDisplayOptions,
 ): string {
   return formatInstantIso(
     refineTimeZoneId,
-    getInstantShimRecordSlots(record),
+    getShimInstantSlots(record),
     options,
   )
 }
 
-export function toBasicString(record: InstantShimRecord): string {
-  return formatInstantIsoAuto(getInstantShimRecordSlots(record))
+export function toBasicString(record: ShimInstantRecord): string {
+  return formatInstantIsoAuto(getShimInstantSlots(record))
 }

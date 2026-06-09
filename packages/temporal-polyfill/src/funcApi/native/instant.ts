@@ -10,9 +10,9 @@ import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  DurationNativeRecord,
-  createDurationNativeRecord,
-  getDurationNative,
+  NativeDurationRecord,
+  createNativeDurationRecord,
+  getNativeDuration,
 } from './duration'
 import {
   attachDebugString,
@@ -21,30 +21,30 @@ import {
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
-  ZonedDateTimeNativeRecord,
-  createZonedDateTimeNativeRecord,
+  NativeZonedDateTimeRecord,
+  createNativeZonedDateTimeRecord,
 } from './zonedDateTime'
 
 type InstantRecord = RecordTypes.InstantRecord
 
-type Format = DateTimeFormatLike<InstantNativeRecord>
+type Format = DateTimeFormatLike<NativeInstantRecord>
 
-export const getInstantNative: (record: unknown) => Temporal.Instant =
+export const getNativeInstant: (record: unknown) => Temporal.Instant =
   getInstantSlots
 
-class _InstantNativeRecord implements InstantRecord {
+class _NativeInstantRecord implements InstantRecord {
   declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
   get epochMilliseconds() {
-    return getInstantNative(this).epochMilliseconds
+    return getNativeInstant(this).epochMilliseconds
   }
 
   get epochNanoseconds() {
-    return getInstantNative(this).epochNanoseconds
+    return getNativeInstant(this).epochNanoseconds
   }
 
   toJSON() {
-    return getInstantNative(this).toString()
+    return getNativeInstant(this).toString()
   }
 
   valueOf() {
@@ -52,262 +52,262 @@ class _InstantNativeRecord implements InstantRecord {
   }
 }
 
-export function createInstantNativeRecord(
+export function createNativeInstantRecord(
   native: Temporal.Instant,
-): InstantNativeRecord {
-  const instance = Object.create(InstantNativeRecord.prototype)
+): NativeInstantRecord {
+  const instance = Object.create(NativeInstantRecord.prototype)
   setInstantSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
-export type InstantNativeRecord = _InstantNativeRecord
-export const InstantNativeRecord = defineTemporalClass(
-  _InstantNativeRecord,
+export type NativeInstantRecord = _NativeInstantRecord
+export const NativeInstantRecord = defineTemporalClass(
+  _NativeInstantRecord,
   'Instant',
 )
 
-export function create(epochNanoseconds: bigint): InstantNativeRecord {
-  return createInstantNativeRecord(
+export function create(epochNanoseconds: bigint): NativeInstantRecord {
+  return createNativeInstantRecord(
     new NativeTemporal!.Instant(epochNanoseconds),
   )
 }
 
 export function fromEpochMilliseconds(
   epochMilliseconds: number,
-): InstantNativeRecord {
+): NativeInstantRecord {
   const resNative =
     NativeTemporal!.Instant.fromEpochMilliseconds(epochMilliseconds)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
 export function fromEpochNanoseconds(
   epochNanoseconds: bigint,
-): InstantNativeRecord {
+): NativeInstantRecord {
   const resNative =
     NativeTemporal!.Instant.fromEpochNanoseconds(epochNanoseconds)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
-export function fromString(s: string): InstantNativeRecord {
+export function fromString(s: string): NativeInstantRecord {
   const resNative = NativeTemporal!.Instant.from(s)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
 export function add(
-  record: InstantNativeRecord,
-  durationRecord: DurationNativeRecord,
-): InstantNativeRecord {
-  const native = getInstantNative(record)
-  const durationNative = getDurationNative(durationRecord)
+  record: NativeInstantRecord,
+  durationRecord: NativeDurationRecord,
+): NativeInstantRecord {
+  const native = getNativeInstant(record)
+  const durationNative = getNativeDuration(durationRecord)
   const resNative = native.add(durationNative)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtract(
-  record: InstantNativeRecord,
-  durationRecord: DurationNativeRecord,
-): InstantNativeRecord {
-  const native = getInstantNative(record)
-  const durationNative = getDurationNative(durationRecord)
+  record: NativeInstantRecord,
+  durationRecord: NativeDurationRecord,
+): NativeInstantRecord {
+  const native = getNativeInstant(record)
+  const durationNative = getNativeDuration(durationRecord)
   const resNative = native.subtract(durationNative)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
 export function addHours(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   hours: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ hours })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ hours })
+  return createNativeInstantRecord(resNative)
 }
 
 export function addMinutes(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   minutes: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ minutes })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ minutes })
+  return createNativeInstantRecord(resNative)
 }
 
 export function addSeconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   seconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ seconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ seconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function addMilliseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   milliseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ milliseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ milliseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function addMicroseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   microseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ microseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ microseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function addNanoseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   nanoseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).add({ nanoseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).add({ nanoseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractHours(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   hours: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ hours })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ hours })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractMinutes(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   minutes: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ minutes })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ minutes })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractSeconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   seconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ seconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ seconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractMilliseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   milliseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ milliseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ milliseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractMicroseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   microseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ microseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ microseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 export function subtractNanoseconds(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   nanoseconds: number,
-): InstantNativeRecord {
-  const resNative = getInstantNative(record).subtract({ nanoseconds })
-  return createInstantNativeRecord(resNative)
+): NativeInstantRecord {
+  const resNative = getNativeInstant(record).subtract({ nanoseconds })
+  return createNativeInstantRecord(resNative)
 }
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: InstantNativeRecord,
-  otherRecord: InstantNativeRecord,
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): DurationNativeRecord {
-  const native = getInstantNative(record)
-  const otherNative = getInstantNative(otherRecord)
+): NativeDurationRecord {
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
   const resNative = native.until(otherNative, options)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 export function diffHours(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffHours as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 export function diffMinutes(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMinutes as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 export function diffSeconds(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffSeconds as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 export function diffMilliseconds(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMilliseconds as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 export function diffMicroseconds(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMicroseconds as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 export function diffNanoseconds(
-  record0: InstantNativeRecord,
-  record1: InstantNativeRecord,
+  record0: NativeInstantRecord,
+  record1: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffNanoseconds as NativeDiffFunc<Temporal.Instant>)(
-    getInstantNative(record0) as any,
-    getInstantNative(record1) as any,
+    getNativeInstant(record0) as any,
+    getNativeInstant(record1) as any,
     options,
   )
 }
 
 function round(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   options: Temporal.RoundingOptions<Temporal.TimeUnit>,
-): InstantNativeRecord {
-  const native = getInstantNative(record)
+): NativeInstantRecord {
+  const native = getNativeInstant(record)
   const resNative = native.round(options)
-  return createInstantNativeRecord(resNative)
+  return createNativeInstantRecord(resNative)
 }
 
 function roundToUnit(
   smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
-): InstantNativeRecord {
+): NativeInstantRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
 
@@ -318,52 +318,52 @@ export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
 export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
 
 export function equals(
-  record: InstantNativeRecord,
-  otherRecord: InstantNativeRecord,
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
 ): boolean {
-  const native = getInstantNative(record)
-  const otherNative = getInstantNative(otherRecord)
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
   return native.equals(otherNative)
 }
 
 export function compare(
-  record: InstantNativeRecord,
-  otherRecord: InstantNativeRecord,
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
 ): NumberSign {
-  const native = getInstantNative(record)
-  const otherNative = getInstantNative(otherRecord)
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
   return NativeTemporal!.Instant.compare(native, otherNative) as NumberSign // !!!
 }
 
 export function toZonedDateTimeISO(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   timeZoneId: string,
-): ZonedDateTimeNativeRecord {
-  const native = getInstantNative(record)
+): NativeZonedDateTimeRecord {
+  const native = getNativeInstant(record)
   const resNative = native.toZonedDateTimeISO(timeZoneId)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getInstantNative)
+) => Format = createNativeDateTimeFormatFactory(getNativeInstant)
 
 export function toLocaleString(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return getInstantNative(record).toLocaleString(locales, options)
+  return getNativeInstant(record).toLocaleString(locales, options)
 }
 
 export function toString(
-  record: InstantNativeRecord,
+  record: NativeInstantRecord,
   options?: InstantStringTimeZoneDisplayOptions,
 ): string {
-  return getInstantNative(record).toString(options)
+  return getNativeInstant(record).toString(options)
 }
 
-export function toBasicString(record: InstantNativeRecord): string {
-  return getInstantNative(record).toString()
+export function toBasicString(record: NativeInstantRecord): string {
+  return getNativeInstant(record).toString()
 }

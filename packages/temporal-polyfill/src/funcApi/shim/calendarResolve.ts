@@ -1,7 +1,7 @@
 import { CalendarImpl, isoCalendarImpl } from '../../internal/calendarImpl'
 import { CalendarRecord, getCalendarRecordImplCreator } from '../calendarRecord'
 
-export function refineCalendarShimArgMaybe(
+export function refineShimCalendarArgMaybe(
   calendarRecord: CalendarRecord | undefined,
 ): CalendarImpl {
   // not specified?
@@ -11,7 +11,7 @@ export function refineCalendarShimArgMaybe(
   return getCalendarRecordImpl(calendarRecord)
 }
 
-export function createCalendarShimStringResolver(
+export function createShimCalendarStringResolver(
   getCalendarRecord: (calendarId: string) => CalendarRecord,
 ): (id: string) => CalendarImpl {
   return (calendarId: string) => {

@@ -30,11 +30,11 @@ import {
   setPlainMonthDaySlots,
 } from '../temporalRecords'
 import {
-  createCalendarShimStringResolver,
-  refineCalendarShimArgMaybe,
+  createShimCalendarStringResolver,
+  refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
-import { PlainDateShimRecord, createPlainDateShimRecord } from './plainDate'
+import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -44,35 +44,35 @@ import { rejectInvalidBag } from './temporalRecords'
 
 type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
 
-type Format = DateTimeFormatLike<PlainMonthDayShimRecord>
+type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>
 
-type PlainMonthDayShimSlots = ReturnType<typeof constructMonthDaySlots>
+type ShimPlainMonthDaySlots = ReturnType<typeof constructMonthDaySlots>
 
-export const getPlainMonthDayShimRecordSlots: (
+export const getShimPlainMonthDaySlots: (
   record: unknown,
-) => PlainMonthDayShimSlots = getPlainMonthDaySlots
+) => ShimPlainMonthDaySlots = getPlainMonthDaySlots
 
-class _PlainMonthDayShimRecord
+class _ShimPlainMonthDayRecord
   implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
 {
   declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
   get calendarId() {
-    return getCalendarSlotId(getPlainMonthDayShimRecordSlots(this).calendar)
+    return getCalendarSlotId(getShimPlainMonthDaySlots(this).calendar)
   }
 
   get monthCode() {
-    const slots = getPlainMonthDayShimRecordSlots(this)
+    const slots = getShimPlainMonthDaySlots(this)
     return computeCalendarMonthCode(slots.calendar, slots)
   }
 
   get day() {
-    const slots = getPlainMonthDayShimRecordSlots(this)
+    const slots = getShimPlainMonthDaySlots(this)
     return computeCalendarDateFields(slots.calendar, slots).day
   }
 
   toJSON() {
-    return formatMonthDayIsoAuto(getPlainMonthDayShimRecordSlots(this))
+    return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(this))
   }
 
   valueOf() {
@@ -80,18 +80,18 @@ class _PlainMonthDayShimRecord
   }
 }
 
-export function createPlainMonthDayShimRecord(
-  slots: PlainMonthDayShimSlots,
-): PlainMonthDayShimRecord {
-  const instance = Object.create(PlainMonthDayShimRecord.prototype)
+export function createShimPlainMonthDayRecord(
+  slots: ShimPlainMonthDaySlots,
+): ShimPlainMonthDayRecord {
+  const instance = Object.create(ShimPlainMonthDayRecord.prototype)
   setPlainMonthDaySlots(instance, slots)
   attachDebugString(instance, slots, formatMonthDayIsoAuto)
   return instance
 }
 
-export type PlainMonthDayShimRecord = _PlainMonthDayShimRecord
-export const PlainMonthDayShimRecord = defineTemporalClass(
-  _PlainMonthDayShimRecord,
+export type ShimPlainMonthDayRecord = _ShimPlainMonthDayRecord
+export const ShimPlainMonthDayRecord = defineTemporalClass(
+  _ShimPlainMonthDayRecord,
   'PlainMonthDay',
 )
 
@@ -100,10 +100,10 @@ export function create(
   isoDay: number,
   calendar?: CalendarRecord,
   referenceIsoYear?: number,
-): PlainMonthDayShimRecord {
-  return createPlainMonthDayShimRecord(
+): ShimPlainMonthDayRecord {
+  return createShimPlainMonthDayRecord(
     constructMonthDaySlots(
-      refineCalendarShimArgMaybe,
+      refineShimCalendarArgMaybe,
       isoMonth,
       isoDay,
       calendar,
@@ -115,77 +115,77 @@ export function create(
 export function fromFields(
   fields: Partial<MonthDayFields & { calendar: CalendarRecord }>,
   options?: Temporal.OverflowOptions,
-): PlainMonthDayShimRecord {
+): ShimPlainMonthDayRecord {
   const inputCalendar = fields.calendar
-  const calendarImpl = refineCalendarShimArgMaybe(inputCalendar)
+  const calendarImpl = refineShimCalendarArgMaybe(inputCalendar)
   const resSlots = refinePlainMonthDayObjectLike(
     calendarImpl,
     !inputCalendar,
     fields as any,
     options,
   )
-  return createPlainMonthDayShimRecord(resSlots)
+  return createShimPlainMonthDayRecord(resSlots)
 }
 
 export function fromString(
   s: string,
   getCalendarRecord: (id: string) => CalendarRecord,
-): PlainMonthDayShimRecord {
-  return createPlainMonthDayShimRecord(
-    parsePlainMonthDay(s, createCalendarShimStringResolver(getCalendarRecord)),
+): ShimPlainMonthDayRecord {
+  return createShimPlainMonthDayRecord(
+    parsePlainMonthDay(s, createShimCalendarStringResolver(getCalendarRecord)),
   )
 }
 
 export function withFields(
-  record: PlainMonthDayShimRecord,
+  record: ShimPlainMonthDayRecord,
   mod: Partial<MonthDayFields>,
   options?: Temporal.OverflowOptions,
-): PlainMonthDayShimRecord {
-  const slots = getPlainMonthDayShimRecordSlots(record)
+): ShimPlainMonthDayRecord {
+  const slots = getShimPlainMonthDaySlots(record)
   const resSlots = mergePlainMonthDayFields(
     slots,
     rejectInvalidBag(mod),
     options,
   )
-  return createPlainMonthDayShimRecord(resSlots)
+  return createShimPlainMonthDayRecord(resSlots)
 }
 
 export function equals(
-  record: PlainMonthDayShimRecord,
-  otherRecord: PlainMonthDayShimRecord,
+  record: ShimPlainMonthDayRecord,
+  otherRecord: ShimPlainMonthDayRecord,
 ): boolean {
-  const slots = getPlainMonthDayShimRecordSlots(record)
-  const otherSlots = getPlainMonthDayShimRecordSlots(otherRecord)
+  const slots = getShimPlainMonthDaySlots(record)
+  const otherSlots = getShimPlainMonthDaySlots(otherRecord)
   return plainMonthDaysEqual(slots, otherSlots)
 }
 
 export function toPlainDate(
-  record: PlainMonthDayShimRecord,
+  record: ShimPlainMonthDayRecord,
   fields: EraYearOrYear,
-): PlainDateShimRecord {
-  const slots = getPlainMonthDayShimRecordSlots(record)
+): ShimPlainDateRecord {
+  const slots = getShimPlainMonthDaySlots(record)
   const resSlots = convertPlainMonthDayToDate(slots.calendar, record, fields)
-  return createPlainDateShimRecord(resSlots)
+  return createShimPlainDateRecord(resSlots)
 }
 
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<PlainMonthDayShimRecord>({
+) => Format = createDateTimeFormatFactory<ShimPlainMonthDayRecord>({
   transformOptions: (options) =>
     applyPlainFormatTimeZone(
       transformMonthDayOptions(options, /* allowPartialOverlap = */ true),
     ),
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
-      const slots = getPlainMonthDayShimRecordSlots(record)
+      const slots = getShimPlainMonthDaySlots(record)
       const format = internals.format
       checkResolvedCalendarCompatible(format, slots, true)
       return [format, isoDateToEpochMilli(slots)!]
     },
     getArgsForRange: (record0, record1) => {
-      const slots0 = getPlainMonthDayShimRecordSlots(record0)
-      const slots1 = getPlainMonthDayShimRecordSlots(record1)
+      const slots0 = getShimPlainMonthDaySlots(record0)
+      const slots1 = getShimPlainMonthDaySlots(record1)
       const format = internals.format
       checkResolvedCalendarCompatible(format, slots0, true)
       checkResolvedCalendarCompatible(format, slots1, true)
@@ -199,11 +199,11 @@ export const createFormat: (
 })
 
 export function toLocaleString(
-  record: PlainMonthDayShimRecord,
+  record: ShimPlainMonthDayRecord,
   locales: LocalesArg | undefined = undefined,
   options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const slots = getPlainMonthDayShimRecordSlots(record)
+  const slots = getShimPlainMonthDaySlots(record)
   const format = new RawDateTimeFormat(
     locales,
     applyPlainFormatTimeZone(
@@ -215,15 +215,12 @@ export function toLocaleString(
 }
 
 export function toString(
-  record: PlainMonthDayShimRecord,
+  record: ShimPlainMonthDayRecord,
   options?: Temporal.PlainDateToStringOptions,
 ): string {
-  return formatPlainMonthDayIso(
-    getPlainMonthDayShimRecordSlots(record),
-    options,
-  )
+  return formatPlainMonthDayIso(getShimPlainMonthDaySlots(record), options)
 }
 
-export function toBasicString(record: PlainMonthDayShimRecord): string {
-  return formatMonthDayIsoAuto(getPlainMonthDayShimRecordSlots(record))
+export function toBasicString(record: ShimPlainMonthDayRecord): string {
+  return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(record))
 }

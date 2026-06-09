@@ -15,24 +15,24 @@ import {
 } from '../temporalRecords'
 import {
   getValidatedCalendarId,
-  refineCalendarNativeArgMaybe,
-  runCalendarNativeResolver,
+  refineNativeCalendarArgMaybe,
+  runNativeCalendarResolver,
 } from './calendarResolve'
 import {
-  DurationNativeRecord,
-  createDurationNativeRecord,
-  getDurationNative,
+  NativeDurationRecord,
+  createNativeDurationRecord,
+  getNativeDuration,
 } from './duration'
-import { InstantNativeRecord, createInstantNativeRecord } from './instant'
-import { PlainDateNativeRecord, createPlainDateNativeRecord } from './plainDate'
+import { NativeInstantRecord, createNativeInstantRecord } from './instant'
+import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
-  PlainDateTimeNativeRecord,
-  createPlainDateTimeNativeRecord,
+  NativePlainDateTimeRecord,
+  createNativePlainDateTimeRecord,
 } from './plainDateTime'
 import {
-  PlainTimeNativeRecord,
-  createPlainTimeNativeRecord,
-  getPlainTimeNative,
+  NativePlainTimeRecord,
+  createNativePlainTimeRecord,
+  getNativePlainTime,
 } from './plainTime'
 import {
   attachDebugString,
@@ -43,79 +43,79 @@ import { createRoundToOptions } from './roundUtils'
 
 type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 
-export const getZonedDateTimeNative: (
+export const getNativeZonedDateTime: (
   record: unknown,
 ) => Temporal.ZonedDateTime = getZonedDateTimeSlots
 
-class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
+class _NativeZonedDateTimeRecord implements ZonedDateTimeRecord {
   declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
   get calendarId() {
-    return getZonedDateTimeNative(this).calendarId
+    return getNativeZonedDateTime(this).calendarId
   }
 
   get epochMilliseconds() {
-    return getZonedDateTimeNative(this).epochMilliseconds
+    return getNativeZonedDateTime(this).epochMilliseconds
   }
 
   get epochNanoseconds() {
-    return getZonedDateTimeNative(this).epochNanoseconds
+    return getNativeZonedDateTime(this).epochNanoseconds
   }
 
   get timeZoneId() {
-    return getZonedDateTimeNative(this).timeZoneId
+    return getNativeZonedDateTime(this).timeZoneId
   }
 
   get era() {
-    return getZonedDateTimeNative(this).era
+    return getNativeZonedDateTime(this).era
   }
 
   get eraYear() {
-    return getZonedDateTimeNative(this).eraYear
+    return getNativeZonedDateTime(this).eraYear
   }
 
   get year() {
-    return getZonedDateTimeNative(this).year
+    return getNativeZonedDateTime(this).year
   }
 
   get month() {
-    return getZonedDateTimeNative(this).month
+    return getNativeZonedDateTime(this).month
   }
 
   get monthCode() {
-    return getZonedDateTimeNative(this).monthCode
+    return getNativeZonedDateTime(this).monthCode
   }
 
   get day() {
-    return getZonedDateTimeNative(this).day
+    return getNativeZonedDateTime(this).day
   }
 
   get hour() {
-    return getZonedDateTimeNative(this).hour
+    return getNativeZonedDateTime(this).hour
   }
 
   get minute() {
-    return getZonedDateTimeNative(this).minute
+    return getNativeZonedDateTime(this).minute
   }
 
   get second() {
-    return getZonedDateTimeNative(this).second
+    return getNativeZonedDateTime(this).second
   }
 
   get millisecond() {
-    return getZonedDateTimeNative(this).millisecond
+    return getNativeZonedDateTime(this).millisecond
   }
 
   get microsecond() {
-    return getZonedDateTimeNative(this).microsecond
+    return getNativeZonedDateTime(this).microsecond
   }
 
   get nanosecond() {
-    return getZonedDateTimeNative(this).nanosecond
+    return getNativeZonedDateTime(this).nanosecond
   }
 
   toJSON() {
-    return getZonedDateTimeNative(this).toString()
+    return getNativeZonedDateTime(this).toString()
   }
 
   valueOf() {
@@ -123,18 +123,18 @@ class _ZonedDateTimeNativeRecord implements ZonedDateTimeRecord {
   }
 }
 
-export function createZonedDateTimeNativeRecord(
+export function createNativeZonedDateTimeRecord(
   native: Temporal.ZonedDateTime,
-): ZonedDateTimeNativeRecord {
-  const instance = Object.create(ZonedDateTimeNativeRecord.prototype)
+): NativeZonedDateTimeRecord {
+  const instance = Object.create(NativeZonedDateTimeRecord.prototype)
   setZonedDateTimeSlots(instance, native)
   attachDebugString(instance, native, (slots) => slots.toString())
   return instance
 }
 
-export type ZonedDateTimeNativeRecord = _ZonedDateTimeNativeRecord
-export const ZonedDateTimeNativeRecord = defineTemporalClass(
-  _ZonedDateTimeNativeRecord,
+export type NativeZonedDateTimeRecord = _NativeZonedDateTimeRecord
+export const NativeZonedDateTimeRecord = defineTemporalClass(
+  _NativeZonedDateTimeRecord,
   'ZonedDateTime',
 )
 
@@ -142,12 +142,12 @@ export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
   calendar?: CalendarRecord,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     new NativeTemporal!.ZonedDateTime(
       epochNanoseconds,
       timeZoneId,
-      refineCalendarNativeArgMaybe(calendar),
+      refineNativeCalendarArgMaybe(calendar),
     ),
   )
 }
@@ -155,209 +155,209 @@ export function create(
 export function fromFields(
   fields: ZonedDateTimeFields<CalendarRecord>,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeNativeRecord {
-  const calendar = refineCalendarNativeArgMaybe(fields.calendar)
+): NativeZonedDateTimeRecord {
+  const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.ZonedDateTime.from(
     { ...fields, calendar } as any, // !!! TODO - day is required
     options,
   )
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function fromString(
   s: string,
   getCalendarRecord: (id: string) => CalendarRecord,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeNativeRecord {
+): NativeZonedDateTimeRecord {
   const resNative = NativeTemporal!.ZonedDateTime.from(s, options)
-  runCalendarNativeResolver(resNative.calendarId, getCalendarRecord)
-  return createZonedDateTimeNativeRecord(resNative)
+  runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function withFields(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   mod: Partial<DateTimeFields>,
   options?: Temporal.ZonedDateTimeFromOptions,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const resNative = native.with(mod, options)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function withCalendar(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   calendarRecord: CalendarRecord,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const calendarId = getValidatedCalendarId(calendarRecord)
   const resNative = native.withCalendar(calendarId)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function withTimeZone(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   timeZoneId: string,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const resNative = native.withTimeZone(timeZoneId)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function withPlainTime(
-  record: ZonedDateTimeNativeRecord,
-  plainTimeRecord?: PlainTimeNativeRecord,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+  record: NativeZonedDateTimeRecord,
+  plainTimeRecord?: NativePlainTimeRecord,
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const plainTimeNative =
     plainTimeRecord === undefined
       ? undefined
-      : getPlainTimeNative(plainTimeRecord)
+      : getNativePlainTime(plainTimeRecord)
   const resNative = native.withPlainTime(plainTimeNative)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
-export function offsetNanoseconds(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).offsetNanoseconds
+export function offsetNanoseconds(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).offsetNanoseconds
 }
 
-export function offset(record: ZonedDateTimeNativeRecord): string {
-  return getZonedDateTimeNative(record).offset
+export function offset(record: NativeZonedDateTimeRecord): string {
+  return getNativeZonedDateTime(record).offset
 }
 
-export function dayOfWeek(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).dayOfWeek
+export function dayOfWeek(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).dayOfWeek
 }
 
-export function daysInWeek(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).daysInWeek
+export function daysInWeek(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).daysInWeek
 }
 
 export function weekOfYear(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
 ): number | undefined {
-  return getZonedDateTimeNative(record).weekOfYear
+  return getNativeZonedDateTime(record).weekOfYear
 }
 
 export function yearOfWeek(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
 ): number | undefined {
-  return getZonedDateTimeNative(record).yearOfWeek
+  return getNativeZonedDateTime(record).yearOfWeek
 }
 
-export function dayOfYear(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).dayOfYear
+export function dayOfYear(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).dayOfYear
 }
 
-export function daysInMonth(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).daysInMonth
+export function daysInMonth(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).daysInMonth
 }
 
-export function daysInYear(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).daysInYear
+export function daysInYear(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).daysInYear
 }
 
-export function monthsInYear(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).monthsInYear
+export function monthsInYear(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).monthsInYear
 }
 
-export function inLeapYear(record: ZonedDateTimeNativeRecord): boolean {
-  return getZonedDateTimeNative(record).inLeapYear
+export function inLeapYear(record: NativeZonedDateTimeRecord): boolean {
+  return getNativeZonedDateTime(record).inLeapYear
 }
 
-export function hoursInDay(record: ZonedDateTimeNativeRecord): number {
-  return getZonedDateTimeNative(record).hoursInDay
+export function hoursInDay(record: NativeZonedDateTimeRecord): number {
+  return getNativeZonedDateTime(record).hoursInDay
 }
 
 export function toString(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options?: Temporal.ZonedDateTimeToStringOptions,
 ): string {
-  return getZonedDateTimeNative(record).toString(options)
+  return getNativeZonedDateTime(record).toString(options)
 }
 
-export function toBasicString(record: ZonedDateTimeNativeRecord): string {
-  return getZonedDateTimeNative(record).toString()
+export function toBasicString(record: NativeZonedDateTimeRecord): string {
+  return getNativeZonedDateTime(record).toString()
 }
 
 export function add(
-  record: ZonedDateTimeNativeRecord,
-  duration: DurationNativeRecord,
+  record: NativeZonedDateTimeRecord,
+  duration: NativeDurationRecord,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
-  const durationNative = getDurationNative(duration)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
+  const durationNative = getNativeDuration(duration)
   const resNative = native.add(durationNative, options)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function subtract(
-  record: ZonedDateTimeNativeRecord,
-  duration: DurationNativeRecord,
+  record: NativeZonedDateTimeRecord,
+  duration: NativeDurationRecord,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
-  const durationNative = getDurationNative(duration)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
+  const durationNative = getNativeDuration(duration)
   const resNative = native.subtract(durationNative, options)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 // this is equivalent to Temporal's `until`
 export function diff(
-  record: ZonedDateTimeNativeRecord,
-  otherRecord: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
+  otherRecord: NativeZonedDateTimeRecord,
   options?: Temporal.RoundingOptionsWithLargestUnit<
     Temporal.DateUnit | Temporal.TimeUnit
   >,
-): DurationNativeRecord {
-  const native = getZonedDateTimeNative(record)
-  const otherNative = getZonedDateTimeNative(otherRecord)
+): NativeDurationRecord {
+  const native = getNativeZonedDateTime(record)
+  const otherNative = getNativeZonedDateTime(otherRecord)
   const resNative = native.until(otherNative, options)
-  return createDurationNativeRecord(resNative)
+  return createNativeDurationRecord(resNative)
 }
 
 function round(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options: Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const resNative = native.round(options)
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function startOfDay(
-  record: ZonedDateTimeNativeRecord,
-): ZonedDateTimeNativeRecord {
-  const native = getZonedDateTimeNative(record)
+  record: NativeZonedDateTimeRecord,
+): NativeZonedDateTimeRecord {
+  const native = getNativeZonedDateTime(record)
   const resNative = native.startOfDay()
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function getTimeZoneTransition(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
-): ZonedDateTimeNativeRecord | null {
-  const native = getZonedDateTimeNative(record)
+): NativeZonedDateTimeRecord | null {
+  const native = getNativeZonedDateTime(record)
   const resNative = native.getTimeZoneTransition(
     normalizeTransitionOptions(options),
   )
-  return resNative ? createZonedDateTimeNativeRecord(resNative) : null
+  return resNative ? createNativeZonedDateTimeRecord(resNative) : null
 }
 
 export function equals(
-  record: ZonedDateTimeNativeRecord,
-  otherRecord: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
+  otherRecord: NativeZonedDateTimeRecord,
 ): boolean {
-  const native = getZonedDateTimeNative(record)
-  const otherNative = getZonedDateTimeNative(otherRecord)
+  const native = getNativeZonedDateTime(record)
+  const otherNative = getNativeZonedDateTime(otherRecord)
   return native.equals(otherNative)
 }
 
 export function compare(
-  record: ZonedDateTimeNativeRecord,
-  otherRecord: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
+  otherRecord: NativeZonedDateTimeRecord,
 ): NumberSign {
-  const native = getZonedDateTimeNative(record)
-  const otherNative = getZonedDateTimeNative(otherRecord)
+  const native = getNativeZonedDateTime(record)
+  const otherNative = getNativeZonedDateTime(otherRecord)
   return NativeTemporal!.ZonedDateTime.compare(
     native,
     otherNative,
@@ -365,52 +365,52 @@ export function compare(
 }
 
 export function toInstant(
-  record: ZonedDateTimeNativeRecord,
-): InstantNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toInstant()
-  return createInstantNativeRecord(resNative)
+  record: NativeZonedDateTimeRecord,
+): NativeInstantRecord {
+  const resNative = getNativeZonedDateTime(record).toInstant()
+  return createNativeInstantRecord(resNative)
 }
 
 export function toPlainDateTime(
-  record: ZonedDateTimeNativeRecord,
-): PlainDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toPlainDateTime()
-  return createPlainDateTimeNativeRecord(resNative)
+  record: NativeZonedDateTimeRecord,
+): NativePlainDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).toPlainDateTime()
+  return createNativePlainDateTimeRecord(resNative)
 }
 
 export function toPlainDate(
-  record: ZonedDateTimeNativeRecord,
-): PlainDateNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toPlainDate()
-  return createPlainDateNativeRecord(resNative)
+  record: NativeZonedDateTimeRecord,
+): NativePlainDateRecord {
+  const resNative = getNativeZonedDateTime(record).toPlainDate()
+  return createNativePlainDateRecord(resNative)
 }
 
 export function toPlainTime(
-  record: ZonedDateTimeNativeRecord,
-): PlainTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).toPlainTime()
-  return createPlainTimeNativeRecord(resNative)
+  record: NativeZonedDateTimeRecord,
+): NativePlainTimeRecord {
+  const resNative = getNativeZonedDateTime(record).toPlainTime()
+  return createNativePlainTimeRecord(resNative)
 }
 
 export function toLocaleString(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  return getZonedDateTimeNative(record).toLocaleString(locales, options)
+  return getNativeZonedDateTime(record).toLocaleString(locales, options)
 }
 
 // Non-standard: With
 // -----------------------------------------------------------------------------
 
 export function withDayOfYear(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   dayOfYear: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.withDayOfYear(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       dayOfYear,
       options,
     ),
@@ -418,25 +418,25 @@ export function withDayOfYear(
 }
 
 export function withDayOfMonth(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   dayOfMonth: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).with(
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).with(
     { day: dayOfMonth },
     options,
   )
-  return createZonedDateTimeNativeRecord(resNative)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 export function withDayOfWeek(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   dayOfWeek: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.withDayOfWeek(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       dayOfWeek,
       options,
     ),
@@ -444,13 +444,13 @@ export function withDayOfWeek(
 }
 
 export function withWeekOfYear(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   weekOfYear: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.withWeekOfYear(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       weekOfYear,
       options,
     ),
@@ -461,182 +461,182 @@ export function withWeekOfYear(
 // -----------------------------------------------------------------------------
 
 export function addYears(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   years: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ years }, options)
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ years }, options)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addMonths(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   months: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ months }, options)
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ months }, options)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addWeeks(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   weeks: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ weeks })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ weeks })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addDays(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   days: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ days })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ days })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addHours(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   hours: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ hours })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ hours })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addMinutes(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   minutes: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ minutes })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ minutes })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addSeconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   seconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ seconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ seconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addMilliseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   milliseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ milliseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ milliseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addMicroseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   microseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ microseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ microseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function addNanoseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   nanoseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).add({ nanoseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).add({ nanoseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractYears(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   years: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ years }, options)
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ years }, options)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractMonths(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   months: number,
   options?: Temporal.OverflowOptions,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ months }, options)
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ months }, options)
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractWeeks(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   weeks: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ weeks })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ weeks })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractDays(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   days: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ days })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ days })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractHours(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   hours: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ hours })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ hours })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractMinutes(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   minutes: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ minutes })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ minutes })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractSeconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   seconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ seconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ seconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractMilliseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   milliseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ milliseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ milliseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractMicroseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   microseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ microseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ microseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 export function subtractNanoseconds(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   nanoseconds: number,
-): ZonedDateTimeNativeRecord {
-  const resNative = getZonedDateTimeNative(record).subtract({ nanoseconds })
-  return createZonedDateTimeNativeRecord(resNative)
+): NativeZonedDateTimeRecord {
+  const resNative = getNativeZonedDateTime(record).subtract({ nanoseconds })
+  return createNativeZonedDateTimeRecord(resNative)
 }
 
 // Non-standard: Round / Start / End
 // -----------------------------------------------------------------------------
 
 export function roundToYear(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToYear(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       normalizeRoundToOptions(options),
     ),
   )
 }
 export function roundToMonth(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToMonth(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       normalizeRoundToOptions(options),
     ),
   )
 }
 export function roundToWeek(
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeNativeRecord {
-  return createZonedDateTimeNativeRecord(
+): NativeZonedDateTimeRecord {
+  return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToWeek(
-      getZonedDateTimeNative(record),
+      getNativeZonedDateTime(record),
       normalizeRoundToOptions(options),
     ),
   )
@@ -644,9 +644,9 @@ export function roundToWeek(
 
 function roundToDayTimeUnit(
   smallestUnit: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>,
-  record: ZonedDateTimeNativeRecord,
+  record: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
-): ZonedDateTimeNativeRecord {
+): NativeZonedDateTimeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
 }
 
@@ -669,90 +669,90 @@ export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
 export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
 export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
 
-export function startOfYear(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfYear(getZonedDateTimeNative(record)),
+export function startOfYear(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfYear(getNativeZonedDateTime(record)),
   )
 }
-export function startOfMonth(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfMonth(getZonedDateTimeNative(record)),
+export function startOfMonth(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfMonth(getNativeZonedDateTime(record)),
   )
 }
-export function startOfWeek(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfWeek(getZonedDateTimeNative(record)),
+export function startOfWeek(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfWeek(getNativeZonedDateTime(record)),
   )
 }
-export function startOfHour(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfHour(getZonedDateTimeNative(record)),
+export function startOfHour(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfHour(getNativeZonedDateTime(record)),
   )
 }
-export function startOfMinute(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfMinute(getZonedDateTimeNative(record)),
+export function startOfMinute(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfMinute(getNativeZonedDateTime(record)),
   )
 }
-export function startOfSecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfSecond(getZonedDateTimeNative(record)),
+export function startOfSecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfSecond(getNativeZonedDateTime(record)),
   )
 }
-export function startOfMillisecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfMillisecond(getZonedDateTimeNative(record)),
+export function startOfMillisecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfMillisecond(getNativeZonedDateTime(record)),
   )
 }
-export function startOfMicrosecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.startOfMicrosecond(getZonedDateTimeNative(record)),
+export function startOfMicrosecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.startOfMicrosecond(getNativeZonedDateTime(record)),
   )
 }
 
-export function endOfYear(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfYear(getZonedDateTimeNative(record)),
+export function endOfYear(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfYear(getNativeZonedDateTime(record)),
   )
 }
-export function endOfMonth(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfMonth(getZonedDateTimeNative(record)),
+export function endOfMonth(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfMonth(getNativeZonedDateTime(record)),
   )
 }
-export function endOfWeek(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfWeek(getZonedDateTimeNative(record)),
+export function endOfWeek(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfWeek(getNativeZonedDateTime(record)),
   )
 }
-export function endOfDay(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfDay(getZonedDateTimeNative(record)),
+export function endOfDay(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfDay(getNativeZonedDateTime(record)),
   )
 }
-export function endOfHour(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfHour(getZonedDateTimeNative(record)),
+export function endOfHour(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfHour(getNativeZonedDateTime(record)),
   )
 }
-export function endOfMinute(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfMinute(getZonedDateTimeNative(record)),
+export function endOfMinute(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfMinute(getNativeZonedDateTime(record)),
   )
 }
-export function endOfSecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfSecond(getZonedDateTimeNative(record)),
+export function endOfSecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfSecond(getNativeZonedDateTime(record)),
   )
 }
-export function endOfMillisecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfMillisecond(getZonedDateTimeNative(record)),
+export function endOfMillisecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfMillisecond(getNativeZonedDateTime(record)),
   )
 }
-export function endOfMicrosecond(record: ZonedDateTimeNativeRecord) {
-  return createZonedDateTimeNativeRecord(
-    TemporalUtils.endOfMicrosecond(getZonedDateTimeNative(record)),
+export function endOfMicrosecond(record: NativeZonedDateTimeRecord) {
+  return createNativeZonedDateTimeRecord(
+    TemporalUtils.endOfMicrosecond(getNativeZonedDateTime(record)),
   )
 }
 
@@ -760,106 +760,106 @@ export function endOfMicrosecond(record: ZonedDateTimeNativeRecord) {
 // -----------------------------------------------------------------------------
 
 export function diffYears(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffMonths(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffWeeks(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffWeeks as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffDays(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffDays as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffHours(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffHours as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffMinutes(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffMinutes as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffSeconds(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (TemporalUtils.diffSeconds as NativeDiffFunc<Temporal.ZonedDateTime>)(
-    getZonedDateTimeNative(record0),
-    getZonedDateTimeNative(record1),
+    getNativeZonedDateTime(record0),
+    getNativeZonedDateTime(record1),
     options,
   )
 }
 export function diffMilliseconds(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (
     TemporalUtils.diffMilliseconds as NativeDiffFunc<Temporal.ZonedDateTime>
-  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
+  )(getNativeZonedDateTime(record0), getNativeZonedDateTime(record1), options)
 }
 export function diffMicroseconds(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (
     TemporalUtils.diffMicroseconds as NativeDiffFunc<Temporal.ZonedDateTime>
-  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
+  )(getNativeZonedDateTime(record0), getNativeZonedDateTime(record1), options)
 }
 export function diffNanoseconds(
-  record0: ZonedDateTimeNativeRecord,
-  record1: ZonedDateTimeNativeRecord,
+  record0: NativeZonedDateTimeRecord,
+  record1: NativeZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return (
     TemporalUtils.diffNanoseconds as NativeDiffFunc<Temporal.ZonedDateTime>
-  )(getZonedDateTimeNative(record0), getZonedDateTimeNative(record1), options)
+  )(getNativeZonedDateTime(record0), getNativeZonedDateTime(record1), options)
 }
