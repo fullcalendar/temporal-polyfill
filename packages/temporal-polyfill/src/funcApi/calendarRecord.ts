@@ -4,11 +4,11 @@ import {
 } from '../apiHelpers/classStyle'
 import { CalendarImpl } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
-import { CalendarRecordBrand } from './recordTypes'
+import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
-class _CalendarShimRecord implements CalendarRecord {
-  declare readonly [CalendarRecordBrand]: undefined
+class _CalendarShimRecord implements RecordTypes.CalendarRecord {
+  declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
   toJSON() {
     return getCalendarRecordId(this)
