@@ -87,23 +87,14 @@ const deprecatedExoticCalendarIdMap: Record<string, string> = {
 /*
 Used to create a stable ExoticCalendar when caller has guaranteed creator-function
 */
-export const getOrCreateExoticCalendar = memoize(
+const getOrCreateExoticCalendar = memoize(
   (createExoticCalendar: () => ExoticCalendar) => createExoticCalendar(),
 )
 
-/*
-If creator-function undefined, returns undefined
-Otherwise, returns cached getter function
-Built for CalendarRecord lazy-resolution
-
-TODO: move this to funcApi/calendar.ts ???
-*/
 export function createExoticCalendarGetter(
-  createExoticCalendar: (() => ExoticCalendar) | undefined,
-): (() => ExoticCalendar) | undefined {
-  return createExoticCalendar
-    ? () => getOrCreateExoticCalendar(createExoticCalendar)
-    : undefined
+  createExoticCalendar: () => ExoticCalendar,
+): () => ExoticCalendar {
+  return () => getOrCreateExoticCalendar(createExoticCalendar)
 }
 
 // Exotic Map Querying

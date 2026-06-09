@@ -70,7 +70,10 @@ describe('fromString', () => {
     })
   })
 
-  it('requires an explicit resolver for intl calendar strings', () => {
+  it('requires an explicit resolver for intl calendar strings even when exotic cache is hot', () => {
+    // Warm the exotic calendar cache first. A basic-only resolver still must
+    // reject the string calendar annotation instead of reusing that record.
+    CalendarFns.getExotic('hebrew')
     expect(() =>
       PlainDateFns.fromString('2024-01-01[u-ca=hebrew]', CalendarFns.getBasic),
     ).toThrow(RangeError)

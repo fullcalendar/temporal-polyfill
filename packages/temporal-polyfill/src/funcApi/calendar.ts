@@ -3,10 +3,10 @@ import {
   buddhistMeta,
   chineseMeta,
   copticMeta,
+  createExoticCalendarGetter,
   dangiMeta,
   ethiopicAmeteAlemMeta,
   ethiopicMeta,
-  getOrCreateExoticCalendar,
   hebrewMeta,
   indianMeta,
   islamicCivilMeta,
@@ -82,8 +82,7 @@ export function getBasic(rawCalendarId: string): Record {
   }
 
   // will lazily error when getCalendarRecordImplCreator is called
-  // TODO: make more formal creator for this?
-  return getOrCreateRecord(rawCalendarId)
+  return getOrCreateUnknownRecord(rawCalendarId)
 }
 
 export function getAny(rawCalendarId: string): Record {
@@ -97,35 +96,38 @@ export function getAny(rawCalendarId: string): Record {
   }
 
   const createImpl = queryExoticCalendarCreator(lowerRawCalendarId)
-  return getOrCreateRecord(rawCalendarId, createImpl)
+  return createImpl
+    ? getOrCreateFoundRecord(rawCalendarId, createImpl)
+    : getOrCreateUnknownRecord(rawCalendarId)
 }
 
 export function getExotic(rawCalendarId: string): Record {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
   const createImpl = queryExoticCalendarCreator(lowerRawCalendarId)
-  return getOrCreateRecord(rawCalendarId, createImpl)
+  return createImpl
+    ? getOrCreateFoundRecord(rawCalendarId, createImpl)
+    : getOrCreateUnknownRecord(rawCalendarId)
 }
 
 // utils
 // -----
 
-const getOrCreateRecord = memoize(
-  (
-    rawCalendarId: string,
-    createImpl?: () => ExoticCalendar, // if blank, unknown calendar
-  ): Record => {
-    const getImpl = createImpl
-      ? () => getOrCreateExoticCalendar(createImpl)
-      : undefined
-
-    return createCalendarRecord(rawCalendarId, getImpl)
-  },
+const getOrCreateFoundRecord = memoize(
+  (rawCalendarId: string, createImpl: () => ExoticCalendar): Record =>
+    createCalendarRecord(rawCalendarId, createExoticCalendarGetter(createImpl)),
 )
+
+// Basic-only callers must not inherit an exotic implementation from a hot
+// cache. Keep unresolved records and exotic-capable records in separate
+// keyspaces even when they have the same user-visible calendar ID.
+const getOrCreateUnknownRecord = memoize(createCalendarRecord) as (
+  rawCalendarId: string,
+) => Record
 
 function createCanonicalGetter([
   canonicalCalendarId,
   createImpl,
 ]: CalendarImplTuple): () => Record {
-  return () => getOrCreateRecord(canonicalCalendarId, createImpl)
+  return () => getOrCreateFoundRecord(canonicalCalendarId, createImpl)
 }

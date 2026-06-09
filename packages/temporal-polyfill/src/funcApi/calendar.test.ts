@@ -30,6 +30,12 @@ describe('function calendar records', () => {
     expect(CalendarFns.getExotic('BUDDHIST')).not.toBe(
       CalendarFns.getExotic('buddhist'),
     )
+    // Basic-only and exotic-capable resolver APIs intentionally return
+    // different records, even for the same raw ID, so their validation
+    // policies cannot leak into each other through the record cache.
+    expect(CalendarFns.getBasic('buddhist')).not.toBe(
+      CalendarFns.getExotic('buddhist'),
+    )
 
     for (const [calendarId, getCalendar] of exoticCalendarGetters) {
       expect(getCalendar()).toBe(getCalendar())
@@ -60,6 +66,20 @@ describe('function calendar records', () => {
 
     expect(date.calendarId).toBe('buddhist')
     expect(date.year).toBe(2567)
+  })
+
+  it('defers unknown calendar errors until function API operations use them', () => {
+    const basicCalendar = CalendarFns.getBasic('something-crazy')
+    const exoticCalendar = CalendarFns.getExotic('something-crazy')
+
+    expect(basicCalendar.valueOf()).toBe('something-crazy')
+    expect(exoticCalendar.valueOf()).toBe('something-crazy')
+    expect(() => PlainDateFns.create(2024, 1, 1, basicCalendar)).toThrow(
+      RangeError,
+    )
+    expect(() => PlainDateFns.create(2024, 1, 1, exoticCalendar)).toThrow(
+      RangeError,
+    )
   })
 
   it('returns the calendar id from valueOf', () => {
