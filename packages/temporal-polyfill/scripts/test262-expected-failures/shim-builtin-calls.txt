@@ -1,9 +1,14 @@
-
-# TODO: RETHINK
-# not allowed to call built-in utilities like Number.isFinite or Math.sign
+# BUILTIN-USAGE
+# Basic built-in utility calls are acceptable in the shim. This test fails
+# because Duration construction calls Number.isFinite and Math.sign.
 built-ins/Temporal/Duration/call-builtin.js
 
-# TODO: RETHINK
-# we use array spreading internally
+# BUILTIN-USAGE
+# Basic array spreading is acceptable in the shim. These tests fail because
+# PlainYearMonth difference methods and time-zone conversion helpers observe
+# Array.prototype[Symbol.iterator].
 built-ins/Temporal/PlainYearMonth/prototype/subtract/builtin-calendar-no-array-iteration.js
 built-ins/Temporal/PlainYearMonth/prototype/since/builtin-calendar-no-array-iteration.js
+built-ins/Temporal/Instant/prototype/toZonedDateTimeISO/no-observable-array-iteration.js
+built-ins/Temporal/PlainDate/prototype/toZonedDateTime/no-observable-array-iteration.js
+built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/no-observable-array-iteration.js

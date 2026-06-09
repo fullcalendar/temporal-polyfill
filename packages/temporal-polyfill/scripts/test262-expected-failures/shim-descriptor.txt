@@ -1,4 +1,3 @@
-
 # builtin
 # Asserts Object.getPrototypeOf(Intl.DateTimeFormat.prototype) === Object.prototype.
 # Our Intl.DateTimeFormat subclasses native DateTimeFormat (class ShimDateTimeFormat

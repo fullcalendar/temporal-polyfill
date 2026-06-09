@@ -1,12 +1,9 @@
-
-# ENV-ISSUE
 # Node >=26 has native Temporal, so the Test262 runner uses the public
 # native-precedence dist/global.js artifact instead of the force-shim Test262
 # artifact. The failures below are differences between the Node native Temporal
 # implementation and the current Test262 expectations. Keeping them isolated
 # here lets CI verify that our native-precedence wiring works without treating
 # native runtime skew as polyfill shim regressions.
-
 built-ins/Temporal/Duration/prototype/add/float64-representable-integer.js
 built-ins/Temporal/Duration/prototype/round/float64-representable-integer.js
 built-ins/Temporal/Duration/prototype/round/rounding-window.js

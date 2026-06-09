@@ -1,4 +1,3 @@
-
 # ENV-ISSUE
 # Node <=22 does not provide Intl.DurationFormat. Duration#toLocaleString still
 # has an ISO-string fallback for useful behavior, but this ECMA-402 test compares
@@ -12,7 +11,7 @@ intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-Durat
 # failure, so keep this out of the general shim expected-failure list.
 intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
 
-# WONTFIX for real
+# ENV-ISSUE
 # Node <=22 host Intl.DateTimeFormat resolvedOptions().timeZone has IANA
 # link-name equality/canonicalization mismatches that vary by host data:
 # Node <=20 misses Asia/Choibalsan -> Asia/Ulaanbaatar, while Node 22 can

@@ -1,7 +1,3 @@
-##
-## Minifier function.length non-conformance
-##
-
 # Some minifier configurations intentionally do not preserve function `.length`,
 # either by removing `= void 0` default parameter initializers or by removing
 # unused formal parameters. Keep this list limited to direct length-conformance

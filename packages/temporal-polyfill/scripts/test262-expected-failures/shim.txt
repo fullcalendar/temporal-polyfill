@@ -1,25 +1,4 @@
-##
-## In addition to the ignored tests below, see other files:
-##
-##   - shim-node-*.txt
-##     Node-version-specific host Intl and runtime differences
-##
-##   - shim-descriptor.txt
-##     We construct our Temporal classes programmatically, not with ES6 `class`.
-##     Thus, our property descriptors are not 100% compliant with the spec.
-##
-##   - shim-builtin-calls.txt
-##     Our polyfill calls methods like Array::push directly on objects,
-##     which could be vulnerable to prototype pollution.
-##     We are weighing cost/benefit of always calling static method references.
-##
-
-
-##
-## Spec deviations (8 total)
-##
-
-# WONTFIX (1)
+# WONTFIX
 # The spec calls for higher floating-point division precision than what JS's
 # 64-bit floats provide. proposal-temporal/polyfill achieves this via string
 # manipulation hacks:
@@ -51,47 +30,24 @@ built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-
 # https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/timeduration.mjs#L92
 built-ins/Temporal/Duration/prototype/total/relativeto-total-of-each-unit.js
 
-# TEMPORARY (3)
-# We intentionally allow tuple/argument spread again in a few internal paths.
-# These tests assert that Array.prototype[Symbol.iterator] is not observed
-# while plumbing Temporal tuples through time-zone conversion helpers.
-built-ins/Temporal/Instant/prototype/toZonedDateTimeISO/no-observable-array-iteration.js
-built-ins/Temporal/PlainDate/prototype/toZonedDateTime/no-observable-array-iteration.js
-built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime/no-observable-array-iteration.js
-
-# WONTFIX (2)
-# Our polyfill does not fully support the lowest/highest year of some i18n
-# calendars because:
+# TEMPORARY
+# We want this test to pass for arithmetic calendars such as Coptic. The current
+# first failure is Coptic at the upper ISO edge: PlainYearMonth.from creates a
+# valid ISO reference date, but computeDateFieldsFromEpochMilli converts that
+# date through epoch milliseconds and produces NaN calendar fields near the
+# TimeClip boundary. A proper fix likely needs the arithmetic calendar path to
+# convert ISO dates directly through Julian-day math, possibly involving the
+# gregoryToJulianDay helper.
 #
-# A) To convert between ISO dates and non-ISO YMD values, we must use
-#    Intl.DateTimeFormat scraping to crawl through a year's months. The
-#    `withCalendar` tests fail while reading non-ISO fields from an ISO edge
-#    date; the `from` tests fail while resolving non-ISO fields back to an ISO
-#    date. In both directions, if the requested date is within-bounds but the
-#    calendar year boundary used for probing is not, our algorithm chokes.
-#
-# Failing code:
-#   new Temporal.PlainDate(-271821, 4, 21, 'buddhist').month
-#   // 2 days within epoch-milliseconds lower bound, but still fails
-#
-# B) -271821-04-19 is a valid PlainDate but it's out-of-range when computing UTC
-#    epoch-milliseconds for Intl.DateTimeFormat. Possible to use a negative
-#    offset time zone like America/Chicago, but this special-case is cumbersome.
-#    Similar TimeClip issues happen at the upper edge when probing beyond
-#    +8640000000000000 ms.
+# ENV-ISSUE
+# TODO: after above fixed, move this test to calendar-extreme-dates.txt
+# The same test also covers Chinese and Dangi extreme dates. Those calendars are
+# lunisolar and still rely on host Intl.DateTimeFormat/ICU data for far-edge
+# conversions, where implementations can throw internal errors or otherwise be
+# unreliable. We do not intend to ship a full independent astronomical calendar
+# engine just to satisfy those extreme cases.
 #
 intl402/Temporal/PlainYearMonth/from/extreme-dates.js
-
-# WONTFIX (3)
-# We do not patch Intl.DateTimeFormat's constructor to more strictly validate
-# timeZone strings
-#
-# Rejecting invalid minus sign: see shim-node-gte22.txt
-
-##
-## Issues with environment, already ignored in proposal-temporal/polyfill
-## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
-##
 
 # ENV-ISSUE
 # Temporal test262 runner does not support $262.createRealm()
@@ -101,31 +57,13 @@ intl402/DateTimeFormat/proto-from-ctor-realm.js
 # https://github.com/tc39/ecma402/issues/402
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 
-
-##
-## TEMPORARY failures while fixing Stage 4 compliance
-##
-
-# WONTFIX for real - extension of WONTFIX (2)
-# Temporal plain objects can represent dates at the edge of Temporal's ISO
-# range, including instants that are outside JavaScript Date's TimeClip range.
-# ECMA-402's Temporal bridge formats those plain values from Temporal format
-# records / epoch nanoseconds and must not apply Date TimeClip.
-#
-# This polyfill's Intl.DateTimeFormat wrapper currently does a narrower bridge:
-# it converts Temporal.PlainDate, Temporal.PlainDateTime, and
-# Temporal.PlainYearMonth to epoch milliseconds and then delegates to native
-# Intl.DateTimeFormat format-like methods with those numbers. Native Intl treats
-# number inputs like Date-time values, so out-of-TimeClip values throw
-# RangeError: Invalid time value before the formatter can produce string output
-# or parts.
-#
-# Fixing these correctly requires a larger Temporal-aware formatting path for
-# format, formatToParts, formatRange, and formatRangeToParts. A small patch that
-# clamps, offsets, or string-rewrites native Intl output would be wrong because
-# the tests cover calendar-sensitive fields, weekdays, ranges, and numbering
-# systems. Keep these expected failures grouped until the bridge no longer
-# relies on Date-bounded epoch milliseconds for Temporal plain objects.
+# ENV-ISSUE
+# Native Intl.DateTimeFormat's JS-facing format methods accept Date-bounded
+# epoch milliseconds. ECMA-402's Temporal bridge instead formats plain Temporal
+# objects from internal epoch-nanosecond records, so edge ISO dates must not hit
+# Date TimeClip. Our wrapper delegates through epoch milliseconds, so these
+# out-of-TimeClip Temporal plain-object cases throw before native Intl can
+# produce strings or parts.
 intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip-non-latin-numerals.js
 intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip-weekday.js
 intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip.js
@@ -136,19 +74,11 @@ intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-cli
 intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip-weekday.js
 intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js
 
-# WONTFIX for real - TODO: combine with groups above
-# Intl host-compliance gaps we intentionally do not paper over
-#
-# The polyfill wraps Intl.DateTimeFormat enough to preserve Temporal object
-# input/output shapes and to make ordinary formatting behavior work, but it is
-# not intended to become a string-level compatibility layer for every ECMA-402
-# feature that the host Intl implementation has not caught up with yet.
-#
-# In particular, these failures come from Node/ICU behavior that would require
-# patching formatted era strings, reimplementing Unicode-extension option
-# resolution, or normalizing broad Islamic fallback calendar IDs. That kind of
-# broad Intl shim is brittle and out of scope unless a future fix is small,
-# local, and clearly improves real Temporal behavior.
+# ENV-ISSUE
+# Native Intl differences around time-zone canonicalization, Unicode-extension
+# option resolution, Islamic fallback calendar IDs, and era part strings would
+# require a broad DateTimeFormat compatibility shim. Keep these failures unless
+# a future fix is small, local, and clearly improves real Temporal behavior.
 intl402/DateTimeFormat/canonicalize-timezone.js
 intl402/DateTimeFormat/canonicalize-utc-timezone.js
 intl402/DateTimeFormat/constructor-options-calendar-islamic-fallback.js
@@ -159,7 +89,7 @@ intl402/DateTimeFormat/timezone-legacy-non-iana.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
 
-# WONTFIX for real - TODO: combine with groups above
+# ENV-ISSUE
 # Chinese/Dangi calendar math follows the host ICU data scraped from
 # Intl.DateTimeFormat. Current test262 uses ICU4X Chinese calendar data for a
 # few cases where Node's ICU4C disagrees, including the 1987 leap-month slot and

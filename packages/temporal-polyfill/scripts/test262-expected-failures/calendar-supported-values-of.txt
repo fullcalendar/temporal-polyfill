@@ -1,5 +1,4 @@
-
-# ENV-ISSUE / BASIC-GLOBAL
+# ENV-ISSUE
 # Node <=16 lacks Intl.supportedValuesOf("calendar"), so these tests cannot run
 # in either lane there. On Node >=18, full/global.js passes, but global.js lacks
 # enough non-ISO/non-Gregory calendar support for the constructed mismatch

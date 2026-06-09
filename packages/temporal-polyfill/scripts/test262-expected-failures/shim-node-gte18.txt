@@ -1,9 +1,9 @@
-
-##
-## Issues with environment, already ignored in proposal-temporal/polyfill
-## https://github.com/tc39/proposal-temporal/blob/main/polyfill/test/expected-failures.txt
-##
-
+# ENV-ISSUE
+# Node >=18 shim runs format en-US timeStyle output with an ordinary space
+# before the day period, while the test expects the narrow no-break space that
+# native Intl.DateTimeFormat("en-US", { timeStyle: "short" }) reports. For
+# example, "2:12:47 PM Coordinated Universal Time" instead of the expected
+# "2:12:47\u202fPM Coordinated Universal Time".
 intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
 
 # ENV-ISSUE

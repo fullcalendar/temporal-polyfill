@@ -96,7 +96,7 @@ yargs(hideBin(process.argv))
         }
 
         if (classApi === 'basic' || currentNodeMajorVersion >= 24) {
-          expectedFailureFiles.push('calendar-data-mismatch.txt')
+          expectedFailureFiles.push('calendar-extreme-dates.txt')
         }
         if (classApi === 'basic' || currentNodeMajorVersion <= 16) {
           expectedFailureFiles.push('calendar-supported-values-of.txt')
