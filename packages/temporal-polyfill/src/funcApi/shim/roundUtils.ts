@@ -166,7 +166,7 @@ export function roundDateToInterval<
   return roundEpochNanoToInterval(
     computeInterval,
     slots,
-    BigInt(isoDateToEpochMilli(slots)!) * bigNanoInMilli,
+    BigInt(isoDateToEpochMilli(slots)) * bigNanoInMilli,
     roundingMode,
   )
 }
@@ -181,7 +181,7 @@ export function roundDateTimeToInterval<
   return roundEpochNanoToInterval(
     computeInterval,
     slots,
-    isoDateTimeToEpochNano(slots)!,
+    isoDateTimeToEpochNano(slots),
     roundingMode,
   )
 }
@@ -195,8 +195,8 @@ function roundEpochNanoToInterval<
   roundingMode: RoundingModeEnum,
 ): CalendarDateTimeFields {
   const [isoFields0, isoFields1] = computeInterval(slots)
-  const epochNano0 = isoDateTimeToEpochNano(isoFields0)!
-  const epochNano1 = isoDateTimeToEpochNano(isoFields1)!
+  const epochNano0 = isoDateTimeToEpochNano(isoFields0)
+  const epochNano1 = isoDateTimeToEpochNano(isoFields1)
   const frac = computeEpochNanoFrac(epochNano, epochNano0, epochNano1)
   const grow = roundWithMode(frac, roundingMode)
   return grow ? isoFields1 : isoFields0

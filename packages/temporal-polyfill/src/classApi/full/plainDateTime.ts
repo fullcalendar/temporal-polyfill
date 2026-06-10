@@ -387,7 +387,7 @@ export class PlainDateTime implements DateTimeFields {
       ),
     )
     checkResolvedCalendarCompatible(format, slots)
-    return format.format(isoDateTimeToEpochMilli(slots)!)
+    return format.format(isoDateTimeToEpochMilli(slots))
   }
 
   toString(

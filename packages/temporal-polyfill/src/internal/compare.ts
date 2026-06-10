@@ -1,7 +1,7 @@
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { durationFieldsToBigNano, getMaxDurationUnit } from './durationMath'
-import { isoDateToEpochMilli } from './epochMath'
+import { isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
   CalendarDateFields,
@@ -104,8 +104,8 @@ export function compareIsoDateFields(
   isoFields1: CalendarDateFields,
 ): NumberSign {
   return compareNumbers(
-    isoDateToEpochMilli(isoFields0)!,
-    isoDateToEpochMilli(isoFields1)!,
+    isoDateToEpochDays(isoFields0),
+    isoDateToEpochDays(isoFields1),
   )
 }
 

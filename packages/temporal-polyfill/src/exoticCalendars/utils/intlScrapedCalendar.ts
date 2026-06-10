@@ -148,7 +148,7 @@ function createIntlFieldCache(
   // above queryYearData: repeated property access can skip the full Intl scrape,
   // while year data remains the shared source for month-boundary lookups.
   return memoize((isoDateFields: CalendarDateFields) => {
-    const epochMilli = isoDateToEpochMilli(isoDateFields)!
+    const epochMilli = isoDateToEpochMilli(isoDateFields)
     const intlFields = epochMilliToIntlFields(epochMilli)
     return {
       ...intlFields,
@@ -166,7 +166,7 @@ function createIntlYearDataCache(
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
   function buildYear(year: number) {
-    let epochMilli = isoArgsToEpochMilli(year - yearCorrection)!
+    let epochMilli = isoArgsToEpochMilli(year - yearCorrection)
     let intlFields: IntlDateFields
     let iterations = 0
     const millisReversed: number[] = []

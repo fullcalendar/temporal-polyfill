@@ -154,7 +154,7 @@ export function computeGregoryEraFields({
   year,
 }: CalendarDateFields): CalendarEraFields {
   if (year < 1) {
-    return { era: 'bce', eraYear: -year + 1 }
+    return { era: 'bce', eraYear: 1 - year }
   }
   return { era: 'ce', eraYear: year }
 }

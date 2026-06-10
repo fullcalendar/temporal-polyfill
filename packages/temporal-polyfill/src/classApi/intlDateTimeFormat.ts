@@ -210,11 +210,11 @@ function temporalDateTimeToEpochMilli(branding: string, slots: object): number {
     case 'Instant':
       return getEpochMilli(slots as any)
     case 'PlainDateTime':
-      return isoDateTimeToEpochMilli(slots as any)!
+      return isoDateTimeToEpochMilli(slots as any)
     case 'PlainDate':
     case 'PlainYearMonth':
     case 'PlainMonthDay':
-      return isoDateToEpochMilli(slots as any)!
+      return isoDateToEpochMilli(slots as any)
     case 'PlainTime':
       return timeFieldsToMilli(slots as any)
     default:

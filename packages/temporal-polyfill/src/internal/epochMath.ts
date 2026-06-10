@@ -60,15 +60,17 @@ export function isoDateTimeToEpochSec(
   return [epochSec, subsecNano]
 }
 
-export function isoDateToEpochMilli(
-  isoDate: CalendarDateFields,
-): number | undefined {
+export function isoDateToEpochDays(isoDate: CalendarDateFields): number {
+  return isoArgsToEpochDays(isoDate.year, isoDate.month, isoDate.day)
+}
+
+export function isoDateToEpochMilli(isoDate: CalendarDateFields): number {
   return isoArgsToEpochMilli(isoDate.year, isoDate.month, isoDate.day)
 }
 
 export function isoDateTimeToEpochMilli(
   isoDateTime: CalendarDateTimeFields,
-): number | undefined {
+): number {
   return isoArgsToEpochMilli(
     isoDateTime.year,
     isoDateTime.month,
@@ -83,27 +85,17 @@ export function isoDateTimeToEpochMilli(
 /*
 For converting to fake epochNano values for math.
 */
-export function isoDateToEpochNano(
-  isoDate: CalendarDateFields,
-): bigint | undefined {
-  const epochMilli = isoDateToEpochMilli(isoDate)
-
-  if (epochMilli !== undefined) {
-    return BigInt(epochMilli) * bigNanoInMilli
-  }
+export function isoDateToEpochNano(isoDate: CalendarDateFields): bigint {
+  return BigInt(isoDateToEpochMilli(isoDate)) * bigNanoInMilli
 }
 
 export function isoDateTimeToEpochNano(
   isoDateTime: CalendarDateTimeFields,
-): bigint | undefined {
-  const epochMilli = isoDateTimeToEpochMilli(isoDateTime)
-
-  if (epochMilli !== undefined) {
-    return (
-      BigInt(epochMilli) * bigNanoInMilli +
-      BigInt(isoDateTime.microsecond * nanoInMicro + isoDateTime.nanosecond)
-    )
-  }
+): bigint {
+  return (
+    BigInt(isoDateTimeToEpochMilli(isoDateTime)) * bigNanoInMilli +
+    BigInt(isoDateTime.microsecond * nanoInMicro + isoDateTime.nanosecond)
+  )
 }
 
 // ISO Arguments -> Epoch
@@ -118,17 +110,11 @@ export type IsoTuple = [
   isoMilli?: number,
 ]
 
-/*
-Assumes in-bounds
-*/
 export function isoArgsToEpochSec(...args: IsoTuple): number {
-  return isoArgsToEpochMilli(...args)! / milliInSec
+  return isoArgsToEpochMilli(...args) / milliInSec
 }
 
-/*
-Returns undefined if the input cannot produce a finite Number epoch.
-*/
-export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
+export function isoArgsToEpochMilli(...args: IsoTuple): number {
   const [
     isoYear,
     isoMonth = 1,
@@ -138,14 +124,11 @@ export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
     isoSecond = 0,
     isoMilli = 0,
   ] = args
-  const epochMilli =
+  return (
     isoArgsToEpochDays(isoYear, isoMonth, isoDay) * milliInDay +
     ((isoHour * 60 + isoMinute) * 60 + isoSecond) * milliInSec +
     isoMilli
-
-  if (!isNaN(epochMilli)) {
-    return epochMilli
-  }
+  )
 }
 
 export function diffEpochMilliDays(

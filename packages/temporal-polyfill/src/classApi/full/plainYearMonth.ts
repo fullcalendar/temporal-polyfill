@@ -236,7 +236,7 @@ export class PlainYearMonth implements YearMonthFields {
       ),
     )
     checkResolvedCalendarCompatible(format, slots, true)
-    return format.format(isoDateToEpochMilli(slots)!)
+    return format.format(isoDateToEpochMilli(slots))
   }
 
   toString(

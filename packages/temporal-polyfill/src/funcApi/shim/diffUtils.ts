@@ -136,7 +136,7 @@ function diffPlainDateTimeLargeUnits(
 }
 
 function isoDateToEpochNano(marker: CalendarDateFields): bigint {
-  return BigInt(isoDateToEpochMilli(marker)!) * bigNanoInMilli
+  return BigInt(isoDateToEpochMilli(marker)) * bigNanoInMilli
 }
 
 // Date Units (years, months, weeks, days)
@@ -221,8 +221,8 @@ function diffZonedDayLikeUnits(
   // `isoFields0` is the start date-time, so it supplies the original wall-clock
   // time for the adjusted end date. The start side already has that time.
   const nanoDiff =
-    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, isoFields0))! -
-    isoDateTimeToEpochNano(isoFields0)! +
+    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, isoFields0)) -
+    isoDateTimeToEpochNano(isoFields0) +
     BigInt(remainderNano)
 
   let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit

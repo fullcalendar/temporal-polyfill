@@ -131,7 +131,7 @@ export class PlainMonthDay implements MonthDayFields {
       ),
     )
     checkResolvedCalendarCompatible(format, slots, true)
-    return format.format(isoDateToEpochMilli(slots)!)
+    return format.format(isoDateToEpochMilli(slots))
   }
 
   toString(

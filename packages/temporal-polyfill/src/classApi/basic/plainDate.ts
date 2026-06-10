@@ -329,7 +329,7 @@ export class PlainDate implements DateFields {
       ),
     )
     checkResolvedCalendarCompatible(format, slots)
-    return format.format(isoDateToEpochMilli(slots)!)
+    return format.format(isoDateToEpochMilli(slots))
   }
 
   toString(

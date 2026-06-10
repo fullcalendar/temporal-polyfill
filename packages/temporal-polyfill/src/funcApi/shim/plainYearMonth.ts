@@ -402,7 +402,7 @@ export const createFormat: (
       const slots = getShimPlainYearMonthSlots(record)
       const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots, true)
-      return [format, isoDateToEpochMilli(slots)!]
+      return [format, isoDateToEpochMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimPlainYearMonthSlots(record0)
@@ -410,11 +410,7 @@ export const createFormat: (
       const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots0, true)
       checkResolvedCalendarCompatible(format, slots1, true)
-      return [
-        format,
-        isoDateToEpochMilli(slots0)!,
-        isoDateToEpochMilli(slots1)!,
-      ]
+      return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
     },
   }),
 })
@@ -432,7 +428,7 @@ export function toLocaleString(
     ),
   )
   checkResolvedCalendarCompatible(format, slots, true)
-  return format.format(isoDateToEpochMilli(slots)!)
+  return format.format(isoDateToEpochMilli(slots))
 }
 
 export function toString(

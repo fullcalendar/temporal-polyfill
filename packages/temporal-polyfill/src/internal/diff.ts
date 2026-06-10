@@ -171,8 +171,8 @@ export function diffPlainDateTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
 
-  const startEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots0)!
-  const endEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots1)!
+  const startEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots0)
+  const endEpochNano = isoDateTimeToEpochNano(plainDateTimeSlots1)
   const sign = compareBigInts(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 
@@ -426,8 +426,8 @@ export function diffDateTimesExact(
   endIsoDateTime: CalendarDateTimeFields,
   largestUnit: Unit,
 ): DurationFields {
-  const startEpochNano = isoDateTimeToEpochNano(startIsoDateTime)!
-  const endEpochNano = isoDateTimeToEpochNano(endIsoDateTime)!
+  const startEpochNano = isoDateTimeToEpochNano(startIsoDateTime)
+  const endEpochNano = isoDateTimeToEpochNano(endIsoDateTime)
   const sign = compareBigInts(endEpochNano, startEpochNano)
 
   if (!sign) {
@@ -759,7 +759,7 @@ function diffDays(
   endIsoDate: CalendarDateFields,
 ): number {
   return diffEpochMilliDays(
-    isoDateToEpochMilli(startIsoDate)!,
-    isoDateToEpochMilli(endIsoDate)!,
+    isoDateToEpochMilli(startIsoDate),
+    isoDateToEpochMilli(endIsoDate),
   )
 }

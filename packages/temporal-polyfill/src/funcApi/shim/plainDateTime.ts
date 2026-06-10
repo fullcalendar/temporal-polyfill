@@ -467,7 +467,7 @@ export const createFormat: (
       const slots = getShimPlainDateTimeSlots(record)
       const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots)
-      return [format, isoDateTimeToEpochMilli(slots)!]
+      return [format, isoDateTimeToEpochMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimPlainDateTimeSlots(record0)
@@ -477,8 +477,8 @@ export const createFormat: (
       checkResolvedCalendarCompatible(format, slots1)
       return [
         format,
-        isoDateTimeToEpochMilli(slots0)!,
-        isoDateTimeToEpochMilli(slots1)!,
+        isoDateTimeToEpochMilli(slots0),
+        isoDateTimeToEpochMilli(slots1),
       ]
     },
   }),
@@ -497,7 +497,7 @@ export function toLocaleString(
     ),
   )
   checkResolvedCalendarCompatible(format, slots)
-  return format.format(isoDateTimeToEpochMilli(slots)!)
+  return format.format(isoDateTimeToEpochMilli(slots))
 }
 
 export function toString(
@@ -893,7 +893,7 @@ function moveByTimeUnit(
   units: number,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
-  const epochNano0 = isoDateTimeToEpochNano(slots)!
+  const epochNano0 = isoDateTimeToEpochNano(slots)
   const epochNano1 =
     epochNano0 + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
   const isoDateTime1 = epochNanoToIso(epochNano1, 0)
@@ -940,7 +940,7 @@ function aligned(
 
     if (nanoDelta) {
       isoDateTime = epochNanoToIso(
-        isoDateTimeToEpochNano(isoDateTime)!,
+        isoDateTimeToEpochNano(isoDateTime),
         nanoDelta,
       )
     }

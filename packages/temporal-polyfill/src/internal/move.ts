@@ -325,7 +325,7 @@ export function moveByDays(
 ): CalendarDateFields {
   if (days) {
     return epochMilliToIsoDateTime(
-      isoDateToEpochMilli(isoDate)! + days * milliInDay,
+      isoDateToEpochMilli(isoDate) + days * milliInDay,
     )
   }
   return isoDate

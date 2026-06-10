@@ -112,7 +112,7 @@ export function getMatchingInstantFor(
   }
 
   if (hasZ) {
-    return isoDateTimeToEpochNano(isoDateTime)!
+    return isoDateTimeToEpochNano(isoDateTime)
   }
 
   return getSingleInstantFor(
@@ -147,7 +147,7 @@ export function getSingleInstantFor(
 
   // within a transition that jumps forward...
   // ('compatible' means 'later')
-  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)!
+  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)
   const gapNano = computeGapNear(timeZone, zonedEpochNano)
 
   // 'later' or 'compatible'
@@ -173,7 +173,7 @@ export function getStartOfDayInstantFor(
     return possibleEpochNanos[0]
   }
 
-  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)!
+  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)
   const zonedEpochNanoDayBefore = zonedEpochNano - bigNanoInUtcDay
 
   return timeZone.getTransition(zonedEpochNanoDayBefore, 1)!
@@ -185,7 +185,7 @@ function findMatchingEpochNano(
   offsetNano: number,
   fuzzy?: boolean,
 ): bigint | undefined {
-  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)!
+  const zonedEpochNano = isoDateTimeToEpochNano(isoDateTime)
 
   if (fuzzy) {
     offsetNano = roundToMinute(offsetNano)

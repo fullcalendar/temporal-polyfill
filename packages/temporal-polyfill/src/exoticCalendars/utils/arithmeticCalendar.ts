@@ -90,7 +90,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
   ) {
     isLeapMonth = Boolean(isLeapMonth)
     const referenceDate = computeDateFieldsFromEpochMilli(
-      isoArgsToEpochMilli(1972, 12, 31)!,
+      isoArgsToEpochMilli(1972, 12, 31),
     )
     let referenceYear = ops.monthDayReferenceYear || referenceDate.year
     const [referenceMonthCodeNumber, referenceIsLeapMonth] =
@@ -140,7 +140,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     computeYearFromEra: ops.computeYearFromEra,
     constrainPlainMonthDay: ops.constrainPlainMonthDay,
     computeDateFields(isoDate) {
-      return computeDateFieldsFromEpochMilli(isoDateToEpochMilli(isoDate)!)
+      return computeDateFieldsFromEpochMilli(isoDateToEpochMilli(isoDate))
     },
     computeIsoFieldsFromParts(year, month, day) {
       const isoDate = epochMilliToIsoDateTime(
@@ -188,7 +188,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
       return ops.computeLeapMonth?.(year)
     },
     computeEraFields(isoDate) {
-      const parts = fromEpochMilli(isoDateToEpochMilli(isoDate)!)
+      const parts = fromEpochMilli(isoDateToEpochMilli(isoDate))
       return ops.computeEraFields
         ? ops.computeEraFields(parts)
         : { era: parts.era, eraYear: parts.eraYear }

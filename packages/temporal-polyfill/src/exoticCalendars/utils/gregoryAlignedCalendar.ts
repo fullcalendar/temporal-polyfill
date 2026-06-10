@@ -54,7 +54,7 @@ export function createGregoryAlignedCalendar(
       return computeIsoFieldsFromParts(calendarYearToIsoYear(year), month, day)
     },
     computeEpochMilli(year, month, day) {
-      return isoArgsToEpochMilli(calendarYearToIsoYear(year), month, day)!
+      return isoArgsToEpochMilli(calendarYearToIsoYear(year), month, day)
     },
     computeMonthCodeParts(_year, month) {
       return computeIsoMonthCodeParts(month)

@@ -415,7 +415,7 @@ export const createFormat: (
       const slots = getShimPlainDateSlots(record)
       const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots)
-      return [format, isoDateToEpochMilli(slots)!]
+      return [format, isoDateToEpochMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimPlainDateSlots(record0)
@@ -423,11 +423,7 @@ export const createFormat: (
       const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots0)
       checkResolvedCalendarCompatible(format, slots1)
-      return [
-        format,
-        isoDateToEpochMilli(slots0)!,
-        isoDateToEpochMilli(slots1)!,
-      ]
+      return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
     },
   }),
 })
@@ -445,7 +441,7 @@ export function toLocaleString(
     ),
   )
   checkResolvedCalendarCompatible(format, slots)
-  return format.format(isoDateToEpochMilli(slots)!)
+  return format.format(isoDateToEpochMilli(slots))
 }
 
 export function toString(
@@ -679,8 +675,8 @@ function diffPlainDateDayLikeUnit(
   // date/date-time/zoned marker converter used by the cross-type helper.
   let res =
     diffEpochMilliDays(
-      isoDateToEpochMilli(slots0)!,
-      isoDateToEpochMilli(slots1)!,
+      isoDateToEpochMilli(slots0),
+      isoDateToEpochMilli(slots1),
     ) / daysInUnit
 
   if (roundingInc) {

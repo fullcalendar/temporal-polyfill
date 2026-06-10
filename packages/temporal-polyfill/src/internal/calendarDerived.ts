@@ -69,7 +69,7 @@ export function computeCalendarEpochMilli(
 ): number {
   return calendar
     ? calendar.computeEpochMilli(year, month, day)
-    : isoArgsToEpochMilli(year, month, day)!
+    : isoArgsToEpochMilli(year, month, day)
 }
 
 export function computeCalendarMonthsInYearForYear(
@@ -147,7 +147,7 @@ export function computeCalendarDayOfYear(
   }
   const { year } = computeCalendarDateFields(calendar, isoDate)
   const milli0 = computeCalendarEpochMilli(calendar, year)
-  return diffEpochMilliDays(milli0!, isoDateToEpochMilli(isoDate)!) + 1
+  return diffEpochMilliDays(milli0, isoDateToEpochMilli(isoDate)) + 1
 }
 
 export function computeCalendarWeekOfYear(
