@@ -116,7 +116,7 @@ export function createIntlScrapedCalendar(
 export function createIntlScrapedCalendarData(
   normCalendarId: string,
 ): IntlScrapedCalendarData {
-  const intlFormat = queryCalendarIntlFormat(normCalendarId)
+  const intlFormat = createCalendarIntlFormat(normCalendarId)
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
     const intlParts = formatEpochMilliToPartsRecord(intlFormat, epochMilli)
@@ -253,43 +253,6 @@ function parseIntlYear(intlParts: Record<string, string>): {
     eraYear: undefined,
     year: parseInt(intlParts.relatedYear || intlParts.year),
   }
-}
-
-const calendarIntlFormatByNormId = new Map<string, Intl.DateTimeFormat>()
-
-/**
- * Shared Intl.DateTimeFormat cache for calendar math and validation. Pass a
- * normalized ID after calendar resolution. During resolution, pass the
- * lowercased raw ID with validateNoFallback=true so invalid/fallback-only input
- * returns undefined instead of populating the normalized-ID cache.
- */
-function queryCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat
-function queryCalendarIntlFormat(
-  lowerRawCalendarId: string,
-  validateNoFallback: true,
-): Intl.DateTimeFormat | undefined
-function queryCalendarIntlFormat(
-  calendarId: string,
-  validateNoFallback = false,
-): Intl.DateTimeFormat | undefined {
-  const format = calendarIntlFormatByNormId.get(calendarId)
-  if (format) {
-    return format
-  }
-
-  const newFormat = createCalendarIntlFormat(calendarId)
-  if (
-    validateNoFallback &&
-    newFormat.resolvedOptions().calendar !== calendarId
-  ) {
-    return undefined
-  }
-
-  // Validation only reaches this point when Intl echoed the lowercased ID, so
-  // that raw ID is also the normalized cache key. The ordinary resolved-ID path
-  // skips the resolvedOptions() check to avoid paying it during calendar math.
-  calendarIntlFormatByNormId.set(calendarId, newFormat)
-  return newFormat
 }
 
 function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
