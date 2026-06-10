@@ -147,9 +147,11 @@ function computeIsoWeeksInYear(year: number): number {
     : 52
 }
 
-// Era (complicated stuff)
+// Era
 // -----------------------------------------------------------------------------
 
+// The interface intentionally accepts YMD, do conform with a common interface
+// for other calendars, which might have mid-year eras and need all YMD info
 export function computeGregoryEraFields({
   year,
 }: CalendarDateFields): CalendarEraFields {

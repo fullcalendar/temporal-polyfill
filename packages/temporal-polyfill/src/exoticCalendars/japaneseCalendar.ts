@@ -4,6 +4,7 @@ import { computeGregoryEraFields } from '../internal/isoCalendarMath'
 import { compareNumbers } from '../internal/utils'
 import { createGregoryAlignedCalendar } from './utils/gregoryAlignedCalendar'
 
+// For converting era+eraYear => ISO-year
 const japaneseEraOrigins = {
   ...gregoryEraOrigins,
   'meiji': 1867,
@@ -13,6 +14,7 @@ const japaneseEraOrigins = {
   'reiwa': 2018,
 }
 
+// For converting ISO-YMD => era+eraYear
 const japaneseEras = [
   {
     name: 'meiji',
@@ -49,6 +51,7 @@ export function createJapaneseCalendar() {
   })
 }
 
+// For converting ISO-YMD => era+eraYear
 function computeJapaneseEraFields(isoDate: {
   year: number
   month: number
