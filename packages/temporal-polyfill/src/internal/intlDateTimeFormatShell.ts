@@ -21,7 +21,6 @@ export type DateTimeFormatShellInternals = {
   transformedOptions: Intl.DateTimeFormatOptions
 }
 type DateTimeFormatShellConfig<R> = {
-  superClass: { prototype: object }
   transformOptions?(
     options: Intl.DateTimeFormatOptions,
   ): Intl.DateTimeFormatOptions
@@ -34,7 +33,6 @@ type DateTimeFormatShellConfig<R> = {
 // provider for raw Intl dispatch tuples. All policy, including Temporal
 // compatibility and non-Temporal fallback, stays in that provider.
 export function createDateTimeFormatShell<R>({
-  superClass,
   transformOptions = (options) => options,
   createArgsProvider,
 }: DateTimeFormatShellConfig<R>) {
@@ -143,12 +141,6 @@ export function createDateTimeFormatShell<R>({
       })
     }
   }
-
-  // Callers own this prototype ancestry because the class/global API needs the
-  // builtin `Intl.DateTimeFormat.prototype -> Object.prototype` shape, while
-  // the func API keeps the captured native prototype in the chain for
-  // `instanceof Intl.DateTimeFormat` without replacing the global constructor.
-  Object.setPrototypeOf(ShimDateTimeFormat.prototype, superClass.prototype)
 
   // Native Intl.DateTimeFormat is callable without `new`, but an ES class is
   // not (and `new` would also consult @@hasInstance — see

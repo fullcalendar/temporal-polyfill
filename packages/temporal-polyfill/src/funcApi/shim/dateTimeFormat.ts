@@ -27,13 +27,16 @@ export function createDateTimeFormatFactory<R>({
   options?: Intl.DateTimeFormatOptions,
 ) => DateTimeFormatLike<R> {
   const ShimDateTimeFormat = createDateTimeFormatShell<R>({
-    // Func API formatters do not replace the global constructor, so keep
-    // native Intl.DateTimeFormat.prototype in the chain for
-    // `instanceof Intl.DateTimeFormat`.
-    superClass: RawDateTimeFormat,
     transformOptions,
     createArgsProvider,
   })
+
+  // Func API formatters do not replace the global constructor, so keep native
+  // Intl.DateTimeFormat.prototype in the chain for `instanceof Intl.DateTimeFormat`.
+  Object.setPrototypeOf(
+    ShimDateTimeFormat.prototype,
+    RawDateTimeFormat.prototype,
+  )
 
   return (
     locales?: LocalesArg,
