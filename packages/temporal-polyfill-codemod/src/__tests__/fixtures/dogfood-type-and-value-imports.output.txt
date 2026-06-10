@@ -1,0 +1,17 @@
+import { diffDays, startOfWeek, type RoundingMathOptions } from 'temporal-utils';
+
+export interface TypeSamples {
+  calendar: string
+  date: Temporal.PlainDate
+  diff: Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>
+  overflow: Temporal.OverflowOptions
+  rounding: RoundingMathOptions
+  toString: Temporal.PlainDateToStringOptions
+}
+
+export function values(date: Temporal.PlainDate, other: Temporal.PlainDate) {
+  return {
+    days: diffDays(date, other),
+    start: startOfWeek(date),
+  };
+}

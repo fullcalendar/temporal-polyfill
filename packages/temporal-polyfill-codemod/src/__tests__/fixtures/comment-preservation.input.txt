@@ -1,0 +1,15 @@
+// File-level comment stays with the file.
+
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+// The created date is intentionally in May.
+const date = PlainDateFns.create(2024, 5, 1)
+
+const next = PlainDateFns.addDays(
+  date,
+  // Keep the duration comment attached to the argument.
+  3,
+)
+
+// Keep the comparison explanation.
+const same = PlainDateFns.equals(date, next)

@@ -1,0 +1,11 @@
+import { diffDays as diffDaysTemporalUtils, startOfWeek as startOfWeekTemporalUtils } from 'temporal-utils';
+
+export function collisionFlow(date: Temporal.PlainDate, other: Temporal.PlainDate) {
+  const startOfWeek = (value: Temporal.PlainDate) => value
+  const diffDays = 10
+
+  const start = startOfWeekTemporalUtils(date)
+  const days = diffDaysTemporalUtils(date, other)
+
+  return { days, diffDays, start, startOfWeek }
+}

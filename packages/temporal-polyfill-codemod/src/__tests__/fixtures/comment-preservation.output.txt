@@ -1,0 +1,10 @@
+// The created date is intentionally in May.
+const date = new Temporal.PlainDate(2024, 5, 1)
+
+const next = date.add({
+  // Keep the duration comment attached to the argument.
+  days: 3
+})
+
+// Keep the comparison explanation.
+const same = date.equals(next)

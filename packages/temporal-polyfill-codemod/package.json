@@ -1,0 +1,51 @@
+{
+  "private": true,
+  "name": "temporal-polyfill-codemod",
+  "version": "0.0.0",
+  "description": "Codemods for temporal-polyfill migrations",
+  "author": {
+    "name": "Adam Shaw",
+    "email": "arshaw@users.noreply.github.com",
+    "url": "http://arshaw.com/"
+  },
+  "license": "MIT",
+  "copyright": "2026 Adam Shaw",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "temporal-polyfill-codemod": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
+    "test": "pnpm run build && pnpm run vitest",
+    "vitest": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "jscodeshift": "^0.15.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.1",
+    "@types/jscodeshift": "^0.11.11",
+    "@types/node": "^18.11.9",
+    "typescript": "~5.3.3",
+    "vitest": "^1.2.2"
+  }
+}

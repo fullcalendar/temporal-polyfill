@@ -1,0 +1,27 @@
+import type { OverflowOptions, RoundingMathOptions } from 'temporal-polyfill/fns'
+import {
+  diffDays,
+  startOfWeek,
+} from 'temporal-polyfill/fns/PlainDate'
+import type {
+  DiffOptions,
+  Record as PlainDateRecord,
+  ToStringOptions,
+} from 'temporal-polyfill/fns/PlainDate'
+import type { Record as CalendarRecord } from 'temporal-polyfill/fns/Calendar'
+
+export interface TypeSamples {
+  calendar: CalendarRecord
+  date: PlainDateRecord
+  diff: DiffOptions
+  overflow: OverflowOptions
+  rounding: RoundingMathOptions
+  toString: ToStringOptions
+}
+
+export function values(date: PlainDateRecord, other: PlainDateRecord) {
+  return {
+    days: diffDays(date, other),
+    start: startOfWeek(date),
+  }
+}

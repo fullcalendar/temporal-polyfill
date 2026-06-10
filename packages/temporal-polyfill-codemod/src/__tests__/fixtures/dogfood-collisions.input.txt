@@ -1,0 +1,11 @@
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+export function collisionFlow(date: PlainDateFns.Record, other: PlainDateFns.Record) {
+  const startOfWeek = (value: PlainDateFns.Record) => value
+  const diffDays = 10
+
+  const start = PlainDateFns.startOfWeek(date)
+  const days = PlainDateFns.diffDays(date, other)
+
+  return { days, diffDays, start, startOfWeek }
+}

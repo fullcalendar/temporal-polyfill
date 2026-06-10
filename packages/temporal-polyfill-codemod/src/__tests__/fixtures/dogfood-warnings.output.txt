@@ -1,0 +1,17 @@
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+
+export function warningFlow(zdt: Temporal.ZonedDateTime, date: Temporal.PlainDate) {
+  const calendar = CalendarFns.getBuddhist()
+  const predicate = PlainDateFns.isRecord
+  const methodName = 'addDays'
+
+  return {
+    calendar,
+    dynamic: PlainDateFns[methodName](date, 1),
+    formatter: PlainDateFns.createFormat('en-US'),
+    predicate,
+    rounded: ZonedDateTimeFns.roundToHour(zdt, { smallestUnit: 'minute' }),
+  }
+}

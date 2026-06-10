@@ -1,0 +1,13 @@
+import { roundToYear } from 'temporal-utils';
+
+const date = new Temporal.PlainDate(2024, 5, 1)
+const nextDate = date.add({
+  days: 3
+})
+const order = Temporal.PlainDate.compare(date, nextDate)
+const rounded = roundToYear(date)
+
+const time = new Temporal.PlainTime(9, 30)
+const nextTime = time.add({
+  minutes: 15
+})
