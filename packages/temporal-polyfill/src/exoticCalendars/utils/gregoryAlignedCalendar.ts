@@ -1,4 +1,4 @@
-import { type ExoticCalendar } from '../../internal/calendarImpl'
+import { type ExoticCalendarWithoutId } from '../../internal/calendarImpl'
 import { isoArgsToEpochMilli } from '../../internal/epochMath'
 import {
   type CalendarDateFields,
@@ -18,7 +18,6 @@ import {
 } from '../../internal/isoCalendarMath'
 
 export interface GregoryAlignedCalendarConfig {
-  id: string
   isoYearOffset?: number
   eraOrigins?: Record<string, number>
   eraRemaps?: Record<string, string>
@@ -31,7 +30,7 @@ export interface GregoryAlignedCalendarConfig {
 
 export function createGregoryAlignedCalendar(
   config: GregoryAlignedCalendarConfig,
-): ExoticCalendar {
+): ExoticCalendarWithoutId {
   const isoYearOffset = config.isoYearOffset || 0
 
   function calendarYearToIsoYear(year: number) {
@@ -43,7 +42,6 @@ export function createGregoryAlignedCalendar(
   }
 
   return {
-    id: config.id,
     eraOrigins: config.eraOrigins,
     eraRemaps: config.eraRemaps,
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,

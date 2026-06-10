@@ -48,13 +48,6 @@ const enum IslamicCalendarVariant {
   Tabular = 2,
 }
 
-// parallels IslamicCalendarVariant
-const islamicCalendarVariantIds = [
-  'islamic-umalqura',
-  'islamic-civil',
-  'islamic-tbla',
-] as const
-
 const umalquraYearStarts = (() => {
   const starts = [0]
   let yearStart = 0
@@ -86,7 +79,6 @@ function createIslamicCalendar(variant: IslamicCalendarVariant) {
       : civilIslamicEpoch
 
   return createArithmeticCalendar({
-    id: islamicCalendarVariantIds[variant],
     eraOrigins: {
       'bh': -1,
       'ah': 0,

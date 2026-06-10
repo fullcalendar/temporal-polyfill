@@ -21,7 +21,6 @@ const indianEraRemaps = {
 
 export function createIndianCalendar() {
   return createArithmeticCalendar({
-    id: 'indian',
     eraOrigins: indianEraOrigins,
     eraRemaps: indianEraRemaps,
     fromJulianDay(julianDay) {

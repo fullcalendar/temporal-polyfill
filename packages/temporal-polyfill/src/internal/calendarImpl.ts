@@ -19,8 +19,7 @@ export type CalendarImpl =
   | typeof gregoryCalendarImpl
   | ExoticCalendar
 
-export interface ExoticCalendar {
-  id: string
+export interface ExoticCalendarWithoutId {
   eraOrigins?: Record<string, number>
   eraRemaps?: Record<string, string>
   leapMonthMeta?: number
@@ -69,6 +68,10 @@ export interface ExoticCalendar {
     year1: number,
     month1: number,
   ): number
+}
+
+export interface ExoticCalendar extends ExoticCalendarWithoutId {
+  id: string
 }
 
 export function getCalendarSlotId(calendar: CalendarImpl): string {

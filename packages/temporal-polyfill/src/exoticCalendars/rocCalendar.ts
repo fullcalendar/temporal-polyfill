@@ -12,7 +12,6 @@ const rocEraRemaps = {
 
 export function createRocCalendar() {
   return createGregoryAlignedCalendar({
-    id: 'roc',
     isoYearOffset: -1911,
     eraOrigins: rocEraOrigins,
     eraRemaps: rocEraRemaps,

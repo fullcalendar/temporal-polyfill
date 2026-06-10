@@ -1,4 +1,4 @@
-import { type ExoticCalendar } from '../../internal/calendarImpl'
+import { type ExoticCalendarWithoutId } from '../../internal/calendarImpl'
 import {
   type MonthCodeParts,
   monthCodeNumberToMonth,
@@ -60,8 +60,7 @@ export interface IntlScrapedCalendarConfig {
   ): number
 }
 
-export interface IntlScrapedCalendar extends ExoticCalendar {
-  id: string
+export interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
   config: IntlScrapedCalendarConfig
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
@@ -83,7 +82,6 @@ export function createIntlScrapedCalendar(
   const queryYearData = createIntlYearDataCache(rawEpochMilliToIntlFields)
 
   const calendar: IntlScrapedCalendar = {
-    id: normCalendarId,
     config,
     queryFields: createIntlFieldCache(rawEpochMilliToIntlFields, queryYearData),
     queryYearData,

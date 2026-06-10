@@ -20,7 +20,6 @@ const monthParts = monthDays * dayParts + monthFract
 
 export function createHebrewCalendar() {
   return createArithmeticCalendar({
-    id: 'hebrew',
     eraOrigins: hebrewEraOrigins,
     leapMonthMeta: -6,
     fromJulianDay(julianDay) {

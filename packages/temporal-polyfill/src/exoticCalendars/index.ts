@@ -1,4 +1,7 @@
-import { type ExoticCalendar } from '../internal/calendarImpl'
+import {
+  type ExoticCalendar,
+  type ExoticCalendarWithoutId,
+} from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
 import { memoize } from '../internal/utils'
 import { createBuddhistCalendar } from './buddhistCalendar'
@@ -26,8 +29,8 @@ import { createRocCalendar } from './rocCalendar'
 // ------
 
 export type CalendarImplTuple = readonly [
-  canonicalCalendarId: string,
-  createImpl: () => ExoticCalendar,
+  canonicalId: string,
+  createImpl: () => ExoticCalendarWithoutId,
 ]
 
 export const buddhistMeta: CalendarImplTuple = [
@@ -85,22 +88,19 @@ const deprecatedExoticCalendarIdMap: Record<string, string> = {
 // -----------------------
 
 /*
-Used to create a stable ExoticCalendar when caller has guaranteed creator-function
+Used to create a stable identified ExoticCalendar when caller has guaranteed
+calendar metadata.
 */
-const getOrCreateExoticCalendar = memoize(
-  (createExoticCalendar: () => ExoticCalendar) => createExoticCalendar(),
-)
-
 export function createExoticCalendarGetter(
-  createExoticCalendar: () => ExoticCalendar,
+  meta: CalendarImplTuple,
 ): () => ExoticCalendar {
-  return () => getOrCreateExoticCalendar(createExoticCalendar)
+  return () => getOrCreateExoticCalendar(...meta)
 }
 
 // Exotic Map Querying
 // -------------------
 
-const exoticMapTuples = [
+const exoticCreatorMap = new Map([
   buddhistMeta,
   chineseMeta,
   copticMeta,
@@ -115,8 +115,21 @@ const exoticMapTuples = [
   islamicUmmAlQuraMeta,
   persianMeta,
   rocMeta,
-]
-const exoticCreatorMap = new Map(exoticMapTuples)
+])
+
+/*
+NOTE: we save min+gzp space having this here vs in "Exotic Individual Utils"
+*/
+const getOrCreateExoticCalendar = memoize(
+  (
+    canonicalId: string,
+    createExoticCalendar: () => ExoticCalendarWithoutId,
+  ) => {
+    const calendar = createExoticCalendar() as ExoticCalendar
+    calendar.id = canonicalId
+    return calendar
+  },
+)
 
 /*
 Uses a cache. Immediately throws if doesn't exist
@@ -124,17 +137,17 @@ Uses a cache. Immediately throws if doesn't exist
 export function getExoticCalendarById(
   lowerRawCalendarId: string,
 ): ExoticCalendar {
-  const createCalendar = queryExoticCalendarCreator(lowerRawCalendarId)
-  if (!createCalendar) {
+  const meta = queryExoticCalendarMeta(lowerRawCalendarId)
+  if (!meta) {
     // TODO: specific message for *full* entrypoint loaded, but still unknown
     throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
   }
-  return getOrCreateExoticCalendar(createCalendar)
+  return getOrCreateExoticCalendar(...meta)
 }
 
-export function queryExoticCalendarCreator(
+export function queryExoticCalendarMeta(
   lowerRawCalendarId: string,
-): (() => ExoticCalendar) | undefined {
+): CalendarImplTuple | undefined {
   if (forbiddenExoticCalendarIdMap[lowerRawCalendarId]) {
     // TODO: specific message for "forbidden" calendar?
     throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
@@ -143,5 +156,6 @@ export function queryExoticCalendarCreator(
   const normCalendarId =
     deprecatedExoticCalendarIdMap[lowerRawCalendarId] || lowerRawCalendarId
 
-  return exoticCreatorMap.get(normCalendarId)
+  const createCalendar = exoticCreatorMap.get(normCalendarId)
+  return createCalendar && [normCalendarId, createCalendar]
 }

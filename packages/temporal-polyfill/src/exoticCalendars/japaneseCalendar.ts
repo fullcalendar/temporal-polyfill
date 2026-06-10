@@ -21,7 +21,6 @@ const japaneseEras = [
 
 export function createJapaneseCalendar() {
   return createGregoryAlignedCalendar({
-    id: 'japanese',
     eraOrigins: japaneseEraOrigins,
     removeEraFieldsOnMonthDayReplace: true,
     computeEraFields(isoDate) {

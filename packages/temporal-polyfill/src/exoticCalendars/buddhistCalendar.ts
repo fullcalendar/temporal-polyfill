@@ -6,7 +6,6 @@ const buddhistEraOrigins = {
 
 export function createBuddhistCalendar() {
   return createGregoryAlignedCalendar({
-    id: 'buddhist',
     isoYearOffset: 543,
     eraOrigins: buddhistEraOrigins,
     computeEraFields(_isoDate, calendarYear) {

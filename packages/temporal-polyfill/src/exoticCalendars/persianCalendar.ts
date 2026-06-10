@@ -14,7 +14,6 @@ const persianMonthStarts = [
 
 export function createPersianCalendar() {
   return createArithmeticCalendar({
-    id: 'persian',
     eraOrigins: persianEraOrigins,
     fromJulianDay(julianDay) {
       const daysSinceEpoch = julianDay - persianEpoch

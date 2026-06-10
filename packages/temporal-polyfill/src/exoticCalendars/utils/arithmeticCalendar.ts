@@ -1,4 +1,4 @@
-import { type ExoticCalendar } from '../../internal/calendarImpl'
+import { type ExoticCalendarWithoutId } from '../../internal/calendarImpl'
 import {
   type MonthCodeParts,
   monthCodeNumberToMonth,
@@ -29,15 +29,14 @@ export interface ArithmeticCalendarParts extends CalendarDateFields {
 }
 
 export interface ArithmeticCalendarOps {
-  id: string
   eraOrigins?: Record<string, number>
   eraRemaps?: Record<string, string>
   leapMonthMeta?: number
   plainMonthDayLeapMonthMaxDays?: Record<number, number>
   plainMonthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
-  computeYearFromEra?: ExoticCalendar['computeYearFromEra']
-  constrainPlainMonthDay?: ExoticCalendar['constrainPlainMonthDay']
+  computeYearFromEra?: ExoticCalendarWithoutId['computeYearFromEra']
+  constrainPlainMonthDay?: ExoticCalendarWithoutId['constrainPlainMonthDay']
   fromJulianDay(julianDay: number): ArithmeticCalendarParts
   toJulianDay(year: number, month: number, day: number): number
   computeDaysInMonth(year: number, month: number): number
@@ -133,8 +132,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     }
   }
 
-  const calendar: ExoticCalendar = {
-    id: ops.id,
+  const calendar: ExoticCalendarWithoutId = {
     eraOrigins: ops.eraOrigins,
     eraRemaps: ops.eraRemaps,
     leapMonthMeta: ops.leapMonthMeta,
@@ -209,7 +207,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
 }
 
 function addArithmeticMonths(
-  calendar: ExoticCalendar,
+  calendar: ExoticCalendarWithoutId,
   year: number,
   month: number,
   monthDelta: number,
@@ -238,7 +236,7 @@ function addArithmeticMonths(
 }
 
 function diffArithmeticMonthSlots(
-  calendar: ExoticCalendar,
+  calendar: ExoticCalendarWithoutId,
   year0: number,
   month0: number,
   year1: number,

@@ -53,7 +53,6 @@ function createCopticFamilyCalendar(
   isAmeteAlem = false,
 ) {
   return createArithmeticCalendar({
-    id,
     eraOrigins:
       id === 'coptic'
         ? copticEraOrigins

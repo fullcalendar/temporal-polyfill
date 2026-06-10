@@ -14,14 +14,10 @@ import {
   islamicUmmAlQuraMeta,
   japaneseMeta,
   persianMeta,
-  queryExoticCalendarCreator,
+  queryExoticCalendarMeta,
   rocMeta,
 } from '../exoticCalendars/index'
-import {
-  ExoticCalendar,
-  gregoryCalendarImpl,
-  isoCalendarImpl,
-} from '../internal/calendarImpl'
+import { gregoryCalendarImpl, isoCalendarImpl } from '../internal/calendarImpl'
 import { requireString } from '../internal/cast'
 import {
   gregoryCalendarId,
@@ -95,18 +91,18 @@ export function getAny(rawCalendarId: string): Record {
     return gregoryCalendarRecord
   }
 
-  const createImpl = queryExoticCalendarCreator(lowerRawCalendarId)
-  return createImpl
-    ? getOrCreateFoundRecord(rawCalendarId, createImpl)
+  const meta = queryExoticCalendarMeta(lowerRawCalendarId)
+  return meta
+    ? getOrCreateFoundRecord(rawCalendarId, meta)
     : getOrCreateUnknownRecord(rawCalendarId)
 }
 
 export function getExotic(rawCalendarId: string): Record {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
 
-  const createImpl = queryExoticCalendarCreator(lowerRawCalendarId)
-  return createImpl
-    ? getOrCreateFoundRecord(rawCalendarId, createImpl)
+  const meta = queryExoticCalendarMeta(lowerRawCalendarId)
+  return meta
+    ? getOrCreateFoundRecord(rawCalendarId, meta)
     : getOrCreateUnknownRecord(rawCalendarId)
 }
 
@@ -114,8 +110,8 @@ export function getExotic(rawCalendarId: string): Record {
 // -----
 
 const getOrCreateFoundRecord = memoize(
-  (rawCalendarId: string, createImpl: () => ExoticCalendar): Record =>
-    createCalendarRecord(rawCalendarId, createExoticCalendarGetter(createImpl)),
+  (rawCalendarId: string, meta: CalendarImplTuple): Record =>
+    createCalendarRecord(rawCalendarId, createExoticCalendarGetter(meta)),
 )
 
 // Basic-only callers must not inherit an exotic implementation from a hot
@@ -125,9 +121,6 @@ const getOrCreateUnknownRecord = memoize(createCalendarRecord) as (
   rawCalendarId: string,
 ) => Record
 
-function createCanonicalGetter([
-  canonicalCalendarId,
-  createImpl,
-]: CalendarImplTuple): () => Record {
-  return () => getOrCreateFoundRecord(canonicalCalendarId, createImpl)
+function createCanonicalGetter(meta: CalendarImplTuple): () => Record {
+  return () => getOrCreateFoundRecord(meta[0], meta)
 }
