@@ -25,7 +25,7 @@ export interface ExoticCalendarWithoutId {
   plainMonthDayLeapMonthMaxDays?: Record<number, number>
   plainMonthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
-  removeEraFieldsOnMonthDayReplace?: boolean
+  erasBeginMidYear?: boolean
 
   computeYearFromEra?(
     eraYear: number,

@@ -44,7 +44,7 @@ const japaneseEras = [
 export function createJapaneseCalendar() {
   return createGregoryAlignedCalendar({
     eraOrigins: japaneseEraOrigins,
-    removeEraFieldsOnMonthDayReplace: true,
+    erasBeginMidYear: true,
     computeEraFields: computeJapaneseEraFields,
   })
 }

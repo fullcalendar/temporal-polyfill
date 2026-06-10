@@ -81,7 +81,7 @@ export function mergeCalendarFields(
     // Some external era systems can begin mid-year. When month/day are
     // supplied, era fields from the original object can become stale, so the
     // replacement year path must be resolved without them.
-    if (calendar && calendar.removeEraFieldsOnMonthDayReplace) {
+    if (calendar && calendar.erasBeginMidYear) {
       spliceFields(
         merged,
         additionalFields,

@@ -18,9 +18,9 @@ import {
 } from '../../internal/isoCalendarMath'
 
 export interface GregoryAlignedCalendarConfig {
-  isoYearOffset?: number
+  isoYearOffset?: number // why would someone NOT specify this?
   eraOrigins?: Record<string, number>
-  removeEraFieldsOnMonthDayReplace?: boolean
+  erasBeginMidYear?: boolean
   computeEraFields?(
     isoDate: CalendarDateFields,
     calendarYear: number,
@@ -43,7 +43,7 @@ export function createGregoryAlignedCalendar(
   return {
     eraOrigins: config.eraOrigins,
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,
-    removeEraFieldsOnMonthDayReplace: config.removeEraFieldsOnMonthDayReplace,
+    erasBeginMidYear: config.erasBeginMidYear,
     computeDateFields(isoDate) {
       return {
         ...isoDate,
