@@ -5,10 +5,7 @@ import {
 import * as errorMessages from '../internal/errorMessages'
 import { memoize } from '../internal/utils'
 import { createBuddhistCalendar } from './buddhistCalendar'
-import {
-  createChineseCalendar,
-  createDangiCalendar,
-} from './chineseDangiCalendar'
+import { createChineseDangiCalendar } from './chineseDangiCalendar'
 import {
   createCopticCalendar,
   createEthiopicAmeteAlemCalendar,
@@ -30,16 +27,22 @@ import { createRocCalendar } from './rocCalendar'
 
 export type CalendarImplTuple = readonly [
   canonicalId: string,
-  createImpl: () => ExoticCalendarWithoutId,
+  createImpl: (canonicalId: string) => ExoticCalendarWithoutId,
 ]
 
 export const buddhistMeta: CalendarImplTuple = [
   'buddhist',
   createBuddhistCalendar,
 ]
-export const chineseMeta: CalendarImplTuple = ['chinese', createChineseCalendar]
+export const chineseMeta: CalendarImplTuple = [
+  'chinese',
+  createChineseDangiCalendar,
+]
 export const copticMeta: CalendarImplTuple = ['coptic', createCopticCalendar]
-export const dangiMeta: CalendarImplTuple = ['dangi', createDangiCalendar]
+export const dangiMeta: CalendarImplTuple = [
+  'dangi',
+  createChineseDangiCalendar,
+]
 export const ethiopicMeta: CalendarImplTuple = [
   'ethiopic',
   createEthiopicCalendar,
@@ -123,9 +126,9 @@ NOTE: we save min+gzp space having this here vs in "Exotic Individual Utils"
 const getOrCreateExoticCalendar = memoize(
   (
     canonicalId: string,
-    createExoticCalendar: () => ExoticCalendarWithoutId,
+    createExoticCalendar: (canonicalId: string) => ExoticCalendarWithoutId,
   ) => {
-    const calendar = createExoticCalendar() as ExoticCalendar
+    const calendar = createExoticCalendar(canonicalId) as ExoticCalendar
     calendar.id = canonicalId
     return calendar
   },

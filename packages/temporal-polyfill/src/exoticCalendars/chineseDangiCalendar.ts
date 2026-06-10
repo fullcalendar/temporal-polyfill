@@ -3,14 +3,6 @@ import {
   createIntlScrapedCalendar,
 } from './utils/intlScrapedCalendar'
 
-export function createChineseCalendar() {
-  return createChineseDangiCalendar('chinese')
-}
-
-export function createDangiCalendar() {
-  return createChineseDangiCalendar('dangi')
-}
-
 // PlainMonthDay stores a canonical reference date, not the user-supplied year.
 // For Chinese/Dangi leap months, Temporal uses a modern reference table rather
 // than blindly accepting every historical Intl result. A value of 0 means that
@@ -38,8 +30,8 @@ const commonScrapedCalendarConfig: IntlScrapedCalendarConfig = {
   getMonthDaySearchStartYear: getChineseDangiMonthDaySearchStartYear,
 }
 
-function createChineseDangiCalendar(normCalendarId: string) {
-  return createIntlScrapedCalendar(normCalendarId, commonScrapedCalendarConfig)
+export function createChineseDangiCalendar(canonicalId: string) {
+  return createIntlScrapedCalendar(canonicalId, commonScrapedCalendarConfig)
 }
 
 function getChineseDangiMonthDaySearchStartYear(
