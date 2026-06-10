@@ -11,8 +11,8 @@ export function buildTerserReadableOptions() {
       ecma: 2020,
       passes: 3, // enough to remove dead object assignment, get lower size
       keep_fargs: true, // keep explicit =undefined params that define method .length
-      unsafe_arrows: true,
-      unsafe_methods: true,
+      unsafe_arrows: true, // just converts anon function(){} to ()=>
+      unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
       hoist_funs: true,
     },
     mangle: false,
