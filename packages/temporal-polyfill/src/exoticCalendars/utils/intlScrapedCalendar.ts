@@ -28,7 +28,7 @@ import {
 import { maxMilli } from '../../internal/temporalConstants'
 import { utcTimeZoneId } from '../../internal/timeZoneConfig'
 import { milliInDay } from '../../internal/units'
-import { compareNumbers, memoize } from '../../internal/utils'
+import { bindArgs, compareNumbers, memoize } from '../../internal/utils'
 
 interface IntlDateFields {
   era: string | undefined
@@ -60,8 +60,7 @@ export interface IntlScrapedCalendarConfig {
   ): number
 }
 
-interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
-  getMonthDaySearchStartYear: IntlScrapedCalendarConfig['getMonthDaySearchStartYear']
+interface IntlScrapedCalendarData {
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
 }
@@ -71,7 +70,52 @@ interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
 export function createIntlScrapedCalendar(
   normCalendarId: string,
   config: IntlScrapedCalendarConfig,
-): IntlScrapedCalendar {
+): ExoticCalendarWithoutId {
+  const intlData = createIntlScrapedCalendarData(normCalendarId)
+
+  return {
+    leapMonthMeta: config.leapMonthMeta,
+    monthDayLeapMonthMaxDays: config.monthDayLeapMonthMaxDays,
+    monthDayCommonMonthMaxDay: config.monthDayCommonMonthMaxDay,
+    computeDateFields: intlData.queryFields,
+    computeIsoFieldsFromParts: bindArgs(
+      computeIsoFieldsFromIntlParts,
+      intlData,
+    ),
+    computeEpochMilli: bindArgs(computeIntlEpochMilli, intlData),
+    computeMonthCodeParts: bindArgs(
+      computeIntlMonthCodeParts,
+      intlData,
+      config.leapMonthMeta,
+    ),
+    computeYearMonthFieldsForMonthDay: bindArgs(
+      computeIntlYearMonthFieldsForMonthDay,
+      intlData,
+      config.leapMonthMeta,
+      config.getMonthDaySearchStartYear,
+    ),
+    computeInLeapYear: bindArgs(
+      computeIntlInLeapYear,
+      intlData,
+      config.leapMonthMeta,
+    ),
+    computeMonthsInYear: bindArgs(computeIntlMonthsInYear, intlData),
+    computeDaysInMonth: bindArgs(computeIntlDaysInMonth, intlData),
+    computeDaysInYear: bindArgs(computeIntlDaysInYear, intlData),
+    computeLeapMonth: bindArgs(
+      computeIntlLeapMonth,
+      intlData,
+      config.leapMonthMeta,
+    ),
+    computeEraFields: bindArgs(computeIntlEraFields, intlData),
+    addMonths: bindArgs(addIntlMonths, intlData),
+    diffMonthSlots: bindArgs(diffIntlMonthSlots, intlData),
+  }
+}
+
+function createIntlScrapedCalendarData(
+  normCalendarId: string,
+): IntlScrapedCalendarData {
   const intlFormat = queryCalendarIntlFormat(normCalendarId)
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
@@ -85,60 +129,7 @@ export function createIntlScrapedCalendar(
     queryYearData,
   )
 
-  const calendar: IntlScrapedCalendar = {
-    getMonthDaySearchStartYear: config.getMonthDaySearchStartYear,
-    queryFields,
-    queryYearData,
-    leapMonthMeta: config.leapMonthMeta,
-    monthDayLeapMonthMaxDays: config.monthDayLeapMonthMaxDays,
-    monthDayCommonMonthMaxDay: config.monthDayCommonMonthMaxDay,
-    computeDateFields(isoDate) {
-      return calendar.queryFields(isoDate)
-    },
-    computeIsoFieldsFromParts(year, month, day) {
-      return computeIsoFieldsFromIntlParts(calendar, year, month, day)
-    },
-    computeEpochMilli(year, month, day) {
-      return computeIntlEpochMilli(calendar, year, month, day)
-    },
-    computeMonthCodeParts(year, month) {
-      return computeIntlMonthCodeParts(calendar, year, month)
-    },
-    computeYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth, day) {
-      return computeIntlYearMonthFieldsForMonthDay(
-        calendar,
-        monthCodeNumber,
-        isLeapMonth,
-        day,
-      )
-    },
-    computeInLeapYear(year) {
-      return computeIntlInLeapYear(calendar, year)
-    },
-    computeMonthsInYear(year) {
-      return computeIntlMonthsInYear(calendar, year)
-    },
-    computeDaysInMonth(year, month) {
-      return computeIntlDaysInMonth(calendar, year, month)
-    },
-    computeDaysInYear(year) {
-      return computeIntlDaysInYear(calendar, year)
-    },
-    computeLeapMonth(year) {
-      return computeIntlLeapMonth(calendar, year)
-    },
-    computeEraFields(isoDate) {
-      return computeIntlEraFields(calendar, isoDate)
-    },
-    addMonths(year, month, monthDelta) {
-      return addIntlMonths(calendar, year, month, monthDelta)
-    },
-    diffMonthSlots(year0, month0, year1, month1) {
-      return diffIntlMonthSlots(calendar, year0, month0, year1, month1)
-    },
-  }
-
-  return calendar
+  return { queryFields, queryYearData }
 }
 
 // Caches
@@ -316,57 +307,51 @@ function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
 // Intl-Calendar methods
 // -----------------------------------------------------------------------------
 
-function computeIntlDateFields(
-  intlCalendar: IntlScrapedCalendar,
-  isoDate: CalendarDateFields,
-): CalendarDateFields {
-  return intlCalendar.queryFields(isoDate)
-}
-
 function computeIsoFieldsFromIntlParts(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
   month?: number,
   day?: number,
 ): CalendarDateFields {
   return epochMilliToIsoDateTime(
-    computeIntlEpochMilli(intlCalendar, year, month, day),
+    computeIntlEpochMilli(intlData, year, month, day),
   )
 }
 
 function computeIntlEpochMilli(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
   month = 1,
   day = 1,
 ): number {
   return (
-    intlCalendar.queryYearData(year).monthEpochMillis[month - 1] +
+    intlData.queryYearData(year).monthEpochMillis[month - 1] +
     (day - 1) * milliInDay
   )
 }
 
 function computeIntlMonthCodeParts(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
+  leapMonthMeta: IntlScrapedCalendarConfig['leapMonthMeta'],
   year: number,
   month: number,
 ): MonthCodeParts {
-  const leapMonth = computeIntlLeapMonth(intlCalendar, year)
+  const leapMonth = computeIntlLeapMonth(intlData, leapMonthMeta, year)
   const monthCodeNumber = monthToMonthCodeNumber(month, leapMonth)
   const isLeapMonth = leapMonth === month
   return [monthCodeNumber, isLeapMonth]
 }
 
 function computeIntlLeapMonth(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
+  leapMonthMeta: IntlScrapedCalendarConfig['leapMonthMeta'],
   year: number,
 ): number | undefined {
-  const leapMonthMeta = intlCalendar.leapMonthMeta
   if (leapMonthMeta === undefined) {
     return undefined
   }
 
-  const currentMonthStrings = queryMonthStrings(intlCalendar, year)
+  const currentMonthStrings = intlData.queryYearData(year).monthStrings
   if (currentMonthStrings.length <= 12) {
     return undefined
   }
@@ -396,7 +381,7 @@ function computeIntlLeapMonth(
   // Older/newer ICU data sometimes encodes leap months with distinct labels
   // like `Mo2bis` instead of repeating the common month label. Fall back to
   // the previous-year diff heuristic in that case.
-  const prevMonthStrings = queryMonthStrings(intlCalendar, year - 1)
+  const prevMonthStrings = intlData.queryYearData(year - 1).monthStrings
   for (let i = 0; i < currentMonthStrings.length; i++) {
     if (currentMonthStrings[i] !== prevMonthStrings[i]) {
       return i + 1
@@ -405,41 +390,42 @@ function computeIntlLeapMonth(
 }
 
 function computeIntlInLeapYear(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
+  leapMonthMeta: IntlScrapedCalendarConfig['leapMonthMeta'],
   year: number,
 ): boolean {
-  if (intlCalendar.leapMonthMeta !== undefined) {
-    return computeIntlMonthsInYear(intlCalendar, year) > 12
+  if (leapMonthMeta !== undefined) {
+    return computeIntlMonthsInYear(intlData, year) > 12
   }
 
-  const daysInYear = computeIntlDaysInYear(intlCalendar, year)
+  const daysInYear = computeIntlDaysInYear(intlData, year)
   return (
-    daysInYear > computeIntlDaysInYear(intlCalendar, year - 1) ||
-    daysInYear > computeIntlDaysInYear(intlCalendar, year + 1)
+    daysInYear > computeIntlDaysInYear(intlData, year - 1) ||
+    daysInYear > computeIntlDaysInYear(intlData, year + 1)
   )
 }
 
 function computeIntlDaysInYear(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
 ): number {
-  const milli = computeIntlEpochMilli(intlCalendar, year)
-  const milliNext = computeIntlEpochMilli(intlCalendar, year + 1)
+  const milli = computeIntlEpochMilli(intlData, year)
+  const milliNext = computeIntlEpochMilli(intlData, year + 1)
   return diffEpochMilliDays(milli, milliNext)
 }
 
 function computeIntlDaysInMonth(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
   month: number,
 ): number {
-  const { monthEpochMillis } = intlCalendar.queryYearData(year)
+  const { monthEpochMillis } = intlData.queryYearData(year)
   let nextMonth = month + 1
   let nextMonthEpochMilli = monthEpochMillis
 
   if (nextMonth > monthEpochMillis.length) {
     nextMonth = 1
-    nextMonthEpochMilli = intlCalendar.queryYearData(year + 1).monthEpochMillis
+    nextMonthEpochMilli = intlData.queryYearData(year + 1).monthEpochMillis
   }
 
   return diffEpochMilliDays(
@@ -449,34 +435,33 @@ function computeIntlDaysInMonth(
 }
 
 function computeIntlMonthsInYear(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
 ): number {
-  return intlCalendar.queryYearData(year).monthEpochMillis.length
+  return intlData.queryYearData(year).monthEpochMillis.length
 }
 
 function computeIntlEraFields(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
-  const intlFields = intlCalendar.queryFields(isoDate)
+  const intlFields = intlData.queryFields(isoDate)
   return { era: intlFields.era, eraYear: intlFields.eraYear }
 }
 
 function computeIntlYearMonthFieldsForMonthDay(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
+  leapMonthMeta: IntlScrapedCalendarConfig['leapMonthMeta'],
+  getMonthDaySearchStartYear: IntlScrapedCalendarConfig['getMonthDaySearchStartYear'],
   monthCodeNumber: number,
   isLeapMonth: boolean,
   day: number,
 ): CalendarYearMonthFields | undefined {
   const startIsoYear =
-    intlCalendar.getMonthDaySearchStartYear?.(
-      monthCodeNumber,
-      isLeapMonth,
-      day,
-    ) || isoEpochFirstLeapYear
+    getMonthDaySearchStartYear?.(monthCodeNumber, isLeapMonth, day) ||
+    isoEpochFirstLeapYear
 
-  const startCalendarDateFields = computeIntlDateFields(intlCalendar, {
+  const startCalendarDateFields = intlData.queryFields({
     year: startIsoYear,
     month: isoMonthsInYear,
     day: 31,
@@ -486,7 +471,11 @@ function computeIntlYearMonthFieldsForMonthDay(
     month: startMonth,
     day: startDay,
   } = startCalendarDateFields
-  const startYearLeapMonth = computeIntlLeapMonth(intlCalendar, startYear)
+  const startYearLeapMonth = computeIntlLeapMonth(
+    intlData,
+    leapMonthMeta,
+    startYear,
+  )
   const startMonthCodeNumber = monthToMonthCodeNumber(
     startMonth,
     startYearLeapMonth,
@@ -507,7 +496,7 @@ function computeIntlYearMonthFieldsForMonthDay(
   // TODO: reference implementation says only go 20 years back.
   for (let yearMove = 0; yearMove < 100; yearMove++) {
     const tryYear = startYear - yearMove
-    const tryLeapMonth = computeIntlLeapMonth(intlCalendar, tryYear)
+    const tryLeapMonth = computeIntlLeapMonth(intlData, leapMonthMeta, tryYear)
     const tryMonth = monthCodeNumberToMonth(
       monthCodeNumber,
       isLeapMonth,
@@ -517,7 +506,7 @@ function computeIntlYearMonthFieldsForMonthDay(
 
     if (
       isLeapMonth === tryMonthIsLeap &&
-      day <= computeIntlDaysInMonth(intlCalendar, tryYear, tryMonth)
+      day <= computeIntlDaysInMonth(intlData, tryYear, tryMonth)
     ) {
       return { year: tryYear, month: tryMonth }
     }
@@ -525,7 +514,7 @@ function computeIntlYearMonthFieldsForMonthDay(
 }
 
 function addIntlMonths(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year: number,
   month: number,
   monthDelta: number,
@@ -539,13 +528,11 @@ function addIntlMonths(
 
     if (monthDelta < 0) {
       while (month < 1) {
-        month += computeIntlMonthsInYear(intlCalendar, --year)
+        month += computeIntlMonthsInYear(intlData, --year)
       }
     } else {
       let monthsInYear: number
-      while (
-        month > (monthsInYear = computeIntlMonthsInYear(intlCalendar, year))
-      ) {
+      while (month > (monthsInYear = computeIntlMonthsInYear(intlData, year))) {
         month -= monthsInYear
         year++
       }
@@ -556,7 +543,7 @@ function addIntlMonths(
 }
 
 function diffIntlMonthSlots(
-  intlCalendar: IntlScrapedCalendar,
+  intlData: IntlScrapedCalendarData,
   year0: number,
   month0: number,
   year1: number,
@@ -573,24 +560,17 @@ function diffIntlMonthSlots(
   }
 
   if (cmp < 0) {
-    let months = computeIntlMonthsInYear(intlCalendar, year0) - month0 + month1
+    let months = computeIntlMonthsInYear(intlData, year0) - month0 + month1
     for (let year = year0 + 1; year < year1; year++) {
-      months += computeIntlMonthsInYear(intlCalendar, year)
+      months += computeIntlMonthsInYear(intlData, year)
     }
     return months
   }
 
-  return -diffIntlMonthSlots(intlCalendar, year1, month1, year0, month0)
+  return -diffIntlMonthSlots(intlData, year1, month1, year0, month0)
 }
 
 // -----------------------------------------------------------------------------
-
-function queryMonthStrings(
-  intlCalendar: IntlScrapedCalendar,
-  year: number,
-): string[] {
-  return intlCalendar.queryYearData(year).monthStrings
-}
 
 function computeIntlMonthIndex(
   queryYearData: IntlYearDataCache,
