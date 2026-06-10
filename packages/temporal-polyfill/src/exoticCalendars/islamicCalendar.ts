@@ -42,7 +42,6 @@ const umalquraPlainMonthDay30ReferenceYears = [
 ]
 
 const enum IslamicCalendarVariant {
-  // Keep Umm al-Qura at 0 so repeated branch checks can minify to `!id`.
   Umalqura = 0,
   Civil = 1,
   Tabular = 2,
@@ -84,26 +83,22 @@ function createIslamicCalendar(variant: IslamicCalendarVariant) {
       'ah': 0,
     },
     fromJulianDay(julianDay) {
-      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-      return !variant
+      return variant === IslamicCalendarVariant.Umalqura
         ? julianDayToUmalqura(julianDay)
         : julianDayToIslamic(epoch, julianDay)
     },
     toJulianDay(year, month, day) {
-      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-      return !variant
+      return variant === IslamicCalendarVariant.Umalqura
         ? umalquraToJulianDay(year, month, day)
         : islamicToJulianDay(epoch, year, month, day)
     },
     computeDaysInMonth(year, month) {
-      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-      return !variant && isUmalquraYear(year)
+      return variant === IslamicCalendarVariant.Umalqura && isUmalquraYear(year)
         ? umalquraMonthLength(year, month)
         : islamicDaysInMonth(year, month)
     },
     computeDaysInYear(year) {
-      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-      return !variant && isUmalquraYear(year)
+      return variant === IslamicCalendarVariant.Umalqura && isUmalquraYear(year)
         ? umalquraYearLength(year)
         : islamicIsLeapYear(year)
           ? 355
@@ -119,14 +114,13 @@ function createIslamicCalendar(variant: IslamicCalendarVariant) {
       // Umm al-Qura is observational. test262 pins each 30-day PlainMonthDay
       // reference to a year where that month actually had 30 days.
       const umalquraReferenceYear =
-        // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-        !variant &&
+        variant === IslamicCalendarVariant.Umalqura &&
         !isLeapMonth &&
         day === 30 &&
         umalquraPlainMonthDay30ReferenceYears[monthCodeNumber - 1]
 
-      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
-      return !variant && umalquraReferenceYear
+      return variant === IslamicCalendarVariant.Umalqura &&
+        umalquraReferenceYear
         ? { year: umalquraReferenceYear, month: monthCodeNumber }
         : undefined
     },
