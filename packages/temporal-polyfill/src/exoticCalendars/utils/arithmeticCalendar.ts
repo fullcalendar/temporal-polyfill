@@ -50,7 +50,9 @@ export interface ArithmeticCalendarOps {
 // Julian Day for ISO 1972-12-31, the package's default month-day reference.
 const monthDayReferenceJulianDay = 2441683
 
-export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
+export function createArithmeticCalendar(
+  ops: ArithmeticCalendarOps,
+): ExoticCalendarWithoutId {
   const monthDayReferenceDate = ops.fromJulianDay(monthDayReferenceJulianDay)
 
   const fromIsoDate = memoize(
@@ -115,7 +117,7 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     }
   }
 
-  const calendar: ExoticCalendarWithoutId = {
+  return {
     eraOrigins: ops.eraOrigins,
     leapMonthMeta: ops.leapMonthMeta,
     monthDayLeapMonthMaxDays: ops.monthDayLeapMonthMaxDays,
@@ -164,18 +166,27 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
         : { era: parts.era, eraYear: parts.eraYear }
     },
     addMonths(year, month, monthDelta) {
-      return addArithmeticMonths(calendar, year, month, monthDelta)
+      return addArithmeticMonths(
+        ops.computeMonthsInYear,
+        year,
+        month,
+        monthDelta,
+      )
     },
     diffMonthSlots(year0, month0, year1, month1) {
-      return diffArithmeticMonthSlots(calendar, year0, month0, year1, month1)
+      return diffArithmeticMonthSlots(
+        ops.computeMonthsInYear,
+        year0,
+        month0,
+        year1,
+        month1,
+      )
     },
   }
-
-  return calendar
 }
 
 function addArithmeticMonths(
-  calendar: ExoticCalendarWithoutId,
+  computeMonthsInYear: ArithmeticCalendarOps['computeMonthsInYear'],
   year: number,
   month: number,
   monthDelta: number,
@@ -189,11 +200,11 @@ function addArithmeticMonths(
 
     if (monthDelta < 0) {
       while (month < 1) {
-        month += calendar.computeMonthsInYear(--year)
+        month += computeMonthsInYear(--year)
       }
     } else {
       let monthsInYear: number
-      while (month > (monthsInYear = calendar.computeMonthsInYear(year))) {
+      while (month > (monthsInYear = computeMonthsInYear(year))) {
         month -= monthsInYear
         year++
       }
@@ -204,7 +215,7 @@ function addArithmeticMonths(
 }
 
 function diffArithmeticMonthSlots(
-  calendar: ExoticCalendarWithoutId,
+  computeMonthsInYear: ArithmeticCalendarOps['computeMonthsInYear'],
   year0: number,
   month0: number,
   year1: number,
@@ -221,12 +232,21 @@ function diffArithmeticMonthSlots(
   }
 
   if (cmp < 0) {
-    let months = calendar.computeMonthsInYear(year0) - month0 + month1
+    let months = computeMonthsInYear(year0) - month0 + month1
     for (let year = year0 + 1; year < year1; year++) {
-      months += calendar.computeMonthsInYear(year)
+      months += computeMonthsInYear(year)
     }
     return months
   }
 
-  return -diffArithmeticMonthSlots(calendar, year1, month1, year0, month0)
+  // Backward diffs are the negative of the same forward walk. Swapping the
+  // endpoints makes the recursive call enter the cmp < 0 branch immediately,
+  // so this is at most one level of recursion.
+  return -diffArithmeticMonthSlots(
+    computeMonthsInYear,
+    year1,
+    month1,
+    year0,
+    month0,
+  )
 }
