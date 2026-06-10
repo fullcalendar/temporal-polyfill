@@ -14,21 +14,13 @@
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # TEMPORARY
-# This representative Duration.total() test's months expectation matches
-# separate JS Number arithmetic:
-#
-#   integerPart + numerator / denom
-#
-# We currently prefer the combined-division shape because it satisfies the more
-# precision-specific NudgeToCalendarUnit test:
-#
-#   built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
-#
-# The proper fix is exact numerator construction plus one final rational-to-
-# Number conversion. The proposal-temporal polyfill handles similar edge cases
-# with an fdiv string-manipulation hack:
-# https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/timeduration.mjs#L92
-built-ins/Temporal/Duration/prototype/total/relativeto-total-of-each-unit.js
+# Calendar-unit total math currently computes the fractional nudge window and
+# then adds it to the whole-unit count. That keeps the implementation compact
+# and passes the representative Duration.total() coverage, but it double-rounds
+# this NudgeToCalendarUnit case. The proper fix is still exact numerator
+# construction plus one final rational-to-Number conversion, but that needs a
+# compact implementation.
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
 
 # TEMPORARY
 # We want this test to pass for arithmetic calendars such as Coptic. The current

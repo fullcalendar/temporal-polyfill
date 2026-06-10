@@ -106,10 +106,7 @@ export function totalRelativeDuration(
   const integerPart =
     nudgeWindow.startDurationFields[durationFieldNamesAsc[totalUnit]]
 
-  // Keep the whole-unit and fractional-window math grouped into a single
-  // division. See DURATION-TOTAL-PRECISION-MEMORY.md for the one-ulp tradeoff
-  // this currently makes between two Duration.total() test262 cases.
-  return (integerPart * denom + numerator * sign) / denom
+  return integerPart + (numerator / denom) * sign
 }
 
 function totalDayTimeDuration(
