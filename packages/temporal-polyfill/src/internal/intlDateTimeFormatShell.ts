@@ -21,6 +21,7 @@ export type DateTimeFormatShellInternals = {
   transformedOptions: Intl.DateTimeFormatOptions
 }
 type DateTimeFormatShellConfig<R> = {
+  superClass: { prototype: object }
   transformOptions?(
     options: Intl.DateTimeFormatOptions,
   ): Intl.DateTimeFormatOptions
@@ -56,6 +57,7 @@ const rawResolvedOptions = RawDateTimeFormat.prototype.resolvedOptions
 // provider for raw Intl dispatch tuples. All policy, including Temporal
 // compatibility and non-Temporal fallback, stays in that provider.
 export function createDateTimeFormatShell<R>({
+  superClass,
   transformOptions = (options) => options,
   createArgsProvider,
 }: DateTimeFormatShellConfig<R>) {
@@ -136,28 +138,18 @@ export function createDateTimeFormatShell<R>({
 
     // Output is identical to native (the instance is a real DTF), so this only
     // exists to make `resolvedOptions` an OWN property of the prototype like the
-    // sibling methods — otherwise it'd be merely inherited through the `extends`
-    // chain and resolvedOptions/prop-desc's own-property check would fail. The
-    // getArgsProvider(this) brand check is redundant with native's own receiver
-    // validation, but kept for uniformity and the polyfill's error message.
+    // sibling methods. Otherwise it'd be merely inherited through the `extends`
+    // chain and resolvedOptions/prop-desc's own-property check would fail.
     resolvedOptions(): Intl.ResolvedDateTimeFormatOptions {
-      getArgsProvider(this)
       return rawResolvedOptions.call(this)
     }
   }
 
-  // Keep native Intl.DateTimeFormat.prototype in the chain so instances still
-  // satisfy `instanceof Intl.DateTimeFormat` when this shell is used by the
-  // func API without replacing the global constructor. The intermediate object
-  // shadows the native @@toStringTag with `undefined`, so deleting the shim's
-  // own tag makes Object.prototype.toString fall back to "[object Object]"
-  // instead of inheriting "Intl.DateTimeFormat" (toString-removed-tag test).
-  Object.setPrototypeOf(
-    ShimDateTimeFormat.prototype,
-    Object.create(RawDateTimeFormat.prototype, {
-      [Symbol.toStringTag]: { configurable: true, value: undefined },
-    }),
-  )
+  // Callers own this prototype ancestry because the class/global API needs the
+  // builtin `Intl.DateTimeFormat.prototype -> Object.prototype` shape, while
+  // the func API keeps the captured native prototype in the chain for
+  // `instanceof Intl.DateTimeFormat` without replacing the global constructor.
+  Object.setPrototypeOf(ShimDateTimeFormat.prototype, superClass.prototype)
 
   // Native Intl.DateTimeFormat is callable without `new`, but an ES class is
   // not (and `new` would also consult @@hasInstance — see

@@ -69,7 +69,7 @@ yargs(hideBin(process.argv))
       }
       const expectedFailureFiles = isNative
         ? ['native.txt']
-        : ['shim.txt', 'shim-builtin-calls.txt', 'shim-descriptor.txt']
+        : ['shim.txt', 'shim-builtin-calls.txt']
 
       if (!isNative) {
         if (currentNodeMajorVersion <= 16) {

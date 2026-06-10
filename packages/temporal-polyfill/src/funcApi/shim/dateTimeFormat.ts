@@ -3,7 +3,7 @@ import {
   DateTimeFormatShellInternals,
   createDateTimeFormatShell,
 } from '../../internal/intlDateTimeFormatShell'
-import { LocalesArg } from '../../internal/intlFormatUtils'
+import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { DateTimeFormatLike } from '../commonTypes'
 
 type DateTimeFormatFactoryConfig<R> = {
@@ -27,6 +27,10 @@ export function createDateTimeFormatFactory<R>({
   options?: Intl.DateTimeFormatOptions,
 ) => DateTimeFormatLike<R> {
   const ShimDateTimeFormat = createDateTimeFormatShell<R>({
+    // Func API formatters do not replace the global constructor, so keep
+    // native Intl.DateTimeFormat.prototype in the chain for
+    // `instanceof Intl.DateTimeFormat`.
+    superClass: RawDateTimeFormat,
     transformOptions,
     createArgsProvider,
   })

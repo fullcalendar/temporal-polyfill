@@ -63,6 +63,15 @@ describe('Intl.DateTimeFormat', () => {
       const s = format.format(pd)
       expect(s).toBe('2024')
     })
+
+    it('uses a spec-shaped prototype chain', () => {
+      const format = new Intl.DateTimeFormat('en-US', { year: 'numeric' })
+
+      expect(format).toBeInstanceOf(Intl.DateTimeFormat)
+      expect(Object.getPrototypeOf(Intl.DateTimeFormat.prototype)).toBe(
+        Object.prototype,
+      )
+    })
   })
 })
 

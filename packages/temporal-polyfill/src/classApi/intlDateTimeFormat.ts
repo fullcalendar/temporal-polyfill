@@ -38,6 +38,7 @@ export function createDateTimeFormatClass(
   ) => TemporalBrandingAndSlots | undefined,
 ): typeof Intl.DateTimeFormat {
   const ShimDateTimeFormat = createDateTimeFormatShell<Formattable>({
+    superClass: Object,
     createArgsProvider(internals) {
       // One Intl.DateTimeFormat per Temporal type branding; each type needs
       // distinct option filtering (e.g. dates drop time fields, times drop date
