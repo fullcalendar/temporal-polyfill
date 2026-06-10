@@ -37,6 +37,8 @@ const umalquraMonthLengths = [
   1373, 669,
 ]
 
+// Parallel to month codes M01-M12, stored as Umm al-Qura / Hijri calendar
+// years where that month has a day 30.
 const umalquraPlainMonthDay30ReferenceYears = [
   1392, 1390, 1391, 1392, 1391, 1392, 1389, 1392, 1392, 1390, 1391, 1390,
 ]

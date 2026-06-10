@@ -61,7 +61,7 @@ export interface IntlScrapedCalendarConfig {
 }
 
 interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
-  config: IntlScrapedCalendarConfig
+  getMonthDaySearchStartYear: IntlScrapedCalendarConfig['getMonthDaySearchStartYear']
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
 }
@@ -80,10 +80,14 @@ export function createIntlScrapedCalendar(
   }
 
   const queryYearData = createIntlYearDataCache(rawEpochMilliToIntlFields)
+  const queryFields = createIntlFieldCache(
+    rawEpochMilliToIntlFields,
+    queryYearData,
+  )
 
   const calendar: IntlScrapedCalendar = {
-    config,
-    queryFields: createIntlFieldCache(rawEpochMilliToIntlFields, queryYearData),
+    getMonthDaySearchStartYear: config.getMonthDaySearchStartYear,
+    queryFields,
     queryYearData,
     leapMonthMeta: config.leapMonthMeta,
     monthDayLeapMonthMaxDays: config.monthDayLeapMonthMaxDays,
@@ -466,7 +470,7 @@ function computeIntlYearMonthFieldsForMonthDay(
   day: number,
 ): CalendarYearMonthFields | undefined {
   const startIsoYear =
-    intlCalendar.config.getMonthDaySearchStartYear?.(
+    intlCalendar.getMonthDaySearchStartYear?.(
       monthCodeNumber,
       isLeapMonth,
       day,

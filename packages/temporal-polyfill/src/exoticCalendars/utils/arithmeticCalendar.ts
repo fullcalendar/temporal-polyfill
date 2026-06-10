@@ -4,24 +4,19 @@ import {
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from '../../internal/calendarMonthCode'
-import {
-  diffEpochMilliDays,
-  epochMilliToIsoDateTime,
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-} from '../../internal/epochMath'
+import { isoDateToEpochDays } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
-import {
-  computeIsoDaysInMonth,
-  isoMonthsInYear,
-} from '../../internal/isoCalendarMath'
-import { milliInDay } from '../../internal/units'
 import { compareNumbers, memoize } from '../../internal/utils'
+import {
+  epochDaysToJulianDay,
+  julianDayToEpochMilli,
+  julianDayToGregory,
+} from './gregoryJulianDay'
 
 export interface ArithmeticCalendarParts extends CalendarDateFields {
   era?: string
@@ -52,28 +47,17 @@ export interface ArithmeticCalendarOps {
   computeEraFields?(parts: ArithmeticCalendarParts): CalendarEraFields
 }
 
-// Adobe's calendar algorithms use Julian Day numbers. Julian Day 2440588 is
-// the civil day containing Unix epoch midnight, so the Temporal epoch-day bridge
-// is exact and avoids Date.UTC year quirks.
-const unixEpochJulianDay = 2440588
-
-function epochMilliToJulianDay(epochMilli: number): number {
-  return diffEpochMilliDays(0, epochMilli) + unixEpochJulianDay
-}
-
-function julianDayToEpochMilli(julianDay: number): number {
-  return (julianDay - unixEpochJulianDay) * milliInDay
-}
+// Julian Day for ISO 1972-12-31, the package's default month-day reference.
+const monthDayReferenceJulianDay = 2441683
 
 export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
-  const fromEpochMilli = memoize((epochMilli: number) =>
-    ops.fromJulianDay(epochMilliToJulianDay(epochMilli)),
-  )
+  const monthDayReferenceDate = ops.fromJulianDay(monthDayReferenceJulianDay)
 
-  function computeDateFieldsFromEpochMilli(epochMilli: number) {
-    const { year, month, day } = fromEpochMilli(epochMilli)
-    return { year, month, day }
-  }
+  const fromIsoDate = memoize(
+    (isoDate: CalendarDateFields) =>
+      ops.fromJulianDay(epochDaysToJulianDay(isoDateToEpochDays(isoDate))),
+    WeakMap,
+  )
 
   function computeDefaultMonthCodeParts(
     year: number,
@@ -89,17 +73,17 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     day: number,
   ) {
     isLeapMonth = Boolean(isLeapMonth)
-    const referenceDate = computeDateFieldsFromEpochMilli(
-      isoArgsToEpochMilli(1972, 12, 31),
-    )
-    let referenceYear = ops.monthDayReferenceYear || referenceDate.year
+    let referenceYear = ops.monthDayReferenceYear || monthDayReferenceDate.year
     const [referenceMonthCodeNumber, referenceIsLeapMonth] =
-      computeDefaultMonthCodeParts(referenceDate.year, referenceDate.month)
+      computeDefaultMonthCodeParts(
+        monthDayReferenceDate.year,
+        monthDayReferenceDate.month,
+      )
 
     if (
       (compareNumbers(monthCodeNumber, referenceMonthCodeNumber) ||
         compareNumbers(Number(isLeapMonth), Number(referenceIsLeapMonth)) ||
-        compareNumbers(day, referenceDate.day)) === 1
+        compareNumbers(day, monthDayReferenceDate.day)) === 1
     ) {
       referenceYear--
     }
@@ -139,35 +123,23 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     monthDayReferenceYear: ops.monthDayReferenceYear,
     computeYearFromEra: ops.computeYearFromEra,
     constrainPlainMonthDay: ops.constrainPlainMonthDay,
-    computeDateFields(isoDate) {
-      return computeDateFieldsFromEpochMilli(isoDateToEpochMilli(isoDate))
-    },
+    computeDateFields: fromIsoDate,
     computeIsoFieldsFromParts(year, month, day) {
-      const isoDate = epochMilliToIsoDateTime(
-        calendar.computeEpochMilli(year, month, day),
-      )
-
-      if (
-        isoDate.month < 1 ||
-        isoDate.month > isoMonthsInYear ||
-        isoDate.day < 1 ||
-        isoDate.day > computeIsoDaysInMonth(isoDate.year, isoDate.month)
-      ) {
-        throw new RangeError(errorMessages.outOfBoundsDate)
-      }
-
-      return isoDate
+      return julianDayToGregory(ops.toJulianDay(year, month, day))
     },
     computeEpochMilli(year, month = 1, day = 1) {
       return julianDayToEpochMilli(ops.toJulianDay(year, month, day))
     },
     computeMonthCodeParts(year, month) {
-      return ops.computeMonthCodeParts
-        ? ops.computeMonthCodeParts(year, month)
-        : computeDefaultMonthCodeParts(year, month)
+      return (ops.computeMonthCodeParts || computeDefaultMonthCodeParts)(
+        year,
+        month,
+      )
     },
     computeYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth, day) {
       return (
+        // A computeYearMonthFieldsForMonthDay function could return undefined,
+        // indicating it wants the fallback
         ops.computeYearMonthFieldsForMonthDay?.(
           monthCodeNumber,
           isLeapMonth,
@@ -184,11 +156,9 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
     computeMonthsInYear: ops.computeMonthsInYear,
     computeDaysInMonth: ops.computeDaysInMonth,
     computeDaysInYear: ops.computeDaysInYear,
-    computeLeapMonth(year) {
-      return ops.computeLeapMonth?.(year)
-    },
+    computeLeapMonth: ops.computeLeapMonth || (() => undefined),
     computeEraFields(isoDate) {
-      const parts = fromEpochMilli(isoDateToEpochMilli(isoDate))
+      const parts = fromIsoDate(isoDate)
       return ops.computeEraFields
         ? ops.computeEraFields(parts)
         : { era: parts.era, eraYear: parts.eraYear }
