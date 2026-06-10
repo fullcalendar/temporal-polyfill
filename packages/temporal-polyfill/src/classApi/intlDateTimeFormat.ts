@@ -53,12 +53,12 @@ export function createDateTimeFormatClass(
           if (formattable === undefined) {
             // .format(undefined) and .formatToParts(undefined) match native Intl
             // and format the current time.
-            return [internals.format]
+            return [internals.baseFormat]
           }
 
           const brandingAndSlots = getTemporalBrandingAndSlots(formattable)
           if (!brandingAndSlots) {
-            return [internals.format, Number(formattable)]
+            return [internals.baseFormat, Number(formattable)]
           }
 
           const [branding, slots] = brandingAndSlots
@@ -81,7 +81,7 @@ export function createDateTimeFormatClass(
           const endEpochMilli = endBrandingAndSlots ? undefined : Number(end)
 
           if (!startBrandingAndSlots && !endBrandingAndSlots) {
-            return [internals.format, startEpochMilli!, endEpochMilli!]
+            return [internals.baseFormat, startEpochMilli!, endEpochMilli!]
           }
 
           if (!startBrandingAndSlots || !endBrandingAndSlots) {

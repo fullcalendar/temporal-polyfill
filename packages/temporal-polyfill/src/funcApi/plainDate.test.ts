@@ -484,6 +484,7 @@ describe('createFormat', () => {
     const format = PlainDateFns.createFormat('en', { dateStyle: 'full' })
 
     expect(format).toBeInstanceOf(Intl.DateTimeFormat)
+    expect(format.format).toBe(format.format)
     expect(format.format(pd)).toBe('Sunday, December 31, 2023')
   })
 

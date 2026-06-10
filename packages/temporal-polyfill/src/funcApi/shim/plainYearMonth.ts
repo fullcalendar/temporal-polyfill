@@ -400,14 +400,14 @@ export const createFormat: (
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainYearMonthSlots(record)
-      const format = internals.format
+      const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots, true)
       return [format, isoDateToEpochMilli(slots)!]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimPlainYearMonthSlots(record0)
       const slots1 = getShimPlainYearMonthSlots(record1)
-      const format = internals.format
+      const format = internals.baseFormat
       checkResolvedCalendarCompatible(format, slots0, true)
       checkResolvedCalendarCompatible(format, slots1, true)
       return [

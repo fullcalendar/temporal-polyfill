@@ -68,6 +68,7 @@ describe('Intl.DateTimeFormat', () => {
       const format = new Intl.DateTimeFormat('en-US', { year: 'numeric' })
 
       expect(format).toBeInstanceOf(Intl.DateTimeFormat)
+      expect(format.format).toBe(format.format)
       expect(Object.getPrototypeOf(Intl.DateTimeFormat.prototype)).toBe(
         Object.prototype,
       )

@@ -423,13 +423,13 @@ export const createFormat: (
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainTimeSlots(record)
-      return [internals.format, timeFieldsToMilli(slots)]
+      return [internals.baseFormat, timeFieldsToMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimPlainTimeSlots(record0)
       const slots1 = getShimPlainTimeSlots(record1)
       return [
-        internals.format,
+        internals.baseFormat,
         timeFieldsToMilli(slots0),
         timeFieldsToMilli(slots1),
       ]

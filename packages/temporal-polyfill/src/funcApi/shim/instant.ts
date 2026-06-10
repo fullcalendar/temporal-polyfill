@@ -401,12 +401,16 @@ export const createFormat: (
   createArgsProvider: (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimInstantSlots(record)
-      return [internals.format, getEpochMilli(slots)]
+      return [internals.baseFormat, getEpochMilli(slots)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimInstantSlots(record0)
       const slots1 = getShimInstantSlots(record1)
-      return [internals.format, getEpochMilli(slots0), getEpochMilli(slots1)]
+      return [
+        internals.baseFormat,
+        getEpochMilli(slots0),
+        getEpochMilli(slots1),
+      ]
     },
   }),
 })
