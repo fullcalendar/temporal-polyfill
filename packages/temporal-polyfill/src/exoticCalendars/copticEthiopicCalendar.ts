@@ -36,37 +36,44 @@ const ethioaaEraRemaps = {
 }
 
 export function createCopticCalendar() {
-  return createCopticFamilyCalendar('coptic', copticEpoch)
+  return createCopticFamilyCalendar(
+    copticEpoch,
+    copticEraOrigins,
+    copticEraRemaps,
+  )
 }
 
 export function createEthiopicCalendar() {
-  return createCopticFamilyCalendar('ethiopic', ethiopicEpoch)
+  return createCopticFamilyCalendar(
+    ethiopicEpoch,
+    ethiopicEraOrigins,
+    ethiopicEraRemaps,
+    0,
+    true,
+  )
 }
 
 export function createEthiopicAmeteAlemCalendar() {
-  return createCopticFamilyCalendar('ethioaa', ethiopicEpoch, true)
+  return createCopticFamilyCalendar(
+    ethiopicEpoch,
+    ethioaaEraOrigins,
+    ethioaaEraRemaps,
+    ameteMihretDelta,
+  )
 }
 
 function createCopticFamilyCalendar(
-  id: 'coptic' | 'ethiopic' | 'ethioaa',
   epoch: number,
-  isAmeteAlem = false,
+  eraOrigins: Record<string, number>,
+  eraRemaps: Record<string, string>,
+  ameteAlemYearDelta = 0,
+  hasAmeteMihretEra = false,
 ) {
   return createArithmeticCalendar({
-    eraOrigins:
-      id === 'coptic'
-        ? copticEraOrigins
-        : id === 'ethiopic'
-          ? ethiopicEraOrigins
-          : ethioaaEraOrigins,
-    eraRemaps:
-      id === 'coptic'
-        ? copticEraRemaps
-        : id === 'ethiopic'
-          ? ethiopicEraRemaps
-          : ethioaaEraRemaps,
+    eraOrigins,
+    eraRemaps,
     computeYearFromEra(eraYear, normalizedEra, eraOrigin) {
-      return normalizedEra === 'aa' && id === 'ethiopic'
+      return normalizedEra === 'aa' && hasAmeteMihretEra
         ? eraYear - ameteMihretDelta
         : eraYearToYear(eraYear, eraOrigin)
     },
@@ -77,26 +84,21 @@ function createCopticFamilyCalendar(
     },
     fromJulianDay(julianDay) {
       const [year, month, day] = julianDayToCopticFamily(epoch, julianDay)
-      return { year: isAmeteAlem ? year + ameteMihretDelta : year, month, day }
+      return { year: year + ameteAlemYearDelta, month, day }
     },
     toJulianDay(year, month, day) {
       return copticFamilyToJulianDay(
         epoch,
-        isAmeteAlem ? year - ameteMihretDelta : year,
+        year - ameteAlemYearDelta,
         month,
         day,
       )
     },
     computeDaysInMonth(year, month) {
-      return copticFamilyDaysInMonth(
-        isAmeteAlem ? year - ameteMihretDelta : year,
-        month,
-      )
+      return copticFamilyDaysInMonth(year - ameteAlemYearDelta, month)
     },
     computeDaysInYear(year) {
-      return (
-        365 + copticFamilyLeapDay(isAmeteAlem ? year - ameteMihretDelta : year)
-      )
+      return 365 + copticFamilyLeapDay(year - ameteAlemYearDelta)
     },
     computeMonthsInYear() {
       return 13
@@ -105,16 +107,13 @@ function createCopticFamilyCalendar(
       return this.computeDaysInYear(year) > 365
     },
     computeEraFields({ year }) {
-      if (id === 'ethioaa') {
+      if (ameteAlemYearDelta) {
         return { era: 'aa', eraYear: year }
       }
-      if (id === 'ethiopic' && year <= 0) {
+      if (hasAmeteMihretEra && year <= 0) {
         return { era: 'aa', eraYear: year + ameteMihretDelta }
       }
-      return {
-        era: id === 'ethiopic' ? 'am' : id === 'coptic' ? 'am' : 'aa',
-        eraYear: year,
-      }
+      return { era: 'am', eraYear: year }
     },
   })
 }
