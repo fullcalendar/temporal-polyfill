@@ -91,8 +91,8 @@ const queryTimeZoneIntlFormat = memoize(
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
-      hour12: false,
     } as Intl.DateTimeFormatOptions
-    return new RawDateTimeFormat('en', options)
+    // Offset math needs midnight as 00:00, not h24's 24:00.
+    return new RawDateTimeFormat('en-u-hc-h23', options)
   },
 )
