@@ -1,0 +1,18 @@
+import {
+  addDays as plusDays,
+  compare as compareDates,
+  create,
+  roundToYear as roundYear,
+} from 'temporal-polyfill/fns/PlainDate'
+import {
+  addMinutes as plusMinutes,
+  create as createTime,
+} from 'temporal-polyfill/fns/PlainTime'
+
+const date = create(2024, 5, 1)
+const nextDate = plusDays(date, 3)
+const order = compareDates(date, nextDate)
+const rounded = roundYear(date)
+
+const time = createTime(9, 30)
+const nextTime = plusMinutes(time, 15)

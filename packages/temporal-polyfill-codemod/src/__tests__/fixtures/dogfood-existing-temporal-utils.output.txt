@@ -1,0 +1,8 @@
+import { startOfWeek as localStartOfWeek } from 'temporal-utils'
+
+export function reusesExistingTemporalUtilsImport(date: Temporal.PlainDate) {
+  const next = date.add({
+    days: 5
+  })
+  return localStartOfWeek(next)
+}

@@ -1,0 +1,17 @@
+import { diffMonths, roundToHour, startOfMonth, withDayOfYear } from 'temporal-utils';
+
+export function namedImportFlow(options: unknown) {
+  const date = new Temporal.PlainDate(2026, 6, 10)
+  const start = startOfMonth(date)
+  const shifted = withDayOfYear(start, 200)
+  const months = diffMonths(start, shifted, options)
+  const order = Temporal.PlainDate.compare(start, shifted)
+
+  const dateTime = new Temporal.PlainDateTime(2026, 6, 10, 9)
+  const later = dateTime.add({
+    hours: 3
+  })
+  const rounded = roundToHour(later, options)
+
+  return { months, order, rounded, shifted }
+}

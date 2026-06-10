@@ -1,0 +1,7 @@
+import { startOfWeek as localStartOfWeek } from 'temporal-utils'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+export function reusesExistingTemporalUtilsImport(date: PlainDateFns.Record) {
+  const next = PlainDateFns.addDays(date, 5)
+  return localStartOfWeek(next)
+}

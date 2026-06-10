@@ -5,6 +5,7 @@ packages:
   # - ./packages/locale-textinfo
   # - ./packages/locale-weekinfo
   - ./packages/temporal-polyfill
+  - ./packages/temporal-polyfill-codemod
   - ./packages/temporal-spec
   - ./packages/temporal-utils
   - ./packages/export-size

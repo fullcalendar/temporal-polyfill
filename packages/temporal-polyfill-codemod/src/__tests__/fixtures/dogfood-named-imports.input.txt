@@ -1,0 +1,26 @@
+import {
+  compare as compareDates,
+  create,
+  diffMonths,
+  startOfMonth,
+  withDayOfYear,
+} from 'temporal-polyfill/fns/PlainDate'
+import {
+  addHours,
+  create as createDateTime,
+  roundToHour,
+} from 'temporal-polyfill/fns/PlainDateTime'
+
+export function namedImportFlow(options: unknown) {
+  const date = create(2026, 6, 10)
+  const start = startOfMonth(date)
+  const shifted = withDayOfYear(start, 200)
+  const months = diffMonths(start, shifted, options)
+  const order = compareDates(start, shifted)
+
+  const dateTime = createDateTime(2026, 6, 10, 9)
+  const later = addHours(dateTime, 3)
+  const rounded = roundToHour(later, options)
+
+  return { months, order, rounded, shifted }
+}
