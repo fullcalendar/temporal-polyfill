@@ -1,7 +1,6 @@
-import { isoArgsToEpochDays, isoDateToEpochDays } from '../internal/epochMath'
+import { isoDateToEpochDays } from '../internal/epochMath'
 import { gregoryEraOrigins } from '../internal/intlCalendarConfig'
 import { computeGregoryEraFields } from '../internal/isoCalendarMath'
-import { compareNumbers } from '../internal/utils'
 import { createGregoryAlignedCalendar } from './utils/gregoryAlignedCalendar'
 
 // For converting era+eraYear => ISO-year
@@ -14,34 +13,11 @@ const japaneseEraOrigins = {
   'reiwa': 2018,
 }
 
-// For converting ISO-YMD => era+eraYear
-const japaneseEras = [
-  {
-    name: 'meiji',
-    originYear: 1867,
-    startEpochDays: isoArgsToEpochDays(1873, 1, 1),
-  },
-  {
-    name: 'taisho',
-    originYear: 1911,
-    startEpochDays: isoArgsToEpochDays(1912, 7, 30),
-  },
-  {
-    name: 'showa',
-    originYear: 1925,
-    startEpochDays: isoArgsToEpochDays(1926, 12, 25),
-  },
-  {
-    name: 'heisei',
-    originYear: 1988,
-    startEpochDays: isoArgsToEpochDays(1989, 1, 8),
-  },
-  {
-    name: 'reiwa',
-    originYear: 2018,
-    startEpochDays: isoArgsToEpochDays(2019, 5, 1),
-  },
-] as const
+const meijiStartEpochDays = -35428 // 1873-01-01
+const taishoStartEpochDays = -20974 // 1912-07-30
+const showaStartEpochDays = -15713 // 1926-12-25
+const heiseiStartEpochDays = 6947 // 1989-01-08
+const reiwaStartEpochDays = 18017 // 2019-05-01
 
 export function createJapaneseCalendar() {
   return createGregoryAlignedCalendar({
@@ -59,11 +35,21 @@ function computeJapaneseEraFields(isoDate: {
 }) {
   const epochDays = isoDateToEpochDays(isoDate)
 
-  for (let i = japaneseEras.length - 1; i >= 0; i--) {
-    const era = japaneseEras[i]
-    if (compareNumbers(epochDays, era.startEpochDays) >= 0) {
-      return { era: era.name, eraYear: isoDate.year - era.originYear }
-    }
+  const era =
+    epochDays >= reiwaStartEpochDays
+      ? 'reiwa'
+      : epochDays >= heiseiStartEpochDays
+        ? 'heisei'
+        : epochDays >= showaStartEpochDays
+          ? 'showa'
+          : epochDays >= taishoStartEpochDays
+            ? 'taisho'
+            : epochDays >= meijiStartEpochDays
+              ? 'meiji'
+              : undefined
+
+  if (era) {
+    return { era, eraYear: isoDate.year - japaneseEraOrigins[era] }
   }
 
   // Temporal's Japanese era round-tripping follows the Gregorian-aligned era
