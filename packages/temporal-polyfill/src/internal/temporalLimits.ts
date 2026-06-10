@@ -1,5 +1,5 @@
 import { bigNanoInUtcDay } from './bigNano'
-import { isoDateTimeToEpochNano } from './epochMath'
+import { isoArgsToEpochDays, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import {
@@ -83,25 +83,16 @@ export function checkIsoDateTimeInBounds(
     isoYearMax,
     Overflow.Reject,
   )
-  // This mirrors the edge-year nudge in isoToLegacyDate, but here it is only
-  // used to ask whether the final PlainDateTime still lands inside the Temporal
-  // range after accounting for the extra day that PlainDateTime permits.
-  const nudge = year === isoYearMin ? 1 : year === isoYearMax ? -1 : 0
 
-  if (nudge) {
-    // Needs to be within 23:59:59.999 of min/max epochNano.
-    checkEpochNanoInBounds(
-      isoDateTimeToEpochNano(
-        combineDateAndTime(
-          {
-            year: isoDateTime.year,
-            month: isoDateTime.month,
-            day: isoDateTime.day + nudge,
-          },
-          { ...isoDateTime, nanosecond: isoDateTime.nanosecond - nudge },
-        ),
-      ),
-    )
+  const epochDays = isoArgsToEpochDays(year, isoDateTime.month, isoDateTime.day)
+
+  // PlainDateTime's lower edge permits one extra ISO day, but not midnight of
+  // that day. The upper edge ends on epoch day +100000000 at 23:59:59.999999999.
+  if (
+    Math.abs(epochDays) > epochNanoDayMax &&
+    (epochDays !== -epochNanoDayMax - 1 || !timeFieldsToNano(isoDateTime))
+  ) {
+    throw new RangeError(errorMessages.outOfBoundsDate)
   }
 }
 

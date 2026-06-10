@@ -1,10 +1,5 @@
 import type { MonthCodeParts } from './calendarMonthCode'
-import {
-  diffEpochMilliDays,
-  isoArgsToEpochMilli,
-  isoDateToEpochMilli,
-  isoToLegacyDate,
-} from './epochMath'
+import { isoArgsToEpochDays } from './epochMath'
 import { calendarDateFieldNamesAsc } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import type {
@@ -92,21 +87,27 @@ export function diffIsoMonthSlots(
 }
 
 export function computeIsoDayOfWeek(isoDateFields: CalendarDateFields): number {
-  const [legacyDate, daysNudged] = isoToLegacyDate(
-    isoDateFields.year,
-    isoDateFields.month,
-    isoDateFields.day,
+  return (
+    modFloor(
+      isoArgsToEpochDays(
+        isoDateFields.year,
+        isoDateFields.month,
+        isoDateFields.day,
+      ) + 4,
+      7,
+    ) || 7
   )
-
-  return modFloor(legacyDate.getUTCDay() - daysNudged, 7) || 7
 }
 
 export function computeIsoDayOfYear(isoDateFields: CalendarDateFields): number {
   return (
-    diffEpochMilliDays(
-      isoArgsToEpochMilli(isoDateFields.year)!,
-      isoDateToEpochMilli(isoDateFields)!,
-    ) + 1
+    isoArgsToEpochDays(
+      isoDateFields.year,
+      isoDateFields.month,
+      isoDateFields.day,
+    ) -
+    isoArgsToEpochDays(isoDateFields.year) +
+    1
   )
 }
 

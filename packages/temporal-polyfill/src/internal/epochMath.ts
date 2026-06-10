@@ -1,8 +1,11 @@
 import { bigNanoInMilli, bigNanoInSec, bigNanoInUtcDay } from './bigNano'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
-import { isoYearMax, isoYearMin, maxMilli } from './temporalConstants'
 import { milliInDay, milliInSec, nanoInMicro, nanoInMilli } from './units'
-import { divFloorBigInt, divModFloor } from './utils'
+import { divFloorBigInt, divModFloor, divTrunc, modFloor } from './utils'
+
+const daysIn400YearCycle = 146097
+const yearsIn400YearCycle = 400
+const monthsInYear = 12
 
 // Epoch Unit Conversion
 // -----------------------------------------------------------------------------
@@ -57,9 +60,6 @@ export function isoDateTimeToEpochSec(
   return [epochSec, subsecNano]
 }
 
-/*
-If out-of-bounds, returns undefined
-*/
 export function isoDateToEpochMilli(
   isoDate: CalendarDateFields,
 ): number | undefined {
@@ -81,8 +81,7 @@ export function isoDateTimeToEpochMilli(
 }
 
 /*
-For converting to fake epochNano values for math
-If out-of-bounds, returns undefined
+For converting to fake epochNano values for math.
 */
 export function isoDateToEpochNano(
   isoDate: CalendarDateFields,
@@ -127,14 +126,25 @@ export function isoArgsToEpochSec(...args: IsoTuple): number {
 }
 
 /*
-If out-of-bounds, returns undefined
+Returns undefined if the input cannot produce a finite Number epoch.
 */
 export function isoArgsToEpochMilli(...args: IsoTuple): number | undefined {
-  const [legacyDate, daysNudged] = isoToLegacyDate(...args)
-  const epochMilli = legacyDate.valueOf()
+  const [
+    isoYear,
+    isoMonth = 1,
+    isoDay = 1,
+    isoHour = 0,
+    isoMinute = 0,
+    isoSecond = 0,
+    isoMilli = 0,
+  ] = args
+  const epochMilli =
+    isoArgsToEpochDays(isoYear, isoMonth, isoDay) * milliInDay +
+    ((isoHour * 60 + isoMinute) * 60 + isoSecond) * milliInSec +
+    isoMilli
 
   if (!isNaN(epochMilli)) {
-    return epochMilli - daysNudged * milliInDay
+    return epochMilli
   }
 }
 
@@ -145,30 +155,28 @@ export function diffEpochMilliDays(
   return Math.trunc((epochMilli1 - epochMilli0) / milliInDay)
 }
 
-// This lives with epoch conversion rather than ISO calendar math because its
-// purpose is bridging ISO fields through JavaScript's legacy Date object. The
-// edge-year nudge below is part of that bridge, not a pure calendar rule.
-export function isoToLegacyDate(
+// Month and day intentionally balance like Date.UTC(), but the year is projected
+// into a safe 400-year Gregorian cycle first. This keeps ISO date math valid for
+// Temporal's full plain-object range without relying on Date TimeClip.
+export function isoArgsToEpochDays(
   isoYear: number,
   isoMonth = 1,
   isoDay = 1,
-  isoHour = 0,
-  isoMinute = 0,
-  isoSec = 0,
-  isoMilli = 0,
-): [Date, number] {
-  // Allows this function to accept values beyond valid Instants. PlainDateTime
-  // permits values within 24 hours of the Instant bounds.
-  const daysNudged =
-    isoYear === isoYearMin ? 1 : isoYear === isoYearMax ? -1 : 0
+): number {
+  const monthIndex = isoMonth - 1
+  isoYear += Math.floor(monthIndex / monthsInYear)
+  isoMonth = modFloor(monthIndex, monthsInYear)
 
-  // Date.UTC() interprets one and two-digit years as being in the 20th century,
-  // so create a Date first and then set the full UTC year explicitly.
-  const legacyDate = new Date()
-  legacyDate.setUTCHours(isoHour, isoMinute, isoSec, isoMilli)
-  legacyDate.setUTCFullYear(isoYear, isoMonth - 1, isoDay + daysNudged)
-
-  return [legacyDate, daysNudged]
+  return (
+    Date.UTC(
+      (isoYear % yearsIn400YearCycle) - yearsIn400YearCycle,
+      isoMonth,
+      0,
+    ) /
+      milliInDay +
+    (divTrunc(isoYear, yearsIn400YearCycle) + 1) * daysIn400YearCycle +
+    isoDay
+  )
 }
 
 // Epoch -> ISO Fields
@@ -191,31 +199,38 @@ export function epochNanoToIso(
   return epochMilliToIsoDateTime(epochMilli, microsecond, nanosecond)
 }
 
-/*
-Accommodates epochMillis that are slightly out-of-range
-*/
 export function epochMilliToIsoDateTime(
   epochMilli: number,
   microsecond = 0,
   nanosecond = 0,
 ): CalendarDateTimeFields {
-  const daysOver = // beyond min/max
-    Math.ceil(Math.max(0, Math.abs(epochMilli) - maxMilli) / milliInDay) *
-    Math.sign(epochMilli)
-
-  // Create a Date that's forced within bounds, then push the ISO day back out
-  // by `daysOver` so callers can represent Temporal's wider PlainDateTime edge.
-  const legacyDate = new Date(epochMilli - daysOver * milliInDay)
+  const [epochDays, dayMilli] = divModFloor(epochMilli, milliInDay)
+  const isoDate = epochDaysToIsoDate(epochDays)
+  const [hour, hourMilli] = divModFloor(dayMilli, 60 * 60 * milliInSec)
+  const [minute, minuteMilli] = divModFloor(hourMilli, 60 * milliInSec)
+  const [second, millisecond] = divModFloor(minuteMilli, milliInSec)
 
   return {
-    year: legacyDate.getUTCFullYear(),
-    month: legacyDate.getUTCMonth() + 1,
-    day: legacyDate.getUTCDate() + daysOver,
-    hour: legacyDate.getUTCHours(),
-    minute: legacyDate.getUTCMinutes(),
-    second: legacyDate.getUTCSeconds(),
-    millisecond: legacyDate.getUTCMilliseconds(),
+    ...isoDate,
+    hour,
+    minute,
+    second,
+    millisecond,
     microsecond,
     nanosecond,
+  }
+}
+
+export function epochDaysToIsoDate(epochDays: number): CalendarDateFields {
+  const legacyDate = new Date(
+    modFloor(epochDays, daysIn400YearCycle) * milliInDay,
+  )
+
+  return {
+    year:
+      legacyDate.getUTCFullYear() +
+      Math.floor(epochDays / daysIn400YearCycle) * yearsIn400YearCycle,
+    month: legacyDate.getUTCMonth() + 1,
+    day: legacyDate.getUTCDate(),
   }
 }

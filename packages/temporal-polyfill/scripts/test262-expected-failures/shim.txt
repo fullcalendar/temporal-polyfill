@@ -14,25 +14,6 @@
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
-# TEMPORARY
-# We want this test to pass for arithmetic calendars such as Coptic. The current
-# first failure is Coptic at the upper ISO edge: PlainYearMonth.from creates a
-# valid ISO reference date, but computeDateFieldsFromEpochMilli converts that
-# date through epoch milliseconds and produces NaN calendar fields near the
-# TimeClip boundary. A proper fix likely needs the arithmetic calendar path to
-# convert ISO dates directly through Julian-day math, possibly involving the
-# gregoryToJulianDay helper.
-#
-# ENV-ISSUE
-# TODO: after above fixed, move this test to calendar-extreme-dates.txt
-# The same test also covers Chinese and Dangi extreme dates. Those calendars are
-# lunisolar and still rely on host Intl.DateTimeFormat/ICU data for far-edge
-# conversions, where implementations can throw internal errors or otherwise be
-# unreliable. We do not intend to ship a full independent astronomical calendar
-# engine just to satisfy those extreme cases.
-#
-intl402/Temporal/PlainYearMonth/from/extreme-dates.js
-
 # ENV-ISSUE
 # Temporal test262 runner does not support $262.createRealm()
 intl402/DateTimeFormat/proto-from-ctor-realm.js
