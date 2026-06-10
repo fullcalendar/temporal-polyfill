@@ -45,7 +45,6 @@ export function resolveCalendarYear(
 ): number {
   const exoticCalendar = calendar || undefined
   const eraOrigins = getCalendarEraOrigins(calendar)
-  const eraRemaps = exoticCalendar?.eraRemaps || {}
   let { era, eraYear, year } = fields
 
   if (year !== undefined) {
@@ -64,8 +63,7 @@ export function resolveCalendarYear(
       throw new RangeError(errorMessages.forbiddenEraParts)
     }
 
-    const normalizedEra =
-      eraRemaps[normalizeEraName(era)] || normalizeEraName(era)
+    const normalizedEra = normalizeEraName(era)
     const eraOrigin = eraOrigins[normalizedEra]
 
     if (eraOrigin === undefined) {
@@ -78,6 +76,7 @@ export function resolveCalendarYear(
     const yearByEra = exoticCalendar?.computeYearFromEra
       ? exoticCalendar.computeYearFromEra(eraYear, normalizedEra, eraOrigin)
       : eraYearToYear(eraYear, eraOrigin)
+
     if (year !== undefined && year !== yearByEra) {
       throw new RangeError(errorMessages.mismatchingYearAndEra)
     }
@@ -195,8 +194,9 @@ function resolveMonthCode(
   return month
 }
 
+// Era origins use a signed offset convention: non-negative origins count
+// forward, while negative origins count backward for "before" eras like BCE.
 export function eraYearToYear(eraYear: number, eraOrigin: number): number {
-  // Era origins use calendarConfig's signed offset convention. The `|| 0`
-  // collapses the possible -0 result into Temporal's observable +0 year.
+  // Collapse the possible -0 result into Temporal's observable +0 year.
   return (eraOrigin + eraYear) * (Math.sign(eraOrigin) || 1) || 0
 }

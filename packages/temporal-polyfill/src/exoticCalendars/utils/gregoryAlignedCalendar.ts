@@ -20,7 +20,6 @@ import {
 export interface GregoryAlignedCalendarConfig {
   isoYearOffset?: number
   eraOrigins?: Record<string, number>
-  eraRemaps?: Record<string, string>
   removeEraFieldsOnMonthDayReplace?: boolean
   computeEraFields?(
     isoDate: CalendarDateFields,
@@ -43,7 +42,6 @@ export function createGregoryAlignedCalendar(
 
   return {
     eraOrigins: config.eraOrigins,
-    eraRemaps: config.eraRemaps,
     monthDayReferenceYear: isoEpochFirstLeapYear + isoYearOffset,
     removeEraFieldsOnMonthDayReplace: config.removeEraFieldsOnMonthDayReplace,
     computeDateFields(isoDate) {

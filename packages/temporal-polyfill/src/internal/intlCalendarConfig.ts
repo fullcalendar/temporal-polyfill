@@ -6,7 +6,7 @@ export const gregoryCalendarId = 'gregory'
 export const gregoryEraOrigins: Record<string, number> = { 'bce': -1, 'ce': 0 }
 
 // Normalize era names from either user input or Intl output into a stable,
-// punctuation-insensitive token before applying calendar-specific remaps.
+// punctuation-insensitive token before calendar-specific era lookup.
 export function normalizeEraName(era: string): string {
   const normalized = era
     .normalize('NFD') // 'Shōwa' -> 'Showa'

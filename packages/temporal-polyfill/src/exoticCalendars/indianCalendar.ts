@@ -13,16 +13,10 @@ const indianYearStart = 80
 const indianEraOrigins = {
   'shaka': 0,
 }
-const indianEraRemaps = {
-  // Some Intl implementations surface the older `saka` label while Temporal
-  // test262 expects the canonical `shaka` code.
-  'saka': 'shaka',
-}
 
 export function createIndianCalendar() {
   return createArithmeticCalendar({
     eraOrigins: indianEraOrigins,
-    eraRemaps: indianEraRemaps,
     fromJulianDay(julianDay) {
       const gregory = julianDayToGregory(julianDay)
       let year = gregory.year - indianEraStart

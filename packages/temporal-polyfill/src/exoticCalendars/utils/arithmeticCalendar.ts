@@ -30,7 +30,6 @@ export interface ArithmeticCalendarParts extends CalendarDateFields {
 
 export interface ArithmeticCalendarOps {
   eraOrigins?: Record<string, number>
-  eraRemaps?: Record<string, string>
   leapMonthMeta?: number
   plainMonthDayLeapMonthMaxDays?: Record<number, number>
   plainMonthDayCommonMonthMaxDay?: number
@@ -134,7 +133,6 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
 
   const calendar: ExoticCalendarWithoutId = {
     eraOrigins: ops.eraOrigins,
-    eraRemaps: ops.eraRemaps,
     leapMonthMeta: ops.leapMonthMeta,
     plainMonthDayLeapMonthMaxDays: ops.plainMonthDayLeapMonthMaxDays,
     plainMonthDayCommonMonthMaxDay: ops.plainMonthDayCommonMonthMaxDay,

@@ -5,16 +5,10 @@ const rocEraOrigins = {
   'roc': 0,
 }
 
-const rocEraRemaps = {
-  'beforeroc': 'broc',
-  'minguo': 'roc',
-}
-
 export function createRocCalendar() {
   return createGregoryAlignedCalendar({
     isoYearOffset: -1911,
     eraOrigins: rocEraOrigins,
-    eraRemaps: rocEraRemaps,
     computeEraFields(_isoDate, calendarYear) {
       return calendarYear < 1
         ? { era: 'broc', eraYear: 1 - calendarYear }

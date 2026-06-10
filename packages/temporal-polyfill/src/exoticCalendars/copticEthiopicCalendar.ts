@@ -18,46 +18,19 @@ const ethiopicEraOrigins = {
 const ethioaaEraOrigins = {
   'aa': 0,
 }
-const copticEraRemaps = {
-  'era0': 'am',
-  'era1': 'am',
-  'coptic': 'am',
-}
-const ethiopicEraRemaps = {
-  'era0': 'aa',
-  'era1': 'am',
-  'ethioaa': 'aa',
-  'ethiopic': 'am',
-}
-const ethioaaEraRemaps = {
-  'era0': 'aa',
-  'era1': 'aa',
-  'ethioaa': 'aa',
-}
 
 export function createCopticCalendar() {
-  return createCopticFamilyCalendar(
-    copticEpoch,
-    copticEraOrigins,
-    copticEraRemaps,
-  )
+  return createCopticFamilyCalendar(copticEpoch, copticEraOrigins)
 }
 
 export function createEthiopicCalendar() {
-  return createCopticFamilyCalendar(
-    ethiopicEpoch,
-    ethiopicEraOrigins,
-    ethiopicEraRemaps,
-    0,
-    true,
-  )
+  return createCopticFamilyCalendar(ethiopicEpoch, ethiopicEraOrigins, 0, true)
 }
 
 export function createEthiopicAmeteAlemCalendar() {
   return createCopticFamilyCalendar(
     ethiopicEpoch,
     ethioaaEraOrigins,
-    ethioaaEraRemaps,
     ameteMihretDelta,
   )
 }
@@ -65,13 +38,11 @@ export function createEthiopicAmeteAlemCalendar() {
 function createCopticFamilyCalendar(
   epoch: number,
   eraOrigins: Record<string, number>,
-  eraRemaps: Record<string, string>,
   ameteAlemYearDelta = 0,
   hasAmeteMihretEra = false,
 ) {
   return createArithmeticCalendar({
     eraOrigins,
-    eraRemaps,
     computeYearFromEra(eraYear, normalizedEra, eraOrigin) {
       return normalizedEra === 'aa' && hasAmeteMihretEra
         ? eraYear - ameteMihretDelta
