@@ -22,8 +22,8 @@ export type CalendarImpl =
 export interface ExoticCalendarWithoutId {
   eraOrigins?: Record<string, number>
   leapMonthMeta?: number
-  plainMonthDayLeapMonthMaxDays?: Record<number, number>
-  plainMonthDayCommonMonthMaxDay?: number
+  monthDayLeapMonthMaxDays?: Record<number, number>
+  monthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
   erasBeginMidYear?: boolean
 

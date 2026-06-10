@@ -70,8 +70,8 @@ export function createHebrewCalendar() {
       return [month - (hebrewIsLeapYear(year) && month > 6 ? 1 : 0), false]
     },
     computeYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth, day) {
-      // test262 fixes the Hebrew leap-month PlainMonthDay reference in ISO
-      // 1970. Hebrew year 5730 has Adar I as M05L and its day range is 1-30.
+      // test262 fixes the Hebrew leap-month month-day reference in ISO 1970.
+      // Hebrew year 5730 has Adar I as M05L and its day range is 1-30.
       return isLeapMonth && monthCodeNumber === 5 && day <= 30
         ? { year: 5730, month: 6 }
         : undefined

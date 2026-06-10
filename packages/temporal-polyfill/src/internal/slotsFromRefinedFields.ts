@@ -334,21 +334,21 @@ export function createPlainMonthDayFromFields(
 
   if (
     isLeapMonth &&
-    ((calendar && calendar.plainMonthDayLeapMonthMaxDays?.[monthCodeNumber]) ??
+    ((calendar && calendar.monthDayLeapMonthMaxDays?.[monthCodeNumber]) ??
       Infinity) < fields.day
   ) {
     if (overflow === Overflow.Reject) {
       throw new RangeError(errorMessages.invalidLeapMonth)
     }
 
-    // Temporal's PlainMonthDay reference table only admits some leap
-    // month-days. When a requested leap month-day is outside that table,
-    // constrain it through the corresponding common month instead.
+    // Temporal's month-day reference table only admits some leap month-days.
+    // When a requested leap month-day is outside that table, constrain it
+    // through the corresponding common month instead.
     isLeapMonth = false
     day = constrainToRange(
       fields.day,
       1,
-      (calendar && calendar.plainMonthDayCommonMonthMaxDay) ?? Infinity,
+      (calendar && calendar.monthDayCommonMonthMaxDay) ?? Infinity,
     )
   }
 

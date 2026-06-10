@@ -31,8 +31,8 @@ export interface ArithmeticCalendarParts extends CalendarDateFields {
 export interface ArithmeticCalendarOps {
   eraOrigins?: Record<string, number>
   leapMonthMeta?: number
-  plainMonthDayLeapMonthMaxDays?: Record<number, number>
-  plainMonthDayCommonMonthMaxDay?: number
+  monthDayLeapMonthMaxDays?: Record<number, number>
+  monthDayCommonMonthMaxDay?: number
   monthDayReferenceYear?: number
   computeYearFromEra?: ExoticCalendarWithoutId['computeYearFromEra']
   constrainPlainMonthDay?: ExoticCalendarWithoutId['constrainPlainMonthDay']
@@ -104,8 +104,8 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
       referenceYear--
     }
 
-    // PlainMonthDay reference slots need a year that can actually represent
-    // the requested month-code/day. Search near the package's ISO-leap-year
+    // Month-day reference slots need a year that can actually represent the
+    // requested month-code/day. Search near the package's ISO-leap-year
     // reference so leap-only days such as Coptic M13-06 or Hebrew M05L work
     // without forcing every calendar to carry a custom table.
     for (let yearDelta = 0; yearDelta < 100; yearDelta++) {
@@ -134,8 +134,8 @@ export function createArithmeticCalendar(ops: ArithmeticCalendarOps) {
   const calendar: ExoticCalendarWithoutId = {
     eraOrigins: ops.eraOrigins,
     leapMonthMeta: ops.leapMonthMeta,
-    plainMonthDayLeapMonthMaxDays: ops.plainMonthDayLeapMonthMaxDays,
-    plainMonthDayCommonMonthMaxDay: ops.plainMonthDayCommonMonthMaxDay,
+    monthDayLeapMonthMaxDays: ops.monthDayLeapMonthMaxDays,
+    monthDayCommonMonthMaxDay: ops.monthDayCommonMonthMaxDay,
     monthDayReferenceYear: ops.monthDayReferenceYear,
     computeYearFromEra: ops.computeYearFromEra,
     constrainPlainMonthDay: ops.constrainPlainMonthDay,

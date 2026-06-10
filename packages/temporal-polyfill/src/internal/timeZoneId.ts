@@ -81,7 +81,8 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
  */
 const queryTimeZoneIntlFormat = memoize(
   (upperNormId: string): Intl.DateTimeFormat => {
-    const options = {
+    // Offset math needs midnight as 00:00, not h24's 24:00.
+    return new RawDateTimeFormat('en-u-hc-h23', {
       calendar: isoCalendarId,
       timeZone: upperNormId,
       era: 'short',
@@ -91,8 +92,6 @@ const queryTimeZoneIntlFormat = memoize(
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
-    } as Intl.DateTimeFormatOptions
-    // Offset math needs midnight as 00:00, not h24's 24:00.
-    return new RawDateTimeFormat('en-u-hc-h23', options)
+    })
   },
 )

@@ -51,8 +51,8 @@ type IntlYearDataCache = (year: number) => IntlYearData
 
 export interface IntlScrapedCalendarConfig {
   leapMonthMeta?: number
-  plainMonthDayLeapMonthMaxDays?: Record<number, number>
-  plainMonthDayCommonMonthMaxDay?: number
+  monthDayLeapMonthMaxDays?: Record<number, number>
+  monthDayCommonMonthMaxDay?: number
   getMonthDaySearchStartYear?(
     monthCodeNumber: number,
     isLeapMonth: boolean,
@@ -60,7 +60,7 @@ export interface IntlScrapedCalendarConfig {
   ): number
 }
 
-export interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
+interface IntlScrapedCalendar extends ExoticCalendarWithoutId {
   config: IntlScrapedCalendarConfig
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
@@ -86,8 +86,8 @@ export function createIntlScrapedCalendar(
     queryFields: createIntlFieldCache(rawEpochMilliToIntlFields, queryYearData),
     queryYearData,
     leapMonthMeta: config.leapMonthMeta,
-    plainMonthDayLeapMonthMaxDays: config.plainMonthDayLeapMonthMaxDays,
-    plainMonthDayCommonMonthMaxDay: config.plainMonthDayCommonMonthMaxDay,
+    monthDayLeapMonthMaxDays: config.monthDayLeapMonthMaxDays,
+    monthDayCommonMonthMaxDay: config.monthDayCommonMonthMaxDay,
     computeDateFields(isoDate) {
       return calendar.queryFields(isoDate)
     },
@@ -268,14 +268,12 @@ const calendarIntlFormatByNormId = new Map<string, Intl.DateTimeFormat>()
  * lowercased raw ID with validateNoFallback=true so invalid/fallback-only input
  * returns undefined instead of populating the normalized-ID cache.
  */
-export function queryCalendarIntlFormat(
-  normCalendarId: string,
-): Intl.DateTimeFormat
-export function queryCalendarIntlFormat(
+function queryCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat
+function queryCalendarIntlFormat(
   lowerRawCalendarId: string,
   validateNoFallback: true,
 ): Intl.DateTimeFormat | undefined
-export function queryCalendarIntlFormat(
+function queryCalendarIntlFormat(
   calendarId: string,
   validateNoFallback = false,
 ): Intl.DateTimeFormat | undefined {
@@ -300,28 +298,28 @@ export function queryCalendarIntlFormat(
 }
 
 function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
-  return new RawDateTimeFormat('en', {
+  // Offset math needs midnight as 00:00, not h24's 24:00.
+  return new RawDateTimeFormat('en-u-hc-h23', {
     calendar: normCalendarId,
     timeZone: utcTimeZoneId,
     era: 'short', // 'narrow' is too terse for japanese months
     year: 'numeric',
     month: 'short', // easier to identify monthCodes
     day: 'numeric',
-    hour12: false,
   })
 }
 
 // Intl-Calendar methods
 // -----------------------------------------------------------------------------
 
-export function computeIntlDateFields(
+function computeIntlDateFields(
   intlCalendar: IntlScrapedCalendar,
   isoDate: CalendarDateFields,
 ): CalendarDateFields {
   return intlCalendar.queryFields(isoDate)
 }
 
-export function computeIsoFieldsFromIntlParts(
+function computeIsoFieldsFromIntlParts(
   intlCalendar: IntlScrapedCalendar,
   year: number,
   month?: number,
@@ -332,7 +330,7 @@ export function computeIsoFieldsFromIntlParts(
   )
 }
 
-export function computeIntlEpochMilli(
+function computeIntlEpochMilli(
   intlCalendar: IntlScrapedCalendar,
   year: number,
   month = 1,
@@ -344,7 +342,7 @@ export function computeIntlEpochMilli(
   )
 }
 
-export function computeIntlMonthCodeParts(
+function computeIntlMonthCodeParts(
   intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
@@ -355,7 +353,7 @@ export function computeIntlMonthCodeParts(
   return [monthCodeNumber, isLeapMonth]
 }
 
-export function computeIntlLeapMonth(
+function computeIntlLeapMonth(
   intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number | undefined {
@@ -402,7 +400,7 @@ export function computeIntlLeapMonth(
   }
 }
 
-export function computeIntlInLeapYear(
+function computeIntlInLeapYear(
   intlCalendar: IntlScrapedCalendar,
   year: number,
 ): boolean {
@@ -417,7 +415,7 @@ export function computeIntlInLeapYear(
   )
 }
 
-export function computeIntlDaysInYear(
+function computeIntlDaysInYear(
   intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number {
@@ -426,7 +424,7 @@ export function computeIntlDaysInYear(
   return diffEpochMilliDays(milli, milliNext)
 }
 
-export function computeIntlDaysInMonth(
+function computeIntlDaysInMonth(
   intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
@@ -446,14 +444,14 @@ export function computeIntlDaysInMonth(
   )
 }
 
-export function computeIntlMonthsInYear(
+function computeIntlMonthsInYear(
   intlCalendar: IntlScrapedCalendar,
   year: number,
 ): number {
   return intlCalendar.queryYearData(year).monthEpochMillis.length
 }
 
-export function computeIntlEraFields(
+function computeIntlEraFields(
   intlCalendar: IntlScrapedCalendar,
   isoDate: CalendarDateFields,
 ): CalendarEraFields {
@@ -461,7 +459,7 @@ export function computeIntlEraFields(
   return { era: intlFields.era, eraYear: intlFields.eraYear }
 }
 
-export function computeIntlYearMonthFieldsForMonthDay(
+function computeIntlYearMonthFieldsForMonthDay(
   intlCalendar: IntlScrapedCalendar,
   monthCodeNumber: number,
   isLeapMonth: boolean,
@@ -522,7 +520,7 @@ export function computeIntlYearMonthFieldsForMonthDay(
   }
 }
 
-export function addIntlMonths(
+function addIntlMonths(
   intlCalendar: IntlScrapedCalendar,
   year: number,
   month: number,
@@ -553,7 +551,7 @@ export function addIntlMonths(
   return { year, month }
 }
 
-export function diffIntlMonthSlots(
+function diffIntlMonthSlots(
   intlCalendar: IntlScrapedCalendar,
   year0: number,
   month0: number,
