@@ -18,6 +18,10 @@ export function julianDayToEpochMilli(julianDay: number): number {
   return (julianDay - unixEpochJulianDay) * milliInDay
 }
 
+export function epochMilliToJulianDay(epochMilli: number): number {
+  return epochMilli / milliInDay + unixEpochJulianDay
+}
+
 export function gregoryToJulianDay(
   year: number,
   month: number,

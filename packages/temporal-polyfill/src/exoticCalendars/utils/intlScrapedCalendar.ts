@@ -30,7 +30,7 @@ import { utcTimeZoneId } from '../../internal/timeZoneConfig'
 import { milliInDay } from '../../internal/units'
 import { bindArgs, compareNumbers, memoize } from '../../internal/utils'
 
-interface IntlDateFields {
+export interface IntlDateFields {
   era: string | undefined
   eraYear: number | undefined
   year: number
@@ -39,7 +39,7 @@ interface IntlDateFields {
   day: number
 }
 
-interface IntlYearData {
+export interface IntlYearData {
   monthEpochMillis: number[]
   // Keep the ordered month labels exactly as Intl produced them. Some
   // calendars repeat the same label for common/leap months, so collapsing to a
@@ -47,7 +47,7 @@ interface IntlYearData {
   monthStrings: string[]
 }
 
-type IntlYearDataCache = (year: number) => IntlYearData
+export type IntlYearDataCache = (year: number) => IntlYearData
 
 export interface IntlScrapedCalendarConfig {
   leapMonthMeta?: number
@@ -60,7 +60,7 @@ export interface IntlScrapedCalendarConfig {
   ): number
 }
 
-interface IntlScrapedCalendarData {
+export interface IntlScrapedCalendarData {
   queryFields: (isoDate: CalendarDateFields) => IntlDateFields
   queryYearData: IntlYearDataCache
 }
@@ -113,7 +113,7 @@ export function createIntlScrapedCalendar(
   }
 }
 
-function createIntlScrapedCalendarData(
+export function createIntlScrapedCalendarData(
   normCalendarId: string,
 ): IntlScrapedCalendarData {
   const intlFormat = queryCalendarIntlFormat(normCalendarId)
@@ -318,7 +318,7 @@ function computeIsoFieldsFromIntlParts(
   )
 }
 
-function computeIntlEpochMilli(
+export function computeIntlEpochMilli(
   intlData: IntlScrapedCalendarData,
   year: number,
   month = 1,
@@ -405,7 +405,7 @@ function computeIntlInLeapYear(
   )
 }
 
-function computeIntlDaysInYear(
+export function computeIntlDaysInYear(
   intlData: IntlScrapedCalendarData,
   year: number,
 ): number {
@@ -414,7 +414,7 @@ function computeIntlDaysInYear(
   return diffEpochMilliDays(milli, milliNext)
 }
 
-function computeIntlDaysInMonth(
+export function computeIntlDaysInMonth(
   intlData: IntlScrapedCalendarData,
   year: number,
   month: number,
