@@ -28,6 +28,16 @@ const plainMonthDayLeapMonthMaxDays: Record<number, number> = {
   12: 0,
 }
 
+const commonScrapedCalendarConfig: IntlScrapedCalendarConfig = {
+  leapMonthMeta: 13,
+  plainMonthDayLeapMonthMaxDays,
+  // When a Chinese/Dangi PlainMonthDay leap month-day falls outside the
+  // accepted leap reference table, Temporal constrains through the
+  // corresponding common month. Common lunisolar months top out at 30 days.
+  plainMonthDayCommonMonthMaxDay: 30,
+  getMonthDaySearchStartYear: getChineseDangiMonthDaySearchStartYear,
+}
+
 function createChineseDangiCalendar(normCalendarId: string) {
   return createIntlScrapedCalendar(normCalendarId, commonScrapedCalendarConfig)
 }
@@ -68,14 +78,4 @@ function getChineseDangiMonthDaySearchStartYear(
     }
   }
   return 1972
-}
-
-const commonScrapedCalendarConfig: IntlScrapedCalendarConfig = {
-  leapMonthMeta: 13,
-  plainMonthDayLeapMonthMaxDays,
-  // When a Chinese/Dangi PlainMonthDay leap month-day falls outside the
-  // accepted leap reference table, Temporal constrains through the
-  // corresponding common month. Common lunisolar months top out at 30 days.
-  plainMonthDayCommonMonthMaxDay: 30,
-  getMonthDaySearchStartYear: getChineseDangiMonthDaySearchStartYear,
 }
