@@ -1,6 +1,6 @@
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import { createStringTagDescriptors, pluckProps } from './utils'
+import { createStringTagDescriptors, identity, pluckProps } from './utils'
 
 export type DateTimeFormatSingleArgs =
   | [format: Intl.DateTimeFormat]
@@ -33,7 +33,7 @@ type DateTimeFormatShellConfig<R> = {
 // provider for raw Intl dispatch tuples. All policy, including Temporal
 // compatibility and non-Temporal fallback, stays in that provider.
 export function createDateTimeFormatShell<R>({
-  transformOptions = (options) => options,
+  transformOptions = identity,
   createArgsProvider,
 }: DateTimeFormatShellConfig<R>) {
   type ShellInternals = {

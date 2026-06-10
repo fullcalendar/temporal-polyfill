@@ -287,7 +287,7 @@ export class PlainDate implements DateFields {
     return createZonedDateTime(
       plainDateToZonedDateTime(
         refineTimeZoneArg,
-        (plainTimeArg) => toPlainTimeSlots(plainTimeArg),
+        toPlainTimeSlots,
         getPlainDateSlots(this),
         optionsObj,
       ),
