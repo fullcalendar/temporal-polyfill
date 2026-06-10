@@ -9,10 +9,7 @@ const astronomicalIslamicEpoch = 1948439
 const umalquraYearStart = 1300
 const umalquraYearEnd = 1600
 const umalquraStartDays = 460322
-export type IslamicCalendarId =
-  | 'islamic-civil'
-  | 'islamic-tbla'
-  | 'islamic-umalqura'
+
 const umalquraMonthLengths = [
   2730, 3412, 3785, 1748, 1770, 876, 2733, 1365, 1705, 1938, 2985, 1492, 2778,
   1372, 3373, 1685, 1866, 2900, 2922, 1453, 1198, 2639, 1303, 1675, 1701, 2773,
@@ -40,6 +37,24 @@ const umalquraMonthLengths = [
   1373, 669,
 ]
 
+const umalquraPlainMonthDay30ReferenceYears = [
+  1392, 1390, 1391, 1392, 1391, 1392, 1389, 1392, 1392, 1390, 1391, 1390,
+]
+
+const enum IslamicCalendarVariant {
+  // Keep Umm al-Qura at 0 so repeated branch checks can minify to `!id`.
+  Umalqura = 0,
+  Civil = 1,
+  Tabular = 2,
+}
+
+// parallels IslamicCalendarVariant
+const islamicCalendarVariantIds = [
+  'islamic-umalqura',
+  'islamic-civil',
+  'islamic-tbla',
+] as const
+
 const umalquraYearStarts = (() => {
   const starts = [0]
   let yearStart = 0
@@ -53,44 +68,50 @@ const umalquraYearStarts = (() => {
 })()
 
 export function createIslamicCivilCalendar() {
-  return createIslamicCalendar('islamic-civil')
+  return createIslamicCalendar(IslamicCalendarVariant.Civil)
 }
 
 export function createIslamicTabularCalendar() {
-  return createIslamicCalendar('islamic-tbla')
+  return createIslamicCalendar(IslamicCalendarVariant.Tabular)
 }
 
 export function createIslamicUmmAlQuraCalendar() {
-  return createIslamicCalendar('islamic-umalqura')
+  return createIslamicCalendar(IslamicCalendarVariant.Umalqura)
 }
 
-function createIslamicCalendar(id: IslamicCalendarId) {
+function createIslamicCalendar(variant: IslamicCalendarVariant) {
   const epoch =
-    id === 'islamic-tbla' ? astronomicalIslamicEpoch : civilIslamicEpoch
+    variant === IslamicCalendarVariant.Tabular
+      ? astronomicalIslamicEpoch
+      : civilIslamicEpoch
 
   return createArithmeticCalendar({
-    id,
+    id: islamicCalendarVariantIds[variant],
     eraOrigins: {
       'bh': -1,
       'ah': 0,
     },
     fromJulianDay(julianDay) {
-      return id === 'islamic-umalqura'
+      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+      return !variant
         ? julianDayToUmalqura(julianDay)
         : julianDayToIslamic(epoch, julianDay)
     },
     toJulianDay(year, month, day) {
-      return id === 'islamic-umalqura'
+      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+      return !variant
         ? umalquraToJulianDay(year, month, day)
         : islamicToJulianDay(epoch, year, month, day)
     },
     computeDaysInMonth(year, month) {
-      return id === 'islamic-umalqura' && isUmalquraYear(year)
+      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+      return !variant && isUmalquraYear(year)
         ? umalquraMonthLength(year, month)
         : islamicDaysInMonth(year, month)
     },
     computeDaysInYear(year) {
-      return id === 'islamic-umalqura' && isUmalquraYear(year)
+      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+      return !variant && isUmalquraYear(year)
         ? umalquraYearLength(year)
         : islamicIsLeapYear(year)
           ? 355
@@ -106,12 +127,14 @@ function createIslamicCalendar(id: IslamicCalendarId) {
       // Umm al-Qura is observational. test262 pins each 30-day PlainMonthDay
       // reference to a year where that month actually had 30 days.
       const umalquraReferenceYear =
-        id === 'islamic-umalqura' &&
+        // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+        !variant &&
         !isLeapMonth &&
         day === 30 &&
         umalquraPlainMonthDay30ReferenceYears[monthCodeNumber - 1]
 
-      return id === 'islamic-umalqura' && umalquraReferenceYear
+      // `!variant` is Umm al-Qura; see IslamicCalendarVariant.
+      return !variant && umalquraReferenceYear
         ? { year: umalquraReferenceYear, month: monthCodeNumber }
         : undefined
     },
@@ -122,10 +145,6 @@ function createIslamicCalendar(id: IslamicCalendarId) {
     },
   })
 }
-
-const umalquraPlainMonthDay30ReferenceYears = [
-  1392, 1390, 1391, 1392, 1391, 1392, 1389, 1392, 1392, 1390, 1391, 1390,
-]
 
 function islamicToJulianDay(
   epoch: number,
