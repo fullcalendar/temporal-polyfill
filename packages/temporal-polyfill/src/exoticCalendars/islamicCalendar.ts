@@ -1,4 +1,4 @@
-import { modFloor } from '../internal/utils'
+import { bindArgs, modFloor } from '../internal/utils'
 import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 
 // Adapted from Adobe's @internationalized/date Islamic calendar implementation
@@ -41,12 +41,6 @@ const umalquraPlainMonthDay30ReferenceYears = [
   1392, 1390, 1391, 1392, 1391, 1392, 1389, 1392, 1392, 1390, 1391, 1390,
 ]
 
-const enum IslamicCalendarVariant {
-  Umalqura = 0,
-  Civil = 1,
-  Tabular = 2,
-}
-
 const umalquraYearStarts = (() => {
   const starts = [0]
   let yearStart = 0
@@ -60,45 +54,50 @@ const umalquraYearStarts = (() => {
 })()
 
 export function createIslamicCivilCalendar() {
-  return createIslamicCalendar(IslamicCalendarVariant.Civil)
+  return createIslamicCalendar(
+    bindArgs(julianDayToIslamic, civilIslamicEpoch),
+    bindArgs(islamicToJulianDay, civilIslamicEpoch),
+  )
 }
 
 export function createIslamicTabularCalendar() {
-  return createIslamicCalendar(IslamicCalendarVariant.Tabular)
+  return createIslamicCalendar(
+    bindArgs(julianDayToIslamic, astronomicalIslamicEpoch),
+    bindArgs(islamicToJulianDay, astronomicalIslamicEpoch),
+  )
 }
 
 export function createIslamicUmmAlQuraCalendar() {
-  return createIslamicCalendar(IslamicCalendarVariant.Umalqura)
+  return createIslamicCalendar(
+    bindArgs(julianDayToUmalqura, civilIslamicEpoch),
+    bindArgs(umalquraToJulianDay, civilIslamicEpoch),
+    true,
+  )
 }
 
-function createIslamicCalendar(variant: IslamicCalendarVariant) {
-  const epoch =
-    variant === IslamicCalendarVariant.Tabular
-      ? astronomicalIslamicEpoch
-      : civilIslamicEpoch
-
+function createIslamicCalendar(
+  fromJulianDay: (julianDay: number) => {
+    year: number
+    month: number
+    day: number
+  },
+  toJulianDay: (year: number, month: number, day: number) => number,
+  hasUmalquraYears = false,
+) {
   return createArithmeticCalendar({
     eraOrigins: {
       'bh': -1,
       'ah': 0,
     },
-    fromJulianDay(julianDay) {
-      return variant === IslamicCalendarVariant.Umalqura
-        ? julianDayToUmalqura(julianDay)
-        : julianDayToIslamic(epoch, julianDay)
-    },
-    toJulianDay(year, month, day) {
-      return variant === IslamicCalendarVariant.Umalqura
-        ? umalquraToJulianDay(year, month, day)
-        : islamicToJulianDay(epoch, year, month, day)
-    },
+    fromJulianDay,
+    toJulianDay,
     computeDaysInMonth(year, month) {
-      return variant === IslamicCalendarVariant.Umalqura && isUmalquraYear(year)
+      return hasUmalquraYears && isUmalquraYear(year)
         ? umalquraMonthLength(year, month)
         : islamicDaysInMonth(year, month)
     },
     computeDaysInYear(year) {
-      return variant === IslamicCalendarVariant.Umalqura && isUmalquraYear(year)
+      return hasUmalquraYears && isUmalquraYear(year)
         ? umalquraYearLength(year)
         : islamicIsLeapYear(year)
           ? 355
@@ -114,13 +113,12 @@ function createIslamicCalendar(variant: IslamicCalendarVariant) {
       // Umm al-Qura is observational. test262 pins each 30-day PlainMonthDay
       // reference to a year where that month actually had 30 days.
       const umalquraReferenceYear =
-        variant === IslamicCalendarVariant.Umalqura &&
+        hasUmalquraYears &&
         !isLeapMonth &&
         day === 30 &&
         umalquraPlainMonthDay30ReferenceYears[monthCodeNumber - 1]
 
-      return variant === IslamicCalendarVariant.Umalqura &&
-        umalquraReferenceYear
+      return hasUmalquraYears && umalquraReferenceYear
         ? { year: umalquraReferenceYear, month: monthCodeNumber }
         : undefined
     },
@@ -197,13 +195,13 @@ function umalquraYearLength(year: number): number {
   )
 }
 
-function julianDayToUmalqura(julianDay: number) {
-  const days = julianDay - civilIslamicEpoch
+function julianDayToUmalqura(epoch: number, julianDay: number) {
+  const days = julianDay - epoch
   if (
     days < umalquraYearStartDay(umalquraYearStart) ||
     days >= umalquraYearStartDay(umalquraYearEnd + 1)
   ) {
-    return julianDayToIslamic(civilIslamicEpoch, julianDay)
+    return julianDayToIslamic(epoch, julianDay)
   }
 
   let year = umalquraYearStart
@@ -222,8 +220,13 @@ function julianDayToUmalqura(julianDay: number) {
   return { year, month, day: days - umalquraMonthStart(year, month) + 1 }
 }
 
-function umalquraToJulianDay(year: number, month: number, day: number): number {
+function umalquraToJulianDay(
+  epoch: number,
+  year: number,
+  month: number,
+  day: number,
+): number {
   return isUmalquraYear(year)
-    ? civilIslamicEpoch + umalquraMonthStart(year, month) + day - 1
-    : islamicToJulianDay(civilIslamicEpoch, year, month, day)
+    ? epoch + umalquraMonthStart(year, month) + day - 1
+    : islamicToJulianDay(epoch, year, month, day)
 }
