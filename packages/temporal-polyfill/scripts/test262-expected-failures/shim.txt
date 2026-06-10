@@ -11,16 +11,8 @@
 #   OURS: 816.5692187493501
 #   SPEC: 816.56921874935
 #
-built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
-
-# TEMPORARY
-# Calendar-unit total math currently computes the fractional nudge window and
-# then adds it to the whole-unit count. That keeps the implementation compact
-# and passes the representative Duration.total() coverage, but it double-rounds
-# this NudgeToCalendarUnit case. The proper fix is still exact numerator
-# construction plus one final rational-to-Number conversion, but that needs a
-# compact implementation.
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
+built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
 # TEMPORARY
 # We want this test to pass for arithmetic calendars such as Coptic. The current
