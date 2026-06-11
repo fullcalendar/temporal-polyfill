@@ -9,6 +9,7 @@ import { DurationFields } from './durationFields'
 import {
   checkDurationTimeUnit,
   checkDurationUnits,
+  durationSubMinuteToBigNano,
   negateDurationFields,
 } from './durationMath'
 import { epochNanoToIsoDateTime } from './epochMath'
@@ -39,7 +40,6 @@ import {
 } from './round'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import type { SubsecDigits } from './temporalSpecHelpers'
-import { subminuteFieldsToBigNano } from './timeFieldMath'
 import { TimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
 import {
@@ -435,7 +435,7 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const bigNano = subminuteFieldsToBigNano(abs)
+  const bigNano = durationSubMinuteToBigNano(abs)
   const wholeSec = Number(bigNano / bigNanoInSec)
   const subsecNano = Number(bigNano % bigNanoInSec)
   checkDurationTimeUnit(wholeSec)

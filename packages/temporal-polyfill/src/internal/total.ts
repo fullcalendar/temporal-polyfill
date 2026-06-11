@@ -7,7 +7,7 @@ import {
 } from './durationFields'
 import {
   computeDurationSign,
-  durationDayTimeFieldsToBigNano,
+  durationDayTimeToBigNano,
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -114,7 +114,7 @@ function totalDayTimeDuration(
   totalUnit: DayTimeUnit,
 ): number {
   return divideBigNanoToExactNumber(
-    durationDayTimeFieldsToBigNano(durationFields),
+    durationDayTimeToBigNano(durationFields),
     unitNanoMap[totalUnit],
   )
 }

@@ -1,5 +1,12 @@
 import type { Temporal } from 'temporal-spec'
-import { bigNanoInSec, bigNanoInUtcDay } from './bigNano'
+import {
+  bigNanoInHour,
+  bigNanoInMicro,
+  bigNanoInMilli,
+  bigNanoInMinute,
+  bigNanoInSec,
+  bigNanoInUtcDay,
+} from './bigNano'
 import {
   DurationFields,
   DurationTimeFields,
@@ -25,7 +32,6 @@ import type {
   DurationRoundingOptions,
   RelativeToOptions,
 } from './temporalSpecHelpers'
-import { timeFieldsToBigNano } from './timeFieldMath'
 import { nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
@@ -135,8 +141,8 @@ function addDayTimeDurations(
   largestUnit: DayTimeUnit,
   doSubtract?: boolean,
 ): DurationFields {
-  const bigNano0 = durationDayTimeFieldsToBigNano(a)
-  const bigNano1 = durationDayTimeFieldsToBigNano(b)
+  const bigNano0 = durationDayTimeToBigNano(a)
+  const bigNano1 = durationDayTimeToBigNano(b)
   const combined = bigNano0 + bigNano1 * BigInt(doSubtract ? -1 : 1)
 
   if (!Number.isFinite(Number(combined / bigNanoInUtcDay))) {
@@ -295,7 +301,7 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
     )
   }
 
-  const bigNano = durationDayTimeFieldsToBigNano(fields)
+  const bigNano = durationDayTimeToBigNano(fields)
   checkDurationTimeUnit(Number(bigNano / bigNanoInSec))
 
   return fields
@@ -310,18 +316,33 @@ export function checkDurationTimeUnit(n: number): void {
 // Field <-> Nanosecond Conversion
 // -----------------------------------------------------------------------------
 
-export function durationOnlyTimeFieldsToBigNano(
-  fields: DurationFields,
-): bigint {
+export function durationOnlyTimeToBigNano(fields: DurationFields): bigint {
   if (durationHasDateParts(fields)) {
     throw new RangeError(errorMessages.invalidLargeUnits)
   }
 
-  return timeFieldsToBigNano(fields)
+  return durationTimeToBigNano(fields)
 }
 
-export function durationDayTimeFieldsToBigNano(fields: DurationFields): bigint {
-  return BigInt(fields.days) * bigNanoInUtcDay + timeFieldsToBigNano(fields)
+export function durationDayTimeToBigNano(fields: DurationFields): bigint {
+  return BigInt(fields.days) * bigNanoInUtcDay + durationTimeToBigNano(fields)
+}
+
+export function durationTimeToBigNano(fields: DurationFields): bigint {
+  return (
+    BigInt(fields.hours) * bigNanoInHour +
+    BigInt(fields.minutes) * bigNanoInMinute +
+    durationSubMinuteToBigNano(fields)
+  )
+}
+
+export function durationSubMinuteToBigNano(fields: DurationFields): bigint {
+  return (
+    BigInt(fields.seconds) * bigNanoInSec +
+    BigInt(fields.milliseconds) * bigNanoInMilli +
+    BigInt(fields.microseconds) * bigNanoInMicro +
+    BigInt(fields.nanoseconds)
+  )
 }
 
 // TODO: audit

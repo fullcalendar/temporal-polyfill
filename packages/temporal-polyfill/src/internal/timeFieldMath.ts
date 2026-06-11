@@ -1,11 +1,3 @@
-import {
-  bigNanoInHour,
-  bigNanoInMicro,
-  bigNanoInMilli,
-  bigNanoInMinute,
-  bigNanoInSec,
-} from './bigNano'
-import { DurationFields } from './durationFields'
 import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
@@ -47,7 +39,6 @@ export function constrainTimeFields(
 // Fields -> Unit-Number
 // -----------------------------------------------------------------------------
 
-// Convenience
 export function timeFieldsToNano(timeFields: TimeFields): number {
   return (
     timeFieldsToSec(timeFields) * nanoInSec + timeFieldsToSubsecNano(timeFields)
@@ -71,26 +62,6 @@ export function timeFieldsToSubsecNano(timeFields: TimeFields): number {
     timeFields.millisecond * nanoInMilli +
     timeFields.microsecond * nanoInMicro +
     timeFields.nanosecond
-  )
-}
-
-// Time Fields -> Unit-Number (bigint)
-// -----------------------------------------------------------------------------
-
-export function timeFieldsToBigNano(fields: DurationFields): bigint {
-  return (
-    BigInt(fields.hours) * bigNanoInHour +
-    BigInt(fields.minutes) * bigNanoInMinute +
-    subminuteFieldsToBigNano(fields)
-  )
-}
-
-export function subminuteFieldsToBigNano(fields: DurationFields): bigint {
-  return (
-    BigInt(fields.seconds) * bigNanoInSec +
-    BigInt(fields.milliseconds) * bigNanoInMilli +
-    BigInt(fields.microseconds) * bigNanoInMicro +
-    BigInt(fields.nanoseconds)
   )
 }
 

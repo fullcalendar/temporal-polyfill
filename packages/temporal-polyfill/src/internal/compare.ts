@@ -1,9 +1,6 @@
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import {
-  durationDayTimeFieldsToBigNano,
-  getMaxDurationUnit,
-} from './durationMath'
+import { durationDayTimeToBigNano, getMaxDurationUnit } from './durationMath'
 import { isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
@@ -72,8 +69,8 @@ export function compareDurations<RA>(
 
   if (isUniformUnit(maxUnit, relativeToSlots)) {
     return compareBigInts(
-      durationDayTimeFieldsToBigNano(durationSlots0),
-      durationDayTimeFieldsToBigNano(durationSlots1),
+      durationDayTimeToBigNano(durationSlots0),
+      durationDayTimeToBigNano(durationSlots1),
     )
   }
 

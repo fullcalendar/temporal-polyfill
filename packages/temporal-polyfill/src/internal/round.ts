@@ -10,7 +10,8 @@ import {
 } from './durationFields'
 import {
   computeDurationSign,
-  durationDayTimeFieldsToBigNano,
+  durationDayTimeToBigNano,
+  durationTimeToBigNano,
   getMaxDurationUnit,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
@@ -38,11 +39,7 @@ import {
   createZonedEpochNanoSlots,
 } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
-import {
-  nanoToTimeAndDay,
-  timeFieldsToBigNano,
-  timeFieldsToNano,
-} from './timeFieldMath'
+import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import {
   getMatchingInstantFor,
@@ -426,7 +423,7 @@ export function roundDayTimeDurationByInc(
 ): Partial<DurationFields> {
   // force <= Day
   const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day)
-  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
+  const bigNano = durationDayTimeToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToInc(
     bigNano,
     BigInt(nanoInc),
@@ -446,7 +443,7 @@ export function roundDayTimeDuration(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): DurationFields {
-  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
+  const bigNano = durationDayTimeToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
@@ -636,7 +633,7 @@ function nudgeDayTimeDuration(
   nudgedEpochNano: bigint,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
+  const bigNano = durationDayTimeToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
@@ -683,7 +680,7 @@ function nudgeZonedTimeDuration(
   nudgedEpochNano: bigint,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const timeNano = Number(timeFieldsToBigNano(durationFields))
+  const timeNano = Number(durationTimeToBigNano(durationFields))
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundNumberToInc(timeNano, nanoInc, roundingMode)
 

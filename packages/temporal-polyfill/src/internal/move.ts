@@ -12,7 +12,8 @@ import { monthCodeNumberToMonth } from './calendarMonthCode'
 import { DurationFields, durationTimeFieldDefaults } from './durationFields'
 import {
   durationHasDateParts,
-  durationOnlyTimeFieldsToBigNano,
+  durationOnlyTimeToBigNano,
+  durationTimeToBigNano,
   getMaxDurationUnit,
   negateDurationFields,
 } from './durationMath'
@@ -42,11 +43,7 @@ import {
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
 } from './temporalLimits'
-import {
-  nanoToTimeAndDay,
-  timeFieldsToBigNano,
-  timeFieldsToNano,
-} from './timeFieldMath'
+import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
@@ -187,7 +184,7 @@ function moveEpochNano(
   durationFields: DurationFields,
 ): bigint {
   return checkEpochNanoInBounds(
-    epochNano + durationOnlyTimeFieldsToBigNano(durationFields),
+    epochNano + durationOnlyTimeToBigNano(durationFields),
   )
 }
 
@@ -202,7 +199,7 @@ export function moveZonedEpochs(
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
 ): EpochNanoFields {
-  const timeOnlyNano = timeFieldsToBigNano(durationFields)
+  const timeOnlyNano = durationTimeToBigNano(durationFields)
   let epochNano = slots.epochNanoseconds
 
   if (!durationHasDateParts(durationFields)) {
@@ -284,7 +281,7 @@ export function moveDate(
 
   const days =
     durationFields.days +
-    Number(timeFieldsToBigNano(durationFields) / bigNanoInUtcDay)
+    Number(durationTimeToBigNano(durationFields) / bigNanoInUtcDay)
 
   if (days) {
     return checkIsoDateInBounds(moveByDays(isoDateFields, days))
@@ -308,7 +305,7 @@ function moveTime(
   timeFields: TimeFields,
   durationFields: DurationFields,
 ): [TimeFields, number] {
-  const durationBigNano = timeFieldsToBigNano(durationFields)
+  const durationBigNano = durationTimeToBigNano(durationFields)
   const durDays = Number(durationBigNano / bigNanoInUtcDay)
   const durTimeNano = Number(durationBigNano % bigNanoInUtcDay)
   const [newTimeFields, overflowDays] = nanoToTimeAndDay(
@@ -340,7 +337,7 @@ function dateAddWithOverflow(
   let { years, months, weeks, days } = durationFields
   let isoDate: CalendarDateFields
 
-  days += Number(timeFieldsToBigNano(durationFields) / bigNanoInUtcDay)
+  days += Number(durationTimeToBigNano(durationFields) / bigNanoInUtcDay)
 
   if (years || months) {
     isoDate = addDateMonths(calendar, isoDateFields, years, months, overflow)
