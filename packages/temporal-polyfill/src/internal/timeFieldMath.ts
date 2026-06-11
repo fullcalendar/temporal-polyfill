@@ -1,8 +1,25 @@
+import {
+  bigNanoInHour,
+  bigNanoInMicro,
+  bigNanoInMilli,
+  bigNanoInMinute,
+  bigNanoInSec,
+} from './bigNano'
+import { DurationFields } from './durationFields'
 import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
-import { givenFieldsToBigNano, nanoToGivenFields } from './unitMath'
-import { Unit, nanoInMilli, nanoInUtcDay } from './units'
+import {
+  milliInHour,
+  milliInMinute,
+  milliInSec,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInSec,
+  nanoInUtcDay,
+  secInHour,
+  secInMinute,
+} from './units'
 import { clampProp, divModFloor, zipPropsDesc } from './utils'
 
 // Time Field Validation
@@ -12,8 +29,6 @@ export function checkTimeFields<P extends TimeFields>(timeFields: P): P {
   constrainTimeFields(timeFields, Overflow.Reject)
   return timeFields
 }
-
-// this is a test
 
 export function constrainTimeFields(
   timeFields: TimeFields,
@@ -29,28 +44,84 @@ export function constrainTimeFields(
   ])
 }
 
-// yo
-
-// Field <-> Nanosecond Conversion
+// Fields -> Unit-Number
 // -----------------------------------------------------------------------------
 
+// Convenience
 export function timeFieldsToNano(timeFields: TimeFields): number {
-  return Number(givenFieldsToBigNano(timeFields, Unit.Hour, timeFieldNamesAsc))
+  return (
+    timeFieldsToSec(timeFields) * nanoInSec + timeFieldsToSubsecNano(timeFields)
+  )
 }
 
-// For Intl formatting: PlainTime has no UTC anchor, so we treat the time fields
-// as an offset from the Unix epoch (midnight, 1970-01-01 UTC).
 export function timeFieldsToMilli(timeFields: TimeFields): number {
-  return timeFieldsToNano(timeFields) / nanoInMilli
+  return timeFieldsToSec(timeFields) * milliInSec + timeFields.millisecond
 }
+
+export function timeFieldsToSec(timeFields: TimeFields): number {
+  return (
+    timeFields.hour * secInHour +
+    timeFields.minute * secInMinute +
+    timeFields.second
+  )
+}
+
+export function timeFieldsToSubsecNano(timeFields: TimeFields): number {
+  return (
+    timeFields.millisecond * nanoInMilli +
+    timeFields.microsecond * nanoInMicro +
+    timeFields.nanosecond
+  )
+}
+
+// Time Fields -> Unit-Number (bigint)
+// -----------------------------------------------------------------------------
+
+export function timeFieldsToBigNano(fields: DurationFields): bigint {
+  return (
+    BigInt(fields.hours) * bigNanoInHour +
+    BigInt(fields.minutes) * bigNanoInMinute +
+    subminuteFieldsToBigNano(fields)
+  )
+}
+
+export function subminuteFieldsToBigNano(fields: DurationFields): bigint {
+  return (
+    BigInt(fields.seconds) * bigNanoInSec +
+    BigInt(fields.milliseconds) * bigNanoInMilli +
+    BigInt(fields.microseconds) * bigNanoInMicro +
+    BigInt(fields.nanoseconds)
+  )
+}
+
+// Unit-Number -> Fields
+// -----------------------------------------------------------------------------
 
 export function nanoToTimeAndDay(nano: number): [TimeFields, number] {
   const [dayDelta, timeNano] = divModFloor(nano, nanoInUtcDay)
-  const timeFields = nanoToGivenFields(
-    timeNano,
-    Unit.Hour,
-    timeFieldNamesAsc,
-  ) as TimeFields
+  return [nanoToTimeFields(timeNano), dayDelta]
+}
 
-  return [timeFields, dayDelta]
+export function nanoToTimeFields(timeNano: number): TimeFields {
+  const [timeMilli, nanoAfterMilli] = divModFloor(timeNano, nanoInMilli)
+  const [microsecond, nanosecond] = divModFloor(nanoAfterMilli, nanoInMicro)
+  return milliToTimeFields(timeMilli, microsecond, nanosecond)
+}
+
+export function milliToTimeFields(
+  timeMilli: number,
+  microsecond = 0,
+  nanosecond = 0,
+): TimeFields {
+  const [hour, milliAfterHour] = divModFloor(timeMilli, milliInHour)
+  const [minute, milliAfterMinute] = divModFloor(milliAfterHour, milliInMinute)
+  const [second, millisecond] = divModFloor(milliAfterMinute, milliInSec)
+  return {
+    hour,
+    minute,
+    second,
+    millisecond,
+    microsecond,
+    nanosecond,
+  }
 }

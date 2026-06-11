@@ -1,4 +1,4 @@
-import { milliInDay } from './units'
+import { milliInUtcDay } from './units'
 
 // These range constants are shared by epoch conversion, bounds checking, and
 // Intl formatting. Keeping them here avoids making those modules depend on each
@@ -31,6 +31,6 @@ PlainYearMonth
 */
 
 export const epochNanoDayMax = 100000000
-export const maxMilli = epochNanoDayMax * milliInDay
+export const maxMilli = epochNanoDayMax * milliInUtcDay
 export const isoYearMax = 275760 // optimization. isoYear at epochNanoMax
 export const isoYearMin = -271821 // optimization. isoYear at epochNanoMin

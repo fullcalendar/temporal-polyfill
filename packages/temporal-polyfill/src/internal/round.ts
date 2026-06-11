@@ -10,7 +10,7 @@ import {
 } from './durationFields'
 import {
   computeDurationSign,
-  durationFieldsToBigNano,
+  durationDayTimeFieldsToBigNano,
   getMaxDurationUnit,
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
@@ -38,7 +38,11 @@ import {
   createZonedEpochNanoSlots,
 } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
-import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
+import {
+  nanoToTimeAndDay,
+  timeFieldsToBigNano,
+  timeFieldsToNano,
+} from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import {
   getMatchingInstantFor,
@@ -420,8 +424,9 @@ export function roundDayTimeDurationByInc(
   nanoInc: number,
   roundingMode: RoundingModeEnum,
 ): Partial<DurationFields> {
-  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day) // force <= Day
-  const bigNano = durationFieldsToBigNano(durationFields, maxUnit)
+  // force <= Day
+  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day)
+  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToInc(
     bigNano,
     BigInt(nanoInc),
@@ -441,7 +446,7 @@ export function roundDayTimeDuration(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): DurationFields {
-  const bigNano = durationFieldsToBigNano(durationFields)
+  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
@@ -632,7 +637,7 @@ function nudgeDayTimeDuration(
   nudgedEpochNano: bigint,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const bigNano = durationFieldsToBigNano(durationFields)
+  const bigNano = durationDayTimeFieldsToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToUnit(
     bigNano,
     smallestUnit,
@@ -679,7 +684,7 @@ function nudgeZonedTimeDuration(
   nudgedEpochNano: bigint,
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
-  const timeNano = Number(durationFieldsToBigNano(durationFields, Unit.Hour))
+  const timeNano = Number(timeFieldsToBigNano(durationFields))
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundNumberToInc(timeNano, nanoInc, roundingMode)
 

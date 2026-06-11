@@ -7,7 +7,7 @@ import {
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,
-  isoArgsToEpochMilli,
+  isoDateArgsToEpochMilli,
   isoDateToEpochMilli,
 } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
@@ -27,7 +27,7 @@ import {
 } from '../../internal/isoCalendarMath'
 import { maxMilli } from '../../internal/temporalConstants'
 import { utcTimeZoneId } from '../../internal/timeZoneConfig'
-import { milliInDay } from '../../internal/units'
+import { milliInUtcDay } from '../../internal/units'
 import { bindArgs, compareNumbers, memoize } from '../../internal/utils'
 
 export interface IntlDateFields {
@@ -161,7 +161,7 @@ function createIntlYearDataCache(
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
   function buildYear(year: number) {
-    let epochMilli = isoArgsToEpochMilli(year - yearCorrection)
+    let epochMilli = isoDateArgsToEpochMilli(year - yearCorrection)
     let intlFields: IntlDateFields
     let iterations = 0
     const millisReversed: number[] = []
@@ -169,12 +169,12 @@ function createIntlYearDataCache(
 
     // move beyond current year
     do {
-      epochMilli += 400 * milliInDay
+      epochMilli += 400 * milliInUtcDay
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year <= year)
 
     do {
       // move to start-of-month
-      epochMilli += (1 - intlFields.day) * milliInDay
+      epochMilli += (1 - intlFields.day) * milliInUtcDay
 
       // Yet-to-be-created hybrid calendar systems (such as one that bridges
       // from Julian-to-Gregorian) could theoretically skips days in a month,
@@ -189,7 +189,7 @@ function createIntlYearDataCache(
       //     epochMilliToIntlFields(epochMilli).monthString !==
       //     intlFields.monthString
       //   ) {
-      //     epochMilli += milliInDay
+      //     epochMilli += milliInUtcDay
       //   }
       // }
       //
@@ -203,7 +203,7 @@ function createIntlYearDataCache(
       }
 
       // move to last day of previous month
-      epochMilli -= milliInDay
+      epochMilli -= milliInUtcDay
 
       if (
         // Safeguard to avoid infinite loop when Intl.DateTimeFormat gives
@@ -289,7 +289,7 @@ export function computeIntlEpochMilli(
 ): number {
   return (
     intlData.queryYearData(year).monthEpochMillis[month - 1] +
-    (day - 1) * milliInDay
+    (day - 1) * milliInUtcDay
   )
 }
 

@@ -13,9 +13,13 @@ import {
   checkEpochNanoInBounds,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
-import { getTimeZonePeriodDays, minPossibleTransition } from './timeZoneConfig'
+import { timeFieldsToSubsecNano } from './timeFieldMath'
+import {
+  getTimeZonePeriodDays,
+  minPossibleTransitionSec,
+} from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
-import { milliInSec, nanoInSec, secInDay } from './units'
+import { milliInSec, nanoInSec, secInUtcDay } from './units'
 import { compareNumbers, constrainToRange, memoize } from './utils'
 
 export interface TimeZone {
@@ -47,7 +51,7 @@ const queryTimeZoneRecord = memoize(
 // Match proposal-temporal's transition-search horizon. Offset lookup itself
 // must remain unbounded: distant-future dates still need their actual Intl
 // offset, even when public transition search would give up after this horizon.
-const transitionSearchSec = secInDay * 366 * 3
+const transitionSearchSec = secInUtcDay * 366 * 3
 
 const maxIntlSampleSec = maxMilli / milliInSec
 // Use a conservative lower sampling bound: around year 1653 CE, which is
@@ -109,7 +113,8 @@ export class IntlTimeZone implements TimeZone {
   }
 
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
-    const [zonedEpochSec, subsecNano] = isoDateTimeToEpochSec(isoDateTime)
+    const zonedEpochSec = isoDateTimeToEpochSec(isoDateTime)
+    const subsecNano = timeFieldsToSubsecNano(isoDateTime)
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
       return checkEpochNanoInBounds(
@@ -141,11 +146,11 @@ function createIntlTimeZoneStore(
   // always given startEpochSec/endEpochSec
   const getSample = memoize(computeOffsetSec)
   const getSplit = memoize(createSplitTuple)
-  const periodSec = periodDays * secInDay
+  const periodSec = periodDays * secInUtcDay
 
   function getPossibleEpochSec(zonedEpochSec: number): number[] {
-    const wideOffsetSec0 = getOffsetSec(zonedEpochSec - secInDay)
-    const wideOffsetSec1 = getOffsetSec(zonedEpochSec + secInDay)
+    const wideOffsetSec0 = getOffsetSec(zonedEpochSec - secInUtcDay)
+    const wideOffsetSec1 = getOffsetSec(zonedEpochSec + secInUtcDay)
 
     const wideUtcEpochSec0 = zonedEpochSec - wideOffsetSec0
     const wideUtcEpochSec1 = zonedEpochSec - wideOffsetSec1 // could move below
@@ -201,7 +206,7 @@ function createIntlTimeZoneStore(
     // Traveling backwards for a transition
     if (direction < 0) {
       // Starting in the past, before minimum possible transition
-      if (epochSec <= minPossibleTransition) {
+      if (epochSec <= minPossibleTransitionSec) {
         return undefined
       }
 
@@ -219,7 +224,7 @@ function createIntlTimeZoneStore(
     const searchEpochSec =
       direction > 0
         ? // if moving forward from far past, fast-forward search to lower bound
-          Math.max(epochSec, minPossibleTransition)
+          Math.max(epochSec, minPossibleTransitionSec)
         : epochSec
     let [startEpochSec, endEpochSec] = computePeriod(searchEpochSec, periodSec)
 
@@ -227,7 +232,7 @@ function createIntlTimeZoneStore(
     const searchLimit =
       direction > 0
         ? Math.max(epochSec, getCurrentEpochSec()) + transitionSearchSec
-        : minPossibleTransition
+        : minPossibleTransitionSec
     const inBounds = () =>
       direction < 0 ? endEpochSec > searchLimit : startEpochSec < searchLimit
 

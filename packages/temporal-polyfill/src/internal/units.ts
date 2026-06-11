@@ -43,9 +43,13 @@ export const unitNamesAsc = Object.keys(
 // Nanoseconds
 // -----------------------------------------------------------------------------
 
-export const secInDay = 86400
-export const milliInDay = 86400000
+export const secInUtcDay = 86400
+export const secInMinute = 60
+export const secInHour = 60 * secInMinute
 export const milliInSec = 1000
+export const milliInMinute = milliInSec * secInMinute
+export const milliInHour = milliInSec * secInHour
+export const milliInUtcDay = 86400000
 
 export const nanoInMicro = TemporalUtils.nanosecondsInMicrosecond
 export const nanoInMilli = TemporalUtils.nanosecondsInMillisecond

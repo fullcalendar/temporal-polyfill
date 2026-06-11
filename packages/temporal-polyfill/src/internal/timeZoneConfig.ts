@@ -47,4 +47,4 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
   return timeZonePeriodDaysByName[timeZoneName] || defaultTimeZonePeriodDays
 }
 
-export const minPossibleTransition = isoArgsToEpochSec(1847)
+export const minPossibleTransitionSec = isoArgsToEpochSec(1847)

@@ -1,5 +1,5 @@
 import { type ExoticCalendarWithoutId } from '../../internal/calendarImpl'
-import { isoArgsToEpochMilli } from '../../internal/epochMath'
+import { isoDateArgsToEpochMilli } from '../../internal/epochMath'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
@@ -54,7 +54,7 @@ export function createGregoryAlignedCalendar(
       return computeIsoFieldsFromParts(calendarYearToIsoYear(year), month, day)
     },
     computeEpochMilli(year, month, day) {
-      return isoArgsToEpochMilli(calendarYearToIsoYear(year), month, day)
+      return isoDateArgsToEpochMilli(calendarYearToIsoYear(year), month, day)
     },
     computeMonthCodeParts(_year, month) {
       return computeIsoMonthCodeParts(month)

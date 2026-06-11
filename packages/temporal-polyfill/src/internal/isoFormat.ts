@@ -9,10 +9,9 @@ import { DurationFields } from './durationFields'
 import {
   checkDurationTimeUnit,
   checkDurationUnits,
-  durationFieldsToBigNano,
   negateDurationFields,
 } from './durationMath'
-import { epochNanoToIso } from './epochMath'
+import { epochNanoAndOffsetToIsoDateTime } from './epochMath'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -40,6 +39,7 @@ import {
 } from './round'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import type { SubsecDigits } from './temporalSpecHelpers'
+import { subminuteFieldsToBigNano } from './timeFieldMath'
 import { TimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
 import {
@@ -91,7 +91,7 @@ export function formatInstantIso<
 export function formatInstantIsoAuto(instantSlots: EpochNanoFields): string {
   return (
     formatIsoDateTimeFields(
-      epochNanoToIso(instantSlots.epochNanoseconds, 0),
+      epochNanoAndOffsetToIsoDateTime(instantSlots.epochNanoseconds, 0),
       undefined,
     ) + 'Z'
   )
@@ -112,7 +112,7 @@ function formatEpochNanoIso(
   )
 
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  const isoDateTime = epochNanoToIso(epochNano, offsetNano)
+  const isoDateTime = epochNanoAndOffsetToIsoDateTime(epochNano, offsetNano)
 
   return (
     formatIsoDateTimeFields(isoDateTime, subsecDigits) +
@@ -145,7 +145,7 @@ export function formatZonedDateTimeIsoAuto(
   const offsetNano = timeZone.getOffsetNanosecondsFor(
     zonedDateTimeSlots.epochNanoseconds,
   )
-  const isoDateTime = epochNanoToIso(
+  const isoDateTime = epochNanoAndOffsetToIsoDateTime(
     zonedDateTimeSlots.epochNanoseconds,
     offsetNano,
   )
@@ -178,7 +178,7 @@ function formatZonedEpochNanoIso(
     roundingMode,
   )
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  const isoDateTime = epochNanoToIso(epochNano, offsetNano)
+  const isoDateTime = epochNanoAndOffsetToIsoDateTime(epochNano, offsetNano)
 
   return (
     formatIsoDateTimeFields(isoDateTime, subsecDigits) +
@@ -436,7 +436,7 @@ function formatDurationSlots(
   const abs = sign === -1 ? negateDurationFields(durationSlots) : durationSlots
   const { hours, minutes } = abs
 
-  const bigNano = durationFieldsToBigNano(abs, Unit.Second)
+  const bigNano = subminuteFieldsToBigNano(abs)
   const wholeSec = Number(bigNano / bigNanoInSec)
   const subsecNano = Number(bigNano % bigNanoInSec)
   checkDurationTimeUnit(wholeSec)

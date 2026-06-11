@@ -3,7 +3,7 @@ import {
   isoArgsToEpochDays,
 } from '../../internal/epochMath'
 import { type CalendarDateFields } from '../../internal/fieldTypes'
-import { milliInDay } from '../../internal/units'
+import { milliInUtcDay } from '../../internal/units'
 
 // Julian Day 2440588 is the civil day containing Unix epoch midnight. This
 // lets us bridge between Temporal epoch days and Adobe-style Julian Day calendar
@@ -15,11 +15,11 @@ export function epochDaysToJulianDay(epochDays: number): number {
 }
 
 export function julianDayToEpochMilli(julianDay: number): number {
-  return (julianDay - unixEpochJulianDay) * milliInDay
+  return (julianDay - unixEpochJulianDay) * milliInUtcDay
 }
 
 export function epochMilliToJulianDay(epochMilli: number): number {
-  return epochMilli / milliInDay + unixEpochJulianDay
+  return epochMilli / milliInUtcDay + unixEpochJulianDay
 }
 
 export function gregoryToJulianDay(
