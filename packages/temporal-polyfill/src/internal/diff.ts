@@ -283,12 +283,6 @@ function diffDateLike(
 ): DurationFields & { sign: NumberSign } {
   const startEpochNano = isoDateToEpochNano(startIsoDate)
   const endEpochNano = isoDateToEpochNano(endIsoDate)
-
-  // TODO: best place to check range?
-  if (startEpochNano === undefined || endEpochNano === undefined) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
-  }
-
   const sign = compareBigInts(endEpochNano, startEpochNano)
   let durationFields: DurationFields
 

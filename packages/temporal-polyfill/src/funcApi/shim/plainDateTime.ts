@@ -23,7 +23,7 @@ import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes } from '../../internal/diff'
 import {
-  epochNanoAndOffsetToIsoDateTime,
+  epochNanoToIsoDateTime,
   isoDateTimeToEpochMilli,
   isoDateTimeToEpochNano,
 } from '../../internal/epochMath'
@@ -896,7 +896,7 @@ function moveByTimeUnit(
   const epochNano0 = isoDateTimeToEpochNano(slots)
   const epochNano1 =
     epochNano0 + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
-  const isoDateTime1 = epochNanoAndOffsetToIsoDateTime(epochNano1, 0)
+  const isoDateTime1 = epochNanoToIsoDateTime(epochNano1)
   return createShimPlainDateTimeRecord(
     createPlainDateTimeFromRefinedFields(
       isoDateTime1,
@@ -939,9 +939,8 @@ function aligned(
     let isoDateTime = computeAlignment(slots)
 
     if (nanoDelta) {
-      isoDateTime = epochNanoAndOffsetToIsoDateTime(
-        isoDateTimeToEpochNano(isoDateTime),
-        nanoDelta,
+      isoDateTime = epochNanoToIsoDateTime(
+        isoDateTimeToEpochNano(isoDateTime) + BigInt(nanoDelta),
       )
     }
 

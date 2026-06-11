@@ -11,7 +11,7 @@ import {
   checkDurationUnits,
   negateDurationFields,
 } from './durationMath'
-import { epochNanoAndOffsetToIsoDateTime } from './epochMath'
+import { epochNanoToIsoDateTime } from './epochMath'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -91,7 +91,7 @@ export function formatInstantIso<
 export function formatInstantIsoAuto(instantSlots: EpochNanoFields): string {
   return (
     formatIsoDateTimeFields(
-      epochNanoAndOffsetToIsoDateTime(instantSlots.epochNanoseconds, 0),
+      epochNanoToIsoDateTime(instantSlots.epochNanoseconds),
       undefined,
     ) + 'Z'
   )
@@ -112,7 +112,7 @@ function formatEpochNanoIso(
   )
 
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  const isoDateTime = epochNanoAndOffsetToIsoDateTime(epochNano, offsetNano)
+  const isoDateTime = epochNanoToIsoDateTime(epochNano + BigInt(offsetNano))
 
   return (
     formatIsoDateTimeFields(isoDateTime, subsecDigits) +
@@ -145,9 +145,8 @@ export function formatZonedDateTimeIsoAuto(
   const offsetNano = timeZone.getOffsetNanosecondsFor(
     zonedDateTimeSlots.epochNanoseconds,
   )
-  const isoDateTime = epochNanoAndOffsetToIsoDateTime(
-    zonedDateTimeSlots.epochNanoseconds,
-    offsetNano,
+  const isoDateTime = epochNanoToIsoDateTime(
+    zonedDateTimeSlots.epochNanoseconds + BigInt(offsetNano),
   )
 
   return (
@@ -178,7 +177,7 @@ function formatZonedEpochNanoIso(
     roundingMode,
   )
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  const isoDateTime = epochNanoAndOffsetToIsoDateTime(epochNano, offsetNano)
+  const isoDateTime = epochNanoToIsoDateTime(epochNano + BigInt(offsetNano))
 
   return (
     formatIsoDateTimeFields(isoDateTime, subsecDigits) +

@@ -1,10 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
-import {
-  epochNanoAndOffsetToIsoDateTime,
-  isoDateTimeToEpochNano,
-} from './epochMath'
+import { epochNanoToIsoDateTime, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
 import { EpochDisambig, OffsetDisambig } from './optionsModel'
@@ -59,9 +56,8 @@ function _zonedEpochSlotsToIso(
   const { epochNanoseconds } = slots
 
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
-  const isoDateTime = epochNanoAndOffsetToIsoDateTime(
-    epochNanoseconds,
-    offsetNanoseconds,
+  const isoDateTime = epochNanoToIsoDateTime(
+    epochNanoseconds + BigInt(offsetNanoseconds),
   )
 
   return {
@@ -159,9 +155,8 @@ export function getSingleInstantFor(
   // 'later' or 'compatible'
   const shiftNano = gapNano * (disambig === EpochDisambig.Earlier ? -1 : 1)
 
-  const shiftedIsoDateTime = epochNanoAndOffsetToIsoDateTime(
-    zonedEpochNano,
-    shiftNano,
+  const shiftedIsoDateTime = epochNanoToIsoDateTime(
+    zonedEpochNano + BigInt(shiftNano),
   )
   possibleEpochNanos = timeZone.getPossibleInstantsFor(shiftedIsoDateTime)
 

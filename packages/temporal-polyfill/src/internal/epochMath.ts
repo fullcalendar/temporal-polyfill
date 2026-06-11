@@ -8,7 +8,13 @@ import {
   timeFieldsToSec,
 } from './timeFieldMath'
 import { milliInUtcDay, secInHour, secInMinute, secInUtcDay } from './units'
-import { divFloorBigInt, divModFloor, divTrunc, modFloor } from './utils'
+import {
+  divFloorBigInt,
+  divModFloor,
+  divModFloorBigInt,
+  divTrunc,
+  modFloor,
+} from './utils'
 
 const daysIn400YearCycle = 146097
 const yearsIn400YearCycle = 400
@@ -23,8 +29,8 @@ export function epochNanoToSec(epochNano: bigint): number {
 }
 
 export function epochNanoToSecMod(epochNano: bigint): [number, number] {
-  const epochSec = divFloorBigInt(epochNano, bigNanoInSec)
-  return [Number(epochSec), Number(epochNano - epochSec * bigNanoInSec)]
+  const [epochSec, nano] = divModFloorBigInt(epochNano, bigNanoInSec)
+  return [Number(epochSec), Number(nano)]
 }
 
 export function epochNanoToMilli(epochNano: bigint): number {
@@ -134,24 +140,19 @@ export function isoArgsToEpochDays(
 // Epoch -> ISO Fields
 // -----------------------------------------------------------------------------
 
-// TODO: best place for this?
-// TODO: make more composable? have caller worry about adding them?
-export function epochNanoAndOffsetToIsoDateTime(
+export function epochNanoToIsoDateTime(
   epochNano: bigint,
-  offsetNano: number,
 ): CalendarDateTimeFields {
-  const zonedEpochNano = epochNano + BigInt(offsetNano)
-  const bigEpochDays = divFloorBigInt(zonedEpochNano, bigNanoInUtcDay)
-  const epochDays = Number(bigEpochDays)
-  const nanoAfterDay = Number(zonedEpochNano - bigEpochDays * bigNanoInUtcDay)
-
+  const [epochDays, nanoAfterDay] = divModFloorBigInt(
+    epochNano,
+    bigNanoInUtcDay,
+  )
   return {
-    ...epochDaysToIsoDate(epochDays),
-    ...nanoToTimeFields(nanoAfterDay),
+    ...epochDaysToIsoDate(Number(epochDays)),
+    ...nanoToTimeFields(Number(nanoAfterDay)),
   }
 }
 
-// Convenience
 export function epochMilliToIsoDateTime(
   epochMilli: number,
   microsecond = 0,

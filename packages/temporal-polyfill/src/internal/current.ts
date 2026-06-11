@@ -1,4 +1,4 @@
-import { epochMilliToNano, epochNanoAndOffsetToIsoDateTime } from './epochMath'
+import { epochMilliToNano, epochNanoToIsoDateTime } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { RawDateTimeFormat } from './intlFormatUtils'
 import { TimeZone } from './timeZone'
@@ -8,7 +8,7 @@ export function getCurrentIsoDateTime(
 ): CalendarDateTimeFields {
   const epochNano = getCurrentEpochNano()
   const offsetNano = timeZone.getOffsetNanosecondsFor(epochNano)
-  return epochNanoAndOffsetToIsoDateTime(epochNano, offsetNano)
+  return epochNanoToIsoDateTime(epochNano + BigInt(offsetNano))
 }
 
 export function getCurrentEpochNano(): bigint {

@@ -385,6 +385,15 @@ export function divFloorBigInt(num: bigint, denom: bigint): bigint {
   return remainder < BigInt(0) ? whole - BigInt(1) : whole
 }
 
+export function divModFloorBigInt(
+  num: bigint,
+  divisor: bigint,
+): [bigint, bigint] {
+  const quotient = divFloorBigInt(num, divisor)
+  const remainder = num - quotient * divisor
+  return [quotient, remainder]
+}
+
 export function divModFloor(num: number, divisor: number): [number, number] {
   const quotient = Math.floor(num / divisor)
   const remainder = modFloor(num, divisor)

@@ -62,7 +62,7 @@ import {
   NumberSign,
   compareBigInts,
   compareToHalfFraction,
-  divFloorBigInt,
+  divModFloorBigInt,
   divTrunc,
 } from './utils'
 
@@ -555,9 +555,8 @@ export function roundBigNanoToDayOriginInc(
   bigNanoInc: bigint,
   roundingMode: RoundingModeEnum,
 ): bigint {
-  const day = divFloorBigInt(bigNano, bigNanoInUtcDay)
+  const [day, timeNano] = divModFloorBigInt(bigNano, bigNanoInUtcDay)
   const dayOriginNano = day * bigNanoInUtcDay
-  const timeNano = bigNano - dayOriginNano
   const quotientTail = (dayOriginNano / bigNanoInc + timeNano / bigNanoInc) % 2n
 
   return (
