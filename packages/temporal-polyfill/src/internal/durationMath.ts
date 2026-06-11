@@ -313,7 +313,7 @@ export function checkDurationTimeUnit(n: number): void {
   }
 }
 
-// Field <-> Nanosecond Conversion
+// Field -> Nanosecond Conversions
 // -----------------------------------------------------------------------------
 
 export function durationOnlyTimeToBigNano(fields: DurationFields): bigint {
@@ -345,7 +345,9 @@ export function durationSubMinuteToBigNano(fields: DurationFields): bigint {
   )
 }
 
-// TODO: audit
+// Nanosecond -> Field Conversions
+// -----------------------------------------------------------------------------
+
 export function nanoToDurationDayTimeFields(
   largeNano: bigint,
 ): { days: number } & DurationTimeFields
@@ -392,7 +394,6 @@ export function nanoToDurationDayTimeFields(
   return dayTimeFields
 }
 
-// TODO: audit
 export function nanoToDurationTimeFields(nano: number): DurationTimeFields
 export function nanoToDurationTimeFields(
   nano: number,

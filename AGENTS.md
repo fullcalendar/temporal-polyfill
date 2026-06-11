@@ -7,6 +7,19 @@ If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
 Don't bother running bare `pnpm run size` ever
 
 
+## Typechecking
+
+Always use the npm script for typechecking — do not invoke `tsc` directly or
+craft custom `tsc` commands. Running `tsc` by hand can leave `tsconfig.tsbuildinfo`
+metadata files stranded in the source tree.
+
+From `packages/temporal-polyfill`:
+
+```
+pnpm run tsc:all
+```
+
+
 ## Linting
 
 After any code change, always check linting from `packages/temporal-polyfill`:

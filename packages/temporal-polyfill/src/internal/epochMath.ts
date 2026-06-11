@@ -59,10 +59,7 @@ export function isoDateTimeToEpochNano(
 export function isoDateTimeToEpochMilli(
   isoDateTime: CalendarDateTimeFields,
 ): number {
-  return (
-    isoDateToEpochDays(isoDateTime) * milliInUtcDay +
-    timeFieldsToMilli(isoDateTime)
-  )
+  return isoDateToEpochMilli(isoDateTime) + timeFieldsToMilli(isoDateTime)
 }
 
 // DATE-ONLY
