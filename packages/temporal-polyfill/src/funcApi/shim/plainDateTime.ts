@@ -457,12 +457,8 @@ export function toPlainTime(
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimPlainDateTimeRecord>({
-  transformOptions: (options) =>
-    applyPlainFormatTimeZone(
-      transformDateTimeOptions(options, /* allowPartialOverlap = */ true),
-    ),
-  createArgsProvider: (internals) => ({
+) => Format = createDateTimeFormatFactory<ShimPlainDateTimeRecord>(
+  (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainDateTimeSlots(record)
       const format = internals.baseFormat
@@ -482,7 +478,11 @@ export const createFormat: (
       ]
     },
   }),
-})
+  (options) =>
+    applyPlainFormatTimeZone(
+      transformDateTimeOptions(options, /* allowPartialOverlap = */ true),
+    ),
+)
 
 export function toLocaleString(
   record: ShimPlainDateTimeRecord,

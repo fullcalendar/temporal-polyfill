@@ -20,22 +20,18 @@ export type DateTimeFormatShellInternals = {
   copiedOptions: Intl.DateTimeFormatOptions
   transformedOptions: Intl.DateTimeFormatOptions
 }
-type DateTimeFormatShellConfig<R> = {
-  transformOptions?(
-    options: Intl.DateTimeFormatOptions,
-  ): Intl.DateTimeFormatOptions
-  createArgsProvider(
-    internals: DateTimeFormatShellInternals,
-  ): DateTimeFormatArgsProvider<R>
-}
 
 // Creates a DateTimeFormat-shaped shell whose methods ask a caller-owned
 // provider for raw Intl dispatch tuples. All policy, including Temporal
 // compatibility and non-Temporal fallback, stays in that provider.
-export function createDateTimeFormatShell<R>({
-  transformOptions = identity,
-  createArgsProvider,
-}: DateTimeFormatShellConfig<R>) {
+export function createDateTimeFormatShell<R>(
+  createArgsProvider: (
+    internals: DateTimeFormatShellInternals,
+  ) => DateTimeFormatArgsProvider<R>,
+  transformOptions: (
+    options: Intl.DateTimeFormatOptions,
+  ) => Intl.DateTimeFormatOptions = identity,
+) {
   type ShellInternals = {
     argsProvider: DateTimeFormatArgsProvider<R>
     baseFormat: Intl.DateTimeFormat

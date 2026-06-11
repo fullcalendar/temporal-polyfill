@@ -392,12 +392,8 @@ export function toPlainDate(
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimPlainYearMonthRecord>({
-  transformOptions: (options) =>
-    applyPlainFormatTimeZone(
-      transformYearMonthOptions(options, /* allowPartialOverlap = */ true),
-    ),
-  createArgsProvider: (internals) => ({
+) => Format = createDateTimeFormatFactory<ShimPlainYearMonthRecord>(
+  (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainYearMonthSlots(record)
       const format = internals.baseFormat
@@ -413,7 +409,11 @@ export const createFormat: (
       return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
     },
   }),
-})
+  (options) =>
+    applyPlainFormatTimeZone(
+      transformYearMonthOptions(options, /* allowPartialOverlap = */ true),
+    ),
+)
 
 export function toLocaleString(
   record: ShimPlainYearMonthRecord,

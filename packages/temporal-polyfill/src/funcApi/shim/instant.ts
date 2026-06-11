@@ -384,10 +384,8 @@ export function toZonedDateTimeISO(
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimInstantRecord>({
-  transformOptions: (options) =>
-    transformInstantOptions(options, /* allowPartialOverlap = */ true),
-  createArgsProvider: (internals) => ({
+) => Format = createDateTimeFormatFactory<ShimInstantRecord>(
+  (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimInstantSlots(record)
       return [internals.baseFormat, getEpochMilli(slots)]
@@ -402,7 +400,9 @@ export const createFormat: (
       ]
     },
   }),
-})
+  (options) =>
+    transformInstantOptions(options, /* allowPartialOverlap = */ true),
+)
 
 export function toLocaleString(
   record: ShimInstantRecord,

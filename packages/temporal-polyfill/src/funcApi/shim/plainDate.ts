@@ -405,12 +405,8 @@ export function toPlainMonthDay(
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimPlainDateRecord>({
-  transformOptions: (options) =>
-    applyPlainFormatTimeZone(
-      transformDateOptions(options, /* allowPartialOverlap = */ true),
-    ),
-  createArgsProvider: (internals) => ({
+) => Format = createDateTimeFormatFactory<ShimPlainDateRecord>(
+  (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainDateSlots(record)
       const format = internals.baseFormat
@@ -426,7 +422,11 @@ export const createFormat: (
       return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
     },
   }),
-})
+  (options) =>
+    applyPlainFormatTimeZone(
+      transformDateOptions(options, /* allowPartialOverlap = */ true),
+    ),
+)
 
 export function toLocaleString(
   record: ShimPlainDateRecord,

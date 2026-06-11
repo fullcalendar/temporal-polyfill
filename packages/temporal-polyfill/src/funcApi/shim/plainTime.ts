@@ -398,12 +398,8 @@ export function compare(
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimPlainTimeRecord>({
-  transformOptions: (options) =>
-    applyPlainFormatTimeZone(
-      transformTimeOptions(options, /* allowPartialOverlap = */ true),
-    ),
-  createArgsProvider: (internals) => ({
+) => Format = createDateTimeFormatFactory<ShimPlainTimeRecord>(
+  (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimPlainTimeSlots(record)
       return [internals.baseFormat, timeFieldsToMilli(slots)]
@@ -418,7 +414,11 @@ export const createFormat: (
       ]
     },
   }),
-})
+  (options) =>
+    applyPlainFormatTimeZone(
+      transformTimeOptions(options, /* allowPartialOverlap = */ true),
+    ),
+)
 
 export function toLocaleString(
   record: ShimPlainTimeRecord,
