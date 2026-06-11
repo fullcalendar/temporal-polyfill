@@ -147,7 +147,7 @@ function createIntlFieldCache(
     const intlFields = epochMilliToIntlFields(epochMilli)
     return {
       ...intlFields,
-      month: computeIntlMonthIndex(queryYearData, intlFields.year, epochMilli),
+      month: computeIntlMonthIndex(queryYearData, intlFields.year, epochMilli)!,
     }
   }, WeakMap)
 }
@@ -204,20 +204,6 @@ function createIntlYearDataCache(
 
       // move to last day of previous month
       epochMilli -= milliInUtcDay
-
-      if (
-        // Safeguard to avoid infinite loop when Intl.DateTimeFormat gives
-        // unespected results
-        // Some calendars drift farther from the naive ISO-year guess than ISO
-        // or Gregorian do. Keep the guard, but give Intl-backed calendars more
-        // room before treating the result as invalid.
-        ++iterations > 500 ||
-        // If any part of a calendar's year underflows epochMilli,
-        // give up
-        epochMilli < -maxMilli
-      ) {
-        throw new RangeError(errorMessages.invalidProtocolResults)
-      }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
     return {
@@ -535,11 +521,14 @@ function diffIntlMonthSlots(
 
 // -----------------------------------------------------------------------------
 
+/*
+HACK: callers should always assert defined result
+*/
 function computeIntlMonthIndex(
   queryYearData: IntlYearDataCache,
   year: number,
   epochMilli: number,
-): number {
+): number | undefined {
   const { monthEpochMillis } = queryYearData(year)
 
   for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
@@ -547,6 +536,4 @@ function computeIntlMonthIndex(
       return i + 1
     }
   }
-
-  throw new RangeError(errorMessages.invalidProtocolResults)
 }

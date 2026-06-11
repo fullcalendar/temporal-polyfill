@@ -59,11 +59,6 @@ export const missingMonth = 'Missing month/monthCode'
 export const failedYearGuess = 'Cannot guess year'
 export const invalidLeapMonth = 'Invalid leap month'
 
-// Calendar/TimeZone-PROTOCOL
-// TODO: remove this since we don't accept Calendar/TimeZone subclasses
-// Also, still used to denote invalid internal result. Give different error.
-export const invalidProtocolResults = 'Invalid protocol results'
-
 // Calendar
 export const invalidCalendar = (calendarId: string) =>
   baseErrorMessages.invalidEntity('Calendar', calendarId)

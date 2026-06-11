@@ -223,12 +223,6 @@ export function roundDuration<RA>(
     largestUnit,
   )
 
-  const origSign = slots.sign
-  const balancedSign = computeDurationSign(balancedDuration)
-  if (origSign && balancedSign && origSign !== balancedSign) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
-
   balancedDuration = roundRelativeDuration(
     balancedDuration,
     markerSpanOps.markerToEpochNano(endMarker),

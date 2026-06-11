@@ -403,7 +403,7 @@ export function diffZonedEpochsExact(
     slots0,
     slots1,
     sign,
-  )
+  )!
   const dateDiff =
     largestUnit === Unit.Day // TODO: use this optimization elsewhere too
       ? { ...durationFieldDefaults, days: diffDays(isoFields0, isoFields1) }
@@ -685,12 +685,15 @@ function compareIsoDate(
 // Prepare
 // -----------------------------------------------------------------------------
 
+/*
+HACK: callers should always assert defined result
+*/
 export function prepareZonedEpochDiff(
   timeZone: TimeZone,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   slots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   sign: NumberSign, // guaranteed non-zero
-): [CalendarDateTimeFields, CalendarDateFields, number] {
+): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
   const startIsoDate = zonedEpochSlotsToIso(slots0, timeZone)
   const endIsoDate = zonedEpochSlotsToIso(slots1, timeZone)
   const endEpochNano = slots1.epochNanoseconds
@@ -722,8 +725,6 @@ export function prepareZonedEpochDiff(
       return [startIsoDate, midIsoDate, remainderNano]
     }
   }
-
-  throw new RangeError(errorMessages.invalidProtocolResults)
 }
 
 // Diffing Via Epoch Nanoseconds

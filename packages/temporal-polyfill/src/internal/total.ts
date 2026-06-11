@@ -99,9 +99,6 @@ export function totalRelativeDuration(
   const epochNano0 = nudgeWindow.epochNano0
   const epochNano1 = nudgeWindow.epochNano1
   const denom = Number(epochNano1 - epochNano0)
-  if (!denom) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
   const numerator = Number(endEpochNano - epochNano0)
   const integerPart =
     nudgeWindow.startDurationFields[durationFieldNamesAsc[totalUnit]]
@@ -163,17 +160,6 @@ export function clampRelativeDuration(
       clampDistance,
       markerMoveOps,
     )
-
-    if (
-      !epochNanoIsWithinWindow(
-        epochNanoProgress,
-        window.epochNano0,
-        window.epochNano1,
-        Math.sign(clampDistance),
-      )
-    ) {
-      throw new RangeError(errorMessages.invalidProtocolResults)
-    }
   }
 
   return {
@@ -224,10 +210,6 @@ export function computeEpochNanoFrac(
   epochNano1: bigint,
 ): number {
   const denomBig = epochNano1 - epochNano0
-  if (!denomBig) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
-
   const numeratorBig = epochNanoProgress - epochNano0
   if (!numeratorBig) {
     return 0

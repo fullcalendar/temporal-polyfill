@@ -155,9 +155,6 @@ export function roundZonedDateTimeToUnit(
     const isoFields1 = moveByDays(isoFields0, 1) as CalendarDateTimeFields
     const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
     const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
-    if (epochNanoseconds < epochNano0 || epochNanoseconds > epochNano1) {
-      throw new RangeError(errorMessages.invalidProtocolResults)
-    }
     epochNanoseconds = roundWithMode(
       computeEpochNanoFrac(epochNanoseconds, epochNano0, epochNano1),
       roundingMode,
@@ -278,10 +275,6 @@ export function computeZonedHoursInDay(
     nanoInHour,
   )
 
-  if (hoursExact <= 0) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
-
   return hoursExact
 }
 
@@ -331,10 +324,6 @@ export function roundZonedEpochToInterval(
   const epochNano = slots.epochNanoseconds
   const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
-
-  if (epochNano < epochNano0 || epochNano > epochNano1) {
-    throw new RangeError(errorMessages.invalidProtocolResults)
-  }
 
   const frac = computeEpochNanoFrac(epochNano, epochNano0, epochNano1)
   const grow = roundWithMode(frac, roundingMode)

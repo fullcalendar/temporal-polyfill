@@ -210,7 +210,7 @@ function diffZonedDayLikeUnits(
     record0,
     record1,
     sign,
-  )
+  )!
   // `isoFields0` is the start date-time, so it supplies the original wall-clock
   // time for the adjusted end date. The start side already has that time.
   const nanoDiff =
