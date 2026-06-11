@@ -16,7 +16,6 @@ import {
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
-import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -58,9 +57,9 @@ import {
 import {
   NumberSign,
   compareBigInts,
-  fabricateNearHalfFraction,
   divModFloorBigInt,
   divTrunc,
+  fabricateNearHalfFraction,
 } from './utils'
 
 // High-Level

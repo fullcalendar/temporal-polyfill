@@ -25,7 +25,6 @@ import {
   isoEpochOriginYear,
   isoMonthsInYear,
 } from '../../internal/isoCalendarMath'
-import { maxMilli } from '../../internal/temporalConstants'
 import { utcTimeZoneId } from '../../internal/timeZoneConfig'
 import { milliInUtcDay } from '../../internal/units'
 import { bindArgs, compareNumbers, memoize } from '../../internal/utils'
@@ -163,7 +162,6 @@ function createIntlYearDataCache(
   function buildYear(year: number) {
     let epochMilli = isoArgsToEpochDays(year - yearCorrection) * milliInUtcDay
     let intlFields: IntlDateFields
-    let iterations = 0
     const millisReversed: number[] = []
     const monthStringsReversed: string[] = []
 
