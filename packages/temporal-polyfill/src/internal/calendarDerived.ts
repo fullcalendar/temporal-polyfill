@@ -4,7 +4,7 @@ import {
   isoCalendarImpl,
 } from './calendarImpl'
 import { MonthCodeParts, formatMonthCode } from './calendarMonthCode'
-import { isoDateArgsToEpochMilli, isoDateToEpochDays } from './epochMath'
+import { isoArgsToEpochDays, isoDateToEpochDays } from './epochMath'
 import { type CalendarDateFields, CalendarEraFields } from './fieldTypes'
 import {
   computeGregoryEraFields,
@@ -17,6 +17,7 @@ import {
   computeIsoWeekFields,
   isoMonthsInYear,
 } from './isoCalendarMath'
+import { milliInUtcDay } from './units'
 
 export function computeCalendarDateFields(
   calendar: CalendarImpl,
@@ -65,7 +66,7 @@ export function computeCalendarEpochMilli(
 ): number {
   return calendar
     ? calendar.computeEpochMilli(year, month, day)
-    : isoDateArgsToEpochMilli(year, month, day)
+    : isoArgsToEpochDays(year, month, day) * milliInUtcDay
 }
 
 export function computeCalendarMonthsInYearForYear(

@@ -5,9 +5,8 @@ import {
   nanoToTimeFields,
   timeFieldsToMilli,
   timeFieldsToNano,
-  timeFieldsToSec,
 } from './timeFieldMath'
-import { milliInUtcDay, secInHour, secInMinute, secInUtcDay } from './units'
+import { milliInUtcDay } from './units'
 import {
   divFloorBigInt,
   divModFloor,
@@ -49,52 +48,12 @@ export function epochMilliToNano(epochMilli: number): bigint {
 // ISO Fields -> Epoch :: CONVENIENCE
 // -----------------------------------------------------------------------------
 
-export function isoDateArgsToEpochMilli(
-  year: number,
-  month?: number,
-  day?: number,
-) {
-  return isoArgsToEpochDays(year, month, day) * milliInUtcDay
-}
-
-export function isoArgsToEpochSec(
-  year: number,
-  month?: number,
-  day?: number,
-  hour = 0,
-  minute = 0,
-  second = 0,
-) {
-  return (
-    isoArgsToEpochDays(year, month, day) * secInUtcDay +
-    hour * secInHour +
-    minute * secInMinute +
-    second
-  )
-}
-
-export function isoDateTimeToEpochSec(
-  isoDateTime: CalendarDateTimeFields,
-): number {
-  return isoDateToEpochSec(isoDateTime) + timeFieldsToSec(isoDateTime)
-}
+// DATE-TIME
 
 export function isoDateTimeToEpochNano(
   isoDateTime: CalendarDateTimeFields,
 ): bigint {
   return isoDateToEpochNano(isoDateTime) + BigInt(timeFieldsToNano(isoDateTime))
-}
-
-export function isoDateToEpochNano(isoDate: CalendarDateFields): bigint {
-  return BigInt(isoDateToEpochDays(isoDate)) * bigNanoInUtcDay
-}
-
-export function isoDateToEpochMilli(isoDate: CalendarDateFields): number {
-  return isoDateToEpochDays(isoDate) * milliInUtcDay
-}
-
-export function isoDateToEpochSec(isoDate: CalendarDateFields): number {
-  return isoDateToEpochDays(isoDate) * secInUtcDay
 }
 
 export function isoDateTimeToEpochMilli(
@@ -104,6 +63,16 @@ export function isoDateTimeToEpochMilli(
     isoDateToEpochDays(isoDateTime) * milliInUtcDay +
     timeFieldsToMilli(isoDateTime)
   )
+}
+
+// DATE-ONLY
+
+export function isoDateToEpochNano(isoDate: CalendarDateFields): bigint {
+  return BigInt(isoDateToEpochDays(isoDate)) * bigNanoInUtcDay
+}
+
+export function isoDateToEpochMilli(isoDate: CalendarDateFields): number {
+  return isoDateToEpochDays(isoDate) * milliInUtcDay
 }
 
 // ISO Fields -> Epoch :: PRIMITIVES

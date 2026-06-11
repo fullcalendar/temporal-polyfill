@@ -7,7 +7,7 @@ import {
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,
-  isoDateArgsToEpochMilli,
+  isoArgsToEpochDays,
   isoDateToEpochMilli,
 } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
@@ -161,7 +161,7 @@ function createIntlYearDataCache(
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
   function buildYear(year: number) {
-    let epochMilli = isoDateArgsToEpochMilli(year - yearCorrection)
+    let epochMilli = isoArgsToEpochDays(year - yearCorrection) * milliInUtcDay
     let intlFields: IntlDateFields
     let iterations = 0
     const millisReversed: number[] = []

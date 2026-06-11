@@ -1,4 +1,4 @@
-import { isoArgsToEpochSec } from './epochMath'
+import { secInUtcDay } from './units'
 
 export const utcTimeZoneId = 'UTC'
 
@@ -47,4 +47,5 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
   return timeZonePeriodDaysByName[timeZoneName] || defaultTimeZonePeriodDays
 }
 
-export const minPossibleTransitionSec = isoArgsToEpochSec(1847)
+// -44925 is 1847-01-01 as an ISO epoch-day count.
+export const minPossibleTransitionSec = -44925 * secInUtcDay

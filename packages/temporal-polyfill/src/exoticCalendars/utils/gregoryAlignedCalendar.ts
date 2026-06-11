@@ -1,5 +1,5 @@
 import { type ExoticCalendarWithoutId } from '../../internal/calendarImpl'
-import { isoDateArgsToEpochMilli } from '../../internal/epochMath'
+import { isoArgsToEpochDays } from '../../internal/epochMath'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
@@ -16,6 +16,7 @@ import {
   isoEpochFirstLeapYear,
   isoMonthsInYear,
 } from '../../internal/isoCalendarMath'
+import { milliInUtcDay } from '../../internal/units'
 
 export interface GregoryAlignedCalendarConfig {
   isoYearOffset?: number // why would someone NOT specify this?
@@ -54,7 +55,10 @@ export function createGregoryAlignedCalendar(
       return computeIsoFieldsFromParts(calendarYearToIsoYear(year), month, day)
     },
     computeEpochMilli(year, month, day) {
-      return isoDateArgsToEpochMilli(calendarYearToIsoYear(year), month, day)
+      return (
+        isoArgsToEpochDays(calendarYearToIsoYear(year), month, day) *
+        milliInUtcDay
+      )
     },
     computeMonthCodeParts(_year, month) {
       return computeIsoMonthCodeParts(month)

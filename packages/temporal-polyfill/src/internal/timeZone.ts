@@ -2,8 +2,8 @@ import { bigNanoInSec } from './bigNano'
 import {
   epochNanoToSec,
   epochNanoToSecMod,
-  isoArgsToEpochSec,
-  isoDateTimeToEpochSec,
+  isoArgsToEpochDays,
+  isoDateToEpochDays,
 } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { normalizeEraName } from './intlCalendarConfig'
@@ -13,13 +13,19 @@ import {
   checkEpochNanoInBounds,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
-import { timeFieldsToSubsecNano } from './timeFieldMath'
+import { timeFieldsToSec, timeFieldsToSubsecNano } from './timeFieldMath'
 import {
   getTimeZonePeriodDays,
   minPossibleTransitionSec,
 } from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
-import { milliInSec, nanoInSec, secInUtcDay } from './units'
+import {
+  milliInSec,
+  nanoInSec,
+  secInHour,
+  secInMinute,
+  secInUtcDay,
+} from './units'
 import { compareNumbers, constrainToRange, memoize } from './utils'
 
 export interface TimeZone {
@@ -113,7 +119,9 @@ export class IntlTimeZone implements TimeZone {
   }
 
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
-    const zonedEpochSec = isoDateTimeToEpochSec(isoDateTime)
+    const zonedEpochSec =
+      isoDateToEpochDays(isoDateTime) * secInUtcDay +
+      timeFieldsToSec(isoDateTime)
     const subsecNano = timeFieldsToSubsecNano(isoDateTime)
 
     return this.tzStore.getPossibleEpochSec(zonedEpochSec).map((epochSec) => {
@@ -343,14 +351,16 @@ function createComputeOffsetSec(
       format,
       epochSec * milliInSec,
     )
-    const zonedEpochSec = isoArgsToEpochSec(
-      parseIntlPartsYear(intlParts),
-      parseInt(intlParts.month),
-      parseInt(intlParts.day),
-      parseInt(intlParts.hour),
-      parseInt(intlParts.minute),
-      parseInt(intlParts.second),
-    )
+    const zonedEpochSec =
+      isoArgsToEpochDays(
+        parseIntlPartsYear(intlParts),
+        parseInt(intlParts.month),
+        parseInt(intlParts.day),
+      ) *
+        secInUtcDay +
+      parseInt(intlParts.hour) * secInHour +
+      parseInt(intlParts.minute) * secInMinute +
+      parseInt(intlParts.second)
     return zonedEpochSec - epochSec
   }
 }
