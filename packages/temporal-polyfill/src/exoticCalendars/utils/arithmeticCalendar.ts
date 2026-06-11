@@ -4,19 +4,19 @@ import {
   monthCodeNumberToMonth,
   monthToMonthCodeNumber,
 } from '../../internal/calendarMonthCode'
-import { isoDateToEpochDays } from '../../internal/epochMath'
+import {
+  epochDaysToIsoDate,
+  isoDateToEpochDays,
+} from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   type CalendarDateFields,
   type CalendarEraFields,
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
+import { milliInUtcDay } from '../../internal/units'
 import { compareNumbers, memoize } from '../../internal/utils'
-import {
-  epochDaysToJulianDay,
-  julianDayToEpochMilli,
-  julianDayToGregory,
-} from './gregoryJulianDay'
+import { unixEpochJulianDay } from './gregoryJulianDay'
 
 export interface ArithmeticCalendarParts extends CalendarDateFields {
   era?: string
@@ -57,7 +57,7 @@ export function createArithmeticCalendar(
 
   const fromIsoDate = memoize(
     (isoDate: CalendarDateFields) =>
-      ops.fromJulianDay(epochDaysToJulianDay(isoDateToEpochDays(isoDate))),
+      ops.fromJulianDay(isoDateToEpochDays(isoDate) + unixEpochJulianDay),
     WeakMap,
   )
 
@@ -127,10 +127,14 @@ export function createArithmeticCalendar(
     constrainPlainMonthDay: ops.constrainPlainMonthDay,
     computeDateFields: fromIsoDate,
     computeIsoFieldsFromParts(year, month, day) {
-      return julianDayToGregory(ops.toJulianDay(year, month, day))
+      return epochDaysToIsoDate(
+        ops.toJulianDay(year, month, day) - unixEpochJulianDay,
+      )
     },
     computeEpochMilli(year, month = 1, day = 1) {
-      return julianDayToEpochMilli(ops.toJulianDay(year, month, day))
+      return (
+        (ops.toJulianDay(year, month, day) - unixEpochJulianDay) * milliInUtcDay
+      )
     },
     computeMonthCodeParts(year, month) {
       return (ops.computeMonthCodeParts || computeDefaultMonthCodeParts)(

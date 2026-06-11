@@ -1,9 +1,7 @@
+import { epochDaysToIsoDate, isoArgsToEpochDays } from '../internal/epochMath'
 import { computeIsoInLeapYear } from '../internal/isoCalendarMath'
 import { createArithmeticCalendar } from './utils/arithmeticCalendar'
-import {
-  gregoryToJulianDay,
-  julianDayToGregory,
-} from './utils/gregoryJulianDay'
+import { unixEpochJulianDay } from './utils/gregoryJulianDay'
 
 // Adapted from Adobe's @internationalized/date Indian calendar implementation
 // and ICU-style arithmetic calendar rules.
@@ -18,10 +16,11 @@ export function createIndianCalendar() {
   return createArithmeticCalendar({
     eraOrigins: indianEraOrigins,
     fromJulianDay(julianDay) {
-      const gregory = julianDayToGregory(julianDay)
+      const gregory = epochDaysToIsoDate(julianDay - unixEpochJulianDay)
       let year = gregory.year - indianEraStart
       let dayOfGregorianYear =
-        julianDay - gregoryToJulianDay(gregory.year, 1, 1)
+        julianDay -
+        (isoArgsToEpochDays(gregory.year, 1, 1) + unixEpochJulianDay)
       let firstMonthDays: number
 
       if (dayOfGregorianYear < indianYearStart) {
@@ -59,10 +58,10 @@ export function createIndianCalendar() {
       let julianDay: number
       if (computeIsoInLeapYear(gregoryYear)) {
         firstMonthDays = 31
-        julianDay = gregoryToJulianDay(gregoryYear, 3, 21)
+        julianDay = isoArgsToEpochDays(gregoryYear, 3, 21) + unixEpochJulianDay
       } else {
         firstMonthDays = 30
-        julianDay = gregoryToJulianDay(gregoryYear, 3, 22)
+        julianDay = isoArgsToEpochDays(gregoryYear, 3, 22) + unixEpochJulianDay
       }
 
       if (month === 1) {

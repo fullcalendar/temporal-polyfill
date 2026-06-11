@@ -1,9 +1,8 @@
+import { epochDaysToIsoDate } from '../internal/epochMath'
+import { milliInUtcDay } from '../internal/units'
 import { bindArgs, modFloor } from '../internal/utils'
 import { createArithmeticCalendar } from './utils/arithmeticCalendar'
-import {
-  epochMilliToJulianDay,
-  julianDayToGregory,
-} from './utils/gregoryJulianDay'
+import { unixEpochJulianDay } from './utils/gregoryJulianDay'
 import {
   type IntlScrapedCalendarData,
   computeIntlDaysInMonth,
@@ -159,7 +158,7 @@ function julianDayToUmalqura(
   }
 
   const { year, month, day } = intlUmalquraData.queryFields(
-    julianDayToGregory(julianDay),
+    epochDaysToIsoDate(julianDay - unixEpochJulianDay),
   )
   return { year, month, day }
 }
@@ -171,8 +170,8 @@ function umalquraToJulianDay(
   day: number,
 ): number {
   return isUmalquraYear(year)
-    ? epochMilliToJulianDay(
-        computeIntlEpochMilli(intlUmalquraData, year, month, day),
-      )
+    ? computeIntlEpochMilli(intlUmalquraData, year, month, day) /
+        milliInUtcDay +
+        unixEpochJulianDay
     : islamicToJulianDay(civilIslamicEpoch, year, month, day)
 }
