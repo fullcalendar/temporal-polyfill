@@ -20,12 +20,13 @@ import {
   MoveMarker,
   createMarkerMoveOps,
 } from '../../internal/relativeMath'
-import { roundBigNanoToInc, roundNumberToInc } from '../../internal/round'
+import { roundNumberToInc } from '../../internal/round'
 import { getCommonCalendar, getCommonTimeZone } from '../../internal/slotUtils'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
+import { bigNanoToRoundedTimeUnit } from './roundUtils'
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
@@ -259,19 +260,10 @@ function diffTimeUnit(
   record1: MovableMarker,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-
-  let nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
-
-  if (roundingInc) {
-    nanoDiff = roundBigNanoToInc(
-      nanoDiff,
-      BigInt(nanoInUnit * roundingInc),
-      roundingMode!,
-    )
-  }
-
-  return roundingInc
-    ? Number(nanoDiff / BigInt(nanoInUnit))
-    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
+  return bigNanoToRoundedTimeUnit(
+    unit,
+    nanoInUnit,
+    markerToEpochNano(record1) - markerToEpochNano(record0),
+    options,
+  )
 }

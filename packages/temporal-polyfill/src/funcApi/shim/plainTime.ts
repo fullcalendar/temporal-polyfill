@@ -1,9 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import {
-  bigNanoInUtcDay,
-  divideBigNanoToExactNumber,
-} from '../../internal/bigNano'
+import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
@@ -17,8 +14,7 @@ import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
-import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
-import { roundBigNanoToInc, roundPlainTimeToUnit } from '../../internal/round'
+import { roundPlainTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   nanoToTimeAndDay,
@@ -50,7 +46,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
-import { refineRoundToOptions } from './roundUtils'
+import { nanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
@@ -231,23 +227,10 @@ function diffTimeUnit(
   otherRecord: ShimPlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const nano0 = timeFieldsToNano(getShimPlainTimeSlots(record))
   const nano1 = timeFieldsToNano(getShimPlainTimeSlots(otherRecord))
 
-  let nanoDiff = BigInt(nano1 - nano0)
-
-  if (roundingInc) {
-    nanoDiff = roundBigNanoToInc(
-      nanoDiff,
-      BigInt(nanoInUnit * roundingInc),
-      roundingMode!,
-    )
-  }
-
-  return roundingInc
-    ? Number(nanoDiff / BigInt(nanoInUnit))
-    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
+  return nanoToRoundedTimeUnit(unit, nanoInUnit, nano1 - nano0, options)
 }
 
 export const diffHours = bindArgs(diffTimeUnit, Unit.Hour, nanoInHour)

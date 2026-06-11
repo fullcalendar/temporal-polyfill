@@ -6,7 +6,6 @@ import {
   bigNanoInMilli,
   bigNanoInMinute,
   bigNanoInSec,
-  divideBigNanoToExactNumber,
 } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
@@ -25,8 +24,7 @@ import {
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
-import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
-import { roundBigNanoToInc, roundInstantToUnit } from '../../internal/round'
+import { roundInstantToUnit } from '../../internal/round'
 import {
   createEpochNanoSlots,
   getEpochMilli,
@@ -60,7 +58,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from './recordUtils'
-import { refineRoundToOptions } from './roundUtils'
+import { bigNanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import {
   ShimZonedDateTimeRecord,
   createShimZonedDateTimeRecord,
@@ -292,7 +290,6 @@ export function diff(
 
 // Instants have no calendar or time-zone balancing, so unit diffs are exact
 // epoch-nanosecond math until the caller opts into rounding.
-// TODO: DRY with ZonedDateTime's
 function diffTimeUnit(
   unit: TimeUnit,
   nanoInUnit: number,
@@ -300,23 +297,15 @@ function diffTimeUnit(
   otherRecord: ShimInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
   const slots = getShimInstantSlots(record)
   const otherSlots = getShimInstantSlots(otherRecord)
 
-  let nanoDiff = otherSlots.epochNanoseconds - slots.epochNanoseconds
-
-  if (roundingInc) {
-    nanoDiff = roundBigNanoToInc(
-      nanoDiff,
-      BigInt(nanoInUnit * roundingInc),
-      roundingMode!,
-    )
-  }
-
-  return roundingInc
-    ? Number(nanoDiff / BigInt(nanoInUnit))
-    : divideBigNanoToExactNumber(nanoDiff, nanoInUnit)
+  return bigNanoToRoundedTimeUnit(
+    unit,
+    nanoInUnit,
+    otherSlots.epochNanoseconds - slots.epochNanoseconds,
+    options,
+  )
 }
 
 export const diffHours = bindArgs(diffTimeUnit, Unit.Hour, nanoInHour)

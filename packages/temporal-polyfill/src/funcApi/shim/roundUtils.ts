@@ -1,4 +1,5 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -25,8 +26,14 @@ import {
   RoundingMathTuple,
   RoundingModeEnum,
 } from '../../internal/optionsModel'
+import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { validateRoundingInc } from '../../internal/optionsValidate'
-import { IsoDateTimeInterval, roundWithMode } from '../../internal/round'
+import {
+  IsoDateTimeInterval,
+  roundBigNanoToInc,
+  roundNumberToInc,
+  roundWithMode,
+} from '../../internal/round'
 import { computeEpochNanoFrac } from '../../internal/total'
 import { TimeUnit, Unit } from '../../internal/units'
 import { bindArgs, zeroOutProps } from '../../internal/utils'
@@ -229,4 +236,51 @@ export function refineRoundToOptions(
     solarMode,
   )
   return [roundingInc, roundingMode]
+}
+
+// Time Unit
+// -----------------------------------------------------------------------------
+
+// Callers compute the signed nanosecond amount. This number path handles the
+// bounded time-of-day case where the amount fits safely in Number.
+export function nanoToRoundedTimeUnit(
+  unit: TimeUnit,
+  nanoInUnit: number,
+  nanoAmount: number,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+
+  if (roundingInc) {
+    nanoAmount = roundNumberToInc(
+      nanoAmount,
+      nanoInUnit * roundingInc,
+      roundingMode!,
+    )
+  }
+
+  return nanoAmount / nanoInUnit
+}
+
+// Epoch-based amounts can be larger than Number's safe integer range, so they
+// stay in bigint until rounding or exact fractional division needs a Number.
+export function bigNanoToRoundedTimeUnit(
+  unit: TimeUnit,
+  nanoInUnit: number,
+  nanoAmount: bigint,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+
+  if (roundingInc) {
+    nanoAmount = roundBigNanoToInc(
+      nanoAmount,
+      BigInt(nanoInUnit * roundingInc),
+      roundingMode!,
+    )
+  }
+
+  return roundingInc
+    ? Number(nanoAmount / BigInt(nanoInUnit))
+    : divideBigNanoToExactNumber(nanoAmount, nanoInUnit)
 }
