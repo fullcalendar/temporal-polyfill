@@ -22,7 +22,7 @@ import {
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
-import { NumberSign, compareBigInts, compareToHalfFraction } from './utils'
+import { NumberSign, compareBigInts, fabricateNearHalfFraction } from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -227,16 +227,11 @@ export function computeEpochNanoFrac(
   if (!denomBig) {
     throw new RangeError(errorMessages.invalidProtocolResults)
   }
-  const numeratorBig = epochNanoProgress - epochNano0
 
+  const numeratorBig = epochNanoProgress - epochNano0
   if (!numeratorBig) {
     return 0
   }
-
-  // Number division can collapse one-nanosecond differences onto 0.5 or 1.
-  // Compare exact bigint positions before fabricating a rounding-safe fraction.
-
-
 
   const absNumerator = numeratorBig < 0n ? -numeratorBig : numeratorBig
   const absDenom = denomBig < 0n ? -denomBig : denomBig
@@ -248,23 +243,11 @@ export function computeEpochNanoFrac(
       return fracSign
     }
 
-    return compareToHalfFraction(
+    return fabricateNearHalfFraction(
       compareBigInts(absNumerator * 2n, absDenom),
       fracSign,
     )
   }
 
-  const frac = Number(numeratorBig) / Number(denomBig)
-
-  if (frac === fracSign) {
-    // TODO: This fallback is only for callers that can pass progress just
-    // outside the rounding window. Consider splitting that use from the
-    // in-window rounding-decision path, so the latter can remain pure exact
-    // threshold comparison and this path can get its own precision strategy.
-    // Preserve "just outside the interval" when Number division rounds back
-    // onto the endpoint.
-    return fracSign * 1.3
-  }
-
-  return frac
+  return Number(numeratorBig) / Number(denomBig)
 }

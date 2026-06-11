@@ -58,7 +58,7 @@ import {
 import {
   NumberSign,
   compareBigInts,
-  compareToHalfFraction,
+  fabricateNearHalfFraction,
   divModFloorBigInt,
   divTrunc,
 } from './utils'
@@ -578,11 +578,8 @@ function roundBigNanoToIncWithTail(
   if (remainder) {
     const absRemainder = remainder < 0n ? -remainder : remainder
 
-    // Precise way of determining before/on/after half
-    const halfCompare = compareBigInts(absRemainder * 2n, bigNanoInc)
-
-    fraction = compareToHalfFraction(
-      halfCompare,
+    fraction = fabricateNearHalfFraction(
+      compareBigInts(absRemainder * 2n, bigNanoInc),
       Math.sign(Number(remainder)) as NumberSign,
     )
   }

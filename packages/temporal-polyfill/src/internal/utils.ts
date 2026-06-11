@@ -428,12 +428,11 @@ export function roundExpand(num: number): number {
 
 // Fabricate a fraction safely away from 0.5 while preserving the exact
 // before/on/after-half comparison.
-
-export function compareToHalfFraction(
+export function fabricateNearHalfFraction(
   halfCompare: NumberSign,
   sign: NumberSign = 1,
 ): number {
-  return sign * (halfCompare * 0.2 + 0.5)
+  return sign * (0.5 + halfCompare / 5)
 }
 
 /*
