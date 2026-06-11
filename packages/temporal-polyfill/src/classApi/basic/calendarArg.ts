@@ -38,9 +38,6 @@ export function extractCalendarFromBag(bag: { calendar?: CalendarArg }):
   }
 }
 
-/*
-Returns an CalendarImpl
-*/
 export function refineCalendarArg(arg: CalendarArg): CalendarImpl {
   if (isObjectLike(arg)) {
     const slots =
@@ -50,7 +47,7 @@ export function refineCalendarArg(arg: CalendarArg): CalendarImpl {
       getPlainMonthDaySlotsIfPresent(arg) ||
       getPlainYearMonthSlotsIfPresent(arg)
 
-    if (!slots || !('calendar' in slots)) {
+    if (!slots) {
       // TODO: better message how non-Temporal objects aren't allowed
       throw new TypeError(errorMessages.invalidCalendar(arg as any))
     }
