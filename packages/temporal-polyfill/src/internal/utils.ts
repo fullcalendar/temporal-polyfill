@@ -382,7 +382,7 @@ export function compareBigInts(a: bigint, b: bigint): NumberSign {
 export function divFloorBigInt(num: bigint, denom: bigint): bigint {
   const whole = num / denom
   const remainder = num % denom
-  return remainder < BigInt(0) ? whole - BigInt(1) : whole
+  return remainder < 0n ? whole - 1n : whole
 }
 
 export function divModFloorBigInt(
