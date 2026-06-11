@@ -1,14 +1,11 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import {
-  bigNanoInMilli,
-  divideBigNanoToExactNumber,
-} from '../../internal/bigNano'
+import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import { type CalendarImpl } from '../../internal/calendarImpl'
 import { diffCalendarDates, prepareZonedEpochDiff } from '../../internal/diff'
 import { DurationFields } from '../../internal/durationFields'
 import {
   isoDateTimeToEpochNano,
-  isoDateToEpochMilli,
+  isoDateToEpochNano,
 } from '../../internal/epochMath'
 import {
   CalendarDateFields,
@@ -133,10 +130,6 @@ function diffPlainDateTimeLargeUnits(
     record1,
     options,
   )
-}
-
-function isoDateToEpochNano(marker: CalendarDateFields): bigint {
-  return BigInt(isoDateToEpochMilli(marker)) * bigNanoInMilli
 }
 
 // Date Units (years, months, weeks, days)

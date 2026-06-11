@@ -118,7 +118,7 @@ function dateToEpochNano(
   timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
   options?: Temporal.DisambiguationOptions,
-): bigint | undefined {
+): bigint {
   const epochDisambig = refineEpochDisambigOptions(options)
   return getSingleInstantFor(timeZone, isoDateTime, epochDisambig)
 }

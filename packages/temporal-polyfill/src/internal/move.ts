@@ -3,7 +3,7 @@ import { bigNanoInUtcDay } from './bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonthForYearMonth,
-  computeCalendarEpochMilli,
+  computeCalendarIsoFieldsFromParts,
   computeCalendarMonthCodeParts,
   computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
@@ -21,8 +21,9 @@ import {
   getMaxDurationUnit,
   negateDurationFields,
 } from './durationMath'
-import { epochMilliToIsoDateTime, isoDateToEpochMilli } from './epochMath'
+import { epochDaysToIsoDate, isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
+import { timeFieldDefaults } from './fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -50,7 +51,7 @@ import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { givenFieldsToBigNano } from './unitMath'
-import { Unit, milliInDay } from './units'
+import { Unit } from './units'
 import { NumberSign, clampEntity } from './utils'
 
 // High-Level
@@ -324,8 +325,9 @@ export function moveByDays(
   days: number,
 ): CalendarDateFields {
   if (days) {
-    return epochMilliToIsoDateTime(
-      isoDateToEpochMilli(isoDate) + days * milliInDay,
+    return combineDateAndTime(
+      epochDaysToIsoDate(isoDateToEpochDays(isoDate) + days),
+      timeFieldDefaults,
     )
   }
   return isoDate
@@ -338,7 +340,7 @@ function dateAddWithOverflow(
   overflow: Overflow,
 ): CalendarDateFields {
   let { years, months, weeks, days } = durationFields
-  let epochMilli: number | undefined
+  let isoDate: CalendarDateFields
 
   days += Number(
     givenFieldsToBigNano(durationFields, Unit.Hour, durationFieldNamesAsc) /
@@ -346,20 +348,17 @@ function dateAddWithOverflow(
   )
 
   if (years || months) {
-    epochMilli = addDateMonths(calendar, isoDateFields, years, months, overflow)
+    isoDate = addDateMonths(calendar, isoDateFields, years, months, overflow)
   } else if (weeks || days) {
-    epochMilli = isoDateToEpochMilli(isoDateFields)
+    isoDate = isoDateFields
   } else {
     return isoDateFields
   }
 
-  if (epochMilli === undefined) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+  if (weeks || days) {
+    isoDate = moveByDays(isoDate, weeks * 7 + days)
   }
 
-  epochMilli += (weeks * 7 + days) * milliInDay
-
-  const isoDate = epochMilliToIsoDateTime(epochMilli)
   return checkIsoDateInBounds(isoDate)
 }
 
@@ -380,7 +379,7 @@ export function addDateMonths(
   years: number,
   months: number,
   overflow: Overflow,
-): number {
+): CalendarDateFields {
   const dateParts = computeCalendarDateFields(calendar, isoDateFields)
   let { year, month, day } = dateParts
 
@@ -422,7 +421,7 @@ export function addDateMonths(
     overflow,
   )
 
-  return computeCalendarEpochMilli(calendar, year, month, day)
+  return computeCalendarIsoFieldsFromParts(calendar, year, month, day)
 }
 
 export function computeYearMovedMonth(

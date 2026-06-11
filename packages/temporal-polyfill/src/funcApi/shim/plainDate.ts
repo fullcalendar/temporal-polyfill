@@ -22,7 +22,7 @@ import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates } from '../../internal/diff'
 import {
-  diffEpochMilliDays,
+  isoDateToEpochDays,
   isoDateToEpochMilli,
 } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
@@ -674,10 +674,7 @@ function diffPlainDateDayLikeUnit(
   // PlainDate day/week diffs are ISO day distances. Avoid the shared
   // date/date-time/zoned marker converter used by the cross-type helper.
   let res =
-    diffEpochMilliDays(
-      isoDateToEpochMilli(slots0),
-      isoDateToEpochMilli(slots1),
-    ) / daysInUnit
+    (isoDateToEpochDays(slots1) - isoDateToEpochDays(slots0)) / daysInUnit
 
   if (roundingInc) {
     res = roundNumberToInc(res, roundingInc, roundingMode!)

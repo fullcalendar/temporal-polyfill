@@ -7,7 +7,6 @@ import {
 } from '../../internal/calendarDerived'
 import { type CalendarImpl, isoCalendarImpl } from '../../internal/calendarImpl'
 import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
-import { epochMilliToIsoDateTime } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
   dayFieldName,
@@ -54,9 +53,7 @@ export function moveByYears(
     return isoDate
   }
   return {
-    ...epochMilliToIsoDateTime(
-      addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
-    ),
+    ...addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
     calendar,
   }
 }
@@ -72,9 +69,7 @@ export function moveByMonths(
     return isoDate
   }
   return {
-    ...epochMilliToIsoDateTime(
-      addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
-    ),
+    ...addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
     calendar,
   }
 }

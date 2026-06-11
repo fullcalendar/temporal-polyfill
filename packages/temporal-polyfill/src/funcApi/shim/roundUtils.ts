@@ -1,14 +1,12 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { bigNanoInMilli } from '../../internal/bigNano'
 import {
   computeCalendarDateFields,
-  computeCalendarEpochMilli,
+  computeCalendarIsoFieldsFromParts,
 } from '../../internal/calendarDerived'
 import { type CalendarImpl } from '../../internal/calendarImpl'
 import {
-  epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
-  isoDateToEpochMilli,
+  isoDateToEpochNano,
 } from '../../internal/epochMath'
 import { timeFieldDefaults, timeFieldNamesAsc } from '../../internal/fieldNames'
 import {
@@ -48,7 +46,7 @@ export function computeYearFloor(
   const { calendar } = slots
   const { year: year0 } = computeCalendarDateFields(calendar, slots)
   return {
-    ...epochMilliToIsoDateTime(computeCalendarEpochMilli(calendar, year0)),
+    ...computeCalendarDateTimeFromParts(calendar, year0),
     year: year0,
   }
 }
@@ -62,9 +60,7 @@ export function computeMonthFloor(
     slots,
   )
   return {
-    ...epochMilliToIsoDateTime(
-      computeCalendarEpochMilli(calendar, year0, month0),
-    ),
+    ...computeCalendarDateTimeFromParts(calendar, year0, month0),
     year: year0,
     month: month0,
   }
@@ -122,10 +118,7 @@ export function computeYearInterval(
   const { calendar } = slots
   const isoFields0 = computeYearFloor(slots)
   const year1 = isoFields0.year + 1
-  return [
-    isoFields0,
-    epochMilliToIsoDateTime(computeCalendarEpochMilli(calendar, year1)),
-  ]
+  return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1)]
 }
 
 export function computeMonthInterval(
@@ -139,10 +132,7 @@ export function computeMonthInterval(
     isoFields0.month,
     1,
   )
-  return [
-    isoFields0,
-    epochMilliToIsoDateTime(computeCalendarEpochMilli(calendar, year1, month1)),
-  ]
+  return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1, month1)]
 }
 
 export function computeIsoWeekInterval(
@@ -166,8 +156,19 @@ export function roundDateToInterval<
   return roundEpochNanoToInterval(
     computeInterval,
     slots,
-    BigInt(isoDateToEpochMilli(slots)) * bigNanoInMilli,
+    isoDateToEpochNano(slots),
     roundingMode,
+  )
+}
+
+function computeCalendarDateTimeFromParts(
+  calendar: CalendarImpl,
+  year: number,
+  month = 1,
+): CalendarDateTimeFields {
+  return combineDateAndTime(
+    computeCalendarIsoFieldsFromParts(calendar, year, month, 1),
+    timeFieldDefaults,
   )
 }
 

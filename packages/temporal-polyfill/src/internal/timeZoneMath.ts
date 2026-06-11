@@ -9,7 +9,7 @@ import { refineDirectionOptions } from './optionsTransitionRefine'
 import { roundToMinute } from './round'
 import { ZonedEpochNanoFields } from './slots'
 import {
-  checkIsoDateInBoundsStrict,
+  checkIsoDateInBounds,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
 import { TimeZone } from './timeZone'
@@ -88,7 +88,7 @@ export function getMatchingInstantFor(
     offsetDisambig === OffsetDisambig.Prefer ||
     offsetDisambig === OffsetDisambig.Reject
   ) {
-    checkIsoDateInBoundsStrict(isoDateTime)
+    checkIsoDateInBounds(isoDateTime, false)
   }
 
   const possibleEpochNanos = timeZone.getPossibleInstantsFor(isoDateTime)

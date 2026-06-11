@@ -87,6 +87,9 @@ small portions of code can back be packed with a lot of meaning.
 ## Bundle Size
 
 Before making size-oriented changes, measure and record the baseline size first.
+When recording size measurements, append clearly-labeled entries to
+`packages/temporal-polyfill/size-audit/BYTES.txt` so future work has a running
+history of before/after numbers.
 
 The size command depends on the `packages/export-size` submodule's built
 output. Always build `export-size` first:
@@ -107,4 +110,5 @@ Use `pnpm run size --raw` for raw byte size. Do not run bare `pnpm run size`.
 
 After a size-oriented code change is settled, run build and sizing. If sizing
 increased, do not revert the code automatically; pause so the user can inspect
-the built artifacts.
+the built artifacts. If sizing stayed the same or decreased, record the final
+number in `packages/temporal-polyfill/size-audit/BYTES.txt`.

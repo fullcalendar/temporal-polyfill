@@ -13,10 +13,8 @@ import {
   negateDurationFields,
 } from './durationMath'
 import {
-  diffEpochMilliDays,
-  epochMilliToIsoDateTime,
   isoDateTimeToEpochNano,
-  isoDateToEpochMilli,
+  isoDateToEpochDays,
   isoDateToEpochNano,
 } from './epochMath'
 import * as errorMessages from './errorMessages'
@@ -522,8 +520,12 @@ export function diffCalendarDates(
         ? calendar.diffMonthSlots(year0, month0, year1, month1)
         : diffIsoMonthSlots(year0, month0, year1, month1)
 
-      let anchorIsoDate = epochMilliToIsoDateTime(
-        addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+      let anchorIsoDate = addDateMonths(
+        calendar,
+        startIsoDate,
+        0,
+        months,
+        Overflow.Constrain,
       )
 
       // Decide whether the anchor overshot the end the same way the spec's
@@ -545,8 +547,12 @@ export function diffCalendarDates(
         0
       ) {
         months -= sign
-        anchorIsoDate = epochMilliToIsoDateTime(
-          addDateMonths(calendar, startIsoDate, 0, months, Overflow.Constrain),
+        anchorIsoDate = addDateMonths(
+          calendar,
+          startIsoDate,
+          0,
+          months,
+          Overflow.Constrain,
         )
       }
 
@@ -758,8 +764,5 @@ function diffDays(
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
 ): number {
-  return diffEpochMilliDays(
-    isoDateToEpochMilli(startIsoDate),
-    isoDateToEpochMilli(endIsoDate),
-  )
+  return isoDateToEpochDays(endIsoDate) - isoDateToEpochDays(startIsoDate)
 }

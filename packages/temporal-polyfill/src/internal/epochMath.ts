@@ -86,7 +86,7 @@ export function isoDateTimeToEpochMilli(
 For converting to fake epochNano values for math.
 */
 export function isoDateToEpochNano(isoDate: CalendarDateFields): bigint {
-  return BigInt(isoDateToEpochMilli(isoDate)) * bigNanoInMilli
+  return BigInt(isoDateToEpochDays(isoDate)) * bigNanoInUtcDay
 }
 
 export function isoDateTimeToEpochNano(
