@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -257,7 +258,7 @@ export class PlainYearMonth implements YearMonthFields {
   }
 }
 
-defineTemporalClass(PlainYearMonth, 'PlainYearMonth')
+defineTemporalClass(PlainYearMonth, PlainYearMonthBranding)
 export function createPlainYearMonth(
   slots: PlainYearMonthSlots,
 ): PlainYearMonth {

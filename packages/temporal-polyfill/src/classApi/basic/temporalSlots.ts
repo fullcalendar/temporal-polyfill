@@ -1,3 +1,13 @@
+import {
+  DurationBranding,
+  InstantBranding,
+  PlainDateBranding,
+  PlainDateTimeBranding,
+  PlainMonthDayBranding,
+  PlainTimeBranding,
+  PlainYearMonthBranding,
+  ZonedDateTimeBranding,
+} from '../../apiHelpers/branding'
 import * as errorMessages from '../../internal/errorMessages'
 import { isObjectLike } from '../../internal/utils'
 import type { TemporalBrandingAndSlots } from '../intlDateTimeFormat'
@@ -23,28 +33,28 @@ export function getTemporalBrandingAndSlots(
   }
 
   let slots: object | undefined = getInstantSlotsIfPresent(obj)
-  if (slots) return ['Instant', slots]
+  if (slots) return [InstantBranding, slots]
 
   slots = getZonedDateTimeSlotsIfPresent(obj)
-  if (slots) return ['ZonedDateTime', slots]
+  if (slots) return [ZonedDateTimeBranding, slots]
 
   slots = getPlainDateTimeSlotsIfPresent(obj)
-  if (slots) return ['PlainDateTime', slots]
+  if (slots) return [PlainDateTimeBranding, slots]
 
   slots = getPlainDateSlotsIfPresent(obj)
-  if (slots) return ['PlainDate', slots]
+  if (slots) return [PlainDateBranding, slots]
 
   slots = getPlainTimeSlotsIfPresent(obj)
-  if (slots) return ['PlainTime', slots]
+  if (slots) return [PlainTimeBranding, slots]
 
   slots = getPlainYearMonthSlotsIfPresent(obj)
-  if (slots) return ['PlainYearMonth', slots]
+  if (slots) return [PlainYearMonthBranding, slots]
 
   slots = getPlainMonthDaySlotsIfPresent(obj)
-  if (slots) return ['PlainMonthDay', slots]
+  if (slots) return [PlainMonthDayBranding, slots]
 
   slots = getDurationSlotsIfPresent(obj)
-  if (slots) return ['Duration', slots]
+  if (slots) return [DurationBranding, slots]
 }
 
 export function rejectInvalidBag<B>(bag: B): B {

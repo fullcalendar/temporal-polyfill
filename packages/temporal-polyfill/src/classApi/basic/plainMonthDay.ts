@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -152,7 +153,7 @@ export class PlainMonthDay implements MonthDayFields {
   }
 }
 
-defineTemporalClass(PlainMonthDay, 'PlainMonthDay')
+defineTemporalClass(PlainMonthDay, PlainMonthDayBranding)
 export function createPlainMonthDay(slots: PlainMonthDaySlots): PlainMonthDay {
   return initPlainMonthDay(Object.create(PlainMonthDay.prototype), slots)
 }

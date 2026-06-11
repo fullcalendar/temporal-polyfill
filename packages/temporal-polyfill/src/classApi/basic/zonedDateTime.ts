@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -488,7 +489,7 @@ export class ZonedDateTime {
   }
 }
 
-defineTemporalClass(ZonedDateTime, 'ZonedDateTime')
+defineTemporalClass(ZonedDateTime, ZonedDateTimeBranding)
 export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {
   return initZonedDateTime(Object.create(ZonedDateTime.prototype), slots)
 }

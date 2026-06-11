@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainDateBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -344,7 +345,7 @@ export class PlainDate implements DateFields {
   }
 }
 
-defineTemporalClass(PlainDate, 'PlainDate')
+defineTemporalClass(PlainDate, PlainDateBranding)
 export function createPlainDate(slots: PlainDateSlots): PlainDate {
   return initPlainDate(Object.create(PlainDate.prototype), slots)
 }

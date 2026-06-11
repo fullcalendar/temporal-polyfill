@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { InstantBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -167,7 +168,7 @@ export class Instant {
   }
 }
 
-defineTemporalClass(Instant, 'Instant')
+defineTemporalClass(Instant, InstantBranding)
 export function createInstant(slots: EpochNanoFields): Instant {
   return initInstant(Object.create(Instant.prototype), slots)
 }

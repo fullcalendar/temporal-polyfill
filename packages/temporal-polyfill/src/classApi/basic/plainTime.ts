@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -196,7 +197,7 @@ export class PlainTime implements TimeFields {
   }
 }
 
-defineTemporalClass(PlainTime, 'PlainTime')
+defineTemporalClass(PlainTime, PlainTimeBranding)
 export function createPlainTime(slots: TimeFields): PlainTime {
   return initPlainTime(Object.create(PlainTime.prototype), slots)
 }

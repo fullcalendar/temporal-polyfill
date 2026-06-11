@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { DurationBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -235,7 +236,7 @@ export class Duration implements DurationFields {
   }
 }
 
-defineTemporalClass(Duration, 'Duration')
+defineTemporalClass(Duration, DurationBranding)
 export function createDuration(slots: DurationSlots): Duration {
   return initDuration(Object.create(Duration.prototype), slots)
 }

@@ -1,4 +1,12 @@
 import {
+  InstantBranding,
+  PlainDateBranding,
+  PlainDateTimeBranding,
+  PlainMonthDayBranding,
+  PlainTimeBranding,
+  PlainYearMonthBranding,
+} from '../apiHelpers/branding'
+import {
   isoDateTimeToEpochMilli,
   isoDateToEpochMilli,
 } from '../internal/epochMath'
@@ -127,13 +135,13 @@ function createUncachedTemporalDateTimeFormat(
   let options: Intl.DateTimeFormatOptions
 
   switch (branding) {
-    case 'Instant':
+    case InstantBranding:
       options = transformInstantOptions(
         internals.copiedOptions,
         /* allowPartialOverlap = */ allowPartialOverlap,
       )
       break
-    case 'PlainDateTime':
+    case PlainDateTimeBranding:
       options = applyPlainFormatTimeZone(
         transformDateTimeOptions(
           internals.copiedOptions,
@@ -141,7 +149,7 @@ function createUncachedTemporalDateTimeFormat(
         ),
       )
       break
-    case 'PlainDate':
+    case PlainDateBranding:
       options = applyPlainFormatTimeZone(
         transformDateOptions(
           internals.copiedOptions,
@@ -149,7 +157,7 @@ function createUncachedTemporalDateTimeFormat(
         ),
       )
       break
-    case 'PlainTime':
+    case PlainTimeBranding:
       options = applyPlainFormatTimeZone(
         transformTimeOptions(
           internals.copiedOptions,
@@ -157,7 +165,7 @@ function createUncachedTemporalDateTimeFormat(
         ),
       )
       break
-    case 'PlainYearMonth':
+    case PlainYearMonthBranding:
       options = applyPlainFormatTimeZone(
         transformYearMonthOptions(
           internals.copiedOptions,
@@ -165,7 +173,7 @@ function createUncachedTemporalDateTimeFormat(
         ),
       )
       break
-    case 'PlainMonthDay':
+    case PlainMonthDayBranding:
       options = applyPlainFormatTimeZone(
         transformMonthDayOptions(
           internals.copiedOptions,
@@ -189,15 +197,15 @@ function checkTemporalDateTimeFormatCompatible(
   slots: object,
 ): void {
   switch (branding) {
-    case 'Instant':
-    case 'PlainTime':
+    case InstantBranding:
+    case PlainTimeBranding:
       return
-    case 'PlainDateTime':
-    case 'PlainDate':
+    case PlainDateTimeBranding:
+    case PlainDateBranding:
       checkResolvedCalendarCompatible(format, slots as any)
       return
-    case 'PlainYearMonth':
-    case 'PlainMonthDay':
+    case PlainYearMonthBranding:
+    case PlainMonthDayBranding:
       checkResolvedCalendarCompatible(format, slots as any, true)
       return
     default:
@@ -207,15 +215,15 @@ function checkTemporalDateTimeFormatCompatible(
 
 function temporalDateTimeToEpochMilli(branding: string, slots: object): number {
   switch (branding) {
-    case 'Instant':
+    case InstantBranding:
       return getEpochMilli(slots as any)
-    case 'PlainDateTime':
+    case PlainDateTimeBranding:
       return isoDateTimeToEpochMilli(slots as any)
-    case 'PlainDate':
-    case 'PlainYearMonth':
-    case 'PlainMonthDay':
+    case PlainDateBranding:
+    case PlainYearMonthBranding:
+    case PlainMonthDayBranding:
       return isoDateToEpochMilli(slots as any)
-    case 'PlainTime':
+    case PlainTimeBranding:
       return timeFieldsToMilli(slots as any)
     default:
       throw new TypeError(errorMessages.invalidFormatType(branding))
