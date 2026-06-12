@@ -8,7 +8,6 @@ import {
 import {
   createCalendarDerivedGetters,
   createCalendarFieldGetters,
-  createEpochGetters,
   createTimeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
@@ -55,6 +54,7 @@ import {
   ZonedEpochNanoFields,
   createDurationSlots,
   getEpochMilli,
+  getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import {
@@ -131,6 +131,14 @@ export const ZonedDateTime = defineTemporalClass(
 
     get calendarId(): string {
       return getCalendarSlotId(getZonedDateTimeSlots(this).calendar)
+    }
+
+    get epochMilliseconds(): number {
+      return getEpochMilli(getZonedDateTimeSlots(this))
+    }
+
+    get epochNanoseconds(): bigint {
+      return getEpochNano(getZonedDateTimeSlots(this))
     }
 
     get offset(): string {
@@ -349,7 +357,6 @@ export const ZonedDateTime = defineTemporalClass(
   createCalendarFieldGetters(getZonedDateTimeIsoSlots),
   createCalendarDerivedGetters(getZonedDateTimeIsoSlots),
   createTimeGetters(getZonedDateTimeIsoSlots),
-  createEpochGetters(getZonedDateTimeSlots),
 )
 
 export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {

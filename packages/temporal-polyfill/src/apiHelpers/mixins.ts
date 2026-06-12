@@ -13,7 +13,6 @@ import {
 import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarDateFields, TimeFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
-import { EpochNanoFields, getEpochMilli, getEpochNano } from '../internal/slots'
 
 type CalendarDateSlots = CalendarDateFields & { calendar: CalendarImpl }
 
@@ -142,22 +141,5 @@ export const createTimeGetters = <Slots extends TimeFields>(
 
     get nanosecond(): number {
       return getSlots(this).nanosecond
-    }
-  }
-
-/*
-Instant and ZonedDateTime both store epoch nanoseconds. These accessors stay
-shared while each class keeps control over its own slot lookup and branding.
-*/
-export const createEpochGetters = <Slots extends EpochNanoFields>(
-  getSlots: (obj: unknown) => Slots,
-) =>
-  class {
-    get epochMilliseconds(): number {
-      return getEpochMilli(getSlots(this))
-    }
-
-    get epochNanoseconds(): bigint {
-      return getEpochNano(getSlots(this))
     }
   }

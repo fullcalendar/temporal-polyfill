@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { InstantBranding } from '../../apiHelpers/branding'
-import { createEpochGetters } from '../../apiHelpers/mixins'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -27,7 +26,11 @@ import {
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import { roundInstantToUnit } from '../../internal/round'
-import { createEpochNanoSlots, getEpochMilli } from '../../internal/slots'
+import {
+  createEpochNanoSlots,
+  getEpochMilli,
+  getEpochNano,
+} from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -75,6 +78,14 @@ export const ShimInstantRecord = defineTemporalClass(
   class {
     declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
+    get epochMilliseconds() {
+      return getEpochMilli(getShimInstantSlots(this))
+    }
+
+    get epochNanoseconds() {
+      return getEpochNano(getShimInstantSlots(this))
+    }
+
     toJSON() {
       return formatInstantIsoAuto(getShimInstantSlots(this))
     }
@@ -83,7 +94,6 @@ export const ShimInstantRecord = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createEpochGetters(getShimInstantSlots),
 )
 
 export function createShimInstantRecord(

@@ -3,7 +3,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   createCalendarFieldGetters,
-  createEpochGetters,
   createTimeGetters,
 } from '../../apiHelpers/mixins'
 import {
@@ -63,7 +62,11 @@ import {
   roundZonedEpochToInterval,
 } from '../../internal/round'
 import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
-import { createZonedEpochNanoSlots, getEpochMilli } from '../../internal/slots'
+import {
+  createZonedEpochNanoSlots,
+  getEpochMilli,
+  getEpochNano,
+} from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -169,6 +172,14 @@ export const ShimZonedDateTimeRecord = defineTemporalClass(
       return getCalendarSlotId(getShimZonedDateTimeSlots(this).calendar)
     }
 
+    get epochMilliseconds() {
+      return getEpochMilli(getShimZonedDateTimeSlots(this))
+    }
+
+    get epochNanoseconds() {
+      return getEpochNano(getShimZonedDateTimeSlots(this))
+    }
+
     get timeZoneId() {
       return getShimZonedDateTimeSlots(this).timeZone.id
     }
@@ -183,7 +194,6 @@ export const ShimZonedDateTimeRecord = defineTemporalClass(
   },
   createCalendarFieldGetters(getShimZonedDateTimeIsoSlots),
   createTimeGetters(getShimZonedDateTimeIsoSlots),
-  createEpochGetters(getShimZonedDateTimeSlots),
 )
 
 export function createShimZonedDateTimeRecord(
