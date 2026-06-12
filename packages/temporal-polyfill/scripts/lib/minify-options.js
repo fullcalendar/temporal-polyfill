@@ -5,8 +5,10 @@ import { readFile } from 'fs/promises'
 // re-testing the official Rollup Terser plugin. Older experiments with
 // cross-chunk nameCache produced invalid ESM.
 
+/*
+For ESM, essentially just remove comments and reformat whitespace
+*/
 export function buildTerserEsmOptions() {
-  // Essentially just remove comments and reformat whitespace
   return {
     compress: false,
     mangle: false,
@@ -23,61 +25,68 @@ export function buildTerserEsmOptions() {
 }
 
 /*
-  "Mismatching types for formatting" x3
-  "Invalid formatting options" x1 -- should ALWAYS be inlined
+Apply optimizations that would NOT normally happen with a default terser config,
+while still keeping outputted file readable. We need to mangle const names
+because otherwise they are overly-aggresively inlined due to their name length
+being not much longer than their impl length. We must do mangle:true, but undo
+function/class mangling.
 
-  NOTE: we're temporarily using global.js to test minification size
-  Just easier to think about the minification in a single pass
-  See minifyPathMap TEMPORARY
-  In package.json, we TEMPORARILY removed `pnpm run minify && ` from "size" script
+Also, hoist_funs only works well when const names mangled during this pass
+because after being hosted, if a function references a const which is defined
+after, Terser will not inline it.
+
+Sanity checks for output:
+- "Mismatching types for formatting" x3 -- probably should NOT be inlined
+- "Invalid formatting options" x1 -- should ALWAYS be inlined
+- Single-use functions that should ALWAYS be inlined:
+  - totalDuration
+  - roundPlainTime
 */
 export function buildTerserReadableIifeOptions() {
   return {
-    compress: {
-      // HACK
-      // Disabling defaults:true, and thus enabling evaluate:true,
-      // will inline LOTS of string consts (and maybe other consts)
-      // which gzip seems to LOVE (20442). More passes helps too.
-      // However, the side effect is that some things get inlined that shouldn't
-      // Like  "Mismatching types for formatting" x3,
-      // which when used as a const, saves 6 bytes
-      // BUT, even after we undo this hack,
-      // our hoist_funs:true prevents the "Invalid formatting options" inlining,
-      // because the const appears after the use in the function :(
-      //
-      passes: 3,
-      //
-      // // Since REAL minification will run again for .min.js,
-      // // disable destructive defaults like evaluate:true
-      // defaults: false,
+    // keep function/class names for readability
+    // applies to both compress and mangle
+    keep_fnames: true,
+    keep_classnames: true,
 
-      // Enable options that will NOT run again when .min.js is generated,
-      // so all options that are NOT the Terser default
+    compress: {
+      // aggressive
+      passes: 3,
       ecma: 2020,
       builtins_ecma: 2020,
       builtins_pure: true,
       hoist_funs: true, // the main reason we're doing this
       unsafe_arrows: true, // just converts anon function(){} to ()=>
       unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
+
+      // for readability
+      join_vars: false,
     },
-    mangle: true,
-    // format: {
-    //   beautify: true,
-    //   braces: true,
-    //   indent_level: 2,
-    // },
+    mangle: true, // except function/class
+    format: {
+      beautify: true,
+      braces: true,
+      indent_level: 2,
+
+      // FYI, we do NOT preserve_annotations. Results in larger size for later
+      // final minified version, which only does one Terser pass, probably
+      // because it prevents further inlining. Anyway, it's a setting meant for
+      // tree-shaking, which is already complete by the time this readable iife
+      // file is generated.
+    },
   }
 }
 
 /*
-  TEMPORARY: minifies the already-minified output from above
+Simulate what jsdelivr does by simply using Terser defaults,
+which implies mangle: true. Ticket with more info:
+https://github.com/jsdelivr/jsdelivr/issues/18185
 */
 export function buildTerserMinifyOptions() {
   return {
-    // Simular what jsdelivr does by simply using Terser defaults,
-    // which implies mangle: true. Ticket with more info:
-    // https://github.com/jsdelivr/jsdelivr/issues/18185
     // // DEBUGGING:
+    // keep_fnames: true,
+    // keep_classnames: true,
     // format: {
     //   beautify: true,
     //   braces: true,
