@@ -118,17 +118,6 @@ export const createPropDescriptors = (
     propVals,
   )
 
-export const createGetterDescriptors = (getters: {
-  [propName: string]: () => unknown
-}): PropertyDescriptorMap =>
-  mapProps(
-    (getter) => ({
-      get: getter,
-      configurable: true,
-    }),
-    getters,
-  )
-
 export const createStringTagDescriptors = (
   value: string,
 ): {
