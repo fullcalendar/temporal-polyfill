@@ -54,6 +54,8 @@ export function buildTerserReadableIifeOptions() {
       // Enable options that will NOT run again when .min.js is generated,
       // so all options that are NOT the Terser default
       ecma: 2020,
+      builtins_ecma: 2020,
+      builtins_pure: true,
       hoist_funs: true, // the main reason we're doing this
       unsafe_arrows: true, // just converts anon function(){} to ()=>
       unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
