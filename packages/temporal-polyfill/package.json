@@ -31,6 +31,7 @@
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
     "bundle": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js",
     "bundle:dev": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js --dev",
+    "gzip-reuse": "./scripts/gzip-reuse.js",
     "minify": "./scripts/minify.js",
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",

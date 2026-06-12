@@ -16,7 +16,8 @@ import { dts } from 'rollup-plugin-dts'
 import { extensions } from './lib/config.js'
 import { mangler } from './lib/mangler.js'
 import {
-  buildTerserReadableOptions,
+  buildTerserEsmOptions,
+  buildTerserReadableIifeOptions,
   readTemporalReservedWords,
 } from './lib/minify-options.js'
 import { pureTopLevel } from './lib/pure-top-level.js'
@@ -142,7 +143,7 @@ function buildIifeConfigs(pkgDir, pkgJson) {
           file: joinPaths('dist', exportName + extensions.iife),
           sourcemap: false,
           sourcemapExcludeSources: true,
-          plugins: [terser(buildTerserReadableOptions())],
+          plugins: [terser(buildTerserReadableIifeOptions())],
         },
       })
     }
@@ -226,7 +227,7 @@ function buildModuleConfigs({
         //// sourcemapExcludeSources: true,
         plugins: [
           !isDev && pureTopLevel(),
-          !isDev && terser(buildTerserReadableOptions()),
+          !isDev && terser(buildTerserEsmOptions()),
           !isDev && mangler({ reserved: temporalReservedWords }),
         ],
       },

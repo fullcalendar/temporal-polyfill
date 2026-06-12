@@ -5,22 +5,57 @@ import { readFile } from 'fs/promises'
 // re-testing the official Rollup Terser plugin. Older experiments with
 // cross-chunk nameCache produced invalid ESM.
 
-export function buildTerserReadableOptions() {
+export function buildTerserEsmOptions() {
+  // Essentially just remove comments and reformat whitespace
+  return {
+    compress: false,
+    mangle: false,
+    format: {
+      beautify: true,
+      braces: true,
+      indent_level: 2,
+
+      // Preserve PURE annotations we injected via pure-top-level plugin,
+      // for better tree-shaking
+      preserve_annotations: true,
+    },
+  }
+}
+
+/*
+  "Mismatching types for formatting" x3
+  "Invalid formatting options" x1 -- should ALWAYS be inlined
+*/
+
+export function buildTerserReadableIifeOptions() {
   return {
     compress: {
+      // HACK
+      // Disabling defaults:true, and thus enabling evaluate:true,
+      // will inline LOTS of string consts (and maybe other consts)
+      // which gzip seems to LOVE (20442). More passes helps too.
+      // However, the side effect is that some things get inlined that shouldn't
+      // Like  "Mismatching types for formatting" x3,
+      // which when used as a const, saves 6 bytes
+      //
+      passes: 3,
+      //
+      // // Since REAL minification will run again for .min.js,
+      // // disable destructive defaults like evaluate:true
+      // defaults: false,
+
+      // Enable options that will NOT run again when .min.js is generated,
+      // so all options that are NOT the Terser default
       ecma: 2020,
-      passes: 3, // enough to remove dead object assignment, get lower size
-      keep_fargs: true, // keep explicit =undefined params that define method .length
+      hoist_funs: true, // the main reason we're doing this
       unsafe_arrows: true, // just converts anon function(){} to ()=>
       unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
-      hoist_funs: true,
     },
     mangle: false,
     format: {
       beautify: true,
       braces: true,
       indent_level: 2,
-      preserve_annotations: true, // like PURE annotations
     },
   }
 }
@@ -30,6 +65,12 @@ export function buildTerserMinifyOptions() {
     // Simular what jsdelivr does by simply using Terser defaults,
     // which implies mangle: true. Ticket with more info:
     // https://github.com/jsdelivr/jsdelivr/issues/18185
+    // // DEBUGGING:
+    // format: {
+    //   beautify: true,
+    //   braces: true,
+    //   indent_level: 2,
+    // },
   }
 }
 
