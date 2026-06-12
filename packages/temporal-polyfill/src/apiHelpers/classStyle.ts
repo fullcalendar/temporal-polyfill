@@ -16,6 +16,18 @@ export function defineTemporalClass<C extends { prototype: object }>(
   return cls
 }
 
+/*
+Should be called with a class so method descriptors are already
+non-enumerable and non-constructible.
+*/
+export function mixin(destPrototype: object, sourceClass: any): void {
+  const descriptors = Object.getOwnPropertyDescriptors(
+    sourceClass.prototype,
+  ) as { constructor?: PropertyDescriptor }
+  delete descriptors.constructor
+  Object.defineProperties(destPrototype, descriptors)
+}
+
 interface JsonDebuggable {
   toJSON(): string
 }

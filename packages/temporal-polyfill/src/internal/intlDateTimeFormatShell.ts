@@ -1,3 +1,4 @@
+import { mixin } from '../apiHelpers/classStyle'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import { createStringTagDescriptors, identity, pluckProps } from './utils'
@@ -84,6 +85,12 @@ export function createDateTimeFormatShell<R>(
       })
     }
 
+    formatToParts(this: object, record?: R): Intl.DateTimeFormatPart[] {
+      const { argsProvider } = getInternals(this)
+      const [format, ...rest] = argsProvider.getArgsForSingle(record)
+      return format.formatToParts(...rest)
+    }
+
     resolvedOptions(): Intl.ResolvedDateTimeFormatOptions {
       return getInternals(this).baseFormat.resolvedOptions()
     }
@@ -92,50 +99,33 @@ export function createDateTimeFormatShell<R>(
   const { prototype } = ShimDateTimeFormat
 
   // Conditional methods follow the host Intl surface area. Older runtimes that
-  // lack formatToParts/formatRange/formatRangeToParts do not get shim methods
-  // for features their native DateTimeFormat never exposed.
-  const conditionalMethods = {
-    formatToParts(this: object, record?: R): Intl.DateTimeFormatPart[] {
-      const { argsProvider } = getInternals(this)
-      const [format, ...rest] = argsProvider.getArgsForSingle(record)
-      return format.formatToParts(...rest)
-    },
+  // lack formatRange/formatRangeToParts do not get shim methods for features
+  // their native DateTimeFormat never exposed.
+  if (
+    (RawDateTimeFormat.prototype as Partial<Intl.DateTimeFormat>).formatRange
+  ) {
+    mixin(
+      prototype,
+      class {
+        formatRange(this: object, record0: R, record1: R): string {
+          const { argsProvider } = getInternals(this)
+          const [format, epochMilli0, epochMilli1] =
+            argsProvider.getArgsForRange(record0, record1)
+          return format.formatRange(epochMilli0, epochMilli1)
+        }
 
-    formatRange(this: object, record0: R, record1: R): string {
-      const { argsProvider } = getInternals(this)
-      const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
-        record0,
-        record1,
-      )
-      return format.formatRange(epochMilli0, epochMilli1)
-    },
-
-    formatRangeToParts(
-      this: object,
-      record0: R,
-      record1: R,
-    ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
-      const { argsProvider } = getInternals(this)
-      const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
-        record0,
-        record1,
-      )
-      return format.formatRangeToParts(epochMilli0, epochMilli1)
-    },
-  }
-
-  for (const methodName in conditionalMethods) {
-    const descriptor = Object.getOwnPropertyDescriptor(
-      RawDateTimeFormat.prototype,
-      methodName,
+        formatRangeToParts(
+          this: object,
+          record0: R,
+          record1: R,
+        ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
+          const { argsProvider } = getInternals(this)
+          const [format, epochMilli0, epochMilli1] =
+            argsProvider.getArgsForRange(record0, record1)
+          return format.formatRangeToParts(epochMilli0, epochMilli1)
+        }
+      },
     )
-    if (descriptor) {
-      Object.defineProperty(prototype, methodName, {
-        ...descriptor,
-        value:
-          conditionalMethods[methodName as keyof typeof conditionalMethods],
-      })
-    }
   }
 
   // Native Intl.DateTimeFormat is callable without `new`, but an ES class is
