@@ -1,5 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 import { DurationBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
@@ -34,11 +39,6 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 
 type ShimDurationSlots = ReturnType<typeof constructDurationSlots>
 

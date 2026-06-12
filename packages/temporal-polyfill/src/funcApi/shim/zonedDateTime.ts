@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
+import {
   createCalendarFieldGetters,
   createTimeGetters,
 } from '../../apiHelpers/mixins'
@@ -132,11 +137,6 @@ import {
   createShimPlainTimeRecord,
   getShimPlainTimeSlots,
 } from './plainTime'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
   computeDayCeil,

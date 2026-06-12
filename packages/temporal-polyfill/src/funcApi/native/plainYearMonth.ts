@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainYearMonthBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
@@ -25,11 +30,6 @@ import {
   getNativeDuration,
 } from './duration'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>
 

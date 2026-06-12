@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { InstantBranding } from '../../apiHelpers/branding'
 import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
+import {
   bigNanoInHour,
   bigNanoInMicro,
   bigNanoInMilli,
@@ -54,11 +59,6 @@ import {
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { bigNanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import {
   ShimZonedDateTimeRecord,

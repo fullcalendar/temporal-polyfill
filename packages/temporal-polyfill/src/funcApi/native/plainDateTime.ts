@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainDateTimeBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -31,11 +36,6 @@ import {
   createNativePlainTimeRecord,
   getNativePlainTime,
 } from './plainTime'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
   NativeZonedDateTimeRecord,

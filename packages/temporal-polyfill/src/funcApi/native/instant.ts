@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { InstantBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -15,11 +20,6 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
   NativeZonedDateTimeRecord,

@@ -1,6 +1,11 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainTimeBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { createTimeGetters } from '../../apiHelpers/mixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
@@ -43,11 +48,6 @@ import {
   getShimDurationSlots,
 } from './duration'
 import { reversedMove } from './moveUtils'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { nanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 

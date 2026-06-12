@@ -2,6 +2,11 @@ import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
+import {
   computeCalendarDateFields,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
@@ -61,11 +66,6 @@ import {
 } from './duration'
 import { reversedMove } from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
   computeYearCeil,

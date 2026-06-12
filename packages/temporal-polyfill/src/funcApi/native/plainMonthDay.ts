@@ -1,5 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 import { PlainMonthDayBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
@@ -16,11 +21,6 @@ import {
 } from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
 

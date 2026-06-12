@@ -1,6 +1,11 @@
 import type { Temporal } from 'temporal-spec'
 import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
+import {
   computeCalendarDateFields,
   computeCalendarMonthCode,
 } from '../../internal/calendarDerived'
@@ -36,11 +41,6 @@ import {
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>

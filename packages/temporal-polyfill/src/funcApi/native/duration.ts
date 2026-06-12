@@ -1,5 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 import { DurationBranding } from '../../apiHelpers/branding'
+import {
+  attachDebugString,
+  defineTemporalClass,
+  forbiddenValueOf,
+} from '../../apiHelpers/classStyle'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
@@ -18,11 +23,6 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
-import {
-  attachDebugString,
-  defineTemporalClass,
-  forbiddenValueOf,
-} from './recordUtils'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
