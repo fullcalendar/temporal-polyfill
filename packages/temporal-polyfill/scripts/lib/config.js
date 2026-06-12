@@ -10,7 +10,8 @@ export const extensions = {
   dts: '.d.ts',
 }
 
+// TEMPORARY
 export const minifyPathMap = {
-  'dist/global.js': 'dist/.global.min.js',
-  'dist/full/global.js': 'dist/full/.global.min.js',
+  'dist/global.js': 'dist/global.js', // 'dist/.global.min.js',
+  'dist/full/global.js': 'dist/full/global.js', // 'dist/full/.global.min.js',
 }

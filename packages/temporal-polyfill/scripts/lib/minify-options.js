@@ -25,8 +25,12 @@ export function buildTerserEsmOptions() {
 /*
   "Mismatching types for formatting" x3
   "Invalid formatting options" x1 -- should ALWAYS be inlined
-*/
 
+  NOTE: we're temporarily using global.js to test minification size
+  Just easier to think about the minification in a single pass
+  See minifyPathMap TEMPORARY
+  In package.json, we TEMPORARILY removed `pnpm run minify && ` from "size" script
+*/
 export function buildTerserReadableIifeOptions() {
   return {
     compress: {
@@ -37,6 +41,9 @@ export function buildTerserReadableIifeOptions() {
       // However, the side effect is that some things get inlined that shouldn't
       // Like  "Mismatching types for formatting" x3,
       // which when used as a const, saves 6 bytes
+      // BUT, even after we undo this hack,
+      // our hoist_funs:true prevents the "Invalid formatting options" inlining,
+      // because the const appears after the use in the function :(
       //
       passes: 3,
       //
@@ -51,15 +58,18 @@ export function buildTerserReadableIifeOptions() {
       unsafe_arrows: true, // just converts anon function(){} to ()=>
       unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
     },
-    mangle: false,
-    format: {
-      beautify: true,
-      braces: true,
-      indent_level: 2,
-    },
+    mangle: true,
+    // format: {
+    //   beautify: true,
+    //   braces: true,
+    //   indent_level: 2,
+    // },
   }
 }
 
+/*
+  TEMPORARY: minifies the already-minified output from above
+*/
 export function buildTerserMinifyOptions() {
   return {
     // Simular what jsdelivr does by simply using Terser defaults,
