@@ -3,8 +3,8 @@ import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { ForbiddenValueOfMixin } from '../../apiHelpers/mixins'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonth,
@@ -255,8 +255,11 @@ export const PlainYearMonth = defineTemporalClass(
     toJSON(): string {
       return formatPlainYearMonthIso(getPlainYearMonthSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createPlainYearMonth(

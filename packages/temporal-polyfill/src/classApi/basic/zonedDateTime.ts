@@ -3,9 +3,9 @@ import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import {
-  ForbiddenValueOfMixin,
   createCalendarDerivedGetters,
   createCalendarFieldGetters,
   createEpochGetters,
@@ -341,8 +341,11 @@ export const ZonedDateTime = defineTemporalClass(
 
       return null
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createCalendarFieldGetters(getZonedDateTimeIsoSlots),
   createCalendarDerivedGetters(getZonedDateTimeIsoSlots),
   createTimeGetters(getZonedDateTimeIsoSlots),

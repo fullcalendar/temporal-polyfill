@@ -35,9 +35,9 @@ import {
   setDurationSlots,
 } from '../temporalRecords'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 
 type ShimDurationSlots = ReturnType<typeof constructDurationSlots>
@@ -95,8 +95,11 @@ export const ShimDurationRecord = defineTemporalClass(
     toJSON() {
       return formatDurationIsoAuto(getShimDurationSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createShimDurationRecord(

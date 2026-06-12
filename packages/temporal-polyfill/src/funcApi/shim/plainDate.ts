@@ -105,9 +105,9 @@ import {
   createShimPlainYearMonthRecord,
 } from './plainYearMonth'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -148,8 +148,11 @@ export const ShimPlainDateRecord = defineTemporalClass(
     toJSON() {
       return formatDateIsoAuto(getShimPlainDateSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createCalendarFieldGetters(getShimPlainDateSlots),
 )
 

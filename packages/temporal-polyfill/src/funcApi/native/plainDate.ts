@@ -40,9 +40,9 @@ import {
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import {
   NativeZonedDateTimeRecord,
@@ -90,8 +90,11 @@ export const NativePlainDateRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainDate(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainDateRecord(

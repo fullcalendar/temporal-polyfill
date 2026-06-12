@@ -3,9 +3,9 @@ import { PlainDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import {
-  ForbiddenValueOfMixin,
   createCalendarDerivedGetters,
   createCalendarFieldGetters,
   createTimeGetters,
@@ -297,8 +297,11 @@ export const PlainDateTime = defineTemporalClass(
     toJSON(): string {
       return formatPlainDateTimeIso(getPlainDateTimeSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createCalendarFieldGetters(getPlainDateTimeSlots),
   createCalendarDerivedGetters(getPlainDateTimeSlots),
   createTimeGetters(getPlainDateTimeSlots),

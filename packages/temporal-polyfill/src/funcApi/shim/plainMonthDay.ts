@@ -37,9 +37,9 @@ import {
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
@@ -76,8 +76,11 @@ export const ShimPlainMonthDayRecord = defineTemporalClass(
     toJSON() {
       return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createShimPlainMonthDayRecord(

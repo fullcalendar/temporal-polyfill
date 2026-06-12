@@ -1,6 +1,6 @@
 export {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-export { ForbiddenValueOfMixin } from '../../apiHelpers/mixins'

@@ -52,9 +52,9 @@ import {
   getShimDurationSlots,
 } from './duration'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { bigNanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import {
@@ -78,8 +78,11 @@ export const ShimInstantRecord = defineTemporalClass(
     toJSON() {
       return formatInstantIsoAuto(getShimInstantSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createEpochGetters(getShimInstantSlots),
 )
 

@@ -17,9 +17,9 @@ import {
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
@@ -50,8 +50,11 @@ export const NativePlainMonthDayRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainMonthDay(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainMonthDayRecord(

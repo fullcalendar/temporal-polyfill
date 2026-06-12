@@ -36,9 +36,9 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 
@@ -120,8 +120,11 @@ export const NativeZonedDateTimeRecord = defineTemporalClass(
     toJSON() {
       return getNativeZonedDateTime(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativeZonedDateTimeRecord(

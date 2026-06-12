@@ -11,18 +11,11 @@ import {
   computeCalendarYearOfWeek,
 } from '../internal/calendarDerived'
 import { CalendarImpl } from '../internal/calendarImpl'
-import * as errorMessages from '../internal/errorMessages'
 import { CalendarDateFields, TimeFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 import { EpochNanoFields, getEpochMilli, getEpochNano } from '../internal/slots'
 
 type CalendarDateSlots = CalendarDateFields & { calendar: CalendarImpl }
-
-export class ForbiddenValueOfMixin {
-  valueOf(): never {
-    throw new TypeError(errorMessages.forbiddenValueOf)
-  }
-}
 
 /*
 These accessors are the stored calendar date fields. The getter body still

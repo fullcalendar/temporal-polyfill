@@ -19,9 +19,9 @@ import {
   setDurationSlots,
 } from '../temporalRecords'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
@@ -75,8 +75,11 @@ export const NativeDurationRecord = defineTemporalClass(
     toJSON() {
       return getNativeDuration(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativeDurationRecord(

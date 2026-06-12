@@ -3,11 +3,9 @@ import { PlainTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import {
-  ForbiddenValueOfMixin,
-  createTimeGetters,
-} from '../../apiHelpers/mixins'
+import { createTimeGetters } from '../../apiHelpers/mixins'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
@@ -177,8 +175,11 @@ export const PlainTime = defineTemporalClass(
     toJSON(): string {
       return formatPlainTimeIso(getPlainTimeSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createTimeGetters(getPlainTimeSlots),
 )
 

@@ -16,9 +16,9 @@ import {
   getNativeDuration,
 } from './duration'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
@@ -47,8 +47,11 @@ export const NativeInstantRecord = defineTemporalClass(
     toJSON() {
       return getNativeInstant(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativeInstantRecord(

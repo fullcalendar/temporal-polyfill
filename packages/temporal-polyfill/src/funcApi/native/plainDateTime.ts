@@ -32,9 +32,9 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
@@ -110,8 +110,11 @@ export const NativePlainDateTimeRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainDateTime(this).toString()
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainDateTimeRecord(

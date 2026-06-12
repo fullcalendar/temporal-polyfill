@@ -62,9 +62,9 @@ import {
 import { reversedMove } from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -123,8 +123,11 @@ export const ShimPlainYearMonthRecord = defineTemporalClass(
     toJSON() {
       return formatYearMonthIsoAuto(getShimPlainYearMonthSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
 )
 
 export function createShimPlainYearMonthRecord(

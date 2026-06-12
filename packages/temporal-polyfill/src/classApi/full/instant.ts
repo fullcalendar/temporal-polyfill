@@ -3,11 +3,9 @@ import { InstantBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import {
-  ForbiddenValueOfMixin,
-  createEpochGetters,
-} from '../../apiHelpers/mixins'
+import { createEpochGetters } from '../../apiHelpers/mixins'
 import { bigNanoInMilli } from '../../internal/bigNano'
 import { requireNumberIsInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
@@ -159,8 +157,11 @@ export const Instant = defineTemporalClass(
     toJSON(): string {
       return formatInstantIso(refineTimeZoneArg, getInstantSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createEpochGetters(getInstantSlots),
 )
 

@@ -44,9 +44,9 @@ import {
 } from './duration'
 import { reversedMove } from './moveUtils'
 import {
-  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
+  forbiddenValueOf,
 } from './recordUtils'
 import { nanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
@@ -67,8 +67,11 @@ export const ShimPlainTimeRecord = defineTemporalClass(
     toJSON() {
       return formatTimeIsoAuto(getShimPlainTimeSlots(this))
     }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
   },
-  ForbiddenValueOfMixin,
   createTimeGetters(getShimPlainTimeSlots),
 )
 

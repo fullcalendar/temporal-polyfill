@@ -72,3 +72,7 @@ export const attachDebugString: (instance: JsonDebuggable) => void =
 export function invalidRecordType(): never {
   throw new TypeError(errorMessages.invalidCallingContext)
 }
+
+export function forbiddenValueOf(): never {
+  throw new TypeError(errorMessages.forbiddenValueOf)
+}
