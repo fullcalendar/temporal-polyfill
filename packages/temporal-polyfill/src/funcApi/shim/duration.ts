@@ -35,21 +35,21 @@ import {
   setDurationSlots,
 } from '../temporalRecords'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 
-type DurationRecord = RecordTypes.DurationRecord
 type ShimDurationSlots = ReturnType<typeof constructDurationSlots>
 
 export const getShimDurationSlots: (record: unknown) => ShimDurationSlots =
   getDurationSlots
 
-export type ShimDurationRecord = InstanceType<typeof ShimDurationRecord>
+export type ShimDurationRecord = InstanceType<typeof ShimDurationRecord> &
+  RecordTypes.DurationRecord
 export const ShimDurationRecord = defineTemporalClass(
   DurationBranding,
-  class implements DurationFields, DurationRecord {
+  class implements DurationFields {
     declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
     get years() {
@@ -95,11 +95,8 @@ export const ShimDurationRecord = defineTemporalClass(
     toJSON() {
       return formatDurationIsoAuto(getShimDurationSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createShimDurationRecord(

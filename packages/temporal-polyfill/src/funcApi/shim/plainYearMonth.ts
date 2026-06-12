@@ -62,9 +62,9 @@ import {
 import { reversedMove } from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -75,7 +75,6 @@ import {
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
-type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
 type Format = DateTimeFormatLike<ShimPlainYearMonthRecord>
 type ShimPlainYearMonthSlots = ReturnType<typeof constructYearMonthSlots>
 
@@ -85,10 +84,11 @@ export const getShimPlainYearMonthSlots: (
 
 export type ShimPlainYearMonthRecord = InstanceType<
   typeof ShimPlainYearMonthRecord
->
+> &
+  RecordTypes.PlainYearMonthRecord
 export const ShimPlainYearMonthRecord = defineTemporalClass(
   PlainYearMonthBranding,
-  class implements YearMonthFields, PlainYearMonthRecord {
+  class implements YearMonthFields {
     declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
 
     get calendarId() {
@@ -123,11 +123,8 @@ export const ShimPlainYearMonthRecord = defineTemporalClass(
     toJSON() {
       return formatYearMonthIsoAuto(getShimPlainYearMonthSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createShimPlainYearMonthRecord(

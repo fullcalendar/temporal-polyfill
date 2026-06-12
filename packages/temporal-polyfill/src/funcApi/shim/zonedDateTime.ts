@@ -2,13 +2,15 @@ import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
-  computeCalendarDateFields,
+  createCalendarFieldGetters,
+  createEpochGetters,
+  createTimeGetters,
+} from '../../apiHelpers/mixins'
+import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
-  computeCalendarEraFields,
   computeCalendarInLeapYear,
-  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
@@ -61,11 +63,7 @@ import {
   roundZonedEpochToInterval,
 } from '../../internal/round'
 import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
-import {
-  createZonedEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
-} from '../../internal/slots'
+import { createZonedEpochNanoSlots, getEpochMilli } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -132,9 +130,9 @@ import {
   getShimPlainTimeSlots,
 } from './plainTime'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -151,7 +149,6 @@ import {
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
-type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 type ShimZonedDateTimeFields = ZonedDateTimeFields<CalendarRecord>
 type ShimZonedDateTimeSlots = ReturnType<typeof constructZonedEpochNanoSlots>
 
@@ -161,90 +158,29 @@ export const getShimZonedDateTimeSlots: (
 
 export type ShimZonedDateTimeRecord = InstanceType<
   typeof ShimZonedDateTimeRecord
->
+> &
+  RecordTypes.ZonedDateTimeRecord
 export const ShimZonedDateTimeRecord = defineTemporalClass(
   ZonedDateTimeBranding,
-  class implements ZonedDateTimeRecord {
+  class {
     declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
     get calendarId() {
       return getCalendarSlotId(getShimZonedDateTimeSlots(this).calendar)
     }
 
-    get epochMilliseconds() {
-      return getEpochMilli(getShimZonedDateTimeSlots(this))
-    }
-
-    get epochNanoseconds() {
-      return getEpochNano(getShimZonedDateTimeSlots(this))
-    }
-
     get timeZoneId() {
       return getShimZonedDateTimeSlots(this).timeZone.id
-    }
-
-    get era() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
-
-    get eraYear() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
-
-    get year() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
-
-    get month() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day() {
-      const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this))
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-
-    get hour() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).hour
-    }
-
-    get minute() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).minute
-    }
-
-    get second() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).second
-    }
-
-    get millisecond() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).millisecond
-    }
-
-    get microsecond() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).microsecond
-    }
-
-    get nanosecond() {
-      return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(this)).nanosecond
     }
 
     toJSON() {
       return formatZonedDateTimeIsoAuto(getShimZonedDateTimeSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createCalendarFieldGetters(getShimZonedDateTimeIsoSlots),
+  createTimeGetters(getShimZonedDateTimeIsoSlots),
+  createEpochGetters(getShimZonedDateTimeSlots),
 )
 
 export function createShimZonedDateTimeRecord(
@@ -254,6 +190,10 @@ export function createShimZonedDateTimeRecord(
   setZonedDateTimeSlots(instance, slots)
   attachDebugString(instance)
   return instance
+}
+
+function getShimZonedDateTimeIsoSlots(record: unknown) {
+  return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
 }
 
 export function create(

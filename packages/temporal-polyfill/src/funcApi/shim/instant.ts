@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { InstantBranding } from '../../apiHelpers/branding'
+import { createEpochGetters } from '../../apiHelpers/mixins'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -26,11 +27,7 @@ import {
 import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import { roundInstantToUnit } from '../../internal/round'
-import {
-  createEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
-} from '../../internal/slots'
+import { createEpochNanoSlots, getEpochMilli } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -55,9 +52,9 @@ import {
   getShimDurationSlots,
 } from './duration'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { bigNanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import {
@@ -65,35 +62,25 @@ import {
   createShimZonedDateTimeRecord,
 } from './zonedDateTime'
 
-type InstantRecord = RecordTypes.InstantRecord
 type Format = DateTimeFormatLike<ShimInstantRecord>
 type ShimInstantSlots = ReturnType<typeof constructEpochNanoSlots>
 
 export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
   getInstantSlots
 
-export type ShimInstantRecord = InstanceType<typeof ShimInstantRecord>
+export type ShimInstantRecord = InstanceType<typeof ShimInstantRecord> &
+  RecordTypes.InstantRecord
 export const ShimInstantRecord = defineTemporalClass(
   InstantBranding,
-  class implements InstantRecord {
+  class {
     declare readonly [RecordTypes.InstantRecordBrand]: undefined
-
-    get epochMilliseconds() {
-      return getEpochMilli(getShimInstantSlots(this))
-    }
-
-    get epochNanoseconds() {
-      return getEpochNano(getShimInstantSlots(this))
-    }
 
     toJSON() {
       return formatInstantIsoAuto(getShimInstantSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createEpochGetters(getShimInstantSlots),
 )
 
 export function createShimInstantRecord(

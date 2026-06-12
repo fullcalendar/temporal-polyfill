@@ -16,24 +16,22 @@ import {
   getNativeDuration,
 } from './duration'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 
-type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<NativePlainTimeRecord>
 
 export const getNativePlainTime: (record: unknown) => Temporal.PlainTime =
   getPlainTimeSlots
 
-export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord>
+export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord> &
+  RecordTypes.PlainTimeRecord
 export const NativePlainTimeRecord = defineTemporalClass(
   PlainTimeBranding,
-  class implements TimeFields, PlainTimeRecord {
-    declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
-
+  class implements TimeFields {
     get hour() {
       return getNativePlainTime(this).hour
     }
@@ -61,11 +59,8 @@ export const NativePlainTimeRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainTime(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainTimeRecord(

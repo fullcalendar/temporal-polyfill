@@ -3,8 +3,11 @@ import { PlainTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import {
+  ForbiddenValueOfMixin,
+  createTimeGetters,
+} from '../../apiHelpers/mixins'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
@@ -41,7 +44,7 @@ const plainTimeSlotsMap = new WeakMap<object, TimeFields>()
 export type PlainTime = InstanceType<typeof PlainTime>
 export const PlainTime = defineTemporalClass(
   PlainTimeBranding,
-  class implements TimeFields {
+  class {
     constructor(
       hour = 0,
       minute = 0,
@@ -74,36 +77,16 @@ export const PlainTime = defineTemporalClass(
       return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
     }
 
-    get hour(): number {
-      return getPlainTimeSlots(this).hour
-    }
-
-    get minute(): number {
-      return getPlainTimeSlots(this).minute
-    }
-
-    get second(): number {
-      return getPlainTimeSlots(this).second
-    }
-
-    get millisecond(): number {
-      return getPlainTimeSlots(this).millisecond
-    }
-
-    get microsecond(): number {
-      return getPlainTimeSlots(this).microsecond
-    }
-
-    get nanosecond(): number {
-      return getPlainTimeSlots(this).nanosecond
-    }
-
     with(
       mod: Partial<TimeFields>,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainTime {
       return createPlainTime(
-        mergePlainTimeFields(this, rejectInvalidBag(mod), options),
+        mergePlainTimeFields(
+          this as unknown as PlainTime,
+          rejectInvalidBag(mod),
+          options,
+        ),
       )
     }
 
@@ -194,11 +177,9 @@ export const PlainTime = defineTemporalClass(
     toJSON(): string {
       return formatPlainTimeIso(getPlainTimeSlots(this))
     }
-
-    valueOf(): never {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createTimeGetters(getPlainTimeSlots),
 )
 
 export function createPlainTime(slots: TimeFields): PlainTime {
@@ -262,8 +243,8 @@ export function optionalToPlainTimeFields(
   return timeArg === undefined ? undefined : toPlainTimeSlots(timeArg)
 }
 
-function initPlainTime(instance: PlainTime, slots: TimeFields): PlainTime {
+function initPlainTime(instance: object, slots: TimeFields): PlainTime {
   plainTimeSlotsMap.set(instance, slots)
-  attachDebugString(instance)
-  return instance
+  attachDebugString(instance as PlainTime)
+  return instance as PlainTime
 }

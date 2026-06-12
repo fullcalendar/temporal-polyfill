@@ -37,13 +37,12 @@ import {
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
-type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
 type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>
 type ShimPlainMonthDaySlots = ReturnType<typeof constructMonthDaySlots>
 
@@ -53,12 +52,11 @@ export const getShimPlainMonthDaySlots: (
 
 export type ShimPlainMonthDayRecord = InstanceType<
   typeof ShimPlainMonthDayRecord
->
+> &
+  RecordTypes.PlainMonthDayRecord
 export const ShimPlainMonthDayRecord = defineTemporalClass(
   PlainMonthDayBranding,
-  class
-    implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
-  {
+  class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
     declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
     get calendarId() {
@@ -78,11 +76,8 @@ export const ShimPlainMonthDayRecord = defineTemporalClass(
     toJSON() {
       return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createShimPlainMonthDayRecord(

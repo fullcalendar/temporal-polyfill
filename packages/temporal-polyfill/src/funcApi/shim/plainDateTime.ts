@@ -2,13 +2,14 @@ import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainDateTimeBranding } from '../../apiHelpers/branding'
 import {
-  computeCalendarDateFields,
+  createCalendarFieldGetters,
+  createTimeGetters,
+} from '../../apiHelpers/mixins'
+import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
-  computeCalendarEraFields,
   computeCalendarInLeapYear,
-  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
@@ -115,9 +116,9 @@ import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import type { ShimPlainTimeRecord } from './plainTime'
 import { createShimPlainTimeRecord } from './plainTime'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -139,7 +140,6 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<ShimPlainDateTimeRecord>
-type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
 type ShimPlainDateTimeSlots = ReturnType<typeof constructDateTimeSlots>
 
 export const getShimPlainDateTimeSlots: (
@@ -148,78 +148,24 @@ export const getShimPlainDateTimeSlots: (
 
 export type ShimPlainDateTimeRecord = InstanceType<
   typeof ShimPlainDateTimeRecord
->
+> &
+  RecordTypes.PlainDateTimeRecord
 export const ShimPlainDateTimeRecord = defineTemporalClass(
   PlainDateTimeBranding,
-  class implements DateTimeFields, PlainDateTimeRecord {
+  class {
     declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
 
     get calendarId() {
       return getCalendarSlotId(getShimPlainDateTimeSlots(this).calendar)
     }
 
-    get era() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
-
-    get eraYear() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
-
-    get year() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
-
-    get month() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day() {
-      const slots = getShimPlainDateTimeSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-
-    get hour() {
-      return getShimPlainDateTimeSlots(this).hour
-    }
-
-    get minute() {
-      return getShimPlainDateTimeSlots(this).minute
-    }
-
-    get second() {
-      return getShimPlainDateTimeSlots(this).second
-    }
-
-    get millisecond() {
-      return getShimPlainDateTimeSlots(this).millisecond
-    }
-
-    get microsecond() {
-      return getShimPlainDateTimeSlots(this).microsecond
-    }
-
-    get nanosecond() {
-      return getShimPlainDateTimeSlots(this).nanosecond
-    }
-
     toJSON() {
       return formatDateTimeIsoAuto(getShimPlainDateTimeSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createCalendarFieldGetters(getShimPlainDateTimeSlots),
+  createTimeGetters(getShimPlainDateTimeSlots),
 )
 
 export function createShimPlainDateTimeRecord(

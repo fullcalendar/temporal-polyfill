@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainTimeBranding } from '../../apiHelpers/branding'
+import { createTimeGetters } from '../../apiHelpers/mixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -43,58 +44,32 @@ import {
 } from './duration'
 import { reversedMove } from './moveUtils'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { nanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
-type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<ShimPlainTimeRecord>
 type ShimPlainTimeSlots = ReturnType<typeof constructTimeSlots>
 
 export const getShimPlainTimeSlots: (record: unknown) => ShimPlainTimeSlots =
   getPlainTimeSlots
 
-export type ShimPlainTimeRecord = InstanceType<typeof ShimPlainTimeRecord>
+export type ShimPlainTimeRecord = InstanceType<typeof ShimPlainTimeRecord> &
+  RecordTypes.PlainTimeRecord
 export const ShimPlainTimeRecord = defineTemporalClass(
   PlainTimeBranding,
-  class implements TimeFields, PlainTimeRecord {
+  class {
     declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
-
-    get hour() {
-      return getShimPlainTimeSlots(this).hour
-    }
-
-    get minute() {
-      return getShimPlainTimeSlots(this).minute
-    }
-
-    get second() {
-      return getShimPlainTimeSlots(this).second
-    }
-
-    get millisecond() {
-      return getShimPlainTimeSlots(this).millisecond
-    }
-
-    get microsecond() {
-      return getShimPlainTimeSlots(this).microsecond
-    }
-
-    get nanosecond() {
-      return getShimPlainTimeSlots(this).nanosecond
-    }
 
     toJSON() {
       return formatTimeIsoAuto(getShimPlainTimeSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createTimeGetters(getShimPlainTimeSlots),
 )
 
 export function createShimPlainTimeRecord(

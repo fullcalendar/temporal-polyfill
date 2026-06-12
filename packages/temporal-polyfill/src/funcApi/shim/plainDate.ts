@@ -1,12 +1,12 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { PlainDateBranding } from '../../apiHelpers/branding'
+import { createCalendarFieldGetters } from '../../apiHelpers/mixins'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
-  computeCalendarEraFields,
   computeCalendarInLeapYear,
   computeCalendarMonthCode,
   computeCalendarMonthsInYear,
@@ -105,9 +105,9 @@ import {
   createShimPlainYearMonthRecord,
 } from './plainYearMonth'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { refineRoundToOptions } from './roundUtils'
 import {
@@ -128,61 +128,29 @@ import {
   createShimZonedDateTimeRecord,
 } from './zonedDateTime'
 
-type PlainDateRecord = RecordTypes.PlainDateRecord
 type Format = DateTimeFormatLike<ShimPlainDateRecord>
 type ShimPlainDateSlots = ReturnType<typeof constructDateSlots>
 
 export const getShimPlainDateSlots: (record: unknown) => ShimPlainDateSlots =
   getPlainDateSlots
 
-export type ShimPlainDateRecord = InstanceType<typeof ShimPlainDateRecord>
+export type ShimPlainDateRecord = InstanceType<typeof ShimPlainDateRecord> &
+  RecordTypes.PlainDateRecord
 export const ShimPlainDateRecord = defineTemporalClass(
   PlainDateBranding,
-  class implements DateFields, PlainDateRecord {
+  class {
     declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
 
     get calendarId() {
       return getCalendarSlotId(getShimPlainDateSlots(this).calendar)
     }
 
-    get era() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
-
-    get eraYear() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
-
-    get year() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
-
-    get month() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day() {
-      const slots = getShimPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-
     toJSON() {
       return formatDateIsoAuto(getShimPlainDateSlots(this))
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createCalendarFieldGetters(getShimPlainDateSlots),
 )
 
 export function createShimPlainDateRecord(

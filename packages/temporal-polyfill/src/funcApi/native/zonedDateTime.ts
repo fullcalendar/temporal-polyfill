@@ -36,13 +36,11 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
-
-type ZonedDateTimeRecord = RecordTypes.ZonedDateTimeRecord
 
 export const getNativeZonedDateTime: (
   record: unknown,
@@ -50,12 +48,11 @@ export const getNativeZonedDateTime: (
 
 export type NativeZonedDateTimeRecord = InstanceType<
   typeof NativeZonedDateTimeRecord
->
+> &
+  RecordTypes.ZonedDateTimeRecord
 export const NativeZonedDateTimeRecord = defineTemporalClass(
   ZonedDateTimeBranding,
-  class implements ZonedDateTimeRecord {
-    declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
-
+  class {
     get calendarId() {
       return getNativeZonedDateTime(this).calendarId
     }
@@ -123,11 +120,8 @@ export const NativeZonedDateTimeRecord = defineTemporalClass(
     toJSON() {
       return getNativeZonedDateTime(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativeZonedDateTimeRecord(

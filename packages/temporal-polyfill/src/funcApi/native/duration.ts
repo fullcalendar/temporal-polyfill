@@ -19,22 +19,19 @@ import {
   setDurationSlots,
 } from '../temporalRecords'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
-
-type DurationRecord = RecordTypes.DurationRecord
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
 
-export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord>
+export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord> &
+  RecordTypes.DurationRecord
 export const NativeDurationRecord = defineTemporalClass(
   DurationBranding,
-  class implements DurationFields, DurationRecord {
-    declare readonly [RecordTypes.DurationRecordBrand]: undefined
-
+  class implements DurationFields {
     get years() {
       return getNativeDuration(this).years
     }
@@ -78,11 +75,8 @@ export const NativeDurationRecord = defineTemporalClass(
     toJSON() {
       return getNativeDuration(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativeDurationRecord(

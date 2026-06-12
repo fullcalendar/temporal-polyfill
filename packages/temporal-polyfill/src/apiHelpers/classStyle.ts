@@ -4,16 +4,40 @@ import {
   createStringTagDescriptors,
 } from '../internal/utils'
 
-export function defineTemporalClass<C extends { prototype: object }>(
-  branding: string,
-  cls: C,
-): C {
+type ClassType = {
+  new (...args: any[]): any
+  prototype: object
+}
+
+type MixinInstances<Mixins extends readonly ClassType[]> =
+  Mixins extends readonly [
+    infer First extends ClassType,
+    ...infer Rest extends ClassType[],
+  ]
+    ? InstanceType<First> & MixinInstances<Rest>
+    : unknown
+
+type TemporalClass<
+  C extends ClassType,
+  Mixins extends readonly ClassType[],
+> = C &
+  (new (
+    ..._args: ConstructorParameters<C>
+  ) => InstanceType<C> & MixinInstances<Mixins>)
+
+export function defineTemporalClass<
+  C extends ClassType,
+  Mixins extends readonly ClassType[],
+>(branding: string, cls: C, ...mixins: Mixins): TemporalClass<C, Mixins> {
   Object.defineProperties(cls, createNameDescriptors(branding))
   Object.defineProperties(
     cls.prototype,
     createStringTagDescriptors('Temporal.' + branding),
   )
-  return cls
+  for (const mixinClass of mixins) {
+    mixin(cls.prototype, mixinClass)
+  }
+  return cls as TemporalClass<C, Mixins>
 }
 
 /*
@@ -44,10 +68,6 @@ export const attachDebugString: (instance: JsonDebuggable) => void =
         })
       }
     : () => {} // TODO: reuse noop
-
-export function forbiddenValueOf(): never {
-  throw new TypeError(errorMessages.forbiddenValueOf)
-}
 
 export function invalidRecordType(): never {
   throw new TypeError(errorMessages.invalidCallingContext)

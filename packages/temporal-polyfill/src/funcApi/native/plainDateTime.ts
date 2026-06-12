@@ -32,9 +32,9 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
@@ -43,7 +43,6 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<NativePlainDateTimeRecord>
-type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
 
 export const getNativePlainDateTime: (
   record: unknown,
@@ -51,12 +50,11 @@ export const getNativePlainDateTime: (
 
 export type NativePlainDateTimeRecord = InstanceType<
   typeof NativePlainDateTimeRecord
->
+> &
+  RecordTypes.PlainDateTimeRecord
 export const NativePlainDateTimeRecord = defineTemporalClass(
   PlainDateTimeBranding,
-  class implements DateTimeFields, PlainDateTimeRecord {
-    declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
-
+  class implements DateTimeFields {
     get calendarId() {
       return getNativePlainDateTime(this).calendarId
     }
@@ -112,11 +110,8 @@ export const NativePlainDateTimeRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainDateTime(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainDateTimeRecord(

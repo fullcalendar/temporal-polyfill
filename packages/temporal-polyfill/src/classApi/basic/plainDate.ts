@@ -3,20 +3,12 @@ import { PlainDateBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import {
-  computeCalendarDateFields,
-  computeCalendarDayOfYear,
-  computeCalendarDaysInMonth,
-  computeCalendarDaysInYear,
-  computeCalendarEraFields,
-  computeCalendarInLeapYear,
-  computeCalendarMonthCode,
-  computeCalendarMonthsInYear,
-  computeCalendarWeekOfYear,
-  computeCalendarYearOfWeek,
-} from '../../internal/calendarDerived'
+  ForbiddenValueOfMixin,
+  createCalendarDerivedGetters,
+  createCalendarFieldGetters,
+} from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { constructDateSlots } from '../../internal/construct'
@@ -41,7 +33,6 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
@@ -129,80 +120,6 @@ export const PlainDate = defineTemporalClass(
 
     get calendarId(): string {
       return getCalendarSlotId(getPlainDateSlots(this).calendar)
-    }
-
-    get era(): string | undefined {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
-
-    get eraYear(): number | undefined {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
-
-    get year(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
-
-    get month(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode(): string {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-
-    get dayOfWeek(): number {
-      return computeIsoDayOfWeek(getPlainDateSlots(this))
-    }
-
-    get dayOfYear(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDayOfYear(slots.calendar, slots)
-    }
-
-    get weekOfYear(): number | undefined {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarWeekOfYear(slots.calendar, slots)
-    }
-
-    get yearOfWeek(): number | undefined {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarYearOfWeek(slots.calendar, slots)
-    }
-
-    get daysInWeek(): number {
-      getPlainDateSlots(this)
-      return 7
-    }
-
-    get daysInMonth(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDaysInMonth(slots.calendar, slots)
-    }
-
-    get daysInYear(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarDaysInYear(slots.calendar, slots)
-    }
-
-    get monthsInYear(): number {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarMonthsInYear(slots.calendar, slots)
-    }
-
-    get inLeapYear(): boolean {
-      const slots = getPlainDateSlots(this)
-      return computeCalendarInLeapYear(slots.calendar, slots)
     }
 
     with(
@@ -322,12 +239,16 @@ export const PlainDate = defineTemporalClass(
 
     toPlainYearMonth(): PlainYearMonth {
       const slots = getPlainDateSlots(this)
-      return createPlainYearMonth(convertToPlainYearMonth(slots.calendar, this))
+      return createPlainYearMonth(
+        convertToPlainYearMonth(slots.calendar, this as unknown as PlainDate),
+      )
     }
 
     toPlainMonthDay(): PlainMonthDay {
       const slots = getPlainDateSlots(this)
-      return createPlainMonthDay(convertToPlainMonthDay(slots.calendar, this))
+      return createPlainMonthDay(
+        convertToPlainMonthDay(slots.calendar, this as unknown as PlainDate),
+      )
     }
 
     toLocaleString(
@@ -354,11 +275,10 @@ export const PlainDate = defineTemporalClass(
     toJSON(): string {
       return formatPlainDateIso(getPlainDateSlots(this))
     }
-
-    valueOf(): never {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createCalendarFieldGetters(getPlainDateSlots),
+  createCalendarDerivedGetters(getPlainDateSlots),
 )
 
 export function createPlainDate(slots: PlainDateSlots): PlainDate {
@@ -414,8 +334,8 @@ export function toPlainDateSlots(
   return res
 }
 
-function initPlainDate(instance: PlainDate, slots: PlainDateSlots): PlainDate {
+function initPlainDate(instance: object, slots: PlainDateSlots): PlainDate {
   plainDateSlotsMap.set(instance, slots)
-  attachDebugString(instance)
-  return instance
+  attachDebugString(instance as PlainDate)
+  return instance as PlainDate
 }

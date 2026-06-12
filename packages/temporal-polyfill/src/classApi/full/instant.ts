@@ -3,8 +3,11 @@ import { InstantBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import {
+  ForbiddenValueOfMixin,
+  createEpochGetters,
+} from '../../apiHelpers/mixins'
 import { bigNanoInMilli } from '../../internal/bigNano'
 import { requireNumberIsInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
@@ -26,7 +29,6 @@ import {
   EpochNanoFields,
   createEpochNanoSlots,
   getEpochMilli,
-  getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike } from '../../internal/utils'
@@ -69,14 +71,6 @@ export const Instant = defineTemporalClass(
 
     static compare(a: InstantArg, b: InstantArg): NumberSign {
       return compareInstants(toInstantSlots(a), toInstantSlots(b))
-    }
-
-    get epochMilliseconds(): number {
-      return getEpochMilli(getInstantSlots(this))
-    }
-
-    get epochNanoseconds(): bigint {
-      return getEpochNano(getInstantSlots(this))
     }
 
     add(durationArg: DurationArg): Instant {
@@ -165,11 +159,9 @@ export const Instant = defineTemporalClass(
     toJSON(): string {
       return formatInstantIso(refineTimeZoneArg, getInstantSlots(this))
     }
-
-    valueOf(): never {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createEpochGetters(getInstantSlots),
 )
 
 export function createInstant(slots: EpochNanoFields): Instant {
@@ -222,8 +214,8 @@ export const { toTemporalInstant } = {
   },
 }
 
-function initInstant(instance: Instant, slots: EpochNanoFields): Instant {
+function initInstant(instance: object, slots: EpochNanoFields): Instant {
   instantSlotsMap.set(instance, slots)
-  attachDebugString(instance)
-  return instance
+  attachDebugString(instance as Instant)
+  return instance as Instant
 }

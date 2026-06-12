@@ -16,9 +16,9 @@ import {
   getNativeDuration,
 } from './duration'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import { createRoundToOptions } from './roundUtils'
 import {
@@ -26,18 +26,16 @@ import {
   createNativeZonedDateTimeRecord,
 } from './zonedDateTime'
 
-type InstantRecord = RecordTypes.InstantRecord
 type Format = DateTimeFormatLike<NativeInstantRecord>
 
 export const getNativeInstant: (record: unknown) => Temporal.Instant =
   getInstantSlots
 
-export type NativeInstantRecord = InstanceType<typeof NativeInstantRecord>
+export type NativeInstantRecord = InstanceType<typeof NativeInstantRecord> &
+  RecordTypes.InstantRecord
 export const NativeInstantRecord = defineTemporalClass(
   InstantBranding,
-  class implements InstantRecord {
-    declare readonly [RecordTypes.InstantRecordBrand]: undefined
-
+  class {
     get epochMilliseconds() {
       return getNativeInstant(this).epochMilliseconds
     }
@@ -49,11 +47,8 @@ export const NativeInstantRecord = defineTemporalClass(
     toJSON() {
       return getNativeInstant(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativeInstantRecord(

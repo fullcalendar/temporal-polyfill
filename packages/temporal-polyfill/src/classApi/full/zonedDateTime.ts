@@ -3,20 +3,14 @@ import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import {
-  computeCalendarDateFields,
-  computeCalendarDayOfYear,
-  computeCalendarDaysInMonth,
-  computeCalendarDaysInYear,
-  computeCalendarEraFields,
-  computeCalendarInLeapYear,
-  computeCalendarMonthCode,
-  computeCalendarMonthsInYear,
-  computeCalendarWeekOfYear,
-  computeCalendarYearOfWeek,
-} from '../../internal/calendarDerived'
+  ForbiddenValueOfMixin,
+  createCalendarDerivedGetters,
+  createCalendarFieldGetters,
+  createEpochGetters,
+  createTimeGetters,
+} from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import {
   compareZonedDateTimes,
@@ -42,7 +36,6 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformZonedOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
 import {
   formatOffsetNano,
   formatZonedDateTimeIso,
@@ -62,7 +55,6 @@ import {
   ZonedEpochNanoFields,
   createDurationSlots,
   getEpochMilli,
-  getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
 import {
@@ -134,151 +126,8 @@ export const ZonedDateTime = defineTemporalClass(
       )
     }
 
-    get epochMilliseconds(): number {
-      return getEpochMilli(getZonedDateTimeSlots(this))
-    }
-
-    get epochNanoseconds(): bigint {
-      return getEpochNano(getZonedDateTimeSlots(this))
-    }
-
     get calendarId(): string {
       return getCalendarSlotId(getZonedDateTimeSlots(this).calendar)
-    }
-
-    get era(): string | undefined {
-      const slots = getZonedDateTimeSlots(this)
-      const isoDateTime = zonedEpochSlotsToIso(slots)
-      return computeCalendarEraFields(slots.calendar, isoDateTime).era
-    }
-
-    get eraYear(): number | undefined {
-      const slots = getZonedDateTimeSlots(this)
-      const isoDateTime = zonedEpochSlotsToIso(slots)
-      return computeCalendarEraFields(slots.calendar, isoDateTime).eraYear
-    }
-
-    get year(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDateFields(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      ).year
-    }
-
-    get month(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDateFields(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      ).month
-    }
-
-    get monthCode(): string {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarMonthCode(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get day(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDateFields(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      ).day
-    }
-
-    get hour(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).hour
-    }
-
-    get minute(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).minute
-    }
-
-    get second(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).second
-    }
-
-    get millisecond(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).millisecond
-    }
-
-    get microsecond(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).microsecond
-    }
-
-    get nanosecond(): number {
-      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).nanosecond
-    }
-
-    get dayOfWeek(): number {
-      return computeIsoDayOfWeek(
-        zonedEpochSlotsToIso(getZonedDateTimeSlots(this)),
-      )
-    }
-
-    get dayOfYear(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDayOfYear(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get weekOfYear(): number | undefined {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarWeekOfYear(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get yearOfWeek(): number | undefined {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarYearOfWeek(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get daysInWeek(): number {
-      getZonedDateTimeSlots(this)
-      return 7
-    }
-
-    get daysInMonth(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDaysInMonth(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get daysInYear(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarDaysInYear(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get monthsInYear(): number {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarMonthsInYear(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
-    }
-
-    get inLeapYear(): boolean {
-      const slots = getZonedDateTimeSlots(this)
-      return computeCalendarInLeapYear(
-        slots.calendar,
-        zonedEpochSlotsToIso(slots),
-      )
     }
 
     get offset(): string {
@@ -489,11 +338,12 @@ export const ZonedDateTime = defineTemporalClass(
 
       return null
     }
-
-    valueOf(): never {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
+  createCalendarFieldGetters(getZonedDateTimeIsoSlots),
+  createCalendarDerivedGetters(getZonedDateTimeIsoSlots),
+  createTimeGetters(getZonedDateTimeIsoSlots),
+  createEpochGetters(getZonedDateTimeSlots),
 )
 
 export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {
@@ -506,6 +356,10 @@ export function getZonedDateTimeSlots(obj: unknown): ZonedDateTimeSlots {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
   return slots
+}
+
+function getZonedDateTimeIsoSlots(obj: unknown) {
+  return zonedEpochSlotsToIso(getZonedDateTimeSlots(obj))
 }
 
 export function getZonedDateTimeSlotsIfPresent(
@@ -540,10 +394,10 @@ export function toZonedDateTimeSlots(
 }
 
 function initZonedDateTime(
-  instance: ZonedDateTime,
+  instance: object,
   slots: ZonedDateTimeSlots,
 ): ZonedDateTime {
   zonedDateTimeSlotsMap.set(instance, slots)
-  attachDebugString(instance)
-  return instance
+  attachDebugString(instance as ZonedDateTime)
+  return instance as ZonedDateTime
 }

@@ -40,27 +40,25 @@ import {
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
 } from './zonedDateTime'
 
-type PlainDateRecord = RecordTypes.PlainDateRecord
 type Format = DateTimeFormatLike<NativePlainDateRecord>
 
 export const getNativePlainDate: (record: unknown) => Temporal.PlainDate =
   getPlainDateSlots
 
-export type NativePlainDateRecord = InstanceType<typeof NativePlainDateRecord>
+export type NativePlainDateRecord = InstanceType<typeof NativePlainDateRecord> &
+  RecordTypes.PlainDateRecord
 export const NativePlainDateRecord = defineTemporalClass(
   PlainDateBranding,
-  class implements DateFields, PlainDateRecord {
-    declare readonly [RecordTypes.PlainDateRecordBrand]: undefined
-
+  class implements DateFields {
     get calendarId() {
       return getNativePlainDate(this).calendarId
     }
@@ -92,11 +90,8 @@ export const NativePlainDateRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainDate(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainDateRecord(

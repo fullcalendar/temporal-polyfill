@@ -120,6 +120,19 @@ pnpm run size --raw
 ```
 
 Use `pnpm run size --raw` for raw byte size. Do not run bare `pnpm run size`.
+When reading `pnpm run size --raw` output, record only the minified global
+bundle sizes from these lines:
+
+```
+Size of ./dist/.global.min.js ...
+63043 → 20443
+
+Size of ./dist/full/.global.min.js ...
+72634 → 24247
+```
+
+In this example, record `20443, Full: 24247`. Ignore the later `export
+min+gzip` table for size-audit entries.
 
 After a size-oriented code change is settled, run build and sizing. If sizing
 increased, do not revert the code automatically; pause so the user can inspect

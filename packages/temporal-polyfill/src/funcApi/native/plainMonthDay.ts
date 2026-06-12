@@ -17,12 +17,11 @@ import {
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
+  ForbiddenValueOfMixin,
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from './recordUtils'
 
-type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
 
 export const getNativePlainMonthDay: (
@@ -31,14 +30,11 @@ export const getNativePlainMonthDay: (
 
 export type NativePlainMonthDayRecord = InstanceType<
   typeof NativePlainMonthDayRecord
->
+> &
+  RecordTypes.PlainMonthDayRecord
 export const NativePlainMonthDayRecord = defineTemporalClass(
   PlainMonthDayBranding,
-  class
-    implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
-  {
-    declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
-
+  class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
     get calendarId() {
       return getNativePlainMonthDay(this).calendarId
     }
@@ -54,11 +50,8 @@ export const NativePlainMonthDayRecord = defineTemporalClass(
     toJSON() {
       return getNativePlainMonthDay(this).toString()
     }
-
-    valueOf() {
-      return forbiddenValueOf()
-    }
   },
+  ForbiddenValueOfMixin,
 )
 
 export function createNativePlainMonthDayRecord(
