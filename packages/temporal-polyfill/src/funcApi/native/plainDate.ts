@@ -100,7 +100,7 @@ export function createNativePlainDateRecord(
 ): NativePlainDateRecord {
   const instance = Object.create(NativePlainDateRecord.prototype)
   setPlainDateSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

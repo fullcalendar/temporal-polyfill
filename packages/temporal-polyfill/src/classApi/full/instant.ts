@@ -222,8 +222,6 @@ export function toTemporalInstant(this: Date): Instant {
 
 function initInstant(instance: Instant, slots: EpochNanoFields): Instant {
   instantSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, (slots) =>
-    formatInstantIso(refineTimeZoneArg, slots),
-  )
+  attachDebugString(instance)
   return instance
 }

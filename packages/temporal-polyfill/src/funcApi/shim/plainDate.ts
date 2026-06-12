@@ -187,7 +187,7 @@ export function createShimPlainDateRecord(
 ): ShimPlainDateRecord {
   const instance = Object.create(ShimPlainDateRecord.prototype)
   setPlainDateSlots(instance, slots)
-  attachDebugString(instance, slots, formatDateIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

@@ -247,7 +247,7 @@ export function createShimZonedDateTimeRecord(
 ): ShimZonedDateTimeRecord {
   const instance = Object.create(ShimZonedDateTimeRecord.prototype)
   setZonedDateTimeSlots(instance, slots)
-  attachDebugString(instance, slots, formatZonedDateTimeIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

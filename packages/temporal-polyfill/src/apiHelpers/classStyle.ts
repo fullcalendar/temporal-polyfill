@@ -16,18 +16,22 @@ export function defineTemporalClass<C extends { prototype: object }>(
   return cls
 }
 
-export function attachDebugString<S>(
-  instance: object,
-  slots: S,
-  formatSlots: (slots: S) => string,
-) {
-  // Keep the existing debug affordance for development builds.
-  if (attachDebugString.name === 'attachDebugString') {
-    Object.defineProperty(instance, '_str_', {
-      value: formatSlots(slots),
-    })
-  }
+interface JsonDebuggable {
+  toJSON(): string
 }
+
+/*
+Must be called AFTER slots are assigned
+*/
+export const attachDebugString: (instance: JsonDebuggable) => void =
+  // detect if minified
+  defineTemporalClass.name === 'defineTemporalClass'
+    ? (instance: JsonDebuggable) => {
+        Object.defineProperty(instance, '_str_', {
+          value: instance.toJSON(),
+        })
+      }
+    : () => {} // TODO: reuse noop
 
 export function forbiddenValueOf(): never {
   throw new TypeError(errorMessages.forbiddenValueOf)

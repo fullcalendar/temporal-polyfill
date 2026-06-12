@@ -405,6 +405,6 @@ export function toPlainDateSlots(
 
 function initPlainDate(instance: PlainDate, slots: PlainDateSlots): PlainDate {
   plainDateSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatPlainDateIso)
+  attachDebugString(instance)
   return instance
 }

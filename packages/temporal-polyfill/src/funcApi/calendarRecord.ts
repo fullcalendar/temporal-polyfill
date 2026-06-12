@@ -32,7 +32,7 @@ export function createCalendarRecord(
   const instance = Object.create(CalendarRecord.prototype)
   const slots = { id, getImpl }
   setCalendarSlots(instance, slots)
-  attachDebugString(instance, slots, (slots) => slots.id)
+  attachDebugString(instance)
   return instance
 }
 

@@ -132,7 +132,7 @@ export function createShimPlainYearMonthRecord(
 ): ShimPlainYearMonthRecord {
   const instance = Object.create(ShimPlainYearMonthRecord.prototype)
   setPlainYearMonthSlots(instance, slots)
-  attachDebugString(instance, slots, formatYearMonthIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

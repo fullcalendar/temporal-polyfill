@@ -57,7 +57,7 @@ export function createNativeInstantRecord(
 ): NativeInstantRecord {
   const instance = Object.create(NativeInstantRecord.prototype)
   setInstantSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

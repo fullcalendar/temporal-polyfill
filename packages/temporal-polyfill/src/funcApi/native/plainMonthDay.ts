@@ -60,7 +60,7 @@ export function createNativePlainMonthDayRecord(
 ): NativePlainMonthDayRecord {
   const instance = Object.create(NativePlainMonthDayRecord.prototype)
   setPlainMonthDaySlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

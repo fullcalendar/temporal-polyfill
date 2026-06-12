@@ -98,7 +98,7 @@ export function createShimInstantRecord(
 ): ShimInstantRecord {
   const instance = Object.create(ShimInstantRecord.prototype)
   setInstantSlots(instance, slots)
-  attachDebugString(instance, slots, formatInstantIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

@@ -120,7 +120,7 @@ export function createNativePlainDateTimeRecord(
 ): NativePlainDateTimeRecord {
   const instance = Object.create(NativePlainDateTimeRecord.prototype)
   setPlainDateTimeSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

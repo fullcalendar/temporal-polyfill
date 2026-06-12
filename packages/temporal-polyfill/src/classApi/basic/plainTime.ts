@@ -265,6 +265,6 @@ export function optionalToPlainTimeFields(
 
 function initPlainTime(instance: PlainTime, slots: TimeFields): PlainTime {
   plainTimeSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatPlainTimeIso)
+  attachDebugString(instance)
   return instance
 }

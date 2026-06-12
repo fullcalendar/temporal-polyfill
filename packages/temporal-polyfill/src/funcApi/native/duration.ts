@@ -85,7 +85,7 @@ export function createNativeDurationRecord(
 ): NativeDurationRecord {
   const instance = Object.create(NativeDurationRecord.prototype)
   setDurationSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

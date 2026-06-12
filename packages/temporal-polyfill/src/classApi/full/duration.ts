@@ -312,6 +312,6 @@ function refinePublicRelativeTo(
 
 function initDuration(instance: Duration, slots: DurationSlots): Duration {
   durationSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatDurationIso)
+  attachDebugString(instance)
   return instance
 }

@@ -68,7 +68,7 @@ export function createNativePlainTimeRecord(
 ): NativePlainTimeRecord {
   const instance = Object.create(NativePlainTimeRecord.prototype)
   setPlainTimeSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

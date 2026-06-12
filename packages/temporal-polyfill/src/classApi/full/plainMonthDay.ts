@@ -207,6 +207,6 @@ function initPlainMonthDay(
   slots: PlainMonthDaySlots,
 ): PlainMonthDay {
   plainMonthDaySlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatPlainMonthDayIso)
+  attachDebugString(instance)
   return instance
 }

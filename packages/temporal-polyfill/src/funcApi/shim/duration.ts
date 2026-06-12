@@ -103,7 +103,7 @@ export function createShimDurationRecord(
 ): ShimDurationRecord {
   const instance = Object.create(ShimDurationRecord.prototype)
   setDurationSlots(instance, slots)
-  attachDebugString(instance, slots, formatDurationIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

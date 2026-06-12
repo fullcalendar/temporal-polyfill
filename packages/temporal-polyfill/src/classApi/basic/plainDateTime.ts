@@ -479,6 +479,6 @@ function initPlainDateTime(
   slots: PlainDateTimeSlots,
 ): PlainDateTime {
   plainDateTimeSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatPlainDateTimeIso)
+  attachDebugString(instance)
   return instance
 }

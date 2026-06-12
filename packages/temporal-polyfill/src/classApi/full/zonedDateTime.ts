@@ -539,6 +539,6 @@ function initZonedDateTime(
   slots: ZonedDateTimeSlots,
 ): ZonedDateTime {
   zonedDateTimeSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatZonedDateTimeIso)
+  attachDebugString(instance)
   return instance
 }

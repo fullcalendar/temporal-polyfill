@@ -81,7 +81,7 @@ export function createNativePlainYearMonthRecord(
 ): NativePlainYearMonthRecord {
   const instance = Object.create(NativePlainYearMonthRecord.prototype)
   setPlainYearMonthSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

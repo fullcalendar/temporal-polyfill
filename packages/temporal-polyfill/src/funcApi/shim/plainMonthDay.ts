@@ -85,7 +85,7 @@ export function createShimPlainMonthDayRecord(
 ): ShimPlainMonthDayRecord {
   const instance = Object.create(ShimPlainMonthDayRecord.prototype)
   setPlainMonthDaySlots(instance, slots)
-  attachDebugString(instance, slots, formatMonthDayIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

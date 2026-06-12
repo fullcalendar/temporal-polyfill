@@ -98,7 +98,7 @@ export function createShimPlainTimeRecord(
 ): ShimPlainTimeRecord {
   const instance = Object.create(ShimPlainTimeRecord.prototype)
   setPlainTimeSlots(instance, slots)
-  attachDebugString(instance, slots, formatTimeIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 

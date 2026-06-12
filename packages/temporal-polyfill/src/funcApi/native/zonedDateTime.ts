@@ -128,7 +128,7 @@ export function createNativeZonedDateTimeRecord(
 ): NativeZonedDateTimeRecord {
   const instance = Object.create(NativeZonedDateTimeRecord.prototype)
   setZonedDateTimeSlots(instance, native)
-  attachDebugString(instance, native, (slots) => slots.toString())
+  attachDebugString(instance)
   return instance
 }
 

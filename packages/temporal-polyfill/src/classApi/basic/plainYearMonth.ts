@@ -309,6 +309,6 @@ function initPlainYearMonth(
   slots: PlainYearMonthSlots,
 ): PlainYearMonth {
   plainYearMonthSlotsMap.set(instance, slots)
-  attachDebugString(instance, slots, formatPlainYearMonthIso)
+  attachDebugString(instance)
   return instance
 }

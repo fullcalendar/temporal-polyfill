@@ -222,7 +222,7 @@ export function createShimPlainDateTimeRecord(
 ): ShimPlainDateTimeRecord {
   const instance = Object.create(ShimPlainDateTimeRecord.prototype)
   setPlainDateTimeSlots(instance, slots)
-  attachDebugString(instance, slots, formatDateTimeIsoAuto)
+  attachDebugString(instance)
   return instance
 }
 
