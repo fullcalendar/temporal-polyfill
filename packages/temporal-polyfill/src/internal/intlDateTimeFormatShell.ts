@@ -158,7 +158,6 @@ export function createDateTimeFormatShell<R>(
   Object.defineProperties(DateTimeFormat, rawStaticDescriptors)
   prototype.constructor = DateTimeFormat
 
-  // TODO: more compact way of doing this
   Object.defineProperties(
     prototype,
     createStringTagDescriptors('Intl.DateTimeFormat'),
