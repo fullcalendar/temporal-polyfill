@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { DurationBranding } from '../../apiHelpers/branding'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
@@ -28,57 +29,61 @@ type DurationRecord = RecordTypes.DurationRecord
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
 
-class _NativeDurationRecord implements DurationFields, DurationRecord {
-  declare readonly [RecordTypes.DurationRecordBrand]: undefined
+export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord>
+export const NativeDurationRecord = defineTemporalClass(
+  DurationBranding,
+  class implements DurationFields, DurationRecord {
+    declare readonly [RecordTypes.DurationRecordBrand]: undefined
 
-  get years() {
-    return getNativeDuration(this).years
-  }
+    get years() {
+      return getNativeDuration(this).years
+    }
 
-  get months() {
-    return getNativeDuration(this).months
-  }
+    get months() {
+      return getNativeDuration(this).months
+    }
 
-  get weeks() {
-    return getNativeDuration(this).weeks
-  }
+    get weeks() {
+      return getNativeDuration(this).weeks
+    }
 
-  get days() {
-    return getNativeDuration(this).days
-  }
+    get days() {
+      return getNativeDuration(this).days
+    }
 
-  get hours() {
-    return getNativeDuration(this).hours
-  }
+    get hours() {
+      return getNativeDuration(this).hours
+    }
 
-  get minutes() {
-    return getNativeDuration(this).minutes
-  }
+    get minutes() {
+      return getNativeDuration(this).minutes
+    }
 
-  get seconds() {
-    return getNativeDuration(this).seconds
-  }
+    get seconds() {
+      return getNativeDuration(this).seconds
+    }
 
-  get milliseconds() {
-    return getNativeDuration(this).milliseconds
-  }
+    get milliseconds() {
+      return getNativeDuration(this).milliseconds
+    }
 
-  get microseconds() {
-    return getNativeDuration(this).microseconds
-  }
+    get microseconds() {
+      return getNativeDuration(this).microseconds
+    }
 
-  get nanoseconds() {
-    return getNativeDuration(this).nanoseconds
-  }
+    get nanoseconds() {
+      return getNativeDuration(this).nanoseconds
+    }
 
-  toJSON() {
-    return getNativeDuration(this).toString()
-  }
+    toJSON() {
+      return getNativeDuration(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativeDurationRecord(
   native: Temporal.Duration,
@@ -88,12 +93,6 @@ export function createNativeDurationRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativeDurationRecord = _NativeDurationRecord
-export const NativeDurationRecord = defineTemporalClass(
-  _NativeDurationRecord,
-  'Duration',
-)
 
 export function create(
   years?: number,

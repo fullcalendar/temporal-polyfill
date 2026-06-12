@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import {
   computeCalendarDateFields,
   computeCalendarMonthCode,
@@ -43,42 +44,46 @@ import {
 import { rejectInvalidBag } from './temporalRecords'
 
 type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
-
 type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>
-
 type ShimPlainMonthDaySlots = ReturnType<typeof constructMonthDaySlots>
 
 export const getShimPlainMonthDaySlots: (
   record: unknown,
 ) => ShimPlainMonthDaySlots = getPlainMonthDaySlots
 
-class _ShimPlainMonthDayRecord
-  implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
-{
-  declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
+export type ShimPlainMonthDayRecord = InstanceType<
+  typeof ShimPlainMonthDayRecord
+>
+export const ShimPlainMonthDayRecord = defineTemporalClass(
+  PlainMonthDayBranding,
+  class
+    implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
+  {
+    declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
-  get calendarId() {
-    return getCalendarSlotId(getShimPlainMonthDaySlots(this).calendar)
-  }
+    get calendarId() {
+      return getCalendarSlotId(getShimPlainMonthDaySlots(this).calendar)
+    }
 
-  get monthCode() {
-    const slots = getShimPlainMonthDaySlots(this)
-    return computeCalendarMonthCode(slots.calendar, slots)
-  }
+    get monthCode() {
+      const slots = getShimPlainMonthDaySlots(this)
+      return computeCalendarMonthCode(slots.calendar, slots)
+    }
 
-  get day() {
-    const slots = getShimPlainMonthDaySlots(this)
-    return computeCalendarDateFields(slots.calendar, slots).day
-  }
+    get day() {
+      const slots = getShimPlainMonthDaySlots(this)
+      return computeCalendarDateFields(slots.calendar, slots).day
+    }
 
-  toJSON() {
-    return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(this))
-  }
+    toJSON() {
+      return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(this))
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createShimPlainMonthDayRecord(
   slots: ShimPlainMonthDaySlots,
@@ -88,12 +93,6 @@ export function createShimPlainMonthDayRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type ShimPlainMonthDayRecord = _ShimPlainMonthDayRecord
-export const ShimPlainMonthDayRecord = defineTemporalClass(
-  _ShimPlainMonthDayRecord,
-  'PlainMonthDay',
-)
 
 export function create(
   isoMonth: number,

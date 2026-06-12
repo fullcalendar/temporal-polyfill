@@ -1,5 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { InstantBranding } from '../../apiHelpers/branding'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -65,33 +66,35 @@ import {
 } from './zonedDateTime'
 
 type InstantRecord = RecordTypes.InstantRecord
-
 type Format = DateTimeFormatLike<ShimInstantRecord>
-
 type ShimInstantSlots = ReturnType<typeof constructEpochNanoSlots>
 
 export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
   getInstantSlots
 
-class _ShimInstantRecord implements InstantRecord {
-  declare readonly [RecordTypes.InstantRecordBrand]: undefined
+export type ShimInstantRecord = InstanceType<typeof ShimInstantRecord>
+export const ShimInstantRecord = defineTemporalClass(
+  InstantBranding,
+  class implements InstantRecord {
+    declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
-  get epochMilliseconds() {
-    return getEpochMilli(getShimInstantSlots(this))
-  }
+    get epochMilliseconds() {
+      return getEpochMilli(getShimInstantSlots(this))
+    }
 
-  get epochNanoseconds() {
-    return getEpochNano(getShimInstantSlots(this))
-  }
+    get epochNanoseconds() {
+      return getEpochNano(getShimInstantSlots(this))
+    }
 
-  toJSON() {
-    return formatInstantIsoAuto(getShimInstantSlots(this))
-  }
+    toJSON() {
+      return formatInstantIsoAuto(getShimInstantSlots(this))
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createShimInstantRecord(
   slots: ShimInstantSlots,
@@ -101,12 +104,6 @@ export function createShimInstantRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type ShimInstantRecord = _ShimInstantRecord
-export const ShimInstantRecord = defineTemporalClass(
-  _ShimInstantRecord,
-  'Instant',
-)
 
 export function create(epochNanoseconds: bigint): ShimInstantRecord {
   return createShimInstantRecord(constructEpochNanoSlots(epochNanoseconds))

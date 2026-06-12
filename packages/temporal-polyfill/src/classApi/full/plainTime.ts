@@ -38,179 +38,178 @@ export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
 
 const plainTimeSlotsMap = new WeakMap<object, TimeFields>()
 
-export class PlainTime implements TimeFields {
-  constructor(
-    hour = 0,
-    minute = 0,
-    second = 0,
-    millisecond = 0,
-    microsecond = 0,
-    nanosecond = 0,
-  ) {
-    initPlainTime(
-      this,
-      constructTimeSlots(
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-      ),
-    )
-  }
+export type PlainTime = InstanceType<typeof PlainTime>
+export const PlainTime = defineTemporalClass(
+  PlainTimeBranding,
+  class implements TimeFields {
+    constructor(
+      hour = 0,
+      minute = 0,
+      second = 0,
+      millisecond = 0,
+      microsecond = 0,
+      nanosecond = 0,
+    ) {
+      initPlainTime(
+        this,
+        constructTimeSlots(
+          hour,
+          minute,
+          second,
+          millisecond,
+          microsecond,
+          nanosecond,
+        ),
+      )
+    }
 
-  static from(
-    arg: PlainTimeArg,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): PlainTime {
-    return createPlainTime(toPlainTimeSlots(arg, options))
-  }
+    static from(
+      arg: PlainTimeArg,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): PlainTime {
+      return createPlainTime(toPlainTimeSlots(arg, options))
+    }
 
-  static compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumberSign {
-    return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
-  }
+    static compare(arg0: PlainTimeArg, arg1: PlainTimeArg): NumberSign {
+      return compareTimeFields(toPlainTimeSlots(arg0), toPlainTimeSlots(arg1))
+    }
 
-  get hour(): number {
-    return getPlainTimeSlots(this).hour
-  }
+    get hour(): number {
+      return getPlainTimeSlots(this).hour
+    }
 
-  get minute(): number {
-    return getPlainTimeSlots(this).minute
-  }
+    get minute(): number {
+      return getPlainTimeSlots(this).minute
+    }
 
-  get second(): number {
-    return getPlainTimeSlots(this).second
-  }
+    get second(): number {
+      return getPlainTimeSlots(this).second
+    }
 
-  get millisecond(): number {
-    return getPlainTimeSlots(this).millisecond
-  }
+    get millisecond(): number {
+      return getPlainTimeSlots(this).millisecond
+    }
 
-  get microsecond(): number {
-    return getPlainTimeSlots(this).microsecond
-  }
+    get microsecond(): number {
+      return getPlainTimeSlots(this).microsecond
+    }
 
-  get nanosecond(): number {
-    return getPlainTimeSlots(this).nanosecond
-  }
+    get nanosecond(): number {
+      return getPlainTimeSlots(this).nanosecond
+    }
 
-  with(
-    mod: Partial<TimeFields>,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): PlainTime {
-    return createPlainTime(
-      mergePlainTimeFields(this, rejectInvalidBag(mod), options),
-    )
-  }
+    with(
+      mod: Partial<TimeFields>,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): PlainTime {
+      return createPlainTime(
+        mergePlainTimeFields(this, rejectInvalidBag(mod), options),
+      )
+    }
 
-  add(durationArg: DurationArg): PlainTime {
-    return createPlainTime(
-      movePlainTime(
-        false,
-        getPlainTimeSlots(this),
-        toDurationSlots(durationArg),
-      ),
-    )
-  }
+    add(durationArg: DurationArg): PlainTime {
+      return createPlainTime(
+        movePlainTime(
+          false,
+          getPlainTimeSlots(this),
+          toDurationSlots(durationArg),
+        ),
+      )
+    }
 
-  subtract(durationArg: DurationArg): PlainTime {
-    return createPlainTime(
-      movePlainTime(
-        true,
-        getPlainTimeSlots(this),
-        toDurationSlots(durationArg),
-      ),
-    )
-  }
+    subtract(durationArg: DurationArg): PlainTime {
+      return createPlainTime(
+        movePlainTime(
+          true,
+          getPlainTimeSlots(this),
+          toDurationSlots(durationArg),
+        ),
+      )
+    }
 
-  until(
-    otherArg: PlainTimeArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-      | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      diffPlainTimes(
-        false,
-        getPlainTimeSlots(this),
-        toPlainTimeSlots(otherArg),
-        options,
-      ),
-    )
-  }
+    until(
+      otherArg: PlainTimeArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+        | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        diffPlainTimes(
+          false,
+          getPlainTimeSlots(this),
+          toPlainTimeSlots(otherArg),
+          options,
+        ),
+      )
+    }
 
-  since(
-    otherArg: PlainTimeArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-      | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      diffPlainTimes(
-        true,
-        getPlainTimeSlots(this),
-        toPlainTimeSlots(otherArg),
-        options,
-      ),
-    )
-  }
+    since(
+      otherArg: PlainTimeArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+        | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        diffPlainTimes(
+          true,
+          getPlainTimeSlots(this),
+          toPlainTimeSlots(otherArg),
+          options,
+        ),
+      )
+    }
 
-  round(
-    options:
-      | Temporal.PluralizeUnit<Temporal.TimeUnit>
-      | Temporal.RoundingOptions<Temporal.TimeUnit>,
-  ): PlainTime {
-    return createPlainTime(roundPlainTime(getPlainTimeSlots(this), options))
-  }
+    round(
+      options:
+        | Temporal.PluralizeUnit<Temporal.TimeUnit>
+        | Temporal.RoundingOptions<Temporal.TimeUnit>,
+    ): PlainTime {
+      return createPlainTime(roundPlainTime(getPlainTimeSlots(this), options))
+    }
 
-  equals(other: PlainTimeArg): boolean {
-    return plainTimesEqual(getPlainTimeSlots(this), toPlainTimeSlots(other))
-  }
+    equals(other: PlainTimeArg): boolean {
+      return plainTimesEqual(getPlainTimeSlots(this), toPlainTimeSlots(other))
+    }
 
-  toLocaleString(
-    locales: LocalesArg | undefined = undefined,
-    options: Intl.DateTimeFormatOptions = {},
-  ): string {
-    const slots = getPlainTimeSlots(this)
-    const format = new RawDateTimeFormat(
-      locales,
-      applyPlainFormatTimeZone(
-        transformTimeOptions(options, /* allowPartialOverlap = */ false),
-      ),
-    )
-    return format.format(timeFieldsToMilli(slots))
-  }
+    toLocaleString(
+      locales: LocalesArg | undefined = undefined,
+      options: Intl.DateTimeFormatOptions = {},
+    ): string {
+      const slots = getPlainTimeSlots(this)
+      const format = new RawDateTimeFormat(
+        locales,
+        applyPlainFormatTimeZone(
+          transformTimeOptions(options, /* allowPartialOverlap = */ false),
+        ),
+      )
+      return format.format(timeFieldsToMilli(slots))
+    }
 
-  toString(
-    options: Temporal.PlainTimeToStringOptions | undefined = undefined,
-  ): string {
-    return formatPlainTimeIso(getPlainTimeSlots(this), options)
-  }
+    toString(
+      options: Temporal.PlainTimeToStringOptions | undefined = undefined,
+    ): string {
+      return formatPlainTimeIso(getPlainTimeSlots(this), options)
+    }
 
-  toJSON(): string {
-    return formatPlainTimeIso(getPlainTimeSlots(this))
-  }
+    toJSON(): string {
+      return formatPlainTimeIso(getPlainTimeSlots(this))
+    }
 
-  valueOf(): never {
-    return forbiddenValueOf()
-  }
-}
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
+  },
+)
 
-defineTemporalClass(PlainTime, PlainTimeBranding)
 export function createPlainTime(slots: TimeFields): PlainTime {
   return initPlainTime(Object.create(PlainTime.prototype), slots)
 }
 
 export function getPlainTimeSlots(obj: unknown): TimeFields {
-  // Precondition: callers only pass object-like receivers because WeakMap
-  // lookup itself rejects primitives.
   const slots = plainTimeSlotsMap.get(obj as object)
-
   if (!slots) {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
-
   return slots
 }
 

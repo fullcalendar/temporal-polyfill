@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { InstantBranding } from '../../apiHelpers/branding'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -26,31 +27,34 @@ import {
 } from './zonedDateTime'
 
 type InstantRecord = RecordTypes.InstantRecord
-
 type Format = DateTimeFormatLike<NativeInstantRecord>
 
 export const getNativeInstant: (record: unknown) => Temporal.Instant =
   getInstantSlots
 
-class _NativeInstantRecord implements InstantRecord {
-  declare readonly [RecordTypes.InstantRecordBrand]: undefined
+export type NativeInstantRecord = InstanceType<typeof NativeInstantRecord>
+export const NativeInstantRecord = defineTemporalClass(
+  InstantBranding,
+  class implements InstantRecord {
+    declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
-  get epochMilliseconds() {
-    return getNativeInstant(this).epochMilliseconds
-  }
+    get epochMilliseconds() {
+      return getNativeInstant(this).epochMilliseconds
+    }
 
-  get epochNanoseconds() {
-    return getNativeInstant(this).epochNanoseconds
-  }
+    get epochNanoseconds() {
+      return getNativeInstant(this).epochNanoseconds
+    }
 
-  toJSON() {
-    return getNativeInstant(this).toString()
-  }
+    toJSON() {
+      return getNativeInstant(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativeInstantRecord(
   native: Temporal.Instant,
@@ -60,12 +64,6 @@ export function createNativeInstantRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativeInstantRecord = _NativeInstantRecord
-export const NativeInstantRecord = defineTemporalClass(
-  _NativeInstantRecord,
-  'Instant',
-)
 
 export function create(epochNanoseconds: bigint): NativeInstantRecord {
   return createNativeInstantRecord(

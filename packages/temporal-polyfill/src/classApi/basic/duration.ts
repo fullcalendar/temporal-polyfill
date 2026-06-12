@@ -47,209 +47,208 @@ type DurationSlots = DurationFields & { sign: NumberSign }
 
 const durationSlotsMap = new WeakMap<object, DurationSlots>()
 
-export class Duration implements DurationFields {
-  constructor(
-    years = 0,
-    months = 0,
-    weeks = 0,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-    milliseconds = 0,
-    microseconds = 0,
-    nanoseconds = 0,
-  ) {
-    initDuration(
-      this,
-      constructDurationSlots(
-        years,
-        months,
-        weeks,
-        days,
-        hours,
-        minutes,
-        seconds,
-        milliseconds,
-        microseconds,
-        nanoseconds,
-      ),
-    )
-  }
+export type Duration = InstanceType<typeof Duration>
+export const Duration = defineTemporalClass(
+  DurationBranding,
+  class implements DurationFields {
+    constructor(
+      years = 0,
+      months = 0,
+      weeks = 0,
+      days = 0,
+      hours = 0,
+      minutes = 0,
+      seconds = 0,
+      milliseconds = 0,
+      microseconds = 0,
+      nanoseconds = 0,
+    ) {
+      initDuration(
+        this,
+        constructDurationSlots(
+          years,
+          months,
+          weeks,
+          days,
+          hours,
+          minutes,
+          seconds,
+          milliseconds,
+          microseconds,
+          nanoseconds,
+        ),
+      )
+    }
 
-  static from(arg: DurationArg): Duration {
-    return createDuration(toDurationSlots(arg))
-  }
+    static from(arg: DurationArg): Duration {
+      return createDuration(toDurationSlots(arg))
+    }
 
-  static compare(
-    durationArg0: DurationArg,
-    durationArg1: DurationArg,
-    options: Temporal.DurationRelativeToOptions | undefined = undefined,
-  ): NumberSign {
-    return compareDurations(
-      refinePublicRelativeTo,
-      toDurationSlots(durationArg0),
-      toDurationSlots(durationArg1),
-      options,
-    )
-  }
-
-  get years(): number {
-    return getDurationSlots(this).years
-  }
-
-  get months(): number {
-    return getDurationSlots(this).months
-  }
-
-  get weeks(): number {
-    return getDurationSlots(this).weeks
-  }
-
-  get days(): number {
-    return getDurationSlots(this).days
-  }
-
-  get hours(): number {
-    return getDurationSlots(this).hours
-  }
-
-  get minutes(): number {
-    return getDurationSlots(this).minutes
-  }
-
-  get seconds(): number {
-    return getDurationSlots(this).seconds
-  }
-
-  get milliseconds(): number {
-    return getDurationSlots(this).milliseconds
-  }
-
-  get microseconds(): number {
-    return getDurationSlots(this).microseconds
-  }
-
-  get nanoseconds(): number {
-    return getDurationSlots(this).nanoseconds
-  }
-
-  get sign(): NumberSign {
-    return getDurationSlots(this).sign
-  }
-
-  get blank(): boolean {
-    return !getDurationSlots(this).sign
-  }
-
-  with(mod: Partial<DurationFields>): Duration {
-    return createDuration(mergeDurationFields(getDurationSlots(this), mod))
-  }
-
-  negated(): Duration {
-    return createDuration(negateDuration(getDurationSlots(this)))
-  }
-
-  abs(): Duration {
-    return createDuration(absDuration(getDurationSlots(this)))
-  }
-
-  add(
-    otherArg: DurationArg,
-    options: Temporal.DurationRelativeToOptions | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      addDurations(
+    static compare(
+      durationArg0: DurationArg,
+      durationArg1: DurationArg,
+      options: Temporal.DurationRelativeToOptions | undefined = undefined,
+    ): NumberSign {
+      return compareDurations(
         refinePublicRelativeTo,
-        false,
-        getDurationSlots(this),
-        toDurationSlots(otherArg),
+        toDurationSlots(durationArg0),
+        toDurationSlots(durationArg1),
         options,
-      ),
-    )
-  }
+      )
+    }
 
-  subtract(
-    otherArg: DurationArg,
-    options: Temporal.DurationRelativeToOptions | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      addDurations(
+    get years(): number {
+      return getDurationSlots(this).years
+    }
+
+    get months(): number {
+      return getDurationSlots(this).months
+    }
+
+    get weeks(): number {
+      return getDurationSlots(this).weeks
+    }
+
+    get days(): number {
+      return getDurationSlots(this).days
+    }
+
+    get hours(): number {
+      return getDurationSlots(this).hours
+    }
+
+    get minutes(): number {
+      return getDurationSlots(this).minutes
+    }
+
+    get seconds(): number {
+      return getDurationSlots(this).seconds
+    }
+
+    get milliseconds(): number {
+      return getDurationSlots(this).milliseconds
+    }
+
+    get microseconds(): number {
+      return getDurationSlots(this).microseconds
+    }
+
+    get nanoseconds(): number {
+      return getDurationSlots(this).nanoseconds
+    }
+
+    get sign(): NumberSign {
+      return getDurationSlots(this).sign
+    }
+
+    get blank(): boolean {
+      return !getDurationSlots(this).sign
+    }
+
+    with(mod: Partial<DurationFields>): Duration {
+      return createDuration(mergeDurationFields(getDurationSlots(this), mod))
+    }
+
+    negated(): Duration {
+      return createDuration(negateDuration(getDurationSlots(this)))
+    }
+
+    abs(): Duration {
+      return createDuration(absDuration(getDurationSlots(this)))
+    }
+
+    add(
+      otherArg: DurationArg,
+      options: Temporal.DurationRelativeToOptions | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        addDurations(
+          refinePublicRelativeTo,
+          false,
+          getDurationSlots(this),
+          toDurationSlots(otherArg),
+          options,
+        ),
+      )
+    }
+
+    subtract(
+      otherArg: DurationArg,
+      options: Temporal.DurationRelativeToOptions | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        addDurations(
+          refinePublicRelativeTo,
+          true,
+          getDurationSlots(this),
+          toDurationSlots(otherArg),
+          options,
+        ),
+      )
+    }
+
+    round(roundTo: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): Duration
+    round(roundTo: Temporal.DurationRoundingOptions): Duration
+    round(
+      roundTo:
+        | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+        | Temporal.DurationRoundingOptions,
+    ): Duration {
+      return createDuration(
+        roundDuration(refinePublicRelativeTo, getDurationSlots(this), roundTo),
+      )
+    }
+
+    total(totalOf: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): number
+    total(totalOf: Temporal.DurationTotalOptions): number
+    total(
+      totalOf:
+        | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+        | Temporal.DurationTotalOptions,
+    ): number {
+      return totalDuration(
         refinePublicRelativeTo,
-        true,
         getDurationSlots(this),
-        toDurationSlots(otherArg),
-        options,
-      ),
-    )
-  }
+        totalOf,
+      )
+    }
 
-  round(roundTo: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): Duration
-  round(roundTo: Temporal.DurationRoundingOptions): Duration
-  round(
-    roundTo:
-      | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-      | Temporal.DurationRoundingOptions,
-  ): Duration {
-    return createDuration(
-      roundDuration(refinePublicRelativeTo, getDurationSlots(this), roundTo),
-    )
-  }
+    toLocaleString(
+      locales: LocalesArg | undefined = undefined,
+      options?: any,
+    ): string {
+      const slots = getDurationSlots(this)
 
-  total(totalOf: Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>): number
-  total(totalOf: Temporal.DurationTotalOptions): number
-  total(
-    totalOf:
-      | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
-      | Temporal.DurationTotalOptions,
-  ): number {
-    return totalDuration(
-      refinePublicRelativeTo,
-      getDurationSlots(this),
-      totalOf,
-    )
-  }
+      return (Intl as any).DurationFormat
+        ? new (Intl as any).DurationFormat(locales, options).format(slots)
+        : formatDurationIso(slots, options)
+    }
 
-  toLocaleString(
-    locales: LocalesArg | undefined = undefined,
-    options?: any,
-  ): string {
-    const slots = getDurationSlots(this)
+    toString(
+      options: Temporal.DurationToStringOptions | undefined = undefined,
+    ): string {
+      return formatDurationIso(getDurationSlots(this), options)
+    }
 
-    return (Intl as any).DurationFormat
-      ? new (Intl as any).DurationFormat(locales, options).format(slots)
-      : formatDurationIso(slots, options)
-  }
+    toJSON(): string {
+      return formatDurationIso(getDurationSlots(this))
+    }
 
-  toString(
-    options: Temporal.DurationToStringOptions | undefined = undefined,
-  ): string {
-    return formatDurationIso(getDurationSlots(this), options)
-  }
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
+  },
+)
 
-  toJSON(): string {
-    return formatDurationIso(getDurationSlots(this))
-  }
-
-  valueOf(): never {
-    return forbiddenValueOf()
-  }
-}
-
-defineTemporalClass(Duration, DurationBranding)
 export function createDuration(slots: DurationSlots): Duration {
   return initDuration(Object.create(Duration.prototype), slots)
 }
 
 export function getDurationSlots(obj: unknown): DurationSlots {
-  // Precondition: callers only pass object-like receivers because WeakMap
-  // lookup itself rejects primitives.
   const slots = durationSlotsMap.get(obj as object)
-
   if (!slots) {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
-
   return slots
 }
 

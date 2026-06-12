@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { PlainTimeBranding } from '../../apiHelpers/branding'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -27,41 +28,45 @@ type Format = DateTimeFormatLike<NativePlainTimeRecord>
 export const getNativePlainTime: (record: unknown) => Temporal.PlainTime =
   getPlainTimeSlots
 
-class _NativePlainTimeRecord implements TimeFields, PlainTimeRecord {
-  declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
+export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord>
+export const NativePlainTimeRecord = defineTemporalClass(
+  PlainTimeBranding,
+  class implements TimeFields, PlainTimeRecord {
+    declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
-  get hour() {
-    return getNativePlainTime(this).hour
-  }
+    get hour() {
+      return getNativePlainTime(this).hour
+    }
 
-  get minute() {
-    return getNativePlainTime(this).minute
-  }
+    get minute() {
+      return getNativePlainTime(this).minute
+    }
 
-  get second() {
-    return getNativePlainTime(this).second
-  }
+    get second() {
+      return getNativePlainTime(this).second
+    }
 
-  get millisecond() {
-    return getNativePlainTime(this).millisecond
-  }
+    get millisecond() {
+      return getNativePlainTime(this).millisecond
+    }
 
-  get microsecond() {
-    return getNativePlainTime(this).microsecond
-  }
+    get microsecond() {
+      return getNativePlainTime(this).microsecond
+    }
 
-  get nanosecond() {
-    return getNativePlainTime(this).nanosecond
-  }
+    get nanosecond() {
+      return getNativePlainTime(this).nanosecond
+    }
 
-  toJSON() {
-    return getNativePlainTime(this).toString()
-  }
+    toJSON() {
+      return getNativePlainTime(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativePlainTimeRecord(
   native: Temporal.PlainTime,
@@ -71,12 +76,6 @@ export function createNativePlainTimeRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativePlainTimeRecord = _NativePlainTimeRecord
-export const NativePlainTimeRecord = defineTemporalClass(
-  _NativePlainTimeRecord,
-  'PlainTime',
-)
 
 export function create(
   hour?: number,

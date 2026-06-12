@@ -47,141 +47,140 @@ export type InstantArg = Instant | string
 
 const instantSlotsMap = new WeakMap<object, EpochNanoFields>()
 
-export class Instant {
-  constructor(epochNanoseconds: bigint) {
-    initInstant(this, constructEpochNanoSlots(epochNanoseconds))
-  }
+export type Instant = InstanceType<typeof Instant>
+export const Instant = defineTemporalClass(
+  InstantBranding,
+  class {
+    constructor(epochNanoseconds: bigint) {
+      initInstant(this, constructEpochNanoSlots(epochNanoseconds))
+    }
 
-  static from(arg: InstantArg): Instant {
-    return createInstant(toInstantSlots(arg))
-  }
+    static from(arg: InstantArg): Instant {
+      return createInstant(toInstantSlots(arg))
+    }
 
-  static fromEpochMilliseconds(epochMilli: number): Instant {
-    return createInstant(epochMilliToInstant(epochMilli))
-  }
+    static fromEpochMilliseconds(epochMilli: number): Instant {
+      return createInstant(epochMilliToInstant(epochMilli))
+    }
 
-  static fromEpochNanoseconds(epochNano: bigint): Instant {
-    return createInstant(epochNanoToInstant(epochNano))
-  }
+    static fromEpochNanoseconds(epochNano: bigint): Instant {
+      return createInstant(epochNanoToInstant(epochNano))
+    }
 
-  static compare(a: InstantArg, b: InstantArg): NumberSign {
-    return compareInstants(toInstantSlots(a), toInstantSlots(b))
-  }
+    static compare(a: InstantArg, b: InstantArg): NumberSign {
+      return compareInstants(toInstantSlots(a), toInstantSlots(b))
+    }
 
-  get epochMilliseconds(): number {
-    return getEpochMilli(getInstantSlots(this))
-  }
+    get epochMilliseconds(): number {
+      return getEpochMilli(getInstantSlots(this))
+    }
 
-  get epochNanoseconds(): bigint {
-    return getEpochNano(getInstantSlots(this))
-  }
+    get epochNanoseconds(): bigint {
+      return getEpochNano(getInstantSlots(this))
+    }
 
-  add(durationArg: DurationArg): Instant {
-    return createInstant(
-      moveInstant(false, getInstantSlots(this), toDurationSlots(durationArg)),
-    )
-  }
+    add(durationArg: DurationArg): Instant {
+      return createInstant(
+        moveInstant(false, getInstantSlots(this), toDurationSlots(durationArg)),
+      )
+    }
 
-  subtract(durationArg: DurationArg): Instant {
-    return createInstant(
-      moveInstant(true, getInstantSlots(this), toDurationSlots(durationArg)),
-    )
-  }
+    subtract(durationArg: DurationArg): Instant {
+      return createInstant(
+        moveInstant(true, getInstantSlots(this), toDurationSlots(durationArg)),
+      )
+    }
 
-  until(
-    otherArg: InstantArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-      | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      diffInstants(
-        false,
-        getInstantSlots(this),
-        toInstantSlots(otherArg),
-        options,
-      ),
-    )
-  }
+    until(
+      otherArg: InstantArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+        | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        diffInstants(
+          false,
+          getInstantSlots(this),
+          toInstantSlots(otherArg),
+          options,
+        ),
+      )
+    }
 
-  since(
-    otherArg: InstantArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
-      | undefined = undefined,
-  ): Duration {
-    return createDuration(
-      diffInstants(
-        true,
-        getInstantSlots(this),
-        toInstantSlots(otherArg),
-        options,
-      ),
-    )
-  }
+    since(
+      otherArg: InstantArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
+        | undefined = undefined,
+    ): Duration {
+      return createDuration(
+        diffInstants(
+          true,
+          getInstantSlots(this),
+          toInstantSlots(otherArg),
+          options,
+        ),
+      )
+    }
 
-  round(
-    options:
-      | Temporal.PluralizeUnit<Temporal.TimeUnit>
-      | Temporal.RoundingOptions<Temporal.TimeUnit>,
-  ): Instant {
-    return createInstant(roundInstant(getInstantSlots(this), options))
-  }
+    round(
+      options:
+        | Temporal.PluralizeUnit<Temporal.TimeUnit>
+        | Temporal.RoundingOptions<Temporal.TimeUnit>,
+    ): Instant {
+      return createInstant(roundInstant(getInstantSlots(this), options))
+    }
 
-  equals(otherArg: InstantArg): boolean {
-    return instantsEqual(getInstantSlots(this), toInstantSlots(otherArg))
-  }
+    equals(otherArg: InstantArg): boolean {
+      return instantsEqual(getInstantSlots(this), toInstantSlots(otherArg))
+    }
 
-  toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
-    return createZonedDateTime(
-      instantToZonedDateTime(
-        getInstantSlots(this),
-        queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-      ),
-    )
-  }
+    toZonedDateTimeISO(timeZoneArg: TimeZoneArg): ZonedDateTime {
+      return createZonedDateTime(
+        instantToZonedDateTime(
+          getInstantSlots(this),
+          queryTimeZone(refineTimeZoneArg(timeZoneArg)),
+        ),
+      )
+    }
 
-  toLocaleString(
-    locales: LocalesArg | undefined = undefined,
-    options: Intl.DateTimeFormatOptions = {},
-  ): string {
-    const slots = getInstantSlots(this)
-    const format = new RawDateTimeFormat(
-      locales,
-      transformInstantOptions(options, /* allowPartialOverlap = */ false),
-    )
-    return format.format(getEpochMilli(slots))
-  }
+    toLocaleString(
+      locales: LocalesArg | undefined = undefined,
+      options: Intl.DateTimeFormatOptions = {},
+    ): string {
+      const slots = getInstantSlots(this)
+      const format = new RawDateTimeFormat(
+        locales,
+        transformInstantOptions(options, /* allowPartialOverlap = */ false),
+      )
+      return format.format(getEpochMilli(slots))
+    }
 
-  toString(
-    options: Temporal.InstantToStringOptions | undefined = undefined,
-  ): string {
-    return formatInstantIso(refineTimeZoneArg, getInstantSlots(this), options)
-  }
+    toString(
+      options: Temporal.InstantToStringOptions | undefined = undefined,
+    ): string {
+      return formatInstantIso(refineTimeZoneArg, getInstantSlots(this), options)
+    }
 
-  toJSON(): string {
-    return formatInstantIso(refineTimeZoneArg, getInstantSlots(this))
-  }
+    toJSON(): string {
+      return formatInstantIso(refineTimeZoneArg, getInstantSlots(this))
+    }
 
-  valueOf(): never {
-    return forbiddenValueOf()
-  }
-}
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
+  },
+)
 
-defineTemporalClass(Instant, InstantBranding)
 export function createInstant(slots: EpochNanoFields): Instant {
   return initInstant(Object.create(Instant.prototype), slots)
 }
 
 export function getInstantSlots(obj: unknown): EpochNanoFields {
-  // Precondition: callers only pass object-like receivers because WeakMap
-  // lookup itself rejects primitives.
   const slots = instantSlotsMap.get(obj as object)
-
   if (!slots) {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
-
   return slots
 }
 

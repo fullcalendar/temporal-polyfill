@@ -100,406 +100,411 @@ type ZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarImpl }
 
 const zonedDateTimeSlotsMap = new WeakMap<object, ZonedDateTimeSlots>()
 
-export class ZonedDateTime {
-  constructor(
-    epochNanoseconds: bigint,
-    timeZoneId: string,
-    calendar: string | undefined = undefined,
-  ) {
-    initZonedDateTime(
-      this,
-      constructZonedEpochNanoSlots(
-        resolveAnyCalendarArg,
-        epochNanoseconds,
-        timeZoneId,
-        calendar,
-      ),
-    )
-  }
+export type ZonedDateTime = InstanceType<typeof ZonedDateTime>
+export const ZonedDateTime = defineTemporalClass(
+  ZonedDateTimeBranding,
+  class {
+    constructor(
+      epochNanoseconds: bigint,
+      timeZoneId: string,
+      calendar: string | undefined = undefined,
+    ) {
+      initZonedDateTime(
+        this,
+        constructZonedEpochNanoSlots(
+          resolveAnyCalendarArg,
+          epochNanoseconds,
+          timeZoneId,
+          calendar,
+        ),
+      )
+    }
 
-  static from(
-    arg: any,
-    options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
-  ): ZonedDateTime {
-    return createZonedDateTime(toZonedDateTimeSlots(arg, options))
-  }
+    static from(
+      arg: any,
+      options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
+    ): ZonedDateTime {
+      return createZonedDateTime(toZonedDateTimeSlots(arg, options))
+    }
 
-  static compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumberSign {
-    return compareZonedDateTimes(
-      toZonedDateTimeSlots(arg0),
-      toZonedDateTimeSlots(arg1),
-    )
-  }
+    static compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumberSign {
+      return compareZonedDateTimes(
+        toZonedDateTimeSlots(arg0),
+        toZonedDateTimeSlots(arg1),
+      )
+    }
 
-  get epochMilliseconds(): number {
-    return getEpochMilli(getZonedDateTimeSlots(this))
-  }
+    get epochMilliseconds(): number {
+      return getEpochMilli(getZonedDateTimeSlots(this))
+    }
 
-  get epochNanoseconds(): bigint {
-    return getEpochNano(getZonedDateTimeSlots(this))
-  }
+    get epochNanoseconds(): bigint {
+      return getEpochNano(getZonedDateTimeSlots(this))
+    }
 
-  get calendarId(): string {
-    return getCalendarSlotId(getZonedDateTimeSlots(this).calendar)
-  }
+    get calendarId(): string {
+      return getCalendarSlotId(getZonedDateTimeSlots(this).calendar)
+    }
 
-  get era(): string | undefined {
-    const slots = getZonedDateTimeSlots(this)
-    const isoDateTime = zonedEpochSlotsToIso(slots)
-    return computeCalendarEraFields(slots.calendar, isoDateTime).era
-  }
+    get era(): string | undefined {
+      const slots = getZonedDateTimeSlots(this)
+      const isoDateTime = zonedEpochSlotsToIso(slots)
+      return computeCalendarEraFields(slots.calendar, isoDateTime).era
+    }
 
-  get eraYear(): number | undefined {
-    const slots = getZonedDateTimeSlots(this)
-    const isoDateTime = zonedEpochSlotsToIso(slots)
-    return computeCalendarEraFields(slots.calendar, isoDateTime).eraYear
-  }
+    get eraYear(): number | undefined {
+      const slots = getZonedDateTimeSlots(this)
+      const isoDateTime = zonedEpochSlotsToIso(slots)
+      return computeCalendarEraFields(slots.calendar, isoDateTime).eraYear
+    }
 
-  get year(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDateFields(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    ).year
-  }
+    get year(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDateFields(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      ).year
+    }
 
-  get month(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDateFields(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    ).month
-  }
+    get month(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDateFields(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      ).month
+    }
 
-  get monthCode(): string {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarMonthCode(slots.calendar, zonedEpochSlotsToIso(slots))
-  }
+    get monthCode(): string {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarMonthCode(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get day(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDateFields(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    ).day
-  }
+    get day(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDateFields(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      ).day
+    }
 
-  get hour(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).hour
-  }
+    get hour(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).hour
+    }
 
-  get minute(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).minute
-  }
+    get minute(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).minute
+    }
 
-  get second(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).second
-  }
+    get second(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).second
+    }
 
-  get millisecond(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).millisecond
-  }
+    get millisecond(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).millisecond
+    }
 
-  get microsecond(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).microsecond
-  }
+    get microsecond(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).microsecond
+    }
 
-  get nanosecond(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).nanosecond
-  }
+    get nanosecond(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).nanosecond
+    }
 
-  get dayOfWeek(): number {
-    return computeIsoDayOfWeek(
-      zonedEpochSlotsToIso(getZonedDateTimeSlots(this)),
-    )
-  }
+    get dayOfWeek(): number {
+      return computeIsoDayOfWeek(
+        zonedEpochSlotsToIso(getZonedDateTimeSlots(this)),
+      )
+    }
 
-  get dayOfYear(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDayOfYear(slots.calendar, zonedEpochSlotsToIso(slots))
-  }
+    get dayOfYear(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDayOfYear(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get weekOfYear(): number | undefined {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarWeekOfYear(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get weekOfYear(): number | undefined {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarWeekOfYear(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get yearOfWeek(): number | undefined {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarYearOfWeek(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get yearOfWeek(): number | undefined {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarYearOfWeek(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get daysInWeek(): number {
-    getZonedDateTimeSlots(this)
-    return 7
-  }
+    get daysInWeek(): number {
+      getZonedDateTimeSlots(this)
+      return 7
+    }
 
-  get daysInMonth(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDaysInMonth(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get daysInMonth(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDaysInMonth(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get daysInYear(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarDaysInYear(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get daysInYear(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarDaysInYear(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get monthsInYear(): number {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarMonthsInYear(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get monthsInYear(): number {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarMonthsInYear(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get inLeapYear(): boolean {
-    const slots = getZonedDateTimeSlots(this)
-    return computeCalendarInLeapYear(
-      slots.calendar,
-      zonedEpochSlotsToIso(slots),
-    )
-  }
+    get inLeapYear(): boolean {
+      const slots = getZonedDateTimeSlots(this)
+      return computeCalendarInLeapYear(
+        slots.calendar,
+        zonedEpochSlotsToIso(slots),
+      )
+    }
 
-  get offset(): string {
-    return formatOffsetNano(
-      zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds,
-    )
-  }
+    get offset(): string {
+      return formatOffsetNano(
+        zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds,
+      )
+    }
 
-  get offsetNanoseconds(): number {
-    return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds
-  }
+    get offsetNanoseconds(): number {
+      return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds
+    }
 
-  get timeZoneId(): string {
-    return getZonedDateTimeSlots(this).timeZone.id
-  }
+    get timeZoneId(): string {
+      return getZonedDateTimeSlots(this).timeZone.id
+    }
 
-  get hoursInDay(): number {
-    return computeZonedHoursInDay(getZonedDateTimeSlots(this))
-  }
+    get hoursInDay(): number {
+      return computeZonedHoursInDay(getZonedDateTimeSlots(this))
+    }
 
-  with(
-    mod: Partial<DateTimeFields>,
-    options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
-  ): ZonedDateTime {
-    return createZonedDateTime(
-      mergeZonedDateTimeFields(
-        getZonedDateTimeSlots(this),
-        rejectInvalidBag(mod),
-        options,
-      ),
-    )
-  }
+    with(
+      mod: Partial<DateTimeFields>,
+      options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        mergeZonedDateTimeFields(
+          getZonedDateTimeSlots(this),
+          rejectInvalidBag(mod),
+          options,
+        ),
+      )
+    }
 
-  withCalendar(calendarArg: CalendarArg): ZonedDateTime {
-    return createZonedDateTime({
-      ...getZonedDateTimeSlots(this),
-      calendar: refineCalendarArg(calendarArg),
-    })
-  }
-
-  withTimeZone(timeZoneArg: TimeZoneArg): ZonedDateTime {
-    return createZonedDateTime({
-      ...getZonedDateTimeSlots(this),
-      timeZone: queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-    })
-  }
-
-  withPlainTime(
-    plainTimeArg: PlainTimeArg | undefined = undefined,
-  ): ZonedDateTime {
-    return createZonedDateTime(
-      zonedDateTimeWithPlainTime(
-        getZonedDateTimeSlots(this),
-        optionalToPlainTimeFields(plainTimeArg),
-      ),
-    )
-  }
-
-  add(
-    durationArg: DurationArg,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): ZonedDateTime {
-    return createZonedDateTime(
-      moveZonedDateTime(
-        false,
-        getZonedDateTimeSlots(this),
-        toDurationSlots(durationArg),
-        options,
-      ),
-    )
-  }
-
-  subtract(
-    durationArg: DurationArg,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): ZonedDateTime {
-    return createZonedDateTime(
-      moveZonedDateTime(
-        true,
-        getZonedDateTimeSlots(this),
-        toDurationSlots(durationArg),
-        options,
-      ),
-    )
-  }
-
-  until(
-    otherArg: ZonedDateTimeArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<
-          Temporal.DateUnit | Temporal.TimeUnit
-        >
-      | undefined = undefined,
-  ): Duration {
-    const slots = getZonedDateTimeSlots(this)
-    const other = toZonedDateTimeSlots(otherArg)
-    const calendar = getCommonCalendar(slots.calendar, other.calendar)
-    return createDuration(
-      createDurationSlots(
-        diffZonedDateTimes(false, calendar, slots, other, options),
-      ),
-    )
-  }
-
-  since(
-    otherArg: ZonedDateTimeArg,
-    options:
-      | Temporal.RoundingOptionsWithLargestUnit<
-          Temporal.DateUnit | Temporal.TimeUnit
-        >
-      | undefined = undefined,
-  ): Duration {
-    const slots = getZonedDateTimeSlots(this)
-    const other = toZonedDateTimeSlots(otherArg)
-    const calendar = getCommonCalendar(slots.calendar, other.calendar)
-    return createDuration(
-      createDurationSlots(
-        diffZonedDateTimes(true, calendar, slots, other, options),
-      ),
-    )
-  }
-
-  round(
-    options:
-      | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-      | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-  ): ZonedDateTime {
-    return createZonedDateTime(
-      roundZonedDateTime(getZonedDateTimeSlots(this), options),
-    )
-  }
-
-  startOfDay(): ZonedDateTime {
-    return createZonedDateTime(
-      computeZonedStartOfDay(getZonedDateTimeSlots(this)),
-    )
-  }
-
-  equals(otherArg: ZonedDateTimeArg): boolean {
-    return zonedDateTimesEqual(
-      getZonedDateTimeSlots(this),
-      toZonedDateTimeSlots(otherArg),
-    )
-  }
-
-  toInstant(): Instant {
-    return createInstant(zonedDateTimeToInstant(getZonedDateTimeSlots(this)))
-  }
-
-  toPlainDateTime(): PlainDateTime {
-    return createPlainDateTime(
-      zonedDateTimeToPlainDateTime(getZonedDateTimeSlots(this)),
-    )
-  }
-
-  toPlainDate(): PlainDate {
-    return createPlainDate(
-      zonedDateTimeToPlainDate(getZonedDateTimeSlots(this)),
-    )
-  }
-
-  toPlainTime(): PlainTime {
-    return createPlainTime(
-      zonedDateTimeToPlainTime(getZonedDateTimeSlots(this)),
-    )
-  }
-
-  toLocaleString(
-    locales: LocalesArg | undefined = undefined,
-    options: Intl.DateTimeFormatOptions = {},
-  ): string {
-    const slots = getZonedDateTimeSlots(this)
-    const format = new RawDateTimeFormat(
-      locales,
-      applyZonedFormatTimeZone(
-        transformZonedOptions(options, /* allowPartialOverlap = */ false),
-        getZonedTimeZoneId(slots),
-      ),
-    )
-    checkResolvedCalendarCompatible(format, slots)
-    return format.format(getEpochMilli(slots))
-  }
-
-  toString(
-    options: Temporal.ZonedDateTimeToStringOptions | undefined = undefined,
-  ): string {
-    return formatZonedDateTimeIso(getZonedDateTimeSlots(this), options)
-  }
-
-  toJSON(): string {
-    return formatZonedDateTimeIso(getZonedDateTimeSlots(this))
-  }
-
-  getTimeZoneTransition(
-    options:
-      | Temporal.TransitionOptions
-      | Temporal.TransitionOptions['direction'],
-  ): ZonedDateTime | null {
-    const slots = getZonedDateTimeSlots(this)
-    const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
-
-    if (newEpochNano) {
+    withCalendar(calendarArg: CalendarArg): ZonedDateTime {
       return createZonedDateTime({
-        ...slots,
-        epochNanoseconds: newEpochNano,
+        ...getZonedDateTimeSlots(this),
+        calendar: refineCalendarArg(calendarArg),
       })
     }
 
-    return null
-  }
+    withTimeZone(timeZoneArg: TimeZoneArg): ZonedDateTime {
+      return createZonedDateTime({
+        ...getZonedDateTimeSlots(this),
+        timeZone: queryTimeZone(refineTimeZoneArg(timeZoneArg)),
+      })
+    }
 
-  valueOf(): never {
-    return forbiddenValueOf()
-  }
-}
+    withPlainTime(
+      plainTimeArg: PlainTimeArg | undefined = undefined,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        zonedDateTimeWithPlainTime(
+          getZonedDateTimeSlots(this),
+          optionalToPlainTimeFields(plainTimeArg),
+        ),
+      )
+    }
 
-defineTemporalClass(ZonedDateTime, ZonedDateTimeBranding)
+    add(
+      durationArg: DurationArg,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        moveZonedDateTime(
+          false,
+          getZonedDateTimeSlots(this),
+          toDurationSlots(durationArg),
+          options,
+        ),
+      )
+    }
+
+    subtract(
+      durationArg: DurationArg,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        moveZonedDateTime(
+          true,
+          getZonedDateTimeSlots(this),
+          toDurationSlots(durationArg),
+          options,
+        ),
+      )
+    }
+
+    until(
+      otherArg: ZonedDateTimeArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<
+            Temporal.DateUnit | Temporal.TimeUnit
+          >
+        | undefined = undefined,
+    ): Duration {
+      const slots = getZonedDateTimeSlots(this)
+      const other = toZonedDateTimeSlots(otherArg)
+      const calendar = getCommonCalendar(slots.calendar, other.calendar)
+      return createDuration(
+        createDurationSlots(
+          diffZonedDateTimes(false, calendar, slots, other, options),
+        ),
+      )
+    }
+
+    since(
+      otherArg: ZonedDateTimeArg,
+      options:
+        | Temporal.RoundingOptionsWithLargestUnit<
+            Temporal.DateUnit | Temporal.TimeUnit
+          >
+        | undefined = undefined,
+    ): Duration {
+      const slots = getZonedDateTimeSlots(this)
+      const other = toZonedDateTimeSlots(otherArg)
+      const calendar = getCommonCalendar(slots.calendar, other.calendar)
+      return createDuration(
+        createDurationSlots(
+          diffZonedDateTimes(true, calendar, slots, other, options),
+        ),
+      )
+    }
+
+    round(
+      options:
+        | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+        | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
+    ): ZonedDateTime {
+      return createZonedDateTime(
+        roundZonedDateTime(getZonedDateTimeSlots(this), options),
+      )
+    }
+
+    startOfDay(): ZonedDateTime {
+      return createZonedDateTime(
+        computeZonedStartOfDay(getZonedDateTimeSlots(this)),
+      )
+    }
+
+    equals(otherArg: ZonedDateTimeArg): boolean {
+      return zonedDateTimesEqual(
+        getZonedDateTimeSlots(this),
+        toZonedDateTimeSlots(otherArg),
+      )
+    }
+
+    toInstant(): Instant {
+      return createInstant(zonedDateTimeToInstant(getZonedDateTimeSlots(this)))
+    }
+
+    toPlainDateTime(): PlainDateTime {
+      return createPlainDateTime(
+        zonedDateTimeToPlainDateTime(getZonedDateTimeSlots(this)),
+      )
+    }
+
+    toPlainDate(): PlainDate {
+      return createPlainDate(
+        zonedDateTimeToPlainDate(getZonedDateTimeSlots(this)),
+      )
+    }
+
+    toPlainTime(): PlainTime {
+      return createPlainTime(
+        zonedDateTimeToPlainTime(getZonedDateTimeSlots(this)),
+      )
+    }
+
+    toLocaleString(
+      locales: LocalesArg | undefined = undefined,
+      options: Intl.DateTimeFormatOptions = {},
+    ): string {
+      const slots = getZonedDateTimeSlots(this)
+      const format = new RawDateTimeFormat(
+        locales,
+        applyZonedFormatTimeZone(
+          transformZonedOptions(options, /* allowPartialOverlap = */ false),
+          getZonedTimeZoneId(slots),
+        ),
+      )
+      checkResolvedCalendarCompatible(format, slots)
+      return format.format(getEpochMilli(slots))
+    }
+
+    toString(
+      options: Temporal.ZonedDateTimeToStringOptions | undefined = undefined,
+    ): string {
+      return formatZonedDateTimeIso(getZonedDateTimeSlots(this), options)
+    }
+
+    toJSON(): string {
+      return formatZonedDateTimeIso(getZonedDateTimeSlots(this))
+    }
+
+    getTimeZoneTransition(
+      options:
+        | Temporal.TransitionOptions
+        | Temporal.TransitionOptions['direction'],
+    ): ZonedDateTime | null {
+      const slots = getZonedDateTimeSlots(this)
+      const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
+
+      if (newEpochNano) {
+        return createZonedDateTime({
+          ...slots,
+          epochNanoseconds: newEpochNano,
+        })
+      }
+
+      return null
+    }
+
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
+  },
+)
+
 export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {
   return initZonedDateTime(Object.create(ZonedDateTime.prototype), slots)
 }
 
 export function getZonedDateTimeSlots(obj: unknown): ZonedDateTimeSlots {
-  // Precondition: callers only pass object-like receivers because WeakMap
-  // lookup itself rejects primitives.
   const slots = zonedDateTimeSlotsMap.get(obj as object)
-
   if (!slots) {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
-
   return slots
 }
 

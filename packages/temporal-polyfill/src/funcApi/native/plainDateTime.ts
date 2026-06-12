@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { PlainDateTimeBranding } from '../../apiHelpers/branding'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -42,78 +43,81 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<NativePlainDateTimeRecord>
-
 type PlainDateTimeRecord = RecordTypes.PlainDateTimeRecord
 
 export const getNativePlainDateTime: (
   record: unknown,
 ) => Temporal.PlainDateTime = getPlainDateTimeSlots
 
-class _NativePlainDateTimeRecord
-  implements DateTimeFields, PlainDateTimeRecord
-{
-  declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
+export type NativePlainDateTimeRecord = InstanceType<
+  typeof NativePlainDateTimeRecord
+>
+export const NativePlainDateTimeRecord = defineTemporalClass(
+  PlainDateTimeBranding,
+  class implements DateTimeFields, PlainDateTimeRecord {
+    declare readonly [RecordTypes.PlainDateTimeRecordBrand]: undefined
 
-  get calendarId() {
-    return getNativePlainDateTime(this).calendarId
-  }
+    get calendarId() {
+      return getNativePlainDateTime(this).calendarId
+    }
 
-  get era() {
-    return getNativePlainDateTime(this).era
-  }
+    get era() {
+      return getNativePlainDateTime(this).era
+    }
 
-  get eraYear() {
-    return getNativePlainDateTime(this).eraYear
-  }
+    get eraYear() {
+      return getNativePlainDateTime(this).eraYear
+    }
 
-  get year() {
-    return getNativePlainDateTime(this).year
-  }
+    get year() {
+      return getNativePlainDateTime(this).year
+    }
 
-  get month() {
-    return getNativePlainDateTime(this).month
-  }
+    get month() {
+      return getNativePlainDateTime(this).month
+    }
 
-  get monthCode() {
-    return getNativePlainDateTime(this).monthCode
-  }
+    get monthCode() {
+      return getNativePlainDateTime(this).monthCode
+    }
 
-  get day() {
-    return getNativePlainDateTime(this).day
-  }
+    get day() {
+      return getNativePlainDateTime(this).day
+    }
 
-  get hour() {
-    return getNativePlainDateTime(this).hour
-  }
+    get hour() {
+      return getNativePlainDateTime(this).hour
+    }
 
-  get minute() {
-    return getNativePlainDateTime(this).minute
-  }
+    get minute() {
+      return getNativePlainDateTime(this).minute
+    }
 
-  get second() {
-    return getNativePlainDateTime(this).second
-  }
+    get second() {
+      return getNativePlainDateTime(this).second
+    }
 
-  get millisecond() {
-    return getNativePlainDateTime(this).millisecond
-  }
+    get millisecond() {
+      return getNativePlainDateTime(this).millisecond
+    }
 
-  get microsecond() {
-    return getNativePlainDateTime(this).microsecond
-  }
+    get microsecond() {
+      return getNativePlainDateTime(this).microsecond
+    }
 
-  get nanosecond() {
-    return getNativePlainDateTime(this).nanosecond
-  }
+    get nanosecond() {
+      return getNativePlainDateTime(this).nanosecond
+    }
 
-  toJSON() {
-    return getNativePlainDateTime(this).toString()
-  }
+    toJSON() {
+      return getNativePlainDateTime(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativePlainDateTimeRecord(
   native: Temporal.PlainDateTime,
@@ -123,12 +127,6 @@ export function createNativePlainDateTimeRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativePlainDateTimeRecord = _NativePlainDateTimeRecord
-export const NativePlainDateTimeRecord = defineTemporalClass(
-  _NativePlainDateTimeRecord,
-  'PlainDateTime',
-)
 
 export function create(
   isoYear: number,

@@ -1,5 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { PlainTimeBranding } from '../../apiHelpers/branding'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -51,47 +52,50 @@ import { rejectInvalidBag } from './temporalRecords'
 
 type PlainTimeRecord = RecordTypes.PlainTimeRecord
 type Format = DateTimeFormatLike<ShimPlainTimeRecord>
-
 type ShimPlainTimeSlots = ReturnType<typeof constructTimeSlots>
 
 export const getShimPlainTimeSlots: (record: unknown) => ShimPlainTimeSlots =
   getPlainTimeSlots
 
-class _ShimPlainTimeRecord implements TimeFields, PlainTimeRecord {
-  declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
+export type ShimPlainTimeRecord = InstanceType<typeof ShimPlainTimeRecord>
+export const ShimPlainTimeRecord = defineTemporalClass(
+  PlainTimeBranding,
+  class implements TimeFields, PlainTimeRecord {
+    declare readonly [RecordTypes.PlainTimeRecordBrand]: undefined
 
-  get hour() {
-    return getShimPlainTimeSlots(this).hour
-  }
+    get hour() {
+      return getShimPlainTimeSlots(this).hour
+    }
 
-  get minute() {
-    return getShimPlainTimeSlots(this).minute
-  }
+    get minute() {
+      return getShimPlainTimeSlots(this).minute
+    }
 
-  get second() {
-    return getShimPlainTimeSlots(this).second
-  }
+    get second() {
+      return getShimPlainTimeSlots(this).second
+    }
 
-  get millisecond() {
-    return getShimPlainTimeSlots(this).millisecond
-  }
+    get millisecond() {
+      return getShimPlainTimeSlots(this).millisecond
+    }
 
-  get microsecond() {
-    return getShimPlainTimeSlots(this).microsecond
-  }
+    get microsecond() {
+      return getShimPlainTimeSlots(this).microsecond
+    }
 
-  get nanosecond() {
-    return getShimPlainTimeSlots(this).nanosecond
-  }
+    get nanosecond() {
+      return getShimPlainTimeSlots(this).nanosecond
+    }
 
-  toJSON() {
-    return formatTimeIsoAuto(getShimPlainTimeSlots(this))
-  }
+    toJSON() {
+      return formatTimeIsoAuto(getShimPlainTimeSlots(this))
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createShimPlainTimeRecord(
   slots: ShimPlainTimeSlots,
@@ -101,12 +105,6 @@ export function createShimPlainTimeRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type ShimPlainTimeRecord = _ShimPlainTimeRecord
-export const ShimPlainTimeRecord = defineTemporalClass(
-  _ShimPlainTimeRecord,
-  'PlainTime',
-)
 
 export function create(
   hour?: number,

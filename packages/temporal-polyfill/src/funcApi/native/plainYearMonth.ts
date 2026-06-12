@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
@@ -31,50 +32,53 @@ import {
 } from './recordUtils'
 
 type PlainYearMonthRecord = RecordTypes.PlainYearMonthRecord
-
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>
 
 export const getNativePlainYearMonth: (
   record: unknown,
 ) => Temporal.PlainYearMonth = getPlainYearMonthSlots
 
-class _NativePlainYearMonthRecord
-  implements YearMonthFields, PlainYearMonthRecord
-{
-  declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
+export type NativePlainYearMonthRecord = InstanceType<
+  typeof NativePlainYearMonthRecord
+>
+export const NativePlainYearMonthRecord = defineTemporalClass(
+  PlainYearMonthBranding,
+  class implements YearMonthFields, PlainYearMonthRecord {
+    declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
 
-  get calendarId() {
-    return getNativePlainYearMonth(this).calendarId
-  }
+    get calendarId() {
+      return getNativePlainYearMonth(this).calendarId
+    }
 
-  get era() {
-    return getNativePlainYearMonth(this).era
-  }
+    get era() {
+      return getNativePlainYearMonth(this).era
+    }
 
-  get eraYear() {
-    return getNativePlainYearMonth(this).eraYear
-  }
+    get eraYear() {
+      return getNativePlainYearMonth(this).eraYear
+    }
 
-  get year() {
-    return getNativePlainYearMonth(this).year
-  }
+    get year() {
+      return getNativePlainYearMonth(this).year
+    }
 
-  get monthCode() {
-    return getNativePlainYearMonth(this).monthCode
-  }
+    get monthCode() {
+      return getNativePlainYearMonth(this).monthCode
+    }
 
-  get month() {
-    return getNativePlainYearMonth(this).month
-  }
+    get month() {
+      return getNativePlainYearMonth(this).month
+    }
 
-  toJSON() {
-    return getNativePlainYearMonth(this).toString()
-  }
+    toJSON() {
+      return getNativePlainYearMonth(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativePlainYearMonthRecord(
   native: Temporal.PlainYearMonth,
@@ -84,12 +88,6 @@ export function createNativePlainYearMonthRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativePlainYearMonthRecord = _NativePlainYearMonthRecord
-export const NativePlainYearMonthRecord = defineTemporalClass(
-  _NativePlainYearMonthRecord,
-  'PlainYearMonth',
-)
 
 export function create(
   isoYear: number,

@@ -1,3 +1,4 @@
+import { CalendarBranding } from '../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -7,20 +8,21 @@ import * as errorMessages from '../internal/errorMessages'
 import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
-class _CalendarRecord implements RecordTypes.CalendarRecord {
-  declare readonly [RecordTypes.CalendarRecordBrand]: undefined
+export type CalendarRecord = InstanceType<typeof CalendarRecord>
+export const CalendarRecord = defineTemporalClass(
+  CalendarBranding,
+  class implements RecordTypes.CalendarRecord {
+    declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
-  toJSON() {
-    return getCalendarRecordId(this)
-  }
+    toJSON(): string {
+      return getCalendarRecordId(this)
+    }
 
-  valueOf() {
-    return getCalendarRecordId(this)
-  }
-}
-
-export type CalendarRecord = _CalendarRecord
-export const CalendarRecord = defineTemporalClass(_CalendarRecord, 'Calendar')
+    valueOf(): string {
+      return getCalendarRecordId(this)
+    }
+  },
+)
 
 /*
 TODO: accept slots object like sibling files?

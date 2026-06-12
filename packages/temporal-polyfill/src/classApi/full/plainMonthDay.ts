@@ -48,122 +48,121 @@ type PlainMonthDaySlots = CalendarDateFields & { calendar: CalendarImpl }
 
 const plainMonthDaySlotsMap = new WeakMap<object, PlainMonthDaySlots>()
 
-export class PlainMonthDay implements MonthDayFields {
-  constructor(
-    isoMonth: number,
-    isoDay: number,
-    calendar: string | undefined = undefined,
-    referenceIsoYear?: number,
-  ) {
-    initPlainMonthDay(
-      this,
-      constructMonthDaySlots(
-        resolveAnyCalendarArg,
-        isoMonth,
-        isoDay,
-        calendar,
-        referenceIsoYear,
-      ),
-    )
-  }
+export type PlainMonthDay = InstanceType<typeof PlainMonthDay>
+export const PlainMonthDay = defineTemporalClass(
+  PlainMonthDayBranding,
+  class implements MonthDayFields {
+    constructor(
+      isoMonth: number,
+      isoDay: number,
+      calendar: string | undefined = undefined,
+      referenceIsoYear?: number,
+    ) {
+      initPlainMonthDay(
+        this,
+        constructMonthDaySlots(
+          resolveAnyCalendarArg,
+          isoMonth,
+          isoDay,
+          calendar,
+          referenceIsoYear,
+        ),
+      )
+    }
 
-  static from(
-    arg: PlainMonthDayArg,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): PlainMonthDay {
-    return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
-  }
+    static from(
+      arg: PlainMonthDayArg,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): PlainMonthDay {
+      return createPlainMonthDay(toPlainMonthDaySlots(arg, options))
+    }
 
-  get calendarId(): string {
-    return getCalendarSlotId(getPlainMonthDaySlots(this).calendar)
-  }
+    get calendarId(): string {
+      return getCalendarSlotId(getPlainMonthDaySlots(this).calendar)
+    }
 
-  get month(): number {
-    const slots = getPlainMonthDaySlots(this)
-    return computeCalendarDateFields(slots.calendar, slots).month
-  }
+    get month(): number {
+      const slots = getPlainMonthDaySlots(this)
+      return computeCalendarDateFields(slots.calendar, slots).month
+    }
 
-  get monthCode(): string {
-    const slots = getPlainMonthDaySlots(this)
-    return computeCalendarMonthCode(slots.calendar, slots)
-  }
+    get monthCode(): string {
+      const slots = getPlainMonthDaySlots(this)
+      return computeCalendarMonthCode(slots.calendar, slots)
+    }
 
-  get day(): number {
-    const slots = getPlainMonthDaySlots(this)
-    return computeCalendarDateFields(slots.calendar, slots).day
-  }
+    get day(): number {
+      const slots = getPlainMonthDaySlots(this)
+      return computeCalendarDateFields(slots.calendar, slots).day
+    }
 
-  with(
-    mod: Partial<MonthDayFields>,
-    options: Temporal.OverflowOptions | undefined = undefined,
-  ): PlainMonthDay {
-    return createPlainMonthDay(
-      mergePlainMonthDayFields(
+    with(
+      mod: Partial<MonthDayFields>,
+      options: Temporal.OverflowOptions | undefined = undefined,
+    ): PlainMonthDay {
+      return createPlainMonthDay(
+        mergePlainMonthDayFields(
+          getPlainMonthDaySlots(this),
+          rejectInvalidBag(mod),
+          options,
+        ),
+      )
+    }
+
+    equals(otherArg: PlainMonthDayArg): boolean {
+      return plainMonthDaysEqual(
         getPlainMonthDaySlots(this),
-        rejectInvalidBag(mod),
-        options,
-      ),
-    )
-  }
+        toPlainMonthDaySlots(otherArg),
+      )
+    }
 
-  equals(otherArg: PlainMonthDayArg): boolean {
-    return plainMonthDaysEqual(
-      getPlainMonthDaySlots(this),
-      toPlainMonthDaySlots(otherArg),
-    )
-  }
+    toPlainDate(bag: YearFields): PlainDate {
+      const slots = getPlainMonthDaySlots(this)
+      return createPlainDate(
+        convertPlainMonthDayToDate(slots.calendar, this, bag),
+      )
+    }
 
-  toPlainDate(bag: YearFields): PlainDate {
-    const slots = getPlainMonthDaySlots(this)
-    return createPlainDate(
-      convertPlainMonthDayToDate(slots.calendar, this, bag),
-    )
-  }
+    toLocaleString(
+      locales: LocalesArg | undefined = undefined,
+      options: Intl.DateTimeFormatOptions = {},
+    ): string {
+      const slots = getPlainMonthDaySlots(this)
+      const format = new RawDateTimeFormat(
+        locales,
+        applyPlainFormatTimeZone(
+          transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
+        ),
+      )
+      checkResolvedCalendarCompatible(format, slots, true)
+      return format.format(isoDateToEpochMilli(slots))
+    }
 
-  toLocaleString(
-    locales: LocalesArg | undefined = undefined,
-    options: Intl.DateTimeFormatOptions = {},
-  ): string {
-    const slots = getPlainMonthDaySlots(this)
-    const format = new RawDateTimeFormat(
-      locales,
-      applyPlainFormatTimeZone(
-        transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
-      ),
-    )
-    checkResolvedCalendarCompatible(format, slots, true)
-    return format.format(isoDateToEpochMilli(slots))
-  }
+    toString(
+      options: Temporal.PlainDateToStringOptions | undefined = undefined,
+    ): string {
+      return formatPlainMonthDayIso(getPlainMonthDaySlots(this), options)
+    }
 
-  toString(
-    options: Temporal.PlainDateToStringOptions | undefined = undefined,
-  ): string {
-    return formatPlainMonthDayIso(getPlainMonthDaySlots(this), options)
-  }
+    toJSON(): string {
+      return formatPlainMonthDayIso(getPlainMonthDaySlots(this))
+    }
 
-  toJSON(): string {
-    return formatPlainMonthDayIso(getPlainMonthDaySlots(this))
-  }
+    valueOf(): never {
+      return forbiddenValueOf()
+    }
+  },
+)
 
-  valueOf(): never {
-    return forbiddenValueOf()
-  }
-}
-
-defineTemporalClass(PlainMonthDay, PlainMonthDayBranding)
 export function createPlainMonthDay(slots: PlainMonthDaySlots): PlainMonthDay {
   return initPlainMonthDay(Object.create(PlainMonthDay.prototype), slots)
 }
 
 export function getPlainMonthDaySlots(obj: unknown): PlainMonthDaySlots {
-  // Precondition: callers only pass object-like receivers because WeakMap
-  // lookup itself rejects primitives.
   const slots = plainMonthDaySlotsMap.get(obj as object)
-
   if (!slots) {
     throw new TypeError(errorMessages.invalidCallingContext)
   }
-
   return slots
 }
 

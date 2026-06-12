@@ -5,8 +5,8 @@ import {
 } from '../internal/utils'
 
 export function defineTemporalClass<C extends { prototype: object }>(
-  cls: C,
   branding: string,
+  cls: C,
 ): C {
   Object.defineProperties(cls, createNameDescriptors(branding))
   Object.defineProperties(

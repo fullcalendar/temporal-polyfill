@@ -1,4 +1,5 @@
 import type { Temporal } from 'temporal-spec'
+import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
@@ -22,38 +23,43 @@ import {
 } from './recordUtils'
 
 type PlainMonthDayRecord = RecordTypes.PlainMonthDayRecord
-
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
 
 export const getNativePlainMonthDay: (
   record: unknown,
 ) => Temporal.PlainMonthDay = getPlainMonthDaySlots
 
-class _NativePlainMonthDayRecord
-  implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
-{
-  declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
+export type NativePlainMonthDayRecord = InstanceType<
+  typeof NativePlainMonthDayRecord
+>
+export const NativePlainMonthDayRecord = defineTemporalClass(
+  PlainMonthDayBranding,
+  class
+    implements Pick<MonthDayFields, 'monthCode' | 'day'>, PlainMonthDayRecord
+  {
+    declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
-  get calendarId() {
-    return getNativePlainMonthDay(this).calendarId
-  }
+    get calendarId() {
+      return getNativePlainMonthDay(this).calendarId
+    }
 
-  get monthCode() {
-    return getNativePlainMonthDay(this).monthCode
-  }
+    get monthCode() {
+      return getNativePlainMonthDay(this).monthCode
+    }
 
-  get day() {
-    return getNativePlainMonthDay(this).day
-  }
+    get day() {
+      return getNativePlainMonthDay(this).day
+    }
 
-  toJSON() {
-    return getNativePlainMonthDay(this).toString()
-  }
+    toJSON() {
+      return getNativePlainMonthDay(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativePlainMonthDayRecord(
   native: Temporal.PlainMonthDay,
@@ -63,12 +69,6 @@ export function createNativePlainMonthDayRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativePlainMonthDayRecord = _NativePlainMonthDayRecord
-export const NativePlainMonthDayRecord = defineTemporalClass(
-  _NativePlainMonthDayRecord,
-  'PlainMonthDay',
-)
 
 export function create(
   isoMonth: number,

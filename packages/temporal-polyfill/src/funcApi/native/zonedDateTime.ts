@@ -1,6 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -47,81 +48,87 @@ export const getNativeZonedDateTime: (
   record: unknown,
 ) => Temporal.ZonedDateTime = getZonedDateTimeSlots
 
-class _NativeZonedDateTimeRecord implements ZonedDateTimeRecord {
-  declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
+export type NativeZonedDateTimeRecord = InstanceType<
+  typeof NativeZonedDateTimeRecord
+>
+export const NativeZonedDateTimeRecord = defineTemporalClass(
+  ZonedDateTimeBranding,
+  class implements ZonedDateTimeRecord {
+    declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 
-  get calendarId() {
-    return getNativeZonedDateTime(this).calendarId
-  }
+    get calendarId() {
+      return getNativeZonedDateTime(this).calendarId
+    }
 
-  get epochMilliseconds() {
-    return getNativeZonedDateTime(this).epochMilliseconds
-  }
+    get epochMilliseconds() {
+      return getNativeZonedDateTime(this).epochMilliseconds
+    }
 
-  get epochNanoseconds() {
-    return getNativeZonedDateTime(this).epochNanoseconds
-  }
+    get epochNanoseconds() {
+      return getNativeZonedDateTime(this).epochNanoseconds
+    }
 
-  get timeZoneId() {
-    return getNativeZonedDateTime(this).timeZoneId
-  }
+    get timeZoneId() {
+      return getNativeZonedDateTime(this).timeZoneId
+    }
 
-  get era() {
-    return getNativeZonedDateTime(this).era
-  }
+    get era() {
+      return getNativeZonedDateTime(this).era
+    }
 
-  get eraYear() {
-    return getNativeZonedDateTime(this).eraYear
-  }
+    get eraYear() {
+      return getNativeZonedDateTime(this).eraYear
+    }
 
-  get year() {
-    return getNativeZonedDateTime(this).year
-  }
+    get year() {
+      return getNativeZonedDateTime(this).year
+    }
 
-  get month() {
-    return getNativeZonedDateTime(this).month
-  }
+    get month() {
+      return getNativeZonedDateTime(this).month
+    }
 
-  get monthCode() {
-    return getNativeZonedDateTime(this).monthCode
-  }
+    get monthCode() {
+      return getNativeZonedDateTime(this).monthCode
+    }
 
-  get day() {
-    return getNativeZonedDateTime(this).day
-  }
+    get day() {
+      return getNativeZonedDateTime(this).day
+    }
 
-  get hour() {
-    return getNativeZonedDateTime(this).hour
-  }
+    get hour() {
+      return getNativeZonedDateTime(this).hour
+    }
 
-  get minute() {
-    return getNativeZonedDateTime(this).minute
-  }
+    get minute() {
+      return getNativeZonedDateTime(this).minute
+    }
 
-  get second() {
-    return getNativeZonedDateTime(this).second
-  }
+    get second() {
+      return getNativeZonedDateTime(this).second
+    }
 
-  get millisecond() {
-    return getNativeZonedDateTime(this).millisecond
-  }
+    get millisecond() {
+      return getNativeZonedDateTime(this).millisecond
+    }
 
-  get microsecond() {
-    return getNativeZonedDateTime(this).microsecond
-  }
+    get microsecond() {
+      return getNativeZonedDateTime(this).microsecond
+    }
 
-  get nanosecond() {
-    return getNativeZonedDateTime(this).nanosecond
-  }
+    get nanosecond() {
+      return getNativeZonedDateTime(this).nanosecond
+    }
 
-  toJSON() {
-    return getNativeZonedDateTime(this).toString()
-  }
+    toJSON() {
+      return getNativeZonedDateTime(this).toString()
+    }
 
-  valueOf() {
-    return forbiddenValueOf()
-  }
-}
+    valueOf() {
+      return forbiddenValueOf()
+    }
+  },
+)
 
 export function createNativeZonedDateTimeRecord(
   native: Temporal.ZonedDateTime,
@@ -131,12 +138,6 @@ export function createNativeZonedDateTimeRecord(
   attachDebugString(instance)
   return instance
 }
-
-export type NativeZonedDateTimeRecord = _NativeZonedDateTimeRecord
-export const NativeZonedDateTimeRecord = defineTemporalClass(
-  _NativeZonedDateTimeRecord,
-  'ZonedDateTime',
-)
 
 export function create(
   epochNanoseconds: bigint,
