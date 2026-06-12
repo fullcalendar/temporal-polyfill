@@ -208,16 +208,19 @@ export function toInstantSlots(arg: InstantArg): EpochNanoFields {
   return parseInstant(arg as any)
 }
 
-export function toTemporalInstant(this: Date): Instant {
-  const epochMilli = Date.prototype.valueOf.call(this) // will error if not Date
-
-  // TODO: better error message instead of "non-integer number" or whatever?
-
-  return createInstant(
-    createEpochNanoSlots(
-      BigInt(requireNumberIsInteger(epochMilli)) * bigNanoInMilli,
-    ),
-  )
+// Defining the function like this is best way to ensure it is
+// "non-constructable" per descriptor-related test262 tests
+export const { toTemporalInstant } = {
+  toTemporalInstant(this: Date): Instant {
+    // Will error if not Date
+    const epochMilli = Date.prototype.valueOf.call(this)
+    // TODO: better error message instead of "non-integer number" or whatever?
+    return createInstant(
+      createEpochNanoSlots(
+        BigInt(requireNumberIsInteger(epochMilli)) * bigNanoInMilli,
+      ),
+    )
+  },
 }
 
 function initInstant(instance: Instant, slots: EpochNanoFields): Instant {
