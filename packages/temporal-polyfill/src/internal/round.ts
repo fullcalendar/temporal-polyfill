@@ -151,7 +151,10 @@ export function roundZonedDateTimeToUnit(
     // is representable. Still verify custom time-zone protocol results below.
     const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
     const isoFields0 = combineDateAndTime(isoDateTime, timeFieldDefaults)
-    const isoFields1 = moveByDays(isoFields0, 1) as CalendarDateTimeFields
+    const isoFields1 = combineDateAndTime(
+      moveByDays(isoFields0, 1),
+      timeFieldDefaults,
+    )
     const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
     const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
     epochNanoseconds = roundWithMode(
@@ -264,7 +267,10 @@ export function computeZonedHoursInDay(
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots, timeZone)
   const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
-  const isoFields1 = moveByDays(isoFields0, 1) as CalendarDateTimeFields
+  const isoFields1 = combineDateAndTime(
+    moveByDays(isoFields0, 1),
+    timeFieldDefaults,
+  )
 
   const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)

@@ -19,7 +19,6 @@ import {
 } from './durationMath'
 import { epochDaysToIsoDate, isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
-import { timeFieldDefaults } from './fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -320,10 +319,7 @@ export function moveByDays(
   days: number,
 ): CalendarDateFields {
   if (days) {
-    return combineDateAndTime(
-      epochDaysToIsoDate(isoDateToEpochDays(isoDate) + days),
-      timeFieldDefaults,
-    )
+    return epochDaysToIsoDate(isoDateToEpochDays(isoDate) + days)
   }
   return isoDate
 }
