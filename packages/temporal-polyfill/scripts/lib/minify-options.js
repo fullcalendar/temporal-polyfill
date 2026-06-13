@@ -6,14 +6,34 @@ import { readFile } from 'fs/promises'
 // cross-chunk nameCache produced invalid ESM.
 
 /*
-For ESM, essentially just remove comments and reformat whitespace
+Optimizations that are done on the per-ESM-module level
+See below function's explanation about mangling. Applies here too
+TODO: reorganize these comments and more explicitly explain minification flow
+NEW: CRAZINESS with inlining consts, because reduce_vars:true AND evaluate:true
+Happens because string consts within-files are inline a lot I think
+But outputted files look fine. Only strings seem inlined, tho not long error strings
 */
 export function buildTerserEsmOptions() {
   return {
     compress: {
-      defaults: false,
+      // aggressive settings
+      passes: 2, // esp needed for multiple tiers of function inlining
+      ecma: 2020,
+      builtins_ecma: 2020,
+      builtins_pure: true,
+      unsafe_arrows: true, // just converts anon function(){} to ()=>
+      unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
       // Risky, but we have good test coverage. Not returning literal true/false publicly anyway
       booleans_as_integers: true,
+      // We do NOT do hoist_funs. Best to save that when everything is in one big iife
+
+      // // stops the CRAZINESS
+      // reduce_vars: false,
+
+      // for readability
+      join_vars: false,
+      keep_fnames: true,
+      keep_classnames: true,
     },
     mangle: false,
     format: {
@@ -54,14 +74,14 @@ export function buildTerserReadableIifeOptions() {
     keep_classnames: true,
 
     compress: {
-      // aggressive
-      passes: 3, // esp needed for multiple tiers of function inlining
+      // aggressive settings
+      passes: 2, // esp needed for multiple tiers of function inlining
       ecma: 2020,
       builtins_ecma: 2020,
       builtins_pure: true,
-      hoist_funs: true, // the main reason we're doing this
       unsafe_arrows: true, // just converts anon function(){} to ()=>
       unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
+      hoist_funs: true, // the main reason we're doing this
 
       // for readability
       join_vars: false,
