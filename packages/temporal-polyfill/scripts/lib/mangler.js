@@ -343,27 +343,9 @@ function collectReservedPropNames(ast) {
     ) {
       collectStaticObjectKeys(node.init, propNames)
     }
-
-    collectStaticDataMapKeys(node, propNames)
   })
 
   return propNames
-}
-
-function collectStaticDataMapKeys(node, propNames) {
-  if (node.type !== 'VariableDeclarator') {
-    return
-  }
-
-  if (node.init?.type === 'ObjectExpression' && isStaticDataMap(node.init)) {
-    collectStaticObjectKeys(node.init, propNames)
-  } else if (isObjectAssignCall(node.init)) {
-    for (const arg of node.init.arguments) {
-      if (arg.type === 'ObjectExpression' && isStaticDataMap(arg)) {
-        collectStaticObjectKeys(arg, propNames)
-      }
-    }
-  }
 }
 
 function collectStaticObjectKeys(objectExpression, propNames) {
@@ -378,39 +360,6 @@ function collectStaticObjectKeys(objectExpression, propNames) {
       propNames.add(propName)
     }
   }
-}
-
-function isStaticDataMap(objectExpression) {
-  return objectExpression.properties.every((prop) => {
-    return (
-      prop.type === 'Property' &&
-      !prop.computed &&
-      !prop.method &&
-      !prop.shorthand &&
-      isStaticDataValue(prop.value)
-    )
-  })
-}
-
-function isStaticDataValue(node) {
-  return (
-    node.type === 'ArrayExpression' ||
-    node.type === 'Literal' ||
-    node.type === 'ObjectExpression' ||
-    (node.type === 'UnaryExpression' && isStaticDataValue(node.argument))
-  )
-}
-
-function isObjectAssignCall(node) {
-  return (
-    node?.type === 'CallExpression' &&
-    node.callee.type === 'MemberExpression' &&
-    !node.callee.computed &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.object.name === 'Object' &&
-    node.callee.property.type === 'Identifier' &&
-    node.callee.property.name === 'assign'
-  )
 }
 
 function collectMemberPropRef(node, namespaceImports, propRefs) {
