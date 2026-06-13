@@ -6,6 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { durationGetters } from '../../apiHelpers/mixins'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
 import {
@@ -50,7 +51,7 @@ const durationSlotsMap = new WeakMap<object, DurationSlots>()
 export type Duration = InstanceType<typeof Duration>
 export const Duration = defineTemporalClass(
   DurationBranding,
-  class implements DurationFields {
+  class {
     constructor(
       years = 0,
       months = 0,
@@ -95,46 +96,6 @@ export const Duration = defineTemporalClass(
         toDurationSlots(durationArg1),
         options,
       )
-    }
-
-    get years(): number {
-      return getDurationSlots(this).years
-    }
-
-    get months(): number {
-      return getDurationSlots(this).months
-    }
-
-    get weeks(): number {
-      return getDurationSlots(this).weeks
-    }
-
-    get days(): number {
-      return getDurationSlots(this).days
-    }
-
-    get hours(): number {
-      return getDurationSlots(this).hours
-    }
-
-    get minutes(): number {
-      return getDurationSlots(this).minutes
-    }
-
-    get seconds(): number {
-      return getDurationSlots(this).seconds
-    }
-
-    get milliseconds(): number {
-      return getDurationSlots(this).milliseconds
-    }
-
-    get microseconds(): number {
-      return getDurationSlots(this).microseconds
-    }
-
-    get nanoseconds(): number {
-      return getDurationSlots(this).nanoseconds
     }
 
     get sign(): NumberSign {
@@ -238,6 +199,8 @@ export const Duration = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
+  getDurationSlots,
+  durationGetters,
 )
 
 export function createDuration(slots: DurationSlots): Duration {

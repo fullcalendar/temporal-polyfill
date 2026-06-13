@@ -6,7 +6,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { createTimeGetters } from '../../apiHelpers/mixins'
+import { timeGetters } from '../../apiHelpers/mixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -72,7 +72,8 @@ export const ShimPlainTimeRecord = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createTimeGetters(getShimPlainTimeSlots),
+  getShimPlainTimeSlots,
+  timeGetters,
 )
 
 export function createShimPlainTimeRecord(

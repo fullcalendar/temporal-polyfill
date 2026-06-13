@@ -2,6 +2,7 @@ import * as errorMessages from '../internal/errorMessages'
 import {
   createNameDescriptors,
   createStringTagDescriptors,
+  mapProps,
   noop,
   throwTypeError,
 } from '../internal/utils'
@@ -11,47 +12,76 @@ type ClassType = {
   prototype: object
 }
 
-type MixinInstances<Mixins extends readonly ClassType[]> =
-  Mixins extends readonly [
-    infer First extends ClassType,
-    ...infer Rest extends ClassType[],
+type GetterMap<Slots> = Record<string, (slots: Slots) => any>
+
+type GetterMapInstance<Getters extends GetterMap<any>> = {
+  readonly [K in keyof Getters]: ReturnType<Getters[K]>
+}
+
+type GetterMapInstances<GetterMaps extends readonly GetterMap<any>[]> =
+  GetterMaps extends readonly [
+    infer First extends GetterMap<any>,
+    ...infer Rest extends GetterMap<any>[],
   ]
-    ? InstanceType<First> & MixinInstances<Rest>
+    ? GetterMapInstance<First> & GetterMapInstances<Rest>
     : unknown
 
 type TemporalClass<
   C extends ClassType,
-  Mixins extends readonly ClassType[],
+  GetterMaps extends readonly GetterMap<any>[],
 > = C &
   (new (
     ..._args: ConstructorParameters<C>
-  ) => InstanceType<C> & MixinInstances<Mixins>)
+  ) => InstanceType<C> & GetterMapInstances<GetterMaps>)
 
+export function defineTemporalClass<C extends ClassType>(
+  branding: string,
+  cls: C,
+): C
 export function defineTemporalClass<
   C extends ClassType,
-  Mixins extends readonly ClassType[],
->(branding: string, cls: C, ...mixins: Mixins): TemporalClass<C, Mixins> {
+  Slots,
+  GetterMaps extends readonly GetterMap<Slots>[],
+>(
+  branding: string,
+  cls: C,
+  getSlots: (obj: unknown) => Slots,
+  ...getterMaps: GetterMaps
+): TemporalClass<C, GetterMaps>
+export function defineTemporalClass(
+  branding: string,
+  cls: ClassType,
+  getSlots?: (obj: unknown) => unknown,
+  ...getterMaps: GetterMap<unknown>[]
+): ClassType {
   Object.defineProperties(cls, createNameDescriptors(branding))
   Object.defineProperties(
     cls.prototype,
     createStringTagDescriptors('Temporal.' + branding),
   )
-  for (const mixinClass of mixins) {
-    mixin(cls.prototype, mixinClass)
+  for (const getterMap of getterMaps) {
+    defineSlotGetters(cls.prototype, getSlots!, getterMap)
   }
-  return cls as TemporalClass<C, Mixins>
+  return cls
 }
 
-/*
-Should be called with a class so method descriptors are already
-non-enumerable and non-constructible.
-*/
-export function mixin(destPrototype: object, sourceClass: any): void {
-  const descriptors = Object.getOwnPropertyDescriptors(
-    sourceClass.prototype,
-  ) as { constructor?: PropertyDescriptor }
-  delete descriptors.constructor
-  Object.defineProperties(destPrototype, descriptors)
+function defineSlotGetters<Slots>(
+  destPrototype: object,
+  getSlots: (obj: unknown) => Slots,
+  getterMap: GetterMap<Slots>,
+): void {
+  Object.defineProperties(
+    destPrototype,
+    mapProps(
+      (getter) => ({
+        get() {
+          return getter(getSlots(this))
+        },
+        configurable: true,
+      }),
+      getterMap,
+    ),
+  )
 }
 
 interface JsonDebuggable {

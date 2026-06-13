@@ -1,7 +1,7 @@
-import { mixin } from '../apiHelpers/classStyle'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
 import {
+  createPropDescriptors,
   createStringTagDescriptors,
   identity,
   pluckProps,
@@ -109,27 +109,31 @@ export function createDateTimeFormatShell<R>(
   if (
     (RawDateTimeFormat.prototype as Partial<Intl.DateTimeFormat>).formatRange
   ) {
-    mixin(
-      prototype,
-      class {
-        formatRange(this: object, record0: R, record1: R): string {
-          const { argsProvider } = getInternals(this)
-          const [format, epochMilli0, epochMilli1] =
-            argsProvider.getArgsForRange(record0, record1)
-          return format.formatRange(epochMilli0, epochMilli1)
-        }
+    function formatRange(this: object, record0: R, record1: R): string {
+      const { argsProvider } = getInternals(this)
+      const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
+        record0,
+        record1,
+      )
+      return format.formatRange(epochMilli0, epochMilli1)
+    }
 
-        formatRangeToParts(
-          this: object,
-          record0: R,
-          record1: R,
-        ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
-          const { argsProvider } = getInternals(this)
-          const [format, epochMilli0, epochMilli1] =
-            argsProvider.getArgsForRange(record0, record1)
-          return format.formatRangeToParts(epochMilli0, epochMilli1)
-        }
-      },
+    function formatRangeToParts(
+      this: object,
+      record0: R,
+      record1: R,
+    ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
+      const { argsProvider } = getInternals(this)
+      const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
+        record0,
+        record1,
+      )
+      return format.formatRangeToParts(epochMilli0, epochMilli1)
+    }
+
+    Object.defineProperties(
+      prototype,
+      createPropDescriptors({ formatRange, formatRangeToParts }),
     )
   }
 

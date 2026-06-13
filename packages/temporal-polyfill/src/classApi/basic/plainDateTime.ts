@@ -7,9 +7,9 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
-  createCalendarDerivedGetters,
-  createCalendarFieldGetters,
-  createTimeGetters,
+  calendarDerivedGetters,
+  calendarFieldGetters,
+  timeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import {
@@ -305,9 +305,10 @@ export const PlainDateTime = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createCalendarFieldGetters(getPlainDateTimeSlots),
-  createCalendarDerivedGetters(getPlainDateTimeSlots),
-  createTimeGetters(getPlainDateTimeSlots),
+  getPlainDateTimeSlots,
+  calendarFieldGetters,
+  calendarDerivedGetters,
+  timeGetters,
 )
 
 export function createPlainDateTime(slots: PlainDateTimeSlots): PlainDateTime {

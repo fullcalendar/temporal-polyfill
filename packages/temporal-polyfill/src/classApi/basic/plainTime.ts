@@ -6,7 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { createTimeGetters } from '../../apiHelpers/mixins'
+import { timeGetters } from '../../apiHelpers/mixins'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
@@ -180,7 +180,8 @@ export const PlainTime = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createTimeGetters(getPlainTimeSlots),
+  getPlainTimeSlots,
+  timeGetters,
 )
 
 export function createPlainTime(slots: TimeFields): PlainTime {

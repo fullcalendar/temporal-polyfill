@@ -6,10 +6,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import {
-  createCalendarFieldGetters,
-  createTimeGetters,
-} from '../../apiHelpers/mixins'
+import { calendarFieldGetters, timeGetters } from '../../apiHelpers/mixins'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -167,8 +164,9 @@ export const ShimPlainDateTimeRecord = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createCalendarFieldGetters(getShimPlainDateTimeSlots),
-  createTimeGetters(getShimPlainDateTimeSlots),
+  getShimPlainDateTimeSlots,
+  calendarFieldGetters,
+  timeGetters,
 )
 
 export function createShimPlainDateTimeRecord(

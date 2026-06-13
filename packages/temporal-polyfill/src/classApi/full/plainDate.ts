@@ -7,8 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
-  createCalendarDerivedGetters,
-  createCalendarFieldGetters,
+  calendarDerivedGetters,
+  calendarFieldGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
@@ -278,8 +278,9 @@ export const PlainDate = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
-  createCalendarFieldGetters(getPlainDateSlots),
-  createCalendarDerivedGetters(getPlainDateSlots),
+  getPlainDateSlots,
+  calendarFieldGetters,
+  calendarDerivedGetters,
 )
 
 export function createPlainDate(slots: PlainDateSlots): PlainDate {

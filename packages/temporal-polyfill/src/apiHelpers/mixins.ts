@@ -11,135 +11,154 @@ import {
   computeCalendarYearOfWeek,
 } from '../internal/calendarDerived'
 import { CalendarImpl } from '../internal/calendarImpl'
+import { DurationFields } from '../internal/durationFields'
 import { CalendarDateFields, TimeFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 
 type CalendarDateSlots = CalendarDateFields & { calendar: CalendarImpl }
 
 /*
-These accessors are the stored calendar date fields. The getter body still
-asks the owning class for slots, so copied descriptors preserve each class's
-brand checks and slot storage.
+These accessors are the stored calendar date fields. defineTemporalClass owns
+the receiver-to-slots lookup, so the maps only describe slot-to-value reads.
 */
-export const createCalendarFieldGetters = <Slots extends CalendarDateSlots>(
-  getSlots: (obj: unknown) => Slots,
-) =>
-  class {
-    get era(): string | undefined {
-      const slots = getSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
+export const calendarFieldGetters = {
+  era(slots: CalendarDateSlots): string | undefined {
+    return computeCalendarEraFields(slots.calendar, slots).era
+  },
 
-    get eraYear(): number | undefined {
-      const slots = getSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
+  eraYear(slots: CalendarDateSlots): number | undefined {
+    return computeCalendarEraFields(slots.calendar, slots).eraYear
+  },
 
-    get year(): number {
-      const slots = getSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
+  year(slots: CalendarDateSlots): number {
+    return computeCalendarDateFields(slots.calendar, slots).year
+  },
 
-    get month(): number {
-      const slots = getSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
+  month(slots: CalendarDateSlots): number {
+    return computeCalendarDateFields(slots.calendar, slots).month
+  },
 
-    get monthCode(): string {
-      const slots = getSlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
+  monthCode(slots: CalendarDateSlots): string {
+    return computeCalendarMonthCode(slots.calendar, slots)
+  },
 
-    get day(): number {
-      const slots = getSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-  }
+  day(slots: CalendarDateSlots): number {
+    return computeCalendarDateFields(slots.calendar, slots).day
+  },
+} as const
 
 /*
 These fields are derived from the ISO date and calendar. Keeping them separate
 lets record-style APIs reuse only the fields they actually expose as
 properties.
 */
-export const createCalendarDerivedGetters = <Slots extends CalendarDateSlots>(
-  getSlots: (obj: unknown) => Slots,
-) =>
-  class {
-    get dayOfWeek(): number {
-      return computeIsoDayOfWeek(getSlots(this))
-    }
+export const calendarDerivedGetters = {
+  dayOfWeek(slots: CalendarDateSlots): number {
+    return computeIsoDayOfWeek(slots)
+  },
 
-    get dayOfYear(): number {
-      const slots = getSlots(this)
-      return computeCalendarDayOfYear(slots.calendar, slots)
-    }
+  dayOfYear(slots: CalendarDateSlots): number {
+    return computeCalendarDayOfYear(slots.calendar, slots)
+  },
 
-    get weekOfYear(): number | undefined {
-      const slots = getSlots(this)
-      return computeCalendarWeekOfYear(slots.calendar, slots)
-    }
+  weekOfYear(slots: CalendarDateSlots): number | undefined {
+    return computeCalendarWeekOfYear(slots.calendar, slots)
+  },
 
-    get yearOfWeek(): number | undefined {
-      const slots = getSlots(this)
-      return computeCalendarYearOfWeek(slots.calendar, slots)
-    }
+  yearOfWeek(slots: CalendarDateSlots): number | undefined {
+    return computeCalendarYearOfWeek(slots.calendar, slots)
+  },
 
-    get daysInWeek(): number {
-      getSlots(this)
-      return 7
-    }
+  daysInWeek(): number {
+    return 7
+  },
 
-    get daysInMonth(): number {
-      const slots = getSlots(this)
-      return computeCalendarDaysInMonth(slots.calendar, slots)
-    }
+  daysInMonth(slots: CalendarDateSlots): number {
+    return computeCalendarDaysInMonth(slots.calendar, slots)
+  },
 
-    get daysInYear(): number {
-      const slots = getSlots(this)
-      return computeCalendarDaysInYear(slots.calendar, slots)
-    }
+  daysInYear(slots: CalendarDateSlots): number {
+    return computeCalendarDaysInYear(slots.calendar, slots)
+  },
 
-    get monthsInYear(): number {
-      const slots = getSlots(this)
-      return computeCalendarMonthsInYear(slots.calendar, slots)
-    }
+  monthsInYear(slots: CalendarDateSlots): number {
+    return computeCalendarMonthsInYear(slots.calendar, slots)
+  },
 
-    get inLeapYear(): boolean {
-      const slots = getSlots(this)
-      return computeCalendarInLeapYear(slots.calendar, slots)
-    }
-  }
+  inLeapYear(slots: CalendarDateSlots): boolean {
+    return computeCalendarInLeapYear(slots.calendar, slots)
+  },
+} as const
 
 /*
 The same clock fields appear on PlainTime and PlainDateTime. Keeping them here
-also preserves the receiver's slot lookup, so PlainTime and PlainDateTime still
-throw their own invalid-calling-context errors.
+keeps their public field accessors in one shared map.
 */
-export const createTimeGetters = <Slots extends TimeFields>(
-  getSlots: (obj: unknown) => Slots,
-) =>
-  class {
-    get hour(): number {
-      return getSlots(this).hour
-    }
+export const timeGetters = {
+  hour(slots: TimeFields): number {
+    return slots.hour
+  },
 
-    get minute(): number {
-      return getSlots(this).minute
-    }
+  minute(slots: TimeFields): number {
+    return slots.minute
+  },
 
-    get second(): number {
-      return getSlots(this).second
-    }
+  second(slots: TimeFields): number {
+    return slots.second
+  },
 
-    get millisecond(): number {
-      return getSlots(this).millisecond
-    }
+  millisecond(slots: TimeFields): number {
+    return slots.millisecond
+  },
 
-    get microsecond(): number {
-      return getSlots(this).microsecond
-    }
+  microsecond(slots: TimeFields): number {
+    return slots.microsecond
+  },
 
-    get nanosecond(): number {
-      return getSlots(this).nanosecond
-    }
-  }
+  nanosecond(slots: TimeFields): number {
+    return slots.nanosecond
+  },
+} as const
+
+// Duration exposes its stored fields directly.
+export const durationGetters = {
+  years(slots: DurationFields): number {
+    return slots.years
+  },
+
+  months(slots: DurationFields): number {
+    return slots.months
+  },
+
+  weeks(slots: DurationFields): number {
+    return slots.weeks
+  },
+
+  days(slots: DurationFields): number {
+    return slots.days
+  },
+
+  hours(slots: DurationFields): number {
+    return slots.hours
+  },
+
+  minutes(slots: DurationFields): number {
+    return slots.minutes
+  },
+
+  seconds(slots: DurationFields): number {
+    return slots.seconds
+  },
+
+  milliseconds(slots: DurationFields): number {
+    return slots.milliseconds
+  },
+
+  microseconds(slots: DurationFields): number {
+    return slots.microseconds
+  },
+
+  nanoseconds(slots: DurationFields): number {
+    return slots.nanoseconds
+  },
+} as const
