@@ -24,6 +24,7 @@ import {
   allPropsEqual,
   compareBigInts,
   compareNumbers,
+  throwRangeError,
 } from './utils'
 
 // High-Level Compare
@@ -75,7 +76,7 @@ export function compareDurations<RA>(
   }
 
   if (!relativeToSlots) {
-    throw new RangeError(errorMessages.missingRelativeTo)
+    throwRangeError(errorMessages.missingRelativeTo)
   }
 
   const markerSpanOps = createMarkerSpanOps(relativeToSlots)

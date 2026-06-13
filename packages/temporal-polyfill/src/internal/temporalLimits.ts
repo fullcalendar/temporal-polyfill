@@ -4,6 +4,7 @@ import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { epochNanoDayMax, isoYearMax, isoYearMin } from './temporalConstants'
 import { timeFieldsToNano } from './timeFieldMath'
+import { throwRangeError } from './utils'
 
 /*
 TODO: move all check* calls as late as possible, right before record-creation,
@@ -24,7 +25,7 @@ export function checkIsoYearMonthInBounds(
     isoYearMonthIndex < isoYearMonthIndexMin ||
     isoYearMonthIndex > isoYearMonthIndexMax
   ) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 
   return isoDate
@@ -54,7 +55,7 @@ export function checkIsoDateTimeInBounds(
   checkIsoDateEpochNanoInBounds(epochNano)
 
   if (epochNano === plainDateEpochNanoMin && !timeFieldsToNano(isoDateTime)) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 }
 
@@ -64,13 +65,13 @@ function checkIsoDateEpochNanoInBounds(
 ): void {
   const min = allowPlainDateLowerEdge ? plainDateEpochNanoMin : epochNanoMin
   if (epochNano < min || epochNano > epochNanoMax) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 }
 
 export function checkEpochNanoInBounds(epochNano: bigint): bigint {
   if (epochNano < epochNanoMin || epochNano > epochNanoMax) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
   return epochNano
 }

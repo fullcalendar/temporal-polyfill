@@ -31,7 +31,7 @@ import {
 import { RawDateTimeFormat, RawFormattable } from '../internal/intlFormatUtils'
 import { getEpochMilli } from '../internal/slots'
 import { timeFieldsToMilli } from '../internal/timeFieldMath'
-import { memoize } from '../internal/utils'
+import { memoize, throwTypeError } from '../internal/utils'
 
 // Temporal values are detected by internal slot branding at runtime, so this
 // shared Intl wrapper doesn't need to import branch-local public classes.
@@ -77,7 +77,7 @@ export function createDateTimeFormatClass(
           if (start === undefined || end === undefined) {
             // ECMA-402 requires both range endpoints before it can check type
             // compatibility. Use the same error as mixed Temporal/non-Temporal input.
-            throw new TypeError(errorMessages.mismatchingFormatTypes)
+            throwTypeError(errorMessages.mismatchingFormatTypes)
           }
 
           const startBrandingAndSlots = getTemporalBrandingAndSlots(start)
@@ -95,14 +95,14 @@ export function createDateTimeFormatClass(
             // ToDateTimeFormattable first converts all non-Temporal values.
             // Only after that can range formatting reject mixed
             // Temporal/non-Temporal input.
-            throw new TypeError(errorMessages.mismatchingFormatTypes)
+            throwTypeError(errorMessages.mismatchingFormatTypes)
           }
 
           const [startBranding, startSlots] = startBrandingAndSlots
           const [endBranding, endSlots] = endBrandingAndSlots
 
           if (startBranding !== endBranding) {
-            throw new TypeError(errorMessages.mismatchingFormatTypes)
+            throwTypeError(errorMessages.mismatchingFormatTypes)
           }
 
           const format = getTemporalFormat(startBranding)
@@ -185,7 +185,7 @@ function createUncachedTemporalDateTimeFormat(
       // Direct Intl.DateTimeFormat formatting deliberately rejects
       // ZonedDateTime; ZonedDateTime.prototype.toLocaleString formats through
       // an Instant instead.
-      throw new TypeError(errorMessages.invalidFormatType(branding))
+      throwTypeError(errorMessages.invalidFormatType(branding))
   }
 
   return new RawDateTimeFormat(internals.resolvedLocale, options)
@@ -209,7 +209,7 @@ function checkTemporalDateTimeFormatCompatible(
       checkResolvedCalendarCompatible(format, slots as any, true)
       return
     default:
-      throw new TypeError(errorMessages.invalidFormatType(branding))
+      throwTypeError(errorMessages.invalidFormatType(branding))
   }
 }
 
@@ -226,6 +226,6 @@ function temporalDateTimeToEpochMilli(branding: string, slots: object): number {
     case PlainTimeBranding:
       return timeFieldsToMilli(slots as any)
     default:
-      throw new TypeError(errorMessages.invalidFormatType(branding))
+      throwTypeError(errorMessages.invalidFormatType(branding))
   }
 }

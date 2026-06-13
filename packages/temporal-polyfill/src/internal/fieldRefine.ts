@@ -10,7 +10,7 @@ import * as errorMessages from './errorMessages'
 import { timeFieldNamesAsc } from './fieldNames'
 import { parseOffsetNano } from './offsetParse'
 import { Overflow } from './optionsModel'
-import { zipPropsConst } from './utils'
+import { throwTypeError, zipPropsConst } from './utils'
 
 export type DateOptionsTuple = [overflow: Overflow, ...extraOptions: unknown[]]
 export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
@@ -123,7 +123,7 @@ export function readAndRefineBagFields(
     } else if (requiredFieldNames) {
       if (requiredFieldNames.includes(fieldName)) {
         // TODO: have caller use a Set
-        throw new TypeError(errorMessages.missingField(fieldName))
+        throwTypeError(errorMessages.missingField(fieldName))
       }
     }
   }
@@ -131,7 +131,7 @@ export function readAndRefineBagFields(
   // Only check zero fields during .with() calls. For .from() calls, empty-bag
   // checking happens within the CalendarImpl-equivalent resolution path.
   if (disallowEmpty && !anyMatching) {
-    throw new TypeError(errorMessages.noValidFields(validFieldNames))
+    throwTypeError(errorMessages.noValidFields(validFieldNames))
   }
 
   return res

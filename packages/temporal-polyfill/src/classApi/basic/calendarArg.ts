@@ -1,9 +1,9 @@
-import type { CalendarImpl } from '../../internal/calendarImpl'
 import { isoCalendarImpl } from '../../internal/calendarImpl'
+import type { CalendarImpl } from '../../internal/calendarImpl'
 import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
 import { parseCalendarId } from '../../internal/isoParse'
-import { isObjectLike } from '../../internal/utils'
+import { isObjectLike, throwTypeError } from '../../internal/utils'
 import { resolveBasicCalendarId } from './calendarResolve'
 import { PlainDate, getPlainDateSlotsIfPresent } from './plainDate'
 import { PlainDateTime, getPlainDateTimeSlotsIfPresent } from './plainDateTime'
@@ -49,7 +49,7 @@ export function refineCalendarArg(arg: CalendarArg): CalendarImpl {
 
     if (!slots) {
       // TODO: better message how non-Temporal objects aren't allowed
-      throw new TypeError(errorMessages.invalidCalendar(arg as any))
+      throwTypeError(errorMessages.invalidCalendar(arg as any))
     }
     return slots.calendar
   }

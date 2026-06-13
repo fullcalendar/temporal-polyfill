@@ -2,7 +2,7 @@ import { requireString } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
 import { parseTimeZoneId } from '../../internal/isoParse'
 import { resolveTimeZoneId } from '../../internal/timeZoneId'
-import { isObjectLike } from '../../internal/utils'
+import { isObjectLike, throwTypeError } from '../../internal/utils'
 import { getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
 export type TimeZoneArg<ZonedDateTimeLike = any> = string | ZonedDateTimeLike
@@ -15,7 +15,7 @@ export function refineTimeZoneArg(arg: TimeZoneArg): string {
     const slots = getZonedDateTimeSlotsIfPresent(arg)
     if (!slots) {
       // TODO: better message how non-Temporal objects aren't allowed
-      throw new TypeError(errorMessages.invalidTimeZone(arg as any)) // !!!
+      throwTypeError(errorMessages.invalidTimeZone(arg as any)) // !!!
     }
     return slots.timeZone.id
   }

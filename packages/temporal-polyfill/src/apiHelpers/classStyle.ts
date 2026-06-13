@@ -2,6 +2,7 @@ import * as errorMessages from '../internal/errorMessages'
 import {
   createNameDescriptors,
   createStringTagDescriptors,
+  throwTypeError,
 } from '../internal/utils'
 
 type ClassType = {
@@ -70,9 +71,9 @@ export const attachDebugString: (instance: JsonDebuggable) => void =
     : () => {} // TODO: reuse noop
 
 export function invalidRecordType(): never {
-  throw new TypeError(errorMessages.invalidCallingContext)
+  throwTypeError(errorMessages.invalidCallingContext)
 }
 
 export function forbiddenValueOf(): never {
-  throw new TypeError(errorMessages.forbiddenValueOf)
+  throwTypeError(errorMessages.forbiddenValueOf)
 }

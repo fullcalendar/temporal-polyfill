@@ -1,7 +1,12 @@
 import { mixin } from '../apiHelpers/classStyle'
 import * as errorMessages from './errorMessages'
 import { LocalesArg, OptionNames, RawDateTimeFormat } from './intlFormatUtils'
-import { createStringTagDescriptors, identity, pluckProps } from './utils'
+import {
+  createStringTagDescriptors,
+  identity,
+  pluckProps,
+  throwTypeError,
+} from './utils'
 
 export type DateTimeFormatSingleArgs =
   | [format: Intl.DateTimeFormat]
@@ -43,7 +48,7 @@ export function createDateTimeFormatShell<R>(
   function getInternals(format: object): ShellInternals {
     const internals = internalsMap.get(format)
     if (!internals) {
-      throw new TypeError(errorMessages.invalidCallingContext)
+      throwTypeError(errorMessages.invalidCallingContext)
     }
     return internals
   }

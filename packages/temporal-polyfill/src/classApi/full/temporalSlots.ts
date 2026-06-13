@@ -9,7 +9,7 @@ import {
   ZonedDateTimeBranding,
 } from '../../apiHelpers/branding'
 import * as errorMessages from '../../internal/errorMessages'
-import { isObjectLike } from '../../internal/utils'
+import { isObjectLike, throwTypeError } from '../../internal/utils'
 import type { TemporalBrandingAndSlots } from '../intlDateTimeFormat'
 import { getDurationSlotsIfPresent } from './duration'
 import { getInstantSlotsIfPresent } from './instant'
@@ -67,7 +67,7 @@ export function rejectInvalidBag<B>(bag: B): B {
     (bag as any).calendar !== undefined ||
     (bag as any).timeZone !== undefined
   ) {
-    throw new TypeError(errorMessages.invalidBag)
+    throwTypeError(errorMessages.invalidBag)
   }
   return bag
 }

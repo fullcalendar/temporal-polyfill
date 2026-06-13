@@ -52,7 +52,7 @@ import {
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../../internal/timeZone'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -317,7 +317,7 @@ export function createPlainDateTime(slots: PlainDateTimeSlots): PlainDateTime {
 export function getPlainDateTimeSlots(obj: unknown): PlainDateTimeSlots {
   const slots = plainDateTimeSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

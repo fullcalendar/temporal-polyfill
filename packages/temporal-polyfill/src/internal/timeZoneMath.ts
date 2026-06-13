@@ -14,7 +14,7 @@ import {
 } from './temporalLimits'
 import { TimeZone } from './timeZone'
 import { nanoInUtcDay } from './units'
-import { memoize } from './utils'
+import { memoize, throwRangeError } from './utils'
 
 export type OffsetNanosecondsOp = (epochNano: bigint) => number
 export type PossibleInstantsOp = (
@@ -108,7 +108,7 @@ export function getMatchingInstantFor(
       return matchingEpochNano
     }
     if (offsetDisambig === OffsetDisambig.Reject) {
-      throw new RangeError(errorMessages.invalidOffsetForTimeZone)
+      throwRangeError(errorMessages.invalidOffsetForTimeZone)
     }
     // else (offsetDisambig === OffsetDisambig.Prefer) ...
   }
@@ -136,7 +136,7 @@ export function getSingleInstantFor(
   }
 
   if (disambig === EpochDisambig.Reject) {
-    throw new RangeError(errorMessages.ambigOffset)
+    throwRangeError(errorMessages.ambigOffset)
   }
 
   // within a transition that jumps back
@@ -223,7 +223,7 @@ function computeGapNear(timeZone: TimeZone, zonedEpochNano: bigint): number {
 
 export function validateTimeZoneGap(gapNano: number): number {
   if (gapNano > nanoInUtcDay) {
-    throw new RangeError(errorMessages.outOfBoundsDstGap)
+    throwRangeError(errorMessages.outOfBoundsDstGap)
   }
   return gapNano
 }

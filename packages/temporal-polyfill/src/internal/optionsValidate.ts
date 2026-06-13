@@ -2,7 +2,7 @@ import * as errorMessages from './errorMessages'
 import { roundingIncName } from './optionsConfig'
 import { Overflow } from './optionsModel'
 import { Unit, nanoInUtcDay, unitNamesAsc, unitNanoMap } from './units'
-import { clampEntity } from './utils'
+import { clampEntity, throwRangeError } from './utils'
 
 /*
 Post-coercion option validation.
@@ -38,9 +38,7 @@ export function validateRoundingInc(
 
     // % is dangerous, but -0 will be falsy just like 0
     if (upUnitNano % (roundingInc * unitNano)) {
-      throw new RangeError(
-        errorMessages.invalidEntity(roundingIncName, roundingInc),
-      )
+      throwRangeError(errorMessages.invalidEntity(roundingIncName, roundingInc))
     }
   } else {
     roundingInc = clampEntity(
@@ -79,6 +77,6 @@ export function checkLargestSmallestUnit(
   smallestUnit: Unit,
 ): void {
   if (smallestUnit > largestUnit) {
-    throw new RangeError(errorMessages.flippedSmallestLargestUnit)
+    throwRangeError(errorMessages.flippedSmallestLargestUnit)
   }
 }

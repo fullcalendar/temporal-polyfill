@@ -42,7 +42,7 @@ import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import {
@@ -271,7 +271,7 @@ export function createPlainYearMonth(
 export function getPlainYearMonthSlots(obj: unknown): PlainYearMonthSlots {
   const slots = plainYearMonthSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

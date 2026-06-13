@@ -29,7 +29,7 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -179,7 +179,7 @@ export function createInstant(slots: EpochNanoFields): Instant {
 export function getInstantSlots(obj: unknown): EpochNanoFields {
   const slots = instantSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

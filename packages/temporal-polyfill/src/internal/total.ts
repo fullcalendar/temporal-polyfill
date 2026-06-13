@@ -22,7 +22,12 @@ import {
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
-import { NumberSign, compareBigInts, fabricateNearHalfFraction } from './utils'
+import {
+  NumberSign,
+  compareBigInts,
+  fabricateNearHalfFraction,
+  throwRangeError,
+} from './utils'
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -43,7 +48,7 @@ export function totalDuration<RA>(
   }
 
   if (!relativeToSlots) {
-    throw new RangeError(errorMessages.missingRelativeTo)
+    throwRangeError(errorMessages.missingRelativeTo)
   }
 
   // Zero durations can still need relative calendar math. In particular, a

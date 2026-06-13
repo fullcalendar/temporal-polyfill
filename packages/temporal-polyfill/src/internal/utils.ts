@@ -24,6 +24,14 @@ export type Classlike = any
 // Validation
 // -----------------------------------------------------------------------------
 
+export function throwRangeError(message: string): never {
+  throw new RangeError(message)
+}
+
+export function throwTypeError(message: string): never {
+  throw new TypeError(message)
+}
+
 export function clampProp<P>(
   props: P,
   propName: keyof FilterPropValues<P, number> & string,
@@ -51,7 +59,7 @@ export function clampEntity(
   const clamped = constrainToRange(num, min, max)
 
   if (overflow && num !== clamped) {
-    throw new RangeError(
+    throwRangeError(
       errorMessages.numberOutOfRangeWithChoices(
         entityName,
         num,
@@ -68,7 +76,7 @@ export function clampEntity(
 export function getDefinedProp(props: any, propName: string): any {
   const propVal = props[propName]
   if (propVal === undefined) {
-    throw new TypeError(errorMessages.missingField(propName))
+    throwTypeError(errorMessages.missingField(propName))
   }
   return propVal
 }

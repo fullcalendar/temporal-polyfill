@@ -41,7 +41,7 @@ import {
   nanoInUtcDay,
   unitNanoMap,
 } from './units'
-import { NumberSign, clampEntity, divTrunc } from './utils'
+import { NumberSign, clampEntity, divTrunc, throwRangeError } from './utils'
 
 const maxCalendarUnit = 2 ** 32 - 1 // inclusive
 const maxDurationSeconds = 2 ** 53
@@ -73,7 +73,7 @@ export function addDurations<RA>(
   }
 
   if (!relativeToSlots) {
-    throw new RangeError(errorMessages.missingRelativeTo)
+    throwRangeError(errorMessages.missingRelativeTo)
   }
 
   if (doSubtract) {
@@ -103,7 +103,7 @@ export function addDurationsWithoutRelativeTo(
   ) as Unit
 
   if (maxUnit > Unit.Day) {
-    throw new RangeError(errorMessages.invalidLargeUnits)
+    throwRangeError(errorMessages.invalidLargeUnits)
   }
 
   return addDayTimeDurationsChecked(
@@ -146,7 +146,7 @@ function addDayTimeDurations(
   const combined = bigNano0 + bigNano1 * BigInt(doSubtract ? -1 : 1)
 
   if (!Number.isFinite(Number(combined / bigNanoInUtcDay))) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 
   return {
@@ -207,7 +207,7 @@ export function roundDuration<RA>(
   }
 
   if (!relativeToSlots) {
-    throw new RangeError(errorMessages.missingRelativeTo)
+    throwRangeError(errorMessages.missingRelativeTo)
   }
 
   const markerSpanOps = createMarkerSpanOps(relativeToSlots)
@@ -275,7 +275,7 @@ export function computeDurationSign(
 
     if (fieldSign) {
       if (sign && sign !== fieldSign) {
-        throw new RangeError(errorMessages.forbiddenDurationSigns)
+        throwRangeError(errorMessages.forbiddenDurationSigns)
       }
       sign = fieldSign
     }
@@ -303,7 +303,7 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
 
 export function checkDurationTimeUnit(n: number): void {
   if (!Number.isSafeInteger(n)) {
-    throw new RangeError(errorMessages.outOfBoundsDuration)
+    throwRangeError(errorMessages.outOfBoundsDuration)
   }
 }
 
@@ -312,7 +312,7 @@ export function checkDurationTimeUnit(n: number): void {
 
 export function durationOnlyTimeToBigNano(fields: DurationFields): bigint {
   if (durationHasDateParts(fields)) {
-    throw new RangeError(errorMessages.invalidLargeUnits)
+    throwRangeError(errorMessages.invalidLargeUnits)
   }
 
   return durationTimeToBigNano(fields)
@@ -367,7 +367,7 @@ export function nanoToDurationDayTimeFields(
   // returned largest field whose Number value has rounded up to the 2^53-second
   // boundary.
   if (!Number.isFinite(largestUnitVal)) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 
   if (
@@ -375,7 +375,7 @@ export function nanoToDurationDayTimeFields(
     Math.abs(largestUnitVal) / (nanoInSec / unitNanoMap[largestUnit]) >=
       maxDurationSeconds
   ) {
-    throw new RangeError(errorMessages.outOfBoundsDate)
+    throwRangeError(errorMessages.outOfBoundsDate)
   }
 
   const dayTimeFields = nanoToGivenFields(

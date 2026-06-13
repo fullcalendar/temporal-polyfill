@@ -5,6 +5,7 @@ import {
 } from '../apiHelpers/classStyle'
 import { CalendarImpl } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
+import { throwRangeError } from '../internal/utils'
 import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
@@ -51,7 +52,7 @@ export function getCalendarRecordImplCreator(
 ): () => CalendarImpl {
   const getImpl = getCalendarSlots(record).getImpl
   if (!getImpl) {
-    throw new RangeError(
+    throwRangeError(
       errorMessages.exoticCalendarRequired(
         getCalendarRecordId(record),
         'getExotic or getAny',

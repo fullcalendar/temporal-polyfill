@@ -2,6 +2,7 @@ import { type CalendarImpl, getCalendarSlotId } from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { type ZonedEpochNanoFields } from './slots'
 import { type TimeZone } from './timeZone'
+import { throwRangeError } from './utils'
 
 // These helpers compare the identity-bearing parts of Temporal slots without
 // tying that logic to a specific caller like diffing or Intl formatting.
@@ -11,7 +12,7 @@ export function getCommonCalendar(
   b: CalendarImpl,
 ): CalendarImpl {
   if (getCalendarSlotId(a) !== getCalendarSlotId(b)) {
-    throw new RangeError(errorMessages.mismatchingCalendars)
+    throwRangeError(errorMessages.mismatchingCalendars)
   }
 
   return a
@@ -19,7 +20,7 @@ export function getCommonCalendar(
 
 export function getCommonTimeZone(a: TimeZone, b: TimeZone): TimeZone {
   if (a.compareKey !== b.compareKey) {
-    throw new RangeError(errorMessages.mismatchingTimeZones)
+    throwRangeError(errorMessages.mismatchingTimeZones)
   }
 
   return a

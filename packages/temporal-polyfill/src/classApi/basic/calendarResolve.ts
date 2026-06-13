@@ -9,6 +9,7 @@ import {
   gregoryCalendarId,
   isoCalendarId,
 } from '../../internal/intlCalendarConfig'
+import { throwRangeError } from '../../internal/utils'
 
 export function resolveBasicCalendarId(rawCalendarId: string): CalendarImpl {
   const lowerRawCalendarId = requireString(rawCalendarId).toLowerCase()
@@ -20,7 +21,7 @@ export function resolveBasicCalendarId(rawCalendarId: string): CalendarImpl {
     return gregoryCalendarImpl
   }
 
-  throw new RangeError(
+  throwRangeError(
     errorMessages.exoticCalendarRequired(
       rawCalendarId,
       'temporal-polyfill/full',

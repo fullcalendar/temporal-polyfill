@@ -27,7 +27,12 @@ import {
 } from '../../internal/isoCalendarMath'
 import { utcTimeZoneId } from '../../internal/timeZoneConfig'
 import { milliInUtcDay } from '../../internal/units'
-import { bindArgs, compareNumbers, memoize } from '../../internal/utils'
+import {
+  bindArgs,
+  compareNumbers,
+  memoize,
+  throwRangeError,
+} from '../../internal/utils'
 
 export interface IntlDateFields {
   era: string | undefined
@@ -470,7 +475,7 @@ function addIntlMonths(
     month += monthDelta
 
     if (!Number.isSafeInteger(month)) {
-      throw new RangeError(errorMessages.outOfBoundsDate)
+      throwRangeError(errorMessages.outOfBoundsDate)
     }
 
     if (monthDelta < 0) {

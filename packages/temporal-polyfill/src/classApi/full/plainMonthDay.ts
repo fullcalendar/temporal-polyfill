@@ -36,7 +36,7 @@ import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { isObjectLike } from '../../internal/utils'
+import { isObjectLike, throwTypeError } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import { PlainDate, createPlainDate } from './plainDate'
@@ -161,7 +161,7 @@ export function createPlainMonthDay(slots: PlainMonthDaySlots): PlainMonthDay {
 export function getPlainMonthDaySlots(obj: unknown): PlainMonthDaySlots {
   const slots = plainMonthDaySlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

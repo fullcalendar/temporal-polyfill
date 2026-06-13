@@ -35,7 +35,7 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
 } from './temporalLimits'
-import { constrainToRange } from './utils'
+import { constrainToRange, throwRangeError, throwTypeError } from './utils'
 
 // Built-in *-from-fields
 // -----------------------------------------------------------------------------
@@ -150,13 +150,13 @@ function prepareDateFields(
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
   ) {
-    throw new TypeError(errorMessages.missingYear(eraOrigins))
+    throwTypeError(errorMessages.missingYear(eraOrigins))
   }
   if (fields.monthCode === undefined && fields.month === undefined) {
-    throw new TypeError(errorMessages.missingMonth)
+    throwTypeError(errorMessages.missingMonth)
   }
   if (fields.day === undefined) {
-    throw new TypeError(errorMessages.missingField('day'))
+    throwTypeError(errorMessages.missingField('day'))
   }
 
   return [parseMonthCodeField(fields), resolveCalendarYear(calendar, fields)]
@@ -174,10 +174,10 @@ export function createPlainYearMonthFromFields(
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
   ) {
-    throw new TypeError(errorMessages.missingYear(eraOrigins))
+    throwTypeError(errorMessages.missingYear(eraOrigins))
   }
   if (fields.monthCode === undefined && fields.month === undefined) {
-    throw new TypeError(errorMessages.missingMonth)
+    throwTypeError(errorMessages.missingMonth)
   }
 
   const monthCodeParts = parseMonthCodeField(fields)
@@ -210,7 +210,7 @@ export function createPlainMonthDayFromFields(
   // Pre-check required fields so that missing-field TypeError is thrown BEFORE
   // any RangeError from monthCode parsing or bounds checking.
   if (fields.day === undefined) {
-    throw new TypeError(errorMessages.missingField('day'))
+    throwTypeError(errorMessages.missingField('day'))
   }
   if (
     !isIso &&
@@ -218,7 +218,7 @@ export function createPlainMonthDayFromFields(
     fields.year === undefined &&
     (fields.era === undefined || fields.eraYear === undefined)
   ) {
-    throw new TypeError(errorMessages.missingYear(eraOrigins))
+    throwTypeError(errorMessages.missingYear(eraOrigins))
   }
 
   const monthCodeParts = parseMonthCodeField(fields)
@@ -279,7 +279,7 @@ export function createPlainMonthDayFromFields(
     // no year given? there must be a monthCode
     if (fields.monthCode === undefined) {
       // TODO: should this message be more specific about month *CODE*?
-      throw new TypeError(errorMessages.missingMonth)
+      throwTypeError(errorMessages.missingMonth)
     }
     // Pluck monthCode/day number without limiting overflow. The syntax check
     // already parsed this before option reads, so reuse that tuple here.
@@ -338,7 +338,7 @@ export function createPlainMonthDayFromFields(
       Infinity) < fields.day
   ) {
     if (overflow === Overflow.Reject) {
-      throw new RangeError(errorMessages.invalidLeapMonth)
+      throwRangeError(errorMessages.invalidLeapMonth)
     }
 
     // Temporal's month-day reference table only admits some leap month-days.
@@ -383,7 +383,7 @@ export function createPlainMonthDayFromFields(
   }
 
   if (!res) {
-    throw new RangeError(errorMessages.failedYearGuess)
+    throwRangeError(errorMessages.failedYearGuess)
   }
   const { year: finalYear, month: finalMonth } = res
 

@@ -22,6 +22,7 @@ import {
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
+import { throwRangeError } from './utils'
 
 // ZonedDateTime with *
 // -----------------------------------------------------------------------------
@@ -113,5 +114,5 @@ function getPreferredCalendar(a: CalendarImpl, b: CalendarImpl): CalendarImpl {
     return b
   }
 
-  throw new RangeError(errorMessages.mismatchingCalendars)
+  throwRangeError(errorMessages.mismatchingCalendars)
 }

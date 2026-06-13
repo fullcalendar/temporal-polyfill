@@ -19,7 +19,7 @@ import {
   moveToDayOfMonthUnsafe,
 } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { clampEntity } from '../../internal/utils'
+import { clampEntity, throwRangeError } from '../../internal/utils'
 
 export function reversedMove<S>(
   f: (slots: S, units: number, options?: Temporal.OverflowOptions) => S,
@@ -162,7 +162,7 @@ export function moveToWeekOfYear(
   const weeksInYear = weekFields.weeksInYear
 
   if (currentWeekOfYear === undefined) {
-    throw new RangeError(errorMessages.unsupportedWeekNumbers)
+    throwRangeError(errorMessages.unsupportedWeekNumbers)
   }
 
   const normWeekOfYear = clampEntity(

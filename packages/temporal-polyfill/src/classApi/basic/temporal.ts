@@ -2,7 +2,6 @@ import {
   createPropDescriptors,
   createStringTagDescriptors,
 } from '../../internal/utils'
-
 import { Duration } from './duration'
 import { Instant } from './instant'
 import { Now } from './now'

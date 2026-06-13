@@ -10,7 +10,12 @@ import * as errorMessages from './errorMessages'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
 import { Overflow } from './optionsModel'
-import { clampEntity, clampProp } from './utils'
+import {
+  clampEntity,
+  clampProp,
+  throwRangeError,
+  throwTypeError,
+} from './utils'
 
 export function getCalendarEraOrigins(
   calendar: CalendarImpl,
@@ -56,18 +61,18 @@ export function resolveCalendarYear(
 
   if (era !== undefined || eraYear !== undefined) {
     if (era === undefined || eraYear === undefined) {
-      throw new TypeError(errorMessages.mismatchingEraParts)
+      throwTypeError(errorMessages.mismatchingEraParts)
     }
 
     if (!eraOrigins) {
-      throw new RangeError(errorMessages.forbiddenEraParts)
+      throwRangeError(errorMessages.forbiddenEraParts)
     }
 
     const normalizedEra = normalizeEraName(era)
     const eraOrigin = eraOrigins[normalizedEra]
 
     if (eraOrigin === undefined) {
-      throw new RangeError(errorMessages.invalidEra(era))
+      throwRangeError(errorMessages.invalidEra(era))
     }
 
     // ISO/Gregory use the compact era-origin convention directly. External
@@ -78,12 +83,12 @@ export function resolveCalendarYear(
       : eraYearToYear(eraYear, eraOrigin)
 
     if (year !== undefined && year !== yearByEra) {
-      throw new RangeError(errorMessages.mismatchingYearAndEra)
+      throwRangeError(errorMessages.mismatchingYearAndEra)
     }
 
     year = yearByEra
   } else if (year === undefined) {
-    throw new TypeError(errorMessages.missingYear(eraOrigins))
+    throwTypeError(errorMessages.missingYear(eraOrigins))
   }
 
   return year
@@ -108,13 +113,13 @@ export function resolveCalendarMonth(
     )
 
     if (month !== undefined && month !== monthByCode) {
-      throw new RangeError(errorMessages.mismatchingMonthAndCode)
+      throwRangeError(errorMessages.mismatchingMonthAndCode)
     }
 
     month = monthByCode
     overflow = Overflow.Reject // monthCode parsing doesn't constrain
   } else if (month === undefined) {
-    throw new TypeError(errorMessages.missingMonth)
+    throwTypeError(errorMessages.missingMonth)
   }
 
   return clampEntity(
@@ -158,13 +163,13 @@ function resolveMonthCode(
 
     // calendar does not support leap years
     if (leapMonthMeta === undefined) {
-      throw new RangeError(errorMessages.invalidLeapMonth)
+      throwRangeError(errorMessages.invalidLeapMonth)
     }
 
     // leap year has a maximum
     if (leapMonthMeta > 0) {
       if (month > leapMonthMeta) {
-        throw new RangeError(errorMessages.invalidLeapMonth)
+        throwRangeError(errorMessages.invalidLeapMonth)
       }
 
       // For variable-leap calendars (Chinese/Dangi), `leapMonth` is the
@@ -173,18 +178,18 @@ function resolveMonthCode(
       // leap monthCode is only available when the ordinals match exactly.
       if (leapMonth !== month) {
         if (overflow === Overflow.Reject) {
-          throw new RangeError(errorMessages.invalidLeapMonth)
+          throwRangeError(errorMessages.invalidLeapMonth)
         }
         month = monthCodeNumberToMonth(monthCodeNumber, false, leapMonth)
       }
     } else {
       // leap year is constant
       if (month !== -leapMonthMeta) {
-        throw new RangeError(errorMessages.invalidLeapMonth)
+        throwRangeError(errorMessages.invalidLeapMonth)
       }
       if (leapMonth === undefined) {
         if (overflow === Overflow.Reject) {
-          throw new RangeError(errorMessages.invalidLeapMonth)
+          throwRangeError(errorMessages.invalidLeapMonth)
         }
         // else, ex: M05L -> M06
       }

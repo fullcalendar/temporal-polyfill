@@ -65,6 +65,7 @@ import {
   parseSign,
   parseSubsecNano,
   signRegExpStr,
+  throwRangeError,
   zipPropsDesc,
 } from './utils'
 
@@ -72,7 +73,7 @@ import {
 // -----------------------------------------------------------------------------
 
 function throwFailedParse(s: string): never {
-  throw new RangeError(errorMessages.failedParse(s))
+  throwRangeError(errorMessages.failedParse(s))
 }
 
 export function parseInstant(s: string): EpochNanoFields {
@@ -207,7 +208,7 @@ export function parsePlainYearMonth(
 
 function requireIsoCalendar(organized: { calendarId: string }): void {
   if (organized.calendarId !== isoCalendarId) {
-    throw new RangeError(errorMessages.invalidSubstring(organized.calendarId))
+    throwRangeError(errorMessages.invalidSubstring(organized.calendarId))
   }
 }
 
@@ -271,7 +272,7 @@ export function parsePlainTime(s: string): TimeFields {
         throwFailedParse(s) // Must have time for PlainTime
       }
       if ((organized as DateTimeLikeOrganized).hasZ) {
-        throw new RangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
+        throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
       }
       requireIsoCalendar(organized as DateTimeLikeOrganized)
     } else {
@@ -395,7 +396,7 @@ function computeMonthDayReferenceYearMonth(
     : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
 
   if (!yearMonthFields) {
-    throw new RangeError(errorMessages.failedYearGuess)
+    throwRangeError(errorMessages.failedYearGuess)
   }
 
   return yearMonthFields
@@ -688,9 +689,7 @@ function organizeIsoYearParts(parts: string[]): number {
   const year = parseInt(parts[2] || parts[3])
 
   if (yearSign < 0 && !year) {
-    throw new RangeError(
-      errorMessages.invalidSubstring(-0 as unknown as string),
-    )
+    throwRangeError(errorMessages.invalidSubstring(-0 as unknown as string))
   }
 
   return yearSign * year
@@ -714,7 +713,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
   } as DurationFields
 
   if (!hasAny) {
-    throw new RangeError(errorMessages.noValidFields(durationFieldNamesAsc))
+    throwRangeError(errorMessages.noValidFields(durationFieldNamesAsc))
   }
 
   if (parseSign(parts[1]) < 0) {
@@ -746,7 +745,7 @@ function organizeDurationParts(parts: string[]): DurationFields {
 
     if (wholeStr !== undefined) {
       if (hasAnyFrac) {
-        throw new RangeError(errorMessages.invalidSubstring(wholeStr)) // Fraction must be last one
+        throwRangeError(errorMessages.invalidSubstring(wholeStr)) // Fraction must be last one
       }
 
       wholeUnits = parseIntSafe(wholeStr)
@@ -785,7 +784,7 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
 
     if (!name) {
       if (timeZoneId) {
-        throw new RangeError(errorMessages.invalidSubstring(whole)) // Cannot specify timeZone multiple times
+        throwRangeError(errorMessages.invalidSubstring(whole)) // Cannot specify timeZone multiple times
       }
       timeZoneId = val
     } else if (name === 'u-ca') {
@@ -794,14 +793,14 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
       calendarIsCritical ||= isCritical
     } else if (isCritical || /[A-Z]/.test(name)) {
       // Critical annotation not used, or uppercase disallowed
-      throw new RangeError(errorMessages.invalidSubstring(whole))
+      throwRangeError(errorMessages.invalidSubstring(whole))
     }
 
     return ''
   })
 
   if (calendarIds.length > 1 && calendarIsCritical) {
-    throw new RangeError(errorMessages.invalidSubstring(s)) // Multiple calendars when one is critical
+    throwRangeError(errorMessages.invalidSubstring(s)) // Multiple calendars when one is critical
   }
 
   return {
@@ -821,7 +820,7 @@ function parseIntSafe(s: string): number {
   const n = parseInt(s)
 
   if (!Number.isFinite(n)) {
-    throw new RangeError(errorMessages.invalidSubstring(s))
+    throwRangeError(errorMessages.invalidSubstring(s))
   }
 
   return n

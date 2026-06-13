@@ -1,7 +1,7 @@
 import * as errorMessages from './errorMessages'
 import { formatOffsetNano } from './isoFormat'
 import { parseOffsetNanoMaybe } from './offsetParse'
-import { capitalize } from './utils'
+import { capitalize, throwRangeError } from './utils'
 
 export function parseTimeZoneOffsetId(upperRawId: string):
   | {
@@ -30,12 +30,12 @@ const badCharactersRegExp = /[^\w\/:+-]+/
 
 export function normalizeNamedTimeZoneId(rawId: string): string {
   if (badCharactersRegExp.test(rawId)) {
-    throw new RangeError(errorMessages.invalidTimeZone(rawId))
+    throwRangeError(errorMessages.invalidTimeZone(rawId))
   }
 
   if (icuRegExp.test(rawId)) {
     // TODO: give identifier
-    throw new RangeError(errorMessages.forbiddenIcuTimeZone)
+    throwRangeError(errorMessages.forbiddenIcuTimeZone)
   }
 
   return rawId

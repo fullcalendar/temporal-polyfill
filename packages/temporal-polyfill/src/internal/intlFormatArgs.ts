@@ -7,6 +7,7 @@ import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { ZonedEpochNanoFields } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
+import { throwRangeError, throwTypeError } from './utils'
 
 type CalendarFormatSlots<S> = S & { calendar: CalendarImpl }
 
@@ -39,7 +40,7 @@ export function applyZonedFormatTimeZone(
   timeZoneId: string,
 ): Intl.DateTimeFormatOptions {
   if (options.timeZone !== undefined) {
-    throw new TypeError(errorMessages.forbiddenFormatTimeZone)
+    throwTypeError(errorMessages.forbiddenFormatTimeZone)
   }
   options.timeZone = timeZoneId
   return options
@@ -59,6 +60,6 @@ export function checkResolvedCalendarCompatible(
     (strictCalendarCheck || slots.calendar !== isoCalendarImpl) &&
     getCalendarSlotId(slots.calendar) !== resolvedCalendarId
   ) {
-    throw new RangeError(errorMessages.mismatchingCalendars)
+    throwRangeError(errorMessages.mismatchingCalendars)
   }
 }

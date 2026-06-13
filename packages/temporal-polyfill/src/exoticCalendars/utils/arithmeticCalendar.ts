@@ -15,7 +15,7 @@ import {
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
 import { milliInUtcDay } from '../../internal/units'
-import { compareNumbers, memoize } from '../../internal/utils'
+import { compareNumbers, memoize, throwRangeError } from '../../internal/utils'
 import { unixEpochJulianDay } from './gregoryJulianDay'
 
 export interface ArithmeticCalendarParts extends CalendarDateFields {
@@ -199,7 +199,7 @@ function addArithmeticMonths(
     month += monthDelta
 
     if (!Number.isSafeInteger(month)) {
-      throw new RangeError(errorMessages.outOfBoundsDate)
+      throwRangeError(errorMessages.outOfBoundsDate)
     }
 
     if (monthDelta < 0) {

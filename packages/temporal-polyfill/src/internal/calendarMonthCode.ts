@@ -1,5 +1,5 @@
 import * as errorMessages from './errorMessages'
-import { padNumber2 } from './utils'
+import { padNumber2, throwRangeError } from './utils'
 
 export type MonthCodeParts = [monthCodeNumber: number, isLeapMonth: boolean]
 
@@ -8,7 +8,7 @@ const monthCodeRegExp = /^M(\d{2})(L?)$/
 export function parseMonthCode(monthCode: string): MonthCodeParts {
   const m = monthCodeRegExp.exec(monthCode)
   if (!m) {
-    throw new RangeError(errorMessages.invalidMonthCode(monthCode))
+    throwRangeError(errorMessages.invalidMonthCode(monthCode))
   }
 
   return [

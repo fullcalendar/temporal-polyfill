@@ -3,7 +3,7 @@ import {
   type ExoticCalendarWithoutId,
 } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
-import { memoize } from '../internal/utils'
+import { memoize, throwRangeError } from '../internal/utils'
 import { createBuddhistCalendar } from './buddhistCalendar'
 import { createChineseDangiCalendar } from './chineseDangiCalendar'
 import {
@@ -141,7 +141,7 @@ export function getExoticCalendarById(
   const meta = queryExoticCalendarMeta(lowerRawCalendarId)
   if (!meta) {
     // TODO: specific message for *full* entrypoint loaded, but still unknown
-    throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
+    throwRangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
   }
   return getOrCreateExoticCalendar(...meta)
 }
@@ -151,7 +151,7 @@ export function queryExoticCalendarMeta(
 ): CalendarImplTuple | undefined {
   if (forbiddenExoticCalendarIdMap[lowerRawCalendarId]) {
     // TODO: specific message for "forbidden" calendar?
-    throw new RangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
+    throwRangeError(errorMessages.invalidCalendar(lowerRawCalendarId))
   }
 
   const normCalendarId =

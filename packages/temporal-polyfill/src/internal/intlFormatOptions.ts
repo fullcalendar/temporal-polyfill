@@ -1,4 +1,5 @@
 import * as errorMessages from './errorMessages'
+import { throwTypeError } from './utils'
 type OptionFields = Record<
   string,
   Intl.DateTimeFormatOptions[keyof Intl.DateTimeFormatOptions]
@@ -130,7 +131,7 @@ function createOptionsTransformer(
       (allowPartialOverlap && hasInvalids && !hasShapeFields) ||
       (hasAnyStyle && hasStyleConflictFields)
     ) {
-      throw new TypeError(errorMessages.invalidFormatOptions)
+      throwTypeError(errorMessages.invalidFormatOptions)
     }
 
     const transformedOptions: Intl.DateTimeFormatOptions = {}

@@ -61,7 +61,7 @@ import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -363,7 +363,7 @@ export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {
 export function getZonedDateTimeSlots(obj: unknown): ZonedDateTimeSlots {
   const slots = zonedDateTimeSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

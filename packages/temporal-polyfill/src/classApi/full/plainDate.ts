@@ -41,7 +41,7 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -289,7 +289,7 @@ export function createPlainDate(slots: PlainDateSlots): PlainDate {
 export function getPlainDateSlots(obj: unknown): PlainDateSlots {
   const slots = plainDateSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }

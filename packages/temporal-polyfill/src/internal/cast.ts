@@ -7,7 +7,7 @@ import {
   toPositiveIntegerWithTruncation,
 } from 'temporal-utils/protected'
 import * as errorMessages from './errorMessages'
-import { Callable, bindArgs } from './utils'
+import { Callable, bindArgs, throwRangeError, throwTypeError } from './utils'
 
 // Require
 // -----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ export function requirePropDefined<V>(
   optionVal: V | null | undefined,
 ): V {
   if (optionVal == null) {
-    throw new RangeError(errorMessages.missingField(optionName))
+    throwRangeError(errorMessages.missingField(optionName))
   }
   return optionVal
 }
@@ -69,7 +69,7 @@ function requireType<A>(
 ): A {
   // biome-ignore lint/suspicious/useValidTypeof: dynamic by design
   if (typeof arg !== typeName) {
-    throw new TypeError(errorMessages.invalidEntity(entityName, arg))
+    throwTypeError(errorMessages.invalidEntity(entityName, arg))
   }
   return arg
 }
@@ -84,7 +84,7 @@ export function requireNumberIsInteger(
   entityName = 'number',
 ): number {
   if (!Number.isInteger(num)) {
-    throw new RangeError(errorMessages.expectedInteger(entityName, num))
+    throwRangeError(errorMessages.expectedInteger(entityName, num))
   }
   return num || 0 // ensure no -0
 }
@@ -94,7 +94,7 @@ export function requireNumberIsInteger(
 
 export function toString(arg: string): string {
   if (typeof arg === 'symbol') {
-    throw new TypeError(errorMessages.forbiddenSymbolToString)
+    throwTypeError(errorMessages.forbiddenSymbolToString)
   }
   return String(arg)
 }
@@ -119,7 +119,7 @@ export function toBigInt(bi: bigint): bigint {
     return BigInt(bi)
   }
   if (typeof bi !== 'bigint') {
-    throw new TypeError(errorMessages.invalidBigInt(bi))
+    throwTypeError(errorMessages.invalidBigInt(bi))
   }
   return bi
 }

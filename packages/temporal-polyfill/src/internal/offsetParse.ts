@@ -7,6 +7,7 @@ import {
   parseSign,
   parseSubsecNano,
   signRegExpStr,
+  throwRangeError,
   validateTimeSeparators,
 } from './utils'
 
@@ -19,7 +20,7 @@ const offsetRegExp = createRegExp(offsetRegExpStr)
 export function parseOffsetNano(s: string): number {
   const offsetNano = parseOffsetNanoMaybe(s)
   if (offsetNano === undefined) {
-    throw new RangeError(errorMessages.failedParse(s)) // Invalid offset string
+    throwRangeError(errorMessages.failedParse(s)) // Invalid offset string
   }
   return offsetNano
 }
@@ -44,7 +45,7 @@ export function offsetHasSeconds(offset: string): boolean {
 
 export function validateTimeZoneOffset(offsetNano: number): number {
   if (Math.abs(offsetNano) >= nanoInUtcDay) {
-    throw new RangeError(errorMessages.outOfBoundsOffset)
+    throwRangeError(errorMessages.outOfBoundsOffset)
   }
   return offsetNano
 }
@@ -56,7 +57,7 @@ function organizeOffsetParts(
   const firstSubMinutePart = parts[4] || parts[5]
 
   if (onlyHourMinute && firstSubMinutePart) {
-    throw new RangeError(errorMessages.invalidSubstring(firstSubMinutePart))
+    throwRangeError(errorMessages.invalidSubstring(firstSubMinutePart))
   }
 
   const offsetNanoPos =

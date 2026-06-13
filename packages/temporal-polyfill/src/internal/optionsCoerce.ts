@@ -25,7 +25,7 @@ import type {
   SubsecDigits,
 } from './temporalSpecHelpers'
 import { Unit, unitNameMap } from './units'
-import { bindArgs, clampEntity } from './utils'
+import { bindArgs, clampEntity, throwRangeError } from './utils'
 
 /*
 Single-option coercion.
@@ -56,7 +56,7 @@ export function coerceFractionalSecondDigits(options: {
       if (toString(subsecDigits) === 'auto') {
         return
       }
-      throw new RangeError(
+      throwRangeError(
         errorMessages.invalidEntity(subsecDigitsName, subsecDigits),
       )
     }
@@ -99,7 +99,7 @@ export function coerceUnitOption<O>(
     unit = durationFieldIndexes[unitStr as DurationFieldName]
   }
   if (unit === undefined) {
-    throw new RangeError(
+    throwRangeError(
       errorMessages.invalidChoice(optionName, unitStr, unitNameMap),
     )
   }
@@ -121,7 +121,7 @@ export function coerceChoiceOption<O>(
   const enumStr = toString(enumArg as string)
   const enumNum = enumNameMap[enumStr]
   if (enumNum === undefined) {
-    throw new RangeError(
+    throwRangeError(
       errorMessages.invalidChoice(optionName, enumStr, enumNameMap),
     )
   }

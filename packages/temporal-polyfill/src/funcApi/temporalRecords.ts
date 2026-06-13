@@ -1,6 +1,7 @@
 import { invalidRecordType } from '../apiHelpers/classStyle'
 import { CalendarImpl } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
+import { throwTypeError } from '../internal/utils'
 
 export type CalendarSlots = {
   id: string
@@ -228,7 +229,7 @@ export function rejectInvalidBag<B>(bag: B): B {
     (bag as any).calendar !== undefined ||
     (bag as any).timeZone !== undefined
   ) {
-    throw new TypeError(errorMessages.invalidBag)
+    throwTypeError(errorMessages.invalidBag)
   }
   return bag
 }

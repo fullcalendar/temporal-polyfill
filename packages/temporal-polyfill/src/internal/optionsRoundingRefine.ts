@@ -34,6 +34,7 @@ import type {
   DurationTotalOptions,
 } from './temporalSpecHelpers'
 import { type DayTimeUnit, Unit } from './units'
+import { throwRangeError } from './utils'
 
 /*
 High-level rounding, diff, and total option refinement.
@@ -111,7 +112,7 @@ export function refineDurationRoundOptions<RA, R>(
   let smallestUnit = coerceSmallestUnit(options)
 
   if (largestUnit === undefined && smallestUnit === undefined) {
-    throw new RangeError(errorMessages.missingSmallestLargestUnit)
+    throwRangeError(errorMessages.missingSmallestLargestUnit)
   }
 
   if (smallestUnit == null) {
@@ -129,7 +130,7 @@ export function refineDurationRoundOptions<RA, R>(
     smallestUnit > Unit.Hour && // a date unit?
     largestUnit !== smallestUnit
   ) {
-    throw new RangeError(
+    throwRangeError(
       'For calendar units with roundingIncrement > 1, use largestUnit = smallestUnit',
     )
   }

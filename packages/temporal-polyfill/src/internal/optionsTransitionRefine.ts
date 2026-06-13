@@ -4,6 +4,7 @@ import { coerceDirection } from './optionsCoerce'
 import { directionName } from './optionsConfig'
 import { Direction } from './optionsModel'
 import { normalizeOptionsOrString } from './optionsNormalize'
+import { throwRangeError } from './utils'
 
 /*
 High-level transition option refinement.
@@ -23,7 +24,7 @@ export function refineDirectionOptions(
   const res = coerceDirection(normalizedOptions, 0)
   if (!res) {
     // neither positive or negative
-    throw new RangeError(errorMessages.invalidEntity(directionName, res))
+    throwRangeError(errorMessages.invalidEntity(directionName, res))
   }
   return res
 }

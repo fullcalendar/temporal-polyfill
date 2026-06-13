@@ -47,7 +47,7 @@ import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
-import { NumberSign, clampEntity } from './utils'
+import { NumberSign, clampEntity, throwRangeError } from './utils'
 
 // High-Level
 // -----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ export function movePlainYearMonth(
   const overflow = refineOverflowOptions(options)
 
   if (durationSlots.sign && getMaxDurationUnit(durationSlots) < Unit.Month) {
-    throw new RangeError(errorMessages.invalidSmallUnits)
+    throwRangeError(errorMessages.invalidSmallUnits)
   }
 
   const { calendar } = plainYearMonthSlots
@@ -438,7 +438,7 @@ export function computeYearMovedMonth(
     // If the target year cannot represent the source leap month, reject mode
     // must fail instead of silently sliding to a neighboring ordinal month.
     if (overflow === Overflow.Reject) {
-      throw new RangeError(errorMessages.invalidLeapMonth)
+      throwRangeError(errorMessages.invalidLeapMonth)
     }
 
     // Chinese/Dangi-style calendars constrain MxxL to the matching common Mxx.

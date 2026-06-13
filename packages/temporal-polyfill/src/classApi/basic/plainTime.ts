@@ -24,7 +24,7 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import { timeFieldsToMilli } from '../../internal/timeFieldMath'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -190,7 +190,7 @@ export function createPlainTime(slots: TimeFields): PlainTime {
 export function getPlainTimeSlots(obj: unknown): TimeFields {
   const slots = plainTimeSlotsMap.get(obj as object)
   if (!slots) {
-    throw new TypeError(errorMessages.invalidCallingContext)
+    throwTypeError(errorMessages.invalidCallingContext)
   }
   return slots
 }
