@@ -114,10 +114,8 @@ export function createDateTimeFormatShell<R>(
       createPropDescriptors({
         formatRange(this: object, record0: R, record1: R): string {
           const { argsProvider } = getInternals(this)
-          const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
-            record0,
-            record1,
-          )
+          const [format, epochMilli0, epochMilli1] =
+            argsProvider.getArgsForRange(record0, record1)
           return format.formatRange(epochMilli0, epochMilli1)
         },
         formatRangeToParts(
@@ -126,10 +124,8 @@ export function createDateTimeFormatShell<R>(
           record1: R,
         ): ReturnType<Intl.DateTimeFormat['formatRangeToParts']> {
           const { argsProvider } = getInternals(this)
-          const [format, epochMilli0, epochMilli1] = argsProvider.getArgsForRange(
-            record0,
-            record1,
-          )
+          const [format, epochMilli0, epochMilli1] =
+            argsProvider.getArgsForRange(record0, record1)
           return format.formatRangeToParts(epochMilli0, epochMilli1)
         },
       }),
