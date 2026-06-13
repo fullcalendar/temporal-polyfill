@@ -2,6 +2,7 @@ import * as errorMessages from '../internal/errorMessages'
 import {
   createNameDescriptors,
   createStringTagDescriptors,
+  noop,
   throwTypeError,
 } from '../internal/utils'
 
@@ -61,8 +62,8 @@ interface JsonDebuggable {
 Must be called AFTER slots are assigned
 */
 export const attachDebugString: (instance: JsonDebuggable) => void =
-  // detect if minified
-  defineTemporalClass.name === 'defineTemporalClass'
+  // detect if NOT minified
+  noop.name === 'noop'
     ? (instance: JsonDebuggable) => {
         Object.defineProperty(instance, '_str_', {
           value: instance.toJSON(),

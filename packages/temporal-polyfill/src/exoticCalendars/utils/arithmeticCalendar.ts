@@ -15,7 +15,7 @@ import {
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
 import { milliInUtcDay } from '../../internal/units'
-import { compareNumbers, memoize, throwRangeError } from '../../internal/utils'
+import { compareNumbers, memoize, noop, throwRangeError } from '../../internal/utils'
 import { unixEpochJulianDay } from './gregoryJulianDay'
 
 export interface ArithmeticCalendarParts extends CalendarDateFields {
@@ -162,7 +162,7 @@ export function createArithmeticCalendar(
     computeMonthsInYear: ops.computeMonthsInYear,
     computeDaysInMonth: ops.computeDaysInMonth,
     computeDaysInYear: ops.computeDaysInYear,
-    computeLeapMonth: ops.computeLeapMonth || (() => undefined),
+    computeLeapMonth: ops.computeLeapMonth || noop,
     computeEraFields(isoDate) {
       const parts = fromIsoDate(isoDate)
       return ops.computeEraFields
