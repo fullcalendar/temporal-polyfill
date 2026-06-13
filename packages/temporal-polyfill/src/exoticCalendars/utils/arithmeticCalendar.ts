@@ -15,7 +15,12 @@ import {
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
 import { milliInUtcDay } from '../../internal/units'
-import { compareNumbers, memoize, noop, throwRangeError } from '../../internal/utils'
+import {
+  compareNumbers,
+  memoize,
+  noop,
+  throwRangeError,
+} from '../../internal/utils'
 import { unixEpochJulianDay } from './gregoryJulianDay'
 
 export interface ArithmeticCalendarParts extends CalendarDateFields {
