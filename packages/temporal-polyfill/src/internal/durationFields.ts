@@ -47,6 +47,11 @@ export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',
 ) as DurationFieldName[]
 
+export const durationGetters = zipPropsGenerator(
+  durationFieldNamesAsc,
+  (fieldName) => (slots: DurationFields) => slots[fieldName],
+)
+
 export const durationFieldNamesAlpha = sortStrings(durationFieldNamesAsc)
 
 export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(

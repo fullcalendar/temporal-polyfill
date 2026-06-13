@@ -11,9 +11,13 @@ import {
   computeCalendarYearOfWeek,
 } from '../internal/calendarDerived'
 import { CalendarImpl } from '../internal/calendarImpl'
-import { DurationFields } from '../internal/durationFields'
-import { CalendarDateFields, TimeFields } from '../internal/fieldTypes'
+import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
+
+// Keep these maps initialized in the same modules as their field-name arrays.
+// Building them here from imports can hit bundled circular-init TDZs.
+export { durationGetters } from '../internal/durationFields'
+export { timeGetters } from '../internal/fieldNames'
 
 type CalendarDateSlots = CalendarDateFields & { calendar: CalendarImpl }
 
@@ -87,78 +91,5 @@ export const calendarDerivedGetters = {
 
   inLeapYear(slots: CalendarDateSlots): boolean {
     return computeCalendarInLeapYear(slots.calendar, slots)
-  },
-} as const
-
-/*
-The same clock fields appear on PlainTime and PlainDateTime. Keeping them here
-keeps their public field accessors in one shared map.
-*/
-export const timeGetters = {
-  hour(slots: TimeFields): number {
-    return slots.hour
-  },
-
-  minute(slots: TimeFields): number {
-    return slots.minute
-  },
-
-  second(slots: TimeFields): number {
-    return slots.second
-  },
-
-  millisecond(slots: TimeFields): number {
-    return slots.millisecond
-  },
-
-  microsecond(slots: TimeFields): number {
-    return slots.microsecond
-  },
-
-  nanosecond(slots: TimeFields): number {
-    return slots.nanosecond
-  },
-} as const
-
-// Duration exposes its stored fields directly.
-export const durationGetters = {
-  years(slots: DurationFields): number {
-    return slots.years
-  },
-
-  months(slots: DurationFields): number {
-    return slots.months
-  },
-
-  weeks(slots: DurationFields): number {
-    return slots.weeks
-  },
-
-  days(slots: DurationFields): number {
-    return slots.days
-  },
-
-  hours(slots: DurationFields): number {
-    return slots.hours
-  },
-
-  minutes(slots: DurationFields): number {
-    return slots.minutes
-  },
-
-  seconds(slots: DurationFields): number {
-    return slots.seconds
-  },
-
-  milliseconds(slots: DurationFields): number {
-    return slots.milliseconds
-  },
-
-  microseconds(slots: DurationFields): number {
-    return slots.microseconds
-  },
-
-  nanoseconds(slots: DurationFields): number {
-    return slots.nanoseconds
   },
 } as const
