@@ -10,7 +10,11 @@ For ESM, essentially just remove comments and reformat whitespace
 */
 export function buildTerserEsmOptions() {
   return {
-    compress: false,
+    compress: {
+      defaults: false,
+      // Risky, but we have good test coverage. Not returning literal true/false publicly anyway
+      booleans_as_integers: true,
+    },
     mangle: false,
     format: {
       beautify: true,
@@ -51,7 +55,7 @@ export function buildTerserReadableIifeOptions() {
 
     compress: {
       // aggressive
-      passes: 3,
+      passes: 3, // esp needed for multiple tiers of function inlining
       ecma: 2020,
       builtins_ecma: 2020,
       builtins_pure: true,
