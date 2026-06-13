@@ -2,16 +2,6 @@ import type { CalendarDateFields, TimeFields } from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
 import { sortStrings, zipPropsConst } from './utils'
 
-// Atomic Field Names
-// -----------------------------------------------------------------------------
-
-// Used as a public-facing entity label for move-to-day-of-month helpers. It is
-// intentionally distinct from the actual Temporal field name, which is "day".
-export const dayFieldName = 'day'
-export const dayOfMonthName = 'dayOfMonth'
-export const dayOfWeekFieldName = 'dayOfWeek'
-export const weekOfYearFieldName = 'weekOfYear'
-
 // Unit-Ordered Field Name Lists
 // -----------------------------------------------------------------------------
 
@@ -21,11 +11,11 @@ export const timeFieldNamesAsc = unitNamesAsc.slice(
 ) as (keyof TimeFields)[]
 
 export const yearFieldNamesAsc = ['year']
-export const dayFieldNamesAsc = [dayFieldName]
+export const dayFieldNamesAsc = ['day']
 export const calendarDateFieldNamesAsc = [
-  ...dayFieldNamesAsc,
+  'day',
   'month',
-  ...yearFieldNamesAsc,
+  'year',
 ] as (keyof CalendarDateFields)[]
 
 // Unordered Field Name Lists
@@ -36,10 +26,9 @@ export const calendarDateFieldNamesAsc = [
 const offsetFieldNames = ['offset']
 export const timeZoneFieldNames = ['timeZone']
 export const eraYearFieldNames = ['era', 'eraYear']
-export const allYearFieldNames = [...eraYearFieldNames, ...yearFieldNamesAsc]
-const monthCodeFieldNames = ['monthCode']
-export const monthFieldNames = ['month', ...monthCodeFieldNames] // month/monthCode
-export const monthDayFieldNames = [...dayFieldNamesAsc, ...monthFieldNames]
+export const allYearFieldNames = ['era', 'eraYear', 'year']
+export const monthFieldNames = ['month', 'monthCode'] // month/monthCode
+export const monthDayFieldNames = ['day', 'month', 'monthCode']
 
 // Alpha Field Name Lists
 // -----------------------------------------------------------------------------
@@ -59,17 +48,16 @@ export const yearMonthFieldNamesWithEraAlpha = sortStrings(
   yearMonthFieldNamesAlpha,
 )
 export const yearMonthCodeFieldNamesAlpha = sortStrings(
-  monthCodeFieldNames,
+  ['monthCode'],
   yearFieldNamesAsc,
 )
 export const yearMonthCodeFieldNamesWithEraAlpha = sortStrings(
   eraYearFieldNames,
   yearMonthCodeFieldNamesAlpha,
 )
-export const monthCodeDayFieldNamesAlpha = sortStrings(
-  dayFieldNamesAsc,
-  monthCodeFieldNames,
-)
+export const monthCodeDayFieldNamesAlpha = sortStrings(dayFieldNamesAsc, [
+  'monthCode',
+])
 export const dateFieldNamesAlpha = sortStrings(
   dayFieldNamesAsc,
   yearMonthFieldNamesAlpha,

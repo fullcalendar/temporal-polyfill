@@ -8,12 +8,6 @@ import {
 import { type CalendarImpl, isoCalendarImpl } from '../../internal/calendarImpl'
 import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
 import * as errorMessages from '../../internal/errorMessages'
-import {
-  dayFieldName,
-  dayOfMonthName,
-  dayOfWeekFieldName,
-  weekOfYearFieldName,
-} from '../../internal/fieldNames'
 import { CalendarDateFields } from '../../internal/fieldTypes'
 import {
   computeIsoDayOfWeek,
@@ -100,8 +94,8 @@ export function moveToDayOfYear(
   const overflow = refineOverflowOptions(options)
   const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
-    dayOfMonthName,
-    toIntegerWithTruncation(dayOfYear, dayOfMonthName),
+    'dayOfMonth',
+    toIntegerWithTruncation(dayOfYear, 'dayOfMonth'),
     1,
     daysInYear,
     overflow,
@@ -123,8 +117,8 @@ export function moveToDayOfMonth(
   const overflow = refineOverflowOptions(options)
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
-    dayFieldName,
-    toIntegerWithTruncation(day, dayFieldName),
+    'day',
+    toIntegerWithTruncation(day, 'day'),
     1,
     daysInMonth,
     overflow,
@@ -147,8 +141,8 @@ export function moveToDayOfWeek(
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const normDayOfWeek = clampEntity(
-    dayOfWeekFieldName,
-    toIntegerWithTruncation(dayOfWeek, dayOfWeekFieldName),
+    'dayOfWeek',
+    toIntegerWithTruncation(dayOfWeek, 'dayOfWeek'),
     1,
     7,
     overflow,
@@ -172,8 +166,8 @@ export function moveToWeekOfYear(
   }
 
   const normWeekOfYear = clampEntity(
-    weekOfYearFieldName,
-    toIntegerWithTruncation(weekOfYear, weekOfYearFieldName),
+    'weekOfYear',
+    toIntegerWithTruncation(weekOfYear, 'weekOfYear'),
     1,
     weeksInYear!,
     overflow,

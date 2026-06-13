@@ -165,39 +165,6 @@ function createOptionsTransformer(
   }
 }
 
-// Shape fields are options that define the visible Temporal output shape.
-const dateShapeFieldNames = ['weekday', 'year', 'month', 'day', 'dateStyle']
-const timeShapeFieldNames = [
-  'dayPeriod',
-  'hour',
-  'minute',
-  'second',
-  'fractionalSecondDigits',
-  'timeStyle',
-]
-const dateTimeShapeFieldNames = [...dateShapeFieldNames, ...timeShapeFieldNames]
-
-// Partial-date types accept only a subset of date fields, but still treat the
-// remaining date/time shape fields as meaningful conflicts.
-const yearMonthShapeFieldNames = ['year', 'month', 'dateStyle']
-const yearMonthInvalidShapeFieldNames = [
-  'weekday',
-  'day',
-  ...timeShapeFieldNames,
-]
-
-const monthDayShapeFieldNames = ['month', 'day', 'dateStyle']
-const monthDayInvalidShapeFieldNames = [
-  'weekday',
-  'year',
-  ...timeShapeFieldNames,
-]
-
-// These options are known DateTimeFormat shape-ish fields, but some Temporal
-// types intentionally remove them without treating them as caller errors.
-const timeZoneNameStrs = ['timeZoneName']
-const timeZoneNameAndEraStrs = ['timeZoneName', 'era']
-
 // Defaults are injected only when the caller did not select any shape fields.
 const dateDefaultShapeFields: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -226,6 +193,17 @@ const monthDayDefaultShapeFields: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
+const dateShapeFieldNames = ['weekday', 'year', 'month', 'day', 'dateStyle']
+const timeShapeFieldNames = [
+  'dayPeriod',
+  'hour',
+  'minute',
+  'second',
+  'fractionalSecondDigits',
+  'timeStyle',
+]
+const dateTimeShapeFieldNames = [...dateShapeFieldNames, ...timeShapeFieldNames]
+
 export const transformInstantOptions = createOptionsTransformer(
   /* shapeFieldNames = */ dateTimeShapeFieldNames,
   /* invalidShapeFieldNames = */ [],
@@ -243,28 +221,34 @@ export const transformZonedOptions = createOptionsTransformer(
 export const transformDateTimeOptions = createOptionsTransformer(
   /* shapeFieldNames = */ dateTimeShapeFieldNames,
   /* invalidShapeFieldNames = */ [],
-  /* ignoredFieldNames = */ timeZoneNameStrs,
+  // Known DateTimeFormat shape-ish fields that this Temporal type ignores.
+  /* ignoredFieldNames = */ ['timeZoneName'],
   /* defaultShapeFields = */ dateTimeDefaultShapeFields,
 )
 
 export const transformDateOptions = createOptionsTransformer(
   /* shapeFieldNames = */ dateShapeFieldNames,
   /* invalidShapeFieldNames = */ timeShapeFieldNames,
-  /* ignoredFieldNames = */ timeZoneNameStrs,
+  // Known DateTimeFormat shape-ish fields that this Temporal type ignores.
+  /* ignoredFieldNames = */ ['timeZoneName'],
   /* defaultShapeFields = */ dateDefaultShapeFields,
 )
 
 export const transformTimeOptions = createOptionsTransformer(
   /* shapeFieldNames = */ timeShapeFieldNames,
   /* invalidShapeFieldNames = */ dateShapeFieldNames,
-  /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
+  // Known DateTimeFormat shape-ish fields that this Temporal type ignores.
+  /* ignoredFieldNames = */ ['timeZoneName', 'era'],
   /* defaultShapeFields = */ timeDefaultShapeFields,
 )
 
 export const transformYearMonthOptions = createOptionsTransformer(
-  /* shapeFieldNames = */ yearMonthShapeFieldNames,
-  /* invalidShapeFieldNames = */ yearMonthInvalidShapeFieldNames,
-  /* ignoredFieldNames = */ timeZoneNameStrs,
+  /* shapeFieldNames = */ ['year', 'month', 'dateStyle'],
+  // Partial-date types accept only a subset of date fields, but still treat the
+  // remaining date/time shape fields as meaningful conflicts.
+  /* invalidShapeFieldNames = */ ['weekday', 'day', ...timeShapeFieldNames],
+  // Known DateTimeFormat shape-ish fields that this Temporal type ignores.
+  /* ignoredFieldNames = */ ['timeZoneName'],
   /* defaultShapeFields = */ yearMonthDefaultShapeFields,
   /* dateStyleReplacementFields = */ {
     full: { year: 'numeric', month: 'long' },
@@ -275,9 +259,12 @@ export const transformYearMonthOptions = createOptionsTransformer(
 )
 
 export const transformMonthDayOptions = createOptionsTransformer(
-  /* shapeFieldNames = */ monthDayShapeFieldNames,
-  /* invalidShapeFieldNames = */ monthDayInvalidShapeFieldNames,
-  /* ignoredFieldNames = */ timeZoneNameAndEraStrs,
+  /* shapeFieldNames = */ ['month', 'day', 'dateStyle'],
+  // Partial-date types accept only a subset of date fields, but still treat the
+  // remaining date/time shape fields as meaningful conflicts.
+  /* invalidShapeFieldNames = */ ['weekday', 'year', ...timeShapeFieldNames],
+  // Known DateTimeFormat shape-ish fields that this Temporal type ignores.
+  /* ignoredFieldNames = */ ['timeZoneName', 'era'],
   /* defaultShapeFields = */ monthDayDefaultShapeFields,
   /* dateStyleReplacementFields = */ {
     full: { month: 'long', day: 'numeric' },
