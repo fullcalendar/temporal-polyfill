@@ -99,7 +99,7 @@ export const attachDebugString: (instance: JsonDebuggable) => void =
           value: instance.toJSON(),
         })
       }
-    : () => {} // TODO: reuse noop
+    : noop
 
 export function invalidRecordType(): never {
   throwTypeError(errorMessages.invalidCallingContext)
