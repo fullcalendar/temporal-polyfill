@@ -3,8 +3,10 @@ const { domprops } = await import(
   new URL('./tools/domprops.js', terserPackageJsonUrl)
 )
 
+// The `etrn` prefix is a deliberately simple trial-and-error size win: common
+// output chars tend to gzip better when assigned to the shortest prop names.
 const identifierStartChars =
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_'
+  'etrnabcdfghijklmopqsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_'
 const identifierChars = identifierStartChars + '0123456789'
 
 const reservedIdentifiers = new Set([
