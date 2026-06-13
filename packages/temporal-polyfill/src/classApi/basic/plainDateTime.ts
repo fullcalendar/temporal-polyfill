@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
   createCalendarDerivedGetters,
@@ -23,7 +24,6 @@ import {
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes } from '../../internal/diff'
 import { isoDateTimeToEpochMilli } from '../../internal/epochMath'
-import * as errorMessages from '../../internal/errorMessages'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateTimeFields,
@@ -52,7 +52,7 @@ import {
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { queryTimeZone } from '../../internal/timeZone'
-import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -315,11 +315,7 @@ export function createPlainDateTime(slots: PlainDateTimeSlots): PlainDateTime {
 }
 
 export function getPlainDateTimeSlots(obj: unknown): PlainDateTimeSlots {
-  const slots = plainDateTimeSlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getPlainDateTimeSlotsIfPresent(obj) || invalidRecordType()
 }
 
 export function getPlainDateTimeSlotsIfPresent(

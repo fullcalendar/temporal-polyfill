@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { createTimeGetters } from '../../apiHelpers/mixins'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -11,7 +12,6 @@ import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
-import * as errorMessages from '../../internal/errorMessages'
 import { TimeFields } from '../../internal/fieldTypes'
 import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
 import { transformTimeOptions } from '../../internal/intlFormatOptions'
@@ -24,7 +24,7 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import { timeFieldsToMilli } from '../../internal/timeFieldMath'
-import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -188,11 +188,7 @@ export function createPlainTime(slots: TimeFields): PlainTime {
 }
 
 export function getPlainTimeSlots(obj: unknown): TimeFields {
-  const slots = plainTimeSlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getPlainTimeSlotsIfPresent(obj) || invalidRecordType()
 }
 
 export function getPlainTimeSlotsIfPresent(

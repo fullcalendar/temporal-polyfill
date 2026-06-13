@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
   createCalendarDerivedGetters,
@@ -24,7 +25,6 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes } from '../../internal/diff'
-import * as errorMessages from '../../internal/errorMessages'
 import {
   DateTimeFields,
   ZonedDateTimeLikeObject,
@@ -61,7 +61,7 @@ import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
-import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -361,11 +361,7 @@ export function createZonedDateTime(slots: ZonedDateTimeSlots): ZonedDateTime {
 }
 
 export function getZonedDateTimeSlots(obj: unknown): ZonedDateTimeSlots {
-  const slots = zonedDateTimeSlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getZonedDateTimeSlotsIfPresent(obj) || invalidRecordType()
 }
 
 function getZonedDateTimeIsoSlots(obj: unknown) {

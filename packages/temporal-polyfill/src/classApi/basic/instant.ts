@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { bigNanoInMilli } from '../../internal/bigNano'
 import { requireNumberIsInteger } from '../../internal/cast'
@@ -15,7 +16,6 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
-import * as errorMessages from '../../internal/errorMessages'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
@@ -29,7 +29,7 @@ import {
   getEpochNano,
 } from '../../internal/slots'
 import { queryTimeZone } from '../../internal/timeZone'
-import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -177,11 +177,7 @@ export function createInstant(slots: EpochNanoFields): Instant {
 }
 
 export function getInstantSlots(obj: unknown): EpochNanoFields {
-  const slots = instantSlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getInstantSlotsIfPresent(obj) || invalidRecordType()
 }
 
 export function getInstantSlotsIfPresent(

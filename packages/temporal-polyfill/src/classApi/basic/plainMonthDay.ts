@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
   computeCalendarDateFields,
@@ -19,7 +20,6 @@ import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
-import * as errorMessages from '../../internal/errorMessages'
 import {
   CalendarDateFields,
   MonthDayFields,
@@ -36,7 +36,7 @@ import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { isObjectLike, throwTypeError } from '../../internal/utils'
+import { isObjectLike } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import {
   resolveBasicCalendarArg,
@@ -162,11 +162,7 @@ export function createPlainMonthDay(slots: PlainMonthDaySlots): PlainMonthDay {
 }
 
 export function getPlainMonthDaySlots(obj: unknown): PlainMonthDaySlots {
-  const slots = plainMonthDaySlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getPlainMonthDaySlotsIfPresent(obj) || invalidRecordType()
 }
 
 export function getPlainMonthDaySlotsIfPresent(

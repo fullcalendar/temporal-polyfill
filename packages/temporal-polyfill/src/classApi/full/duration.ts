@@ -4,6 +4,7 @@ import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
+  invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { compareDurations } from '../../internal/compare'
 import { constructDurationSlots } from '../../internal/construct'
@@ -18,7 +19,6 @@ import {
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
-import * as errorMessages from '../../internal/errorMessages'
 import { ZonedDateTimeLikeObject } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { formatDurationIso } from '../../internal/isoFormat'
@@ -27,7 +27,7 @@ import { mergeDurationFields } from '../../internal/merge'
 import { RelativeToSlots } from '../../internal/relativeMath'
 import { createDateSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'
-import { NumberSign, isObjectLike, throwTypeError } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarId } from './calendarResolve'
 import { PlainDateArg, getPlainDateSlotsIfPresent } from './plainDate'
@@ -245,11 +245,7 @@ export function createDuration(slots: DurationSlots): Duration {
 }
 
 export function getDurationSlots(obj: unknown): DurationSlots {
-  const slots = durationSlotsMap.get(obj as object)
-  if (!slots) {
-    throwTypeError(errorMessages.invalidCallingContext)
-  }
-  return slots
+  return getDurationSlotsIfPresent(obj) || invalidRecordType()
 }
 
 export function getDurationSlotsIfPresent(
