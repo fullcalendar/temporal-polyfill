@@ -245,7 +245,7 @@ export function refineRoundToOptions(
 // bounded time-of-day case where the amount fits safely in Number.
 export function nanoToRoundedTimeUnit(
   unit: TimeUnit,
-  nanoInUnit: number,
+  nanoInUnit: number, // overengineered for caller to supply? SEE ABOVE COMMENT
   nanoAmount: number,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
@@ -266,7 +266,7 @@ export function nanoToRoundedTimeUnit(
 // stay in bigint until rounding or exact fractional division needs a Number.
 export function bigNanoToRoundedTimeUnit(
   unit: TimeUnit,
-  nanoInUnit: number,
+  nanoInUnit: number, // overengineered for caller to supply? SEE ABOVE COMMENT
   nanoAmount: bigint,
   options?: RoundingMathOptions | RoundingMode,
 ): number {

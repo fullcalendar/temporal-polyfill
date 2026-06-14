@@ -97,12 +97,10 @@ export function roundInstantToUnit(
   roundingMode: RoundingModeEnum,
 ): EpochNanoFields {
   return createEpochNanoSlots(
-    roundBigNanoToUnit(
+    roundBigNanoToDayOriginInc(
       instantSlots.epochNanoseconds,
-      smallestUnit,
-      roundingInc,
+      computeBigNanoInc(smallestUnit, roundingInc),
       roundingMode,
-      true, // useDayOrigin
     ),
   )
 }
@@ -387,6 +385,13 @@ export function computeNanoInc(
   return unitNanoMap[smallestUnit] * roundingInc
 }
 
+export function computeBigNanoInc(
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+): bigint {
+  return BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
+}
+
 // Interval / Floor Funcs
 // -----------------------------------------------------------------------------
 
@@ -438,10 +443,9 @@ export function roundDayTimeDuration(
   roundingMode: RoundingModeEnum,
 ): DurationFields {
   const bigNano = durationDayTimeToBigNano(durationFields)
-  const roundedBigNano = roundBigNanoToUnit(
+  const roundedBigNano = roundBigNanoToInc(
     bigNano,
-    smallestUnit,
-    roundingInc,
+    computeBigNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
   return {
@@ -506,21 +510,11 @@ export function roundRelativeDuration(
 
 // Rounding Numbers
 // -----------------------------------------------------------------------------
-
-export function roundBigNanoToUnit(
-  bigNano: bigint,
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-  useDayOrigin?: boolean,
-): bigint {
-  const bigNanoInc = BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
-  const roundFunc = useDayOrigin
-    ? roundBigNanoToDayOriginInc
-    : roundBigNanoToInc
-
-  return roundFunc(bigNano, bigNanoInc, roundingMode)
-}
+/*
+  NOTE: these functions accept an "inc" that can be derived with
+    computeNanoInc
+    computeBigNanoInc
+*/
 
 /*
 Rounds an exact nanosecond bigint to an exact bigint increment. The quotient is
@@ -625,10 +619,9 @@ function nudgeDayTimeDuration(
   expandedBigUnit: boolean, // grew year/month/week/day?
 ] {
   const bigNano = durationDayTimeToBigNano(durationFields)
-  const roundedBigNano = roundBigNanoToUnit(
+  const roundedBigNano = roundBigNanoToInc(
     bigNano,
-    smallestUnit,
-    roundingInc,
+    computeBigNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )
   const nanoDiff = roundedBigNano - bigNano
