@@ -12,11 +12,11 @@ import {
   timeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../../internal/compare'
-import { constructDateTimeSlots } from '../../internal/construct'
 import {
   plainDateTimeToZonedDateTime,
   zonedDateTimeToPlainDateTime,
@@ -38,6 +38,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
+import { checkIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
@@ -51,8 +52,9 @@ import {
   createTimeSlots,
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -106,21 +108,22 @@ export const PlainDateTime = defineTemporalClass(
       nanosecond = 0,
       calendar: string | undefined = undefined,
     ) {
+      const isoDateTime = mapProps(toIntegerWithTruncation, {
+        year: isoYear,
+        month: isoMonth,
+        day: isoDay,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+      })
+      checkIsoDateTimeFields(isoDateTime)
+      checkIsoDateTimeInBounds(isoDateTime)
       initPlainDateTime(
         this,
-        constructDateTimeSlots(
-          resolveAnyCalendarArg,
-          isoYear,
-          isoMonth,
-          isoDay,
-          hour,
-          minute,
-          second,
-          millisecond,
-          microsecond,
-          nanosecond,
-          calendar,
-        ),
+        createDateTimeSlots(isoDateTime, resolveAnyCalendarArg(calendar)),
       )
     }
 

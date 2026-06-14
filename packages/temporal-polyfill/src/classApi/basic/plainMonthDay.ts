@@ -15,8 +15,8 @@ import {
   getCalendarSlotId,
   isoCalendarImpl,
 } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
-import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
@@ -32,11 +32,17 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
+import {
+  checkIsoDateFields,
+  isoEpochFirstLeapYear,
+} from '../../internal/isoCalendarMath'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { isObjectLike } from '../../internal/utils'
+import { createDateSlots } from '../../internal/slots'
+import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { isObjectLike, mapProps } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import {
   resolveBasicCalendarArg,
@@ -61,14 +67,24 @@ export const PlainMonthDay = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoYear?: number,
     ) {
+      const isoMonthDay = mapProps(toIntegerWithTruncation, {
+        month: isoMonth,
+        day: isoDay,
+      })
+      const calendarImpl = resolveBasicCalendarArg(calendar)
+      const isoYearInt = toIntegerWithTruncation(
+        referenceIsoYear ?? isoEpochFirstLeapYear,
+      )
       initPlainMonthDay(
         this,
-        constructMonthDaySlots(
-          resolveBasicCalendarArg,
-          isoMonth,
-          isoDay,
-          calendar,
-          referenceIsoYear,
+        createDateSlots(
+          checkIsoDateInBounds(
+            checkIsoDateFields({
+              year: isoYearInt,
+              ...isoMonthDay,
+            }),
+          ),
+          calendarImpl,
         ),
       )
     }

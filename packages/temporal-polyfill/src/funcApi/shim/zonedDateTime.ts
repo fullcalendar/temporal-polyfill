@@ -16,13 +16,12 @@ import {
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
-import { getCalendarSlotId } from '../../internal/calendarImpl'
-import { toStrictInteger } from '../../internal/cast'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toBigInt, toStrictInteger } from '../../internal/cast'
 import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
 } from '../../internal/compare'
-import { constructZonedEpochNanoSlots } from '../../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -65,6 +64,7 @@ import {
 } from '../../internal/round'
 import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
+  ZonedEpochNanoFields,
   createZonedEpochNanoSlots,
   getEpochMilli,
   getEpochNano,
@@ -151,7 +151,7 @@ import {
 import { rejectInvalidBag } from './temporalRecords'
 
 type ShimZonedDateTimeFields = ZonedDateTimeFields<CalendarRecord>
-type ShimZonedDateTimeSlots = ReturnType<typeof constructZonedEpochNanoSlots>
+type ShimZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarImpl }
 
 export const getShimZonedDateTimeSlots: (
   record: unknown,
@@ -213,12 +213,13 @@ export function create(
   timeZoneId: string,
   calendar?: CalendarRecord,
 ): ShimZonedDateTimeRecord {
+  const epochNanoBigInt = toBigInt(epochNanoseconds)
+  const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
   return createShimZonedDateTimeRecord(
-    constructZonedEpochNanoSlots(
-      refineShimCalendarArgMaybe,
-      epochNanoseconds,
-      timeZoneId,
-      calendar,
+    createZonedEpochNanoSlots(
+      checkEpochNanoInBounds(epochNanoBigInt),
+      queryTimeZone(refinedTimeZoneId),
+      refineShimCalendarArgMaybe(calendar),
     ),
   )
 }

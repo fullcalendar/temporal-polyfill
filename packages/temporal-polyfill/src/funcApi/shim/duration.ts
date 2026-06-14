@@ -5,13 +5,14 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { toStrictInteger } from '../../internal/cast'
 import { compareDurations } from '../../internal/compare'
-import { constructDurationSlots } from '../../internal/construct'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
 import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
   addDurationsWithoutRelativeTo,
+  checkDurationUnits,
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
@@ -23,13 +24,14 @@ import {
 import { parseDuration } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
 import { RelativeToSlots } from '../../internal/relativeMath'
+import { createDurationSlots } from '../../internal/slots'
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
 } from '../../internal/temporalSpecHelpers'
 import { totalDuration } from '../../internal/total'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, mapProps } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -40,7 +42,7 @@ import {
   setDurationSlots,
 } from '../temporalRecords'
 
-type ShimDurationSlots = ReturnType<typeof constructDurationSlots>
+type ShimDurationSlots = DurationFields & { sign: NumberSign }
 
 export const getShimDurationSlots: (record: unknown) => ShimDurationSlots =
   getDurationSlots
@@ -124,17 +126,21 @@ export function create(
   nanoseconds = 0,
 ): ShimDurationRecord {
   return createShimDurationRecord(
-    constructDurationSlots(
-      years,
-      months,
-      weeks,
-      days,
-      hours,
-      minutes,
-      seconds,
-      milliseconds,
-      microseconds,
-      nanoseconds,
+    createDurationSlots(
+      checkDurationUnits(
+        mapProps(toStrictInteger, {
+          years,
+          months,
+          weeks,
+          days,
+          hours,
+          minutes,
+          seconds,
+          milliseconds,
+          microseconds,
+          nanoseconds,
+        }),
+      ),
     ),
   )
 }

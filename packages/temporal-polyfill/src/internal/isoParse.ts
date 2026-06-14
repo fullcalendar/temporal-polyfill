@@ -66,7 +66,6 @@ import {
   parseSubsecNano,
   signRegExpStr,
   throwRangeError,
-  zipPropsDesc,
 } from './utils'
 
 // High-level
@@ -700,15 +699,13 @@ function organizeDurationParts(parts: string[]): DurationFields {
   let hasAnyFrac = false
   let leftoverNano = 0
   let durationFields = {
-    ...zipPropsDesc(durationFieldNamesAsc, [
-      parseUnit(parts[2]),
-      parseUnit(parts[3]),
-      parseUnit(parts[4]),
-      parseUnit(parts[5]),
-      parseUnit(parts[6], parts[7], Unit.Hour),
-      parseUnit(parts[8], parts[9], Unit.Minute),
-      parseUnit(parts[10], parts[11], Unit.Second),
-    ]),
+    year: parseUnit(parts[2]),
+    month: parseUnit(parts[3]),
+    week: parseUnit(parts[4]),
+    day: parseUnit(parts[5]),
+    hour: parseUnit(parts[6], parts[7], Unit.Hour),
+    minute: parseUnit(parts[8], parts[9], Unit.Minute),
+    second: parseUnit(parts[10], parts[11], Unit.Second),
     ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
   } as DurationFields
 

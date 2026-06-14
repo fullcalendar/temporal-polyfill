@@ -15,26 +15,29 @@ import {
   computeCalendarMonthCode,
   computeCalendarMonthsInYear,
 } from '../../internal/calendarDerived'
-import { getCalendarSlotId } from '../../internal/calendarImpl'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import {
-  constructDurationSlots,
-  constructYearMonthSlots,
-} from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth } from '../../internal/diff'
+import { checkDurationUnits } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
-import { DayFields, YearMonthFields } from '../../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  DayFields,
+  YearMonthFields,
+} from '../../internal/fieldTypes'
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
+import { checkIsoDateFields } from '../../internal/isoCalendarMath'
 import {
   formatPlainYearMonthIso,
   formatYearMonthIsoAuto,
@@ -43,9 +46,10 @@ import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { getCommonCalendar } from '../../internal/slotUtils'
-import { createDateSlots } from '../../internal/slots'
+import { createDateSlots, createDurationSlots } from '../../internal/slots'
+import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, mapProps } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -74,9 +78,10 @@ import {
   roundDateToInterval,
 } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
+import { durationFieldDefaults } from '../../internal/durationFields'
 
 type Format = DateTimeFormatLike<ShimPlainYearMonthRecord>
-type ShimPlainYearMonthSlots = ReturnType<typeof constructYearMonthSlots>
+type ShimPlainYearMonthSlots = CalendarDateFields & { calendar: CalendarImpl }
 
 export const getShimPlainYearMonthSlots: (
   record: unknown,
@@ -145,13 +150,21 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoDay?: number,
 ): ShimPlainYearMonthRecord {
+  const isoYearMonth = mapProps(toIntegerWithTruncation, {
+    year: isoYear,
+    month: isoMonth,
+  })
+  const calendarImpl = refineShimCalendarArgMaybe(calendar)
+  const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
   return createShimPlainYearMonthRecord(
-    constructYearMonthSlots(
-      refineShimCalendarArgMaybe,
-      isoYear,
-      isoMonth,
-      calendar,
-      referenceIsoDay,
+    createDateSlots(
+      checkIsoYearMonthInBounds(
+        checkIsoDateFields({
+          ...isoYearMonth,
+          day: isoDayInt,
+        }),
+      ),
+      calendarImpl,
     ),
   )
 }
@@ -232,7 +245,12 @@ export function addYears(
   const resSlots = movePlainYearMonth(
     false,
     slots,
-    constructDurationSlots(years, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    createDurationSlots(
+      checkDurationUnits({
+        ...durationFieldDefaults,
+        years: toStrictInteger(years),
+      }),
+    ),
     options,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -247,7 +265,12 @@ export function addMonths(
   const resSlots = movePlainYearMonth(
     false,
     slots,
-    constructDurationSlots(0, months, 0, 0, 0, 0, 0, 0, 0, 0),
+    createDurationSlots(
+      checkDurationUnits({
+        ...durationFieldDefaults,
+        months: toStrictInteger(months),
+      }),
+    ),
     options,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -355,10 +378,14 @@ export function endOfYear(
   const slots = getShimPlainYearMonthSlots(record)
   const yearCeilSlots = createDateSlots(computeYearCeil(slots), slots.calendar)
   return createShimPlainYearMonthRecord(
+    // move back a month
     movePlainYearMonth(
       true,
       yearCeilSlots,
-      constructDurationSlots(0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+      createDurationSlots({
+        ...durationFieldDefaults,
+        months: 1,
+      }),
     ),
   )
 }

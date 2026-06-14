@@ -1,4 +1,3 @@
-import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
 import {
@@ -12,7 +11,7 @@ import {
   secInHour,
   secInMinute,
 } from './units'
-import { clampProp, divModFloor, zipPropsDesc } from './utils'
+import { clampEntity, divModFloor, mapProps } from './utils'
 
 // Time Field Validation
 // -----------------------------------------------------------------------------
@@ -22,18 +21,21 @@ export function checkTimeFields<P extends TimeFields>(timeFields: P): P {
   return timeFields
 }
 
+const maxValues: Partial<TimeFields> = {
+  hour: 23,
+  minute: 59,
+  second: 59,
+  // or else 999
+}
+
 export function constrainTimeFields(
   timeFields: TimeFields,
   overflow?: Overflow,
 ): TimeFields {
-  return zipPropsDesc(timeFieldNamesAsc, [
-    clampProp(timeFields, 'hour', 0, 23, overflow),
-    clampProp(timeFields, 'minute', 0, 59, overflow),
-    clampProp(timeFields, 'second', 0, 59, overflow),
-    clampProp(timeFields, 'millisecond', 0, 999, overflow),
-    clampProp(timeFields, 'microsecond', 0, 999, overflow),
-    clampProp(timeFields, 'nanosecond', 0, 999, overflow),
-  ])
+  return mapProps(
+    (val, name) => clampEntity(name, val, 0, maxValues[name] || 999, overflow),
+    timeFields,
+  )
 }
 
 // Fields -> Unit-Number

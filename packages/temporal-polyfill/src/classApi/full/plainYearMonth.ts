@@ -16,11 +16,11 @@ import {
   computeCalendarMonthsInYear,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { constructYearMonthSlots } from '../../internal/construct'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth } from '../../internal/diff'
@@ -36,13 +36,16 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
+import { checkIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
 import { movePlainYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { createDateSlots } from '../../internal/slots'
+import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
+import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import {
@@ -70,14 +73,22 @@ export const PlainYearMonth = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoDay?: number,
     ) {
+      const isoYearMonth = mapProps(toIntegerWithTruncation, {
+        year: isoYear,
+        month: isoMonth,
+      })
+      const calendarImpl = resolveAnyCalendarArg(calendar)
+      const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
       initPlainYearMonth(
         this,
-        constructYearMonthSlots(
-          resolveAnyCalendarArg,
-          isoYear,
-          isoMonth,
-          calendar,
-          referenceIsoDay,
+        createDateSlots(
+          checkIsoYearMonthInBounds(
+            checkIsoDateFields({
+              ...isoYearMonth,
+              day: isoDayInt,
+            }),
+          ),
+          calendarImpl,
         ),
       )
     }

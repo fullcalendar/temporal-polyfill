@@ -17,12 +17,11 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toStrictInteger } from '../../internal/cast'
+import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../../internal/compare'
-import { constructDateTimeSlots } from '../../internal/construct'
 import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes } from '../../internal/diff'
@@ -45,7 +44,10 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
+import {
+  checkIsoDateTimeFields,
+  computeIsoDayOfWeek,
+} from '../../internal/isoCalendarMath'
 import {
   formatDateTimeIsoAuto,
   formatPlainDateTimeIso,
@@ -65,6 +67,7 @@ import {
   createTimeSlots,
 } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
@@ -76,7 +79,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../../internal/units'
-import { NumberSign, bindArgs } from '../../internal/utils'
+import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -138,7 +141,9 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<ShimPlainDateTimeRecord>
-type ShimPlainDateTimeSlots = ReturnType<typeof constructDateTimeSlots>
+type ShimPlainDateTimeSlots = CalendarDateTimeFields & {
+  calendar: CalendarImpl
+}
 
 export const getShimPlainDateTimeSlots: (
   record: unknown,
@@ -191,20 +196,21 @@ export function create(
   nanosecond = 0,
   calendar?: CalendarRecord,
 ): ShimPlainDateTimeRecord {
+  const isoDateTime = mapProps(toIntegerWithTruncation, {
+    year: isoYear,
+    month: isoMonth,
+    day: isoDay,
+    hour,
+    minute,
+    second,
+    millisecond,
+    microsecond,
+    nanosecond,
+  })
+  checkIsoDateTimeFields(isoDateTime)
+  checkIsoDateTimeInBounds(isoDateTime)
   return createShimPlainDateTimeRecord(
-    constructDateTimeSlots(
-      refineShimCalendarArgMaybe,
-      isoYear,
-      isoMonth,
-      isoDay,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      nanosecond,
-      calendar,
-    ),
+    createDateTimeSlots(isoDateTime, refineShimCalendarArgMaybe(calendar)),
   )
 }
 

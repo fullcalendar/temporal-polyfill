@@ -12,11 +12,11 @@ import {
   timeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toBigInt } from '../../internal/cast'
 import {
   compareZonedDateTimes,
   zonedDateTimesEqual,
 } from '../../internal/compare'
-import { constructZonedEpochNanoSlots } from '../../internal/construct'
 import {
   zonedDateTimeToInstant,
   zonedDateTimeToPlainDate,
@@ -53,10 +53,13 @@ import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
+  createZonedEpochNanoSlots,
   getEpochMilli,
   getEpochNano,
 } from '../../internal/slots'
+import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
+import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
@@ -101,13 +104,14 @@ export const ZonedDateTime = defineTemporalClass(
       timeZoneId: string,
       calendar: string | undefined = undefined,
     ) {
+      const epochNanoBigInt = toBigInt(epochNanoseconds)
+      const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
       initZonedDateTime(
         this,
-        constructZonedEpochNanoSlots(
-          resolveAnyCalendarArg,
-          epochNanoseconds,
-          timeZoneId,
-          calendar,
+        createZonedEpochNanoSlots(
+          checkEpochNanoInBounds(epochNanoBigInt),
+          queryTimeZone(refinedTimeZoneId),
+          resolveAnyCalendarArg(calendar),
         ),
       )
     }

@@ -7,8 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { timeGetters } from '../../apiHelpers/mixins'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
-import { constructTimeSlots } from '../../internal/construct'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
@@ -23,8 +23,11 @@ import { movePlainTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
-import { timeFieldsToMilli } from '../../internal/timeFieldMath'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import {
+  checkTimeFields,
+  timeFieldsToMilli,
+} from '../../internal/timeFieldMath'
+import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   Duration,
   DurationArg,
@@ -53,13 +56,17 @@ export const PlainTime = defineTemporalClass(
     ) {
       initPlainTime(
         this,
-        constructTimeSlots(
-          hour,
-          minute,
-          second,
-          millisecond,
-          microsecond,
-          nanosecond,
+        createTimeSlots(
+          checkTimeFields(
+            mapProps(toIntegerWithTruncation, {
+              hour,
+              minute,
+              second,
+              millisecond,
+              microsecond,
+              nanosecond,
+            }),
+          ),
         ),
       )
     }

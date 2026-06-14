@@ -7,9 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { bigNanoInMilli } from '../../internal/bigNano'
-import { requireNumberIsInteger } from '../../internal/cast'
+import { requireNumberIsInteger, toBigInt } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
-import { constructEpochNanoSlots } from '../../internal/construct'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -28,6 +27,7 @@ import {
   getEpochMilli,
   getEpochNano,
 } from '../../internal/slots'
+import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
@@ -52,7 +52,12 @@ export const Instant = defineTemporalClass(
   InstantBranding,
   class {
     constructor(epochNanoseconds: bigint) {
-      initInstant(this, constructEpochNanoSlots(epochNanoseconds))
+      initInstant(
+        this,
+        createEpochNanoSlots(
+          checkEpochNanoInBounds(toBigInt(epochNanoseconds)),
+        ),
+      )
     }
 
     static from(arg: InstantArg): Instant {

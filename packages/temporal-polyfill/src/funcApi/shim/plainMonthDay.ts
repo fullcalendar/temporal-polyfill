@@ -9,13 +9,17 @@ import {
   computeCalendarDateFields,
   computeCalendarMonthCode,
 } from '../../internal/calendarDerived'
-import { getCalendarSlotId } from '../../internal/calendarImpl'
+import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
-import { constructMonthDaySlots } from '../../internal/construct'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
-import { EraYearOrYear, MonthDayFields } from '../../internal/fieldTypes'
+import {
+  CalendarDateFields,
+  EraYearOrYear,
+  MonthDayFields,
+} from '../../internal/fieldTypes'
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
@@ -23,11 +27,18 @@ import {
 import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
+  checkIsoDateFields,
+  isoEpochFirstLeapYear,
+} from '../../internal/isoCalendarMath'
+import {
   formatMonthDayIsoAuto,
   formatPlainMonthDayIso,
 } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
+import { createDateSlots } from '../../internal/slots'
+import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { mapProps } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -44,7 +55,7 @@ import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>
-type ShimPlainMonthDaySlots = ReturnType<typeof constructMonthDaySlots>
+type ShimPlainMonthDaySlots = CalendarDateFields & { calendar: CalendarImpl }
 
 export const getShimPlainMonthDaySlots: (
   record: unknown,
@@ -98,13 +109,23 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoYear?: number,
 ): ShimPlainMonthDayRecord {
+  const isoMonthDay = mapProps(toIntegerWithTruncation, {
+    month: isoMonth,
+    day: isoDay,
+  })
+  const calendarImpl = refineShimCalendarArgMaybe(calendar)
+  const isoYearInt = toIntegerWithTruncation(
+    referenceIsoYear ?? isoEpochFirstLeapYear,
+  )
   return createShimPlainMonthDayRecord(
-    constructMonthDaySlots(
-      refineShimCalendarArgMaybe,
-      isoMonth,
-      isoDay,
-      calendar,
-      referenceIsoYear,
+    createDateSlots(
+      checkIsoDateInBounds(
+        checkIsoDateFields({
+          year: isoYearInt,
+          ...isoMonthDay,
+        }),
+      ),
+      calendarImpl,
     ),
   )
 }

@@ -11,8 +11,8 @@ import {
   calendarFieldGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
-import { constructDateSlots } from '../../internal/construct'
 import {
   convertToPlainMonthDay,
   convertToPlainYearMonth,
@@ -33,6 +33,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
+import { checkIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
@@ -41,7 +42,8 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   CalendarArg,
   getCalendarFromBag,
@@ -94,12 +96,17 @@ export const PlainDate = defineTemporalClass(
     ) {
       initPlainDate(
         this,
-        constructDateSlots(
-          resolveBasicCalendarArg,
-          isoYear,
-          isoMonth,
-          isoDay,
-          calendar,
+        createDateSlots(
+          checkIsoDateInBounds(
+            checkIsoDateFields(
+              mapProps(toIntegerWithTruncation, {
+                year: isoYear,
+                month: isoMonth,
+                day: isoDay,
+              }),
+            ),
+          ),
+          resolveBasicCalendarArg(calendar),
         ),
       )
     }

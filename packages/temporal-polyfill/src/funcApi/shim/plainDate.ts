@@ -22,8 +22,8 @@ import {
   type CalendarImpl,
   getCalendarSlotId,
 } from '../../internal/calendarImpl'
+import { toIntegerWithTruncation } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
-import { constructDateSlots } from '../../internal/construct'
 import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates } from '../../internal/diff'
@@ -43,7 +43,10 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
+import {
+  checkIsoDateFields,
+  computeIsoDayOfWeek,
+} from '../../internal/isoCalendarMath'
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
@@ -60,7 +63,7 @@ import {
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
-import { NumberSign, bindArgs } from '../../internal/utils'
+import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import {
   DateTimeFormatLike,
@@ -129,7 +132,7 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<ShimPlainDateRecord>
-type ShimPlainDateSlots = ReturnType<typeof constructDateSlots>
+type ShimPlainDateSlots = CalendarDateFields & { calendar: CalendarImpl }
 
 export const getShimPlainDateSlots: (record: unknown) => ShimPlainDateSlots =
   getPlainDateSlots
@@ -173,12 +176,17 @@ export function create(
   calendar?: CalendarRecord,
 ): ShimPlainDateRecord {
   return createShimPlainDateRecord(
-    constructDateSlots(
-      refineShimCalendarArgMaybe,
-      isoYear,
-      isoMonth,
-      isoDay,
-      calendar,
+    createDateSlots(
+      checkIsoDateInBounds(
+        checkIsoDateFields(
+          mapProps(toIntegerWithTruncation, {
+            year: isoYear,
+            month: isoMonth,
+            day: isoDay,
+          }),
+        ),
+      ),
+      refineShimCalendarArgMaybe(calendar),
     ),
   )
 }

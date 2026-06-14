@@ -179,6 +179,7 @@ export function checkIsoDateFields<P extends CalendarDateFields>(
   return isoInternals
 }
 
+// Like checkIsoDateFields, but returns boolean instead of throwing
 export function isIsoDateFieldsValid(isoDate: CalendarDateFields): boolean {
   return allPropsEqual(
     calendarDateFieldNamesAsc,

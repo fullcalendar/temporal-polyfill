@@ -8,9 +8,8 @@ import {
 } from '../../apiHelpers/classStyle'
 import { timeGetters } from '../../apiHelpers/mixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
-import { toStrictInteger } from '../../internal/cast'
+import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
-import { constructTimeSlots } from '../../internal/construct'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
 import { TimeFields } from '../../internal/fieldTypes'
@@ -24,6 +23,7 @@ import { movePlainTime } from '../../internal/move'
 import { roundPlainTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
+  checkTimeFields,
   nanoToTimeAndDay,
   timeFieldsToMilli,
   timeFieldsToNano,
@@ -37,7 +37,7 @@ import {
   nanoInMinute,
   nanoInSec,
 } from '../../internal/units'
-import { NumberSign, bindArgs } from '../../internal/utils'
+import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
@@ -56,7 +56,7 @@ import { refineRoundToOptions } from './roundUtils'
 import { rejectInvalidBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainTimeRecord>
-type ShimPlainTimeSlots = ReturnType<typeof constructTimeSlots>
+type ShimPlainTimeSlots = TimeFields
 
 export const getShimPlainTimeSlots: (record: unknown) => ShimPlainTimeSlots =
   getPlainTimeSlots
@@ -98,13 +98,17 @@ export function create(
   nanosecond = 0,
 ): ShimPlainTimeRecord {
   return createShimPlainTimeRecord(
-    constructTimeSlots(
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      nanosecond,
+    createTimeSlots(
+      checkTimeFields(
+        mapProps(toIntegerWithTruncation, {
+          hour,
+          minute,
+          second,
+          millisecond,
+          microsecond,
+          nanosecond,
+        }),
+      ),
     ),
   )
 }

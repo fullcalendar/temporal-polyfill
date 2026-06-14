@@ -13,9 +13,8 @@ import {
   bigNanoInMinute,
   bigNanoInSec,
 } from '../../internal/bigNano'
-import { toStrictInteger } from '../../internal/cast'
+import { toBigInt, toStrictInteger } from '../../internal/cast'
 import { compareInstants, instantsEqual } from '../../internal/compare'
-import { constructEpochNanoSlots } from '../../internal/construct'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -32,6 +31,7 @@ import { parseInstant } from '../../internal/isoParse'
 import { moveInstant } from '../../internal/move'
 import { roundInstantToUnit } from '../../internal/round'
 import {
+  EpochNanoFields,
   createEpochNanoSlots,
   getEpochMilli,
   getEpochNano,
@@ -70,7 +70,7 @@ import {
 } from './zonedDateTime'
 
 type Format = DateTimeFormatLike<ShimInstantRecord>
-type ShimInstantSlots = ReturnType<typeof constructEpochNanoSlots>
+type ShimInstantSlots = EpochNanoFields
 
 export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
   getInstantSlots
@@ -110,7 +110,9 @@ export function createShimInstantRecord(
 }
 
 export function create(epochNanoseconds: bigint): ShimInstantRecord {
-  return createShimInstantRecord(constructEpochNanoSlots(epochNanoseconds))
+  return createShimInstantRecord(
+    createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNanoseconds))),
+  )
 }
 
 export function fromEpochMilliseconds(

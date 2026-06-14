@@ -7,8 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { durationGetters } from '../../apiHelpers/mixins'
+import { toStrictInteger } from '../../internal/cast'
 import { compareDurations } from '../../internal/compare'
-import { constructDurationSlots } from '../../internal/construct'
 import {
   refineDurationObjectLike,
   refineMaybeZonedDateTimeObjectLike,
@@ -17,6 +17,7 @@ import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
   addDurations,
+  checkDurationUnits,
   negateDuration,
   roundDuration,
 } from '../../internal/durationMath'
@@ -26,9 +27,9 @@ import { formatDurationIso } from '../../internal/isoFormat'
 import { parseDuration, parseRelativeToSlots } from '../../internal/isoParse'
 import { mergeDurationFields } from '../../internal/merge'
 import { RelativeToSlots } from '../../internal/relativeMath'
-import { createDateSlots } from '../../internal/slots'
+import { createDateSlots, createDurationSlots } from '../../internal/slots'
 import { totalDuration } from '../../internal/total'
-import { NumberSign, isObjectLike } from '../../internal/utils'
+import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarId } from './calendarResolve'
 import { PlainDateArg, getPlainDateSlotsIfPresent } from './plainDate'
@@ -66,17 +67,21 @@ export const Duration = defineTemporalClass(
     ) {
       initDuration(
         this,
-        constructDurationSlots(
-          years,
-          months,
-          weeks,
-          days,
-          hours,
-          minutes,
-          seconds,
-          milliseconds,
-          microseconds,
-          nanoseconds,
+        createDurationSlots(
+          checkDurationUnits(
+            mapProps(toStrictInteger, {
+              years,
+              months,
+              weeks,
+              days,
+              hours,
+              minutes,
+              seconds,
+              milliseconds,
+              microseconds,
+              nanoseconds,
+            }),
+          ),
         ),
       )
     }

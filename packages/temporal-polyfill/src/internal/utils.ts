@@ -191,22 +191,6 @@ export function zipPropsConst<P, C>(
   return res
 }
 
-// zips descending-order-key-array AND value-array into an object
-// outputted object's keys are in reverse order from propNamesDesc
-export function zipPropsDesc<P>(
-  propNamesDesc: (keyof P)[],
-  propVals: P[keyof P][],
-): P {
-  let i = propNamesDesc.length
-  const res = {} as any
-
-  for (const propVal of propVals) {
-    res[propNamesDesc[--i]] = propVal
-  }
-
-  return res
-}
-
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P
 export function pluckProps<P, D extends object>(
   propNames: (keyof P)[],
