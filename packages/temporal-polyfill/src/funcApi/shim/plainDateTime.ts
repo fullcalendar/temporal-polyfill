@@ -183,12 +183,12 @@ export function create(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  hour?: number,
-  minute?: number,
-  second?: number,
-  millisecond?: number,
-  microsecond?: number,
-  nanosecond?: number,
+  hour = 0,
+  minute = 0,
+  second = 0,
+  millisecond = 0,
+  microsecond = 0,
+  nanosecond = 0,
   calendar?: CalendarRecord,
 ): ShimPlainDateTimeRecord {
   return createShimPlainDateTimeRecord(

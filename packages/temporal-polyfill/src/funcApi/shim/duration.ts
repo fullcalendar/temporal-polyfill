@@ -112,16 +112,16 @@ export function createShimDurationRecord(
 }
 
 export function create(
-  years?: number,
-  months?: number,
-  weeks?: number,
-  days?: number,
-  hours?: number,
-  minutes?: number,
-  seconds?: number,
-  milliseconds?: number,
-  microseconds?: number,
-  nanoseconds?: number,
+  years = 0,
+  months = 0,
+  weeks = 0,
+  days = 0,
+  hours = 0,
+  minutes = 0,
+  seconds = 0,
+  milliseconds = 0,
+  microseconds = 0,
+  nanoseconds = 0,
 ): ShimDurationRecord {
   return createShimDurationRecord(
     constructDurationSlots(

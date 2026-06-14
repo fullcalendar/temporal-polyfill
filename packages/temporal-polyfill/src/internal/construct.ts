@@ -38,12 +38,12 @@ export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
 }
 
 export function constructTimeSlots(
-  hour = 0,
-  minute = 0,
-  second = 0,
-  millisecond = 0,
-  microsecond = 0,
-  nanosecond = 0,
+  hour: number,
+  minute: number,
+  second: number,
+  millisecond: number,
+  microsecond: number,
+  nanosecond: number,
 ): TimeFields {
   const timeFields = zipPropsDesc(timeFieldNamesAsc, [
     hour,
@@ -59,16 +59,16 @@ export function constructTimeSlots(
 }
 
 export function constructDurationSlots(
-  years = 0,
-  months = 0,
-  weeks = 0,
-  days = 0,
-  hours = 0,
-  minutes = 0,
-  seconds = 0,
-  milliseconds = 0,
-  microseconds = 0,
-  nanoseconds = 0,
+  years: number,
+  months: number,
+  weeks: number,
+  days: number,
+  hours: number,
+  minutes: number,
+  seconds: number,
+  milliseconds: number,
+  microseconds: number,
+  nanoseconds: number,
 ): DurationFields & { sign: NumberSign } {
   const durationFields = zipPropsDesc(durationFieldNamesAsc, [
     years,
@@ -107,12 +107,12 @@ export function constructDateTimeSlots<C>(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  hour = 0,
-  minute = 0,
-  second = 0,
-  millisecond = 0,
-  microsecond = 0,
-  nanosecond = 0,
+  hour: number,
+  minute: number,
+  second: number,
+  millisecond: number,
+  microsecond: number,
+  nanosecond: number,
   calendar?: C,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
   const isoYearInt = toIntegerWithTruncation(isoYear)

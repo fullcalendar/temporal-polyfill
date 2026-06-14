@@ -232,7 +232,7 @@ export function addYears(
   const resSlots = movePlainYearMonth(
     false,
     slots,
-    constructDurationSlots(years),
+    constructDurationSlots(years, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     options,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -247,7 +247,7 @@ export function addMonths(
   const resSlots = movePlainYearMonth(
     false,
     slots,
-    constructDurationSlots(0, months),
+    constructDurationSlots(0, months, 0, 0, 0, 0, 0, 0, 0, 0),
     options,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -355,7 +355,11 @@ export function endOfYear(
   const slots = getShimPlainYearMonthSlots(record)
   const yearCeilSlots = createDateSlots(computeYearCeil(slots), slots.calendar)
   return createShimPlainYearMonthRecord(
-    movePlainYearMonth(true, yearCeilSlots, constructDurationSlots(0, 1)),
+    movePlainYearMonth(
+      true,
+      yearCeilSlots,
+      constructDurationSlots(0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    ),
   )
 }
 
