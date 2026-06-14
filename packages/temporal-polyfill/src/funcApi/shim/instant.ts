@@ -55,11 +55,15 @@ import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
+  adaptRecordTimeUnitDiff,
+  diffInstantEpochNanoTimeUnit,
+} from './diffUtils'
+import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import { bigNanoToRoundedTimeUnit, refineRoundToOptions } from './roundUtils'
+import { refineRoundToOptions } from './roundUtils'
 import {
   ShimZonedDateTimeRecord,
   createShimZonedDateTimeRecord,
@@ -285,40 +289,29 @@ export function diff(
   return createShimDurationRecord(resSlots)
 }
 
-// Instants have no calendar or time-zone balancing, so unit diffs are exact
-// epoch-nanosecond math until the caller opts into rounding.
-function diffTimeUnit(
-  unit: TimeUnit,
-  nanoInUnit: number,
-  record: ShimInstantRecord,
-  otherRecord: ShimInstantRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  const slots = getShimInstantSlots(record)
-  const otherSlots = getShimInstantSlots(otherRecord)
+const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
+  ShimInstantRecord,
+  ShimInstantSlots
+>(diffInstantEpochNanoTimeUnit, getShimInstantSlots)
 
-  return bigNanoToRoundedTimeUnit(
-    unit,
-    nanoInUnit,
-    otherSlots.epochNanoseconds - slots.epochNanoseconds,
-    options,
-  )
-}
-
-export const diffHours = bindArgs(diffTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(diffTimeUnit, Unit.Minute, nanoInMinute)
-export const diffSeconds = bindArgs(diffTimeUnit, Unit.Second, nanoInSec)
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Minute,
+  nanoInMinute,
+)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
 export const diffMilliseconds = bindArgs(
-  diffTimeUnit,
+  diffRecordTimeUnit,
   Unit.Millisecond,
   nanoInMilli,
 )
 export const diffMicroseconds = bindArgs(
-  diffTimeUnit,
+  diffRecordTimeUnit,
   Unit.Microsecond,
   nanoInMicro,
 )
-export const diffNanoseconds = bindArgs(diffTimeUnit, Unit.Nanosecond, 1)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
 
 function roundToUnit(
   smallestUnit: TimeUnit,

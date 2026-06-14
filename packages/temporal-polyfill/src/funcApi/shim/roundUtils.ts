@@ -240,6 +240,9 @@ export function refineRoundToOptions(
 
 // Time Unit
 // -----------------------------------------------------------------------------
+// Called only by diffUtils.ts
+// Unlike class API, this func API is able to return floating-point unit-numbers
+// for the diff functions, thus the more involved math like divideBigNanoToExactNumber
 
 // Callers compute the signed nanosecond amount. This number path handles the
 // bounded time-of-day case where the amount fits safely in Number.

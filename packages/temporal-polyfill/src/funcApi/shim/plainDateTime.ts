@@ -92,10 +92,11 @@ import {
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
+  adaptRecordTimeUnitDiff,
+  diffPlainDateTimeEpochNanoTimeUnit,
   diffPlainDateTimeMonths,
   diffPlainDateTimeYears,
   diffPlainDays,
-  diffPlainTimeUnits,
   diffPlainWeeks,
 } from './diffUtils'
 import {
@@ -802,36 +803,29 @@ export function diffDays(
   )
 }
 
-export const diffHours = bindArgs(diffTimeUnits, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(diffTimeUnits, Unit.Minute, nanoInMinute)
-export const diffSeconds = bindArgs(diffTimeUnits, Unit.Second, nanoInSec)
+const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
+  ShimPlainDateTimeRecord,
+  ShimPlainDateTimeSlots
+>(diffPlainDateTimeEpochNanoTimeUnit, getShimPlainDateTimeSlots)
+
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Minute,
+  nanoInMinute,
+)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
 export const diffMilliseconds = bindArgs(
-  diffTimeUnits,
+  diffRecordTimeUnit,
   Unit.Millisecond,
   nanoInMilli,
 )
 export const diffMicroseconds = bindArgs(
-  diffTimeUnits,
+  diffRecordTimeUnit,
   Unit.Microsecond,
   nanoInMicro,
 )
-export const diffNanoseconds = bindArgs(diffTimeUnits, Unit.Nanosecond, 1)
-
-function diffTimeUnits(
-  unit: Unit,
-  nanoInUnit: number,
-  record0: ShimPlainDateTimeRecord,
-  record1: ShimPlainDateTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  return diffPlainTimeUnits(
-    unit as any,
-    nanoInUnit,
-    getShimPlainDateTimeSlots(record0),
-    getShimPlainDateTimeSlots(record1),
-    options,
-  )
-}
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
 
 function moveByTimeUnit(
   nanoInUnit: number,

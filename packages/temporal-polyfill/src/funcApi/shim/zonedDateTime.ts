@@ -101,9 +101,10 @@ import {
   refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import {
+  adaptRecordTimeUnitDiff,
   diffZonedDays,
+  diffZonedEpochNanoTimeUnit,
   diffZonedMonths,
-  diffZonedTimeUnits,
   diffZonedWeeks,
   diffZonedYears,
 } from './diffUtils'
@@ -749,36 +750,29 @@ export function diffDays(
   )
 }
 
-export const diffHours = bindArgs(diffTimeUnits, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(diffTimeUnits, Unit.Minute, nanoInMinute)
-export const diffSeconds = bindArgs(diffTimeUnits, Unit.Second, nanoInSec)
+const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
+  ShimZonedDateTimeRecord,
+  ShimZonedDateTimeSlots
+>(diffZonedEpochNanoTimeUnit, getShimZonedDateTimeSlots)
+
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Minute,
+  nanoInMinute,
+)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
 export const diffMilliseconds = bindArgs(
-  diffTimeUnits,
+  diffRecordTimeUnit,
   Unit.Millisecond,
   nanoInMilli,
 )
 export const diffMicroseconds = bindArgs(
-  diffTimeUnits,
+  diffRecordTimeUnit,
   Unit.Microsecond,
   nanoInMicro,
 )
-export const diffNanoseconds = bindArgs(diffTimeUnits, Unit.Nanosecond, 1)
-
-function diffTimeUnits(
-  unit: Unit,
-  nanoInUnit: number,
-  record0: ShimZonedDateTimeRecord,
-  record1: ShimZonedDateTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  return diffZonedTimeUnits(
-    unit as any,
-    nanoInUnit,
-    getShimZonedDateTimeSlots(record0),
-    getShimZonedDateTimeSlots(record1),
-    options,
-  )
-}
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
 
 function moveByTimeUnit(
   nanoInUnit: number,

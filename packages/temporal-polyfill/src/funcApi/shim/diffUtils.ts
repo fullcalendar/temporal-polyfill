@@ -10,6 +10,7 @@ import {
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
+  TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
 import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
@@ -23,17 +24,22 @@ import {
 import { roundNumberToInc } from '../../internal/round'
 import { getCommonCalendar, getCommonTimeZone } from '../../internal/slotUtils'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
+import { timeFieldsToNano } from '../../internal/timeFieldMath'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
 import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
-import { bigNanoToRoundedTimeUnit } from './roundUtils'
+import { bigNanoToRoundedTimeUnit, nanoToRoundedTimeUnit } from './roundUtils'
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
 export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnits, Unit.Week, 7)
 export const diffZonedDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, 1)
-export const diffZonedTimeUnits = bindArgs(
-  diffTimeUnit,
+export const diffZonedEpochNanoTimeUnit = bindArgs(
+  diffEpochNanoTimeUnit,
+  getEpochNano as MarkerToEpochNano,
+)
+export const diffInstantEpochNanoTimeUnit = bindArgs(
+  diffEpochNanoTimeUnit,
   getEpochNano as MarkerToEpochNano,
 )
 
@@ -59,10 +65,30 @@ export const diffPlainDays = bindArgs(
   Unit.Day,
   1,
 )
-export const diffPlainTimeUnits = bindArgs(
-  diffTimeUnit,
+export const diffPlainDateTimeEpochNanoTimeUnit = bindArgs(
+  diffEpochNanoTimeUnit,
   isoDateTimeToEpochNano as MarkerToEpochNano,
 )
+
+export function adaptRecordTimeUnitDiff<Record, Slots>(
+  diffSlots: (
+    unit: TimeUnit,
+    nanoInUnit: number,
+    slots0: Slots,
+    slots1: Slots,
+    options?: RoundingMathOptions | RoundingMode,
+  ) => number,
+  getSlots: (record: Record) => Slots,
+): (
+  unit: TimeUnit,
+  nanoInUnit: number,
+  record0: Record,
+  record1: Record,
+  options?: RoundingMathOptions | RoundingMode,
+) => number {
+  return (unit, nanoInUnit, record0, record1, options) =>
+    diffSlots(unit, nanoInUnit, getSlots(record0), getSlots(record1), options)
+}
 
 // Large Units (years, months)
 // -----------------------------------------------------------------------------
@@ -251,8 +277,7 @@ function diffPlainDayLikeUnit(
 // Time Units
 // -----------------------------------------------------------------------------
 
-// TODO: DRY with Instant's
-function diffTimeUnit(
+function diffEpochNanoTimeUnit(
   markerToEpochNano: MarkerToEpochNano,
   unit: TimeUnit,
   nanoInUnit: number,
@@ -264,6 +289,23 @@ function diffTimeUnit(
     unit,
     nanoInUnit,
     markerToEpochNano(record1) - markerToEpochNano(record0),
+    options,
+  )
+}
+
+// PlainTime diffing is intentionally a within-day nano-of-day calculation,
+// rather than an epoch-nanosecond calculation through an implicit date.
+export function diffPlainTimeNanoOfDayTimeUnit(
+  unit: TimeUnit,
+  nanoInUnit: number,
+  slots0: TimeFields,
+  slots1: TimeFields,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  return nanoToRoundedTimeUnit(
+    unit,
+    nanoInUnit,
+    timeFieldsToNano(slots1) - timeFieldsToNano(slots0),
     options,
   )
 }
