@@ -382,7 +382,6 @@ export function toZonedDateTimeSlots(
 ): ZonedDateTimeSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getZonedDateTimeSlotsIfPresent(arg)
-
     if (ownSlots) {
       refineZonedFieldOptions(options) // parse unused options
       return ownSlots

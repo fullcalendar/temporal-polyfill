@@ -184,7 +184,6 @@ export function toPlainMonthDaySlots(
 ): PlainMonthDaySlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainMonthDaySlotsIfPresent(arg)
-
     if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
       return ownSlots

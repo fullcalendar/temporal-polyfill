@@ -238,19 +238,16 @@ function refinePublicRelativeTo(
   if (relativeTo !== undefined) {
     if (isObjectLike(relativeTo)) {
       const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(relativeTo)
-
       if (zonedDateTimeSlots) {
         return zonedDateTimeSlots
       }
 
       const dateSlots = getPlainDateSlotsIfPresent(relativeTo)
-
       if (dateSlots) {
         return dateSlots
       }
 
       const dateTimeSlots = getPlainDateTimeSlotsIfPresent(relativeTo)
-
       if (dateTimeSlots) {
         return createDateSlots(dateTimeSlots, dateTimeSlots.calendar)
       }

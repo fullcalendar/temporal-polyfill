@@ -334,14 +334,12 @@ export function toPlainDateTimeSlots(
 ): PlainDateTimeSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainDateTimeSlotsIfPresent(arg)
-
     if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
       return ownSlots
     }
 
     const dateSlots = getPlainDateSlotsIfPresent(arg)
-
     if (dateSlots) {
       refineOverflowOptions(options) // parse unused options
       return createDateTimeSlots(
@@ -351,7 +349,6 @@ export function toPlainDateTimeSlots(
     }
 
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
-
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
       return zonedDateTimeToPlainDateTime(zonedDateTimeSlots)

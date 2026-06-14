@@ -292,7 +292,6 @@ export function toPlainYearMonthSlots(
 ): PlainYearMonthSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainYearMonthSlotsIfPresent(arg)
-
     if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
       return ownSlots

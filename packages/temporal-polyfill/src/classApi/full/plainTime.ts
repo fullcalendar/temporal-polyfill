@@ -207,21 +207,18 @@ export function toPlainTimeSlots(
 ): TimeFields {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainTimeSlotsIfPresent(arg)
-
     if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
       return ownSlots
     }
 
     const dateTimeSlots = getPlainDateTimeSlotsIfPresent(arg)
-
     if (dateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
       return createTimeSlots(dateTimeSlots)
     }
 
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
-
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
       return zonedDateTimeToPlainTime(zonedDateTimeSlots)

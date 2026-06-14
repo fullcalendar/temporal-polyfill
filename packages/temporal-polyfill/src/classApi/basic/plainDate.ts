@@ -308,21 +308,18 @@ export function toPlainDateSlots(
 ): PlainDateSlots {
   if (isObjectLike(arg)) {
     const ownSlots = getPlainDateSlotsIfPresent(arg)
-
     if (ownSlots) {
       refineOverflowOptions(options) // parse unused options
       return ownSlots
     }
 
     const dateTimeSlots = getPlainDateTimeSlotsIfPresent(arg)
-
     if (dateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
       return createDateSlots(dateTimeSlots, dateTimeSlots.calendar)
     }
 
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
-
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
       return zonedDateTimeToPlainDate(zonedDateTimeSlots)
