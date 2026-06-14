@@ -24,8 +24,8 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
-  checkTimeFields,
   timeFieldsToMilli,
+  validateTimeFields,
 } from '../../internal/timeFieldMath'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
@@ -35,7 +35,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { getPlainDateTimeSlotsIfPresent } from './plainDateTime'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 import { getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
 export type PlainTimeArg = PlainTime | Partial<TimeFields> | string
@@ -54,21 +54,17 @@ export const PlainTime = defineTemporalClass(
       microsecond = 0,
       nanosecond = 0,
     ) {
-      initPlainTime(
-        this,
-        createTimeSlots(
-          checkTimeFields(
-            mapProps(toIntegerWithTruncation, {
-              hour,
-              minute,
-              second,
-              millisecond,
-              microsecond,
-              nanosecond,
-            }),
-          ),
-        ),
+      const fields = validateTimeFields(
+        mapProps(toIntegerWithTruncation, {
+          hour,
+          minute,
+          second,
+          millisecond,
+          microsecond,
+          nanosecond,
+        }),
       )
+      initPlainTime(this, createTimeSlots(fields))
     }
 
     static from(
@@ -88,8 +84,8 @@ export const PlainTime = defineTemporalClass(
     ): PlainTime {
       return createPlainTime(
         mergePlainTimeFields(
-          this as unknown as PlainTime,
-          rejectInvalidBag(mod),
+          getPlainTimeSlots(this),
+          validateBag(mod),
           options,
         ),
       )

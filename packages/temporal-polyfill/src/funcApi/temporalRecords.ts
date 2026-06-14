@@ -219,7 +219,7 @@ function isTemporalRecord(record: unknown): boolean {
   )
 }
 
-export function rejectInvalidBag<B>(bag: B): B {
+export function validateBag<B>(bag: B): B {
   if (
     isTemporalRecord(bag) ||
     // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.

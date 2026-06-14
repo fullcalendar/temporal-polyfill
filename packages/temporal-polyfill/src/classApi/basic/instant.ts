@@ -52,12 +52,8 @@ export const Instant = defineTemporalClass(
   InstantBranding,
   class {
     constructor(epochNanoseconds: bigint) {
-      initInstant(
-        this,
-        createEpochNanoSlots(
-          checkEpochNanoInBounds(toBigInt(epochNanoseconds)),
-        ),
-      )
+      const epochNano = checkEpochNanoInBounds(toBigInt(epochNanoseconds))
+      initInstant(this, createEpochNanoSlots(epochNano))
     }
 
     static from(arg: InstantArg): Instant {

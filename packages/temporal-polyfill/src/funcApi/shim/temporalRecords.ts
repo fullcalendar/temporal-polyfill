@@ -1,1 +1,1 @@
-export { rejectInvalidBag } from '../temporalRecords'
+export { validateBag } from '../temporalRecords'

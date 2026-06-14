@@ -57,7 +57,7 @@ export function getTemporalBrandingAndSlots(
   if (slots) return [DurationBranding, slots]
 }
 
-export function rejectInvalidBag<B>(bag: B): B {
+export function validateBag<B>(bag: B): B {
   if (
     getTemporalBrandingAndSlots(bag) ||
     // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.

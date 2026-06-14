@@ -17,9 +17,9 @@ import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
   addDurations,
-  checkDurationUnits,
   negateDuration,
   roundDuration,
+  validateDurationFields,
 } from '../../internal/durationMath'
 import { ZonedDateTimeLikeObject } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -65,25 +65,21 @@ export const Duration = defineTemporalClass(
       microseconds = 0,
       nanoseconds = 0,
     ) {
-      initDuration(
-        this,
-        createDurationSlots(
-          checkDurationUnits(
-            mapProps(toStrictInteger, {
-              years,
-              months,
-              weeks,
-              days,
-              hours,
-              minutes,
-              seconds,
-              milliseconds,
-              microseconds,
-              nanoseconds,
-            }),
-          ),
-        ),
+      const fields = validateDurationFields(
+        mapProps(toStrictInteger, {
+          years,
+          months,
+          weeks,
+          days,
+          hours,
+          minutes,
+          seconds,
+          milliseconds,
+          microseconds,
+          nanoseconds,
+        }),
       )
+      initDuration(this, createDurationSlots(fields))
     }
 
     static from(arg: DurationArg): Duration {

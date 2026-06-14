@@ -33,8 +33,8 @@ import {
 import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
-  checkIsoDateFields,
   isoEpochFirstLeapYear,
+  validateIsoDateFields,
 } from '../../internal/isoCalendarMath'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
@@ -42,11 +42,11 @@ import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import { isObjectLike, mapProps } from '../../internal/utils'
+import { isObjectLike } from '../../internal/utils'
 import { extractCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import { PlainDate, createPlainDate } from './plainDate'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 
 export type PlainMonthDayArg = PlainMonthDay | MonthDayLikeObject | string
 
@@ -64,26 +64,20 @@ export const PlainMonthDay = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoYear?: number,
     ) {
-      const isoMonthDay = mapProps(toIntegerWithTruncation, {
-        month: isoMonth,
-        day: isoDay,
-      })
+      const isoMonthInt = toIntegerWithTruncation(isoMonth)
+      const isoDayInt = toIntegerWithTruncation(isoDay)
       const calendarImpl = resolveAnyCalendarArg(calendar)
       const isoYearInt = toIntegerWithTruncation(
         referenceIsoYear ?? isoEpochFirstLeapYear,
       )
-      initPlainMonthDay(
-        this,
-        createDateSlots(
-          checkIsoDateInBounds(
-            checkIsoDateFields({
-              year: isoYearInt,
-              ...isoMonthDay,
-            }),
-          ),
-          calendarImpl,
-        ),
+      const fields = checkIsoDateInBounds(
+        validateIsoDateFields({
+          year: isoYearInt,
+          month: isoMonthInt,
+          day: isoDayInt,
+        }),
       )
+      initPlainMonthDay(this, createDateSlots(fields, calendarImpl))
     }
 
     static from(
@@ -119,7 +113,7 @@ export const PlainMonthDay = defineTemporalClass(
       return createPlainMonthDay(
         mergePlainMonthDayFields(
           getPlainMonthDaySlots(this),
-          rejectInvalidBag(mod),
+          validateBag(mod),
           options,
         ),
       )

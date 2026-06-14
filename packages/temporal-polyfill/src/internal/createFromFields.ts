@@ -6,7 +6,7 @@ import {
   durationFieldDefaults,
   durationFieldNamesAlpha,
 } from './durationFields'
-import { checkDurationUnits } from './durationMath'
+import { validateDurationFields } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
 import {
   dateFieldNamesAlpha,
@@ -290,7 +290,7 @@ export function refineDurationObjectLike(
   ) as Partial<DurationFields>
 
   return createDurationSlots(
-    checkDurationUnits({
+    validateDurationFields({
       ...durationFieldDefaults,
       ...durationFields,
     }),

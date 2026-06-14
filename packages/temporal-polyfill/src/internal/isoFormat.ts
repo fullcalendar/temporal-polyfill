@@ -7,10 +7,10 @@ import {
 } from './calendarImpl'
 import { DurationFields } from './durationFields'
 import {
-  checkDurationTimeUnit,
-  checkDurationUnits,
   durationSubMinuteToBigNano,
   negateDurationFields,
+  validateDurationFields,
+  validateDurationTimeUnit,
 } from './durationMath'
 import { epochNanoToIsoDateTime } from './epochMath'
 import {
@@ -412,7 +412,7 @@ export function formatDurationIso(
     }
 
     // Check out-of-bounds
-    checkDurationUnits(slots)
+    validateDurationFields(slots)
   }
 
   return formatDurationSlots(
@@ -438,7 +438,7 @@ function formatDurationSlots(
   const bigNano = durationSubMinuteToBigNano(abs)
   const wholeSec = Number(bigNano / bigNanoInSec)
   const subsecNano = Number(bigNano % bigNanoInSec)
-  checkDurationTimeUnit(wholeSec)
+  validateDurationTimeUnit(wholeSec)
 
   const subsecNanoString = formatSubsecNano(subsecNano, subsecDigits)
   const forceSec =

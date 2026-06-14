@@ -1,3 +1,4 @@
+import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { Overflow } from './optionsModel'
 import {
@@ -11,12 +12,15 @@ import {
   secInHour,
   secInMinute,
 } from './units'
-import { clampEntity, divModFloor, mapProps } from './utils'
+import { clampEntity, divModFloor } from './utils'
 
 // Time Field Validation
 // -----------------------------------------------------------------------------
 
-export function checkTimeFields<P extends TimeFields>(timeFields: P): P {
+/*
+Returns given argument as-is
+*/
+export function validateTimeFields<P extends TimeFields>(timeFields: P): P {
   constrainTimeFields(timeFields, Overflow.Reject)
   return timeFields
 }
@@ -32,10 +36,21 @@ export function constrainTimeFields(
   timeFields: TimeFields,
   overflow?: Overflow,
 ): TimeFields {
-  return mapProps(
-    (val, name) => clampEntity(name, val, 0, maxValues[name] || 999, overflow),
-    timeFields,
-  )
+  const constrainedFields = {} as TimeFields
+
+  // Some callers validate a combined date-time record. Only the clock fields
+  // have clock bounds; date fields must be left for calendar validation.
+  for (const fieldName of timeFieldNamesAsc) {
+    constrainedFields[fieldName] = clampEntity(
+      fieldName,
+      timeFields[fieldName],
+      0,
+      maxValues[fieldName] || 999,
+      overflow,
+    )
+  }
+
+  return constrainedFields
 }
 
 // Fields -> Unit-Number

@@ -23,10 +23,10 @@ import { movePlainTime } from '../../internal/move'
 import { roundPlainTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
-  checkTimeFields,
   nanoToTimeAndDay,
   timeFieldsToMilli,
   timeFieldsToNano,
+  validateTimeFields,
 } from '../../internal/timeFieldMath'
 import {
   TimeUnit,
@@ -53,7 +53,7 @@ import {
 } from './duration'
 import { reversedMove } from './moveUtils'
 import { refineRoundToOptions } from './roundUtils'
-import { rejectInvalidBag } from './temporalRecords'
+import { validateBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainTimeRecord>
 type ShimPlainTimeSlots = TimeFields
@@ -97,20 +97,17 @@ export function create(
   microsecond = 0,
   nanosecond = 0,
 ): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord(
-    createTimeSlots(
-      checkTimeFields(
-        mapProps(toIntegerWithTruncation, {
-          hour,
-          minute,
-          second,
-          millisecond,
-          microsecond,
-          nanosecond,
-        }),
-      ),
-    ),
+  const fields = validateTimeFields(
+    mapProps(toIntegerWithTruncation, {
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond,
+    }),
   )
+  return createShimPlainTimeRecord(createTimeSlots(fields))
 }
 
 export function fromFields(
@@ -130,7 +127,7 @@ export function withFields(
   options?: Temporal.OverflowOptions,
 ): ShimPlainTimeRecord {
   const slots = getShimPlainTimeSlots(record)
-  const resSlots = mergePlainTimeFields(slots, rejectInvalidBag(mod), options)
+  const resSlots = mergePlainTimeFields(slots, validateBag(mod), options)
   return createShimPlainTimeRecord(resSlots)
 }
 

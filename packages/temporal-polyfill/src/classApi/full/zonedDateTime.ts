@@ -86,7 +86,7 @@ import {
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 
 export type ZonedDateTimeArg = ZonedDateTime | ZonedDateTimeLikeObject | string
@@ -104,15 +104,12 @@ export const ZonedDateTime = defineTemporalClass(
       timeZoneId: string,
       calendar: string | undefined = undefined,
     ) {
-      const epochNanoBigInt = toBigInt(epochNanoseconds)
-      const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
+      const epochNano = checkEpochNanoInBounds(toBigInt(epochNanoseconds))
+      const timeZone = queryTimeZone(refineTimeZoneId(timeZoneId))
+      const calendarImpl = resolveAnyCalendarArg(calendar)
       initZonedDateTime(
         this,
-        createZonedEpochNanoSlots(
-          checkEpochNanoInBounds(epochNanoBigInt),
-          queryTimeZone(refinedTimeZoneId),
-          resolveAnyCalendarArg(calendar),
-        ),
+        createZonedEpochNanoSlots(epochNano, timeZone, calendarImpl),
       )
     }
 
@@ -167,7 +164,7 @@ export const ZonedDateTime = defineTemporalClass(
       return createZonedDateTime(
         mergeZonedDateTimeFields(
           getZonedDateTimeSlots(this),
-          rejectInvalidBag(mod),
+          validateBag(mod),
           options,
         ),
       )

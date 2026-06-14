@@ -12,9 +12,9 @@ import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
   addDurationsWithoutRelativeTo,
-  checkDurationUnits,
   negateDuration,
   roundDuration,
+  validateDurationFields,
 } from '../../internal/durationMath'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
@@ -125,24 +125,21 @@ export function create(
   microseconds = 0,
   nanoseconds = 0,
 ): ShimDurationRecord {
-  return createShimDurationRecord(
-    createDurationSlots(
-      checkDurationUnits(
-        mapProps(toStrictInteger, {
-          years,
-          months,
-          weeks,
-          days,
-          hours,
-          minutes,
-          seconds,
-          milliseconds,
-          microseconds,
-          nanoseconds,
-        }),
-      ),
-    ),
+  const fields = validateDurationFields(
+    mapProps(toStrictInteger, {
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes,
+      seconds,
+      milliseconds,
+      microseconds,
+      nanoseconds,
+    }),
   )
+  return createShimDurationRecord(createDurationSlots(fields))
 }
 
 export function fromFields(

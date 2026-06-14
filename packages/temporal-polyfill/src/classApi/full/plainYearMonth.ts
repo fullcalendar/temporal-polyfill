@@ -36,7 +36,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { checkIsoDateFields } from '../../internal/isoCalendarMath'
+import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
@@ -45,7 +45,7 @@ import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
-import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
+import { NumberSign, isObjectLike } from '../../internal/utils'
 import { getCalendarFromBag } from './calendarArg'
 import { resolveAnyCalendarArg, resolveAnyCalendarId } from './calendarResolve'
 import {
@@ -55,7 +55,7 @@ import {
   toDurationSlots,
 } from './duration'
 import { PlainDate, createPlainDate } from './plainDate'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 
 export type PlainYearMonthArg = PlainYearMonth | YearMonthLikeObject | string
 
@@ -73,24 +73,18 @@ export const PlainYearMonth = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoDay?: number,
     ) {
-      const isoYearMonth = mapProps(toIntegerWithTruncation, {
-        year: isoYear,
-        month: isoMonth,
-      })
+      const isoYearInt = toIntegerWithTruncation(isoYear)
+      const isoMonthInt = toIntegerWithTruncation(isoMonth)
       const calendarImpl = resolveAnyCalendarArg(calendar)
       const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
-      initPlainYearMonth(
-        this,
-        createDateSlots(
-          checkIsoYearMonthInBounds(
-            checkIsoDateFields({
-              ...isoYearMonth,
-              day: isoDayInt,
-            }),
-          ),
-          calendarImpl,
-        ),
+      const fields = checkIsoYearMonthInBounds(
+        validateIsoDateFields({
+          year: isoYearInt,
+          month: isoMonthInt,
+          day: isoDayInt,
+        }),
       )
+      initPlainYearMonth(this, createDateSlots(fields, calendarImpl))
     }
 
     static from(
@@ -166,7 +160,7 @@ export const PlainYearMonth = defineTemporalClass(
       return createPlainYearMonth(
         mergePlainYearMonthFields(
           getPlainYearMonthSlots(this),
-          rejectInvalidBag(mod),
+          validateBag(mod),
           options,
         ),
       )

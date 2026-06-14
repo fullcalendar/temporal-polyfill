@@ -110,9 +110,8 @@ export function createShimInstantRecord(
 }
 
 export function create(epochNanoseconds: bigint): ShimInstantRecord {
-  return createShimInstantRecord(
-    createEpochNanoSlots(checkEpochNanoInBounds(toBigInt(epochNanoseconds))),
-  )
+  const epochNano = checkEpochNanoInBounds(toBigInt(epochNanoseconds))
+  return createShimInstantRecord(createEpochNanoSlots(epochNano))
 }
 
 export function fromEpochMilliseconds(

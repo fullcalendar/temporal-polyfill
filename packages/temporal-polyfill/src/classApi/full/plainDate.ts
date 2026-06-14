@@ -33,7 +33,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { checkIsoDateFields } from '../../internal/isoCalendarMath'
+import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
@@ -68,7 +68,7 @@ import {
   toPlainTimeSlots,
 } from './plainTime'
 import { PlainYearMonth, createPlainYearMonth } from './plainYearMonth'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import {
   ZonedDateTime,
@@ -92,21 +92,17 @@ export const PlainDate = defineTemporalClass(
       isoDay: number,
       calendar: string | undefined = undefined,
     ) {
-      initPlainDate(
-        this,
-        createDateSlots(
-          checkIsoDateInBounds(
-            checkIsoDateFields(
-              mapProps(toIntegerWithTruncation, {
-                year: isoYear,
-                month: isoMonth,
-                day: isoDay,
-              }),
-            ),
-          ),
-          resolveAnyCalendarArg(calendar),
+      const fields = checkIsoDateInBounds(
+        validateIsoDateFields(
+          mapProps(toIntegerWithTruncation, {
+            year: isoYear,
+            month: isoMonth,
+            day: isoDay,
+          }),
         ),
       )
+      const calendarImpl = resolveAnyCalendarArg(calendar)
+      initPlainDate(this, createDateSlots(fields, calendarImpl))
     }
 
     static from(
@@ -133,7 +129,7 @@ export const PlainDate = defineTemporalClass(
     ): PlainDate {
       const slots = getPlainDateSlots(this)
       return createPlainDate(
-        mergePlainDateFields(slots, rejectInvalidBag(mod), options),
+        mergePlainDateFields(slots, validateBag(mod), options),
       )
     }
 

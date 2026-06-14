@@ -44,8 +44,8 @@ import {
 import { transformDateOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
-  checkIsoDateFields,
   computeIsoDayOfWeek,
+  validateIsoDateFields,
 } from '../../internal/isoCalendarMath'
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
@@ -125,7 +125,7 @@ import {
   computeYearInterval,
   roundDateToInterval,
 } from './roundUtils'
-import { rejectInvalidBag } from './temporalRecords'
+import { validateBag } from './temporalRecords'
 import {
   ShimZonedDateTimeRecord,
   createShimZonedDateTimeRecord,
@@ -175,20 +175,17 @@ export function create(
   isoDay: number,
   calendar?: CalendarRecord,
 ): ShimPlainDateRecord {
-  return createShimPlainDateRecord(
-    createDateSlots(
-      checkIsoDateInBounds(
-        checkIsoDateFields(
-          mapProps(toIntegerWithTruncation, {
-            year: isoYear,
-            month: isoMonth,
-            day: isoDay,
-          }),
-        ),
-      ),
-      refineShimCalendarArgMaybe(calendar),
+  const fields = checkIsoDateInBounds(
+    validateIsoDateFields(
+      mapProps(toIntegerWithTruncation, {
+        year: isoYear,
+        month: isoMonth,
+        day: isoDay,
+      }),
     ),
   )
+  const calendarImpl = refineShimCalendarArgMaybe(calendar)
+  return createShimPlainDateRecord(createDateSlots(fields, calendarImpl))
 }
 
 export function fromFields(
@@ -224,7 +221,7 @@ export function withFields(
   options?: Temporal.OverflowOptions,
 ) {
   const slots = getShimPlainDateSlots(record)
-  const resSlots = mergePlainDateFields(slots, rejectInvalidBag(mod), options)
+  const resSlots = mergePlainDateFields(slots, validateBag(mod), options)
   return createShimPlainDateRecord(resSlots)
 }
 

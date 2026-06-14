@@ -27,8 +27,8 @@ import {
 import { transformMonthDayOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
-  checkIsoDateFields,
   isoEpochFirstLeapYear,
+  validateIsoDateFields,
 } from '../../internal/isoCalendarMath'
 import {
   formatMonthDayIsoAuto,
@@ -38,7 +38,6 @@ import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import { mapProps } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -52,7 +51,7 @@ import {
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
-import { rejectInvalidBag } from './temporalRecords'
+import { validateBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainMonthDayRecord>
 type ShimPlainMonthDaySlots = CalendarDateFields & { calendar: CalendarImpl }
@@ -109,25 +108,20 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoYear?: number,
 ): ShimPlainMonthDayRecord {
-  const isoMonthDay = mapProps(toIntegerWithTruncation, {
-    month: isoMonth,
-    day: isoDay,
-  })
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
+  const isoDayInt = toIntegerWithTruncation(isoDay)
   const calendarImpl = refineShimCalendarArgMaybe(calendar)
   const isoYearInt = toIntegerWithTruncation(
     referenceIsoYear ?? isoEpochFirstLeapYear,
   )
-  return createShimPlainMonthDayRecord(
-    createDateSlots(
-      checkIsoDateInBounds(
-        checkIsoDateFields({
-          year: isoYearInt,
-          ...isoMonthDay,
-        }),
-      ),
-      calendarImpl,
-    ),
+  const fields = checkIsoDateInBounds(
+    validateIsoDateFields({
+      year: isoYearInt,
+      month: isoMonthInt,
+      day: isoDayInt,
+    }),
   )
+  return createShimPlainMonthDayRecord(createDateSlots(fields, calendarImpl))
 }
 
 export function fromFields(
@@ -160,11 +154,7 @@ export function withFields(
   options?: Temporal.OverflowOptions,
 ): ShimPlainMonthDayRecord {
   const slots = getShimPlainMonthDaySlots(record)
-  const resSlots = mergePlainMonthDayFields(
-    slots,
-    rejectInvalidBag(mod),
-    options,
-  )
+  const resSlots = mergePlainMonthDayFields(slots, validateBag(mod), options)
   return createShimPlainMonthDayRecord(resSlots)
 }
 

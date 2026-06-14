@@ -45,8 +45,8 @@ import {
 import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
-  checkIsoDateTimeFields,
   computeIsoDayOfWeek,
+  validateIsoDateTimeFields,
 } from '../../internal/isoCalendarMath'
 import {
   formatDateTimeIsoAuto,
@@ -134,7 +134,7 @@ import {
   computeYearInterval,
   roundDateTimeToInterval,
 } from './roundUtils'
-import { rejectInvalidBag } from './temporalRecords'
+import { validateBag } from './temporalRecords'
 import {
   ShimZonedDateTimeRecord,
   createShimZonedDateTimeRecord,
@@ -196,21 +196,24 @@ export function create(
   nanosecond = 0,
   calendar?: CalendarRecord,
 ): ShimPlainDateTimeRecord {
-  const isoDateTime = mapProps(toIntegerWithTruncation, {
-    year: isoYear,
-    month: isoMonth,
-    day: isoDay,
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
-  })
-  checkIsoDateTimeFields(isoDateTime)
-  checkIsoDateTimeInBounds(isoDateTime)
+  const fields = checkIsoDateTimeInBounds(
+    validateIsoDateTimeFields(
+      mapProps(toIntegerWithTruncation, {
+        year: isoYear,
+        month: isoMonth,
+        day: isoDay,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        nanosecond,
+      }),
+    ),
+  )
+  const calendarImpl = refineShimCalendarArgMaybe(calendar)
   return createShimPlainDateTimeRecord(
-    createDateTimeSlots(isoDateTime, refineShimCalendarArgMaybe(calendar)),
+    createDateTimeSlots(fields, calendarImpl),
   )
 }
 
@@ -247,11 +250,7 @@ export function withFields(
   options?: Temporal.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
-  const resSlots = mergePlainDateTimeFields(
-    slots,
-    rejectInvalidBag(mod),
-    options,
-  )
+  const resSlots = mergePlainDateTimeFields(slots, validateBag(mod), options)
   return createShimPlainDateTimeRecord(resSlots)
 }
 

@@ -7,7 +7,7 @@ import { getCalendarEraOrigins, getCalendarFieldNames } from './calendarFields'
 import { type CalendarImpl } from './calendarImpl'
 import { formatMonthCode } from './calendarMonthCode'
 import { DurationFields, durationFieldNamesAlpha } from './durationFields'
-import { checkDurationUnits } from './durationMath'
+import { validateDurationFields } from './durationMath'
 import { resolveTimeFields } from './fieldConvert'
 import {
   allYearFieldNames,
@@ -190,10 +190,7 @@ export function mergeZonedDateTimeFields(
       mergedCalendarFields as any,
       () => refineZonedFieldOptions(options, OffsetDisambig.Prefer),
     )
-  const timeFields = constrainTimeFields(
-    pluckProps(timeFieldNamesAlpha, mergedAllFields),
-    overflow,
-  )
+  const timeFields = constrainTimeFields(mergedAllFields, overflow)
 
   return createZonedEpochNanoSlots(
     getMatchingInstantFor(
@@ -258,16 +255,10 @@ export function mergePlainDateTimeFields(
       mergedCalendarFields as any,
       () => [refineOverflowOptions(options)],
     )
-  const isoDateFields = plainDateSlots
-
-  const timeFields = constrainTimeFields(
-    pluckProps(timeFieldNamesAlpha, mergedAllFields),
-    overflow,
-  )
 
   return createPlainDateTimeFromRefinedFields(
-    isoDateFields,
-    timeFields,
+    plainDateSlots,
+    constrainTimeFields(mergedAllFields, overflow),
     calendar,
   )
 }
@@ -421,7 +412,7 @@ function mergeDurationBag(
     durationFieldNamesAlpha,
     durationFieldRefiners,
   )
-  return checkDurationUnits({ ...initialFields, ...newFields })
+  return validateDurationFields({ ...initialFields, ...newFields })
 }
 
 function computeMonthCode(

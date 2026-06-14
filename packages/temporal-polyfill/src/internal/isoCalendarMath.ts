@@ -8,7 +8,7 @@ import type {
   CalendarYearMonthFields,
 } from './fieldTypes'
 import { Overflow } from './optionsModel'
-import { checkTimeFields } from './timeFieldMath'
+import { validateTimeFields } from './timeFieldMath'
 import { allPropsEqual, clampProp, divTrunc, modFloor, modTrunc } from './utils'
 
 export const isoEpochOriginYear = 1970
@@ -161,33 +161,45 @@ export function computeGregoryEraFields({
   return { era: 'ce', eraYear: year }
 }
 
-// Checking Fields
+// Validating Fields
 // -----------------------------------------------------------------------------
-// Checks validity of month/day/time fields, but does NOT do bounds checking.
+// Validates the month/day/time fields are individually in-range, but does NOT
+// do epoch-unit-bounds checking (see check*InBounds in temporalLimits).
 
-export function checkIsoDateTimeFields(
+/*
+Returns given argument as-is
+*/
+export function validateIsoDateTimeFields(
   isoDateTime: CalendarDateTimeFields,
-): void {
-  checkIsoDateFields(isoDateTime)
-  checkTimeFields(isoDateTime)
+): CalendarDateTimeFields {
+  validateIsoDateFields(isoDateTime)
+  return validateTimeFields(isoDateTime)
 }
 
-export function checkIsoDateFields<P extends CalendarDateFields>(
+/*
+Returns given argument as-is
+*/
+export function validateIsoDateFields<P extends CalendarDateFields>(
   isoInternals: P,
 ): P {
   constrainIsoDateFields(isoInternals, Overflow.Reject)
+  // Cannot return above result because constrains shape to just date
+  // Callers might be checking the date-subset of a larger shape
   return isoInternals
 }
 
-// Like checkIsoDateFields, but returns boolean instead of throwing
+// Like validateIsoDateFields, but returns boolean instead of throwing
 export function isIsoDateFieldsValid(isoDate: CalendarDateFields): boolean {
   return allPropsEqual(
     calendarDateFieldNamesAsc,
     isoDate,
-    constrainIsoDateFields(isoDate),
+    constrainIsoDateFields(isoDate), // has Overflow:Constrain by default
   )
 }
 
+/*
+Can be given larger shape (datetime), but will ONLY return date parts
+*/
 function constrainIsoDateFields(
   isoDate: CalendarDateFields,
   overflow?: Overflow,

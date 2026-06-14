@@ -7,7 +7,7 @@ import {
 import { type CalendarImpl } from './calendarImpl'
 import { requireString, toStringViaPrimitive } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import { checkDurationUnits, negateDurationFields } from './durationMath'
+import { negateDurationFields, validateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
 import {
   CalendarDateFields,
@@ -18,11 +18,11 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { isoCalendarId } from './intlCalendarConfig'
 import {
-  checkIsoDateFields,
-  checkIsoDateTimeFields,
   computeIsoYearMonthFieldsForMonthDay,
   isIsoDateFieldsValid,
   isoEpochFirstLeapYear,
+  validateIsoDateFields,
+  validateIsoDateTimeFields,
 } from './isoCalendarMath'
 import { moveToDayOfMonthUnsafe } from './move'
 import {
@@ -49,7 +49,7 @@ import {
   checkIsoYearMonthInBounds,
   isoDateTimeAndOffsetToEpochNano,
 } from './temporalLimits'
-import { checkTimeFields, nanoToTimeAndDay } from './timeFieldMath'
+import { nanoToTimeAndDay, validateTimeFields } from './timeFieldMath'
 import { FixedTimeZone, queryTimeZone } from './timeZone'
 import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
@@ -100,7 +100,7 @@ export function parseInstant(s: string): EpochNanoFields {
     parseOffsetNanoMaybe(organized.timeZoneId, true) // onlyHourMinute=true
   }
 
-  checkIsoDateTimeFields(organized)
+  validateIsoDateTimeFields(organized)
   const epochNanoseconds = isoDateTimeAndOffsetToEpochNano(
     organized,
     offsetNano,
@@ -186,7 +186,7 @@ export function parsePlainYearMonth(
   if (organized) {
     requireIsoCalendar(organized)
     return createDateSlots(
-      checkIsoYearMonthInBounds(checkIsoDateFields(organized)),
+      checkIsoYearMonthInBounds(validateIsoDateFields(organized)),
       resolveCalendar(organized.calendarId),
     )
   }
@@ -221,7 +221,7 @@ export function parsePlainMonthDay(
     requireIsoCalendar(organized)
 
     return createDateSlots(
-      checkIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
+      validateIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
       resolveCalendar(organized.calendarId),
     )
   }
@@ -287,7 +287,7 @@ export function parsePlainTime(s: string): TimeFields {
     throwFailedParse(s)
   }
 
-  return createTimeSlots(checkTimeFields(organized))
+  return createTimeSlots(validateTimeFields(organized))
 }
 
 export function parseDuration(
@@ -297,7 +297,7 @@ export function parseDuration(
   if (!parsed) {
     throwFailedParse(s)
   }
-  return createDurationSlots(checkDurationUnits(parsed))
+  return createDurationSlots(validateDurationFields(parsed))
 }
 
 // If `s` is a Temporal string, extract its calendar annotation.
@@ -345,9 +345,9 @@ function finalizeDateLike(
     // Full-date strings still go through the normal ParseISODateTime-style
     // validation. Only after that do PlainYearMonth/PlainMonthDay project the
     // parsed date onto the representative ISO date stored in their slots.
-    checkIsoDateFields(organized)
+    validateIsoDateFields(organized)
     if (organized.hasTime) {
-      checkTimeFields(organized)
+      validateTimeFields(organized)
     }
     return finalizeDate(isoDateProjector(organized), resolveCalendar)
   }
@@ -415,7 +415,7 @@ function finalizeZonedDateTime(
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
   const timeZone = queryTimeZone(timeZoneId)
 
-  checkIsoDateTimeFields(organized)
+  validateIsoDateTimeFields(organized)
 
   let epochNano: bigint
 
@@ -454,7 +454,7 @@ function finalizeDateTime(
   organized: DateTimeLikeOrganized,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  checkIsoDateTimeFields(organized)
+  validateIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
     ...combineDateAndTime(organized, organized),
@@ -466,7 +466,7 @@ function finalizeDate(
   organized: DateOrganized,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
-  checkIsoDateFields(organized)
+  validateIsoDateFields(organized)
   checkIsoDateInBounds(organized)
   return {
     calendar: resolveCalendar(organized.calendarId),
@@ -699,13 +699,13 @@ function organizeDurationParts(parts: string[]): DurationFields {
   let hasAnyFrac = false
   let leftoverNano = 0
   let durationFields = {
-    year: parseUnit(parts[2]),
-    month: parseUnit(parts[3]),
-    week: parseUnit(parts[4]),
-    day: parseUnit(parts[5]),
-    hour: parseUnit(parts[6], parts[7], Unit.Hour),
-    minute: parseUnit(parts[8], parts[9], Unit.Minute),
-    second: parseUnit(parts[10], parts[11], Unit.Second),
+    years: parseUnit(parts[2]),
+    months: parseUnit(parts[3]),
+    weeks: parseUnit(parts[4]),
+    days: parseUnit(parts[5]),
+    hours: parseUnit(parts[6], parts[7], Unit.Hour),
+    minutes: parseUnit(parts[8], parts[9], Unit.Minute),
+    seconds: parseUnit(parts[10], parts[11], Unit.Second),
     ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
   } as DurationFields
 

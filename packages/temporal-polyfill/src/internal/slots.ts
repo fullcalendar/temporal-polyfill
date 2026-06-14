@@ -57,6 +57,10 @@ export function createTimeSlots(time: TimeFields): TimeFields {
   return pluckProps(timeFieldNamesAsc, time)
 }
 
+/*
+NOTE: unlike other functions in this file,
+this function does VALIDATION while computing sign
+*/
 export function createDurationSlots(
   durationFields: DurationFields,
 ): DurationFields & { sign: NumberSign } {

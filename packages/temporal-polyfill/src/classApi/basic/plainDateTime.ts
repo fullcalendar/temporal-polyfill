@@ -38,7 +38,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformDateTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { checkIsoDateTimeFields } from '../../internal/isoCalendarMath'
+import { validateIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
@@ -81,7 +81,7 @@ import {
   createPlainTime,
   optionalToPlainTimeFields,
 } from './plainTime'
-import { rejectInvalidBag } from './temporalSlots'
+import { validateBag } from './temporalSlots'
 import { TimeZoneArg, refineTimeZoneArg } from './timeZoneArg'
 import {
   ZonedDateTime,
@@ -111,23 +111,23 @@ export const PlainDateTime = defineTemporalClass(
       nanosecond = 0,
       calendar: string | undefined = undefined,
     ) {
-      const isoDateTime = mapProps(toIntegerWithTruncation, {
-        year: isoYear,
-        month: isoMonth,
-        day: isoDay,
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        nanosecond,
-      })
-      checkIsoDateTimeFields(isoDateTime)
-      checkIsoDateTimeInBounds(isoDateTime)
-      initPlainDateTime(
-        this,
-        createDateTimeSlots(isoDateTime, resolveBasicCalendarArg(calendar)),
+      const fields = checkIsoDateTimeInBounds(
+        validateIsoDateTimeFields(
+          mapProps(toIntegerWithTruncation, {
+            year: isoYear,
+            month: isoMonth,
+            day: isoDay,
+            hour,
+            minute,
+            second,
+            millisecond,
+            microsecond,
+            nanosecond,
+          }),
+        ),
       )
+      const calendarImpl = resolveBasicCalendarArg(calendar)
+      initPlainDateTime(this, createDateTimeSlots(fields, calendarImpl))
     }
 
     static from(
@@ -154,7 +154,7 @@ export const PlainDateTime = defineTemporalClass(
       return createPlainDateTime(
         mergePlainDateTimeFields(
           getPlainDateTimeSlots(this),
-          rejectInvalidBag(mod),
+          validateBag(mod),
           options,
         ),
       )

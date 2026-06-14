@@ -124,7 +124,7 @@ function addDayTimeDurationsChecked(
   // Calendar units have to stay on the relative path so months, years, and
   // calendar-dependent weeks cannot silently collapse into fixed nanoseconds.
   return createDurationSlots(
-    checkDurationUnits(
+    validateDurationFields(
       addDayTimeDurations(
         slots,
         otherSlots,
@@ -181,7 +181,7 @@ export function roundDuration<RA>(
   // day lengths.
   if (!relativeToSlots && maxUnit <= Unit.Day) {
     return createDurationSlots(
-      checkDurationUnits(
+      validateDurationFields(
         roundDayTimeDuration(
           slots,
           largestUnit as DayTimeUnit,
@@ -284,7 +284,7 @@ export function computeDurationSign(
   return sign
 }
 
-export function checkDurationUnits(fields: DurationFields): DurationFields {
+export function validateDurationFields(fields: DurationFields): DurationFields {
   for (const calendarUnit of durationCalendarFieldNamesAsc) {
     clampEntity(
       calendarUnit,
@@ -295,13 +295,15 @@ export function checkDurationUnits(fields: DurationFields): DurationFields {
     )
   }
 
+  // Duration time values may exceed MAX_SAFE_INTEGER only as a fractional
+  // seconds tail, so validate the balanced whole-second part.
   const bigNano = durationDayTimeToBigNano(fields)
-  checkDurationTimeUnit(Number(bigNano / bigNanoInSec))
+  validateDurationTimeUnit(Number(bigNano / bigNanoInSec))
 
   return fields
 }
 
-export function checkDurationTimeUnit(n: number): void {
+export function validateDurationTimeUnit(n: number): void {
   if (!Number.isSafeInteger(n)) {
     throwRangeError(errorMessages.outOfBoundsDuration)
   }

@@ -47,16 +47,19 @@ export function checkIsoDateInBounds(
 
 export function checkIsoDateTimeInBounds(
   isoDateTime: CalendarDateTimeFields,
-): void {
+): CalendarDateTimeFields {
   const epochNano = isoDateToEpochNano(isoDateTime)
 
   // PlainDateTime's lower edge permits one extra ISO day, but not midnight of
   // that day. The upper edge ends on epoch day +100000000 at 23:59:59.999999999.
   checkIsoDateEpochNanoInBounds(epochNano)
 
+  // Reject exact lower-edge midnight; PlainDateTime starts one nanosecond later.
   if (epochNano === plainDateEpochNanoMin && !timeFieldsToNano(isoDateTime)) {
     throwRangeError(errorMessages.outOfBoundsDate)
   }
+
+  return isoDateTime
 }
 
 function checkIsoDateEpochNanoInBounds(

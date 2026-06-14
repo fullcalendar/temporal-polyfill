@@ -148,7 +148,7 @@ import {
   computeYearFloor,
   computeYearInterval,
 } from './roundUtils'
-import { rejectInvalidBag } from './temporalRecords'
+import { validateBag } from './temporalRecords'
 
 type ShimZonedDateTimeFields = ZonedDateTimeFields<CalendarRecord>
 type ShimZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarImpl }
@@ -213,14 +213,11 @@ export function create(
   timeZoneId: string,
   calendar?: CalendarRecord,
 ): ShimZonedDateTimeRecord {
-  const epochNanoBigInt = toBigInt(epochNanoseconds)
-  const refinedTimeZoneId = refineTimeZoneId(timeZoneId)
+  const epochNano = checkEpochNanoInBounds(toBigInt(epochNanoseconds))
+  const timeZone = queryTimeZone(refineTimeZoneId(timeZoneId))
+  const calendarImpl = refineShimCalendarArgMaybe(calendar)
   return createShimZonedDateTimeRecord(
-    createZonedEpochNanoSlots(
-      checkEpochNanoInBounds(epochNanoBigInt),
-      queryTimeZone(refinedTimeZoneId),
-      refineShimCalendarArgMaybe(calendar),
-    ),
+    createZonedEpochNanoSlots(epochNano, timeZone, calendarImpl),
   )
 }
 
@@ -259,11 +256,7 @@ export function withFields(
   options?: Temporal.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
-  const resSlots = mergeZonedDateTimeFields(
-    slots,
-    rejectInvalidBag(mod),
-    options,
-  )
+  const resSlots = mergeZonedDateTimeFields(slots, validateBag(mod), options)
   return createShimZonedDateTimeRecord(resSlots)
 }
 

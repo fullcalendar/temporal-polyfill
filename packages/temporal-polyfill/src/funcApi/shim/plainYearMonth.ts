@@ -24,7 +24,8 @@ import {
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { diffPlainYearMonth } from '../../internal/diff'
-import { checkDurationUnits } from '../../internal/durationMath'
+import { durationFieldDefaults } from '../../internal/durationFields'
+import { validateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
   CalendarDateFields,
@@ -37,7 +38,7 @@ import {
 } from '../../internal/intlFormatArgs'
 import { transformYearMonthOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
-import { checkIsoDateFields } from '../../internal/isoCalendarMath'
+import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import {
   formatPlainYearMonthIso,
   formatYearMonthIsoAuto,
@@ -49,7 +50,7 @@ import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots, createDurationSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
-import { NumberSign, mapProps } from '../../internal/utils'
+import { NumberSign } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import type * as RecordTypes from '../recordTypes'
@@ -77,8 +78,7 @@ import {
   computeYearInterval,
   roundDateToInterval,
 } from './roundUtils'
-import { rejectInvalidBag } from './temporalRecords'
-import { durationFieldDefaults } from '../../internal/durationFields'
+import { validateBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainYearMonthRecord>
 type ShimPlainYearMonthSlots = CalendarDateFields & { calendar: CalendarImpl }
@@ -150,23 +150,18 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoDay?: number,
 ): ShimPlainYearMonthRecord {
-  const isoYearMonth = mapProps(toIntegerWithTruncation, {
-    year: isoYear,
-    month: isoMonth,
-  })
+  const isoYearInt = toIntegerWithTruncation(isoYear)
+  const isoMonthInt = toIntegerWithTruncation(isoMonth)
   const calendarImpl = refineShimCalendarArgMaybe(calendar)
   const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
-  return createShimPlainYearMonthRecord(
-    createDateSlots(
-      checkIsoYearMonthInBounds(
-        checkIsoDateFields({
-          ...isoYearMonth,
-          day: isoDayInt,
-        }),
-      ),
-      calendarImpl,
-    ),
+  const fields = checkIsoYearMonthInBounds(
+    validateIsoDateFields({
+      year: isoYearInt,
+      month: isoMonthInt,
+      day: isoDayInt,
+    }),
   )
+  return createShimPlainYearMonthRecord(createDateSlots(fields, calendarImpl))
 }
 
 export function fromFields(
@@ -217,11 +212,7 @@ export function withFields(
   options?: Temporal.OverflowOptions,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const resSlots = mergePlainYearMonthFields(
-    slots,
-    rejectInvalidBag(mod),
-    options,
-  )
+  const resSlots = mergePlainYearMonthFields(slots, validateBag(mod), options)
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -246,7 +237,7 @@ export function addYears(
     false,
     slots,
     createDurationSlots(
-      checkDurationUnits({
+      validateDurationFields({
         ...durationFieldDefaults,
         years: toStrictInteger(years),
       }),
@@ -266,7 +257,7 @@ export function addMonths(
     false,
     slots,
     createDurationSlots(
-      checkDurationUnits({
+      validateDurationFields({
         ...durationFieldDefaults,
         months: toStrictInteger(months),
       }),
