@@ -90,7 +90,10 @@ const propertyLikeTypes = new Set([
   'PropertyDefinition',
 ])
 
-export function mangler({ reserved = [] } = {}) {
+export function mangler({
+  additionalReserved = [],
+  builtinReservedExceptions = [],
+} = {}) {
   return {
     name: 'temporal-property-mangler',
     generateBundle(_outputOptions, bundle) {
@@ -102,7 +105,10 @@ export function mangler({ reserved = [] } = {}) {
         return
       }
 
-      const reservedNames = buildReservedNames(reserved)
+      const reservedNames = buildReservedNames({
+        additionalReserved,
+        builtinReservedExceptions,
+      })
       const chunkContexts = chunks.map(({ fileName, chunk }) => {
         const ast = this.parse(chunk.code)
         const namespaceImports = collectNamespaceImports(ast)
@@ -140,11 +146,17 @@ export function mangler({ reserved = [] } = {}) {
   }
 }
 
-function buildReservedNames(reserved) {
-  const reservedNames = new Set(reserved)
-
+function buildReservedNames({ additionalReserved, builtinReservedExceptions }) {
+  const reservedNames = new Set()
   findTerserBuiltinProps(reservedNames)
   for (const prop of extraBuiltinProps) {
+    reservedNames.add(prop)
+  }
+
+  for (const prop of builtinReservedExceptions) {
+    reservedNames.delete(prop)
+  }
+  for (const prop of additionalReserved) {
     reservedNames.add(prop)
   }
 

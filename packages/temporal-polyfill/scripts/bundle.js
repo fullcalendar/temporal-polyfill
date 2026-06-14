@@ -228,7 +228,13 @@ function buildModuleConfigs({
         plugins: [
           !isDev && pureTopLevel(),
           !isDev && terser(buildTerserEsmOptions()),
-          !isDev && mangler({ reserved: temporalReservedWords }),
+          !isDev &&
+            mangler({
+              additionalReserved: temporalReservedWords,
+              // Terser reserves this for SVG marker APIs; we do not touch SVG,
+              // so our internal field can stay readable in source and mangle.
+              builtinReservedExceptions: ['marker'],
+            }),
         ],
       },
     },
