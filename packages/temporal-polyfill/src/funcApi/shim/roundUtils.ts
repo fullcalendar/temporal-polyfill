@@ -278,7 +278,8 @@ export function bigNanoToRoundedTimeUnit(
   if (roundingInc) {
     nanoAmount = roundBigNanoToInc(
       nanoAmount,
-      BigInt(nanoInUnit * roundingInc),
+      // Like computeBigNanoInc, multiply after converting to bigint
+      BigInt(nanoInUnit) * BigInt(roundingInc),
       roundingMode!,
     )
   }
