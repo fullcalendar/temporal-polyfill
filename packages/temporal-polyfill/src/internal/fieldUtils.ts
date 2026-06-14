@@ -11,8 +11,9 @@ export function combineDateAndTime(
   isoDate: CalendarDateFields,
   time: TimeFields,
 ): CalendarDateTimeFields {
-  return {
-    ...pluckProps(timeFieldNamesAsc, time),
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate),
-  }
+  return pluckProps(
+    calendarDateFieldNamesAsc,
+    isoDate,
+    pluckProps(timeFieldNamesAsc, time),
+  )
 }

@@ -8,7 +8,6 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import { combineDateAndTime } from './fieldUtils'
 import { type TimeZone } from './timeZone'
 import { NumberSign, pluckProps } from './utils'
 
@@ -39,11 +38,11 @@ export function createDateTimeSlots(
   calendar?: CalendarImpl,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
-  return {
-    calendar,
-    // strange to use this, but does plucking in ascending order
-    ...combineDateAndTime(isoDateTime, isoDateTime),
-  }
+  return pluckProps(
+    calendarDateFieldNamesAsc,
+    isoDateTime,
+    pluckProps(timeFieldNamesAsc, isoDateTime, { calendar }),
+  )
 }
 
 export function createDateSlots(
@@ -51,25 +50,19 @@ export function createDateSlots(
   calendar?: CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
-  return {
-    calendar,
-    ...pluckProps(calendarDateFieldNamesAsc, isoDate as CalendarDateFields),
-  }
+  return pluckProps(calendarDateFieldNamesAsc, isoDate, { calendar })
 }
 
 export function createTimeSlots(time: TimeFields): TimeFields {
-  return {
-    ...pluckProps(timeFieldNamesAsc, time),
-  }
+  return pluckProps(timeFieldNamesAsc, time)
 }
 
 export function createDurationSlots(
   durationFields: DurationFields,
 ): DurationFields & { sign: NumberSign } {
-  return {
+  return pluckProps(durationFieldNamesAsc, durationFields, {
     sign: computeDurationSign(durationFields),
-    ...pluckProps(durationFieldNamesAsc, durationFields),
-  }
+  })
 }
 
 // -----------------------------------------------------------------------------

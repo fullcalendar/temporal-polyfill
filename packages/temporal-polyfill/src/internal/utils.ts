@@ -207,16 +207,23 @@ export function zipPropsDesc<P>(
   return res
 }
 
-export function pluckProps<P>(propNames: (keyof P)[], props: P): P {
+export function pluckProps<P>(propNames: (keyof P)[], props: P): P
+export function pluckProps<P, D extends object>(
+  propNames: (keyof P)[],
+  props: P,
+  dest: D,
+): P & D
+export function pluckProps<P>(
+  propNames: (keyof P)[],
+  props: P,
   // Avoid inherited fields from Object.prototype pollution.
   // We give the resulting object to Intl.DateTimeFormat
-  const res = Object.create(null) as P
-
+  dest: any = Object.create(null),
+): P {
   for (const propName of propNames) {
-    res[propName] = props[propName]
+    dest[propName] = props[propName]
   }
-
-  return res
+  return dest
 }
 
 export function excludePropsByName<P, K extends keyof P>(
