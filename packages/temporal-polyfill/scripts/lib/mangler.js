@@ -93,6 +93,7 @@ const propertyLikeTypes = new Set([
 export function mangler({
   additionalReserved = [],
   builtinReservedExceptions = [],
+  keepQuoted = false,
 } = {}) {
   return {
     name: 'temporal-property-mangler',
@@ -125,7 +126,7 @@ export function mangler({
           fileName,
           chunk,
           namespaceImports,
-          reservedPropNames: collectReservedPropNames(ast),
+          reservedPropNames: collectReservedPropNames(ast, { keepQuoted }),
           propRefs: collectPropRefs(ast, namespaceImports),
         }
       })
@@ -331,9 +332,13 @@ function collectPropRefs(ast, namespaceImports) {
   return propRefs
 }
 
-function collectReservedPropNames(ast) {
+function collectReservedPropNames(ast, { keepQuoted }) {
   const dynamicLookupObjects = new Set()
   const propNames = new Set()
+
+  if (keepQuoted) {
+    collectQuotedPropNames(ast, propNames)
+  }
 
   walkAst(ast, (node) => {
     if (
@@ -358,6 +363,24 @@ function collectReservedPropNames(ast) {
   })
 
   return propNames
+}
+
+function collectQuotedPropNames(ast, propNames) {
+  walkAst(ast, (node, parent) => {
+    if (node.type === 'MemberExpression') {
+      const propName = readMemberPropName(node)
+
+      if (propName && node.computed) {
+        propNames.add(propName)
+      }
+    } else if (isPropertyLike(node, parent) && node.key?.type === 'Literal') {
+      const propName = readStaticPropName(node.key)
+
+      if (propName) {
+        propNames.add(propName)
+      }
+    }
+  })
 }
 
 function collectStaticObjectKeys(objectExpression, propNames) {

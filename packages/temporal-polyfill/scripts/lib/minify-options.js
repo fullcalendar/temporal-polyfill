@@ -41,6 +41,10 @@ export function buildTerserEsmOptions() {
       braces: true,
       indent_level: 2,
 
+      // preserve quoted props so prop-mangler plugin knows to not mangle
+      // when its own `keepQuoted` setting is enabled
+      keep_quoted_props: true,
+
       // Preserve PURE annotations we injected via pure-top-level plugin,
       // for better tree-shaking
       preserve_annotations: true,

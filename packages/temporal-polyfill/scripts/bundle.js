@@ -230,6 +230,7 @@ function buildModuleConfigs({
           !isDev && terser(buildTerserEsmOptions()),
           !isDev &&
             mangler({
+              keepQuoted: true,
               additionalReserved: temporalReservedWords,
               // Terser reserves this for SVG marker APIs; we do not touch SVG,
               // so our internal field can stay readable in source and mangle.
