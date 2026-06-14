@@ -38,50 +38,36 @@ export function constructEpochNanoSlots(epochNano: bigint): EpochNanoFields {
 }
 
 export function constructTimeSlots(
-  hour: number,
-  minute: number,
-  second: number,
-  millisecond: number,
-  microsecond: number,
-  nanosecond: number,
+  ...fieldValues: [
+    hour: number,
+    minute: number,
+    second: number,
+    millisecond: number,
+    microsecond: number,
+    nanosecond: number,
+  ]
 ): TimeFields {
-  const timeFields = zipPropsDesc(timeFieldNamesAsc, [
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
-  ])
+  const timeFields = zipPropsDesc(timeFieldNamesAsc, fieldValues)
   return createTimeSlots(
     checkTimeFields(mapProps(toIntegerWithTruncation, timeFields)),
   )
 }
 
 export function constructDurationSlots(
-  years: number,
-  months: number,
-  weeks: number,
-  days: number,
-  hours: number,
-  minutes: number,
-  seconds: number,
-  milliseconds: number,
-  microseconds: number,
-  nanoseconds: number,
+  ...fieldValues: [
+    years: number,
+    months: number,
+    weeks: number,
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number,
+    milliseconds: number,
+    microseconds: number,
+    nanoseconds: number,
+  ]
 ): DurationFields & { sign: NumberSign } {
-  const durationFields = zipPropsDesc(durationFieldNamesAsc, [
-    years,
-    months,
-    weeks,
-    days,
-    hours,
-    minutes,
-    seconds,
-    milliseconds,
-    microseconds,
-    nanoseconds,
-  ])
+  const durationFields = zipPropsDesc(durationFieldNamesAsc, fieldValues)
   return createDurationSlots(
     checkDurationUnits(mapProps(toStrictInteger, durationFields)),
   )
