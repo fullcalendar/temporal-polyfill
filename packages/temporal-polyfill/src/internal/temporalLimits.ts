@@ -14,8 +14,8 @@ even for moving!
 const epochNanoMax = BigInt(epochNanoDayMax) * bigNanoInUtcDay
 const epochNanoMin = BigInt(-epochNanoDayMax) * bigNanoInUtcDay
 const plainDateEpochNanoMin = epochNanoMin - bigNanoInUtcDay
-const isoYearMonthIndexMin = isoYearMin * 12 + 4
-const isoYearMonthIndexMax = isoYearMax * 12 + 9
+export const isoYearMonthIndexMin = isoYearMin * 12 + 4
+export const isoYearMonthIndexMax = isoYearMax * 12 + 9
 
 export function checkIsoYearMonthInBounds(
   isoDate: CalendarDateFields,

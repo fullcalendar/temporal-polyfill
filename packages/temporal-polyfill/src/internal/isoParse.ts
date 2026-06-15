@@ -47,6 +47,7 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoDateTimeAndOffsetToEpochNano,
+  isoYearMonthIndexMin,
 } from './temporalLimits'
 import { nanoToTimeAndDay, validateTimeFields } from './timeFieldMath'
 import { FixedTimeZone, queryTimeZone } from './timeZone'
@@ -358,7 +359,8 @@ function projectIsoYearMonthDate(
 ): DateOrganized {
   // The final YearMonth slot drops the day, but its range check still needs a
   // valid representative ISO date. The minimum ISO year-month starts on day 20.
-  const day = organized.year === -271821 && organized.month === 4 ? 20 : 1
+  const isoYearMonthIndex = organized.year * 12 + organized.month
+  const day = isoYearMonthIndex === isoYearMonthIndexMin ? 20 : 1
   return {
     ...organized,
     day,
