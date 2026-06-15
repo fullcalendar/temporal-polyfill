@@ -8,7 +8,7 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import { getOptionsObject } from './optionsNormalize'
+import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
   createMarkerSpanOps,
@@ -56,7 +56,7 @@ export function compareDurations<RA>(
   durationSlots1: DurationFields,
   options?: RelativeToOptions<RA>,
 ): NumberSign {
-  const normalOptions = getOptionsObject(options)
+  const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const maxUnit = Math.max(
     getMaxDurationUnit(durationSlots0),

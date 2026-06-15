@@ -8,7 +8,7 @@ import {
 } from '../../apiHelpers/classStyle'
 import { timeGetters } from '../../apiHelpers/mixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
-import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
+import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
@@ -98,7 +98,7 @@ export function create(
   nanosecond = 0,
 ): ShimPlainTimeRecord {
   const fields = validateTimeFields(
-    mapProps(toIntegerWithTruncation, {
+    mapProps(toIntegerWithTrunc, {
       hour,
       minute,
       second,

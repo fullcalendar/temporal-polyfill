@@ -12,7 +12,7 @@ import {
   timeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
@@ -117,7 +117,7 @@ export const PlainDateTime = defineTemporalClass(
     ) {
       const fields = checkIsoDateTimeInBounds(
         validateIsoDateTimeFields(
-          mapProps(toIntegerWithTruncation, {
+          mapProps(toIntegerWithTrunc, {
             year: isoYear,
             month: isoMonth,
             day: isoDay,

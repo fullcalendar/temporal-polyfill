@@ -45,18 +45,18 @@ export const unitNamesAsc = Object.keys(
 
 export const secInMinute = 60
 export const secInHour = 60 * secInMinute
-export const secInUtcDay = 86400
+export const secInUtcDay = 86_400
 
-export const milliInSec = 1000
+export const milliInSec = 1_000
 export const milliInMinute = milliInSec * secInMinute
 export const milliInHour = milliInSec * secInHour
 export const milliInUtcDay = milliInSec * secInUtcDay
 
-export const nanoInMicro = TemporalUtils.nanosecondsInMicrosecond
-export const nanoInMilli = TemporalUtils.nanosecondsInMillisecond
-export const nanoInSec = TemporalUtils.nanosecondsInSecond
-export const nanoInMinute = TemporalUtils.nanosecondsInMinute
-export const nanoInHour = TemporalUtils.nanosecondsInHour
+export const nanoInMicro = TemporalUtils.nanoInMicro
+export const nanoInMilli = TemporalUtils.nanoInMilli
+export const nanoInSec = TemporalUtils.nanoInSec
+export const nanoInMinute = TemporalUtils.nanoInMinute
+export const nanoInHour = TemporalUtils.nanoInHour
 export const nanoInUtcDay = 86_400_000_000_000
 
 export const unitNanoMap = [

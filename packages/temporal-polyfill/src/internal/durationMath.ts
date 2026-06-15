@@ -17,7 +17,7 @@ import {
 } from './durationFields'
 import * as errorMessages from './errorMessages'
 import { Overflow } from './optionsModel'
-import { getOptionsObject } from './optionsNormalize'
+import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
@@ -56,7 +56,7 @@ export function addDurations<RA>(
   otherSlots: DurationFields,
   options?: RelativeToOptions<RA>,
 ): DurationFields & { sign: NumberSign } {
-  const normalOptions = getOptionsObject(options)
+  const normalOptions = normalizeOptions(options)
   const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
   const maxUnit = Math.max(
     getMaxDurationUnit(slots),

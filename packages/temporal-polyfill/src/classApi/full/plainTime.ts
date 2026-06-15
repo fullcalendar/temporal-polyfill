@@ -7,7 +7,7 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import { timeGetters } from '../../apiHelpers/mixins'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -59,7 +59,7 @@ export const PlainTime = defineTemporalClass(
       nanosecond = 0,
     ) {
       const fields = validateTimeFields(
-        mapProps(toIntegerWithTruncation, {
+        mapProps(toIntegerWithTrunc, {
           hour,
           minute,
           second,

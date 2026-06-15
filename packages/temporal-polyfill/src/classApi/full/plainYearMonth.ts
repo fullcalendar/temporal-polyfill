@@ -11,7 +11,7 @@ import {
   yearMonthFieldGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -68,10 +68,10 @@ export const PlainYearMonth = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoDay?: number,
     ) {
-      const isoYearInt = toIntegerWithTruncation(isoYear)
-      const isoMonthInt = toIntegerWithTruncation(isoMonth)
+      const isoYearInt = toIntegerWithTrunc(isoYear)
+      const isoMonthInt = toIntegerWithTrunc(isoMonth)
       const calendarImpl = resolveAnyCalendarArg(calendar)
-      const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
+      const isoDayInt = toIntegerWithTrunc(referenceIsoDay ?? 1)
       const fields = checkIsoYearMonthInBounds(
         validateIsoDateFields({
           year: isoYearInt,

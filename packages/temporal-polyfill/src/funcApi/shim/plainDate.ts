@@ -22,7 +22,7 @@ import {
   type CalendarImpl,
   getCalendarSlotId,
 } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
@@ -177,7 +177,7 @@ export function create(
 ): ShimPlainDateRecord {
   const fields = checkIsoDateInBounds(
     validateIsoDateFields(
-      mapProps(toIntegerWithTruncation, {
+      mapProps(toIntegerWithTrunc, {
         year: isoYear,
         month: isoMonth,
         day: isoDay,

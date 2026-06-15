@@ -1,4 +1,4 @@
-export { getOptionsObject } from 'temporal-utils/protected'
+export { normalizeOptions } from 'temporal-utils/protected'
 import { requireObjectLike } from './cast'
 
 /*

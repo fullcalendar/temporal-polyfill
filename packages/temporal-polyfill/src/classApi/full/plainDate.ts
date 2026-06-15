@@ -8,7 +8,7 @@ import {
 } from '../../apiHelpers/classStyle'
 import { dateDerivedGetters, dateFieldGetters } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import {
   convertToPlainMonthDay,
@@ -92,7 +92,7 @@ export const PlainDate = defineTemporalClass(
     ) {
       const fields = checkIsoDateInBounds(
         validateIsoDateFields(
-          mapProps(toIntegerWithTruncation, {
+          mapProps(toIntegerWithTrunc, {
             year: isoYear,
             month: isoMonth,
             day: isoDay,

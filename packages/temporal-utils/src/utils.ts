@@ -1,10 +1,10 @@
 import * as errorMessages from './errorMessages.js'
 
-export const nanosecondsInMicrosecond = 1_000
-export const nanosecondsInMillisecond = 1_000_000
-export const nanosecondsInSecond = 1_000_000_000
-export const nanosecondsInMinute = 60_000_000_000
-export const nanosecondsInHour = 3_600_000_000_000
+export const nanoInMicro = 1_000
+export const nanoInMilli = 1_000_000
+export const nanoInSec = 1_000_000_000
+export const nanoInMinute = 60_000_000_000
+export const nanoInHour = 3_600_000_000_000
 
 // just used to scrape types from temporal-spec
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
@@ -16,7 +16,7 @@ export type RoundingMathOptions = Pick<
   'roundingIncrement' | 'roundingMode'
 >
 
-export function getOptionsObject<O extends {}>(options: O | undefined): O {
+export function normalizeOptions<O extends {}>(options: O | undefined): O {
   if (options === undefined) {
     return Object.create(null)
   }
@@ -37,10 +37,7 @@ export function toFiniteNumber(arg: number, entityName = 'number'): number {
   return arg
 }
 
-export function toIntegerWithTruncation(
-  arg: number,
-  entityName?: string,
-): number {
+export function toIntegerWithTrunc(arg: number, entityName?: string): number {
   return Math.trunc(toFiniteNumber(arg, entityName)) || 0 // ensure no -0
 }
 
@@ -49,7 +46,7 @@ export function toPositiveIntegerWithTruncation(
   entityName?: string,
 ): number {
   return requireNumberIsPositive(
-    toIntegerWithTruncation(arg, entityName),
+    toIntegerWithTrunc(arg, entityName),
     entityName,
   )
 }
@@ -120,7 +117,7 @@ for exact in-range input.
 function normalizeOverflow(
   options: Temporal.OverflowOptions | undefined,
 ): NonNullable<Temporal.OverflowOptions['overflow']> {
-  options = getOptionsObject(options)
+  options = normalizeOptions(options)
 
   const overflow = options.overflow
   if (overflow === undefined) {

@@ -1,5 +1,5 @@
 import * as errorMessages from './errorMessages.js'
-import { normalizeNumberInRange, toIntegerWithTruncation } from './utils.js'
+import { normalizeNumberInRange, toIntegerWithTrunc } from './utils.js'
 
 const isoCalendarId = 'iso8601'
 
@@ -10,7 +10,7 @@ export function withDayOfYear<
     | Temporal.ZonedDateTime,
 >(date: T, dayOfYear: number, options?: Temporal.OverflowOptions): T {
   const normDayOfYear = normalizeNumberInRange(
-    toIntegerWithTruncation(dayOfYear),
+    toIntegerWithTrunc(dayOfYear),
     1,
     date.daysInYear,
     options,
@@ -27,7 +27,7 @@ export function withDayOfWeek<
     | Temporal.ZonedDateTime,
 >(date: T, dayOfWeek: number, options?: Temporal.OverflowOptions): T {
   const normDayOfWeek = normalizeNumberInRange(
-    toIntegerWithTruncation(dayOfWeek),
+    toIntegerWithTrunc(dayOfWeek),
     1,
     date.daysInWeek,
     options,
@@ -50,7 +50,7 @@ export function withWeekOfYear<
   const currentWeekOfYear = date.weekOfYear!
   const currentYearOfWeek = date.yearOfWeek!
   const normWeekOfYear = normalizeNumberInRange(
-    toIntegerWithTruncation(weekOfYear),
+    toIntegerWithTrunc(weekOfYear),
     1,
     computeIsoWeeksInYear(currentYearOfWeek),
     options,

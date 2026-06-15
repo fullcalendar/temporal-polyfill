@@ -3,7 +3,7 @@ import {
   requireNumberIsPositive,
   requireObjectLike,
   toFiniteNumber,
-  toIntegerWithTruncation,
+  toIntegerWithTrunc,
   toPositiveIntegerWithTruncation,
 } from 'temporal-utils/protected'
 import * as errorMessages from './errorMessages'
@@ -127,7 +127,7 @@ export function toBigInt(bi: bigint): bigint {
 export {
   requireObjectLike,
   toFiniteNumber,
-  toIntegerWithTruncation,
+  toIntegerWithTrunc,
   toPositiveIntegerWithTruncation,
 }
 

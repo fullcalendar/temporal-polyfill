@@ -12,7 +12,7 @@ import {
   getCalendarSlotId,
   isoCalendarImpl,
 } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
@@ -64,10 +64,10 @@ export const PlainMonthDay = defineTemporalClass(
       calendar: string | undefined = undefined,
       referenceIsoYear?: number,
     ) {
-      const isoMonthInt = toIntegerWithTruncation(isoMonth)
-      const isoDayInt = toIntegerWithTruncation(isoDay)
+      const isoMonthInt = toIntegerWithTrunc(isoMonth)
+      const isoDayInt = toIntegerWithTrunc(isoDay)
       const calendarImpl = resolveBasicCalendarArg(calendar)
-      const isoYearInt = toIntegerWithTruncation(
+      const isoYearInt = toIntegerWithTrunc(
         referenceIsoYear ?? isoEpochFirstLeapYear,
       )
       const fields = checkIsoDateInBounds(

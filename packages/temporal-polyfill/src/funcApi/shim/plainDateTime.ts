@@ -17,7 +17,7 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
+import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
@@ -199,7 +199,7 @@ export function create(
 ): ShimPlainDateTimeRecord {
   const fields = checkIsoDateTimeInBounds(
     validateIsoDateTimeFields(
-      mapProps(toIntegerWithTruncation, {
+      mapProps(toIntegerWithTrunc, {
         year: isoYear,
         month: isoMonth,
         day: isoDay,

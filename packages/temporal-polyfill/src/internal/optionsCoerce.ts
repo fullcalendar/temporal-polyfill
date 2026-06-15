@@ -1,5 +1,5 @@
 import type { Temporal } from 'temporal-spec'
-import { toIntegerWithTruncation, toString } from './cast'
+import { toIntegerWithTrunc, toString } from './cast'
 import { DurationFieldName, durationFieldIndexes } from './durationFields'
 import * as errorMessages from './errorMessages'
 import {
@@ -43,7 +43,7 @@ export function coerceRoundingIncInteger(options: {
   if (roundingInc === undefined) {
     return 1
   }
-  return toIntegerWithTruncation(roundingInc, roundingIncName)
+  return toIntegerWithTrunc(roundingInc, roundingIncName)
 }
 
 export function coerceFractionalSecondDigits(options: {

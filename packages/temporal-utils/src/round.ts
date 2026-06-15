@@ -1,6 +1,6 @@
 import * as errorMessages from './errorMessages.js'
 import { startOfMonth, startOfWeek, startOfYear } from './startOf.js'
-import { RoundingMathOptions, RoundingMode, getOptionsObject } from './utils.js'
+import { RoundingMathOptions, RoundingMode, normalizeOptions } from './utils.js'
 
 export function roundToYear<
   T extends
@@ -163,7 +163,7 @@ function getNativeRoundOptions(
   return {
     ...(typeof options === 'string'
       ? { roundingMode: options }
-      : getOptionsObject(options)),
+      : normalizeOptions(options)),
     smallestUnit: forcedUnit,
   }
 }
@@ -179,7 +179,7 @@ function normalizeRoundingOptions(
   const normOptions: RoundingMathOptions =
     typeof options === 'string'
       ? { roundingMode: options }
-      : getOptionsObject(options)
+      : normalizeOptions(options)
 
   // This is just for units >day
   if (normOptions.roundingIncrement && normOptions.roundingIncrement !== 1) {

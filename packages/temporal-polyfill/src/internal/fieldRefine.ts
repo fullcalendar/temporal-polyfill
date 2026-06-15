@@ -1,6 +1,6 @@
 import {
   requireString,
-  toIntegerWithTruncation,
+  toIntegerWithTrunc,
   toPositiveIntegerWithTruncation,
   toStrictInteger,
   toStringViaPrimitive,
@@ -56,7 +56,7 @@ export const dateFieldRefiners = {
 
 export const timeFieldRefiners = zipPropsConst(
   timeFieldNamesAsc,
-  toIntegerWithTruncation,
+  toIntegerWithTrunc,
 )
 
 export const durationFieldRefiners = zipPropsConst(

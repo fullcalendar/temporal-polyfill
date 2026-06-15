@@ -9,11 +9,11 @@ import {
   startOfYear,
 } from './startOf.js'
 import {
-  nanosecondsInHour,
-  nanosecondsInMicrosecond,
-  nanosecondsInMillisecond,
-  nanosecondsInMinute,
-  nanosecondsInSecond,
+  nanoInHour,
+  nanoInMicro,
+  nanoInMilli,
+  nanoInMinute,
+  nanoInSec,
 } from './utils.js'
 
 export function endOfYear<
@@ -90,7 +90,7 @@ export function endOfHour<
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
 >(date: T): T {
-  return startOfHour(date).add({ nanoseconds: nanosecondsInHour - 1 }) as T
+  return startOfHour(date).add({ nanoseconds: nanoInHour - 1 }) as T
 }
 
 export function endOfMinute<
@@ -99,7 +99,7 @@ export function endOfMinute<
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
 >(date: T): T {
-  return startOfMinute(date).add({ nanoseconds: nanosecondsInMinute - 1 }) as T
+  return startOfMinute(date).add({ nanoseconds: nanoInMinute - 1 }) as T
 }
 
 export function endOfSecond<
@@ -108,7 +108,7 @@ export function endOfSecond<
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
 >(date: T): T {
-  return startOfSecond(date).add({ nanoseconds: nanosecondsInSecond - 1 }) as T
+  return startOfSecond(date).add({ nanoseconds: nanoInSec - 1 }) as T
 }
 
 export function endOfMillisecond<
@@ -118,7 +118,7 @@ export function endOfMillisecond<
     | Temporal.ZonedDateTime,
 >(date: T): T {
   return startOfMillisecond(date).add({
-    nanoseconds: nanosecondsInMillisecond - 1,
+    nanoseconds: nanoInMilli - 1,
   }) as T
 }
 
@@ -129,6 +129,6 @@ export function endOfMicrosecond<
     | Temporal.ZonedDateTime,
 >(date: T): T {
   return startOfMicrosecond(date).add({
-    nanoseconds: nanosecondsInMicrosecond - 1,
+    nanoseconds: nanoInMicro - 1,
   }) as T
 }

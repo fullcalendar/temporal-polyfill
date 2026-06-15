@@ -23,7 +23,7 @@ import type {
   RoundingMathTuple,
   RoundingTuple,
 } from './optionsModel'
-import { getOptionsObject, normalizeOptionsOrString } from './optionsNormalize'
+import { normalizeOptions, normalizeOptionsOrString } from './optionsNormalize'
 import {
   checkLargestSmallestUnit,
   validateRoundingInc,
@@ -62,7 +62,7 @@ export function refineDiffOptions<
   minUnit = Unit.Nanosecond,
   defaultRoundingMode: RoundingModeEnum = RoundingModeEnum.Trunc,
 ): DiffTuple {
-  options = getOptionsObject(options)
+  options = normalizeOptions(options)
 
   let largestUnit = coerceLargestUnit(options, minUnit)
   let roundingInc = coerceRoundingIncInteger(options)

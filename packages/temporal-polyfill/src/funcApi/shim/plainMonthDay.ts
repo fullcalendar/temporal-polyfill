@@ -10,7 +10,7 @@ import {
   computeCalendarMonthCode,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation } from '../../internal/cast'
+import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
 import { convertPlainMonthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
@@ -108,10 +108,10 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoYear?: number,
 ): ShimPlainMonthDayRecord {
-  const isoMonthInt = toIntegerWithTruncation(isoMonth)
-  const isoDayInt = toIntegerWithTruncation(isoDay)
+  const isoMonthInt = toIntegerWithTrunc(isoMonth)
+  const isoDayInt = toIntegerWithTrunc(isoDay)
   const calendarImpl = refineShimCalendarArgMaybe(calendar)
-  const isoYearInt = toIntegerWithTruncation(
+  const isoYearInt = toIntegerWithTrunc(
     referenceIsoYear ?? isoEpochFirstLeapYear,
   )
   const fields = checkIsoDateInBounds(

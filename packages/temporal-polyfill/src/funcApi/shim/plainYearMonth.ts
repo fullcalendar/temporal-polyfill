@@ -16,7 +16,7 @@ import {
   computeCalendarMonthsInYear,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
-import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
+import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateFields,
   plainYearMonthsEqual,
@@ -150,10 +150,10 @@ export function create(
   calendar?: CalendarRecord,
   referenceIsoDay?: number,
 ): ShimPlainYearMonthRecord {
-  const isoYearInt = toIntegerWithTruncation(isoYear)
-  const isoMonthInt = toIntegerWithTruncation(isoMonth)
+  const isoYearInt = toIntegerWithTrunc(isoYear)
+  const isoMonthInt = toIntegerWithTrunc(isoMonth)
   const calendarImpl = refineShimCalendarArgMaybe(calendar)
-  const isoDayInt = toIntegerWithTruncation(referenceIsoDay ?? 1)
+  const isoDayInt = toIntegerWithTrunc(referenceIsoDay ?? 1)
   const fields = checkIsoYearMonthInBounds(
     validateIsoDateFields({
       year: isoYearInt,
