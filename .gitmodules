@@ -10,3 +10,6 @@
 [submodule "packages/export-size"]
 	path = packages/export-size
 	url = https://github.com/fullcalendar/export-size.git
+[submodule "packages/terser"]
+	path = packages/terser
+	url = https://github.com/fullcalendar/terser.git
