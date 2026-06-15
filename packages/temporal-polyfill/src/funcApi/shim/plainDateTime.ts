@@ -25,6 +25,7 @@ import {
 import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import {
   epochNanoToIsoDateTime,
   isoDateTimeToEpochMilli,
@@ -53,7 +54,7 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
-import { moveDateTime, signedDurationFields } from '../../internal/move'
+import { moveDateTime } from '../../internal/move'
 import {
   IsoDateTimeInterval,
   computeDayFloor,
@@ -328,7 +329,7 @@ export function add(
     moveDateTime(
       slots.calendar,
       slots,
-      signedDurationFields(false, durationSlots),
+      durationSlots,
       options === undefined ? Object.create(null) : options,
     ),
     slots.calendar,
@@ -347,7 +348,7 @@ export function subtract(
     moveDateTime(
       slots.calendar,
       slots,
-      signedDurationFields(true, durationSlots),
+      negateDurationFields(durationSlots),
       options === undefined ? Object.create(null) : options,
     ),
     slots.calendar,

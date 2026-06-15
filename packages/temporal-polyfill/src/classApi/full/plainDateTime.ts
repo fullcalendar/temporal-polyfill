@@ -23,6 +23,7 @@ import {
 } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainDateTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateTimeToEpochMilli } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
@@ -42,7 +43,7 @@ import { validateIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
-import { moveDateTime, signedDurationFields } from '../../internal/move'
+import { moveDateTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
@@ -190,7 +191,7 @@ export const PlainDateTime = defineTemporalClass(
           moveDateTime(
             slots.calendar,
             slots,
-            signedDurationFields(false, toDurationSlots(durationArg)),
+            toDurationSlots(durationArg),
             options === undefined ? Object.create(null) : options,
           ),
           slots.calendar,
@@ -208,7 +209,7 @@ export const PlainDateTime = defineTemporalClass(
           moveDateTime(
             slots.calendar,
             slots,
-            signedDurationFields(true, toDurationSlots(durationArg)),
+            negateDurationFields(toDurationSlots(durationArg)),
             options === undefined ? Object.create(null) : options,
           ),
           slots.calendar,

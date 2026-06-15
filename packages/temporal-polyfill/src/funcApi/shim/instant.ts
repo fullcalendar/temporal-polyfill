@@ -21,6 +21,7 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
@@ -28,7 +29,7 @@ import {
   formatInstantIsoAuto,
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
-import { moveEpochNano, signedDurationFields } from '../../internal/move'
+import { moveEpochNano } from '../../internal/move'
 import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
@@ -143,10 +144,7 @@ export function add(
   const slots = getShimInstantSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createEpochNanoSlots(
-    moveEpochNano(
-      slots.epochNanoseconds,
-      signedDurationFields(false, durationSlots),
-    ),
+    moveEpochNano(slots.epochNanoseconds, durationSlots),
   )
   return createShimInstantRecord(resSlots)
 }
@@ -158,10 +156,7 @@ export function subtract(
   const slots = getShimInstantSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createEpochNanoSlots(
-    moveEpochNano(
-      slots.epochNanoseconds,
-      signedDurationFields(true, durationSlots),
-    ),
+    moveEpochNano(slots.epochNanoseconds, negateDurationFields(durationSlots)),
   )
   return createShimInstantRecord(resSlots)
 }

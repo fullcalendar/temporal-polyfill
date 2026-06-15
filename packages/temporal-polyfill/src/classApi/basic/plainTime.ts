@@ -12,6 +12,7 @@ import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { TimeFields } from '../../internal/fieldTypes'
 import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
 import { transformTimeOptions } from '../../internal/intlFormatOptions'
@@ -19,7 +20,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
-import { moveTime, signedDurationFields } from '../../internal/move'
+import { moveTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
@@ -98,10 +99,7 @@ export const PlainTime = defineTemporalClass(
       const slots = getPlainTimeSlots(this)
       return createPlainTime(
         // result is guaranteed exact TimeFields shape
-        moveTime(
-          slots,
-          signedDurationFields(false, toDurationSlots(durationArg)),
-        )[0],
+        moveTime(slots, toDurationSlots(durationArg))[0],
       )
     }
 
@@ -109,10 +107,7 @@ export const PlainTime = defineTemporalClass(
       const slots = getPlainTimeSlots(this)
       return createPlainTime(
         // result is guaranteed exact TimeFields shape
-        moveTime(
-          slots,
-          signedDurationFields(true, toDurationSlots(durationArg)),
-        )[0],
+        moveTime(slots, negateDurationFields(toDurationSlots(durationArg)))[0],
       )
     }
 

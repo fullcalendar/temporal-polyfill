@@ -27,6 +27,7 @@ import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import {
   isoDateToEpochDays,
   isoDateToEpochMilli,
@@ -50,7 +51,7 @@ import {
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
-import { moveByDays, moveDate, signedDurationFields } from '../../internal/move'
+import { moveByDays, moveDate } from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { IsoDateTimeInterval, roundNumberToInc } from '../../internal/round'
 import { getCommonCalendar } from '../../internal/slotUtils'
@@ -276,12 +277,7 @@ export function add(
   const slots = getShimPlainDateSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateSlots(
-    moveDate(
-      slots.calendar,
-      slots,
-      signedDurationFields(false, durationSlots),
-      options,
-    ),
+    moveDate(slots.calendar, slots, durationSlots, options),
     slots.calendar,
   )
   return createShimPlainDateRecord(resSlots)
@@ -298,7 +294,7 @@ export function subtract(
     moveDate(
       slots.calendar,
       slots,
-      signedDurationFields(true, durationSlots),
+      negateDurationFields(durationSlots),
       options,
     ),
     slots.calendar,

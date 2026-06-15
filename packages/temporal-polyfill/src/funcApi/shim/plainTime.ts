@@ -12,6 +12,7 @@ import { toIntegerWithTruncation, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { diffPlainTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { TimeFields } from '../../internal/fieldTypes'
 import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
 import { transformTimeOptions } from '../../internal/intlFormatOptions'
@@ -19,7 +20,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
-import { moveTime, signedDurationFields } from '../../internal/move'
+import { moveTime } from '../../internal/move'
 import { computeNanoInc, roundTimeToNano } from '../../internal/round'
 import {
   nanoToTimeAndDay,
@@ -137,10 +138,7 @@ export function add(
   const slots = getShimPlainTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   // result is guaranteed exact TimeFields shape
-  const resSlots = moveTime(
-    slots,
-    signedDurationFields(false, durationSlots),
-  )[0]
+  const resSlots = moveTime(slots, durationSlots)[0]
   return createShimPlainTimeRecord(resSlots)
 }
 
@@ -151,7 +149,7 @@ export function subtract(
   const slots = getShimPlainTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   // result is guaranteed exact TimeFields shape
-  const resSlots = moveTime(slots, signedDurationFields(true, durationSlots))[0]
+  const resSlots = moveTime(slots, negateDurationFields(durationSlots))[0]
   return createShimPlainTimeRecord(resSlots)
 }
 

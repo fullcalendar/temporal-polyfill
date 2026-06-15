@@ -40,16 +40,6 @@ import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
 import { NumberSign, clampEntity, throwRangeError } from './utils'
 
-// High-Level
-// -----------------------------------------------------------------------------
-
-export function signedDurationFields(
-  doSubtract: boolean,
-  durationFields: DurationFields,
-): DurationFields {
-  return doSubtract ? negateDurationFields(durationFields) : durationFields
-}
-
 // Low-Level
 // -----------------------------------------------------------------------------
 
@@ -80,7 +70,7 @@ export function moveYearMonth(
   const movedIsoDateFields = dateAddWithOverflow(
     calendar,
     startOfMonthFields,
-    signedDurationFields(doSubtract, durationSlots),
+    doSubtract ? negateDurationFields(durationSlots) : durationSlots,
     overflow,
   )
 

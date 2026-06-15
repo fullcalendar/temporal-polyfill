@@ -15,11 +15,12 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { diffInstants } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
-import { moveEpochNano, signedDurationFields } from '../../internal/move'
+import { moveEpochNano } from '../../internal/move'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import {
@@ -90,10 +91,7 @@ export const Instant = defineTemporalClass(
       const slots = getInstantSlots(this)
       return createInstant(
         createEpochNanoSlots(
-          moveEpochNano(
-            slots.epochNanoseconds,
-            signedDurationFields(false, toDurationSlots(durationArg)),
-          ),
+          moveEpochNano(slots.epochNanoseconds, toDurationSlots(durationArg)),
         ),
       )
     }
@@ -104,7 +102,7 @@ export const Instant = defineTemporalClass(
         createEpochNanoSlots(
           moveEpochNano(
             slots.epochNanoseconds,
-            signedDurationFields(true, toDurationSlots(durationArg)),
+            negateDurationFields(toDurationSlots(durationArg)),
           ),
         ),
       )

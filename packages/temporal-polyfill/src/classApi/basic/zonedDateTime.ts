@@ -25,6 +25,7 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import {
   DateTimeFields,
   ZonedDateTimeLikeObject,
@@ -42,7 +43,7 @@ import {
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveZonedEpochSlots, signedDurationFields } from '../../internal/move'
+import { moveZonedEpochSlots } from '../../internal/move'
 import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
@@ -209,7 +210,7 @@ export const ZonedDateTime = defineTemporalClass(
       return createZonedDateTime(
         moveZonedEpochSlots(
           slots,
-          signedDurationFields(false, toDurationSlots(durationArg)),
+          toDurationSlots(durationArg),
           options === undefined ? Object.create(null) : options,
         ),
       )
@@ -223,7 +224,7 @@ export const ZonedDateTime = defineTemporalClass(
       return createZonedDateTime(
         moveZonedEpochSlots(
           slots,
-          signedDurationFields(true, toDurationSlots(durationArg)),
+          negateDurationFields(toDurationSlots(durationArg)),
           options === undefined ? Object.create(null) : options,
         ),
       )

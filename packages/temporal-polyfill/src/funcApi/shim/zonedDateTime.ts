@@ -30,6 +30,7 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { diffZonedDateTimes } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -52,7 +53,7 @@ import {
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveZonedEpochSlots, signedDurationFields } from '../../internal/move'
+import { moveZonedEpochSlots } from '../../internal/move'
 import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import {
   IsoDateTimeInterval,
@@ -388,7 +389,7 @@ export function add(
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveZonedEpochSlots(
     slots,
-    signedDurationFields(false, durationSlots),
+    durationSlots,
     options === undefined ? Object.create(null) : options,
   )
   return createShimZonedDateTimeRecord(resSlots)
@@ -403,7 +404,7 @@ export function subtract(
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = moveZonedEpochSlots(
     slots,
-    signedDurationFields(true, durationSlots),
+    negateDurationFields(durationSlots),
     options === undefined ? Object.create(null) : options,
   )
   return createShimZonedDateTimeRecord(resSlots)
