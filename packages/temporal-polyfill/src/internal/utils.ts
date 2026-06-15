@@ -24,11 +24,11 @@ export type Classlike = any
 // Validation
 // -----------------------------------------------------------------------------
 
-export function throwRangeError(message: string): never {
+export function throwRangeError(message?: string): never {
   throw new RangeError(message)
 }
 
-export function throwTypeError(message: string): never {
+export function throwTypeError(message?: string): never {
   throw new TypeError(message)
 }
 

@@ -25,6 +25,7 @@ import {
   isoEpochOriginYear,
   isoMonthsInYear,
 } from '../../internal/isoCalendarMath'
+import { maxMilli } from '../../internal/temporalConstants'
 import { utcTimeZoneId } from '../../internal/timeZoneConfig'
 import { milliInUtcDay } from '../../internal/units'
 import {
@@ -151,7 +152,7 @@ function createIntlFieldCache(
     const intlFields = epochMilliToIntlFields(epochMilli)
     return {
       ...intlFields,
-      month: computeIntlMonthIndex(queryYearData, intlFields.year, epochMilli)!,
+      month: computeIntlMonthIndex(queryYearData, intlFields.year, epochMilli),
     }
   }, WeakMap)
 }
@@ -167,6 +168,7 @@ function createIntlYearDataCache(
   function buildYear(year: number) {
     let epochMilli = isoArgsToEpochDays(year - yearCorrection) * milliInUtcDay
     let intlFields: IntlDateFields
+    let iterations = 0
     const millisReversed: number[] = []
     const monthStringsReversed: string[] = []
 
@@ -207,6 +209,19 @@ function createIntlYearDataCache(
 
       // move to last day of previous month
       epochMilli -= milliInUtcDay
+
+      if (
+        // Safeguard to avoid infinite loop when Intl.DateTimeFormat gives
+        // unexpected results. Some calendars drift farther from the naive
+        // ISO-year guess than ISO or Gregorian do, so give Intl-backed
+        // calendars more room before treating the result as invalid.
+        ++iterations > 500 ||
+        // If any part of a calendar's year underflows epochMilli,
+        // give up
+        epochMilli < -maxMilli
+      ) {
+        throwRangeError()
+      }
     } while ((intlFields = epochMilliToIntlFields(epochMilli)).year >= year)
 
     return {
@@ -524,14 +539,11 @@ function diffIntlMonthSlots(
 
 // -----------------------------------------------------------------------------
 
-/*
-HACK: callers should always assert defined result
-*/
 function computeIntlMonthIndex(
   queryYearData: IntlYearDataCache,
   year: number,
   epochMilli: number,
-): number | undefined {
+): number {
   const { monthEpochMillis } = queryYearData(year)
 
   for (let i = monthEpochMillis.length - 1; i >= 0; i--) {
@@ -539,4 +551,6 @@ function computeIntlMonthIndex(
       return i + 1
     }
   }
+
+  throwRangeError()
 }
