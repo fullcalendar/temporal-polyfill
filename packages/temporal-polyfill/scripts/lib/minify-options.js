@@ -30,10 +30,10 @@ const baseNonMangleCompressOptions = {
   // Adjust inlining
   // See our terser package's fork-info/api-docs.md
   assume_mangled: true, // corrects inlining calculations when mangle:false
-  number_inline_aggressiveness: 3, // sweet spot
-  string_inline_aggressiveness: 4, // sweet spot
+  inline_number_aggressiveness: 3, // sweet spot
+  inline_string_aggressiveness: 4, // sweet spot
   /*
-  string_inline_lte_length: 22 // will inline "fractionalSecondDigits"
+  inline_string_lte_length: 22 // will inline "fractionalSecondDigits"
   */
 }
 
@@ -73,7 +73,7 @@ export function buildTerserReadableIifeOptions() {
     compress: {
       ...baseNonMangleCompressOptions,
 
-      // Only makes sense now that all esm assembled into one big iife
+      // Only makes sense now that all ESM assembled into one big iife
       hoist_funs: true,
     },
     mangle: false,
