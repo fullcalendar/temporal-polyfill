@@ -20,7 +20,7 @@ import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { moveTime, signedDurationFields } from '../../internal/move'
-import { roundPlainTimeToUnit } from '../../internal/round'
+import { computeNanoInc, roundTimeToNano } from '../../internal/round'
 import {
   nanoToTimeAndDay,
   timeFieldsToMilli,
@@ -234,6 +234,7 @@ function roundToUnit(
   record: ShimPlainTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   const [roundingInc, roundingMode] = refineRoundToOptions(
@@ -241,12 +242,11 @@ function roundToUnit(
     options,
   )
   return createShimPlainTimeRecord(
-    roundPlainTimeToUnit(
-      getShimPlainTimeSlots(record),
-      smallestUnit,
-      roundingInc,
+    roundTimeToNano(
+      slots,
+      computeNanoInc(smallestUnit, roundingInc),
       roundingMode,
-    ),
+    )[0],
   )
 }
 

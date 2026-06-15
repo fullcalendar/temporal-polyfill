@@ -57,7 +57,8 @@ import { moveDateTime, signedDurationFields } from '../../internal/move'
 import {
   IsoDateTimeInterval,
   computeDayFloor,
-  roundPlainDateTimeToUnit,
+  computeNanoInc,
+  roundDateTimeToNano,
 } from '../../internal/round'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import {
@@ -646,6 +647,7 @@ function roundToDayTimeUnit(
   record: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimPlainDateTimeRecord {
+  const slots = getShimPlainDateTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   const [roundingInc, roundingMode] = refineRoundToOptions(
@@ -653,11 +655,13 @@ function roundToDayTimeUnit(
     options,
   )
   return createShimPlainDateTimeRecord(
-    roundPlainDateTimeToUnit(
-      getShimPlainDateTimeSlots(record),
-      smallestUnit,
-      roundingInc,
-      roundingMode,
+    createDateTimeSlots(
+      roundDateTimeToNano(
+        slots,
+        computeNanoInc(smallestUnit, roundingInc),
+        roundingMode,
+      ),
+      slots.calendar,
     ),
   )
 }

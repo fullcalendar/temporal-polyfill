@@ -59,7 +59,7 @@ import {
   alignZonedEpoch,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
-  roundZonedDateTimeToUnit,
+  roundZonedEpochSlotsToUnit,
   roundZonedEpochToInterval,
 } from '../../internal/round'
 import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
@@ -571,6 +571,7 @@ function roundToDayTimeUnit(
   record: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   const [roundingInc, roundingMode] = refineRoundToOptions(
@@ -578,12 +579,7 @@ function roundToDayTimeUnit(
     options,
   )
   return createShimZonedDateTimeRecord(
-    roundZonedDateTimeToUnit(
-      getShimZonedDateTimeSlots(record),
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-    ),
+    roundZonedEpochSlotsToUnit(slots, smallestUnit, roundingInc, roundingMode),
   )
 }
 

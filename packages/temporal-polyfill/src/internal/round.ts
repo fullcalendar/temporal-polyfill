@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import {
@@ -22,20 +21,13 @@ import { combineDateAndTime } from './fieldUtils'
 import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
-import { refineRoundingOptions } from './optionsRoundingRefine'
 import {
   MarkerMoveOps,
   isUniformUnit,
   isZonedEpochSlots,
   moveMarkerToEpochNano,
 } from './relativeMath'
-import {
-  EpochNanoFields,
-  ZonedEpochNanoFields,
-  createDateTimeSlots,
-  createEpochNanoSlots,
-  createZonedEpochNanoSlots,
-} from './slots'
+import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import {
@@ -60,77 +52,17 @@ import {
   fabricateNearHalfFraction,
 } from './utils'
 
-// High-Level
+// Pre-Refined Rounding
 // -----------------------------------------------------------------------------
 
-export function roundInstant(
-  instantSlots: EpochNanoFields,
-  options:
-    | Temporal.PluralizeUnit<Temporal.TimeUnit>
-    | Temporal.RoundingOptions<Temporal.TimeUnit>,
-): EpochNanoFields {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
-    options,
-    Unit.Hour,
-    true, // solarMode
-  ) as [TimeUnit, number, RoundingModeEnum]
-  return roundInstantToUnit(
-    instantSlots,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-  )
-}
-
 /*
-Like roundInstant, but accepts an already-refined smallestUnit/inc/mode
-instead of a raw options bag. Lets callers that already hold a separate
-smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
-options object only to have it re-parsed.
+Rounds a ZonedDateTime after public callers have already refined the options
+into smallestUnit/inc/mode. Accept the original slots object because
+zonedEpochSlotsToIso caches by object identity, but return only the canonical
+zoned slot fields.
 */
-export function roundInstantToUnit(
-  instantSlots: EpochNanoFields,
-  smallestUnit: TimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): EpochNanoFields {
-  return createEpochNanoSlots(
-    roundBigNanoToDayOriginInc(
-      instantSlots.epochNanoseconds,
-      computeBigNanoInc(smallestUnit, roundingInc),
-      roundingMode,
-    ),
-  )
-}
-
-/*
-ONLY day & time
-*/
-export function roundZonedDateTime(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl }, // might get returned :(
-  options:
-    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
-    options,
-  ) as [DayTimeUnit, number, RoundingModeEnum]
-  return roundZonedDateTimeToUnit(
-    slots,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-  )
-}
-
-/*
-Like roundZonedDateTime, but accepts an already-refined smallestUnit/inc/mode
-instead of a raw options bag. Lets callers that already hold a separate
-smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
-options object only to have it re-parsed.
-*/
-export function roundZonedDateTimeToUnit(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl }, // might get returned :(
+export function roundZonedEpochSlotsToUnit(
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   smallestUnit: DayTimeUnit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
@@ -139,7 +71,7 @@ export function roundZonedDateTimeToUnit(
   const { timeZone, calendar } = slots
 
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return slots
+    return { epochNanoseconds, timeZone, calendar }
   }
 
   if (smallestUnit === Unit.Day) {
@@ -178,80 +110,7 @@ export function roundZonedDateTimeToUnit(
     )
   }
 
-  return createZonedEpochNanoSlots(epochNanoseconds, timeZone, calendar)
-}
-
-/*
-ONLY day & time
-*/
-export function roundPlainDateTime(
-  slots: CalendarDateTimeFields & { calendar: CalendarImpl },
-  options:
-    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
-    | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
-    options,
-  ) as [DayTimeUnit, number, RoundingModeEnum]
-  return roundPlainDateTimeToUnit(
-    slots,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-  )
-}
-
-/*
-Like roundPlainDateTime, but accepts an already-refined smallestUnit/inc/mode
-instead of a raw options bag. Lets callers that already hold a separate
-smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
-options object only to have it re-parsed.
-*/
-export function roundPlainDateTimeToUnit(
-  slots: CalendarDateTimeFields & { calendar: CalendarImpl },
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  const roundedIsoDateTime = roundDateTimeToNano(
-    slots,
-    computeNanoInc(smallestUnit, roundingInc),
-    roundingMode,
-  )
-  return createDateTimeSlots(roundedIsoDateTime, slots.calendar)
-}
-
-export function roundPlainTime(
-  slots: TimeFields,
-  options:
-    | Temporal.PluralizeUnit<Temporal.TimeUnit>
-    | Temporal.RoundingOptions<Temporal.TimeUnit>,
-): TimeFields {
-  const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
-    options,
-    Unit.Hour,
-  ) as [TimeUnit, number, RoundingModeEnum]
-  return roundPlainTimeToUnit(slots, smallestUnit, roundingInc, roundingMode)
-}
-
-/*
-Like roundPlainTime, but accepts an already-refined smallestUnit/inc/mode
-instead of a raw options bag. Lets callers that already hold a separate
-smallestUnit (e.g. the funcApi roundTo* helpers) skip synthesizing a fake
-options object only to have it re-parsed.
-*/
-export function roundPlainTimeToUnit(
-  slots: TimeFields,
-  smallestUnit: TimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): TimeFields {
-  // result is guaranteed exact TimeFields shape
-  return roundTimeToNano(
-    slots,
-    computeNanoInc(smallestUnit, roundingInc),
-    roundingMode,
-  )[0]
+  return { epochNanoseconds, timeZone, calendar }
 }
 
 // Zoned Utils

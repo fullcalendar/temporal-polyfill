@@ -29,7 +29,10 @@ import {
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveEpochNano, signedDurationFields } from '../../internal/move'
-import { roundInstantToUnit } from '../../internal/round'
+import {
+  computeBigNanoInc,
+  roundBigNanoToDayOriginInc,
+} from '../../internal/round'
 import {
   EpochNanoFields,
   createEpochNanoSlots,
@@ -329,6 +332,7 @@ function roundToUnit(
   record: ShimInstantRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimInstantRecord {
+  const slots = getShimInstantSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   // solarMode: Instant validates increments against a full UTC day.
@@ -338,11 +342,12 @@ function roundToUnit(
     true, // solarMode
   )
   return createShimInstantRecord(
-    roundInstantToUnit(
-      getShimInstantSlots(record),
-      smallestUnit,
-      roundingInc,
-      roundingMode,
+    createEpochNanoSlots(
+      roundBigNanoToDayOriginInc(
+        slots.epochNanoseconds,
+        computeBigNanoInc(smallestUnit, roundingInc),
+        roundingMode,
+      ),
     ),
   )
 }

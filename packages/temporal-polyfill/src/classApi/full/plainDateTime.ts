@@ -44,7 +44,9 @@ import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
 import { moveDateTime, signedDurationFields } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { roundPlainDateTime } from '../../internal/round'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
+import { computeNanoInc, roundDateTimeToNano } from '../../internal/round'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import {
   createDateSlots,
@@ -54,6 +56,7 @@ import {
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
+import { DayTimeUnit } from '../../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   CalendarArg,
@@ -250,8 +253,19 @@ export const PlainDateTime = defineTemporalClass(
         | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
         | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
     ): PlainDateTime {
+      const slots = getPlainDateTimeSlots(this)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
+        options,
+      ) as [DayTimeUnit, number, RoundingModeEnum]
       return createPlainDateTime(
-        roundPlainDateTime(getPlainDateTimeSlots(this), options),
+        createDateTimeSlots(
+          roundDateTimeToNano(
+            slots,
+            computeNanoInc(smallestUnit, roundingInc),
+            roundingMode,
+          ),
+          slots.calendar,
+        ),
       )
     }
 

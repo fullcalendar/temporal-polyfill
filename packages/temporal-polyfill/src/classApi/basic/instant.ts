@@ -20,7 +20,12 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveEpochNano, signedDurationFields } from '../../internal/move'
-import { roundInstant } from '../../internal/round'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
+import {
+  computeBigNanoInc,
+  roundBigNanoToDayOriginInc,
+} from '../../internal/round'
 import {
   EpochNanoFields,
   createEpochNanoSlots,
@@ -29,6 +34,7 @@ import {
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
+import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   Duration,
@@ -141,7 +147,21 @@ export const Instant = defineTemporalClass(
         | Temporal.PluralizeUnit<Temporal.TimeUnit>
         | Temporal.RoundingOptions<Temporal.TimeUnit>,
     ): Instant {
-      return createInstant(roundInstant(getInstantSlots(this), options))
+      const slots = getInstantSlots(this)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
+        options,
+        Unit.Hour,
+        true, // solarMode
+      ) as [TimeUnit, number, RoundingModeEnum]
+      return createInstant(
+        createEpochNanoSlots(
+          roundBigNanoToDayOriginInc(
+            slots.epochNanoseconds,
+            computeBigNanoInc(smallestUnit, roundingInc),
+            roundingMode,
+          ),
+        ),
+      )
     }
 
     equals(otherArg: InstantArg): boolean {

@@ -44,10 +44,12 @@ import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedEpochSlots, signedDurationFields } from '../../internal/move'
 import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
-  roundZonedDateTime,
+  roundZonedEpochSlotsToUnit,
 } from '../../internal/round'
 import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
@@ -64,6 +66,7 @@ import {
   getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
+import { DayTimeUnit } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
   CalendarArg,
@@ -267,8 +270,17 @@ export const ZonedDateTime = defineTemporalClass(
         | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
         | Temporal.RoundingOptions<'day' | Temporal.TimeUnit>,
     ): ZonedDateTime {
+      const slots = getZonedDateTimeSlots(this)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
+        options,
+      ) as [DayTimeUnit, number, RoundingModeEnum]
       return createZonedDateTime(
-        roundZonedDateTime(getZonedDateTimeSlots(this), options),
+        roundZonedEpochSlotsToUnit(
+          slots,
+          smallestUnit,
+          roundingInc,
+          roundingMode,
+        ),
       )
     }
 

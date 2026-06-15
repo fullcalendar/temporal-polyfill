@@ -21,12 +21,15 @@ import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { moveTime, signedDurationFields } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { roundPlainTime } from '../../internal/round'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
+import { computeNanoInc, roundTimeToNano } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   timeFieldsToMilli,
   validateTimeFields,
 } from '../../internal/timeFieldMath'
+import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   Duration,
@@ -150,7 +153,18 @@ export const PlainTime = defineTemporalClass(
         | Temporal.PluralizeUnit<Temporal.TimeUnit>
         | Temporal.RoundingOptions<Temporal.TimeUnit>,
     ): PlainTime {
-      return createPlainTime(roundPlainTime(getPlainTimeSlots(this), options))
+      const slots = getPlainTimeSlots(this)
+      const [smallestUnit, roundingInc, roundingMode] = refineRoundingOptions(
+        options,
+        Unit.Hour,
+      ) as [TimeUnit, number, RoundingModeEnum]
+      return createPlainTime(
+        roundTimeToNano(
+          slots,
+          computeNanoInc(smallestUnit, roundingInc),
+          roundingMode,
+        )[0],
+      )
     }
 
     equals(other: PlainTimeArg): boolean {
