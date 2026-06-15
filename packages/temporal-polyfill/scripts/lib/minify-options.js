@@ -50,7 +50,7 @@ export function buildTerserEsmOptions() {
 
       // Risky, but we have good test coverage
       // We're not returning literal true/false publicly anyway
-      // Only necessary in this first pass, not in iife
+      // Only necessary in this first pass, not in IIFE
       booleans_as_integers: true,
     },
     mangle: false,
@@ -73,7 +73,7 @@ export function buildTerserReadableIifeOptions() {
     compress: {
       ...baseNonMangleCompressOptions,
 
-      // Only makes sense now that all ESM assembled into one big iife
+      // Only makes sense now that all ESM assembled into one big IIFE
       hoist_funs: true,
     },
     mangle: false,
@@ -83,7 +83,7 @@ export function buildTerserReadableIifeOptions() {
       // FYI, we do NOT preserve_annotations. Results in larger size for later
       // final minified version, which only does one Terser pass, probably
       // because it prevents further inlining. Anyway, it's a setting meant for
-      // tree-shaking, which is already complete by the time this readable iife
+      // tree-shaking, which is already complete by the time this readable IIFE
       // file is generated.
     },
   }
