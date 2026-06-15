@@ -182,7 +182,7 @@ export const Instant = defineTemporalClass(
       const slots = getInstantSlots(this)
       const format = new RawDateTimeFormat(
         locales,
-        transformInstantOptions(options, /* allowPartialOverlap = */ false),
+        transformInstantOptions(options),
       )
       return format.format(getEpochMilli(slots))
     }

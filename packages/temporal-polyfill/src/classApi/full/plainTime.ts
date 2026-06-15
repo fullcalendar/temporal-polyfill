@@ -173,9 +173,7 @@ export const PlainTime = defineTemporalClass(
       const slots = getPlainTimeSlots(this)
       const format = new RawDateTimeFormat(
         locales,
-        applyPlainFormatTimeZone(
-          transformTimeOptions(options, /* allowPartialOverlap = */ false),
-        ),
+        applyPlainFormatTimeZone(transformTimeOptions(options)),
       )
       return format.format(timeFieldsToMilli(slots))
     }

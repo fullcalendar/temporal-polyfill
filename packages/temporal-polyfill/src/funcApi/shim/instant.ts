@@ -413,7 +413,7 @@ export function toLocaleString(
   const slots = getShimInstantSlots(record)
   const format = new RawDateTimeFormat(
     locales,
-    transformInstantOptions(options, /* allowPartialOverlap = */ false),
+    transformInstantOptions(options),
   )
   return format.format(getEpochMilli(slots))
 }

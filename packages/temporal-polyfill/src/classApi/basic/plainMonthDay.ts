@@ -143,9 +143,7 @@ export const PlainMonthDay = defineTemporalClass(
       const slots = getPlainMonthDaySlots(this)
       const format = new RawDateTimeFormat(
         locales,
-        applyPlainFormatTimeZone(
-          transformMonthDayOptions(options, /* allowPartialOverlap = */ false),
-        ),
+        applyPlainFormatTimeZone(transformMonthDayOptions(options)),
       )
       checkResolvedCalendarCompatible(format, slots, true)
       return format.format(isoDateToEpochMilli(slots))

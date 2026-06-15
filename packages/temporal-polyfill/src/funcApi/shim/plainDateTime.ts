@@ -456,9 +456,7 @@ export function toLocaleString(
   const slots = getShimPlainDateTimeSlots(record)
   const format = new RawDateTimeFormat(
     locales,
-    applyPlainFormatTimeZone(
-      transformDateTimeOptions(options, /* allowPartialOverlap = */ false),
-    ),
+    applyPlainFormatTimeZone(transformDateTimeOptions(options)),
   )
   checkResolvedCalendarCompatible(format, slots)
   return format.format(isoDateTimeToEpochMilli(slots))

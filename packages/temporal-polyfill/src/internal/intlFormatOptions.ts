@@ -25,7 +25,7 @@ export type OptionsTransformer = (
   // type, as long as at least one compatible field remains after exclusions are
   // stripped. Intl.DateTimeFormat-with-Temporal-input paths allow this;
   // Temporal.prototype.toLocaleString paths do not.
-  allowPartialOverlap: boolean,
+  allowPartialOverlap?: boolean,
 ) => Intl.DateTimeFormatOptions
 
 function analyzeOptions(
@@ -98,7 +98,7 @@ function createOptionsTransformer(
 
   return (
     options: Intl.DateTimeFormatOptions,
-    allowPartialOverlap: boolean,
+    allowPartialOverlap?: boolean,
   ): Intl.DateTimeFormatOptions => {
     const analysis = analyzeOptions(
       options,

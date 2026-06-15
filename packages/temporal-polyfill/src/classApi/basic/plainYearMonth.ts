@@ -256,9 +256,7 @@ export const PlainYearMonth = defineTemporalClass(
       const slots = getPlainYearMonthSlots(this)
       const format = new RawDateTimeFormat(
         locales,
-        applyPlainFormatTimeZone(
-          transformYearMonthOptions(options, /* allowPartialOverlap = */ false),
-        ),
+        applyPlainFormatTimeZone(transformYearMonthOptions(options)),
       )
       checkResolvedCalendarCompatible(format, slots, true)
       return format.format(isoDateToEpochMilli(slots))

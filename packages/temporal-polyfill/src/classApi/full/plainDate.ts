@@ -268,9 +268,7 @@ export const PlainDate = defineTemporalClass(
       const slots = getPlainDateSlots(this)
       const format = new RawDateTimeFormat(
         locales,
-        applyPlainFormatTimeZone(
-          transformDateOptions(options, /* allowPartialOverlap = */ false),
-        ),
+        applyPlainFormatTimeZone(transformDateOptions(options)),
       )
       checkResolvedCalendarCompatible(format, slots)
       return format.format(isoDateToEpochMilli(slots))

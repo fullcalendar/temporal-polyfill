@@ -407,9 +407,7 @@ export function toLocaleString(
   const slots = getShimPlainTimeSlots(record)
   const format = new RawDateTimeFormat(
     locales,
-    applyPlainFormatTimeZone(
-      transformTimeOptions(options, /* allowPartialOverlap = */ false),
-    ),
+    applyPlainFormatTimeZone(transformTimeOptions(options)),
   )
   return format.format(timeFieldsToMilli(slots))
 }

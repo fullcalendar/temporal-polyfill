@@ -501,7 +501,7 @@ export function toLocaleString(
   const format = new RawDateTimeFormat(
     locales,
     applyZonedFormatTimeZone(
-      transformZonedOptions(options, /* allowPartialOverlap = */ false),
+      transformZonedOptions(options),
       getZonedTimeZoneId(slots),
     ),
   )
