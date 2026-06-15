@@ -14,8 +14,12 @@ Sanity checks for output:
   - roundPlainTime
 */
 
+/*
+Used for both the ESM and IIFE phases because once everything is combined in the
+IIFE, imports/exports flatten and there might be more opportunities
+*/
 const baseNonMangleCompressOptions = {
-  passes: 2, // sweet spot. needed for multiple tiers of function inlining
+  passes: 2, // sweet spot. needed for multiple tiers of inlining
   ecma: 2020,
   builtins_ecma: 2020,
   builtins_pure: true,
@@ -26,8 +30,11 @@ const baseNonMangleCompressOptions = {
   // Adjust inlining
   // See our terser package's fork-info/api-docs.md
   assume_mangled: true, // corrects inlining calculations when mangle:false
+  number_inline_aggressiveness: 3, // sweet spot
   string_inline_aggressiveness: 4, // sweet spot
-  // string_inline_lte_length: 22 // will inline "fractionalSecondDigits"
+  /*
+  string_inline_lte_length: 22 // will inline "fractionalSecondDigits"
+  */
 }
 
 const baseFormatOptions = {
