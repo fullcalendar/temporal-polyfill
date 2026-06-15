@@ -6,40 +6,49 @@ import { readFile } from 'fs/promises'
 // cross-chunk nameCache produced invalid ESM.
 
 /*
-Optimizations that are done on the per-ESM-module level
-See below function's explanation about mangling. Applies here too
-TODO: reorganize these comments and more explicitly explain minification flow
-NEW: CRAZINESS with inlining consts, because reduce_vars:true AND evaluate:true
-Happens because string consts within-files are inline a lot I think
-But outputted files look fine. Only strings seem inlined, tho not long error strings
+Sanity checks for output:
+- "Mismatching types for formatting" x3 -- probably should NOT be inlined
+- "Invalid formatting options" x1 -- should ALWAYS be inlined
+- Single-use functions that should ALWAYS be inlined:
+  - totalDuration
+  - roundPlainTime
 */
+
+const baseNonMangleCompressOptions = {
+  passes: 2, // sweet spot. needed for multiple tiers of function inlining
+  ecma: 2020,
+  builtins_ecma: 2020,
+  builtins_pure: true,
+  unsafe_arrows: true, // just converts anon function(){} to ()=>
+  unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
+  join_vars: false, // for readability
+
+  // Adjust inlining
+  // See our terser package's fork-info/api-docs.md
+  assume_mangled: true, // corrects inlining calculations when mangle:false
+  string_inline_aggressiveness: 4, // sweet spot
+  // string_inline_lte_length: 22 // will inline "fractionalSecondDigits"
+}
+
+const baseFormatOptions = {
+  beautify: true,
+  braces: true,
+  indent_level: 2,
+}
+
 export function buildTerserEsmOptions() {
   return {
     compress: {
-      // aggressive settings
-      passes: 2, // esp needed for multiple tiers of function inlining
-      ecma: 2020,
-      builtins_ecma: 2020,
-      builtins_pure: true,
-      unsafe_arrows: true, // just converts anon function(){} to ()=>
-      unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
-      // Risky, but we have good test coverage. Not returning literal true/false publicly anyway
+      ...baseNonMangleCompressOptions,
+
+      // Risky, but we have good test coverage
+      // We're not returning literal true/false publicly anyway
+      // Only necessary in this first pass, not in iife
       booleans_as_integers: true,
-      // We do NOT do hoist_funs. Best to save that when everything is in one big iife
-
-      // // stops the CRAZINESS
-      // reduce_vars: false,
-
-      // for readability
-      join_vars: false,
-      keep_fnames: true,
-      keep_classnames: true,
     },
     mangle: false,
     format: {
-      beautify: true,
-      braces: true,
-      indent_level: 2,
+      ...baseFormatOptions,
 
       // preserve quoted props so prop-mangler plugin knows to not mangle
       // when its own `keepQuoted` setting is enabled
@@ -52,49 +61,17 @@ export function buildTerserEsmOptions() {
   }
 }
 
-/*
-Apply optimizations that would NOT normally happen with a default terser config,
-while still keeping outputted file readable. We need to mangle const names
-because otherwise they are overly-aggresively inlined due to their name length
-being not much longer than their impl length. We must do mangle:true, but undo
-function/class mangling.
-
-Also, hoist_funs only works well when const names mangled during this pass
-because after being hosted, if a function references a const which is defined
-after, Terser will not inline it.
-
-Sanity checks for output:
-- "Mismatching types for formatting" x3 -- probably should NOT be inlined
-- "Invalid formatting options" x1 -- should ALWAYS be inlined
-- Single-use functions that should ALWAYS be inlined:
-  - totalDuration
-  - roundPlainTime
-*/
 export function buildTerserReadableIifeOptions() {
   return {
-    // keep function/class names for readability
-    // applies to both compress and mangle
-    keep_fnames: true,
-    keep_classnames: true,
-
     compress: {
-      // aggressive settings
-      passes: 2, // esp needed for multiple tiers of function inlining
-      ecma: 2020,
-      builtins_ecma: 2020,
-      builtins_pure: true,
-      unsafe_arrows: true, // just converts anon function(){} to ()=>
-      unsafe_methods: true, // just converts { m: function(){} } to { m(){} }
-      hoist_funs: true, // the main reason we're doing this
+      ...baseNonMangleCompressOptions,
 
-      // for readability
-      join_vars: false,
+      // Only makes sense now that all esm assembled into one big iife
+      hoist_funs: true,
     },
-    mangle: true, // except function/class
+    mangle: false,
     format: {
-      beautify: true,
-      braces: true,
-      indent_level: 2,
+      ...baseFormatOptions,
 
       // FYI, we do NOT preserve_annotations. Results in larger size for later
       // final minified version, which only does one Terser pass, probably
