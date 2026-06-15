@@ -84,12 +84,6 @@ export function getDefinedProp(props: any, propName: string): any {
 // Cache
 // -----------------------------------------------------------------------------
 
-// interface MapInterface<K, V> {
-//   has(key: K): boolean
-//   get(key: K): V,
-//   set(key: K, val: V): void
-// }
-
 export function memoize<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
   MapClass: { new (): any } = Map, // TODO: better type
@@ -195,21 +189,6 @@ export function pluckProps<P>(
   return dest
 }
 
-export function excludePropsByName<P, K extends keyof P>(
-  propNames: Set<string>,
-  props: P,
-): Omit<P, K> {
-  const filteredProps = {} as any
-
-  for (const propName in props) {
-    if (!propNames.has(propName)) {
-      filteredProps[propName] = props[propName]
-    }
-  }
-
-  return filteredProps
-}
-
 export function allPropsEqual(
   propNames: string[],
   props0: any,
@@ -220,20 +199,6 @@ export function allPropsEqual(
       return false
     }
   }
-  return true
-}
-
-export function areNumberArraysEqual(a: number[], b: number[]): boolean {
-  if (a.length !== b.length) {
-    return false
-  }
-
-  for (const [i, val] of a.entries()) {
-    if (val !== b[i]) {
-      return false
-    }
-  }
-
   return true
 }
 
