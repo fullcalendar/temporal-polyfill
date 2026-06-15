@@ -39,9 +39,9 @@ export function createDateTimeSlots(
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
   // Internal ISO calendar slots are represented by an omitted/undefined calendar.
   return pluckProps(
-    calendarDateFieldNamesAsc,
+    timeFieldNamesAsc,
     isoDateTime,
-    pluckProps(timeFieldNamesAsc, isoDateTime, { calendar }),
+    createDateSlots(isoDateTime, calendar),
   )
 }
 
