@@ -45,7 +45,7 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
-import { movePlainYearMonth } from '../../internal/move'
+import { moveYearMonth } from '../../internal/move'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots, createDurationSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
@@ -223,7 +223,10 @@ export function add(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = movePlainYearMonth(false, slots, durationSlots, options)
+  const resSlots = createDateSlots(
+    moveYearMonth(false, slots.calendar, slots, durationSlots, options),
+    slots.calendar,
+  )
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -233,16 +236,20 @@ export function addYears(
   options?: Temporal.OverflowOptions,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const resSlots = movePlainYearMonth(
-    false,
-    slots,
-    createDurationSlots(
-      validateDurationFields({
-        ...durationFieldDefaults,
-        years: toStrictInteger(years),
-      }),
+  const resSlots = createDateSlots(
+    moveYearMonth(
+      false,
+      slots.calendar,
+      slots,
+      createDurationSlots(
+        validateDurationFields({
+          ...durationFieldDefaults,
+          years: toStrictInteger(years),
+        }),
+      ),
+      options,
     ),
-    options,
+    slots.calendar,
   )
   return createShimPlainYearMonthRecord(resSlots)
 }
@@ -253,16 +260,20 @@ export function addMonths(
   options?: Temporal.OverflowOptions,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const resSlots = movePlainYearMonth(
-    false,
-    slots,
-    createDurationSlots(
-      validateDurationFields({
-        ...durationFieldDefaults,
-        months: toStrictInteger(months),
-      }),
+  const resSlots = createDateSlots(
+    moveYearMonth(
+      false,
+      slots.calendar,
+      slots,
+      createDurationSlots(
+        validateDurationFields({
+          ...durationFieldDefaults,
+          months: toStrictInteger(months),
+        }),
+      ),
+      options,
     ),
-    options,
+    slots.calendar,
   )
   return createShimPlainYearMonthRecord(resSlots)
 }
@@ -274,7 +285,10 @@ export function subtract(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = movePlainYearMonth(true, slots, durationSlots, options)
+  const resSlots = createDateSlots(
+    moveYearMonth(true, slots.calendar, slots, durationSlots, options),
+    slots.calendar,
+  )
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -344,6 +358,7 @@ export function roundToYear(
   const [, roundingMode] = refineRoundToOptions(Unit.Year, options)
   const roundedIsoDateTime = roundDateToInterval(
     computeYearInterval,
+    slots.calendar,
     slots,
     roundingMode,
   )
@@ -357,7 +372,7 @@ export function startOfYear(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   return createShimPlainYearMonthRecord(
-    createDateSlots(computeYearFloor(slots), slots.calendar),
+    createDateSlots(computeYearFloor(slots.calendar, slots), slots.calendar),
   )
 }
 
@@ -367,16 +382,19 @@ export function endOfYear(
   record: ShimPlainYearMonthRecord,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const yearCeilSlots = createDateSlots(computeYearCeil(slots), slots.calendar)
   return createShimPlainYearMonthRecord(
     // move back a month
-    movePlainYearMonth(
-      true,
-      yearCeilSlots,
-      createDurationSlots({
-        ...durationFieldDefaults,
-        months: 1,
-      }),
+    createDateSlots(
+      moveYearMonth(
+        true,
+        slots.calendar,
+        computeYearCeil(slots.calendar, slots),
+        createDurationSlots({
+          ...durationFieldDefaults,
+          months: 1,
+        }),
+      ),
+      slots.calendar,
     ),
   )
 }

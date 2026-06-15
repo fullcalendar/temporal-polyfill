@@ -13,7 +13,11 @@ import {
   TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
-import { moveDate, moveDateTime, moveZonedEpochs } from '../../internal/move'
+import {
+  moveDate,
+  moveDateTime,
+  moveZonedEpochSlots,
+} from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
   MarkerToEpochNano,
@@ -105,7 +109,7 @@ function diffZonedLargeUnits(
   return diffDateUnits(
     getEpochNano as MarkerToEpochNano,
     bindArgs(prepareZonedEpochDiff, timeZone) as unknown as MarkersToIsoFields,
-    bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
+    moveZonedEpochSlots as MoveMarker,
     (f0: CalendarDateFields, f1: CalendarDateFields) =>
       diffCalendarDates(calendar, f0, f1, unit),
     unit,
@@ -277,12 +281,12 @@ function diffPlainDayLikeUnit(
 // Time Units
 // -----------------------------------------------------------------------------
 
-function diffEpochNanoTimeUnit(
-  markerToEpochNano: MarkerToEpochNano,
+function diffEpochNanoTimeUnit<M>(
+  markerToEpochNano: MarkerToEpochNano<M>,
   unit: TimeUnit,
   nanoInUnit: number,
-  record0: MovableMarker,
-  record1: MovableMarker,
+  record0: M,
+  record1: M,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   return bigNanoToRoundedTimeUnit(

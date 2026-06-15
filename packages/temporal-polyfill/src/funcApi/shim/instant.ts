@@ -28,7 +28,7 @@ import {
   formatInstantIsoAuto,
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
-import { moveInstant } from '../../internal/move'
+import { moveEpochNano, signedDurationFields } from '../../internal/move'
 import { roundInstantToUnit } from '../../internal/round'
 import {
   EpochNanoFields,
@@ -139,7 +139,12 @@ export function add(
 ): ShimInstantRecord {
   const slots = getShimInstantSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveInstant(false, slots, durationSlots)
+  const resSlots = createEpochNanoSlots(
+    moveEpochNano(
+      slots.epochNanoseconds,
+      signedDurationFields(false, durationSlots),
+    ),
+  )
   return createShimInstantRecord(resSlots)
 }
 
@@ -149,7 +154,12 @@ export function subtract(
 ): ShimInstantRecord {
   const slots = getShimInstantSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveInstant(true, slots, durationSlots)
+  const resSlots = createEpochNanoSlots(
+    moveEpochNano(
+      slots.epochNanoseconds,
+      signedDurationFields(true, durationSlots),
+    ),
+  )
   return createShimInstantRecord(resSlots)
 }
 

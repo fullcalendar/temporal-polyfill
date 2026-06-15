@@ -24,7 +24,7 @@ import {
   validateIsoDateFields,
   validateIsoDateTimeFields,
 } from './isoCalendarMath'
-import { moveToDayOfMonthUnsafe } from './move'
+import { moveToStartOfMonth } from './move'
 import {
   offsetHasSeconds,
   parseOffsetNano,
@@ -196,12 +196,9 @@ export function parsePlainYearMonth(
     resolveCalendar,
   )
   const { calendar } = dateSlots
-  const moveIsoSlots = moveToDayOfMonthUnsafe(
-    (isoDate) => computeCalendarDateFields(calendar, isoDate).day,
-    dateSlots,
-  )
+  const startOfMonthFields = moveToStartOfMonth(calendar, dateSlots)
 
-  return createDateSlots(moveIsoSlots, calendar)
+  return createDateSlots(startOfMonthFields, calendar)
 }
 
 function requireIsoCalendar(organized: { calendarId: string }): void {

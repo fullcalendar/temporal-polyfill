@@ -42,7 +42,7 @@ import { validateIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { mergePlainDateTimeFields } from '../../internal/merge'
-import { movePlainDateTime } from '../../internal/move'
+import { moveDateTime, signedDurationFields } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainDateTime } from '../../internal/round'
 import { getCommonCalendar } from '../../internal/slotUtils'
@@ -181,12 +181,16 @@ export const PlainDateTime = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDateTime {
+      const slots = getPlainDateTimeSlots(this)
       return createPlainDateTime(
-        movePlainDateTime(
-          false,
-          getPlainDateTimeSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateTimeSlots(
+          moveDateTime(
+            slots.calendar,
+            slots,
+            signedDurationFields(false, toDurationSlots(durationArg)),
+            options === undefined ? Object.create(null) : options,
+          ),
+          slots.calendar,
         ),
       )
     }
@@ -195,12 +199,16 @@ export const PlainDateTime = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDateTime {
+      const slots = getPlainDateTimeSlots(this)
       return createPlainDateTime(
-        movePlainDateTime(
-          true,
-          getPlainDateTimeSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateTimeSlots(
+          moveDateTime(
+            slots.calendar,
+            slots,
+            signedDurationFields(true, toDurationSlots(durationArg)),
+            options === undefined ? Object.create(null) : options,
+          ),
+          slots.calendar,
         ),
       )
     }

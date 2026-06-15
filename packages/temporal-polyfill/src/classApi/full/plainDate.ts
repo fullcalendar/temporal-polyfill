@@ -37,7 +37,7 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
-import { movePlainDate } from '../../internal/move'
+import { moveDate, signedDurationFields } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
@@ -144,12 +144,16 @@ export const PlainDate = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDate {
+      const slots = getPlainDateSlots(this)
       return createPlainDate(
-        movePlainDate(
-          false,
-          getPlainDateSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateSlots(
+          moveDate(
+            slots.calendar,
+            slots,
+            signedDurationFields(false, toDurationSlots(durationArg)),
+            options,
+          ),
+          slots.calendar,
         ),
       )
     }
@@ -158,12 +162,16 @@ export const PlainDate = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDate {
+      const slots = getPlainDateSlots(this)
       return createPlainDate(
-        movePlainDate(
-          true,
-          getPlainDateSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateSlots(
+          moveDate(
+            slots.calendar,
+            slots,
+            signedDurationFields(true, toDurationSlots(durationArg)),
+            options,
+          ),
+          slots.calendar,
         ),
       )
     }

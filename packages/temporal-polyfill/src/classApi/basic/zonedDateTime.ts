@@ -42,7 +42,7 @@ import {
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveZonedDateTime } from '../../internal/move'
+import { moveZonedEpochSlots, signedDurationFields } from '../../internal/move'
 import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
 import {
   computeZonedHoursInDay,
@@ -202,12 +202,12 @@ export const ZonedDateTime = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): ZonedDateTime {
+      const slots = getZonedDateTimeSlots(this)
       return createZonedDateTime(
-        moveZonedDateTime(
-          false,
-          getZonedDateTimeSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        moveZonedEpochSlots(
+          slots,
+          signedDurationFields(false, toDurationSlots(durationArg)),
+          options === undefined ? Object.create(null) : options,
         ),
       )
     }
@@ -216,12 +216,12 @@ export const ZonedDateTime = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): ZonedDateTime {
+      const slots = getZonedDateTimeSlots(this)
       return createZonedDateTime(
-        moveZonedDateTime(
-          true,
-          getZonedDateTimeSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        moveZonedEpochSlots(
+          slots,
+          signedDurationFields(true, toDurationSlots(durationArg)),
+          options === undefined ? Object.create(null) : options,
         ),
       )
     }
@@ -370,7 +370,8 @@ export function getZonedDateTimeSlots(obj: unknown): ZonedDateTimeSlots {
 }
 
 function getZonedDateTimeIsoSlots(obj: unknown) {
-  return zonedEpochSlotsToIso(getZonedDateTimeSlots(obj))
+  const slots = getZonedDateTimeSlots(obj)
+  return { ...zonedEpochSlotsToIso(slots), calendar: slots.calendar }
 }
 
 export function getZonedDateTimeSlotsIfPresent(

@@ -22,7 +22,6 @@ export type PossibleInstantsOp = (
 ) => bigint[]
 
 export type FixedIsoZonedFields = CalendarDateTimeFields & {
-  calendar: CalendarImpl
   offsetNanoseconds: number
 }
 
@@ -44,16 +43,20 @@ export function getTimeZoneTransitionEpochNanoseconds(
 // ISO <-> Epoch conversions (on passed-in instances)
 // -----------------------------------------------------------------------------
 
+/*
+This is WeakMap-memoized by zoned slots object identity. Callers that already
+have a stable zoned slots object should pass that exact object, not an
+equivalent freshly-created bag, so repeated offset/ISO conversions hit cache.
+*/
 export const zonedEpochSlotsToIso = memoize(
   _zonedEpochSlotsToIso,
   WeakMap,
 ) as typeof _zonedEpochSlotsToIso
 
 function _zonedEpochSlotsToIso(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  timeZone: TimeZone = slots.timeZone,
+  slots: ZonedEpochNanoFields,
 ): FixedIsoZonedFields {
-  const { epochNanoseconds } = slots
+  const { epochNanoseconds, timeZone } = slots
 
   const offsetNanoseconds = timeZone.getOffsetNanosecondsFor(epochNanoseconds)
   const isoDateTime = epochNanoToIsoDateTime(
@@ -61,7 +64,6 @@ function _zonedEpochSlotsToIso(
   )
 
   return {
-    calendar: slots.calendar,
     ...isoDateTime,
     offsetNanoseconds,
   }

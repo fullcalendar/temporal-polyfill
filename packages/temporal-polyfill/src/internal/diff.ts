@@ -30,8 +30,8 @@ import {
   moveByDays,
   moveDate,
   moveDateTime,
-  moveToDayOfMonthUnsafe,
-  moveZonedEpochs,
+  moveToStartOfMonth,
+  moveZonedEpochSlots,
 } from './move'
 import { Overflow, RoundingModeEnum } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
@@ -152,7 +152,7 @@ export function diffZonedDateTimes(
       createMarkerMoveOps(
         slots0,
         getEpochNano as MarkerToEpochNano,
-        bindArgs(moveZonedEpochs, timeZone, calendar) as MoveMarker,
+        moveZonedEpochSlots as MoveMarker,
       ),
     )
   }
@@ -250,11 +250,8 @@ export function diffPlainYearMonth(
 ): DurationFields & { sign: NumberSign } {
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
-  const getDay = (isoDate: CalendarDateFields) =>
-    computeCalendarDateFields(calendar, isoDate).day
-
-  const firstOfMonth0 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots0)
-  const firstOfMonth1 = moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots1)
+  const firstOfMonth0 = moveToStartOfMonth(calendar, plainYearMonthSlots0)
+  const firstOfMonth1 = moveToStartOfMonth(calendar, plainYearMonthSlots1)
 
   // Short-circuit if exactly the same, before the in-bounds check below.
   if (!compareIsoDate(firstOfMonth0, firstOfMonth1)) {
@@ -386,8 +383,8 @@ export function diffZonedEpochsExact(
   // Same-date zoned diffs have no calendar date part. Keeping them as instant
   // diffs also avoids re-resolving an ambiguous repeated wall-clock time while
   // deriving the intermediate marker.
-  const isoDateTime0 = zonedEpochSlotsToIso(slots0, timeZone)
-  const isoDateTime1 = zonedEpochSlotsToIso(slots1, timeZone)
+  const isoDateTime0 = zonedEpochSlotsToIso(slots0)
+  const isoDateTime1 = zonedEpochSlotsToIso(slots1)
   if (!compareIsoDate(isoDateTime0, isoDateTime1)) {
     return {
       ...durationFieldDefaults,
@@ -694,8 +691,8 @@ export function prepareZonedEpochDiff(
   slots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   sign: NumberSign, // guaranteed non-zero
 ): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
-  const startIsoDate = zonedEpochSlotsToIso(slots0, timeZone)
-  const endIsoDate = zonedEpochSlotsToIso(slots1, timeZone)
+  const startIsoDate = zonedEpochSlotsToIso(slots0)
+  const endIsoDate = zonedEpochSlotsToIso(slots1)
   const endEpochNano = slots1.epochNanoseconds
   let dayCorrection = 0
 

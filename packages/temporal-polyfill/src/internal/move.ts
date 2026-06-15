@@ -29,20 +29,13 @@ import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths } from './isoCalendarMath'
 import { refineOverflowOptions } from './optionsFieldRefine'
 import { Overflow } from './optionsModel'
-import {
-  EpochNanoFields,
-  ZonedEpochNanoFields,
-  createDateSlots,
-  createDateTimeSlots,
-  createEpochNanoSlots,
-} from './slots'
+import { ZonedEpochNanoFields } from './slots'
 import {
   checkEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeInBounds,
 } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
-import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
 import { NumberSign, clampEntity, throwRangeError } from './utils'
@@ -50,79 +43,23 @@ import { NumberSign, clampEntity, throwRangeError } from './utils'
 // High-Level
 // -----------------------------------------------------------------------------
 
-export function moveInstant(
+export function signedDurationFields(
   doSubtract: boolean,
-  instantSlots: EpochNanoFields,
-  durationSlots: DurationFields,
-): EpochNanoFields {
-  return createEpochNanoSlots(
-    moveEpochNano(
-      instantSlots.epochNanoseconds,
-      signedDurationFields(doSubtract, durationSlots),
-    ),
-  )
+  durationFields: DurationFields,
+): DurationFields {
+  return doSubtract ? negateDurationFields(durationFields) : durationFields
 }
 
-export function moveZonedDateTime(
-  doSubtract: boolean,
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  durationSlots: DurationFields,
-  options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  return {
-    ...zonedDateTimeSlots, // retain timeZone/calendar, order
-    ...moveZonedEpochs(
-      zonedDateTimeSlots.timeZone,
-      zonedDateTimeSlots.calendar,
-      zonedDateTimeSlots,
-      signedDurationFields(doSubtract, durationSlots),
-      options,
-    ),
-  }
-}
+// Low-Level
+// -----------------------------------------------------------------------------
 
-export function movePlainDateTime(
+export function moveYearMonth(
   doSubtract: boolean,
-  plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
-  durationSlots: DurationFields,
-  options: Temporal.OverflowOptions = Object.create(null), // so internal Calendar knows options *could* have been passed in
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  const { calendar } = plainDateTimeSlots
-  return createDateTimeSlots(
-    moveDateTime(
-      calendar,
-      plainDateTimeSlots,
-      signedDurationFields(doSubtract, durationSlots),
-      options,
-    ),
-    calendar,
-  )
-}
-
-export function movePlainDate(
-  doSubtract: boolean,
-  plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
-  durationSlots: DurationFields,
-  options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const { calendar } = plainDateSlots
-  return createDateSlots(
-    moveDate(
-      calendar,
-      plainDateSlots,
-      signedDurationFields(doSubtract, durationSlots),
-      options,
-    ),
-    calendar,
-  )
-}
-
-export function movePlainYearMonth(
-  doSubtract: boolean,
-  plainYearMonthSlots: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDateFields: CalendarDateFields,
   durationSlots: DurationFields & { sign: NumberSign },
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
+): CalendarDateFields {
   /*
   PlainYearMonth has one awkward ordering rule: overflow must be read before
   rejecting units below months. Date arithmetic normally reads overflow inside
@@ -135,48 +72,22 @@ export function movePlainYearMonth(
     throwRangeError(errorMessages.invalidSmallUnits)
   }
 
-  const { calendar } = plainYearMonthSlots
-  const getDay = (isoDate: CalendarDateFields) =>
-    computeCalendarDateFields(calendar, isoDate).day
-
   // The first-of-month must be representable, this check in-bounds
-  const isoDateFields: CalendarDateFields = checkIsoDateInBounds(
-    moveToDayOfMonthUnsafe(getDay, plainYearMonthSlots),
+  const startOfMonthFields: CalendarDateFields = checkIsoDateInBounds(
+    moveToStartOfMonth(calendar, isoDateFields),
   )
 
   const movedIsoDateFields = dateAddWithOverflow(
     calendar,
-    isoDateFields,
+    startOfMonthFields,
     signedDurationFields(doSubtract, durationSlots),
     overflow,
   )
 
-  return createDateSlots(
-    moveToDayOfMonthUnsafe(getDay, movedIsoDateFields),
-    calendar,
-  )
+  return moveToStartOfMonth(calendar, movedIsoDateFields)
 }
 
-export function movePlainTime(
-  doSubtract: boolean,
-  slots: TimeFields,
-  durationSlots: DurationFields,
-): TimeFields {
-  // result is guaranteed exact TimeFields shape
-  return moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0]
-}
-
-function signedDurationFields(
-  doSubtract: boolean,
-  durationFields: DurationFields,
-): DurationFields {
-  return doSubtract ? negateDurationFields(durationFields) : durationFields
-}
-
-// Low-Level
-// -----------------------------------------------------------------------------
-
-function moveEpochNano(
+export function moveEpochNano(
   epochNano: bigint,
   durationFields: DurationFields,
 ): bigint {
@@ -186,24 +97,23 @@ function moveEpochNano(
 }
 
 /*
-timeZone must be the same object carried by the zoned slots. Passing it
-through keeps repeated offset/transition work on one memoized implementation.
+Pass the original zoned slots object when possible so zonedEpochSlotsToIso's
+WeakMap memoization can reuse repeated offset/ISO conversions.
 */
-export function moveZonedEpochs(
-  timeZone: TimeZone,
-  calendar: CalendarImpl,
+export function moveZonedEpochSlots(
   slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
-): EpochNanoFields {
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
+  const { calendar, epochNanoseconds: epochNano, timeZone } = slots
   const timeOnlyNano = durationTimeToBigNano(durationFields)
-  let epochNano = slots.epochNanoseconds
+  let movedEpochNano = epochNano
 
   if (!durationHasDateParts(durationFields)) {
-    epochNano += timeOnlyNano
+    movedEpochNano += timeOnlyNano
     refineOverflowOptions(options) // for validation only
   } else {
-    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+    const isoDateTime = zonedEpochSlotsToIso(slots)
     const movedIsoDateFields = moveDate(
       calendar,
       isoDateTime,
@@ -213,7 +123,7 @@ export function moveZonedEpochs(
       },
       options,
     )
-    epochNano =
+    movedEpochNano =
       getSingleInstantFor(
         timeZone,
         combineDateAndTime(movedIsoDateFields, isoDateTime),
@@ -221,7 +131,8 @@ export function moveZonedEpochs(
   }
 
   return {
-    epochNanoseconds: checkEpochNanoInBounds(epochNano),
+    ...slots,
+    epochNanoseconds: checkEpochNanoInBounds(movedEpochNano),
   }
 }
 
@@ -287,18 +198,15 @@ export function moveDate(
   return isoDateFields
 }
 
-/*
-Callers should ensure in-bounds
-*/
-export function moveToDayOfMonthUnsafe<F extends CalendarDateFields>(
-  getDay: (isoDate: CalendarDateFields) => number,
-  isoDate: F,
-  dayOfMonth = 1,
+export function moveToStartOfMonth(
+  calendar: CalendarImpl,
+  isoDateFields: CalendarDateFields,
 ): CalendarDateFields {
-  return moveByDays(isoDate, dayOfMonth - getDay(isoDate))
+  const dayOfMonth = computeCalendarDateFields(calendar, isoDateFields).day
+  return moveByDays(isoDateFields, 1 - dayOfMonth)
 }
 
-function moveTime(
+export function moveTime(
   timeFields: TimeFields,
   durationFields: DurationFields,
 ): [TimeFields, number] {

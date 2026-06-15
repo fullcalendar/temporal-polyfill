@@ -19,7 +19,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
-import { movePlainTime } from '../../internal/move'
+import { moveTime, signedDurationFields } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { roundPlainTime } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
@@ -92,22 +92,24 @@ export const PlainTime = defineTemporalClass(
     }
 
     add(durationArg: DurationArg): PlainTime {
+      const slots = getPlainTimeSlots(this)
       return createPlainTime(
-        movePlainTime(
-          false,
-          getPlainTimeSlots(this),
-          toDurationSlots(durationArg),
-        ),
+        // result is guaranteed exact TimeFields shape
+        moveTime(
+          slots,
+          signedDurationFields(false, toDurationSlots(durationArg)),
+        )[0],
       )
     }
 
     subtract(durationArg: DurationArg): PlainTime {
+      const slots = getPlainTimeSlots(this)
       return createPlainTime(
-        movePlainTime(
-          true,
-          getPlainTimeSlots(this),
-          toDurationSlots(durationArg),
-        ),
+        // result is guaranteed exact TimeFields shape
+        moveTime(
+          slots,
+          signedDurationFields(true, toDurationSlots(durationArg)),
+        )[0],
       )
     }
 

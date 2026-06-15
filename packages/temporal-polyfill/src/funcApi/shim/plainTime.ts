@@ -19,7 +19,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
-import { movePlainTime } from '../../internal/move'
+import { moveTime, signedDurationFields } from '../../internal/move'
 import { roundPlainTimeToUnit } from '../../internal/round'
 import {
   nanoToTimeAndDay,
@@ -136,7 +136,11 @@ export function add(
 ): ShimPlainTimeRecord {
   const slots = getShimPlainTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = movePlainTime(false, slots, durationSlots)
+  // result is guaranteed exact TimeFields shape
+  const resSlots = moveTime(
+    slots,
+    signedDurationFields(false, durationSlots),
+  )[0]
   return createShimPlainTimeRecord(resSlots)
 }
 
@@ -146,7 +150,8 @@ export function subtract(
 ): ShimPlainTimeRecord {
   const slots = getShimPlainTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = movePlainTime(true, slots, durationSlots)
+  // result is guaranteed exact TimeFields shape
+  const resSlots = moveTime(slots, signedDurationFields(true, durationSlots))[0]
   return createShimPlainTimeRecord(resSlots)
 }
 

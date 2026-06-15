@@ -18,7 +18,7 @@ export function zonedDateTimeWithPlainTime(
   plainTimeFields: TimeFields | undefined,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { timeZone } = zonedDateTimeSlots
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots, timeZone)
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
   const { offsetNanoseconds } = isoDateTime
 
   const time = plainTimeFields || timeFieldDefaults

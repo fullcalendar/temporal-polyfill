@@ -52,7 +52,7 @@ import {
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveZonedDateTime } from '../../internal/move'
+import { moveZonedEpochSlots, signedDurationFields } from '../../internal/move'
 import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import {
   IsoDateTimeInterval,
@@ -204,8 +204,11 @@ export function createShimZonedDateTimeRecord(
   return instance
 }
 
-function getShimZonedDateTimeIsoSlots(record: unknown) {
-  return zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+function getShimZonedDateTimeIsoSlots(
+  record: unknown,
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
+  const slots = getShimZonedDateTimeSlots(record)
+  return { ...zonedEpochSlotsToIso(slots), calendar: slots.calendar }
 }
 
 export function create(
@@ -325,39 +328,39 @@ export function daysInWeek(record: ShimZonedDateTimeRecord): number {
 export function weekOfYear(
   record: ShimZonedDateTimeRecord,
 ): number | undefined {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarWeekOfYear(slots.calendar, slots)
 }
 
 export function yearOfWeek(
   record: ShimZonedDateTimeRecord,
 ): number | undefined {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarYearOfWeek(slots.calendar, slots)
 }
 
 export function dayOfYear(record: ShimZonedDateTimeRecord): number {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarDayOfYear(slots.calendar, slots)
 }
 
 export function daysInMonth(record: ShimZonedDateTimeRecord): number {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarDaysInMonth(slots.calendar, slots)
 }
 
 export function daysInYear(record: ShimZonedDateTimeRecord): number {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarDaysInYear(slots.calendar, slots)
 }
 
 export function monthsInYear(record: ShimZonedDateTimeRecord): number {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarMonthsInYear(slots.calendar, slots)
 }
 
 export function inLeapYear(record: ShimZonedDateTimeRecord): boolean {
-  const slots = zonedEpochSlotsToIso(getShimZonedDateTimeSlots(record))
+  const slots = getShimZonedDateTimeIsoSlots(record)
   return computeCalendarInLeapYear(slots.calendar, slots)
 }
 
@@ -383,7 +386,11 @@ export function add(
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveZonedDateTime(false, slots, durationSlots, options)
+  const resSlots = moveZonedEpochSlots(
+    slots,
+    signedDurationFields(false, durationSlots),
+    options === undefined ? Object.create(null) : options,
+  )
   return createShimZonedDateTimeRecord(resSlots)
 }
 
@@ -394,7 +401,11 @@ export function subtract(
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveZonedDateTime(true, slots, durationSlots, options)
+  const resSlots = moveZonedEpochSlots(
+    slots,
+    signedDurationFields(true, durationSlots),
+    options === undefined ? Object.create(null) : options,
+  )
   return createShimZonedDateTimeRecord(resSlots)
 }
 
@@ -784,7 +795,10 @@ function moveByTimeUnit(
 
 function roundToInterval(
   unit: Unit,
-  computeInterval: (slots: any) => IsoDateTimeInterval,
+  computeInterval: (
+    calendar: CalendarImpl,
+    slots: CalendarDateTimeFields,
+  ) => IsoDateTimeInterval,
   record: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimZonedDateTimeRecord {
@@ -792,7 +806,6 @@ function roundToInterval(
   const [, roundingMode] = refineRoundToOptions(unit, options)
   const epochNanoseconds = roundZonedEpochToInterval(
     computeInterval,
-    slots.timeZone,
     slots,
     roundingMode,
   )
@@ -803,14 +816,16 @@ function roundToInterval(
 }
 
 function aligned(
-  computeAlignment: (record: any) => CalendarDateTimeFields,
+  computeAlignment: (
+    calendar: CalendarImpl,
+    record: CalendarDateTimeFields,
+  ) => CalendarDateTimeFields,
   nanoDelta = 0,
 ): (record: ShimZonedDateTimeRecord) => ShimZonedDateTimeRecord {
   return (record) => {
     const slots = getShimZonedDateTimeSlots(record)
     const epochNanoseconds =
-      alignZonedEpoch(computeAlignment, slots.timeZone, slots) +
-      BigInt(nanoDelta)
+      alignZonedEpoch(computeAlignment, slots) + BigInt(nanoDelta)
     return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
@@ -825,7 +840,7 @@ function alignedZonedTime(
   return (record) => {
     const slots = getShimZonedDateTimeSlots(record)
     const { timeZone } = slots
-    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
+    const isoDateTime = zonedEpochSlotsToIso(slots)
 
     // Sub-day alignment is wall-clock alignment, not exact-time subtraction.
     // Transitions can happen inside an hour/minute/etc, so subtracting the
@@ -847,6 +862,7 @@ function alignedZonedTime(
         EpochDisambig.Compat,
         true,
       ) + BigInt(nanoDelta)
+
     return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
@@ -855,19 +871,25 @@ function alignedZonedTime(
 }
 
 function zonedTransform<A extends any[]>(
-  transformIsoDate: (isoDate: any, ...args: A) => CalendarDateFields,
+  transformIsoDate: (
+    calendar: CalendarImpl,
+    isoDate: CalendarDateFields,
+    ...args: A
+  ) => CalendarDateFields,
 ): (record: ShimZonedDateTimeRecord, ...args: A) => ShimZonedDateTimeRecord {
   return (record, ...args) => {
     const slots = getShimZonedDateTimeSlots(record)
-    const { timeZone } = slots
-    const isoDateTime = zonedEpochSlotsToIso(slots, timeZone)
-    const isoDate = transformIsoDate(isoDateTime, ...args)
+    const { calendar, timeZone } = slots
+    const isoDateTime = zonedEpochSlotsToIso(slots)
+    const isoDate = transformIsoDate(calendar, isoDateTime, ...args)
+
     // These transforms are date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
     const epochNanoseconds = getSingleInstantFor(
       timeZone,
       combineDateAndTime(isoDate, isoDateTime),
     )
+
     return createShimZonedDateTimeRecord({
       ...slots,
       epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),

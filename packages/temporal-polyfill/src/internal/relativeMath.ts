@@ -5,8 +5,8 @@ import { isoDateTimeToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { moveDateTime, moveZonedEpochs } from './move'
-import { EpochNanoFields, ZonedEpochNanoFields, getEpochNano } from './slots'
+import { moveDateTime, moveZonedEpochSlots } from './move'
+import { ZonedEpochNanoFields, getEpochNano } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
 import { Callable, bindArgs } from './utils'
@@ -19,7 +19,7 @@ export type RelativeToSlots =
 // Individual Op types
 // -----------------------------------------------------------------------------
 
-export type MarkerToEpochNano = (marker: MovableMarker) => bigint
+export type MarkerToEpochNano<M = MovableMarker> = (marker: M) => bigint
 
 export type MoveMarker = (
   marker: MovableMarker,
@@ -39,7 +39,7 @@ export type DiffMarkers = (
 export type MovableMarker =
   | CalendarDateFields
   | CalendarDateTimeFields
-  | EpochNanoFields
+  | ZonedEpochMarker
 export interface MarkerMoveOps {
   marker: MovableMarker
   markerToEpochNano: MarkerToEpochNano
@@ -47,11 +47,13 @@ export interface MarkerMoveOps {
 }
 
 // See comments for `createMarkerSpanOps`
-export type SpannableMarker = CalendarDateTimeFields | EpochNanoFields
+export type SpannableMarker = CalendarDateTimeFields | ZonedEpochMarker
 export interface MarkerSpanOps extends MarkerMoveOps {
   marker: SpannableMarker
   diffMarkers: DiffMarkers
 }
+
+export type ZonedEpochMarker = ZonedEpochNanoFields & { calendar: CalendarImpl }
 
 // Only ever given to roundRelativeDuration after diffing (aka until/since)
 // which uses it to create rounding "windows" for nudging and bubbling
@@ -88,7 +90,7 @@ export function createMarkerSpanOps(
     return {
       marker: relativeToSlots,
       markerToEpochNano: getEpochNano as MarkerToEpochNano,
-      moveMarker: bindArgs(moveZonedEpochs, timeZone, calendar) as Callable,
+      moveMarker: moveZonedEpochSlots as Callable,
       diffMarkers: bindArgs(
         diffZonedEpochsExact,
         timeZone,
@@ -120,24 +122,10 @@ export function moveMarkerToEpochNano(
   )
 }
 
-// Done for Duration::round/total, which has a forked flow because .relativeTo
-// could be multiple things.
-// See note in createMarkerSpanOps about short-circuiting.
 export function isZonedEpochSlots(
-  marker: RelativeToSlots | undefined,
-): marker is ZonedEpochNanoFields & { calendar: CalendarImpl }
-export function isZonedEpochSlots(
-  marker: MovableMarker | undefined,
-): marker is EpochNanoFields
-export function isZonedEpochSlots(
-  marker: MovableMarker | RelativeToSlots | undefined,
-): marker is
-  | EpochNanoFields
-  | (ZonedEpochNanoFields & { calendar: CalendarImpl })
-export function isZonedEpochSlots(
-  marker: MovableMarker | RelativeToSlots | undefined,
-): boolean {
-  return Boolean(marker && 'epochNanoseconds' in marker)
+  marker: MovableMarker | RelativeToSlots,
+): marker is ZonedEpochMarker {
+  return 'timeZone' in marker
 }
 
 // Done with MarkerSpanOps, which has a forked flow because .relativeTo in the
@@ -182,5 +170,5 @@ export function isUniformUnit(
   unit: Unit,
   marker: MovableMarker | RelativeToSlots | undefined,
 ): boolean {
-  return unit <= Unit.Day - (isZonedEpochSlots(marker) ? 1 : 0)
+  return unit <= Unit.Day - (marker && isZonedEpochSlots(marker) ? 1 : 0)
 }

@@ -40,7 +40,7 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
-import { movePlainYearMonth } from '../../internal/move'
+import { moveYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
@@ -170,12 +170,17 @@ export const PlainYearMonth = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainYearMonth {
+      const slots = getPlainYearMonthSlots(this)
       return createPlainYearMonth(
-        movePlainYearMonth(
-          false,
-          getPlainYearMonthSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateSlots(
+          moveYearMonth(
+            false,
+            slots.calendar,
+            slots,
+            toDurationSlots(durationArg),
+            options,
+          ),
+          slots.calendar,
         ),
       )
     }
@@ -184,12 +189,17 @@ export const PlainYearMonth = defineTemporalClass(
       durationArg: DurationArg,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainYearMonth {
+      const slots = getPlainYearMonthSlots(this)
       return createPlainYearMonth(
-        movePlainYearMonth(
-          true,
-          getPlainYearMonthSlots(this),
-          toDurationSlots(durationArg),
-          options,
+        createDateSlots(
+          moveYearMonth(
+            true,
+            slots.calendar,
+            slots,
+            toDurationSlots(durationArg),
+            options,
+          ),
+          slots.calendar,
         ),
       )
     }

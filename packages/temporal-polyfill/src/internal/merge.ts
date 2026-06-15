@@ -140,7 +140,7 @@ export function mergeZonedDateTimeFields(
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
-  const isoDateTime = { ...zonedEpochSlotsToIso(zonedDateTimeSlots), calendar }
+  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
   const {
     offsetNanoseconds,
     hour,
@@ -150,6 +150,7 @@ export function mergeZonedDateTimeFields(
     microsecond,
     nanosecond,
   } = isoDateTime
+
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.

@@ -13,11 +13,7 @@ import {
   computeIsoDayOfWeek,
   computeIsoWeekFields,
 } from '../../internal/isoCalendarMath'
-import {
-  addDateMonths,
-  moveByDays,
-  moveToDayOfMonthUnsafe,
-} from '../../internal/move'
+import { addDateMonths, moveByDays } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { clampEntity, throwRangeError } from '../../internal/utils'
 
@@ -37,38 +33,33 @@ export function reversedMove<S>(
 // their calendar only when building record/slot outputs.
 
 export function moveByYears(
-  isoDate: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDate: CalendarDateFields,
   years: number,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const { calendar } = isoDate
+): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   if (!years) {
     return isoDate
   }
-  return {
-    ...addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow),
-    calendar,
-  }
+  return addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow)
 }
 
 export function moveByMonths(
-  isoDate: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDate: CalendarDateFields,
   months: number,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const { calendar } = isoDate
+): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   if (!months) {
     return isoDate
   }
-  return {
-    ...addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow),
-    calendar,
-  }
+  return addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow)
 }
 
 export function moveByIsoWeeks(
+  _calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   weeks: number,
 ): CalendarDateFields {
@@ -76,6 +67,7 @@ export function moveByIsoWeeks(
 }
 
 export function moveByDaysStrict(
+  _calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   days: number,
 ): CalendarDateFields {
@@ -86,11 +78,11 @@ export function moveByDaysStrict(
 // -----------------------------------------------------------------------------
 
 export function moveToDayOfYear(
-  isoDate: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDate: CalendarDateFields,
   dayOfYear: number,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const { calendar } = isoDate
+): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const daysInYear = computeCalendarDaysInYear(calendar, isoDate)
   const normDayOfYear = clampEntity(
@@ -102,18 +94,15 @@ export function moveToDayOfYear(
   )
 
   const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
-  return {
-    ...moveByDays(isoDate, normDayOfYear - currentDayOfYear),
-    calendar,
-  }
+  return moveByDays(isoDate, normDayOfYear - currentDayOfYear)
 }
 
 export function moveToDayOfMonth(
-  isoDate: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDate: CalendarDateFields,
   day: number,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const { calendar } = isoDate
+): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity(
@@ -124,17 +113,12 @@ export function moveToDayOfMonth(
     overflow,
   )
 
-  return {
-    ...moveToDayOfMonthUnsafe(
-      (dateFields) => computeCalendarDateFields(calendar, dateFields).day,
-      isoDate,
-      normDayOfMonth,
-    ),
-    calendar,
-  }
+  const currentDayOfMonth = computeCalendarDateFields(calendar, isoDate).day
+  return moveByDays(isoDate, normDayOfMonth - currentDayOfMonth)
 }
 
 export function moveToDayOfWeek(
+  _calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   options?: Temporal.OverflowOptions,
@@ -151,13 +135,14 @@ export function moveToDayOfWeek(
 }
 
 export function moveToWeekOfYear(
-  isoDate: CalendarDateFields & { calendar: CalendarImpl },
+  calendar: CalendarImpl,
+  isoDate: CalendarDateFields,
   weekOfYear: number,
   options?: Temporal.OverflowOptions,
-): CalendarDateFields & { calendar: CalendarImpl } {
+): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   const weekFields =
-    isoDate.calendar === isoCalendarImpl ? computeIsoWeekFields(isoDate) : {}
+    calendar === isoCalendarImpl ? computeIsoWeekFields(isoDate) : {}
   const currentWeekOfYear = weekFields.weekOfYear
   const weeksInYear = weekFields.weeksInYear
 
@@ -173,8 +158,5 @@ export function moveToWeekOfYear(
     overflow,
   )
 
-  return {
-    ...moveByIsoWeeks(isoDate, normWeekOfYear - currentWeekOfYear),
-    calendar: isoDate.calendar,
-  }
+  return moveByIsoWeeks(calendar, isoDate, normWeekOfYear - currentWeekOfYear)
 }

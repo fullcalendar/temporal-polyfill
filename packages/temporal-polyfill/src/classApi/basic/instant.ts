@@ -19,7 +19,7 @@ import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
-import { moveInstant } from '../../internal/move'
+import { moveEpochNano, signedDurationFields } from '../../internal/move'
 import { roundInstant } from '../../internal/round'
 import {
   EpochNanoFields,
@@ -81,14 +81,26 @@ export const Instant = defineTemporalClass(
     }
 
     add(durationArg: DurationArg): Instant {
+      const slots = getInstantSlots(this)
       return createInstant(
-        moveInstant(false, getInstantSlots(this), toDurationSlots(durationArg)),
+        createEpochNanoSlots(
+          moveEpochNano(
+            slots.epochNanoseconds,
+            signedDurationFields(false, toDurationSlots(durationArg)),
+          ),
+        ),
       )
     }
 
     subtract(durationArg: DurationArg): Instant {
+      const slots = getInstantSlots(this)
       return createInstant(
-        moveInstant(true, getInstantSlots(this), toDurationSlots(durationArg)),
+        createEpochNanoSlots(
+          moveEpochNano(
+            slots.epochNanoseconds,
+            signedDurationFields(true, toDurationSlots(durationArg)),
+          ),
+        ),
       )
     }
 
