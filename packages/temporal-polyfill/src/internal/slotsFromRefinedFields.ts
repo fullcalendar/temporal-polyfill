@@ -68,6 +68,10 @@ export function createPlainDateFromFields(
   return createPlainDateFromPreparedFields(calendar, fields, prepared, overflow)
 }
 
+/*
+Valuable because handles delicate observable order
+TODO: rename
+*/
 export function createPlainDateFromFieldsWithOptionsRefiner<
   T extends DateOptionsTuple,
 >(

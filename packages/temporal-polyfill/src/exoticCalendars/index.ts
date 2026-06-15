@@ -93,9 +93,9 @@ const exoticCreatorMap = new Map([
 // Distinguish deprecated aliases from fallback-only IDs. Temporal accepts
 // true aliases like `islamicc`, but rejects broad Intl fallbacks.
 // TODO: use Set?
-const forbiddenExoticCalendarIdMap: Record<string, number> = {
-  'islamic': 1,
-  'islamic-rgsa': 1,
+const forbiddenExoticCalendarIdMap: Record<string, boolean> = {
+  'islamic': true,
+  'islamic-rgsa': true,
 }
 
 // These aliases are Temporal-recognized legacy calendar IDs. Keep them in the
