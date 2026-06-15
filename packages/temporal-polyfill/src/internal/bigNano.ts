@@ -15,12 +15,12 @@ Number's safe integer range. Using bigint makes the representation simpler and
 keeps the exact nanosecond total available until a caller explicitly asks for a
 Number conversion.
 */
-export const bigNanoInUtcDay = BigInt(nanoInUtcDay)
-export const bigNanoInHour = BigInt(nanoInHour)
-export const bigNanoInMinute = BigInt(nanoInMinute)
-export const bigNanoInSec = BigInt(nanoInSec)
-export const bigNanoInMilli = BigInt(nanoInMilli)
 export const bigNanoInMicro = BigInt(nanoInMicro)
+export const bigNanoInMilli = BigInt(nanoInMilli)
+export const bigNanoInSec = BigInt(nanoInSec)
+export const bigNanoInMinute = BigInt(nanoInMinute)
+export const bigNanoInHour = BigInt(nanoInHour)
+export const bigNanoInUtcDay = BigInt(nanoInUtcDay)
 
 export function divideBigNanoToExactNumber(
   bigNano: bigint,
