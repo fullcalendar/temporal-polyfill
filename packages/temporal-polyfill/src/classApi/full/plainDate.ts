@@ -6,10 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import {
-  dateDerivedGetters,
-  dateFieldGetters,
-} from '../../apiHelpers/mixins'
+import { dateDerivedGetters, dateFieldGetters } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTruncation } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
