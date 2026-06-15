@@ -140,34 +140,25 @@ export function mergeZonedDateTimeFields(
     dateTimeAndOffsetFieldNamesWithEraAlpha,
   )
 
-  const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
-  const {
-    offsetNanoseconds,
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
-  } = isoDateTime
+  const zonedSlots = zonedEpochSlotsToIso(zonedDateTimeSlots)
 
   // The receiver's slots are projected into the same refined field shape that
   // readAndRefineBagFields() produces for the user's .with() bag below. This
   // keeps calendar merging and later date/time resolution on one representation.
-  const { year, month, day } = computeCalendarDateFields(calendar, isoDateTime)
+  const { year, month, day } = computeCalendarDateFields(calendar, zonedSlots)
   const origFields = {
     year,
     monthCode: computeMonthCode(calendar, year, month),
     day,
-    hour,
-    minute,
-    second,
-    millisecond,
-    microsecond,
-    nanosecond,
+    hour: zonedSlots.hour,
+    minute: zonedSlots.minute,
+    second: zonedSlots.second,
+    millisecond: zonedSlots.millisecond,
+    microsecond: zonedSlots.microsecond,
+    nanosecond: zonedSlots.nanosecond,
     // readAndRefineBagFields() refines the public offset string to nanoseconds,
     // so the copied receiver value must use that same internal representation.
-    offset: offsetNanoseconds,
+    offset: zonedSlots.offsetNanoseconds,
   }
   const partialFields = readAndRefineBagFields(
     modFields,
