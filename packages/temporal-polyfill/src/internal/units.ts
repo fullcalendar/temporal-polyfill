@@ -50,7 +50,7 @@ export const secInUtcDay = 86400
 export const milliInSec = 1000
 export const milliInMinute = milliInSec * secInMinute
 export const milliInHour = milliInSec * secInHour
-export const milliInUtcDay = 86400000
+export const milliInUtcDay = milliInSec * secInUtcDay
 
 export const nanoInMicro = TemporalUtils.nanosecondsInMicrosecond
 export const nanoInMilli = TemporalUtils.nanosecondsInMillisecond

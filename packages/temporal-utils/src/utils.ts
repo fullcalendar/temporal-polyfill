@@ -1,10 +1,10 @@
 import * as errorMessages from './errorMessages.js'
 
-export const nanosecondsInMicrosecond = 1000
-export const nanosecondsInMillisecond = 1000000
-export const nanosecondsInSecond = 1000000000
-export const nanosecondsInMinute = 60000000000
-export const nanosecondsInHour = 3600000000000
+export const nanosecondsInMicrosecond = 1_000
+export const nanosecondsInMillisecond = 1_000_000
+export const nanosecondsInSecond = 1_000_000_000
+export const nanosecondsInMinute = 60_000_000_000
+export const nanosecondsInHour = 3_600_000_000_000
 
 // just used to scrape types from temporal-spec
 type RoundingUnit = Temporal.DateUnit | Temporal.TimeUnit
