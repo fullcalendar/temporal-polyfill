@@ -162,21 +162,6 @@ export function mapProps<P, R>(
   return res
 }
 
-// zips key-array AND value-generator into an object
-export function zipPropsGenerator<P, R>(
-  propNames: (keyof P)[],
-  propValGenerator: (propName: keyof P, i: number) => R,
-): { [K in keyof P]: R } {
-  let i = 0
-  const props = {} as { [K in keyof P]: R }
-
-  for (const propName of propNames) {
-    props[propName] = propValGenerator(propName, i++)
-  }
-
-  return props
-}
-
 // zips key-array AND value-constant into an object
 export function zipPropsConst<P, C>(
   propNames: (keyof P)[],

@@ -1,11 +1,5 @@
 import { Unit, unitNamesAsc } from './units'
-import {
-  bindArgs,
-  sortStrings,
-  zeroOutProps,
-  zipPropsConst,
-  zipPropsGenerator,
-} from './utils'
+import { bindArgs, sortStrings, zeroOutProps, zipPropsConst } from './utils'
 
 export interface DurationDateFields {
   days: number
@@ -47,9 +41,12 @@ export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',
 ) as DurationFieldName[]
 
-export const durationGetters = zipPropsGenerator(
-  durationFieldNamesAsc,
-  (fieldName) => (slots: DurationFields) => slots[fieldName],
+export const durationGetters = durationFieldNamesAsc.reduce(
+  (getters, fieldName) => {
+    getters[fieldName] = (slots: DurationFields) => slots[fieldName]
+    return getters
+  },
+  {} as { [K in keyof DurationFields]: (slots: DurationFields) => number },
 )
 
 export const durationFieldNamesAlpha = sortStrings(durationFieldNamesAsc)
@@ -62,9 +59,12 @@ export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
 export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
 
-export const durationFieldIndexes = zipPropsGenerator(
-  durationFieldNamesAsc,
-  (_propName: DurationFieldName, i: number) => i,
+export const durationFieldIndexes = durationFieldNamesAsc.reduce(
+  (indexes, fieldName, i) => {
+    indexes[fieldName] = i
+    return indexes
+  },
+  {} as { [K in DurationFieldName]: number },
 )
 
 // Field Defaults
