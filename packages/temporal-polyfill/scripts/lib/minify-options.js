@@ -45,6 +45,7 @@ const baseFormatOptions = {
 
 export function buildTerserEsmOptions() {
   return {
+    module: true,
     compress: {
       ...baseNonMangleCompressOptions,
 
