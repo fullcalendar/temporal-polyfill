@@ -21,7 +21,6 @@ import { parsePlainTime } from '../../internal/isoParse'
 import { mergePlainTimeFields } from '../../internal/merge'
 import { movePlainTime } from '../../internal/move'
 import { roundPlainTimeToUnit } from '../../internal/round'
-import { createTimeSlots } from '../../internal/slots'
 import {
   nanoToTimeAndDay,
   timeFieldsToMilli,
@@ -107,7 +106,7 @@ export function create(
       nanosecond,
     }),
   )
-  return createShimPlainTimeRecord(createTimeSlots(fields))
+  return createShimPlainTimeRecord(fields)
 }
 
 export function fromFields(
@@ -169,7 +168,8 @@ function moveByTimeUnit(
     ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
 
   return createShimPlainTimeRecord(
-    createTimeSlots(nanoToTimeAndDay(Number(wrappedNano))[0]),
+    // result is guaranteed exact TimeFields shape
+    nanoToTimeAndDay(Number(wrappedNano))[0],
   )
 }
 

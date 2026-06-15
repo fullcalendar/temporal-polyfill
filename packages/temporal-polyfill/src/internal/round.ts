@@ -34,7 +34,6 @@ import {
   ZonedEpochNanoFields,
   createDateTimeSlots,
   createEpochNanoSlots,
-  createTimeSlots,
   createZonedEpochNanoSlots,
 } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
@@ -248,12 +247,12 @@ export function roundPlainTimeToUnit(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): TimeFields {
-  const roundedTimeFields = roundTimeToNano(
+  // result is guaranteed exact TimeFields shape
+  return roundTimeToNano(
     slots,
     computeNanoInc(smallestUnit, roundingInc),
     roundingMode,
   )[0]
-  return createTimeSlots(roundedTimeFields)
 }
 
 // Zoned Utils

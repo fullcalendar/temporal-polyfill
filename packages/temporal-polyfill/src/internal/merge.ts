@@ -50,7 +50,6 @@ import { OffsetDisambig } from './optionsModel'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
-  createTimeSlots,
   createZonedEpochNanoSlots,
 } from './slots'
 import {
@@ -371,7 +370,8 @@ export function mergePlainTimeFields(
   mod: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
 ): TimeFields {
-  return createTimeSlots(mergePlainTimeBag(initialFields, mod, options))
+  // result is guaranteed exact TimeFields shape
+  return mergePlainTimeBag(initialFields, mod, options)
 }
 
 export function mergeDurationFields(

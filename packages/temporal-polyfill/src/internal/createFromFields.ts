@@ -50,7 +50,6 @@ import { RelativeToSlots } from './relativeMath'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
-  createTimeSlots,
   createZonedEpochNanoSlots,
 } from './slots'
 import {
@@ -276,7 +275,8 @@ export function refinePlainTimeObjectLike(
   // spec says overflow parsed after fields
   const overflow = refineOverflowOptions(options)
 
-  return createTimeSlots(resolveTimeFields(fields, overflow))
+  // result is guaranteed exact TimeFields shape
+  return resolveTimeFields(fields, overflow)
 }
 
 export function refineDurationObjectLike(

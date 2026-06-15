@@ -64,7 +64,7 @@ export const PlainTime = defineTemporalClass(
           nanosecond,
         }),
       )
-      initPlainTime(this, createTimeSlots(fields))
+      initPlainTime(this, fields)
     }
 
     static from(

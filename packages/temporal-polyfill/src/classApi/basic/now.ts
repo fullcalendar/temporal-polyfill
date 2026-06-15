@@ -63,8 +63,10 @@ export const Now = Object.defineProperties(
         const isoDateTime = getCurrentIsoDateTime(
           queryTimeZone(refineTimeZoneArg(timeZoneArg)),
         )
-        // Omitting calendar constructs ISO-calendar slots.
-        return createPlainDate(createDateSlots(isoDateTime))
+        return createPlainDate(
+          // Omitting calendar constructs ISO-calendar slots.
+          createDateSlots(isoDateTime),
+        )
       },
 
       plainTimeISO(

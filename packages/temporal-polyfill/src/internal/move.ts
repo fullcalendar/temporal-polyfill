@@ -35,7 +35,6 @@ import {
   createDateSlots,
   createDateTimeSlots,
   createEpochNanoSlots,
-  createTimeSlots,
 } from './slots'
 import {
   checkEpochNanoInBounds,
@@ -163,9 +162,8 @@ export function movePlainTime(
   slots: TimeFields,
   durationSlots: DurationFields,
 ): TimeFields {
-  return createTimeSlots(
-    moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0],
-  )
+  // result is guaranteed exact TimeFields shape
+  return moveTime(slots, signedDurationFields(doSubtract, durationSlots))[0]
 }
 
 function signedDurationFields(

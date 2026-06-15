@@ -1,7 +1,7 @@
 import type { Temporal } from 'temporal-spec'
 import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
-import { type CalendarImpl, isoCalendarImpl } from './calendarImpl'
+import { type CalendarImpl } from './calendarImpl'
 import { requireObjectLike, toBigInt, toStrictInteger } from './cast'
 import {
   dayFieldNamesAsc,
@@ -56,7 +56,7 @@ import { pluckProps } from './utils'
 export function instantToZonedDateTime(
   instantSlots: EpochNanoFields,
   timeZone: TimeZone,
-  calendar: CalendarImpl = isoCalendarImpl,
+  calendar?: CalendarImpl, // omitting means isoCalendarImpl (undefined)
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   return createZonedEpochNanoSlots(
     instantSlots.epochNanoseconds,

@@ -36,7 +36,6 @@ import {
   EpochNanoFields,
   ZonedEpochNanoFields,
   createDateSlots,
-  createDateTimeSlots,
   createDurationSlots,
   createEpochNanoSlots,
   createTimeSlots,
@@ -161,8 +160,8 @@ export function parsePlainDateTime(
     throwFailedParse(s)
   }
 
-  const slots = finalizeDateTime(organized, resolveCalendar)
-  return createDateTimeSlots(slots, slots.calendar)
+  // result is exact DateTimeSlots shape
+  return finalizeDateTime(organized, resolveCalendar)
 }
 
 export function parsePlainDate(
@@ -450,6 +449,7 @@ function finalizeZonedDateTime(
   )
 }
 
+// Returns exact DateTimeSlots shape
 function finalizeDateTime(
   organized: DateTimeLikeOrganized,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
