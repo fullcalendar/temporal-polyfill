@@ -335,9 +335,13 @@ export function getTimeZoneTransition(
   options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
 ): NativeZonedDateTimeRecord | null {
   const native = getNativeZonedDateTime(record)
-  const resNative = native.getTimeZoneTransition(
-    normalizeTransitionOptions(options),
-  )
+  const resNative = (
+    native.getTimeZoneTransition as (
+      options:
+        | Temporal.TransitionOptions
+        | Temporal.TransitionOptions['direction'],
+    ) => Temporal.ZonedDateTime | null
+  )(options)
   return resNative ? createNativeZonedDateTimeRecord(resNative) : null
 }
 
@@ -646,18 +650,6 @@ function roundToDayTimeUnit(
   options?: RoundingMathOptions | RoundingMode,
 ): NativeZonedDateTimeRecord {
   return round(record, createRoundToOptions(smallestUnit, options))
-}
-
-function normalizeTransitionOptions(
-  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
-): Temporal.TransitionOptions {
-  if (typeof options !== 'string') {
-    return options
-  }
-
-  const res: Temporal.TransitionOptions = Object.create(null)
-  res.direction = options
-  return res
 }
 
 export const roundToDay = bindArgs(roundToDayTimeUnit, 'day')

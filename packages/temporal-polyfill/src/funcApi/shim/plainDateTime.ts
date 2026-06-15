@@ -326,12 +326,7 @@ export function add(
   const slots = getShimPlainDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateTimeSlots(
-    moveDateTime(
-      slots.calendar,
-      slots,
-      durationSlots,
-      options === undefined ? Object.create(null) : options,
-    ),
+    moveDateTime(slots.calendar, slots, durationSlots, options),
     slots.calendar,
   )
   return createShimPlainDateTimeRecord(resSlots)
@@ -349,7 +344,7 @@ export function subtract(
       slots.calendar,
       slots,
       negateDurationFields(durationSlots),
-      options === undefined ? Object.create(null) : options,
+      options,
     ),
     slots.calendar,
   )

@@ -205,11 +205,7 @@ export const ZonedDateTime = defineTemporalClass(
     ): ZonedDateTime {
       const slots = getZonedDateTimeSlots(this)
       return createZonedDateTime(
-        moveZonedEpochSlots(
-          slots,
-          toDurationSlots(durationArg),
-          options === undefined ? Object.create(null) : options,
-        ),
+        moveZonedEpochSlots(slots, toDurationSlots(durationArg), options),
       )
     }
 
@@ -222,7 +218,7 @@ export const ZonedDateTime = defineTemporalClass(
         moveZonedEpochSlots(
           slots,
           negateDurationFields(toDurationSlots(durationArg)),
-          options === undefined ? Object.create(null) : options,
+          options,
         ),
       )
     }

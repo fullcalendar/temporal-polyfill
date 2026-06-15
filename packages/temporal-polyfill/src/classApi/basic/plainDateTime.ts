@@ -191,12 +191,11 @@ export const PlainDateTime = defineTemporalClass(
       const slots = getPlainDateTimeSlots(this)
       return createPlainDateTime(
         createDateTimeSlots(
-          // result is guaranteed exact TimeFields shape
           moveDateTime(
             slots.calendar,
             slots,
             toDurationSlots(durationArg),
-            options === undefined ? Object.create(null) : options,
+            options,
           ),
           slots.calendar,
         ),
@@ -210,12 +209,11 @@ export const PlainDateTime = defineTemporalClass(
       const slots = getPlainDateTimeSlots(this)
       return createPlainDateTime(
         createDateTimeSlots(
-          // result is guaranteed exact TimeFields shape
           moveDateTime(
             slots.calendar,
             slots,
             negateDurationFields(toDurationSlots(durationArg)),
-            options === undefined ? Object.create(null) : options,
+            options,
           ),
           slots.calendar,
         ),

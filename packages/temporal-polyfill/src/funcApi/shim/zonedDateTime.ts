@@ -387,11 +387,7 @@ export function add(
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveZonedEpochSlots(
-    slots,
-    durationSlots,
-    options === undefined ? Object.create(null) : options,
-  )
+  const resSlots = moveZonedEpochSlots(slots, durationSlots, options)
   return createShimZonedDateTimeRecord(resSlots)
 }
 
@@ -405,7 +401,7 @@ export function subtract(
   const resSlots = moveZonedEpochSlots(
     slots,
     negateDurationFields(durationSlots),
-    options === undefined ? Object.create(null) : options,
+    options,
   )
   return createShimZonedDateTimeRecord(resSlots)
 }
