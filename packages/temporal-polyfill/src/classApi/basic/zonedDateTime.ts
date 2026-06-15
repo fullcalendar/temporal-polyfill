@@ -7,8 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
-  calendarDerivedGetters,
-  calendarFieldGetters,
+  dateDerivedGetters,
+  dateFieldGetters,
   timeGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
@@ -365,8 +365,8 @@ export const ZonedDateTime = defineTemporalClass(
     }
   },
   getZonedDateTimeIsoSlots,
-  calendarFieldGetters,
-  calendarDerivedGetters,
+  dateFieldGetters,
+  dateDerivedGetters,
   timeGetters,
 )
 

@@ -7,8 +7,8 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
-  calendarDerivedGetters,
-  calendarFieldGetters,
+  dateDerivedGetters,
+  dateFieldGetters,
 } from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTruncation } from '../../internal/cast'
@@ -291,8 +291,8 @@ export const PlainDate = defineTemporalClass(
     }
   },
   getPlainDateSlots,
-  calendarFieldGetters,
-  calendarDerivedGetters,
+  dateFieldGetters,
+  dateDerivedGetters,
 )
 
 export function createPlainDate(slots: PlainDateSlots): PlainDate {

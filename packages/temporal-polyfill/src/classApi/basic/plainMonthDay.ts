@@ -6,10 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import {
-  computeCalendarDateFields,
-  computeCalendarMonthCode,
-} from '../../internal/calendarDerived'
+import { monthDayFieldGetters } from '../../apiHelpers/mixins'
 import {
   CalendarImpl,
   getCalendarSlotId,
@@ -60,7 +57,7 @@ const plainMonthDaySlotsMap = new WeakMap<object, PlainMonthDaySlots>()
 export type PlainMonthDay = InstanceType<typeof PlainMonthDay>
 export const PlainMonthDay = defineTemporalClass(
   PlainMonthDayBranding,
-  class implements MonthDayFields {
+  class {
     constructor(
       isoMonth: number,
       isoDay: number,
@@ -94,21 +91,6 @@ export const PlainMonthDay = defineTemporalClass(
       return getCalendarSlotId(getPlainMonthDaySlots(this).calendar)
     }
 
-    get month(): number {
-      const slots = getPlainMonthDaySlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode(): string {
-      const slots = getPlainMonthDaySlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day(): number {
-      const slots = getPlainMonthDaySlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
-    }
-
     with(
       mod: Partial<MonthDayFields>,
       options: Temporal.OverflowOptions | undefined = undefined,
@@ -132,7 +114,11 @@ export const PlainMonthDay = defineTemporalClass(
     toPlainDate(bag: YearFields): PlainDate {
       const slots = getPlainMonthDaySlots(this)
       return createPlainDate(
-        convertPlainMonthDayToDate(slots.calendar, this, bag),
+        convertPlainMonthDayToDate(
+          slots.calendar,
+          this as unknown as PlainMonthDay,
+          bag,
+        ),
       )
     }
 
@@ -163,6 +149,8 @@ export const PlainMonthDay = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
+  getPlainMonthDaySlots,
+  monthDayFieldGetters,
 )
 
 export function createPlainMonthDay(slots: PlainMonthDaySlots): PlainMonthDay {

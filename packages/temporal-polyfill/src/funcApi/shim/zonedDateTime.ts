@@ -6,7 +6,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { calendarFieldGetters, timeGetters } from '../../apiHelpers/mixins'
+import { dateFieldGetters, timeGetters } from '../../apiHelpers/mixins'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -192,7 +192,7 @@ export const ShimZonedDateTimeRecord = defineTemporalClass(
     }
   },
   getShimZonedDateTimeIsoSlots,
-  calendarFieldGetters,
+  dateFieldGetters,
   timeGetters,
 )
 

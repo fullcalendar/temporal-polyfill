@@ -7,14 +7,9 @@ import {
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
 import {
-  computeCalendarDateFields,
-  computeCalendarDaysInMonth,
-  computeCalendarDaysInYear,
-  computeCalendarEraFields,
-  computeCalendarInLeapYear,
-  computeCalendarMonthCode,
-  computeCalendarMonthsInYear,
-} from '../../internal/calendarDerived'
+  yearMonthDerivedGetters,
+  yearMonthFieldGetters,
+} from '../../apiHelpers/mixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTruncation } from '../../internal/cast'
 import {
@@ -69,7 +64,7 @@ const plainYearMonthSlotsMap = new WeakMap<object, PlainYearMonthSlots>()
 export type PlainYearMonth = InstanceType<typeof PlainYearMonth>
 export const PlainYearMonth = defineTemporalClass(
   PlainYearMonthBranding,
-  class implements YearMonthFields {
+  class {
     constructor(
       isoYear: number,
       isoMonth: number,
@@ -109,51 +104,6 @@ export const PlainYearMonth = defineTemporalClass(
 
     get calendarId(): string {
       return getCalendarSlotId(getPlainYearMonthSlots(this).calendar)
-    }
-
-    get era(): string | undefined {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).era
-    }
-
-    get eraYear(): number | undefined {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarEraFields(slots.calendar, slots).eraYear
-    }
-
-    get year(): number {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).year
-    }
-
-    get month(): number {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).month
-    }
-
-    get monthCode(): string {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get daysInMonth(): number {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarDaysInMonth(slots.calendar, slots)
-    }
-
-    get daysInYear(): number {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarDaysInYear(slots.calendar, slots)
-    }
-
-    get monthsInYear(): number {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarMonthsInYear(slots.calendar, slots)
-    }
-
-    get inLeapYear(): boolean {
-      const slots = getPlainYearMonthSlots(this)
-      return computeCalendarInLeapYear(slots.calendar, slots)
     }
 
     with(
@@ -245,7 +195,11 @@ export const PlainYearMonth = defineTemporalClass(
     toPlainDate(bag: { day: number }): PlainDate {
       const slots = getPlainYearMonthSlots(this)
       return createPlainDate(
-        convertPlainYearMonthToDate(slots.calendar, this, bag),
+        convertPlainYearMonthToDate(
+          slots.calendar,
+          this as unknown as PlainYearMonth,
+          bag,
+        ),
       )
     }
 
@@ -276,6 +230,9 @@ export const PlainYearMonth = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
+  getPlainYearMonthSlots,
+  yearMonthFieldGetters,
+  yearMonthDerivedGetters,
 )
 
 export function createPlainYearMonth(
