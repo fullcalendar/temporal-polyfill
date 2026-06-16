@@ -17,7 +17,7 @@ const exoticCalendarGetters = [
   ['islamic-tbla', CalendarFns.getIslamicTabular],
   ['islamic-umalqura', CalendarFns.getIslamicUmmAlQura],
   ['persian', CalendarFns.getPersian],
-  ['roc', CalendarFns.getRoc],
+  ['roc', CalendarFns.getROC],
 ] as const
 
 describe('function calendar records', () => {

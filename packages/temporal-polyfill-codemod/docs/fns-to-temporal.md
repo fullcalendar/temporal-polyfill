@@ -206,7 +206,7 @@ Named calendar record getters map to literal calendar ID strings:
 | `CalendarFns.getIslamicTabular()` | `'islamic-tbla'` |
 | `CalendarFns.getIslamicUmmAlQura()` | `'islamic-umalqura'` |
 | `CalendarFns.getPersian()` | `'persian'` |
-| `CalendarFns.getRoc()` | `'roc'` |
+| `CalendarFns.getROC()` | `'roc'` |
 
 `CalendarFns.getExotic(id)`, `CalendarFns.getAny(id)`, and similar resolver
 calls should rewrite to the calendar ID expression when the value is being

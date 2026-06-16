@@ -149,7 +149,7 @@ const recordGetterCalendarIds: Record<string, string> = {
   getIslamicTabular: 'islamic-tbla',
   getIslamicUmmAlQura: 'islamic-umalqura',
   getPersian: 'persian',
-  getRoc: 'roc',
+  getROC: 'roc',
 }
 
 interface RecordTypeConfig {

@@ -29,7 +29,7 @@ export const gregoryAlignedCalendars: CalendarPlugin = {
       case 'gregory': return CalendarFns.getGregory()
       case 'buddhist': return CalendarFns.getBuddhist()
       case 'japanese': return CalendarFns.getJapanese()
-      case 'roc': return CalendarFns.getRoc()
+      case 'roc': return CalendarFns.getROC()
     }
     throw new RangeError(`Unsupported calendar ${id}`)
   }

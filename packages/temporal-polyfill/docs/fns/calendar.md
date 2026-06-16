@@ -37,7 +37,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
   - [`getIslamicTabular`](#getislamictabular)
   - [`getIslamicUmmAlQura`](#getislamicummalqura)
   - [`getPersian`](#getpersian)
-  - [`getRoc`](#getroc)
+  - [`getROC`](#getroc)
 
 ## Record Shape
 
@@ -530,7 +530,7 @@ const calendar = 'persian'
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-### `getRoc`
+### `getROC`
 
 Signature:
 
@@ -541,7 +541,7 @@ Signature:
 Fn API:
 
 ```ts
-const calendar = CalendarFns.getRoc()
+const calendar = CalendarFns.getROC()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 

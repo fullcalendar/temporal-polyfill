@@ -137,7 +137,7 @@ export const fnsApiCoverage = {
     getIslamicTabular: 'contextual-calendar',
     getIslamicUmmAlQura: 'contextual-calendar',
     getPersian: 'contextual-calendar',
-    getRoc: 'contextual-calendar',
+    getROC: 'contextual-calendar',
   },
   Instant: {
     isRecord: 'direct',

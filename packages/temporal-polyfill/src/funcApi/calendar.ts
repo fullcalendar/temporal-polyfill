@@ -62,7 +62,7 @@ export const getIslamicCivil = createCanonicalGetter(islamicCivilMeta)
 export const getIslamicTabular = createCanonicalGetter(islamicTabularMeta)
 export const getIslamicUmmAlQura = createCanonicalGetter(islamicUmmAlQuraMeta)
 export const getPersian = createCanonicalGetter(persianMeta)
-export const getRoc = createCanonicalGetter(rocMeta)
+export const getROC = createCanonicalGetter(rocMeta)
 
 // aggregate
 // ---------
