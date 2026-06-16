@@ -36,7 +36,7 @@
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",
     "readme": "cp README.md dist",
-    "license": "cp ../../LICENSE dist",
+    "license": "cp LICENSE dist",
     "test": "pnpm run vitest && pnpm run test262",
     "vitest": "./scripts/vitest.js",
     "vitest:dev": "vitest dev",
