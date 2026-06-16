@@ -51,6 +51,7 @@ import * as InstantFns from 'temporal-polyfill/fns/Instant'
   - [`roundToMicrosecond`](#roundtomicrosecond)
 - [Conversion](#conversion)
   - [`toZonedDateTimeISO`](#tozoneddatetimeiso)
+  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
@@ -881,6 +882,33 @@ Temporal API:
 ```ts
 const zonedDateTime = instant.toZonedDateTimeISO(timeZoneId)
 ```
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.Instant
+```
+
+Fn API:
+
+```ts
+const native = InstantFns.toNative(instant)
+```
+
+Temporal API:
+
+```ts
+const native = instant
+```
+
+Produces a real `Temporal.Instant` built directly from the record's
+`epochNanoseconds`, with no string round-trip. The `temporal` argument defaults
+to `globalThis.Temporal`; pass an explicit Temporal implementation to target a
+specific one — otherwise `toNative` throws when no global `Temporal` is present.
+Because a migrated record is already a `Temporal.Instant`, the codemod rewrites
+the entire call to the bare record expression.
 
 ## Formatting
 

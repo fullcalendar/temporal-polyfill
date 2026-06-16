@@ -44,6 +44,7 @@ import * as PlainYearMonthFns from 'temporal-polyfill/fns/PlainYearMonth'
   - [`endOfYear`](#endofyear)
 - [Conversion](#conversion)
   - [`toPlainDate`](#toplaindate)
+  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
@@ -625,6 +626,34 @@ Temporal API:
 ```ts
 const date = yearMonth.toPlainDate({ day: 1 })
 ```
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.PlainYearMonth
+```
+
+Fn API:
+
+```ts
+const native = PlainYearMonthFns.toNative(yearMonth)
+```
+
+Temporal API:
+
+```ts
+const native = yearMonth
+```
+
+Produces a real `Temporal.PlainYearMonth` built directly from the record's ISO
+date slots (including the reference ISO day) and `calendarId`, with no string
+round-trip. The `temporal` argument defaults to `globalThis.Temporal`; pass an
+explicit Temporal implementation to target a specific one — otherwise `toNative`
+throws when no global `Temporal` is present. Because a migrated record is already
+a `Temporal.PlainYearMonth`, the codemod rewrites the entire call to the bare
+record expression.
 
 ## Formatting
 

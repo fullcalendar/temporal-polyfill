@@ -105,6 +105,7 @@ import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
   - [`toZonedDateTime`](#tozoneddatetime)
   - [`toPlainDate`](#toplaindate)
   - [`toPlainTime`](#toplaintime)
+  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
@@ -2120,6 +2121,34 @@ Temporal API:
 ```ts
 const time = dateTime.toPlainTime()
 ```
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.PlainDateTime
+```
+
+Fn API:
+
+```ts
+const native = PlainDateTimeFns.toNative(dateTime)
+```
+
+Temporal API:
+
+```ts
+const native = dateTime
+```
+
+Produces a real `Temporal.PlainDateTime` built directly from the record's ISO
+date-time slots and `calendarId`, with no string round-trip. The `temporal`
+argument defaults to `globalThis.Temporal`; pass an explicit Temporal
+implementation to target a specific one — otherwise `toNative` throws when no
+global `Temporal` is present. Because a migrated record is already a
+`Temporal.PlainDateTime`, the codemod rewrites the entire call to the bare record
+expression.
 
 ## Formatting
 

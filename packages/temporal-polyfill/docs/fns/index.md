@@ -27,3 +27,14 @@ Abbreviations used by the type pages:
 - [`Duration`](duration.md) - duration construction, arithmetic, rounding, totaling, comparison, and formatting.
 - [`Calendar`](calendar.md) - `CalendarRecord` factories and calendar resolver helpers.
 - [`Types`](types.md) - TypeScript-only exports and their codemod targets for the real Temporal API.
+
+## Native Interop
+
+Each record-bearing type also exports a `toNative` function (listed under that
+type's Conversion section) that builds a real `Temporal.*` instance from the
+record's internal ISO/epoch slots. This is awkward to do in userspace — the
+native constructors want ISO values that the records deliberately don't expose —
+so the polyfill provides it directly, with no string round-trip. `toNative`
+accepts an optional Temporal implementation and defaults to
+`globalThis.Temporal`. The codemod rewrites a `toNative` call to its bare record
+argument, since a migrated record is already a native Temporal object.

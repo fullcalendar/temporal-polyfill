@@ -32,6 +32,8 @@ import * as DurationFns from 'temporal-polyfill/fns/Duration'
   - [`total`](#total)
 - [Comparison](#comparison)
   - [`compare`](#compare)
+- [Conversion](#conversion)
+  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
@@ -373,6 +375,35 @@ const order = Temporal.Duration.compare(duration, otherDuration, options)
 
 Duration records and any `relativeTo` record need their own record-to-Temporal
 transform.
+
+## Conversion
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.Duration
+```
+
+Fn API:
+
+```ts
+const native = DurationFns.toNative(duration)
+```
+
+Temporal API:
+
+```ts
+const native = duration
+```
+
+Produces a real `Temporal.Duration` built directly from the record's duration
+fields. The `temporal` argument defaults to `globalThis.Temporal`; pass an
+explicit Temporal implementation to target a specific one — otherwise `toNative`
+throws when no global `Temporal` is present. Because a migrated record is already
+a `Temporal.Duration`, the codemod rewrites the entire call to the bare record
+expression.
 
 ## Formatting
 
