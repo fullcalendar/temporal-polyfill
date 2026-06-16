@@ -13,6 +13,7 @@ import {
 
 // Adapted from Adobe's @internationalized/date Islamic calendar implementation
 // and ICU-style arithmetic calendar rules.
+// https://github.com/adobe/react-spectrum/blob/main/packages/@internationalized/date/src/calendars/IslamicCalendar.ts
 
 const civilIslamicEpoch = 1948440
 const astronomicalIslamicEpoch = 1948439

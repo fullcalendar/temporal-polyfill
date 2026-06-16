@@ -5,6 +5,7 @@ import { unixEpochJulianDay } from './utils/gregoryJulianDay'
 
 // Adapted from Adobe's @internationalized/date Indian calendar implementation
 // and ICU-style arithmetic calendar rules.
+// https://github.com/adobe/react-spectrum/blob/main/packages/@internationalized/date/src/calendars/IndianCalendar.ts
 
 const indianEraStart = 78
 const indianYearStart = 80

@@ -4,6 +4,7 @@ import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 
 // Adapted from Adobe's @internationalized/date Ethiopic/Coptic calendar
 // implementation and ICU-style arithmetic calendar rules.
+// https://github.com/adobe/react-spectrum/blob/main/packages/@internationalized/date/src/calendars/EthiopicCalendar.ts
 
 const ethiopicEpoch = 1723856
 const copticEpoch = 1824665

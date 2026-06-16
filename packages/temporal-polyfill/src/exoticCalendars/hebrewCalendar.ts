@@ -3,6 +3,7 @@ import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 
 // Adapted from Adobe's @internationalized/date Hebrew calendar implementation
 // and ICU-style arithmetic calendar rules.
+// https://github.com/adobe/react-spectrum/blob/main/packages/@internationalized/date/src/calendars/HebrewCalendar.ts
 
 const hebrewEpoch = 347997
 const hebrewEraOrigins = {

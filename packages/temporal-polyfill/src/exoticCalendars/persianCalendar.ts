@@ -3,6 +3,7 @@ import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 
 // Adapted from Adobe's @internationalized/date Persian calendar implementation
 // and ICU-style arithmetic calendar rules.
+// https://github.com/adobe/react-spectrum/blob/main/packages/@internationalized/date/src/calendars/PersianCalendar.ts
 
 const persianEpoch = 1948320
 const persianEraOrigins = {
