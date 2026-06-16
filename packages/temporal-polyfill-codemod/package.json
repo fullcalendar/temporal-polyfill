@@ -21,8 +21,7 @@
   },
   "files": [
     "dist",
-    "!dist/.tsbuildinfo",
-    "README.md"
+    "!dist/.tsbuildinfo"
   ],
   "exports": {
     ".": {
