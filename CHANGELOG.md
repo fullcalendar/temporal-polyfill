@@ -1,17 +1,24 @@
 
-next
-----
+v1.0.0
+------
+
+curl -sL "https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.2/global.min.js" | gzip -9 | wc -c
+
+
+old size: 20167
+new size: 19554 (default entrypoint)
+
+
+- fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
+- fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
+- fix: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification (#92)
+- fix: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day (#84)
+- fix: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles (#75)
+- fix: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 (#74)
+- fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
+- fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
 
 - breaking: no more cjs in dist
-- fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` ([#87](https://github.com/fullcalendar/temporal-polyfill/issues/87)). This correct behavior is now also covered by test262's `test/built-ins/Temporal/Duration/prototype/round/blank-duration.js`.
-- fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` ([#55](https://github.com/fullcalendar/temporal-polyfill/issues/55)). This correct behavior is now also covered by test262's `test/built-ins/Temporal/Duration/prototype/total/blank-duration.js` and `test/built-ins/Temporal/Duration/prototype/total/zero-duration.js`.
-- fix: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification ([#92](https://github.com/fullcalendar/temporal-polyfill/issues/92)).
-- fix: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day ([#84](https://github.com/fullcalendar/temporal-polyfill/issues/84)).
-- fix: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles ([#75](https://github.com/fullcalendar/temporal-polyfill/issues/75)). This correct behavior is now also covered by test262's `test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js` and `test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/default-does-not-include-year-time-and-time-zone-name.js`.
-- fix: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 ([#74](https://github.com/fullcalendar/temporal-polyfill/issues/74)). This correct behavior is mostly covered by test262's broader Buddhist calendar conversion tests, including `test/intl402/Temporal/PlainDate/from/roundtrip-from-property-bag.js` and `test/intl402/Temporal/PlainDate/prototype/withCalendar/extreme-dates.js`, though not by this exact edge case.
-- fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` ([#73](https://github.com/fullcalendar/temporal-polyfill/issues/73)). The root cause is mostly covered by test262's `test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/transitions-close-together.js` and `test/intl402/Temporal/ZonedDateTime/prototype/startOfDay/transitions-close-together.js`, though not by these exact string parsing cases.
-- fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 ([#49](https://github.com/fullcalendar/temporal-polyfill/issues/49)). No matching test262 coverage was found for this future-offset property-bag construction case.
-- No more temporal-spec?
 - Calendars more conformant
 - Removed Node 14 support
 - global.min.js no longer part of published dist (use jsdelivr)
