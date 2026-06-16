@@ -4,6 +4,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { durationGetters } from '../../apiHelpers/shimMixins'
 import { toStrictInteger } from '../../internal/cast'
 import { compareDurations } from '../../internal/compare'
 import { refineDurationObjectLike } from '../../internal/createFromFields'
@@ -15,6 +16,7 @@ import {
   roundDuration,
   validateDurationFields,
 } from '../../internal/durationMath'
+import * as errorMessages from '../../internal/errorMessages'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import {
   formatDurationIso,
@@ -30,7 +32,7 @@ import type {
   RelativeToOptions,
 } from '../../internal/temporalSpecHelpers'
 import { totalDuration } from '../../internal/total'
-import { NumberSign, mapProps } from '../../internal/utils'
+import { NumberSign, mapProps, throwTypeError } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import { DurationRecordBranding } from '../recordBranding'
@@ -50,50 +52,11 @@ export const getShimDurationSlots: (record: unknown) => ShimDurationSlots =
 
 export type ShimDurationRecord = InstanceType<typeof ShimDurationRecord> &
   RecordTypes.DurationRecord
+
 export const ShimDurationRecord = defineTemporalClass(
   DurationRecordBranding,
-  class implements DurationFields {
+  class {
     declare readonly [RecordTypes.DurationRecordBrand]: undefined
-
-    get years() {
-      return getShimDurationSlots(this).years
-    }
-
-    get months() {
-      return getShimDurationSlots(this).months
-    }
-
-    get weeks() {
-      return getShimDurationSlots(this).weeks
-    }
-
-    get days() {
-      return getShimDurationSlots(this).days
-    }
-
-    get hours() {
-      return getShimDurationSlots(this).hours
-    }
-
-    get minutes() {
-      return getShimDurationSlots(this).minutes
-    }
-
-    get seconds() {
-      return getShimDurationSlots(this).seconds
-    }
-
-    get milliseconds() {
-      return getShimDurationSlots(this).milliseconds
-    }
-
-    get microseconds() {
-      return getShimDurationSlots(this).microseconds
-    }
-
-    get nanoseconds() {
-      return getShimDurationSlots(this).nanoseconds
-    }
 
     toJSON() {
       return formatDurationIsoAuto(getShimDurationSlots(this))
@@ -103,6 +66,8 @@ export const ShimDurationRecord = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
+  getShimDurationSlots,
+  durationGetters,
 )
 
 export function createShimDurationRecord(
@@ -151,22 +116,6 @@ export function fromFields(
 
 export function fromString(s: string): ShimDurationRecord {
   return createShimDurationRecord(parseDuration(s))
-}
-
-export function toNative(duration: ShimDurationRecord): Temporal.Duration {
-  const slots = getShimDurationSlots(duration)
-  return new NativeTemporal!.Duration(
-    slots.years,
-    slots.months,
-    slots.weeks,
-    slots.days,
-    slots.hours,
-    slots.minutes,
-    slots.seconds,
-    slots.milliseconds,
-    slots.microseconds,
-    slots.nanoseconds,
-  )
 }
 
 export function sign(duration: ShimDurationRecord): NumberSign {
@@ -276,6 +225,22 @@ export function toBasicString(duration: ShimDurationRecord): string {
   return formatDurationIsoAuto(getShimDurationSlots(duration))
 }
 
+export function toNative(duration: ShimDurationRecord): Temporal.Duration {
+  const slots = getShimDurationSlots(duration)
+  return new NativeTemporal!.Duration(
+    slots.years,
+    slots.months,
+    slots.weeks,
+    slots.days,
+    slots.hours,
+    slots.minutes,
+    slots.seconds,
+    slots.milliseconds,
+    slots.microseconds,
+    slots.nanoseconds,
+  )
+}
+
 // Util
 // ----
 
@@ -297,6 +262,6 @@ function refineRelativeTo(
     if (slots) {
       return slots as RelativeToSlots
     }
-    // otherwise, throw error?
+    throwTypeError(errorMessages.invalidRelativeTo(arg))
   }
 }

@@ -56,6 +56,7 @@ export const getNativePlainDate: (record: unknown) => Temporal.PlainDate =
 
 export type NativePlainDateRecord = InstanceType<typeof NativePlainDateRecord> &
   RecordTypes.PlainDateRecord
+
 export const NativePlainDateRecord = defineTemporalClass(
   PlainDateRecordBranding,
   class {
@@ -120,9 +121,6 @@ export function fromString(
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
   return createNativePlainDateRecord(resNative)
 }
-
-export const toNative: (record: NativePlainDateRecord) => Temporal.PlainDate =
-  getNativePlainDate
 
 export function getFields(record: NativePlainDateRecord): DateFields {
   const native = getNativePlainDate(record)
@@ -244,6 +242,30 @@ export function compare(
   return NativeTemporal!.PlainDate.compare(native, otherNative) as NumberSign // !!!
 }
 
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createNativeDateTimeFormatFactory(getNativePlainDate)
+
+export function toLocaleString(
+  record: NativePlainDateRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getNativePlainDate(record).toLocaleString(locales, options)
+}
+
+export function toString(
+  record: NativePlainDateRecord,
+  options?: Temporal.PlainDateToStringOptions,
+): string {
+  return getNativePlainDate(record).toString(options)
+}
+
+export function toBasicString(record: NativePlainDateRecord): string {
+  return getNativePlainDate(record).toString()
+}
+
 export function toZonedDateTime(
   record: NativePlainDateRecord,
   options: string | PlainDateToZonedDateTimeOptions<NativePlainTimeRecord>,
@@ -290,29 +312,8 @@ export function toPlainMonthDay(
   return createNativePlainMonthDayRecord(resNative)
 }
 
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getNativePlainDate)
-
-export function toLocaleString(
-  record: NativePlainDateRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  return getNativePlainDate(record).toLocaleString(locales, options)
-}
-
-export function toString(
-  record: NativePlainDateRecord,
-  options?: Temporal.PlainDateToStringOptions,
-): string {
-  return getNativePlainDate(record).toString(options)
-}
-
-export function toBasicString(record: NativePlainDateRecord): string {
-  return getNativePlainDate(record).toString()
-}
+export const toNative: (record: NativePlainDateRecord) => Temporal.PlainDate =
+  getNativePlainDate
 
 // Non-standard: With
 // -----------------------------------------------------------------------------

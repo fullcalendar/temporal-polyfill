@@ -41,6 +41,7 @@ export type NativePlainYearMonthRecord = InstanceType<
   typeof NativePlainYearMonthRecord
 > &
   RecordTypes.PlainYearMonthRecord
+
 export const NativePlainYearMonthRecord = defineTemporalClass(
   PlainYearMonthRecordBranding,
   class {
@@ -106,12 +107,6 @@ export function fromString(
   return createNativePlainYearMonthRecord(resNative)
 }
 
-// Native PlainYearMonth keeps its reference ISO day in an internal slot.
-// Returning the stored native object is the only lossless conversion here.
-export const toNative: (
-  record: NativePlainYearMonthRecord,
-) => Temporal.PlainYearMonth = getNativePlainYearMonth
-
 export function daysInMonth(record: NativePlainYearMonthRecord): number {
   return getNativePlainYearMonth(record).daysInMonth
 }
@@ -149,24 +144,6 @@ export function add(
   return createNativePlainYearMonthRecord(resNative)
 }
 
-export function addYears(
-  record: NativePlainYearMonthRecord,
-  years: number,
-  options?: Temporal.OverflowOptions,
-): NativePlainYearMonthRecord {
-  const resNative = getNativePlainYearMonth(record).add({ years }, options)
-  return createNativePlainYearMonthRecord(resNative)
-}
-
-export function addMonths(
-  record: NativePlainYearMonthRecord,
-  months: number,
-  options?: Temporal.OverflowOptions,
-): NativePlainYearMonthRecord {
-  const resNative = getNativePlainYearMonth(record).add({ months }, options)
-  return createNativePlainYearMonthRecord(resNative)
-}
-
 export function subtract(
   record: NativePlainYearMonthRecord,
   duration: NativeDurationRecord,
@@ -175,27 +152,6 @@ export function subtract(
   const native = getNativePlainYearMonth(record)
   const durationNative = getNativeDuration(duration)
   const resNative = native.subtract(durationNative, options)
-  return createNativePlainYearMonthRecord(resNative)
-}
-
-export function subtractYears(
-  record: NativePlainYearMonthRecord,
-  years: number,
-  options?: Temporal.OverflowOptions,
-): NativePlainYearMonthRecord {
-  const resNative = getNativePlainYearMonth(record).subtract({ years }, options)
-  return createNativePlainYearMonthRecord(resNative)
-}
-
-export function subtractMonths(
-  record: NativePlainYearMonthRecord,
-  months: number,
-  options?: Temporal.OverflowOptions,
-): NativePlainYearMonthRecord {
-  const resNative = getNativePlainYearMonth(record).subtract(
-    { months },
-    options,
-  )
   return createNativePlainYearMonthRecord(resNative)
 }
 
@@ -209,58 +165,6 @@ export function diff(
   const otherNative = getNativePlainYearMonth(otherRecord)
   const resNative = native.until(otherNative, options)
   return createNativeDurationRecord(resNative)
-}
-
-export function diffYears(
-  record0: NativePlainYearMonthRecord,
-  record1: NativePlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.PlainYearMonth>)(
-    getNativePlainYearMonth(record0),
-    getNativePlainYearMonth(record1),
-    options,
-  )
-}
-
-export function diffMonths(
-  record0: NativePlainYearMonthRecord,
-  record1: NativePlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.PlainYearMonth>)(
-    getNativePlainYearMonth(record0),
-    getNativePlainYearMonth(record1),
-    options,
-  )
-}
-
-export function roundToYear(
-  record: NativePlainYearMonthRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): NativePlainYearMonthRecord {
-  return createNativePlainYearMonthRecord(
-    TemporalUtils.roundToYear(
-      getNativePlainYearMonth(record),
-      normalizeRoundToOptions(options),
-    ),
-  )
-}
-
-export function startOfYear(
-  record: NativePlainYearMonthRecord,
-): NativePlainYearMonthRecord {
-  return createNativePlainYearMonthRecord(
-    TemporalUtils.startOfYear(getNativePlainYearMonth(record)),
-  )
-}
-
-export function endOfYear(
-  record: NativePlainYearMonthRecord,
-): NativePlainYearMonthRecord {
-  return createNativePlainYearMonthRecord(
-    TemporalUtils.endOfYear(getNativePlainYearMonth(record)),
-  )
 }
 
 export function equals(
@@ -282,15 +186,6 @@ export function compare(
     native,
     otherNative,
   ) as NumberSign // !!!
-}
-
-export function toPlainDate(
-  record: NativePlainYearMonthRecord,
-  fields: { day: number },
-): NativePlainDateRecord {
-  const native = getNativePlainYearMonth(record)
-  const resNative = native.toPlainDate(fields)
-  return createNativePlainDateRecord(resNative)
 }
 
 export const createFormat: (
@@ -315,4 +210,125 @@ export function toString(
 
 export function toBasicString(record: NativePlainYearMonthRecord): string {
   return getNativePlainYearMonth(record).toString()
+}
+
+export function toPlainDate(
+  record: NativePlainYearMonthRecord,
+  fields: { day: number },
+): NativePlainDateRecord {
+  const native = getNativePlainYearMonth(record)
+  const resNative = native.toPlainDate(fields)
+  return createNativePlainDateRecord(resNative)
+}
+
+// Native PlainYearMonth keeps its reference ISO day in an internal slot.
+// Returning the stored native object is the only lossless conversion here.
+export const toNative: (
+  record: NativePlainYearMonthRecord,
+) => Temporal.PlainYearMonth = getNativePlainYearMonth
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+export function addYears(
+  record: NativePlainYearMonthRecord,
+  years: number,
+  options?: Temporal.OverflowOptions,
+): NativePlainYearMonthRecord {
+  const resNative = getNativePlainYearMonth(record).add({ years }, options)
+  return createNativePlainYearMonthRecord(resNative)
+}
+
+export function addMonths(
+  record: NativePlainYearMonthRecord,
+  months: number,
+  options?: Temporal.OverflowOptions,
+): NativePlainYearMonthRecord {
+  const resNative = getNativePlainYearMonth(record).add({ months }, options)
+  return createNativePlainYearMonthRecord(resNative)
+}
+
+export function subtractYears(
+  record: NativePlainYearMonthRecord,
+  years: number,
+  options?: Temporal.OverflowOptions,
+): NativePlainYearMonthRecord {
+  const resNative = getNativePlainYearMonth(record).subtract({ years }, options)
+  return createNativePlainYearMonthRecord(resNative)
+}
+
+export function subtractMonths(
+  record: NativePlainYearMonthRecord,
+  months: number,
+  options?: Temporal.OverflowOptions,
+): NativePlainYearMonthRecord {
+  const resNative = getNativePlainYearMonth(record).subtract(
+    { months },
+    options,
+  )
+  return createNativePlainYearMonthRecord(resNative)
+}
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+export function roundToYear(
+  record: NativePlainYearMonthRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): NativePlainYearMonthRecord {
+  return createNativePlainYearMonthRecord(
+    TemporalUtils.roundToYear(
+      getNativePlainYearMonth(record),
+      normalizeRoundToOptions(options),
+    ),
+  )
+}
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export function startOfYear(
+  record: NativePlainYearMonthRecord,
+): NativePlainYearMonthRecord {
+  return createNativePlainYearMonthRecord(
+    TemporalUtils.startOfYear(getNativePlainYearMonth(record)),
+  )
+}
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+export function endOfYear(
+  record: NativePlainYearMonthRecord,
+): NativePlainYearMonthRecord {
+  return createNativePlainYearMonthRecord(
+    TemporalUtils.endOfYear(getNativePlainYearMonth(record)),
+  )
+}
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+export function diffYears(
+  record0: NativePlainYearMonthRecord,
+  record1: NativePlainYearMonthRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  return (TemporalUtils.diffYears as NativeDiffFunc<Temporal.PlainYearMonth>)(
+    getNativePlainYearMonth(record0),
+    getNativePlainYearMonth(record1),
+    options,
+  )
+}
+
+export function diffMonths(
+  record0: NativePlainYearMonthRecord,
+  record1: NativePlainYearMonthRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  return (TemporalUtils.diffMonths as NativeDiffFunc<Temporal.PlainYearMonth>)(
+    getNativePlainYearMonth(record0),
+    getNativePlainYearMonth(record1),
+    options,
+  )
 }

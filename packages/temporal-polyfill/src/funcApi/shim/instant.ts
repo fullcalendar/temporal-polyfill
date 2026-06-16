@@ -82,6 +82,7 @@ export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
 
 export type ShimInstantRecord = InstanceType<typeof ShimInstantRecord> &
   RecordTypes.InstantRecord
+
 export const ShimInstantRecord = defineTemporalClass(
   InstantRecordBranding,
   class {
@@ -138,11 +139,6 @@ export function fromString(s: string): ShimInstantRecord {
   return createShimInstantRecord(resSlots)
 }
 
-export function toNative(record: ShimInstantRecord): Temporal.Instant {
-  const slots = getShimInstantSlots(record)
-  return new NativeTemporal!.Instant(slots.epochNanoseconds)
-}
-
 export function add(
   record: ShimInstantRecord,
   durationRecord: ShimDurationRecord,
@@ -166,6 +162,106 @@ export function subtract(
   )
   return createShimInstantRecord(resSlots)
 }
+
+// this is equivalent to Temporal's `until`
+export function diff(
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+): ShimDurationRecord {
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
+  const resSlots = diffInstants(false, slots, otherSlots, options)
+  return createShimDurationRecord(resSlots)
+}
+
+export function equals(
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
+): boolean {
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
+  return instantsEqual(slots, otherSlots)
+}
+
+export function compare(
+  record: ShimInstantRecord,
+  otherRecord: ShimInstantRecord,
+): NumberSign {
+  const slots = getShimInstantSlots(record)
+  const otherSlots = getShimInstantSlots(otherRecord)
+  return compareInstants(slots, otherSlots)
+}
+
+export function toZonedDateTimeISO(
+  record: ShimInstantRecord,
+  timeZoneId: string,
+): ShimZonedDateTimeRecord {
+  const resSlots = instantToZonedDateTime(
+    getShimInstantSlots(record),
+    queryTimeZone(refineTimeZoneId(timeZoneId)),
+  )
+  return createShimZonedDateTimeRecord(resSlots)
+}
+
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createDateTimeFormatFactory<ShimInstantRecord>(
+  (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getShimInstantSlots(record)
+      return [internals.baseFormat, getEpochMilli(slots)]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getShimInstantSlots(record0)
+      const slots1 = getShimInstantSlots(record1)
+      return [
+        internals.baseFormat,
+        getEpochMilli(slots0),
+        getEpochMilli(slots1),
+      ]
+    },
+  }),
+  (options) =>
+    transformInstantOptions(options, /* allowPartialOverlap = */ true),
+)
+
+export function toLocaleString(
+  record: ShimInstantRecord,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
+): string {
+  const slots = getShimInstantSlots(record)
+  const format = new RawDateTimeFormat(
+    locales,
+    transformInstantOptions(options),
+  )
+  return format.format(getEpochMilli(slots))
+}
+
+export function toString(
+  record: ShimInstantRecord,
+  options?: InstantStringTimeZoneDisplayOptions,
+): string {
+  return formatInstantIso(
+    refineTimeZoneId,
+    getShimInstantSlots(record),
+    options,
+  )
+}
+
+export function toBasicString(record: ShimInstantRecord): string {
+  return formatInstantIsoAuto(getShimInstantSlots(record))
+}
+
+export function toNative(record: ShimInstantRecord): Temporal.Instant {
+  const slots = getShimInstantSlots(record)
+  return new NativeTemporal!.Instant(slots.epochNanoseconds)
+}
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
 
 function moveByNanoseconds(
   record: ShimInstantRecord,
@@ -292,41 +388,8 @@ export function subtractNanoseconds(
   return moveByNanoseconds(record, -BigInt(toStrictInteger(nanoseconds)))
 }
 
-// this is equivalent to Temporal's `until`
-export function diff(
-  record: ShimInstantRecord,
-  otherRecord: ShimInstantRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): ShimDurationRecord {
-  const slots = getShimInstantSlots(record)
-  const otherSlots = getShimInstantSlots(otherRecord)
-  const resSlots = diffInstants(false, slots, otherSlots, options)
-  return createShimDurationRecord(resSlots)
-}
-
-const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
-  ShimInstantRecord,
-  ShimInstantSlots
->(diffInstantEpochNanoTimeUnit, getShimInstantSlots)
-
-export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Minute,
-  nanoInMinute,
-)
-export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
-export const diffMilliseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Millisecond,
-  nanoInMilli,
-)
-export const diffMicroseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Microsecond,
-  nanoInMicro,
-)
-export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
+// Non-standard: Round
+// -----------------------------------------------------------------------------
 
 function roundToUnit(
   smallestUnit: TimeUnit,
@@ -359,82 +422,29 @@ export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
 export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
 export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
 
-export function equals(
-  record: ShimInstantRecord,
-  otherRecord: ShimInstantRecord,
-): boolean {
-  const slots = getShimInstantSlots(record)
-  const otherSlots = getShimInstantSlots(otherRecord)
-  return instantsEqual(slots, otherSlots)
-}
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
 
-export function compare(
-  record: ShimInstantRecord,
-  otherRecord: ShimInstantRecord,
-): NumberSign {
-  const slots = getShimInstantSlots(record)
-  const otherSlots = getShimInstantSlots(otherRecord)
-  return compareInstants(slots, otherSlots)
-}
+const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
+  ShimInstantRecord,
+  ShimInstantSlots
+>(diffInstantEpochNanoTimeUnit, getShimInstantSlots)
 
-export function toZonedDateTimeISO(
-  record: ShimInstantRecord,
-  timeZoneId: string,
-): ShimZonedDateTimeRecord {
-  const resSlots = instantToZonedDateTime(
-    getShimInstantSlots(record),
-    queryTimeZone(refineTimeZoneId(timeZoneId)),
-  )
-  return createShimZonedDateTimeRecord(resSlots)
-}
-
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimInstantRecord>(
-  (internals) => ({
-    getArgsForSingle: (record) => {
-      const slots = getShimInstantSlots(record)
-      return [internals.baseFormat, getEpochMilli(slots)]
-    },
-    getArgsForRange: (record0, record1) => {
-      const slots0 = getShimInstantSlots(record0)
-      const slots1 = getShimInstantSlots(record1)
-      return [
-        internals.baseFormat,
-        getEpochMilli(slots0),
-        getEpochMilli(slots1),
-      ]
-    },
-  }),
-  (options) =>
-    transformInstantOptions(options, /* allowPartialOverlap = */ true),
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Minute,
+  nanoInMinute,
 )
-
-export function toLocaleString(
-  record: ShimInstantRecord,
-  locales: LocalesArg | undefined = undefined,
-  options: Intl.DateTimeFormatOptions = {},
-): string {
-  const slots = getShimInstantSlots(record)
-  const format = new RawDateTimeFormat(
-    locales,
-    transformInstantOptions(options),
-  )
-  return format.format(getEpochMilli(slots))
-}
-
-export function toString(
-  record: ShimInstantRecord,
-  options?: InstantStringTimeZoneDisplayOptions,
-): string {
-  return formatInstantIso(
-    refineTimeZoneId,
-    getShimInstantSlots(record),
-    options,
-  )
-}
-
-export function toBasicString(record: ShimInstantRecord): string {
-  return formatInstantIsoAuto(getShimInstantSlots(record))
-}
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
+export const diffMilliseconds = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+export const diffMicroseconds = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)

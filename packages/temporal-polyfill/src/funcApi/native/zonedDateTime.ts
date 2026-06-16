@@ -50,6 +50,7 @@ export type NativeZonedDateTimeRecord = InstanceType<
   typeof NativeZonedDateTimeRecord
 > &
   RecordTypes.ZonedDateTimeRecord
+
 export const NativeZonedDateTimeRecord = defineTemporalClass(
   ZonedDateTimeRecordBranding,
   class {
@@ -126,10 +127,6 @@ export function fromString(
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
   return createNativeZonedDateTimeRecord(resNative)
 }
-
-export const toNative: (
-  record: NativeZonedDateTimeRecord,
-) => Temporal.ZonedDateTime = getNativeZonedDateTime
 
 export function withFields(
   record: NativeZonedDateTimeRecord,
@@ -325,6 +322,14 @@ export function compare(
   ) as NumberSign // !!!
 }
 
+export function toLocaleString(
+  record: NativeZonedDateTimeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getNativeZonedDateTime(record).toLocaleString(locales, options)
+}
+
 export function toInstant(
   record: NativeZonedDateTimeRecord,
 ): NativeInstantRecord {
@@ -353,13 +358,9 @@ export function toPlainTime(
   return createNativePlainTimeRecord(resNative)
 }
 
-export function toLocaleString(
+export const toNative: (
   record: NativeZonedDateTimeRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  return getNativeZonedDateTime(record).toLocaleString(locales, options)
-}
+) => Temporal.ZonedDateTime = getNativeZonedDateTime
 
 // Non-standard: With
 // -----------------------------------------------------------------------------
@@ -566,7 +567,7 @@ export function subtractNanoseconds(
   return createNativeZonedDateTimeRecord(resNative)
 }
 
-// Non-standard: Round / Start / End
+// Non-standard: Round
 // -----------------------------------------------------------------------------
 
 export function roundToYear(
@@ -618,6 +619,9 @@ export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
 export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
 export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
 export function startOfYear(record: NativeZonedDateTimeRecord) {
   return createNativeZonedDateTimeRecord(
     TemporalUtils.startOfYear(getNativeZonedDateTime(record)),
@@ -658,6 +662,9 @@ export function startOfMicrosecond(record: NativeZonedDateTimeRecord) {
     TemporalUtils.startOfMicrosecond(getNativeZonedDateTime(record)),
   )
 }
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
 
 export function endOfYear(record: NativeZonedDateTimeRecord) {
   return createNativeZonedDateTimeRecord(

@@ -83,6 +83,8 @@ export const outOfBoundsDate = 'Out-of-bounds date'
 export const outOfBoundsDuration = 'Out-of-bounds duration'
 export const forbiddenDurationSigns = 'Cannot mix duration signs'
 export const missingRelativeTo = 'Missing relativeTo'
+export const invalidRelativeTo = (arg: unknown) =>
+  invalidEntity('relativeTo', arg)
 export const invalidLargeUnits = 'Cannot use large units' // for Instant math
 export const invalidSmallUnits = 'Cannot use small units'
 

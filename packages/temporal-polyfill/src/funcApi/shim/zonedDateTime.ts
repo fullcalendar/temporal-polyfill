@@ -163,6 +163,7 @@ export type ShimZonedDateTimeRecord = InstanceType<
   typeof ShimZonedDateTimeRecord
 > &
   RecordTypes.ZonedDateTimeRecord
+
 export const ShimZonedDateTimeRecord = defineTemporalClass(
   ZonedDateTimeRecordBranding,
   class {
@@ -252,17 +253,6 @@ export function fromString(
       createShimCalendarStringResolver(getCalendarRecord),
       options,
     ),
-  )
-}
-
-export function toNative(
-  record: ShimZonedDateTimeRecord,
-): Temporal.ZonedDateTime {
-  const slots = getShimZonedDateTimeSlots(record)
-  return new NativeTemporal!.ZonedDateTime(
-    slots.epochNanoseconds,
-    slots.timeZone.id,
-    getCalendarSlotId(slots.calendar),
   )
 }
 
@@ -476,6 +466,23 @@ export function compare(
   return compareZonedDateTimes(slots, otherSlots)
 }
 
+export function toLocaleString(
+  record: ShimZonedDateTimeRecord,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
+): string {
+  const slots = getShimZonedDateTimeSlots(record)
+  const format = new RawDateTimeFormat(
+    locales,
+    applyZonedFormatTimeZone(
+      transformZonedOptions(options),
+      getZonedTimeZoneId(slots),
+    ),
+  )
+  checkResolvedCalendarCompatible(format, slots)
+  return format.format(getEpochMilli(slots))
+}
+
 export function toInstant(record: ShimZonedDateTimeRecord): ShimInstantRecord {
   const resSlots = zonedDateTimeToInstant(getShimZonedDateTimeSlots(record))
   return createShimInstantRecord(resSlots)
@@ -504,21 +511,15 @@ export function toPlainTime(
   return createShimPlainTimeRecord(resSlots)
 }
 
-export function toLocaleString(
+export function toNative(
   record: ShimZonedDateTimeRecord,
-  locales: LocalesArg | undefined = undefined,
-  options: Intl.DateTimeFormatOptions = {},
-): string {
+): Temporal.ZonedDateTime {
   const slots = getShimZonedDateTimeSlots(record)
-  const format = new RawDateTimeFormat(
-    locales,
-    applyZonedFormatTimeZone(
-      transformZonedOptions(options),
-      getZonedTimeZoneId(slots),
-    ),
+  return new NativeTemporal!.ZonedDateTime(
+    slots.epochNanoseconds,
+    slots.timeZone.id,
+    getCalendarSlotId(slots.calendar),
   )
-  checkResolvedCalendarCompatible(format, slots)
-  return format.format(getEpochMilli(slots))
 }
 
 // Non-standard: With

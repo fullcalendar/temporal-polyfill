@@ -32,6 +32,7 @@ export type NativePlainMonthDayRecord = InstanceType<
   typeof NativePlainMonthDayRecord
 > &
   RecordTypes.PlainMonthDayRecord
+
 export const NativePlainMonthDayRecord = defineTemporalClass(
   PlainMonthDayRecordBranding,
   class {
@@ -97,12 +98,6 @@ export function fromString(
   return createNativePlainMonthDayRecord(resNative)
 }
 
-// Native PlainMonthDay keeps its reference ISO year in an internal slot.
-// Returning the stored native object is the only lossless conversion here.
-export const toNative: (
-  record: NativePlainMonthDayRecord,
-) => Temporal.PlainMonthDay = getNativePlainMonthDay
-
 export function withFields(
   record: NativePlainMonthDayRecord,
   mod: Partial<MonthDayFields>,
@@ -120,15 +115,6 @@ export function equals(
   const native = getNativePlainMonthDay(record)
   const otherNative = getNativePlainMonthDay(otherRecord)
   return native.equals(otherNative)
-}
-
-export function toPlainDate(
-  record: NativePlainMonthDayRecord,
-  fields: { era?: string; eraYear?: number; year?: number },
-): NativePlainDateRecord {
-  const native = getNativePlainMonthDay(record)
-  const resNative = native.toPlainDate(fields)
-  return createNativePlainDateRecord(resNative)
 }
 
 export const createFormat: (
@@ -154,3 +140,18 @@ export function toString(
 export function toBasicString(record: NativePlainMonthDayRecord): string {
   return getNativePlainMonthDay(record).toString()
 }
+
+export function toPlainDate(
+  record: NativePlainMonthDayRecord,
+  fields: { era?: string; eraYear?: number; year?: number },
+): NativePlainDateRecord {
+  const native = getNativePlainMonthDay(record)
+  const resNative = native.toPlainDate(fields)
+  return createNativePlainDateRecord(resNative)
+}
+
+// Native PlainMonthDay keeps its reference ISO year in an internal slot.
+// Returning the stored native object is the only lossless conversion here.
+export const toNative: (
+  record: NativePlainMonthDayRecord,
+) => Temporal.PlainMonthDay = getNativePlainMonthDay

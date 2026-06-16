@@ -140,6 +140,7 @@ export const getShimPlainDateSlots: (record: unknown) => ShimPlainDateSlots =
 
 export type ShimPlainDateRecord = InstanceType<typeof ShimPlainDateRecord> &
   RecordTypes.PlainDateRecord
+
 export const ShimPlainDateRecord = defineTemporalClass(
   PlainDateRecordBranding,
   class {
@@ -207,25 +208,6 @@ export function fromString(
   )
 }
 
-export function toNative(record: ShimPlainDateRecord): Temporal.PlainDate {
-  const slots = getShimPlainDateSlots(record)
-  return new NativeTemporal!.PlainDate(
-    slots.year,
-    slots.month,
-    slots.day,
-    getCalendarSlotId(slots.calendar),
-  )
-}
-
-export function withCalendar(
-  record: ShimPlainDateRecord,
-  inputCalendar: CalendarRecord,
-): ShimPlainDateRecord {
-  const slots = getShimPlainDateSlots(record)
-  const calendarImpl = getCalendarRecordImpl(inputCalendar)
-  return createShimPlainDateRecord(createDateSlots(slots, calendarImpl))
-}
-
 export function withFields(
   record: ShimPlainDateRecord,
   mod: Partial<DateFields>,
@@ -236,9 +218,13 @@ export function withFields(
   return createShimPlainDateRecord(resSlots)
 }
 
-export function dayOfYear(record: ShimPlainDateRecord) {
+export function withCalendar(
+  record: ShimPlainDateRecord,
+  inputCalendar: CalendarRecord,
+): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
-  return computeCalendarDayOfYear(slots.calendar, slots)
+  const calendarImpl = getCalendarRecordImpl(inputCalendar)
+  return createShimPlainDateRecord(createDateSlots(slots, calendarImpl))
 }
 
 export function dayOfWeek(record: ShimPlainDateRecord): number {
@@ -258,6 +244,11 @@ export function weekOfYear(record: ShimPlainDateRecord): number | undefined {
 export function yearOfWeek(record: ShimPlainDateRecord): number | undefined {
   const slots = getShimPlainDateSlots(record)
   return computeCalendarYearOfWeek(slots.calendar, slots)
+}
+
+export function dayOfYear(record: ShimPlainDateRecord) {
+  const slots = getShimPlainDateSlots(record)
+  return computeCalendarDayOfYear(slots.calendar, slots)
 }
 
 export function daysInMonth(record: ShimPlainDateRecord): number {
@@ -344,6 +335,57 @@ export function compare(
   return compareIsoDateFields(slots, otherSlots)
 }
 
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createDateTimeFormatFactory<ShimPlainDateRecord>(
+  (internals) => ({
+    getArgsForSingle: (record) => {
+      const slots = getShimPlainDateSlots(record)
+      const format = internals.baseFormat
+      checkResolvedCalendarCompatible(format, slots)
+      return [format, isoDateToEpochMilli(slots)]
+    },
+    getArgsForRange: (record0, record1) => {
+      const slots0 = getShimPlainDateSlots(record0)
+      const slots1 = getShimPlainDateSlots(record1)
+      const format = internals.baseFormat
+      checkResolvedCalendarCompatible(format, slots0)
+      checkResolvedCalendarCompatible(format, slots1)
+      return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
+    },
+  }),
+  (options) =>
+    applyPlainFormatTimeZone(
+      transformDateOptions(options, /* allowPartialOverlap = */ true),
+    ),
+)
+
+export function toLocaleString(
+  record: ShimPlainDateRecord,
+  locales: LocalesArg | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = {},
+): string {
+  const slots = getShimPlainDateSlots(record)
+  const format = new RawDateTimeFormat(
+    locales,
+    applyPlainFormatTimeZone(transformDateOptions(options)),
+  )
+  checkResolvedCalendarCompatible(format, slots)
+  return format.format(isoDateToEpochMilli(slots))
+}
+
+export function toString(
+  record: ShimPlainDateRecord,
+  options?: Temporal.PlainDateToStringOptions,
+): string {
+  return formatPlainDateIso(getShimPlainDateSlots(record), options)
+}
+
+export function toBasicString(record: ShimPlainDateRecord): string {
+  return formatDateIsoAuto(getShimPlainDateSlots(record))
+}
+
 export function toZonedDateTime(
   record: ShimPlainDateRecord,
   options: string | PlainDateToZonedDateTimeOptions<ShimPlainTimeRecord>,
@@ -398,55 +440,14 @@ export function toPlainMonthDay(
   return createShimPlainMonthDayRecord(resSlots)
 }
 
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createDateTimeFormatFactory<ShimPlainDateRecord>(
-  (internals) => ({
-    getArgsForSingle: (record) => {
-      const slots = getShimPlainDateSlots(record)
-      const format = internals.baseFormat
-      checkResolvedCalendarCompatible(format, slots)
-      return [format, isoDateToEpochMilli(slots)]
-    },
-    getArgsForRange: (record0, record1) => {
-      const slots0 = getShimPlainDateSlots(record0)
-      const slots1 = getShimPlainDateSlots(record1)
-      const format = internals.baseFormat
-      checkResolvedCalendarCompatible(format, slots0)
-      checkResolvedCalendarCompatible(format, slots1)
-      return [format, isoDateToEpochMilli(slots0), isoDateToEpochMilli(slots1)]
-    },
-  }),
-  (options) =>
-    applyPlainFormatTimeZone(
-      transformDateOptions(options, /* allowPartialOverlap = */ true),
-    ),
-)
-
-export function toLocaleString(
-  record: ShimPlainDateRecord,
-  locales: LocalesArg | undefined = undefined,
-  options: Intl.DateTimeFormatOptions = {},
-): string {
+export function toNative(record: ShimPlainDateRecord): Temporal.PlainDate {
   const slots = getShimPlainDateSlots(record)
-  const format = new RawDateTimeFormat(
-    locales,
-    applyPlainFormatTimeZone(transformDateOptions(options)),
+  return new NativeTemporal!.PlainDate(
+    slots.year,
+    slots.month,
+    slots.day,
+    getCalendarSlotId(slots.calendar),
   )
-  checkResolvedCalendarCompatible(format, slots)
-  return format.format(isoDateToEpochMilli(slots))
-}
-
-export function toString(
-  record: ShimPlainDateRecord,
-  options?: Temporal.PlainDateToStringOptions,
-): string {
-  return formatPlainDateIso(getShimPlainDateSlots(record), options)
-}
-
-export function toBasicString(record: ShimPlainDateRecord): string {
-  return formatDateIsoAuto(getShimPlainDateSlots(record))
 }
 
 // Non-standard: With

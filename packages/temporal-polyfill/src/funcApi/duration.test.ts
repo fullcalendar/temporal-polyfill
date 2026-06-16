@@ -200,6 +200,18 @@ describe('round', () => {
     })
     expectDurationEquals(rounded, { months: 2 }) // b/c Feb 2024 has 29 days
   })
+
+  it('rejects invalid relativeTo records', () => {
+    const dur = DurationFns.fromFields({ days: 1, hours: 12 })
+    const invalidRelativeTo = DurationFns.create()
+
+    expect(() =>
+      DurationFns.round(dur, {
+        smallestUnit: 'days',
+        relativeTo: invalidRelativeTo as any,
+      }),
+    ).toThrow(TypeError)
+  })
 })
 
 describe('total', () => {
@@ -231,6 +243,18 @@ describe('total', () => {
     )
     const total = DurationFns.total(dur, { unit: 'months', relativeTo: zdt })
     expect(total).toBe(1.5) // b/c Feb 2023 has 28 days
+  })
+
+  it('rejects invalid relativeTo records', () => {
+    const dur = DurationFns.fromFields({ days: 1, hours: 12 })
+    const invalidRelativeTo = DurationFns.create()
+
+    expect(() =>
+      DurationFns.total(dur, {
+        unit: 'days',
+        relativeTo: invalidRelativeTo as any,
+      }),
+    ).toThrow(TypeError)
   })
 })
 
@@ -267,6 +291,18 @@ describe('compare', () => {
     )
     expect(DurationFns.compare(d0, d1, { relativeTo: zdt })).toBe(-1)
     expect(DurationFns.compare(d1, d0, { relativeTo: zdt })).toBe(1)
+  })
+
+  it('rejects invalid relativeTo records', () => {
+    const d0 = DurationFns.fromFields({ days: 1 })
+    const d1 = DurationFns.fromFields({ days: 2 })
+    const invalidRelativeTo = DurationFns.create()
+
+    expect(() =>
+      DurationFns.compare(d0, d1, {
+        relativeTo: invalidRelativeTo as any,
+      }),
+    ).toThrow(TypeError)
   })
 })
 

@@ -32,6 +32,7 @@ export const getNativeInstant: (record: unknown) => Temporal.Instant =
 
 export type NativeInstantRecord = InstanceType<typeof NativeInstantRecord> &
   RecordTypes.InstantRecord
+
 export const NativeInstantRecord = defineTemporalClass(
   InstantRecordBranding,
   class {
@@ -89,9 +90,6 @@ export function fromString(s: string): NativeInstantRecord {
   return createNativeInstantRecord(resNative)
 }
 
-export const toNative: (record: NativeInstantRecord) => Temporal.Instant =
-  getNativeInstant
-
 export function add(
   record: NativeInstantRecord,
   durationRecord: RecordTypes.DurationRecord,
@@ -111,6 +109,75 @@ export function subtract(
   const resNative = native.subtract(durationNative)
   return createNativeInstantRecord(resNative)
 }
+
+// this is equivalent to Temporal's `until`
+export function diff(
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+): NativeDurationRecord {
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
+  const resNative = native.until(otherNative, options)
+  return createNativeDurationRecord(resNative)
+}
+
+export function equals(
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
+): boolean {
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
+  return native.equals(otherNative)
+}
+
+export function compare(
+  record: NativeInstantRecord,
+  otherRecord: NativeInstantRecord,
+): NumberSign {
+  const native = getNativeInstant(record)
+  const otherNative = getNativeInstant(otherRecord)
+  return NativeTemporal!.Instant.compare(native, otherNative) as NumberSign // !!!
+}
+
+export function toZonedDateTimeISO(
+  record: NativeInstantRecord,
+  timeZoneId: string,
+): NativeZonedDateTimeRecord {
+  const native = getNativeInstant(record)
+  const resNative = native.toZonedDateTimeISO(timeZoneId)
+  return createNativeZonedDateTimeRecord(resNative)
+}
+
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createNativeDateTimeFormatFactory(getNativeInstant)
+
+export function toLocaleString(
+  record: NativeInstantRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getNativeInstant(record).toLocaleString(locales, options)
+}
+
+export function toString(
+  record: NativeInstantRecord,
+  options?: InstantStringTimeZoneDisplayOptions,
+): string {
+  return getNativeInstant(record).toString(options)
+}
+
+export function toBasicString(record: NativeInstantRecord): string {
+  return getNativeInstant(record).toString()
+}
+
+export const toNative: (record: NativeInstantRecord) => Temporal.Instant =
+  getNativeInstant
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
 
 export function addHours(
   record: NativeInstantRecord,
@@ -208,17 +275,34 @@ export function subtractNanoseconds(
   return createNativeInstantRecord(resNative)
 }
 
-// this is equivalent to Temporal's `until`
-export function diff(
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+function round(
   record: NativeInstantRecord,
-  otherRecord: NativeInstantRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): NativeDurationRecord {
+  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
+): NativeInstantRecord {
   const native = getNativeInstant(record)
-  const otherNative = getNativeInstant(otherRecord)
-  const resNative = native.until(otherNative, options)
-  return createNativeDurationRecord(resNative)
+  const resNative = native.round(options)
+  return createNativeInstantRecord(resNative)
 }
+
+function roundToUnit(
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
+  record: NativeInstantRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): NativeInstantRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToHour = bindArgs(roundToUnit, 'hour')
+export const roundToMinute = bindArgs(roundToUnit, 'minute')
+export const roundToSecond = bindArgs(roundToUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
 
 export function diffHours(
   record0: NativeInstantRecord,
@@ -290,78 +374,4 @@ export function diffNanoseconds(
     getNativeInstant(record1) as any,
     options,
   )
-}
-
-function round(
-  record: NativeInstantRecord,
-  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
-): NativeInstantRecord {
-  const native = getNativeInstant(record)
-  const resNative = native.round(options)
-  return createNativeInstantRecord(resNative)
-}
-
-function roundToUnit(
-  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
-  record: NativeInstantRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): NativeInstantRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
-}
-
-export const roundToHour = bindArgs(roundToUnit, 'hour')
-export const roundToMinute = bindArgs(roundToUnit, 'minute')
-export const roundToSecond = bindArgs(roundToUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
-
-export function equals(
-  record: NativeInstantRecord,
-  otherRecord: NativeInstantRecord,
-): boolean {
-  const native = getNativeInstant(record)
-  const otherNative = getNativeInstant(otherRecord)
-  return native.equals(otherNative)
-}
-
-export function compare(
-  record: NativeInstantRecord,
-  otherRecord: NativeInstantRecord,
-): NumberSign {
-  const native = getNativeInstant(record)
-  const otherNative = getNativeInstant(otherRecord)
-  return NativeTemporal!.Instant.compare(native, otherNative) as NumberSign // !!!
-}
-
-export function toZonedDateTimeISO(
-  record: NativeInstantRecord,
-  timeZoneId: string,
-): NativeZonedDateTimeRecord {
-  const native = getNativeInstant(record)
-  const resNative = native.toZonedDateTimeISO(timeZoneId)
-  return createNativeZonedDateTimeRecord(resNative)
-}
-
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getNativeInstant)
-
-export function toLocaleString(
-  record: NativeInstantRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  return getNativeInstant(record).toLocaleString(locales, options)
-}
-
-export function toString(
-  record: NativeInstantRecord,
-  options?: InstantStringTimeZoneDisplayOptions,
-): string {
-  return getNativeInstant(record).toString(options)
-}
-
-export function toBasicString(record: NativeInstantRecord): string {
-  return getNativeInstant(record).toString()
 }

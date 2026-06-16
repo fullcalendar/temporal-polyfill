@@ -64,6 +64,7 @@ export const getShimPlainTimeSlots: (record: unknown) => ShimPlainTimeSlots =
 
 export type ShimPlainTimeRecord = InstanceType<typeof ShimPlainTimeRecord> &
   RecordTypes.PlainTimeRecord
+
 export const ShimPlainTimeRecord = defineTemporalClass(
   PlainTimeRecordBranding,
   class {
@@ -122,18 +123,6 @@ export function fromString(s: string): ShimPlainTimeRecord {
   return createShimPlainTimeRecord(parsePlainTime(s))
 }
 
-export function toNative(record: ShimPlainTimeRecord): Temporal.PlainTime {
-  const slots = getShimPlainTimeSlots(record)
-  return new NativeTemporal!.PlainTime(
-    slots.hour,
-    slots.minute,
-    slots.second,
-    slots.millisecond,
-    slots.microsecond,
-    slots.nanosecond,
-  )
-}
-
 export function withFields(
   record: ShimPlainTimeRecord,
   mod: Partial<TimeFields>,
@@ -166,43 +155,6 @@ export function subtract(
   return createShimPlainTimeRecord(resSlots)
 }
 
-function moveByTimeUnit(
-  nanoInUnit: number,
-  record: ShimPlainTimeRecord,
-  units: number,
-): ShimPlainTimeRecord {
-  const slots = getShimPlainTimeSlots(record)
-  const movedNano =
-    BigInt(timeFieldsToNano(slots)) +
-    BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
-
-  // Like nanoToTimeAndDay's floor-mod day split, but kept in bigint space until
-  // after wrapping. These two paths should probably converge someday.
-  // PlainTime has no date component, so overflowing past midnight wraps within
-  // the ISO day and deliberately discards the day delta.
-  const wrappedNano =
-    ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
-
-  return createShimPlainTimeRecord(
-    // result is guaranteed exact TimeFields shape
-    nanoToTimeAndDay(Number(wrappedNano))[0],
-  )
-}
-
-export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
-export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
-export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)
-export const addMilliseconds = bindArgs(moveByTimeUnit, nanoInMilli)
-export const addMicroseconds = bindArgs(moveByTimeUnit, nanoInMicro)
-export const addNanoseconds = bindArgs(moveByTimeUnit, 1)
-
-export const subtractHours = reversedMove(addHours)
-export const subtractMinutes = reversedMove(addMinutes)
-export const subtractSeconds = reversedMove(addSeconds)
-export const subtractMilliseconds = reversedMove(addMilliseconds)
-export const subtractMicroseconds = reversedMove(addMicroseconds)
-export const subtractNanoseconds = reversedMove(addNanoseconds)
-
 // this is equivalent to Temporal's `until`
 export function diff(
   record: ShimPlainTimeRecord,
@@ -214,159 +166,6 @@ export function diff(
   return createShimDurationRecord(
     diffPlainTimes(false, slots, otherSlots, options),
   )
-}
-
-const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
-  ShimPlainTimeRecord,
-  ShimPlainTimeSlots
->(diffPlainTimeNanoOfDayTimeUnit, getShimPlainTimeSlots)
-
-export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Minute,
-  nanoInMinute,
-)
-export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
-export const diffMilliseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Millisecond,
-  nanoInMilli,
-)
-export const diffMicroseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Microsecond,
-  nanoInMicro,
-)
-export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
-
-function roundToUnit(
-  smallestUnit: TimeUnit,
-  record: ShimPlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): ShimPlainTimeRecord {
-  const slots = getShimPlainTimeSlots(record)
-  // We already hold smallestUnit as a separate arg, so refine the options
-  // directly instead of synthesizing a raw options bag for re-parsing.
-  const [roundingInc, roundingMode] = refineRoundToOptions(
-    smallestUnit,
-    options,
-  )
-  return createShimPlainTimeRecord(
-    roundTimeToNano(
-      slots,
-      computeNanoInc(smallestUnit, roundingInc),
-      roundingMode,
-    )[0],
-  )
-}
-
-export const roundToHour = bindArgs(roundToUnit, Unit.Hour)
-export const roundToMinute = bindArgs(roundToUnit, Unit.Minute)
-export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
-export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
-export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
-
-export function startOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    minute: 0,
-    second: 0,
-    millisecond: 0,
-    microsecond: 0,
-    nanosecond: 0,
-  })
-}
-
-export function startOfMinute(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    second: 0,
-    millisecond: 0,
-    microsecond: 0,
-    nanosecond: 0,
-  })
-}
-
-export function startOfSecond(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    millisecond: 0,
-    microsecond: 0,
-    nanosecond: 0,
-  })
-}
-
-export function startOfMillisecond(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    microsecond: 0,
-    nanosecond: 0,
-  })
-}
-
-export function startOfMicrosecond(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    nanosecond: 0,
-  })
-}
-
-export function endOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    minute: 59,
-    second: 59,
-    millisecond: 999,
-    microsecond: 999,
-    nanosecond: 999,
-  })
-}
-
-export function endOfMinute(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    second: 59,
-    millisecond: 999,
-    microsecond: 999,
-    nanosecond: 999,
-  })
-}
-
-export function endOfSecond(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    millisecond: 999,
-    microsecond: 999,
-    nanosecond: 999,
-  })
-}
-
-export function endOfMillisecond(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    microsecond: 999,
-    nanosecond: 999,
-  })
-}
-
-export function endOfMicrosecond(
-  record: ShimPlainTimeRecord,
-): ShimPlainTimeRecord {
-  return createShimPlainTimeRecord({
-    ...getShimPlainTimeSlots(record),
-    nanosecond: 999,
-  })
 }
 
 export function equals(
@@ -435,3 +234,220 @@ export function toString(
 export function toBasicString(record: ShimPlainTimeRecord): string {
   return formatTimeIsoAuto(getShimPlainTimeSlots(record))
 }
+
+export function toNative(record: ShimPlainTimeRecord): Temporal.PlainTime {
+  const slots = getShimPlainTimeSlots(record)
+  return new NativeTemporal!.PlainTime(
+    slots.hour,
+    slots.minute,
+    slots.second,
+    slots.millisecond,
+    slots.microsecond,
+    slots.nanosecond,
+  )
+}
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
+
+function moveByTimeUnit(
+  nanoInUnit: number,
+  record: ShimPlainTimeRecord,
+  units: number,
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
+  const movedNano =
+    BigInt(timeFieldsToNano(slots)) +
+    BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
+
+  // Like nanoToTimeAndDay's floor-mod day split, but kept in bigint space until
+  // after wrapping. These two paths should probably converge someday.
+  // PlainTime has no date component, so overflowing past midnight wraps within
+  // the ISO day and deliberately discards the day delta.
+  const wrappedNano =
+    ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
+
+  return createShimPlainTimeRecord(
+    // result is guaranteed exact TimeFields shape
+    nanoToTimeAndDay(Number(wrappedNano))[0],
+  )
+}
+
+export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
+export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
+export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)
+export const addMilliseconds = bindArgs(moveByTimeUnit, nanoInMilli)
+export const addMicroseconds = bindArgs(moveByTimeUnit, nanoInMicro)
+export const addNanoseconds = bindArgs(moveByTimeUnit, 1)
+
+export const subtractHours = reversedMove(addHours)
+export const subtractMinutes = reversedMove(addMinutes)
+export const subtractSeconds = reversedMove(addSeconds)
+export const subtractMilliseconds = reversedMove(addMilliseconds)
+export const subtractMicroseconds = reversedMove(addMicroseconds)
+export const subtractNanoseconds = reversedMove(addNanoseconds)
+
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+function roundToUnit(
+  smallestUnit: TimeUnit,
+  record: ShimPlainTimeRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): ShimPlainTimeRecord {
+  const slots = getShimPlainTimeSlots(record)
+  // We already hold smallestUnit as a separate arg, so refine the options
+  // directly instead of synthesizing a raw options bag for re-parsing.
+  const [roundingInc, roundingMode] = refineRoundToOptions(
+    smallestUnit,
+    options,
+  )
+  return createShimPlainTimeRecord(
+    roundTimeToNano(
+      slots,
+      computeNanoInc(smallestUnit, roundingInc),
+      roundingMode,
+    )[0],
+  )
+}
+
+export const roundToHour = bindArgs(roundToUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToUnit, Unit.Microsecond)
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export function startOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMinute(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    second: 0,
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfSecond(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    millisecond: 0,
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMillisecond(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    microsecond: 0,
+    nanosecond: 0,
+  })
+}
+
+export function startOfMicrosecond(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    nanosecond: 0,
+  })
+}
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+export function endOfHour(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    minute: 59,
+    second: 59,
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMinute(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    second: 59,
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfSecond(record: ShimPlainTimeRecord): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    millisecond: 999,
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMillisecond(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    microsecond: 999,
+    nanosecond: 999,
+  })
+}
+
+export function endOfMicrosecond(
+  record: ShimPlainTimeRecord,
+): ShimPlainTimeRecord {
+  return createShimPlainTimeRecord({
+    ...getShimPlainTimeSlots(record),
+    nanosecond: 999,
+  })
+}
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
+
+const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
+  ShimPlainTimeRecord,
+  ShimPlainTimeSlots
+>(diffPlainTimeNanoOfDayTimeUnit, getShimPlainTimeSlots)
+
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
+export const diffMinutes = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Minute,
+  nanoInMinute,
+)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
+export const diffMilliseconds = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Millisecond,
+  nanoInMilli,
+)
+export const diffMicroseconds = bindArgs(
+  diffRecordTimeUnit,
+  Unit.Microsecond,
+  nanoInMicro,
+)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)

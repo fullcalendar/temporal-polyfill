@@ -4,10 +4,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import {
-  computeCalendarDateFields,
-  computeCalendarMonthCode,
-} from '../../internal/calendarDerived'
+import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
@@ -65,23 +62,14 @@ export type ShimPlainMonthDayRecord = InstanceType<
   typeof ShimPlainMonthDayRecord
 > &
   RecordTypes.PlainMonthDayRecord
+
 export const ShimPlainMonthDayRecord = defineTemporalClass(
   PlainMonthDayRecordBranding,
-  class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
+  class {
     declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 
     get calendarId() {
       return getCalendarSlotId(getShimPlainMonthDaySlots(this).calendar)
-    }
-
-    get monthCode() {
-      const slots = getShimPlainMonthDaySlots(this)
-      return computeCalendarMonthCode(slots.calendar, slots)
-    }
-
-    get day() {
-      const slots = getShimPlainMonthDaySlots(this)
-      return computeCalendarDateFields(slots.calendar, slots).day
     }
 
     toJSON() {
@@ -92,6 +80,8 @@ export const ShimPlainMonthDayRecord = defineTemporalClass(
       return forbiddenValueOf()
     }
   },
+  getShimPlainMonthDaySlots,
+  monthDayFieldGetters,
 )
 
 export function createShimPlainMonthDayRecord(
@@ -149,18 +139,6 @@ export function fromString(
   )
 }
 
-export function toNative(
-  record: ShimPlainMonthDayRecord,
-): Temporal.PlainMonthDay {
-  const slots = getShimPlainMonthDaySlots(record)
-  return new NativeTemporal!.PlainMonthDay(
-    slots.month,
-    slots.day,
-    getCalendarSlotId(slots.calendar),
-    slots.year,
-  )
-}
-
 export function withFields(
   record: ShimPlainMonthDayRecord,
   mod: Partial<MonthDayFields>,
@@ -178,15 +156,6 @@ export function equals(
   const slots = getShimPlainMonthDaySlots(record)
   const otherSlots = getShimPlainMonthDaySlots(otherRecord)
   return plainMonthDaysEqual(slots, otherSlots)
-}
-
-export function toPlainDate(
-  record: ShimPlainMonthDayRecord,
-  fields: EraYearOrYear,
-): ShimPlainDateRecord {
-  const slots = getShimPlainMonthDaySlots(record)
-  const resSlots = convertPlainMonthDayToDate(slots.calendar, record, fields)
-  return createShimPlainDateRecord(resSlots)
 }
 
 export const createFormat: (
@@ -238,4 +207,25 @@ export function toString(
 
 export function toBasicString(record: ShimPlainMonthDayRecord): string {
   return formatMonthDayIsoAuto(getShimPlainMonthDaySlots(record))
+}
+
+export function toPlainDate(
+  record: ShimPlainMonthDayRecord,
+  fields: EraYearOrYear,
+): ShimPlainDateRecord {
+  const slots = getShimPlainMonthDaySlots(record)
+  const resSlots = convertPlainMonthDayToDate(slots.calendar, record, fields)
+  return createShimPlainDateRecord(resSlots)
+}
+
+export function toNative(
+  record: ShimPlainMonthDayRecord,
+): Temporal.PlainMonthDay {
+  const slots = getShimPlainMonthDaySlots(record)
+  return new NativeTemporal!.PlainMonthDay(
+    slots.month,
+    slots.day,
+    getCalendarSlotId(slots.calendar),
+    slots.year,
+  )
 }

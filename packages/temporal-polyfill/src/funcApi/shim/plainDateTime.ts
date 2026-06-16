@@ -155,6 +155,7 @@ export type ShimPlainDateTimeRecord = InstanceType<
   typeof ShimPlainDateTimeRecord
 > &
   RecordTypes.PlainDateTimeRecord
+
 export const ShimPlainDateTimeRecord = defineTemporalClass(
   PlainDateTimeRecordBranding,
   class {
@@ -234,24 +235,6 @@ export function fromString(
 ): ShimPlainDateTimeRecord {
   return createShimPlainDateTimeRecord(
     parsePlainDateTime(s, createShimCalendarStringResolver(getCalendarRecord)),
-  )
-}
-
-export function toNative(
-  record: ShimPlainDateTimeRecord,
-): Temporal.PlainDateTime {
-  const slots = getShimPlainDateTimeSlots(record)
-  return new NativeTemporal!.PlainDateTime(
-    slots.year,
-    slots.month,
-    slots.day,
-    slots.hour,
-    slots.minute,
-    slots.second,
-    slots.millisecond,
-    slots.microsecond,
-    slots.nanosecond,
-    getCalendarSlotId(slots.calendar),
   )
 }
 
@@ -409,34 +392,6 @@ export function compare(
   return compareIsoDateTimeFields(slots, otherSlots)
 }
 
-export function toZonedDateTime(
-  record: ShimPlainDateTimeRecord,
-  timeZoneId: string,
-  options?: Temporal.DisambiguationOptions,
-): ShimZonedDateTimeRecord {
-  const resSlots = plainDateTimeToZonedDateTime(
-    getShimPlainDateTimeSlots(record),
-    queryTimeZone(refineTimeZoneId(timeZoneId)),
-    options,
-  )
-  return createShimZonedDateTimeRecord(resSlots)
-}
-
-export function toPlainDate(
-  record: ShimPlainDateTimeRecord,
-): ShimPlainDateRecord {
-  const slots = getShimPlainDateTimeSlots(record)
-  const resSlots = createDateSlots(slots, slots.calendar)
-  return createShimPlainDateRecord(resSlots)
-}
-
-export function toPlainTime(
-  record: ShimPlainDateTimeRecord,
-): ShimPlainTimeRecord {
-  const resSlots = createTimeSlots(getShimPlainDateTimeSlots(record))
-  return createShimPlainTimeRecord(resSlots)
-}
-
 export const createFormat: (
   locales?: LocalesArg,
   options?: Intl.DateTimeFormatOptions,
@@ -490,6 +445,52 @@ export function toString(
 
 export function toBasicString(record: ShimPlainDateTimeRecord): string {
   return formatDateTimeIsoAuto(getShimPlainDateTimeSlots(record))
+}
+
+export function toZonedDateTime(
+  record: ShimPlainDateTimeRecord,
+  timeZoneId: string,
+  options?: Temporal.DisambiguationOptions,
+): ShimZonedDateTimeRecord {
+  const resSlots = plainDateTimeToZonedDateTime(
+    getShimPlainDateTimeSlots(record),
+    queryTimeZone(refineTimeZoneId(timeZoneId)),
+    options,
+  )
+  return createShimZonedDateTimeRecord(resSlots)
+}
+
+export function toPlainDate(
+  record: ShimPlainDateTimeRecord,
+): ShimPlainDateRecord {
+  const slots = getShimPlainDateTimeSlots(record)
+  const resSlots = createDateSlots(slots, slots.calendar)
+  return createShimPlainDateRecord(resSlots)
+}
+
+export function toPlainTime(
+  record: ShimPlainDateTimeRecord,
+): ShimPlainTimeRecord {
+  const resSlots = createTimeSlots(getShimPlainDateTimeSlots(record))
+  return createShimPlainTimeRecord(resSlots)
+}
+
+export function toNative(
+  record: ShimPlainDateTimeRecord,
+): Temporal.PlainDateTime {
+  const slots = getShimPlainDateTimeSlots(record)
+  return new NativeTemporal!.PlainDateTime(
+    slots.year,
+    slots.month,
+    slots.day,
+    slots.hour,
+    slots.minute,
+    slots.second,
+    slots.millisecond,
+    slots.microsecond,
+    slots.nanosecond,
+    getCalendarSlotId(slots.calendar),
+  )
 }
 
 // Non-standard: With
@@ -555,7 +556,7 @@ export function withWeekOfYear(
   )
 }
 
-// Non-standard: Add
+// Non-standard: Move
 // -----------------------------------------------------------------------------
 
 export function addYears(

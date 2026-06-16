@@ -52,10 +52,6 @@ export const fromString: (
   getCalendar: (calendarId: string) => CalendarFns.Record,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
-export const toNative: (record: Record) => Temporal.PlainDate = NativeTemporal
-  ? Native.toNative
-  : Shim.toNative
-
 export const dayOfWeek: (record: Record) => number = NativeTemporal
   ? Native.dayOfWeek
   : Shim.dayOfWeek
@@ -127,6 +123,24 @@ export const equals: (record: Record, otherRecord: Record) => boolean =
 export const compare: (record: Record, otherRecord: Record) => number =
   NativeTemporal ? Native.compare : Shim.compare
 
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
+
+export const toLocaleString: (
+  record: Record,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
+
+export const toString: (record: Record, options?: ToStringOptions) => string =
+  NativeTemporal ? Native.toString : Shim.toString
+
+export const toBasicString: (record: Record) => string = NativeTemporal
+  ? Native.toBasicString
+  : Shim.toBasicString
+
 export const toZonedDateTime: {
   (record: Record, timeZoneId: string): ZonedDateTimeFns.Record
   (record: Record, options: ToZonedDateTimeOptions): ZonedDateTimeFns.Record
@@ -151,23 +165,12 @@ export const toPlainYearMonth: (record: Record) => PlainYearMonthFns.Record =
 export const toPlainMonthDay: (record: Record) => PlainMonthDayFns.Record =
   NativeTemporal ? Native.toPlainMonthDay : Shim.toPlainMonthDay
 
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = NativeTemporal ? Native.createFormat : Shim.createFormat
+export const toNative: (record: Record) => Temporal.PlainDate = NativeTemporal
+  ? Native.toNative
+  : Shim.toNative
 
-export const toLocaleString: (
-  record: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
-
-export const toString: (record: Record, options?: ToStringOptions) => string =
-  NativeTemporal ? Native.toString : Shim.toString
-
-export const toBasicString: (record: Record) => string = NativeTemporal
-  ? Native.toBasicString
-  : Shim.toBasicString
+// Non-standard: With
+// -----------------------------------------------------------------------------
 
 export const withDayOfYear: (
   record: Record,
@@ -192,6 +195,9 @@ export const withWeekOfYear: (
   weekOfYear: number,
   options?: OverflowOptions,
 ) => Record = NativeTemporal ? Native.withWeekOfYear : Shim.withWeekOfYear
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
 
 export const addYears: (
   record: Record,
@@ -236,6 +242,9 @@ export const subtractDays: (
   options?: OverflowOptions,
 ) => Record = NativeTemporal ? Native.subtractDays : Shim.subtractDays
 
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
 export const roundToYear: {
   (record: Record): Record
   (record: Record, roundingMode: RoundingMode): Record
@@ -254,6 +263,9 @@ export const roundToWeek: {
   (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToWeek : Shim.roundToWeek
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
 export const startOfYear: (record: Record) => Record = NativeTemporal
   ? Native.startOfYear
   : Shim.startOfYear
@@ -266,6 +278,9 @@ export const startOfWeek: (record: Record) => Record = NativeTemporal
   ? Native.startOfWeek
   : Shim.startOfWeek
 
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
 export const endOfYear: (record: Record) => Record = NativeTemporal
   ? Native.endOfYear
   : Shim.endOfYear
@@ -277,6 +292,9 @@ export const endOfMonth: (record: Record) => Record = NativeTemporal
 export const endOfWeek: (record: Record) => Record = NativeTemporal
   ? Native.endOfWeek
   : Shim.endOfWeek
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
 
 export const diffYears: {
   (record0: Record, record1: Record): number

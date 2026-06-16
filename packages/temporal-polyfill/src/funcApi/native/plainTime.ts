@@ -29,6 +29,7 @@ export const getNativePlainTime: (record: unknown) => Temporal.PlainTime =
 
 export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord> &
   RecordTypes.PlainTimeRecord
+
 export const NativePlainTimeRecord = defineTemporalClass(
   PlainTimeRecordBranding,
   class {
@@ -86,9 +87,6 @@ export function fromString(s: string): NativePlainTimeRecord {
   return createNativePlainTimeRecord(resNative)
 }
 
-export const toNative: (record: NativePlainTimeRecord) => Temporal.PlainTime =
-  getNativePlainTime
-
 export function withFields(
   record: NativePlainTimeRecord,
   mod: Partial<TimeFields>,
@@ -108,6 +106,76 @@ export function add(
   const resNative = native.add(durationNative)
   return createNativePlainTimeRecord(resNative)
 }
+
+export function subtract(
+  record: NativePlainTimeRecord,
+  duration: NativeDurationRecord,
+): NativePlainTimeRecord {
+  const native = getNativePlainTime(record)
+  const durationNative = getNativeDuration(duration)
+  const resNative = native.subtract(durationNative)
+  return createNativePlainTimeRecord(resNative)
+}
+
+// this is equivalent to Temporal's `until`
+export function diff(
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
+  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+): NativeDurationRecord {
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
+  const resNative = native.until(otherNative, options)
+  return createNativeDurationRecord(resNative)
+}
+
+export function equals(
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
+): boolean {
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
+  return native.equals(otherNative)
+}
+
+export function compare(
+  record: NativePlainTimeRecord,
+  otherRecord: NativePlainTimeRecord,
+): NumberSign {
+  const native = getNativePlainTime(record)
+  const otherNative = getNativePlainTime(otherRecord)
+  return NativeTemporal!.PlainTime.compare(native, otherNative) as NumberSign
+}
+
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createNativeDateTimeFormatFactory(getNativePlainTime)
+
+export function toLocaleString(
+  record: NativePlainTimeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getNativePlainTime(record).toLocaleString(locales, options)
+}
+
+export function toString(
+  record: NativePlainTimeRecord,
+  options?: Temporal.PlainTimeToStringOptions,
+): string {
+  return getNativePlainTime(record).toString(options)
+}
+
+export function toBasicString(record: NativePlainTimeRecord): string {
+  return getNativePlainTime(record).toString()
+}
+
+export const toNative: (record: NativePlainTimeRecord) => Temporal.PlainTime =
+  getNativePlainTime
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
 
 export function addHours(
   record: NativePlainTimeRecord,
@@ -154,16 +222,6 @@ export function addNanoseconds(
   nanoseconds: number,
 ): NativePlainTimeRecord {
   const resNative = getNativePlainTime(record).add({ nanoseconds })
-  return createNativePlainTimeRecord(resNative)
-}
-
-export function subtract(
-  record: NativePlainTimeRecord,
-  duration: NativeDurationRecord,
-): NativePlainTimeRecord {
-  const native = getNativePlainTime(record)
-  const durationNative = getNativeDuration(duration)
-  const resNative = native.subtract(durationNative)
   return createNativePlainTimeRecord(resNative)
 }
 
@@ -215,17 +273,100 @@ export function subtractNanoseconds(
   return createNativePlainTimeRecord(resNative)
 }
 
-// this is equivalent to Temporal's `until`
-export function diff(
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
+function round(
   record: NativePlainTimeRecord,
-  otherRecord: NativePlainTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
-): NativeDurationRecord {
+  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
+): NativePlainTimeRecord {
   const native = getNativePlainTime(record)
-  const otherNative = getNativePlainTime(otherRecord)
-  const resNative = native.until(otherNative, options)
-  return createNativeDurationRecord(resNative)
+  const resNative = native.round(options)
+  return createNativePlainTimeRecord(resNative)
 }
+
+function roundToUnit(
+  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
+  record: NativePlainTimeRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): NativePlainTimeRecord {
+  return round(record, createRoundToOptions(smallestUnit, options))
+}
+
+export const roundToHour = bindArgs(roundToUnit, 'hour')
+export const roundToMinute = bindArgs(roundToUnit, 'minute')
+export const roundToSecond = bindArgs(roundToUnit, 'second')
+export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
+export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
+
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
+export function startOfHour(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfHour(getNativePlainTime(record)),
+  )
+}
+
+export function startOfMinute(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMinute(getNativePlainTime(record)),
+  )
+}
+
+export function startOfSecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfSecond(getNativePlainTime(record)),
+  )
+}
+
+export function startOfMillisecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMillisecond(getNativePlainTime(record)),
+  )
+}
+
+export function startOfMicrosecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.startOfMicrosecond(getNativePlainTime(record)),
+  )
+}
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
+
+export function endOfHour(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfHour(getNativePlainTime(record)),
+  )
+}
+
+export function endOfMinute(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMinute(getNativePlainTime(record)),
+  )
+}
+
+export function endOfSecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfSecond(getNativePlainTime(record)),
+  )
+}
+
+export function endOfMillisecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMillisecond(getNativePlainTime(record)),
+  )
+}
+
+export function endOfMicrosecond(record: NativePlainTimeRecord) {
+  return createNativePlainTimeRecord(
+    TemporalUtils.endOfMicrosecond(getNativePlainTime(record)),
+  )
+}
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
 
 export function diffHours(
   record0: NativePlainTimeRecord,
@@ -297,129 +438,4 @@ export function diffNanoseconds(
     getNativePlainTime(record1),
     options,
   )
-}
-
-function round(
-  record: NativePlainTimeRecord,
-  options: Temporal.RoundingOptions<Temporal.TimeUnit>,
-): NativePlainTimeRecord {
-  const native = getNativePlainTime(record)
-  const resNative = native.round(options)
-  return createNativePlainTimeRecord(resNative)
-}
-
-function roundToUnit(
-  smallestUnit: Temporal.PluralizeUnit<Temporal.TimeUnit>,
-  record: NativePlainTimeRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): NativePlainTimeRecord {
-  return round(record, createRoundToOptions(smallestUnit, options))
-}
-
-export const roundToHour = bindArgs(roundToUnit, 'hour')
-export const roundToMinute = bindArgs(roundToUnit, 'minute')
-export const roundToSecond = bindArgs(roundToUnit, 'second')
-export const roundToMillisecond = bindArgs(roundToUnit, 'millisecond')
-export const roundToMicrosecond = bindArgs(roundToUnit, 'microsecond')
-
-export function startOfHour(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.startOfHour(getNativePlainTime(record)),
-  )
-}
-
-export function startOfMinute(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.startOfMinute(getNativePlainTime(record)),
-  )
-}
-
-export function startOfSecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.startOfSecond(getNativePlainTime(record)),
-  )
-}
-
-export function startOfMillisecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.startOfMillisecond(getNativePlainTime(record)),
-  )
-}
-
-export function startOfMicrosecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.startOfMicrosecond(getNativePlainTime(record)),
-  )
-}
-
-export function endOfHour(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.endOfHour(getNativePlainTime(record)),
-  )
-}
-
-export function endOfMinute(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.endOfMinute(getNativePlainTime(record)),
-  )
-}
-
-export function endOfSecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.endOfSecond(getNativePlainTime(record)),
-  )
-}
-
-export function endOfMillisecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.endOfMillisecond(getNativePlainTime(record)),
-  )
-}
-
-export function endOfMicrosecond(record: NativePlainTimeRecord) {
-  return createNativePlainTimeRecord(
-    TemporalUtils.endOfMicrosecond(getNativePlainTime(record)),
-  )
-}
-
-export function equals(
-  record: NativePlainTimeRecord,
-  otherRecord: NativePlainTimeRecord,
-): boolean {
-  const native = getNativePlainTime(record)
-  const otherNative = getNativePlainTime(otherRecord)
-  return native.equals(otherNative)
-}
-
-export function compare(
-  record: NativePlainTimeRecord,
-  otherRecord: NativePlainTimeRecord,
-): NumberSign {
-  const native = getNativePlainTime(record)
-  const otherNative = getNativePlainTime(otherRecord)
-  return NativeTemporal!.PlainTime.compare(native, otherNative) as NumberSign
-}
-
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getNativePlainTime)
-
-export function toLocaleString(
-  record: NativePlainTimeRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  return getNativePlainTime(record).toLocaleString(locales, options)
-}
-
-export function toString(
-  record: NativePlainTimeRecord,
-  options?: Temporal.PlainTimeToStringOptions,
-): string {
-  return getNativePlainTime(record).toString(options)
-}
-
-export function toBasicString(record: NativePlainTimeRecord): string {
-  return getNativePlainTime(record).toString()
 }

@@ -40,9 +40,6 @@ export const fromString: (
   getCalendar: (calendarId: string) => CalendarFns.Record,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
-export const toNative: (record: Record) => Temporal.PlainMonthDay =
-  NativeTemporal ? Native.toNative : Shim.toNative
-
 export const withFields: (
   record: Record,
   mod: WithFields,
@@ -51,13 +48,6 @@ export const withFields: (
 
 export const equals: (record: Record, otherRecord: Record) => boolean =
   NativeTemporal ? Native.equals : Shim.equals
-
-export const toPlainDate: (
-  record: Record,
-  fields: EraYearOrYear,
-) => PlainDateFns.Record = NativeTemporal
-  ? Native.toPlainDate
-  : Shim.toPlainDate
 
 export const createFormat: (
   locales?: LocalesArg,
@@ -76,3 +66,13 @@ export const toString: (record: Record, options?: ToStringOptions) => string =
 export const toBasicString: (record: Record) => string = NativeTemporal
   ? Native.toBasicString
   : Shim.toBasicString
+
+export const toPlainDate: (
+  record: Record,
+  fields: EraYearOrYear,
+) => PlainDateFns.Record = NativeTemporal
+  ? Native.toPlainDate
+  : Shim.toPlainDate
+
+export const toNative: (record: Record) => Temporal.PlainMonthDay =
+  NativeTemporal ? Native.toNative : Shim.toNative

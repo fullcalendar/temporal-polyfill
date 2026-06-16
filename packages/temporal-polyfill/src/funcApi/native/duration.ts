@@ -5,13 +5,14 @@ import {
 } from '../../apiHelpers/classStyle'
 import { durationGetters } from '../../apiHelpers/nativeMixins'
 import { DurationFields } from '../../internal/durationFields'
+import * as errorMessages from '../../internal/errorMessages'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
   DurationRoundingOptions,
   DurationTotalOptions,
   RelativeToOptions,
 } from '../../internal/temporalSpecHelpers'
-import { NumberSign } from '../../internal/utils'
+import { NumberSign, throwTypeError } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import { DurationRecordBranding } from '../recordBranding'
@@ -29,6 +30,7 @@ export const getNativeDuration: (record: unknown) => Temporal.Duration =
 
 export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord> &
   RecordTypes.DurationRecord
+
 export const NativeDurationRecord = defineTemporalClass(
   DurationRecordBranding,
   class {
@@ -92,9 +94,6 @@ export function fromString(s: string): NativeDurationRecord {
   const resNative = NativeTemporal!.Duration.from(s)
   return createNativeDurationRecord(resNative)
 }
-
-export const toNative: (duration: NativeDurationRecord) => Temporal.Duration =
-  getNativeDuration
 
 export function sign(duration: NativeDurationRecord): NumberSign {
   const native = getNativeDuration(duration)
@@ -218,6 +217,9 @@ export function toBasicString(duration: NativeDurationRecord): string {
   return getNativeDuration(duration).toString()
 }
 
+export const toNative: (duration: NativeDurationRecord) => Temporal.Duration =
+  getNativeDuration
+
 // Util
 // ----
 
@@ -244,6 +246,6 @@ function refineRelativeTo(
     if (native) {
       return native as NativeRelativeTo
     }
-    // otherwise, throw error?
+    throwTypeError(errorMessages.invalidRelativeTo(arg))
   }
 }

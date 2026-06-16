@@ -52,6 +52,7 @@ export type NativePlainDateTimeRecord = InstanceType<
   typeof NativePlainDateTimeRecord
 > &
   RecordTypes.PlainDateTimeRecord
+
 export const NativePlainDateTimeRecord = defineTemporalClass(
   PlainDateTimeRecordBranding,
   class {
@@ -129,10 +130,6 @@ export function fromString(
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
   return createNativePlainDateTimeRecord(resNative)
 }
-
-export const toNative: (
-  record: NativePlainDateTimeRecord,
-) => Temporal.PlainDateTime = getNativePlainDateTime
 
 export function withCalendar(
   record: NativePlainDateTimeRecord,
@@ -273,6 +270,30 @@ export function compare(
   ) as NumberSign // !!!
 }
 
+export const createFormat: (
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => Format = createNativeDateTimeFormatFactory(getNativePlainDateTime)
+
+export function toLocaleString(
+  record: NativePlainDateTimeRecord,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return getNativePlainDateTime(record).toLocaleString(locales, options)
+}
+
+export function toString(
+  record: NativePlainDateTimeRecord,
+  options?: Temporal.PlainDateTimeToStringOptions,
+): string {
+  return getNativePlainDateTime(record).toString(options)
+}
+
+export function toBasicString(record: NativePlainDateTimeRecord): string {
+  return getNativePlainDateTime(record).toString()
+}
+
 export function toZonedDateTime(
   record: NativePlainDateTimeRecord,
   timeZoneId: string,
@@ -297,29 +318,9 @@ export function toPlainTime(
   return createNativePlainTimeRecord(resNative)
 }
 
-export const createFormat: (
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => Format = createNativeDateTimeFormatFactory(getNativePlainDateTime)
-
-export function toLocaleString(
+export const toNative: (
   record: NativePlainDateTimeRecord,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-): string {
-  return getNativePlainDateTime(record).toLocaleString(locales, options)
-}
-
-export function toString(
-  record: NativePlainDateTimeRecord,
-  options?: Temporal.PlainDateTimeToStringOptions,
-): string {
-  return getNativePlainDateTime(record).toString(options)
-}
-
-export function toBasicString(record: NativePlainDateTimeRecord): string {
-  return getNativePlainDateTime(record).toString()
-}
+) => Temporal.PlainDateTime = getNativePlainDateTime
 
 // Non-standard: With
 // -----------------------------------------------------------------------------
@@ -545,7 +546,7 @@ export function subtractNanoseconds(
   return createNativePlainDateTimeRecord(resNative)
 }
 
-// Non-standard: Round / Start / End
+// Non-standard: Round
 // -----------------------------------------------------------------------------
 
 export function roundToYear(
@@ -599,6 +600,9 @@ export const roundToSecond = bindArgs(roundToDayTimeUnit, 'second')
 export const roundToMillisecond = bindArgs(roundToDayTimeUnit, 'millisecond')
 export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, 'microsecond')
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
 export function startOfYear(record: NativePlainDateTimeRecord) {
   return createNativePlainDateTimeRecord(
     TemporalUtils.startOfYear(getNativePlainDateTime(record)),
@@ -644,6 +648,9 @@ export function startOfMicrosecond(record: NativePlainDateTimeRecord) {
     TemporalUtils.startOfMicrosecond(getNativePlainDateTime(record)),
   )
 }
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
 
 export function endOfYear(record: NativePlainDateTimeRecord) {
   return createNativePlainDateTimeRecord(

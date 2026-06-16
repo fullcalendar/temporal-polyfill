@@ -47,9 +47,6 @@ export const fromString: (
   options?: FromOptions,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
-export const toNative: (record: Record) => Temporal.ZonedDateTime =
-  NativeTemporal ? Native.toNative : Shim.toNative
-
 export const withFields: (
   record: Record,
   mod: WithFields,
@@ -157,6 +154,12 @@ export const equals: (record: Record, otherRecord: Record) => boolean =
 export const compare: (record: Record, otherRecord: Record) => number =
   NativeTemporal ? Native.compare : Shim.compare
 
+export const toLocaleString: (
+  record: Record,
+  locales?: LocalesArg,
+  options?: Intl.DateTimeFormatOptions,
+) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
+
 export const toInstant: (record: Record) => InstantFns.Record = NativeTemporal
   ? Native.toInstant
   : Shim.toInstant
@@ -170,11 +173,11 @@ export const toPlainDate: (record: Record) => PlainDateFns.Record =
 export const toPlainTime: (record: Record) => PlainTimeFns.Record =
   NativeTemporal ? Native.toPlainTime : Shim.toPlainTime
 
-export const toLocaleString: (
-  record: Record,
-  locales?: LocalesArg,
-  options?: Intl.DateTimeFormatOptions,
-) => string = NativeTemporal ? Native.toLocaleString : Shim.toLocaleString
+export const toNative: (record: Record) => Temporal.ZonedDateTime =
+  NativeTemporal ? Native.toNative : Shim.toNative
+
+// Non-standard: With
+// -----------------------------------------------------------------------------
 
 export const withDayOfYear: (
   record: Record,
@@ -199,6 +202,9 @@ export const withWeekOfYear: (
   value: number,
   options?: OverflowOptions,
 ) => Record = NativeTemporal ? Native.withWeekOfYear : Shim.withWeekOfYear
+
+// Non-standard: Move
+// -----------------------------------------------------------------------------
 
 export const addYears: (
   record: Record,
@@ -326,6 +332,9 @@ export const subtractNanoseconds: (
   ? Native.subtractNanoseconds
   : Shim.subtractNanoseconds
 
+// Non-standard: Round
+// -----------------------------------------------------------------------------
+
 export const roundToYear: {
   (record: Record): Record
   (record: Record, roundingMode: RoundingMode): Record
@@ -380,6 +389,9 @@ export const roundToMicrosecond: {
   (record: Record, options: RoundingMathOptions): Record
 } = NativeTemporal ? Native.roundToMicrosecond : Shim.roundToMicrosecond
 
+// Non-standard: Start-of-Unit
+// -----------------------------------------------------------------------------
+
 export const startOfYear: (record: Record) => Record = NativeTemporal
   ? Native.startOfYear
   : Shim.startOfYear
@@ -411,6 +423,9 @@ export const startOfMillisecond: (record: Record) => Record = NativeTemporal
 export const startOfMicrosecond: (record: Record) => Record = NativeTemporal
   ? Native.startOfMicrosecond
   : Shim.startOfMicrosecond
+
+// Non-standard: End-of-Unit
+// -----------------------------------------------------------------------------
 
 export const endOfYear: (record: Record) => Record = NativeTemporal
   ? Native.endOfYear
@@ -447,6 +462,9 @@ export const endOfMillisecond: (record: Record) => Record = NativeTemporal
 export const endOfMicrosecond: (record: Record) => Record = NativeTemporal
   ? Native.endOfMicrosecond
   : Shim.endOfMicrosecond
+
+// Non-standard: Diffing
+// -----------------------------------------------------------------------------
 
 export const diffYears: {
   (record0: Record, record1: Record): number

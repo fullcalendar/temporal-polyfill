@@ -56,10 +56,6 @@ export const fromString: (s: string) => Record = NativeTemporal
   ? Native.fromString
   : Shim.fromString
 
-export const toNative: (duration: Record) => Temporal.Duration = NativeTemporal
-  ? Native.toNative
-  : Shim.toNative
-
 export const sign: (duration: Record) => number = NativeTemporal
   ? Native.sign
   : Shim.sign
@@ -113,3 +109,7 @@ export const toString: (duration: Record, options?: ToStringOptions) => string =
 export const toBasicString: (duration: Record) => string = NativeTemporal
   ? Native.toBasicString
   : Shim.toBasicString
+
+export const toNative: (duration: Record) => Temporal.Duration = NativeTemporal
+  ? Native.toNative
+  : Shim.toNative
