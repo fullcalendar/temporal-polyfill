@@ -1,5 +1,6 @@
 import * as errorMessages from '../internal/errorMessages'
 import {
+  type GetterMap,
   createNameDescriptors,
   createStringTagDescriptors,
   mapProps,
@@ -11,8 +12,6 @@ type ClassType = {
   new (...args: any[]): any
   prototype: object
 }
-
-type GetterMap<Slots> = Record<string, (slots: Slots) => any>
 
 type GetterMapInstance<Getters extends GetterMap<any>> = {
   readonly [K in keyof Getters]: ReturnType<Getters[K]>

@@ -1,6 +1,6 @@
 import type { CalendarDateFields, TimeFields } from './fieldTypes'
 import { Unit, unitNamesAsc } from './units'
-import { sortStrings, zipPropsConst } from './utils'
+import { createPropGetters, sortStrings, zipPropsConst } from './utils'
 
 // Unit-Ordered Field Name Lists
 // -----------------------------------------------------------------------------
@@ -10,12 +10,8 @@ export const timeFieldNamesAsc = unitNamesAsc.slice(
   Unit.Day,
 ) as (keyof TimeFields)[]
 
-export const timeGetters = timeFieldNamesAsc.reduce(
-  (getters, fieldName) => {
-    getters[fieldName] = (slots: TimeFields) => slots[fieldName]
-    return getters
-  },
-  {} as { [K in keyof TimeFields]: (slots: TimeFields) => number },
+export const timeGetters = createPropGetters<TimeFields, keyof TimeFields>(
+  timeFieldNamesAsc,
 )
 
 export const yearFieldNamesAsc = ['year']

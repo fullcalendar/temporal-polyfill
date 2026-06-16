@@ -142,6 +142,8 @@ export type FilterPropValues<P, F> = {
   [K in keyof P as P[K] extends F ? K : never]: P[K]
 }
 
+export type GetterMap<Slots> = Record<string, (slots: Slots) => any>
+
 // transformer goes first because usually constant and minifies better
 export function mapProps<P, R>(
   transformer: (propVal: P[keyof P], propName: keyof P) => R,
@@ -168,6 +170,18 @@ export function zipPropsConst<P, C>(
   }
 
   return res
+}
+
+export function createPropGetters<Slots, FieldName extends keyof Slots>(
+  propNames: readonly FieldName[],
+): { [K in FieldName]: (slots: Slots) => any } {
+  const getters = {} as { [K in FieldName]: (slots: Slots) => any }
+
+  for (const propName of propNames) {
+    getters[propName] = (slots: Slots) => slots[propName]
+  }
+
+  return getters
 }
 
 export function pluckProps<P>(propNames: (keyof P)[], props: P): P

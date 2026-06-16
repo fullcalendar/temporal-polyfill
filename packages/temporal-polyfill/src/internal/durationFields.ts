@@ -1,5 +1,11 @@
 import { Unit, unitNamesAsc } from './units'
-import { bindArgs, sortStrings, zeroOutProps, zipPropsConst } from './utils'
+import {
+  bindArgs,
+  createPropGetters,
+  sortStrings,
+  zeroOutProps,
+  zipPropsConst,
+} from './utils'
 
 export interface DurationDateFields {
   days: number
@@ -41,13 +47,10 @@ export const durationFieldNamesAsc = unitNamesAsc.map(
   (unitName) => unitName + 's',
 ) as DurationFieldName[]
 
-export const durationGetters = durationFieldNamesAsc.reduce(
-  (getters, fieldName) => {
-    getters[fieldName] = (slots: DurationFields) => slots[fieldName]
-    return getters
-  },
-  {} as { [K in keyof DurationFields]: (slots: DurationFields) => number },
-)
+export const durationGetters = createPropGetters<
+  DurationFields,
+  DurationFieldName
+>(durationFieldNamesAsc)
 
 export const durationFieldNamesAlpha = sortStrings(durationFieldNamesAsc)
 
