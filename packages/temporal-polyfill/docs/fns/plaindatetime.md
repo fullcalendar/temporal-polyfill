@@ -101,16 +101,16 @@ import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
   - [`endOfSecond`](#endofsecond)
   - [`endOfMillisecond`](#endofmillisecond)
   - [`endOfMicrosecond`](#endofmicrosecond)
-- [Conversion](#conversion)
-  - [`toZonedDateTime`](#tozoneddatetime)
-  - [`toPlainDate`](#toplaindate)
-  - [`toPlainTime`](#toplaintime)
-  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
+- [Conversion](#conversion)
+  - [`toZonedDateTime`](#tozoneddatetime)
+  - [`toPlainDate`](#toplaindate)
+  - [`toPlainTime`](#toplaintime)
+  - [`toNative`](#tonative)
 
 ## Record Shape
 
@@ -2060,96 +2060,6 @@ import { endOfMicrosecond } from 'temporal-utils'
 const nextDateTime = endOfMicrosecond(dateTime)
 ```
 
-## Conversion
-
-### `toZonedDateTime`
-
-Signature:
-
-```ts
-(record: Record, timeZoneId: string, options?: EpochDisambigOptions) => ZonedDateTimeRecord
-```
-
-Fn API:
-
-```ts
-const zonedDateTime = PlainDateTimeFns.toZonedDateTime(dateTime, timeZoneId, options)
-```
-
-Temporal API:
-
-```ts
-const zonedDateTime = dateTime.toZonedDateTime(timeZoneId, options)
-```
-
-### `toPlainDate`
-
-Signature:
-
-```ts
-(record: Record) => PlainDateRecord
-```
-
-Fn API:
-
-```ts
-const date = PlainDateTimeFns.toPlainDate(dateTime)
-```
-
-Temporal API:
-
-```ts
-const date = dateTime.toPlainDate()
-```
-
-### `toPlainTime`
-
-Signature:
-
-```ts
-(record: Record) => PlainTimeRecord
-```
-
-Fn API:
-
-```ts
-const time = PlainDateTimeFns.toPlainTime(dateTime)
-```
-
-Temporal API:
-
-```ts
-const time = dateTime.toPlainTime()
-```
-
-### `toNative`
-
-Signature:
-
-```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainDateTime
-```
-
-Fn API:
-
-```ts
-const native = PlainDateTimeFns.toNative(dateTime)
-```
-
-Temporal API:
-
-```ts
-const native = dateTime
-```
-
-Produces a real `Temporal.PlainDateTime` built directly from the record's ISO
-date-time slots and `calendarId`, with no string round-trip. The `temporal`
-argument defaults to `globalThis.Temporal`; pass an explicit Temporal
-implementation to target a specific one — otherwise `toNative` throws when no
-global `Temporal` is present. Because a migrated record is already a
-`Temporal.PlainDateTime`, the codemod rewrites the entire call to the bare record
-expression.
-
 ## Formatting
 
 ### `toString`
@@ -2241,3 +2151,93 @@ const text = format.format(dateTime)
 ```
 
 This rewrite is appropriate when later uses rely on `format.format(dateTime)`.
+
+## Conversion
+
+### `toZonedDateTime`
+
+Signature:
+
+```ts
+(record: Record, timeZoneId: string, options?: EpochDisambigOptions) => ZonedDateTimeRecord
+```
+
+Fn API:
+
+```ts
+const zonedDateTime = PlainDateTimeFns.toZonedDateTime(dateTime, timeZoneId, options)
+```
+
+Temporal API:
+
+```ts
+const zonedDateTime = dateTime.toZonedDateTime(timeZoneId, options)
+```
+
+### `toPlainDate`
+
+Signature:
+
+```ts
+(record: Record) => PlainDateRecord
+```
+
+Fn API:
+
+```ts
+const date = PlainDateTimeFns.toPlainDate(dateTime)
+```
+
+Temporal API:
+
+```ts
+const date = dateTime.toPlainDate()
+```
+
+### `toPlainTime`
+
+Signature:
+
+```ts
+(record: Record) => PlainTimeRecord
+```
+
+Fn API:
+
+```ts
+const time = PlainDateTimeFns.toPlainTime(dateTime)
+```
+
+Temporal API:
+
+```ts
+const time = dateTime.toPlainTime()
+```
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.PlainDateTime
+```
+
+Fn API:
+
+```ts
+const native = PlainDateTimeFns.toNative(dateTime)
+```
+
+Temporal API:
+
+```ts
+const native = dateTime
+```
+
+Produces a real `Temporal.PlainDateTime` built directly from the record's ISO
+date-time slots and `calendarId`, with no string round-trip. The `temporal`
+argument defaults to `globalThis.Temporal`; pass an explicit Temporal
+implementation to target a specific one — otherwise `toNative` throws when no
+global `Temporal` is present. Because a migrated record is already a
+`Temporal.PlainDateTime`, the codemod rewrites the entire call to the bare record
+expression.

@@ -61,13 +61,13 @@ import * as PlainTimeFns from 'temporal-polyfill/fns/PlainTime'
   - [`endOfSecond`](#endofsecond)
   - [`endOfMillisecond`](#endofmillisecond)
   - [`endOfMicrosecond`](#endofmicrosecond)
-- [Conversion](#conversion)
-  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
+- [Conversion](#conversion)
+  - [`toNative`](#tonative)
 
 ## Record Shape
 
@@ -1110,35 +1110,6 @@ import { endOfMicrosecond } from 'temporal-utils'
 const nextTime = endOfMicrosecond(time)
 ```
 
-## Conversion
-
-### `toNative`
-
-Signature:
-
-```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainTime
-```
-
-Fn API:
-
-```ts
-const native = PlainTimeFns.toNative(time)
-```
-
-Temporal API:
-
-```ts
-const native = time
-```
-
-Produces a real `Temporal.PlainTime` built directly from the record's ISO time
-slots, with no string round-trip. The `temporal` argument defaults to
-`globalThis.Temporal`; pass an explicit Temporal implementation to target a
-specific one — otherwise `toNative` throws when no global `Temporal` is present.
-Because a migrated record is already a `Temporal.PlainTime`, the codemod rewrites
-the entire call to the bare record expression.
-
 ## Formatting
 
 ### `toString`
@@ -1224,3 +1195,32 @@ const text = format.format(time)
 ```
 
 This rewrite is appropriate when later uses rely on `format.format(time)`.
+
+## Conversion
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.PlainTime
+```
+
+Fn API:
+
+```ts
+const native = PlainTimeFns.toNative(time)
+```
+
+Temporal API:
+
+```ts
+const native = time
+```
+
+Produces a real `Temporal.PlainTime` built directly from the record's ISO time
+slots, with no string round-trip. The `temporal` argument defaults to
+`globalThis.Temporal`; pass an explicit Temporal implementation to target a
+specific one — otherwise `toNative` throws when no global `Temporal` is present.
+Because a migrated record is already a `Temporal.PlainTime`, the codemod rewrites
+the entire call to the bare record expression.

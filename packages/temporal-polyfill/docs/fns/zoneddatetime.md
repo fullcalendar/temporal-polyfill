@@ -107,17 +107,17 @@ import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
   - [`endOfMicrosecond`](#endofmicrosecond)
 - [Time Zone Transition](#time-zone-transition)
   - [`getTimeZoneTransition`](#gettimezonetransition)
+- [Formatting](#formatting)
+  - [`toString`](#tostring)
+  - [`toBasicString`](#tobasicstring)
+  - [`toLocaleString`](#tolocalestring)
+  - [❌ `createFormat`](#createformat)
 - [Conversion](#conversion)
   - [`toInstant`](#toinstant)
   - [`toPlainDateTime`](#toplaindatetime)
   - [`toPlainDate`](#toplaindate)
   - [`toPlainTime`](#toplaintime)
   - [`toNative`](#tonative)
-- [Formatting](#formatting)
-  - [`toString`](#tostring)
-  - [`toBasicString`](#tobasicstring)
-  - [`toLocaleString`](#tolocalestring)
-  - [❌ `createFormat`](#createformat)
 
 ## Record Shape
 
@@ -2173,6 +2173,83 @@ Temporal API:
 const transition = zonedDateTime.getTimeZoneTransition(direction)
 ```
 
+## Formatting
+
+### `toString`
+
+Signature:
+
+```ts
+(record: Record, options?: ZonedDateTimeDisplayOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toString(zonedDateTime, options)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toString(options)
+```
+
+### `toBasicString`
+
+Signature:
+
+```ts
+(record: Record) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toBasicString(zonedDateTime)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toString()
+```
+
+### `toLocaleString`
+
+Signature:
+
+```ts
+(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = ZonedDateTimeFns.toLocaleString(zonedDateTime, locales, options)
+```
+
+Temporal API:
+
+```ts
+const text = zonedDateTime.toLocaleString(locales, options)
+```
+
+### `createFormat`
+
+❌ **This function does not exist.** It was never part of the Fns API and has no
+direct equivalent. Use `Intl.DateTimeFormat` directly instead, pulling the time
+zone off the record and formatting its `epochMilliseconds`:
+
+```ts
+const format = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: zonedDateTime.timeZoneId,
+})
+const text = format.format(zonedDateTime.epochMilliseconds)
+```
+
 ## Conversion
 
 ### `toInstant`
@@ -2282,80 +2359,3 @@ Temporal implementation to target a specific one — otherwise `toNative` throws
 when no global `Temporal` is present. Because a migrated record is already a
 `Temporal.ZonedDateTime`, the codemod rewrites the entire call to the bare record
 expression.
-
-## Formatting
-
-### `toString`
-
-Signature:
-
-```ts
-(record: Record, options?: ZonedDateTimeDisplayOptions) => string
-```
-
-Fn API:
-
-```ts
-const text = ZonedDateTimeFns.toString(zonedDateTime, options)
-```
-
-Temporal API:
-
-```ts
-const text = zonedDateTime.toString(options)
-```
-
-### `toBasicString`
-
-Signature:
-
-```ts
-(record: Record) => string
-```
-
-Fn API:
-
-```ts
-const text = ZonedDateTimeFns.toBasicString(zonedDateTime)
-```
-
-Temporal API:
-
-```ts
-const text = zonedDateTime.toString()
-```
-
-### `toLocaleString`
-
-Signature:
-
-```ts
-(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
-```
-
-Fn API:
-
-```ts
-const text = ZonedDateTimeFns.toLocaleString(zonedDateTime, locales, options)
-```
-
-Temporal API:
-
-```ts
-const text = zonedDateTime.toLocaleString(locales, options)
-```
-
-### `createFormat`
-
-❌ **This function does not exist.** It was never part of the Fns API and has no
-direct equivalent. Use `Intl.DateTimeFormat` directly instead, pulling the time
-zone off the record and formatting its `epochMilliseconds`:
-
-```ts
-const format = new Intl.DateTimeFormat('en-US', {
-  dateStyle: 'long',
-  timeStyle: 'short',
-  timeZone: zonedDateTime.timeZoneId,
-})
-const text = format.format(zonedDateTime.epochMilliseconds)
-```

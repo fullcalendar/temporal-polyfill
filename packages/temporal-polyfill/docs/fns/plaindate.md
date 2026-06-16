@@ -64,17 +64,17 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
   - [`endOfYear`](#endofyear)
   - [`endOfMonth`](#endofmonth)
   - [`endOfWeek`](#endofweek)
+- [Formatting](#formatting)
+  - [`toString`](#tostring)
+  - [`toBasicString`](#tobasicstring)
+  - [`toLocaleString`](#tolocalestring)
+  - [`createFormat`](#createformat)
 - [Conversion](#conversion)
   - [`toZonedDateTime`](#tozoneddatetime)
   - [`toPlainDateTime`](#toplaindatetime)
   - [`toPlainYearMonth`](#toplainyearmonth)
   - [`toPlainMonthDay`](#toplainmonthday)
   - [`toNative`](#tonative)
-- [Formatting](#formatting)
-  - [`toString`](#tostring)
-  - [`toBasicString`](#tobasicstring)
-  - [`toLocaleString`](#tolocalestring)
-  - [`createFormat`](#createformat)
 
 ## Record Shape
 
@@ -1122,6 +1122,92 @@ import { endOfWeek } from 'temporal-utils'
 const nextDate = endOfWeek(date)
 ```
 
+## Formatting
+
+### `toString`
+
+Signature:
+
+```ts
+(record: Record, options?: CalendarDisplayOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainDateFns.toString(date, options)
+```
+
+Temporal API:
+
+```ts
+const text = date.toString(options)
+```
+
+### `toBasicString`
+
+Signature:
+
+```ts
+(record: Record) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainDateFns.toBasicString(date)
+```
+
+Temporal API:
+
+```ts
+const text = date.toString()
+```
+
+### `toLocaleString`
+
+Signature:
+
+```ts
+(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
+```
+
+Fn API:
+
+```ts
+const text = PlainDateFns.toLocaleString(date, locales, options)
+```
+
+Temporal API:
+
+```ts
+const text = date.toLocaleString(locales, options)
+```
+
+### `createFormat`
+
+Signature:
+
+```ts
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+```
+
+Fn API:
+
+```ts
+const format = PlainDateFns.createFormat('en-US', { dateStyle: 'long' })
+const text = format.format(date)
+```
+
+Temporal API:
+
+```ts
+const format = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' })
+const text = format.format(date)
+```
+
+This rewrite is appropriate when later uses rely on `format.format(date)`.
+
 ## Conversion
 
 ### `toZonedDateTime`
@@ -1235,89 +1321,3 @@ defaults to `globalThis.Temporal`; pass an explicit Temporal implementation to
 target a specific one — otherwise `toNative` throws when no global `Temporal` is
 present. Because a migrated record is already a `Temporal.PlainDate`, the codemod
 rewrites the entire call to the bare record expression.
-
-## Formatting
-
-### `toString`
-
-Signature:
-
-```ts
-(record: Record, options?: CalendarDisplayOptions) => string
-```
-
-Fn API:
-
-```ts
-const text = PlainDateFns.toString(date, options)
-```
-
-Temporal API:
-
-```ts
-const text = date.toString(options)
-```
-
-### `toBasicString`
-
-Signature:
-
-```ts
-(record: Record) => string
-```
-
-Fn API:
-
-```ts
-const text = PlainDateFns.toBasicString(date)
-```
-
-Temporal API:
-
-```ts
-const text = date.toString()
-```
-
-### `toLocaleString`
-
-Signature:
-
-```ts
-(record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
-```
-
-Fn API:
-
-```ts
-const text = PlainDateFns.toLocaleString(date, locales, options)
-```
-
-Temporal API:
-
-```ts
-const text = date.toLocaleString(locales, options)
-```
-
-### `createFormat`
-
-Signature:
-
-```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
-```
-
-Fn API:
-
-```ts
-const format = PlainDateFns.createFormat('en-US', { dateStyle: 'long' })
-const text = format.format(date)
-```
-
-Temporal API:
-
-```ts
-const format = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' })
-const text = format.format(date)
-```
-
-This rewrite is appropriate when later uses rely on `format.format(date)`.

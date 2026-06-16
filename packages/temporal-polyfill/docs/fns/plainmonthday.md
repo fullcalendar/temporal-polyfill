@@ -21,14 +21,14 @@ import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
   - [`withFields`](#withfields)
 - [Comparison](#comparison)
   - [`equals`](#equals)
-- [Conversion](#conversion)
-  - [`toPlainDate`](#toplaindate)
-  - [`toNative`](#tonative)
 - [Formatting](#formatting)
   - [`toString`](#tostring)
   - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
+- [Conversion](#conversion)
+  - [`toPlainDate`](#toplaindate)
+  - [`toNative`](#tonative)
 
 ## Record Shape
 
@@ -201,56 +201,6 @@ Temporal API:
 const same = monthDay.equals(otherMonthDay)
 ```
 
-## Conversion
-
-### `toPlainDate`
-
-Signature:
-
-```ts
-(record: Record, fields: EraYearOrYear) => PlainDateRecord
-```
-
-Fn API:
-
-```ts
-const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 })
-```
-
-Temporal API:
-
-```ts
-const date = monthDay.toPlainDate({ year: 2024 })
-```
-
-### `toNative`
-
-Signature:
-
-```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainMonthDay
-```
-
-Fn API:
-
-```ts
-const native = PlainMonthDayFns.toNative(monthDay)
-```
-
-Temporal API:
-
-```ts
-const native = monthDay
-```
-
-Produces a real `Temporal.PlainMonthDay` built directly from the record's ISO
-date slots (including the reference ISO year) and `calendarId`, with no string
-round-trip. The `temporal` argument defaults to `globalThis.Temporal`; pass an
-explicit Temporal implementation to target a specific one — otherwise `toNative`
-throws when no global `Temporal` is present. Because a migrated record is already
-a `Temporal.PlainMonthDay`, the codemod rewrites the entire call to the bare
-record expression.
-
 ## Formatting
 
 ### `toString`
@@ -342,3 +292,53 @@ const text = format.format(monthDay)
 ```
 
 This rewrite is appropriate when later uses rely on `format.format(monthDay)`.
+
+## Conversion
+
+### `toPlainDate`
+
+Signature:
+
+```ts
+(record: Record, fields: EraYearOrYear) => PlainDateRecord
+```
+
+Fn API:
+
+```ts
+const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 })
+```
+
+Temporal API:
+
+```ts
+const date = monthDay.toPlainDate({ year: 2024 })
+```
+
+### `toNative`
+
+Signature:
+
+```ts
+(record: Record, temporal?: typeof Temporal) => Temporal.PlainMonthDay
+```
+
+Fn API:
+
+```ts
+const native = PlainMonthDayFns.toNative(monthDay)
+```
+
+Temporal API:
+
+```ts
+const native = monthDay
+```
+
+Produces a real `Temporal.PlainMonthDay` built directly from the record's ISO
+date slots (including the reference ISO year) and `calendarId`, with no string
+round-trip. The `temporal` argument defaults to `globalThis.Temporal`; pass an
+explicit Temporal implementation to target a specific one — otherwise `toNative`
+throws when no global `Temporal` is present. Because a migrated record is already
+a `Temporal.PlainMonthDay`, the codemod rewrites the entire call to the bare
+record expression.
