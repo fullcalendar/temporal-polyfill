@@ -1,4 +1,12 @@
-import type { DurationFields } from '../../internal/durationFields'
+import {
+  type DurationFields,
+  durationFieldNamesAsc,
+} from '../../internal/durationFields'
+import {
+  allYearFieldNames,
+  monthFieldNames,
+  timeFieldNamesAsc,
+} from '../../internal/fieldNames'
 import type {
   DateFields,
   DateStats,
@@ -8,198 +16,79 @@ import type {
   YearMonthStats,
 } from '../../internal/fieldTypes'
 
-export const durationGetters = {
-  nanoseconds(slots: DurationFields): number {
-    return slots.nanoseconds
-  },
+type GetterMap<Slots, FieldName extends keyof Slots> = {
+  [K in FieldName]: (slots: Slots) => any
+}
 
-  microseconds(slots: DurationFields): number {
-    return slots.microseconds
-  },
+function createNativeGetters<Slots, FieldName extends keyof Slots>(
+  fieldNames: readonly FieldName[],
+): GetterMap<Slots, FieldName> {
+  const getters = {} as GetterMap<Slots, FieldName>
+  for (const fieldName of fieldNames) {
+    getters[fieldName] = ((slots: Slots) => slots[fieldName]) as GetterMap<
+      Slots,
+      FieldName
+    >[typeof fieldName]
+  }
+  return getters
+}
 
-  milliseconds(slots: DurationFields): number {
-    return slots.milliseconds
-  },
+const yearMonthFieldNames = [...allYearFieldNames, ...monthFieldNames] as const
+const dateFieldNames = [...yearMonthFieldNames, 'day'] as const
+const monthDayFieldNames = [...monthFieldNames, 'day'] as const
+const monthCodeDayFieldNames = ['monthCode', 'day'] as const
 
-  seconds(slots: DurationFields): number {
-    return slots.seconds
-  },
+const yearMonthStatNames = [
+  'daysInMonth',
+  'daysInYear',
+  'monthsInYear',
+  'inLeapYear',
+] as const
 
-  minutes(slots: DurationFields): number {
-    return slots.minutes
-  },
+const dateStatNames = [
+  'dayOfWeek',
+  'dayOfYear',
+  'weekOfYear',
+  'yearOfWeek',
+  'daysInWeek',
+  ...yearMonthStatNames,
+] as const
 
-  hours(slots: DurationFields): number {
-    return slots.hours
-  },
+export const durationGetters = createNativeGetters<
+  DurationFields,
+  keyof DurationFields
+>(durationFieldNamesAsc)
 
-  days(slots: DurationFields): number {
-    return slots.days
-  },
+export const timeGetters = createNativeGetters<TimeFields, keyof TimeFields>(
+  timeFieldNamesAsc,
+)
 
-  weeks(slots: DurationFields): number {
-    return slots.weeks
-  },
+export const yearMonthFieldGetters = createNativeGetters<
+  YearMonthFields,
+  keyof YearMonthFields
+>(yearMonthFieldNames)
 
-  months(slots: DurationFields): number {
-    return slots.months
-  },
+export const dateFieldGetters = createNativeGetters<
+  DateFields,
+  keyof DateFields
+>(dateFieldNames)
 
-  years(slots: DurationFields): number {
-    return slots.years
-  },
-} as const
+export const monthDayFieldGetters = createNativeGetters<
+  MonthDayFields,
+  keyof MonthDayFields
+>(monthDayFieldNames)
 
-export const timeGetters = {
-  nanosecond(slots: TimeFields): number {
-    return slots.nanosecond
-  },
+export const monthCodeDayFieldGetters = createNativeGetters<
+  Pick<MonthDayFields, 'monthCode' | 'day'>,
+  'monthCode' | 'day'
+>(monthCodeDayFieldNames)
 
-  microsecond(slots: TimeFields): number {
-    return slots.microsecond
-  },
+export const yearMonthDerivedGetters = createNativeGetters<
+  YearMonthStats,
+  keyof YearMonthStats
+>(yearMonthStatNames)
 
-  millisecond(slots: TimeFields): number {
-    return slots.millisecond
-  },
-
-  second(slots: TimeFields): number {
-    return slots.second
-  },
-
-  minute(slots: TimeFields): number {
-    return slots.minute
-  },
-
-  hour(slots: TimeFields): number {
-    return slots.hour
-  },
-} as const
-
-export const yearMonthFieldGetters = {
-  era(slots: YearMonthFields): string | undefined {
-    return slots.era
-  },
-
-  eraYear(slots: YearMonthFields): number | undefined {
-    return slots.eraYear
-  },
-
-  year(slots: YearMonthFields): number {
-    return slots.year
-  },
-
-  month(slots: YearMonthFields): number {
-    return slots.month
-  },
-
-  monthCode(slots: YearMonthFields): string {
-    return slots.monthCode
-  },
-} as const
-
-export const dateFieldGetters = {
-  era(slots: DateFields): string | undefined {
-    return slots.era
-  },
-
-  eraYear(slots: DateFields): number | undefined {
-    return slots.eraYear
-  },
-
-  year(slots: DateFields): number {
-    return slots.year
-  },
-
-  month(slots: DateFields): number {
-    return slots.month
-  },
-
-  monthCode(slots: DateFields): string {
-    return slots.monthCode
-  },
-
-  day(slots: DateFields): number {
-    return slots.day
-  },
-} as const
-
-export const monthDayFieldGetters = {
-  month(slots: MonthDayFields): number {
-    return slots.month
-  },
-
-  monthCode(slots: MonthDayFields): string {
-    return slots.monthCode
-  },
-
-  day(slots: MonthDayFields): number {
-    return slots.day
-  },
-} as const
-
-export const monthCodeDayFieldGetters = {
-  monthCode(slots: Pick<MonthDayFields, 'monthCode' | 'day'>): string {
-    return slots.monthCode
-  },
-
-  day(slots: Pick<MonthDayFields, 'monthCode' | 'day'>): number {
-    return slots.day
-  },
-} as const
-
-export const yearMonthDerivedGetters = {
-  daysInMonth(slots: YearMonthStats): number {
-    return slots.daysInMonth
-  },
-
-  daysInYear(slots: YearMonthStats): number {
-    return slots.daysInYear
-  },
-
-  monthsInYear(slots: YearMonthStats): number {
-    return slots.monthsInYear
-  },
-
-  inLeapYear(slots: YearMonthStats): boolean {
-    return slots.inLeapYear
-  },
-} as const
-
-export const dateDerivedGetters = {
-  dayOfWeek(slots: DateStats): number {
-    return slots.dayOfWeek
-  },
-
-  dayOfYear(slots: DateStats): number {
-    return slots.dayOfYear
-  },
-
-  weekOfYear(slots: DateStats): number | undefined {
-    return slots.weekOfYear
-  },
-
-  yearOfWeek(slots: DateStats): number | undefined {
-    return slots.yearOfWeek
-  },
-
-  daysInWeek(slots: DateStats): number {
-    return slots.daysInWeek
-  },
-
-  daysInMonth(slots: DateStats): number {
-    return slots.daysInMonth
-  },
-
-  daysInYear(slots: DateStats): number {
-    return slots.daysInYear
-  },
-
-  monthsInYear(slots: DateStats): number {
-    return slots.monthsInYear
-  },
-
-  inLeapYear(slots: DateStats): boolean {
-    return slots.inLeapYear
-  },
-} as const
+export const dateDerivedGetters = createNativeGetters<
+  DateStats,
+  keyof DateStats
+>(dateStatNames)

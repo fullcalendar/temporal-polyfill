@@ -28,7 +28,7 @@ export const numberOutOfRangeWithChoices = (
 
 // Entity/Fields/Bags
 export const missingField = (fieldName: string) => `Missing ${fieldName}`
-export const noValidFields = (validFields: string[]) =>
+export const noValidFields = (validFields: readonly string[]) =>
   'No valid fields: ' + validFields.join()
 export const invalidBag = 'Invalid bag'
 

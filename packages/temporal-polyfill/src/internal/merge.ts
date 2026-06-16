@@ -100,8 +100,8 @@ If ANY of these props exists on additional, replaces ALL dest with them.
 function spliceFields(
   dest: any,
   additional: any,
-  allPropNames: string[],
-  deletablePropNames?: string[],
+  allPropNames: readonly string[],
+  deletablePropNames?: readonly string[],
 ): void {
   let anyMatching = false
   const nonMatchingPropNames: string[] = []

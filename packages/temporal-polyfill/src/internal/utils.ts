@@ -158,7 +158,7 @@ export function mapProps<P, R>(
 
 // zips key-array AND value-constant into an object
 export function zipPropsConst<P, C>(
-  propNames: (keyof P)[],
+  propNames: readonly (keyof P)[],
   propVal: C,
 ): { [K in keyof P]: C } {
   const res = {} as any
@@ -170,14 +170,14 @@ export function zipPropsConst<P, C>(
   return res
 }
 
-export function pluckProps<P>(propNames: (keyof P)[], props: P): P
+export function pluckProps<P>(propNames: readonly (keyof P)[], props: P): P
 export function pluckProps<P, D extends object>(
-  propNames: (keyof P)[],
+  propNames: readonly (keyof P)[],
   props: P,
   dest: D,
 ): P & D
 export function pluckProps<P>(
-  propNames: (keyof P)[],
+  propNames: readonly (keyof P)[],
   props: P,
   // Avoid inherited fields from Object.prototype pollution.
   // We give the resulting object to Intl.DateTimeFormat
@@ -190,7 +190,7 @@ export function pluckProps<P>(
 }
 
 export function allPropsEqual(
-  propNames: string[],
+  propNames: readonly string[],
   props0: any,
   props1: any,
 ): boolean {
@@ -203,7 +203,7 @@ export function allPropsEqual(
 }
 
 export function zeroOutProps(
-  propNames: string[],
+  propNames: readonly string[],
   clearUntilI: number,
   props: Record<string, number>,
 ): Record<string, number> {
@@ -246,7 +246,9 @@ Easier to mark pure than calling .slice().sort() directly, which has 2 calls.
 Accepts multiple field-name lists so callers can avoid fabricating temporary
 combined arrays before sorting.
 */
-export function sortStrings<T extends string>(...strss: T[][]): T[] {
+export function sortStrings<T extends string>(
+  ...strss: readonly (readonly T[])[]
+): T[] {
   return ([] as T[]).concat(...strss).sort()
 }
 

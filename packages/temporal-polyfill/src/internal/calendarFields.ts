@@ -29,9 +29,9 @@ export function getCalendarEraOrigins(
 
 export function getCalendarFieldNames(
   calendar: CalendarImpl,
-  fieldNames: string[],
-  fieldNamesWithEra: string[] = fieldNames,
-): string[] {
+  fieldNames: readonly string[],
+  fieldNamesWithEra: readonly string[] = fieldNames,
+): readonly string[] {
   // Both inputs are caller-owned, pre-sorted lists. Calendars with eras swap in
   // the explicit era-bearing variant instead of building field order here.
   return getCalendarEraOrigins(calendar) ? fieldNamesWithEra : fieldNames

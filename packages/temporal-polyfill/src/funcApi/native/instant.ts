@@ -91,7 +91,7 @@ export function fromString(s: string): NativeInstantRecord {
 
 export function add(
   record: NativeInstantRecord,
-  durationRecord: NativeDurationRecord,
+  durationRecord: RecordTypes.DurationRecord,
 ): NativeInstantRecord {
   const native = getNativeInstant(record)
   const durationNative = getNativeDuration(durationRecord)
@@ -101,7 +101,7 @@ export function add(
 
 export function subtract(
   record: NativeInstantRecord,
-  durationRecord: NativeDurationRecord,
+  durationRecord: RecordTypes.DurationRecord,
 ): NativeInstantRecord {
   const native = getNativeInstant(record)
   const durationNative = getNativeDuration(durationRecord)
