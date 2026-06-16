@@ -129,20 +129,39 @@ export function BirthdayCountdown({
       console.log('date', date)
       console.log('birthdayMonthDay', birthdayMonthDay)
       console.log('calendar', calendar)
+
+      if (!PlainDateFns.isRecord(calendar)) {
+        console.log('calendar is not a PlainDateRecord, duh')
+      }
+
+      // should NOT throw error
+      console.log('calendar.valueOf()', calendar.valueOf())
+
+      // // SHOULD throw error
+      // console.log('date.valueOf()', date.valueOf())
     }
 
     onDateClick?.({
       dateString,
       get plainDate() {
+        if (!PlainDateFns.isRecord(date)) {
+          console.log('Very strange!')
+        }
         return PlainDateFns.toTemporal(date)
       },
       get plainDateTime() {
-        return PlainDateTimeFns.toTemporal(PlainDateFns.toPlainDateTime(date))
+        const dateTime = PlainDateFns.toPlainDateTime(date)
+        if (!PlainDateTimeFns.isRecord(dateTime)) {
+          console.log('Very strange!')
+        }
+        return PlainDateTimeFns.toTemporal(dateTime)
       },
       get zonedDateTime() {
-        return ZonedDateTimeFns.toTemporal(
-          PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId()),
-        )
+        const zdt = PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId())
+        if (!ZonedDateTimeFns.isRecord(zdt)) {
+          console.log('Very strange!')
+        }
+        return ZonedDateTimeFns.toTemporal(zdt)
       },
       get legacyDate() {
         return new Date(
@@ -166,7 +185,7 @@ export function BirthdayCountdown({
             ))}
           </select>
         </label>
-        <p>Your pretend birthday is {dateFormat.format(birthday)}.</p>
+        <p>Your pretend birthday is {dateFormat.format(birthday)}</p>
       </div>
       <h2>Current Month</h2>
       <ul>
@@ -185,7 +204,7 @@ export function BirthdayCountdown({
               <div className="date-actions">
                 {selectedDateKey === dateKey ? (
                   <span className="countdown-message">
-                    {daysUntilBirthday} days until my birthday.
+                    {daysUntilBirthday} days until my birthday
                   </span>
                 ) : null}
                 <button type="button" onClick={() => handleDateClick(date)}>

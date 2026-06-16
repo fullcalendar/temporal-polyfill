@@ -1,8 +1,19 @@
 import { render } from 'preact'
 import { BirthdayCountdown } from './BirthdayCountdown.tsx'
-import { allCalendars } from './calendarPlugin.ts'
 import './styles.css'
-import 'temporal-polyfill/global'
+
+/*
+import { basicCalendars as calendarPlugin } from './calendarPlugin.ts'
+import 'temporal-polyfill/global' // basic entrypoint
+*/
+
+/*
+import { gregoryAlignedCalendars as calendarPlugin } from './calendarPlugin.ts'
+import 'temporal-polyfill/full/global'
+*/
+
+import { allCalendars as calendarPlugin } from './calendarPlugin.ts'
+import 'temporal-polyfill/full/global'
 
 function App() {
   return (
@@ -10,7 +21,7 @@ function App() {
       <h1>Birthday Countdown</h1>
       <BirthdayCountdown
         debug // will console.log the fns API's Record
-        calendarPlugin={allCalendars}
+        calendarPlugin={calendarPlugin}
         onDateClick={(info) => {
           console.log('--------------------')
           console.log('onDateClick callback')
