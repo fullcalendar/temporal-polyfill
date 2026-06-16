@@ -12,6 +12,7 @@
     "@preact/preset-vite": "^2.10.0",
     "preact": "^10.27.0",
     "temporal-polyfill": "workspace:*",
+    "temporal-polyfill-codemod": "workspace:*",
     "vite": "^7.0.0"
   },
   "devDependencies": {

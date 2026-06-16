@@ -31,6 +31,9 @@ importers:
       temporal-polyfill:
         specifier: workspace:*
         version: link:../../packages/temporal-polyfill/dist
+      temporal-polyfill-codemod:
+        specifier: workspace:*
+        version: link:../../packages/temporal-polyfill-codemod
       vite:
         specifier: ^7.0.0
         version: 7.3.5(jiti@1.21.0)
