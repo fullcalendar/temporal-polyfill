@@ -14,12 +14,38 @@ main {
 h1,
 h2,
 p {
-  margin-top: 0;
+  margin: 1em 0;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 3em;
+}
+
+.calendar-controls label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.calendar-controls p {
+  margin-bottom: 0;
+  text-align: right;
+}
+
+select {
+  min-width: 220px;
+  padding: 6px 10px;
+  font: inherit;
 }
 
 ul {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -28,8 +54,9 @@ li {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 0;
+  padding: 12px 0;
   gap: 12px;
-  padding: 8px 0;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -54,6 +81,20 @@ button {
 }
 
 @media (max-width: 560px) {
+  .calendar-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .calendar-controls p {
+    text-align: left;
+  }
+
+  select {
+    min-width: 0;
+    width: 100%;
+  }
+
   li {
     align-items: flex-start;
     flex-direction: column;

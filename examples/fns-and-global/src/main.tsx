@@ -1,37 +1,20 @@
 import { render } from 'preact'
-import { useMemo } from 'preact/hooks'
-import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
-
 import { BirthdayCountdown } from './BirthdayCountdown.tsx'
+import { allCalendars } from './calendarPlugin.ts'
 import './styles.css'
-
 import 'temporal-polyfill/global'
 
-function randomIntInclusive(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
 function App() {
-  const birthday = useMemo(
-    () =>
-      PlainMonthDayFns.create(
-        randomIntInclusive(1, 12),
-        randomIntInclusive(1, 28),
-      ),
-    [],
-  )
-
   return (
     <main>
       <h1>Birthday Countdown</h1>
-      <p>Your pretend birthday is {PlainMonthDayFns.toString(birthday)}.</p>
       <BirthdayCountdown
-        birthday={birthday}
         debug // will console.log the fns API's Record
+        calendarPlugin={allCalendars}
         onDateClick={(info) => {
-          console.log('----------------')
-          console.log('App clicked info')
-          console.log('----------------')
+          console.log('--------------------')
+          console.log('onDateClick callback')
+          console.log('--------------------')
           console.log('dateString', info.dateString)
           console.log('plainDate', info.plainDate)
           console.log('plainDateTime', info.plainDateTime)

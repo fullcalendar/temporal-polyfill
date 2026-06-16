@@ -1,10 +1,13 @@
-import { useState } from 'preact/hooks'
+import type { JSX } from 'preact'
+import { useMemo, useState } from 'preact/hooks'
+import type * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 import * as NowFns from 'temporal-polyfill/fns/Now'
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
 import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
 import * as PlainYearMonthFns from 'temporal-polyfill/fns/PlainYearMonth'
 import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+import { CalendarPlugin } from './calendarPlugin'
 
 /*
 Exposes real Temporal objects lazily, but caller must support them
@@ -18,23 +21,50 @@ type DateClickInfo = {
 }
 
 type BirthdayCountdownProps = {
-  birthday: PlainMonthDayFns.Record
   debug?: boolean
+  calendarPlugin: CalendarPlugin
   onDateClick?: (info: DateClickInfo) => void
 }
 
-const dateFormat = PlainDateFns.createFormat(undefined, {
-  dateStyle: 'full',
-})
+function randomIntInclusive(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
 
-function getCurrentMonthDates(): PlainDateFns.Record[] {
-  const today = NowFns.plainDateISO()
-  const currentMonth = PlainDateFns.toPlainYearMonth(today)
+function getToday(calendar: CalendarFns.Record): PlainDateFns.Record {
+  return PlainDateFns.withCalendar(NowFns.plainDateISO(), calendar)
+}
+
+function createRandomBirthday(calendar: CalendarFns.Record): PlainDateFns.Record {
+  const today = getToday(calendar)
+
+  // Pick a real date in the selected calendar's current year, so calendars
+  // with leap months or non-Gregorian month lengths get valid birthdays.
+  return PlainDateFns.withDayOfYear(
+    today,
+    randomIntInclusive(1, PlainDateFns.daysInYear(today)),
+  )
+}
+
+function getCurrentMonthDates(
+  calendar: CalendarFns.Record,
+): PlainDateFns.Record[] {
+  const currentMonthStart = PlainDateFns.startOfMonth(getToday(calendar))
+  const currentMonth = PlainDateFns.toPlainYearMonth(currentMonthStart)
   const daysInMonth = PlainYearMonthFns.daysInMonth(currentMonth)
 
   return Array.from({ length: daysInMonth }, (_unused, index) =>
-    PlainDateFns.create(currentMonth.year, currentMonth.month, index + 1),
+    PlainDateFns.addDays(currentMonthStart, index),
   )
+}
+
+// Match the Intl formatter calendar to the selected calendar. The fns formatter
+// intentionally rejects mismatched calendars instead of silently formatting a
+// Hebrew date with a Gregorian formatter, for example.
+function createDateFormat(calendarId: string): PlainDateFns.Format {
+  return PlainDateFns.createFormat(undefined, {
+    calendar: calendarId,
+    dateStyle: 'full',
+  })
 }
 
 function getNextBirthday(
@@ -62,22 +92,43 @@ function getDaysUntilBirthday(
 }
 
 export function BirthdayCountdown({
-  birthday,
   debug = false,
+  calendarPlugin,
   onDateClick,
 }: BirthdayCountdownProps) {
+  const [calendarId, setCalendarId] = useState(
+    () => calendarPlugin.choices[0]?.id ?? 'iso8601',
+  )
+  const calendar = useMemo(
+    () => calendarPlugin.getCalendarRecord(calendarId),
+    [calendarId, calendarPlugin],
+  )
+  const [birthday, setBirthday] = useState(() => createRandomBirthday(calendar))
   const [selectedDateKey, setSelectedDateKey] = useState<string>()
-  const dates = getCurrentMonthDates()
+  const dateFormat = useMemo(() => createDateFormat(calendarId), [calendarId])
+  const birthdayMonthDay = PlainDateFns.toPlainMonthDay(birthday)
+  const dates = getCurrentMonthDates(calendar)
+
+  function handleCalendarChange(event: JSX.TargetedEvent<HTMLSelectElement>) {
+    const nextCalendarId = event.currentTarget.value
+    const nextCalendar = calendarPlugin.getCalendarRecord(nextCalendarId)
+
+    setCalendarId(nextCalendarId)
+    setBirthday(createRandomBirthday(nextCalendar))
+    setSelectedDateKey(undefined)
+  }
 
   function handleDateClick(date: PlainDateFns.Record) {
-    const dateString = PlainDateFns.toString(date)
+    const dateString = PlainDateFns.toString(date, { calendarName: 'always' })
     setSelectedDateKey(dateString)
 
     if (debug) {
-      console.log(
-        'BirthdayCountdown clicked date Record:',
-        date, // direct Record object
-      )
+      console.log('----------------')
+      console.log('Internal Records')
+      console.log('----------------')
+      console.log('date', date)
+      console.log('birthdayMonthDay', birthdayMonthDay)
+      console.log('calendar', calendar)
     }
 
     onDateClick?.({
@@ -98,17 +149,35 @@ export function BirthdayCountdown({
           PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId())
             .epochMilliseconds,
         )
-      }
+      },
     })
   }
 
   return (
     <section>
+      <div className="calendar-controls">
+        <label>
+          Calendar system
+          <select value={calendarId} onChange={handleCalendarChange}>
+            {calendarPlugin.choices.map((choice) => (
+              <option key={choice.id} value={choice.id}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p>Your pretend birthday is {dateFormat.format(birthday)}.</p>
+      </div>
       <h2>Current Month</h2>
       <ul>
         {dates.map((date) => {
-          const dateKey = PlainDateFns.toString(date)
-          const daysUntilBirthday = getDaysUntilBirthday(date, birthday)
+          const dateKey = PlainDateFns.toString(date, {
+            calendarName: 'always',
+          })
+          const daysUntilBirthday = getDaysUntilBirthday(
+            date,
+            birthdayMonthDay,
+          )
 
           return (
             <li key={dateKey}>
