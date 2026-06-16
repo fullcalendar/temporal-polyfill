@@ -9,7 +9,6 @@ import { CalendarRecordBranding } from './recordBranding'
 import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
-export type CalendarRecord = InstanceType<typeof CalendarRecord>
 export const CalendarRecord = defineTemporalClass(
   CalendarRecordBranding,
   class implements RecordTypes.CalendarRecord {
@@ -31,7 +30,7 @@ TODO: accept slots object like sibling files?
 export function createCalendarRecord(
   id: string,
   getImpl?: () => CalendarImpl,
-): CalendarRecord {
+): RecordTypes.CalendarRecord {
   const instance = Object.create(CalendarRecord.prototype)
   const slots = { id, getImpl }
   setCalendarSlots(instance, slots)
@@ -39,7 +38,9 @@ export function createCalendarRecord(
   return instance
 }
 
-export function getCalendarRecordId(record: CalendarRecord): string {
+export function getCalendarRecordId(
+  record: RecordTypes.CalendarRecord,
+): string {
   return getCalendarSlots(record).id
 }
 
@@ -48,7 +49,7 @@ If caller simply wants to validate that record holds a known calendar,
 can simply call this and discard the result
 */
 export function getCalendarRecordImplCreator(
-  record: CalendarRecord,
+  record: RecordTypes.CalendarRecord,
 ): () => CalendarImpl {
   const getImpl = getCalendarSlots(record).getImpl
   if (!getImpl) {

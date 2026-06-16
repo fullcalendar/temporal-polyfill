@@ -10,7 +10,6 @@ import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -73,7 +72,7 @@ export function createNativePlainYearMonthRecord(
 export function create(
   isoYear: number,
   isoMonth: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
   referenceIsoDay?: number,
 ): NativePlainYearMonthRecord {
   return createNativePlainYearMonthRecord(
@@ -87,7 +86,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<YearMonthFields & { calendar: CalendarRecord }>,
+  fields: Partial<YearMonthFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): NativePlainYearMonthRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
@@ -100,7 +99,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): NativePlainYearMonthRecord {
   const resNative = NativeTemporal!.PlainYearMonth.from(s)
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)

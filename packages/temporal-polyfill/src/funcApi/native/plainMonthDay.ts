@@ -7,7 +7,6 @@ import { monthDayFieldGetters } from '../../apiHelpers/nativeMixins'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -64,7 +63,7 @@ export function createNativePlainMonthDayRecord(
 export function create(
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
   referenceIsoYear?: number,
 ): NativePlainMonthDayRecord {
   return createNativePlainMonthDayRecord(
@@ -78,7 +77,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<MonthDayFields & { calendar: CalendarRecord }>,
+  fields: Partial<MonthDayFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): NativePlainMonthDayRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
@@ -91,7 +90,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): NativePlainMonthDayRecord {
   const resNative = NativeTemporal!.PlainMonthDay.from(s)
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)

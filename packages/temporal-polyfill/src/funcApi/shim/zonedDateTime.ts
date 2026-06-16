@@ -88,7 +88,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { CalendarRecord } from '../calendarRecord'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -151,7 +150,7 @@ import {
 } from './roundUtils'
 import { validateBag } from './temporalRecords'
 
-type ShimZonedDateTimeFields = ZonedDateTimeFields<CalendarRecord>
+type ShimZonedDateTimeFields = ZonedDateTimeFields<RecordTypes.CalendarRecord>
 type ShimZonedDateTimeSlots = ZonedEpochNanoFields & { calendar: CalendarImpl }
 
 export const getShimZonedDateTimeSlots: (
@@ -216,7 +215,7 @@ function getShimZonedDateTimeIsoSlots(
 export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): ShimZonedDateTimeRecord {
   const epochNano = checkEpochNanoInBounds(toBigInt(epochNanoseconds))
   const timeZone = queryTimeZone(refineTimeZoneId(timeZoneId))
@@ -243,7 +242,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
   options?: TemporalSpec.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
   return createShimZonedDateTimeRecord(
@@ -267,7 +266,7 @@ export function withFields(
 
 export function withCalendar(
   record: ShimZonedDateTimeRecord,
-  inputCalendar: CalendarRecord,
+  inputCalendar: RecordTypes.CalendarRecord,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const calendarImpl = getCalendarRecordImpl(inputCalendar)

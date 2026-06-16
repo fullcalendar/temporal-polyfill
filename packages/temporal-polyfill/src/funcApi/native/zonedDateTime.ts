@@ -10,7 +10,6 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { CalendarRecord } from '../calendarRecord'
 import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -95,7 +94,7 @@ export function createNativeZonedDateTimeRecord(
 export function create(
   epochNanoseconds: bigint,
   timeZoneId: string,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): NativeZonedDateTimeRecord {
   return createNativeZonedDateTimeRecord(
     new NativeTemporal!.ZonedDateTime(
@@ -107,7 +106,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: ZonedDateTimeFields<CalendarRecord>,
+  fields: ZonedDateTimeFields<RecordTypes.CalendarRecord>,
   options?: Temporal.ZonedDateTimeFromOptions,
 ): NativeZonedDateTimeRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
@@ -120,7 +119,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
   options?: Temporal.ZonedDateTimeFromOptions,
 ): NativeZonedDateTimeRecord {
   const resNative = NativeTemporal!.ZonedDateTime.from(s, options)
@@ -140,7 +139,7 @@ export function withFields(
 
 export function withCalendar(
   record: NativeZonedDateTimeRecord,
-  calendarRecord: CalendarRecord,
+  calendarRecord: RecordTypes.CalendarRecord,
 ): NativeZonedDateTimeRecord {
   const native = getNativeZonedDateTime(record)
   const calendarId = getValidatedCalendarId(calendarRecord)

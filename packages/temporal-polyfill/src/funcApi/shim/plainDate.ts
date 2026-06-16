@@ -64,7 +64,6 @@ import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { CalendarRecord } from '../calendarRecord'
 import {
   DateTimeFormatLike,
   PlainDateToZonedDateTimeOptions,
@@ -174,7 +173,7 @@ export function create(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): ShimPlainDateRecord {
   const fields = checkIsoDateInBounds(
     validateIsoDateFields(
@@ -190,7 +189,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateFields & { calendar: CalendarRecord }>,
+  fields: Partial<DateFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)
@@ -200,7 +199,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): ShimPlainDateRecord {
   return createShimPlainDateRecord(
     parsePlainDate(s, createShimCalendarStringResolver(getCalendarRecord)),
@@ -219,7 +218,7 @@ export function withFields(
 
 export function withCalendar(
   record: ShimPlainDateRecord,
-  inputCalendar: CalendarRecord,
+  inputCalendar: RecordTypes.CalendarRecord,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   const calendarImpl = getCalendarRecordImpl(inputCalendar)

@@ -24,10 +24,8 @@ import {
   isoCalendarId,
 } from '../internal/intlCalendarConfig'
 import { memoize } from '../internal/utils'
-import {
-  CalendarRecord as Record,
-  createCalendarRecord,
-} from './calendarRecord'
+import { createCalendarRecord } from './calendarRecord'
+import type { CalendarRecord as Record } from './recordTypes'
 
 export { Record }
 

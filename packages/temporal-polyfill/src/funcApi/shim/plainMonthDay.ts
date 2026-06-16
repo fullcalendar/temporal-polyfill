@@ -34,7 +34,6 @@ import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -95,7 +94,7 @@ export function createShimPlainMonthDayRecord(
 export function create(
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
   referenceIsoYear?: number,
 ): ShimPlainMonthDayRecord {
   const isoMonthInt = toIntegerWithTrunc(isoMonth)
@@ -115,7 +114,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<MonthDayFields & { calendar: CalendarRecord }>,
+  fields: Partial<MonthDayFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
   const inputCalendar = fields.calendar
@@ -131,7 +130,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): ShimPlainMonthDayRecord {
   return createShimPlainMonthDayRecord(
     parsePlainMonthDay(s, createShimCalendarStringResolver(getCalendarRecord)),

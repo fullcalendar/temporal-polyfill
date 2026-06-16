@@ -1,8 +1,9 @@
 import { CalendarImpl, isoCalendarImpl } from '../../internal/calendarImpl'
-import { CalendarRecord, getCalendarRecordImplCreator } from '../calendarRecord'
+import { getCalendarRecordImplCreator } from '../calendarRecord'
+import * as RecordType from '../recordTypes'
 
 export function refineShimCalendarArgMaybe(
-  calendarRecord: CalendarRecord | undefined,
+  calendarRecord: RecordType.CalendarRecord | undefined,
 ): CalendarImpl {
   // not specified?
   if (calendarRecord === undefined) {
@@ -12,7 +13,7 @@ export function refineShimCalendarArgMaybe(
 }
 
 export function createShimCalendarStringResolver(
-  getCalendarRecord: (calendarId: string) => CalendarRecord,
+  getCalendarRecord: (calendarId: string) => RecordType.CalendarRecord,
 ): (id: string) => CalendarImpl {
   return (calendarId: string) => {
     const calendarRecord = getCalendarRecord(calendarId.toLowerCase())
@@ -23,7 +24,9 @@ export function createShimCalendarStringResolver(
 /*
 Throws if calendar doesn't exist
 */
-export function getCalendarRecordImpl(record: CalendarRecord): CalendarImpl {
+export function getCalendarRecordImpl(
+  record: RecordType.CalendarRecord,
+): CalendarImpl {
   return getCalendarRecordImplCreator(record)()
 }
 

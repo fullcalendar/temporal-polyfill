@@ -48,7 +48,6 @@ import { createDateSlots, createDurationSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -123,7 +122,7 @@ export function createShimPlainYearMonthRecord(
 export function create(
   isoYear: number,
   isoMonth: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
   referenceIsoDay?: number,
 ): ShimPlainYearMonthRecord {
   const isoYearInt = toIntegerWithTrunc(isoYear)
@@ -141,7 +140,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<YearMonthFields & { calendar: CalendarRecord }>,
+  fields: Partial<YearMonthFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainYearMonthRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)
@@ -155,7 +154,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): ShimPlainYearMonthRecord {
   return createShimPlainYearMonthRecord(
     parsePlainYearMonth(s, createShimCalendarStringResolver(getCalendarRecord)),

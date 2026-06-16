@@ -10,7 +10,6 @@ import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { CalendarRecord } from '../calendarRecord'
 import {
   DateTimeFormatLike,
   NativeDiffFunc,
@@ -89,7 +88,7 @@ export function create(
   isoYear: number,
   isoMonth: number,
   isoDay: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): NativePlainDateRecord {
   return createNativePlainDateRecord(
     new NativeTemporal!.PlainDate(
@@ -102,7 +101,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateFields & { calendar: CalendarRecord }>,
+  fields: Partial<DateFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): NativePlainDateRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
@@ -115,7 +114,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): NativePlainDateRecord {
   const resNative = NativeTemporal!.PlainDate.from(s)
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
@@ -182,7 +181,7 @@ export function withFields(
 
 export function withCalendar(
   record: NativePlainDateRecord,
-  calendarRecord: CalendarRecord,
+  calendarRecord: RecordTypes.CalendarRecord,
 ): NativePlainDateRecord {
   const native = getNativePlainDate(record)
   const calendarId = getValidatedCalendarId(calendarRecord)

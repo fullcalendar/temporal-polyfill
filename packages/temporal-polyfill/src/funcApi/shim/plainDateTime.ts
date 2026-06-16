@@ -80,7 +80,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -196,7 +195,7 @@ export function create(
   millisecond = 0,
   microsecond = 0,
   nanosecond = 0,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): ShimPlainDateTimeRecord {
   const fields = checkIsoDateTimeInBounds(
     validateIsoDateTimeFields(
@@ -220,7 +219,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateTimeFields & { calendar: CalendarRecord }>,
+  fields: Partial<DateTimeFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)
@@ -230,7 +229,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): ShimPlainDateTimeRecord {
   return createShimPlainDateTimeRecord(
     parsePlainDateTime(s, createShimCalendarStringResolver(getCalendarRecord)),
@@ -239,7 +238,7 @@ export function fromString(
 
 export function withCalendar(
   record: ShimPlainDateTimeRecord,
-  inputCalendar: CalendarRecord,
+  inputCalendar: RecordTypes.CalendarRecord,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const calendarImpl = getCalendarRecordImpl(inputCalendar)

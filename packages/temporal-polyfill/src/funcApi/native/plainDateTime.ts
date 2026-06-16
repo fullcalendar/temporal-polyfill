@@ -10,7 +10,6 @@ import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -92,7 +91,7 @@ export function create(
   millisecond?: number,
   microsecond?: number,
   nanosecond?: number,
-  calendar?: CalendarRecord,
+  calendar?: RecordTypes.CalendarRecord,
 ): NativePlainDateTimeRecord {
   return createNativePlainDateTimeRecord(
     new NativeTemporal!.PlainDateTime(
@@ -111,7 +110,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateTimeFields & { calendar: CalendarRecord }>,
+  fields: Partial<DateTimeFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): NativePlainDateTimeRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
@@ -124,7 +123,7 @@ export function fromFields(
 
 export function fromString(
   s: string,
-  getCalendarRecord: (id: string) => CalendarRecord,
+  getCalendarRecord: (id: string) => RecordTypes.CalendarRecord,
 ): NativePlainDateTimeRecord {
   const resNative = NativeTemporal!.PlainDateTime.from(s)
   runNativeCalendarResolver(resNative.calendarId, getCalendarRecord)
@@ -133,7 +132,7 @@ export function fromString(
 
 export function withCalendar(
   record: NativePlainDateTimeRecord,
-  calendarRecord: CalendarRecord,
+  calendarRecord: RecordTypes.CalendarRecord,
 ): NativePlainDateTimeRecord {
   const native = getNativePlainDateTime(record)
   const calendarId = getValidatedCalendarId(calendarRecord)
