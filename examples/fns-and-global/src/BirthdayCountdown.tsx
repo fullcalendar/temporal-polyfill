@@ -1,8 +1,10 @@
 import { useState } from 'preact/hooks'
 import * as NowFns from 'temporal-polyfill/fns/Now'
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
 import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
 import * as PlainYearMonthFns from 'temporal-polyfill/fns/PlainYearMonth'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
 
 /*
 Exposes real Temporal objects lazily, but caller must support them
@@ -81,16 +83,21 @@ export function BirthdayCountdown({
     onDateClick?.({
       dateString,
       get plainDate() {
-        return dateToPlainDate(date)
+        return PlainDateFns.toNative(date)
       },
       get plainDateTime() {
-        return dateToPlainDateTime(date)
+        return PlainDateTimeFns.toNative(PlainDateFns.toPlainDateTime(date))
       },
       get zonedDateTime() {
-        return dateToZonedDateTime(date)
+        return ZonedDateTimeFns.toNative(
+          PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId()),
+        )
       },
       get legacyDate() {
-        return dateToLegacyDate(date)
+        return new Date(
+          PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId())
+            .epochMilliseconds,
+        )
       }
     })
   }
@@ -122,25 +129,4 @@ export function BirthdayCountdown({
       </ul>
     </section>
   )
-}
-
-// Utils
-// -----------------------------------------------------------------------------
-
-function dateToPlainDate(date: PlainDateFns.Record): Temporal.PlainDate {
-  return new Temporal.PlainDate(...PlainDateFns.toISOArray(date))
-}
-
-function dateToPlainDateTime(date: PlainDateFns.Record): Temporal.PlainDateTime {
-  return dateToPlainDate(date).toPlainDateTime()
-}
-
-function dateToZonedDateTime(date: PlainDateFns.Record): Temporal.ZonedDateTime {
-  return dateToPlainDateTime(date).toZonedDateTime(Temporal.Now.timeZone())
-}
-
-// does not require Temporal
-function dateToLegacyDate(date: PlainDateFns.Record): Date {
-  const zdt = PlainDateFns.toZonedDateTime(date, NowFns.timeZone())
-  return new Date(zdt.epochMilliseconds)
 }

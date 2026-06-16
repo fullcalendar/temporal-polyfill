@@ -1,13 +1,11 @@
 import { render } from 'preact'
 import { useMemo } from 'preact/hooks'
-import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
 
 import { BirthdayCountdown } from './BirthdayCountdown.tsx'
 import './styles.css'
 
-// for testing temporal-polyfill shim implementation
-import 'temporal-polyfill/implementation'
+import 'temporal-polyfill/global'
 
 function randomIntInclusive(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
