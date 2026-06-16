@@ -5,6 +5,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
+import { dateFieldGetters, timeGetters } from '../../apiHelpers/nativeMixins'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -29,7 +30,6 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import { dateFieldGetters, timeGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
   NativePlainTimeRecord,

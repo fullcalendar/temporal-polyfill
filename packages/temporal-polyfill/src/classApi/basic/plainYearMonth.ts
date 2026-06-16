@@ -9,7 +9,7 @@ import {
 import {
   yearMonthDerivedGetters,
   yearMonthFieldGetters,
-} from '../../apiHelpers/mixins'
+} from '../../apiHelpers/shimMixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import {

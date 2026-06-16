@@ -5,6 +5,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
+import { yearMonthFieldGetters } from '../../apiHelpers/nativeMixins'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
@@ -28,7 +29,6 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import { yearMonthFieldGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>

@@ -97,9 +97,9 @@ style calls. In that mode an empty matching field set is rejected by default.
 */
 export function readAndRefineBagFields(
   bag: Record<string, unknown>,
-  validFieldNames: readonly string[], // must be alphabetized
+  validFieldNames: string[], // must be alphabetized
   fieldRefiners: FieldRefinerMap,
-  requiredFieldNames?: readonly string[],
+  requiredFieldNames?: string[],
   disallowEmpty = !requiredFieldNames,
 ): Record<string, unknown> {
   const res: Record<string, unknown> = {}

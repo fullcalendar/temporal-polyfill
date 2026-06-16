@@ -6,7 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { timeGetters } from '../../apiHelpers/mixins'
+import { timeGetters } from '../../apiHelpers/shimMixins'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'

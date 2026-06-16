@@ -14,6 +14,15 @@ describe('full entrypoint', () => {
   })
 })
 
+describe('Temporal.PlainMonthDay', () => {
+  it('does not expose a numeric month field', () => {
+    const pmd = new TemporalFull.PlainMonthDay(6, 18)
+
+    expect('month' in pmd).toBe(false)
+    expect((pmd as any).month).toBeUndefined()
+  })
+})
+
 describe('integration recreations', () => {
   // test262 mostly covers this through broad Buddhist calendar conversion
   // tests, but not this exact 1582 withCalendar repro. Consider telling the

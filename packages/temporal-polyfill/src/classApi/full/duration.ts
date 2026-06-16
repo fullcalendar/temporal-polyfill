@@ -6,7 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { durationGetters } from '../../apiHelpers/mixins'
+import { durationGetters } from '../../apiHelpers/shimMixins'
 import { toStrictInteger } from '../../internal/cast'
 import { compareDurations } from '../../internal/compare'
 import {

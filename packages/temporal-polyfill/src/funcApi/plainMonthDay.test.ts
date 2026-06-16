@@ -96,9 +96,11 @@ describe('calendar field getters', () => {
   it('works', () => {
     const pmd = PlainMonthDayFns.create(6, 18)
     expect({
+      month: 'month' in pmd,
       monthCode: pmd.monthCode,
       day: pmd.day,
     }).toEqual({
+      month: false,
       monthCode: 'M06',
       day: 18,
     })

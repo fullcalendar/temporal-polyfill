@@ -6,7 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { monthDayFieldGetters } from '../../apiHelpers/mixins'
+import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import {
   CalendarImpl,
   getCalendarSlotId,

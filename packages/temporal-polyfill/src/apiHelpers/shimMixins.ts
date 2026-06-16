@@ -75,10 +75,6 @@ export const dateFieldGetters = {
 } as const
 
 export const monthDayFieldGetters = {
-  month(slots: CalendarDateSlots): number {
-    return computeCalendarDateFields(slots.calendar, slots).month
-  },
-
   monthCode(slots: CalendarDateSlots): string {
     return computeCalendarMonthCode(slots.calendar, slots)
   },

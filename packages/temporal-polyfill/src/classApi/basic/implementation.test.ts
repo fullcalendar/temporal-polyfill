@@ -54,6 +54,15 @@ describe('Temporal.ZonedDateTime', () => {
   })
 })
 
+describe('Temporal.PlainMonthDay', () => {
+  it('does not expose a numeric month field', () => {
+    const pmd = new Temporal.PlainMonthDay(6, 18)
+
+    expect('month' in pmd).toBe(false)
+    expect((pmd as any).month).toBeUndefined()
+  })
+})
+
 describe('Intl.DateTimeFormat', () => {
   describe('constructor', () => {
     // https://github.com/fullcalendar/temporal-polyfill/issues/25

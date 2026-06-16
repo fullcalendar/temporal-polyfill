@@ -1,12 +1,4 @@
-import {
-  type DurationFields,
-  durationFieldNamesAsc,
-} from '../../internal/durationFields'
-import {
-  allYearFieldNames,
-  monthFieldNames,
-  timeFieldNamesAsc,
-} from '../../internal/fieldNames'
+import type { DurationFields } from '../internal/durationFields'
 import type {
   DateFields,
   DateStats,
@@ -14,17 +6,18 @@ import type {
   TimeFields,
   YearMonthFields,
   YearMonthStats,
-} from '../../internal/fieldTypes'
+} from '../internal/fieldTypes'
+import * as ShimMixins from './shimMixins'
 
 type GetterMap<Slots, FieldName extends keyof Slots> = {
   [K in FieldName]: (slots: Slots) => any
 }
 
 function createNativeGetters<Slots, FieldName extends keyof Slots>(
-  fieldNames: readonly FieldName[],
+  shimGetters: Record<FieldName, unknown>,
 ): GetterMap<Slots, FieldName> {
   const getters = {} as GetterMap<Slots, FieldName>
-  for (const fieldName of fieldNames) {
+  for (const fieldName of Object.keys(shimGetters) as FieldName[]) {
     getters[fieldName] = ((slots: Slots) => slots[fieldName]) as GetterMap<
       Slots,
       FieldName
@@ -33,62 +26,36 @@ function createNativeGetters<Slots, FieldName extends keyof Slots>(
   return getters
 }
 
-const yearMonthFieldNames = [...allYearFieldNames, ...monthFieldNames] as const
-const dateFieldNames = [...yearMonthFieldNames, 'day'] as const
-const monthDayFieldNames = [...monthFieldNames, 'day'] as const
-const monthCodeDayFieldNames = ['monthCode', 'day'] as const
-
-const yearMonthStatNames = [
-  'daysInMonth',
-  'daysInYear',
-  'monthsInYear',
-  'inLeapYear',
-] as const
-
-const dateStatNames = [
-  'dayOfWeek',
-  'dayOfYear',
-  'weekOfYear',
-  'yearOfWeek',
-  'daysInWeek',
-  ...yearMonthStatNames,
-] as const
-
 export const durationGetters = createNativeGetters<
   DurationFields,
   keyof DurationFields
->(durationFieldNamesAsc)
+>(ShimMixins.durationGetters)
 
 export const timeGetters = createNativeGetters<TimeFields, keyof TimeFields>(
-  timeFieldNamesAsc,
+  ShimMixins.timeGetters,
 )
 
 export const yearMonthFieldGetters = createNativeGetters<
   YearMonthFields,
   keyof YearMonthFields
->(yearMonthFieldNames)
+>(ShimMixins.yearMonthFieldGetters)
 
 export const dateFieldGetters = createNativeGetters<
   DateFields,
   keyof DateFields
->(dateFieldNames)
+>(ShimMixins.dateFieldGetters)
 
 export const monthDayFieldGetters = createNativeGetters<
-  MonthDayFields,
-  keyof MonthDayFields
->(monthDayFieldNames)
-
-export const monthCodeDayFieldGetters = createNativeGetters<
   Pick<MonthDayFields, 'monthCode' | 'day'>,
   'monthCode' | 'day'
->(monthCodeDayFieldNames)
+>(ShimMixins.monthDayFieldGetters)
 
 export const yearMonthDerivedGetters = createNativeGetters<
   YearMonthStats,
   keyof YearMonthStats
->(yearMonthStatNames)
+>(ShimMixins.yearMonthDerivedGetters)
 
 export const dateDerivedGetters = createNativeGetters<
   DateStats,
   keyof DateStats
->(dateStatNames)
+>(ShimMixins.dateDerivedGetters)

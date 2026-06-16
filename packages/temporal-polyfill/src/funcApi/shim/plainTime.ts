@@ -5,7 +5,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { timeGetters } from '../../apiHelpers/mixins'
+import { timeGetters } from '../../apiHelpers/shimMixins'
 import { bigNanoInUtcDay } from '../../internal/bigNano'
 import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'

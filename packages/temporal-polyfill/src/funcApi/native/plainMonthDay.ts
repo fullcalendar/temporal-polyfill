@@ -3,6 +3,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
+import { monthDayFieldGetters } from '../../apiHelpers/nativeMixins'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
@@ -19,7 +20,6 @@ import {
   runNativeCalendarResolver,
 } from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
-import { monthCodeDayFieldGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
@@ -48,7 +48,7 @@ export const NativePlainMonthDayRecord = defineTemporalClass(
     }
   },
   getNativePlainMonthDay,
-  monthCodeDayFieldGetters,
+  monthDayFieldGetters,
 )
 
 export function createNativePlainMonthDayRecord(

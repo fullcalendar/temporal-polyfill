@@ -3,6 +3,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
+import { durationGetters } from '../../apiHelpers/nativeMixins'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type {
@@ -22,7 +23,6 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
-import { durationGetters } from './mixins'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots

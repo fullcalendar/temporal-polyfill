@@ -5,7 +5,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { dateFieldGetters, timeGetters } from '../../apiHelpers/mixins'
+import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,

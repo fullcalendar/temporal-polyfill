@@ -18,8 +18,8 @@ export const timeGetters = timeFieldNamesAsc.reduce(
   {} as { [K in keyof TimeFields]: (slots: TimeFields) => number },
 )
 
-export const yearFieldNamesAsc = ['year'] as const
-export const dayFieldNamesAsc = ['day'] as const
+export const yearFieldNamesAsc = ['year']
+export const dayFieldNamesAsc = ['day']
 export const calendarDateFieldNamesAsc = [
   'day',
   'month',
@@ -31,12 +31,12 @@ export const calendarDateFieldNamesAsc = [
 // These lists include fields outside the numeric date/time core, and their
 // order is not numeric unit significance.
 
-const offsetFieldNames = ['offset'] as const
-export const timeZoneFieldNames = ['timeZone'] as const
-export const eraYearFieldNames = ['era', 'eraYear'] as const
-export const allYearFieldNames = ['era', 'eraYear', 'year'] as const
-export const monthFieldNames = ['month', 'monthCode'] as const
-export const monthDayFieldNames = ['day', 'month', 'monthCode'] as const
+const offsetFieldNames = ['offset']
+export const timeZoneFieldNames = ['timeZone']
+export const eraYearFieldNames = ['era', 'eraYear']
+export const allYearFieldNames = ['era', 'eraYear', 'year']
+export const monthFieldNames = ['month', 'monthCode']
+export const monthDayFieldNames = ['day', 'month', 'monthCode']
 
 // Alpha Field Name Lists
 // -----------------------------------------------------------------------------
