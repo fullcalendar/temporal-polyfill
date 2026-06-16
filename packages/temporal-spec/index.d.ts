@@ -1,8 +1,7 @@
 /*
-Derived from: https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.temporal.d.ts
-LICENSE: https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt
-
-NOTE: keep synced with all other definition files
+This file was derived from the TypeScript project.
+Original source: https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.intl.d.ts
+Copyright (c) Microsoft Corporation. Licensed under the Apache License 2.0.
 */
 
 /// <reference lib="es2015.symbol.wellknown" />

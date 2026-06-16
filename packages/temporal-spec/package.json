@@ -8,21 +8,27 @@
     "email": "arshaw@users.noreply.github.com",
     "url": "http://arshaw.com/"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/fullcalendar/temporal-polyfill.git",
     "directory": "packages/temporal-spec"
   },
-  "type": "module",
-  "main": "./index.js",
-  "types": "./index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
     "lint": "biome check .",
     "lint:fix": "biome check --apply .",
     "typecheck": "tsc -p tsconfig.json"
   },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "global.js",
+    "global.d.ts"
+  ],
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
