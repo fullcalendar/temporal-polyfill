@@ -4,7 +4,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -57,11 +56,11 @@ export const NativePlainTimeRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativePlainTime(this).toString()
+      return getNativePlainTime(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativePlainTime(this).valueOf()
     }
   },
 )

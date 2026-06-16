@@ -4,7 +4,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -118,11 +117,11 @@ export const NativeZonedDateTimeRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativeZonedDateTime(this).toString()
+      return getNativeZonedDateTime(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativeZonedDateTime(this).valueOf()
     }
   },
 )

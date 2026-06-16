@@ -2,7 +2,6 @@ import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { DurationFields } from '../../internal/durationFields'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -73,11 +72,11 @@ export const NativeDurationRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativeDuration(this).toString()
+      return getNativeDuration(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativeDuration(this).valueOf()
     }
   },
 )

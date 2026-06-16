@@ -2,7 +2,6 @@ import type { Temporal } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -48,11 +47,11 @@ export const NativePlainMonthDayRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativePlainMonthDay(this).toString()
+      return getNativePlainMonthDay(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativePlainMonthDay(this).valueOf()
     }
   },
 )

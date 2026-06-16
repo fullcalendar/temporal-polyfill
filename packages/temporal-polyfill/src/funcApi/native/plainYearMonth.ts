@@ -4,7 +4,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
@@ -69,11 +68,11 @@ export const NativePlainYearMonthRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativePlainYearMonth(this).toString()
+      return getNativePlainYearMonth(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativePlainYearMonth(this).valueOf()
     }
   },
 )

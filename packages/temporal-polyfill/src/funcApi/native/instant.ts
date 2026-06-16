@@ -4,7 +4,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
   defineTemporalClass,
-  forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
@@ -45,11 +44,11 @@ export const NativeInstantRecord = defineTemporalClass(
     }
 
     toJSON() {
-      return getNativeInstant(this).toString()
+      return getNativeInstant(this).toJSON()
     }
 
     valueOf(): never {
-      return forbiddenValueOf()
+      return getNativeInstant(this).valueOf()
     }
   },
 )
