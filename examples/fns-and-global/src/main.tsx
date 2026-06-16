@@ -29,6 +29,7 @@ function App() {
         birthday={birthday}
         debug // will console.log the fns API's Record
         onDateClick={(info) => {
+          console.log('----------------')
           console.log('App clicked info')
           console.log('----------------')
           console.log('dateString', info.dateString)

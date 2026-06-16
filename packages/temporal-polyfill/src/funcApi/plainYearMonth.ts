@@ -121,8 +121,8 @@ export const toPlainDate: (
   ? Native.toPlainDate
   : Shim.toPlainDate
 
-export const toNative: (record: Record) => Temporal.PlainYearMonth =
-  NativeTemporal ? Native.toNative : Shim.toNative
+export const toTemporal: (record: Record) => Temporal.PlainYearMonth =
+  NativeTemporal ? Native.toTemporal : Shim.toTemporal
 
 // Non-standard: Move
 // -----------------------------------------------------------------------------

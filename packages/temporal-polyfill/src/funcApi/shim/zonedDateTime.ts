@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
@@ -88,7 +88,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
@@ -229,7 +228,7 @@ export function create(
 
 export function fromFields(
   fields: ShimZonedDateTimeFields,
-  options?: Temporal.ZonedDateTimeFromOptions,
+  options?: TemporalSpec.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
   const inputCalendar = fields.calendar
   const calendarImpl = refineShimCalendarArgMaybe(inputCalendar)
@@ -245,7 +244,7 @@ export function fromFields(
 export function fromString(
   s: string,
   getCalendarRecord: (id: string) => CalendarRecord,
-  options?: Temporal.ZonedDateTimeFromOptions,
+  options?: TemporalSpec.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
   return createShimZonedDateTimeRecord(
     parseZonedDateTime(
@@ -259,7 +258,7 @@ export function fromString(
 export function withFields(
   record: ShimZonedDateTimeRecord,
   mod: Partial<DateTimeFields>,
-  options?: Temporal.ZonedDateTimeFromOptions,
+  options?: TemporalSpec.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const resSlots = mergeZonedDateTimeFields(slots, validateBag(mod), options)
@@ -373,7 +372,7 @@ export function hoursInDay(record: ShimZonedDateTimeRecord): number {
 
 export function toString(
   record: ShimZonedDateTimeRecord,
-  options?: Temporal.ZonedDateTimeToStringOptions,
+  options?: TemporalSpec.ZonedDateTimeToStringOptions,
 ): string {
   return formatZonedDateTimeIso(getShimZonedDateTimeSlots(record), options)
 }
@@ -385,7 +384,7 @@ export function toBasicString(record: ShimZonedDateTimeRecord): string {
 export function add(
   record: ShimZonedDateTimeRecord,
   durationRecord: ShimDurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -396,7 +395,7 @@ export function add(
 export function subtract(
   record: ShimZonedDateTimeRecord,
   durationRecord: ShimDurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -412,8 +411,8 @@ export function subtract(
 export function diff(
   record: ShimZonedDateTimeRecord,
   otherRecord: ShimZonedDateTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<
-    Temporal.DateUnit | Temporal.TimeUnit
+  options?: TemporalSpec.RoundingOptionsWithLargestUnit<
+    TemporalSpec.DateUnit | TemporalSpec.TimeUnit
   >,
 ): ShimDurationRecord {
   const slots = getShimZonedDateTimeSlots(record)
@@ -439,7 +438,9 @@ export function startOfDay(
 
 export function getTimeZoneTransition(
   record: ShimZonedDateTimeRecord,
-  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
+  options:
+    | TemporalSpec.TransitionOptions
+    | TemporalSpec.TransitionOptions['direction'],
 ): ShimZonedDateTimeRecord | null {
   const slots = getShimZonedDateTimeSlots(record)
   const epochNanoseconds = getTimeZoneTransitionEpochNanoseconds(slots, options)
@@ -511,11 +512,16 @@ export function toPlainTime(
   return createShimPlainTimeRecord(resSlots)
 }
 
-export function toNative(
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.ZonedDateTime(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { ZonedDateTime: TemporalSpec.ZonedDateTimeConstructor }
+
+export function toTemporal(
   record: ShimZonedDateTimeRecord,
-): Temporal.ZonedDateTime {
+): TemporalSpec.ZonedDateTime {
   const slots = getShimZonedDateTimeSlots(record)
-  return new NativeTemporal!.ZonedDateTime(
+  return new Temporal.ZonedDateTime(
     slots.epochNanoseconds,
     slots.timeZone.id,
     getCalendarSlotId(slots.calendar),

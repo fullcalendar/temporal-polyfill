@@ -173,7 +173,7 @@ export function toBasicString(record: NativeInstantRecord): string {
   return getNativeInstant(record).toString()
 }
 
-export const toNative: (record: NativeInstantRecord) => Temporal.Instant =
+export const toTemporal: (record: NativeInstantRecord) => Temporal.Instant =
   getNativeInstant
 
 // Non-standard: Move

@@ -358,7 +358,7 @@ export function toPlainTime(
   return createNativePlainTimeRecord(resNative)
 }
 
-export const toNative: (
+export const toTemporal: (
   record: NativeZonedDateTimeRecord,
 ) => Temporal.ZonedDateTime = getNativeZonedDateTime
 

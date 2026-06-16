@@ -28,13 +28,18 @@ Abbreviations used by the type pages:
 - [`Calendar`](calendar.md) - `CalendarRecord` factories and calendar resolver helpers.
 - [`Types`](types.md) - TypeScript-only exports and their codemod targets for the real Temporal API.
 
-## Native Interop
+## Temporal Interop
 
-Each record-bearing type also exports a `toNative` function (listed under that
+Each record-bearing type also exports a `toTemporal` function (listed under that
 type's Conversion section) that builds a real `Temporal.*` instance from the
 record's internal ISO/epoch slots. This is awkward to do in userspace — the
-native constructors want ISO values that the records deliberately don't expose —
-so the polyfill provides it directly, with no string round-trip. `toNative`
-reads the native constructors from `globalThis.Temporal`, throwing when no
-global `Temporal` is present. The codemod rewrites a `toNative` call to its bare
-record argument, since a migrated record is already a native Temporal object.
+class constructors want ISO values that the records deliberately don't expose —
+so the polyfill provides it directly, with no string round-trip.
+
+`toTemporal` reads the constructors from the global `Temporal` at call time, so
+it works against whatever implementation is installed — a host-native `Temporal`
+or any polyfill. When the host has no native `Temporal`, install one globally
+before calling `toTemporal`; we recommend this package's own
+`temporal-polyfill/global` entrypoint for optimal code sharing.
+
+`toTemporal` throws when no global `Temporal` is present.

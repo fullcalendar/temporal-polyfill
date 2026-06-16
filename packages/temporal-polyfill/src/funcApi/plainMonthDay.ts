@@ -74,5 +74,5 @@ export const toPlainDate: (
   ? Native.toPlainDate
   : Shim.toPlainDate
 
-export const toNative: (record: Record) => Temporal.PlainMonthDay =
-  NativeTemporal ? Native.toNative : Shim.toNative
+export const toTemporal: (record: Record) => Temporal.PlainMonthDay =
+  NativeTemporal ? Native.toTemporal : Shim.toTemporal

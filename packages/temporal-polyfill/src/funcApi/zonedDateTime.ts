@@ -173,8 +173,8 @@ export const toPlainDate: (record: Record) => PlainDateFns.Record =
 export const toPlainTime: (record: Record) => PlainTimeFns.Record =
   NativeTemporal ? Native.toPlainTime : Shim.toPlainTime
 
-export const toNative: (record: Record) => Temporal.ZonedDateTime =
-  NativeTemporal ? Native.toNative : Shim.toNative
+export const toTemporal: (record: Record) => Temporal.ZonedDateTime =
+  NativeTemporal ? Native.toTemporal : Shim.toTemporal
 
 // Non-standard: With
 // -----------------------------------------------------------------------------

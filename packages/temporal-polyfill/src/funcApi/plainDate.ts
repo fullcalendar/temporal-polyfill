@@ -165,9 +165,9 @@ export const toPlainYearMonth: (record: Record) => PlainYearMonthFns.Record =
 export const toPlainMonthDay: (record: Record) => PlainMonthDayFns.Record =
   NativeTemporal ? Native.toPlainMonthDay : Shim.toPlainMonthDay
 
-export const toNative: (record: Record) => Temporal.PlainDate = NativeTemporal
-  ? Native.toNative
-  : Shim.toNative
+export const toTemporal: (record: Record) => Temporal.PlainDate = NativeTemporal
+  ? Native.toTemporal
+  : Shim.toTemporal
 
 // Non-standard: With
 // -----------------------------------------------------------------------------

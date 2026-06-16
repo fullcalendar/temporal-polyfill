@@ -152,6 +152,6 @@ export function toPlainDate(
 
 // Native PlainMonthDay keeps its reference ISO year in an internal slot.
 // Returning the stored native object is the only lossless conversion here.
-export const toNative: (
+export const toTemporal: (
   record: NativePlainMonthDayRecord,
 ) => Temporal.PlainMonthDay = getNativePlainMonthDay

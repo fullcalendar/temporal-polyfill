@@ -217,7 +217,7 @@ export function toBasicString(duration: NativeDurationRecord): string {
   return getNativeDuration(duration).toString()
 }
 
-export const toNative: (duration: NativeDurationRecord) => Temporal.Duration =
+export const toTemporal: (duration: NativeDurationRecord) => Temporal.Duration =
   getNativeDuration
 
 // Util

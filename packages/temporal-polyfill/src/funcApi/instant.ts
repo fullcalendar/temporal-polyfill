@@ -81,9 +81,9 @@ export const toBasicString: (record: Record) => string = NativeTemporal
   ? Native.toBasicString
   : Shim.toBasicString
 
-export const toNative: (record: Record) => Temporal.Instant = NativeTemporal
-  ? Native.toNative
-  : Shim.toNative
+export const toTemporal: (record: Record) => Temporal.Instant = NativeTemporal
+  ? Native.toTemporal
+  : Shim.toTemporal
 
 // Non-standard: Move
 // -----------------------------------------------------------------------------

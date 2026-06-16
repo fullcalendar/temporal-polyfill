@@ -67,7 +67,7 @@ import * as PlainTimeFns from 'temporal-polyfill/fns/PlainTime'
   - [`toLocaleString`](#tolocalestring)
   - [`createFormat`](#createformat)
 - [Conversion](#conversion)
-  - [`toNative`](#tonative)
+  - [`toTemporal`](#totemporal)
 
 ## Record Shape
 
@@ -1202,7 +1202,7 @@ This rewrite is appropriate when later uses rely on `format.format(time)`.
 
 ## Conversion
 
-### `toNative`
+### `toTemporal`
 
 Signature:
 
@@ -1213,17 +1213,11 @@ Signature:
 Fn API:
 
 ```ts
-const native = PlainTimeFns.toNative(time)
-```
-
-Temporal API:
-
-```ts
-const native = time
+const realPlainTime = PlainTimeFns.toTemporal(time)
 ```
 
 Produces a real `Temporal.PlainTime` built directly from the record's ISO time
-slots, with no string round-trip. The native constructor comes from
-`globalThis.Temporal`; `toNative` throws when no global `Temporal` is present.
-Because a migrated record is already a `Temporal.PlainTime`, the codemod rewrites
-the entire call to the bare record expression.
+slots, with no string round-trip. The constructor comes from the global
+`Temporal` at call time, so it uses whatever implementation is installed — a
+host-native `Temporal` or any polyfill (see [Temporal Interop](index.md#temporal-interop)) — and `toTemporal` throws when no global
+`Temporal` is present.

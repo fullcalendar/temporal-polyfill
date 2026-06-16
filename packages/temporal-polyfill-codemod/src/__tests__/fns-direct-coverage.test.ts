@@ -179,7 +179,7 @@ function directCallArgs(typeName: string, helperName: string): string | null {
     return `${receiver}, { day: 1, year: 2024 }`
   }
 
-  if (helperName === 'toNative') {
+  if (helperName === 'toTemporal') {
     return receiver
   }
 

@@ -37,7 +37,7 @@ import * as DurationFns from 'temporal-polyfill/fns/Duration'
   - [`toBasicString`](#tobasicstring)
   - [`toLocaleString`](#tolocalestring)
 - [Conversion](#conversion)
-  - [`toNative`](#tonative)
+  - [`toTemporal`](#totemporal)
 
 ## Record Shape
 
@@ -444,7 +444,7 @@ const text = duration.toLocaleString(locales, options)
 
 ## Conversion
 
-### `toNative`
+### `toTemporal`
 
 Signature:
 
@@ -455,17 +455,11 @@ Signature:
 Fn API:
 
 ```ts
-const native = DurationFns.toNative(duration)
-```
-
-Temporal API:
-
-```ts
-const native = duration
+const realDuration = DurationFns.toTemporal(duration)
 ```
 
 Produces a real `Temporal.Duration` built directly from the record's duration
-fields. The native constructor comes from `globalThis.Temporal`; `toNative`
-throws when no global `Temporal` is present. Because a migrated record is already
-a `Temporal.Duration`, the codemod rewrites the entire call to the bare record
-expression.
+fields. The constructor comes from the global `Temporal` at call time, so it
+uses whatever implementation is installed — a host-native `Temporal` or any
+polyfill (see [Temporal Interop](index.md#temporal-interop)) — and `toTemporal`
+throws when no global `Temporal` is present.

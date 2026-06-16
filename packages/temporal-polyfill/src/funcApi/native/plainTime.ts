@@ -171,7 +171,7 @@ export function toBasicString(record: NativePlainTimeRecord): string {
   return getNativePlainTime(record).toString()
 }
 
-export const toNative: (record: NativePlainTimeRecord) => Temporal.PlainTime =
+export const toTemporal: (record: NativePlainTimeRecord) => Temporal.PlainTime =
   getNativePlainTime
 
 // Non-standard: Move

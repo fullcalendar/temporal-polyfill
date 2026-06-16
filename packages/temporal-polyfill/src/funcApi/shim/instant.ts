@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
@@ -53,7 +53,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -167,7 +166,7 @@ export function subtract(
 export function diff(
   record: ShimInstantRecord,
   otherRecord: ShimInstantRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+  options?: TemporalSpec.RoundingOptionsWithLargestUnit<TemporalSpec.TimeUnit>,
 ): ShimDurationRecord {
   const slots = getShimInstantSlots(record)
   const otherSlots = getShimInstantSlots(otherRecord)
@@ -255,9 +254,14 @@ export function toBasicString(record: ShimInstantRecord): string {
   return formatInstantIsoAuto(getShimInstantSlots(record))
 }
 
-export function toNative(record: ShimInstantRecord): Temporal.Instant {
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.Instant(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { Instant: TemporalSpec.InstantConstructor }
+
+export function toTemporal(record: ShimInstantRecord): TemporalSpec.Instant {
   const slots = getShimInstantSlots(record)
-  return new NativeTemporal!.Instant(slots.epochNanoseconds)
+  return new Temporal.Instant(slots.epochNanoseconds)
 }
 
 // Non-standard: Move

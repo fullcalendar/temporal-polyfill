@@ -312,7 +312,7 @@ export function toPlainMonthDay(
   return createNativePlainMonthDayRecord(resNative)
 }
 
-export const toNative: (record: NativePlainDateRecord) => Temporal.PlainDate =
+export const toTemporal: (record: NativePlainDateRecord) => Temporal.PlainDate =
   getNativePlainDate
 
 // Non-standard: With

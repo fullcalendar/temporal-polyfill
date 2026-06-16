@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
@@ -37,7 +37,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -114,7 +113,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<TimeFields>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainTimeRecord {
   return createShimPlainTimeRecord(refinePlainTimeObjectLike(fields, options))
 }
@@ -126,7 +125,7 @@ export function fromString(s: string): ShimPlainTimeRecord {
 export function withFields(
   record: ShimPlainTimeRecord,
   mod: Partial<TimeFields>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainTimeRecord {
   const slots = getShimPlainTimeSlots(record)
   const resSlots = mergePlainTimeFields(slots, validateBag(mod), options)
@@ -159,7 +158,7 @@ export function subtract(
 export function diff(
   record: ShimPlainTimeRecord,
   otherRecord: ShimPlainTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>,
+  options?: TemporalSpec.RoundingOptionsWithLargestUnit<TemporalSpec.TimeUnit>,
 ): ShimDurationRecord {
   const slots = getShimPlainTimeSlots(record)
   const otherSlots = getShimPlainTimeSlots(otherRecord)
@@ -226,7 +225,7 @@ export function toLocaleString(
 
 export function toString(
   record: ShimPlainTimeRecord,
-  options?: Temporal.PlainTimeToStringOptions,
+  options?: TemporalSpec.PlainTimeToStringOptions,
 ): string {
   return formatPlainTimeIso(getShimPlainTimeSlots(record), options)
 }
@@ -235,9 +234,16 @@ export function toBasicString(record: ShimPlainTimeRecord): string {
   return formatTimeIsoAuto(getShimPlainTimeSlots(record))
 }
 
-export function toNative(record: ShimPlainTimeRecord): Temporal.PlainTime {
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.PlainTime(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { PlainTime: TemporalSpec.PlainTimeConstructor }
+
+export function toTemporal(
+  record: ShimPlainTimeRecord,
+): TemporalSpec.PlainTime {
   const slots = getShimPlainTimeSlots(record)
-  return new NativeTemporal!.PlainTime(
+  return new Temporal.PlainTime(
     slots.hour,
     slots.minute,
     slots.second,

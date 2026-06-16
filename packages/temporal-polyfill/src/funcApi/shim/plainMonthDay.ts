@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -34,7 +34,6 @@ import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
@@ -117,7 +116,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<MonthDayFields & { calendar: CalendarRecord }>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
   const inputCalendar = fields.calendar
   const calendarImpl = refineShimCalendarArgMaybe(inputCalendar)
@@ -142,7 +141,7 @@ export function fromString(
 export function withFields(
   record: ShimPlainMonthDayRecord,
   mod: Partial<MonthDayFields>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
   const slots = getShimPlainMonthDaySlots(record)
   const resSlots = mergePlainMonthDayFields(slots, validateBag(mod), options)
@@ -200,7 +199,7 @@ export function toLocaleString(
 
 export function toString(
   record: ShimPlainMonthDayRecord,
-  options?: Temporal.PlainDateToStringOptions,
+  options?: TemporalSpec.PlainDateToStringOptions,
 ): string {
   return formatPlainMonthDayIso(getShimPlainMonthDaySlots(record), options)
 }
@@ -218,11 +217,16 @@ export function toPlainDate(
   return createShimPlainDateRecord(resSlots)
 }
 
-export function toNative(
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.PlainMonthDay(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { PlainMonthDay: TemporalSpec.PlainMonthDayConstructor }
+
+export function toTemporal(
   record: ShimPlainMonthDayRecord,
-): Temporal.PlainMonthDay {
+): TemporalSpec.PlainMonthDay {
   const slots = getShimPlainMonthDaySlots(record)
-  return new NativeTemporal!.PlainMonthDay(
+  return new Temporal.PlainMonthDay(
     slots.month,
     slots.day,
     getCalendarSlotId(slots.calendar),

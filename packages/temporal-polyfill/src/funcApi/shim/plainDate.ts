@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
@@ -64,7 +64,6 @@ import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import {
   DateTimeFormatLike,
@@ -192,7 +191,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<DateFields & { calendar: CalendarRecord }>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)
   const resSlots = refinePlainDateObjectLike(calendarImpl, fields, options)
@@ -211,7 +210,7 @@ export function fromString(
 export function withFields(
   record: ShimPlainDateRecord,
   mod: Partial<DateFields>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) {
   const slots = getShimPlainDateSlots(record)
   const resSlots = mergePlainDateFields(slots, validateBag(mod), options)
@@ -274,7 +273,7 @@ export function inLeapYear(record: ShimPlainDateRecord): boolean {
 export function add(
   record: ShimPlainDateRecord,
   durationRecord: any,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) {
   const slots = getShimPlainDateSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -288,7 +287,7 @@ export function add(
 export function subtract(
   record: ShimPlainDateRecord,
   durationRecord: any,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) {
   const slots = getShimPlainDateSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -308,7 +307,7 @@ export function subtract(
 export function diff(
   record: ShimPlainDateRecord,
   otherRecord: ShimPlainDateRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>,
+  options?: TemporalSpec.RoundingOptionsWithLargestUnit<TemporalSpec.DateUnit>,
 ): ShimDurationRecord {
   const slots = getShimPlainDateSlots(record)
   const otherSlots = getShimPlainDateSlots(otherRecord)
@@ -377,7 +376,7 @@ export function toLocaleString(
 
 export function toString(
   record: ShimPlainDateRecord,
-  options?: Temporal.PlainDateToStringOptions,
+  options?: TemporalSpec.PlainDateToStringOptions,
 ): string {
   return formatPlainDateIso(getShimPlainDateSlots(record), options)
 }
@@ -440,9 +439,16 @@ export function toPlainMonthDay(
   return createShimPlainMonthDayRecord(resSlots)
 }
 
-export function toNative(record: ShimPlainDateRecord): Temporal.PlainDate {
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.PlainDate(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { PlainDate: TemporalSpec.PlainDateConstructor }
+
+export function toTemporal(
+  record: ShimPlainDateRecord,
+): TemporalSpec.PlainDate {
   const slots = getShimPlainDateSlots(record)
-  return new NativeTemporal!.PlainDate(
+  return new Temporal.PlainDate(
     slots.year,
     slots.month,
     slots.day,
@@ -456,7 +462,7 @@ export function toNative(record: ShimPlainDateRecord): Temporal.PlainDate {
 export function withDayOfYear(
   record: ShimPlainDateRecord,
   dayOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -470,7 +476,7 @@ export function withDayOfYear(
 export function withDayOfMonth(
   record: ShimPlainDateRecord,
   dayOfMonth: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -484,7 +490,7 @@ export function withDayOfMonth(
 export function withDayOfWeek(
   record: ShimPlainDateRecord,
   dayOfWeek: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -498,7 +504,7 @@ export function withDayOfWeek(
 export function withWeekOfYear(
   record: ShimPlainDateRecord,
   weekOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -515,7 +521,7 @@ export function withWeekOfYear(
 export function addYears(
   record: ShimPlainDateRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -529,7 +535,7 @@ export function addYears(
 export function addMonths(
   record: ShimPlainDateRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
@@ -569,24 +575,24 @@ export function addDays(
 export const subtractYears: (
   record: ShimPlainDateRecord,
   units: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) => ShimPlainDateRecord = (record, units, options) =>
   addYears(record, -units, options)
 export const subtractMonths: (
   record: ShimPlainDateRecord,
   units: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) => ShimPlainDateRecord = (record, units, options) =>
   addMonths(record, -units, options)
 export const subtractWeeks: (
   record: ShimPlainDateRecord,
   units: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) => ShimPlainDateRecord = (record, units) => addWeeks(record, -units)
 export const subtractDays: (
   record: ShimPlainDateRecord,
   units: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ) => ShimPlainDateRecord = (record, units) => addDays(record, -units)
 
 // Non-standard: Round

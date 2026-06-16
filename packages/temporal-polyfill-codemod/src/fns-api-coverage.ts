@@ -113,8 +113,8 @@ const formatting = {
   createFormat: 'diagnostic-only',
 } as const satisfies Record<string, FnsCodemodStatus>
 
-const nativeConversion = {
-  toNative: 'direct',
+const temporalConversion = {
+  toTemporal: 'direct',
 } as const satisfies Record<string, FnsCodemodStatus>
 
 export const fnsApiCoverage = {
@@ -155,7 +155,7 @@ export const fnsApiCoverage = {
     ...timeRounds,
     toZonedDateTimeISO: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   ZonedDateTime: {
     isRecord: 'direct',
@@ -190,7 +190,7 @@ export const fnsApiCoverage = {
     toPlainDate: 'direct',
     toPlainTime: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   PlainDateTime: {
     isRecord: 'direct',
@@ -219,7 +219,7 @@ export const fnsApiCoverage = {
     toPlainDate: 'direct',
     toPlainTime: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   PlainDate: {
     isRecord: 'direct',
@@ -241,7 +241,7 @@ export const fnsApiCoverage = {
     toPlainYearMonth: 'direct',
     toPlainMonthDay: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   PlainTime: {
     isRecord: 'direct',
@@ -259,7 +259,7 @@ export const fnsApiCoverage = {
     ...timeRounds,
     ...timeStartsAndEnds,
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   PlainYearMonth: {
     isRecord: 'direct',
@@ -287,7 +287,7 @@ export const fnsApiCoverage = {
     endOfYear: 'temporal-utils',
     toPlainDate: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   PlainMonthDay: {
     isRecord: 'direct',
@@ -298,7 +298,7 @@ export const fnsApiCoverage = {
     equals: 'direct',
     toPlainDate: 'direct',
     ...formatting,
-    ...nativeConversion,
+    ...temporalConversion,
   },
   Duration: {
     isRecord: 'direct',
@@ -318,7 +318,7 @@ export const fnsApiCoverage = {
     toString: 'direct',
     toBasicString: 'direct',
     toLocaleString: 'direct',
-    ...nativeConversion,
+    ...temporalConversion,
   },
   Now: {
     timeZoneId: 'direct',

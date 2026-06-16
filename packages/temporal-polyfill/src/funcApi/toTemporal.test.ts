@@ -22,12 +22,12 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 const hasNativeTemporal = Boolean(NativeTemporal)
 
-describe('toNative', () => {
+describe('toTemporal', () => {
   it.runIf(hasNativeTemporal)(
     'converts records to native Temporal objects',
     () => {
       const instant = InstantFns.create(1_234_567_890n)
-      const nativeInstant = InstantFns.toNative(instant)
+      const nativeInstant = InstantFns.toTemporal(instant)
       expect(nativeInstant).toBeInstanceOf(NativeTemporal!.Instant)
       expectInstantEquals(nativeInstant, 1_234_567_890n)
 
@@ -36,7 +36,7 @@ describe('toNative', () => {
         'UTC',
         CalendarFns.getISO(),
       )
-      const nativeZonedDateTime = ZonedDateTimeFns.toNative(zonedDateTime)
+      const nativeZonedDateTime = ZonedDateTimeFns.toTemporal(zonedDateTime)
       expect(nativeZonedDateTime).toBeInstanceOf(NativeTemporal!.ZonedDateTime)
       expectZonedDateTimeEquals(nativeZonedDateTime, {
         epochNanoseconds: 1_234_567_890n,
@@ -55,7 +55,7 @@ describe('toNative', () => {
         12,
         CalendarFns.getISO(),
       )
-      const nativePlainDateTime = PlainDateTimeFns.toNative(plainDateTime)
+      const nativePlainDateTime = PlainDateTimeFns.toTemporal(plainDateTime)
       expect(nativePlainDateTime).toBeInstanceOf(NativeTemporal!.PlainDateTime)
       expectPlainDateTimeEquals(nativePlainDateTime, {
         year: 2024,
@@ -70,7 +70,7 @@ describe('toNative', () => {
       })
 
       const plainDate = PlainDateFns.create(2024, 5, 6, CalendarFns.getISO())
-      const nativePlainDate = PlainDateFns.toNative(plainDate)
+      const nativePlainDate = PlainDateFns.toTemporal(plainDate)
       expect(nativePlainDate).toBeInstanceOf(NativeTemporal!.PlainDate)
       expectPlainDateEquals(nativePlainDate, {
         year: 2024,
@@ -79,7 +79,7 @@ describe('toNative', () => {
       })
 
       const plainTime = PlainTimeFns.create(7, 8, 9, 10, 11, 12)
-      const nativePlainTime = PlainTimeFns.toNative(plainTime)
+      const nativePlainTime = PlainTimeFns.toTemporal(plainTime)
       expect(nativePlainTime).toBeInstanceOf(NativeTemporal!.PlainTime)
       expectPlainTimeEquals(nativePlainTime, {
         hour: 7,
@@ -96,7 +96,7 @@ describe('toNative', () => {
         CalendarFns.getISO(),
         6,
       )
-      const nativePlainYearMonth = PlainYearMonthFns.toNative(plainYearMonth)
+      const nativePlainYearMonth = PlainYearMonthFns.toTemporal(plainYearMonth)
       expect(nativePlainYearMonth).toBeInstanceOf(
         NativeTemporal!.PlainYearMonth,
       )
@@ -111,7 +111,7 @@ describe('toNative', () => {
         CalendarFns.getISO(),
         2024,
       )
-      const nativePlainMonthDay = PlainMonthDayFns.toNative(plainMonthDay)
+      const nativePlainMonthDay = PlainMonthDayFns.toTemporal(plainMonthDay)
       expect(nativePlainMonthDay).toBeInstanceOf(NativeTemporal!.PlainMonthDay)
       expectPlainMonthDayEquals(nativePlainMonthDay, {
         monthCode: 'M05',
@@ -119,7 +119,7 @@ describe('toNative', () => {
       })
 
       const duration = DurationFns.create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-      const nativeDuration = DurationFns.toNative(duration)
+      const nativeDuration = DurationFns.toTemporal(duration)
       expect(nativeDuration).toBeInstanceOf(NativeTemporal!.Duration)
       expectDurationEquals(nativeDuration, {
         years: 1,
@@ -139,24 +139,24 @@ describe('toNative', () => {
   it.runIf(!hasNativeTemporal)(
     'throws when no global Temporal is present',
     () => {
-      expect(() => InstantFns.toNative(InstantFns.create(1n))).toThrow()
+      expect(() => InstantFns.toTemporal(InstantFns.create(1n))).toThrow()
       expect(() =>
-        ZonedDateTimeFns.toNative(ZonedDateTimeFns.create(1n, 'UTC')),
+        ZonedDateTimeFns.toTemporal(ZonedDateTimeFns.create(1n, 'UTC')),
       ).toThrow()
       expect(() =>
-        PlainDateTimeFns.toNative(PlainDateTimeFns.create(2024, 5, 6)),
+        PlainDateTimeFns.toTemporal(PlainDateTimeFns.create(2024, 5, 6)),
       ).toThrow()
       expect(() =>
-        PlainDateFns.toNative(PlainDateFns.create(2024, 5, 6)),
+        PlainDateFns.toTemporal(PlainDateFns.create(2024, 5, 6)),
       ).toThrow()
-      expect(() => PlainTimeFns.toNative(PlainTimeFns.create(7))).toThrow()
+      expect(() => PlainTimeFns.toTemporal(PlainTimeFns.create(7))).toThrow()
       expect(() =>
-        PlainYearMonthFns.toNative(PlainYearMonthFns.create(2024, 5)),
+        PlainYearMonthFns.toTemporal(PlainYearMonthFns.create(2024, 5)),
       ).toThrow()
       expect(() =>
-        PlainMonthDayFns.toNative(PlainMonthDayFns.create(5, 6)),
+        PlainMonthDayFns.toTemporal(PlainMonthDayFns.create(5, 6)),
       ).toThrow()
-      expect(() => DurationFns.toNative(DurationFns.create(1))).toThrow()
+      expect(() => DurationFns.toTemporal(DurationFns.create(1))).toThrow()
     },
   )
 })

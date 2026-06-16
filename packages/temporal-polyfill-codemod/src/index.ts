@@ -767,7 +767,7 @@ function rewriteRecordTypeCall(
     return state.j.memberExpression(args[0], state.j.identifier(exportName))
   }
 
-  if (exportName === 'toNative') {
+  if (exportName === 'toTemporal') {
     if (args.length !== 1) {
       warn(
         state,
@@ -776,7 +776,7 @@ function rewriteRecordTypeCall(
       )
       return null
     }
-    // Migrated functional records are already native Temporal instances.
+    // Migrated functional records are already real Temporal instances.
     return args[0]
   }
 

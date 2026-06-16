@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -33,7 +33,6 @@ import type {
 } from '../../internal/temporalSpecHelpers'
 import { totalDuration } from '../../internal/total'
 import { NumberSign, mapProps, throwTypeError } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import { DurationRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -171,7 +170,7 @@ export function subtract(
 export function round(
   duration: ShimDurationRecord,
   options:
-    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
+    | TemporalSpec.PluralizeUnit<'day' | TemporalSpec.TimeUnit>
     | DurationRoundingOptions<ShimRelativeToRecord>,
 ): ShimDurationRecord {
   const slots = getShimDurationSlots(duration)
@@ -182,7 +181,7 @@ export function round(
 export function total(
   duration: ShimDurationRecord,
   options:
-    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | TemporalSpec.PluralizeUnit<TemporalSpec.DateUnit | TemporalSpec.TimeUnit>
     | DurationTotalOptions<ShimRelativeToRecord>,
 ): number {
   return totalDuration(
@@ -216,7 +215,7 @@ export function toLocaleString(
 
 export function toString(
   duration: ShimDurationRecord,
-  options?: Temporal.DurationToStringOptions,
+  options?: TemporalSpec.DurationToStringOptions,
 ): string {
   return formatDurationIso(getShimDurationSlots(duration), options)
 }
@@ -225,9 +224,16 @@ export function toBasicString(duration: ShimDurationRecord): string {
   return formatDurationIsoAuto(getShimDurationSlots(duration))
 }
 
-export function toNative(duration: ShimDurationRecord): Temporal.Duration {
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.Duration(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { Duration: TemporalSpec.DurationConstructor }
+
+export function toTemporal(
+  duration: ShimDurationRecord,
+): TemporalSpec.Duration {
   const slots = getShimDurationSlots(duration)
-  return new NativeTemporal!.Duration(
+  return new Temporal.Duration(
     slots.years,
     slots.months,
     slots.weeks,

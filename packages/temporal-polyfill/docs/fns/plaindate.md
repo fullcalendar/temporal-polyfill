@@ -74,7 +74,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
   - [`toPlainDateTime`](#toplaindatetime)
   - [`toPlainYearMonth`](#toplainyearmonth)
   - [`toPlainMonthDay`](#toplainmonthday)
-  - [`toNative`](#tonative)
+  - [`toTemporal`](#totemporal)
 
 ## Record Shape
 
@@ -1299,7 +1299,7 @@ Temporal API:
 const monthDay = date.toPlainMonthDay()
 ```
 
-### `toNative`
+### `toTemporal`
 
 Signature:
 
@@ -1310,17 +1310,11 @@ Signature:
 Fn API:
 
 ```ts
-const native = PlainDateFns.toNative(date)
-```
-
-Temporal API:
-
-```ts
-const native = date
+const realPlainDate = PlainDateFns.toTemporal(date)
 ```
 
 Produces a real `Temporal.PlainDate` built directly from the record's ISO date
-slots and `calendarId`, with no string round-trip. The native constructor comes
-from `globalThis.Temporal`; `toNative` throws when no global `Temporal` is
-present. Because a migrated record is already a `Temporal.PlainDate`, the codemod
-rewrites the entire call to the bare record expression.
+slots and `calendarId`, with no string round-trip. The constructor comes from
+the global `Temporal` at call time, so it uses whatever implementation is
+installed — a host-native `Temporal` or any polyfill (see [Temporal Interop](index.md#temporal-interop)) — and `toTemporal` throws when no global
+`Temporal` is present.

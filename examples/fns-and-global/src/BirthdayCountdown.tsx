@@ -83,13 +83,13 @@ export function BirthdayCountdown({
     onDateClick?.({
       dateString,
       get plainDate() {
-        return PlainDateFns.toNative(date)
+        return PlainDateFns.toTemporal(date)
       },
       get plainDateTime() {
-        return PlainDateTimeFns.toNative(PlainDateFns.toPlainDateTime(date))
+        return PlainDateTimeFns.toTemporal(PlainDateFns.toPlainDateTime(date))
       },
       get zonedDateTime() {
-        return ZonedDateTimeFns.toNative(
+        return ZonedDateTimeFns.toTemporal(
           PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId()),
         )
       },

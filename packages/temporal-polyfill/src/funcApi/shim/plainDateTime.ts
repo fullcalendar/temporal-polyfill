@@ -1,4 +1,4 @@
-import type { Temporal } from 'temporal-spec'
+import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   attachDebugString,
@@ -80,7 +80,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
@@ -222,7 +221,7 @@ export function create(
 
 export function fromFields(
   fields: Partial<DateTimeFields & { calendar: CalendarRecord }>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)
   const resSlots = refinePlainDateTimeObjectLike(calendarImpl, fields, options)
@@ -250,7 +249,7 @@ export function withCalendar(
 export function withFields(
   record: ShimPlainDateTimeRecord,
   mod: Partial<DateTimeFields>,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const resSlots = mergePlainDateTimeFields(slots, validateBag(mod), options)
@@ -323,7 +322,7 @@ export function inLeapYear(record: ShimPlainDateTimeRecord): boolean {
 export function add(
   record: ShimPlainDateTimeRecord,
   durationRecord: ShimDurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -337,7 +336,7 @@ export function add(
 export function subtract(
   record: ShimPlainDateTimeRecord,
   durationRecord: ShimDurationRecord,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
@@ -357,8 +356,8 @@ export function subtract(
 export function diff(
   record: ShimPlainDateTimeRecord,
   otherRecord: ShimPlainDateTimeRecord,
-  options?: Temporal.RoundingOptionsWithLargestUnit<
-    Temporal.DateUnit | Temporal.TimeUnit
+  options?: TemporalSpec.RoundingOptionsWithLargestUnit<
+    TemporalSpec.DateUnit | TemporalSpec.TimeUnit
   >,
 ): ShimDurationRecord {
   const slots = getShimPlainDateTimeSlots(record)
@@ -438,7 +437,7 @@ export function toLocaleString(
 
 export function toString(
   record: ShimPlainDateTimeRecord,
-  options?: Temporal.PlainDateTimeToStringOptions,
+  options?: TemporalSpec.PlainDateTimeToStringOptions,
 ): string {
   return formatPlainDateTimeIso(getShimPlainDateTimeSlots(record), options)
 }
@@ -450,7 +449,7 @@ export function toBasicString(record: ShimPlainDateTimeRecord): string {
 export function toZonedDateTime(
   record: ShimPlainDateTimeRecord,
   timeZoneId: string,
-  options?: Temporal.DisambiguationOptions,
+  options?: TemporalSpec.DisambiguationOptions,
 ): ShimZonedDateTimeRecord {
   const resSlots = plainDateTimeToZonedDateTime(
     getShimPlainDateTimeSlots(record),
@@ -475,11 +474,16 @@ export function toPlainTime(
   return createShimPlainTimeRecord(resSlots)
 }
 
-export function toNative(
+// Type the bare global `Temporal` value (module-scoped, NOT `declare global`,
+// so it never leaks into a consumer's environment). Lets `toTemporal` build via
+// `new Temporal.PlainDateTime(...)` — smaller than `globalThis.Temporal`, read lazily.
+declare const Temporal: { PlainDateTime: TemporalSpec.PlainDateTimeConstructor }
+
+export function toTemporal(
   record: ShimPlainDateTimeRecord,
-): Temporal.PlainDateTime {
+): TemporalSpec.PlainDateTime {
   const slots = getShimPlainDateTimeSlots(record)
-  return new NativeTemporal!.PlainDateTime(
+  return new Temporal.PlainDateTime(
     slots.year,
     slots.month,
     slots.day,
@@ -499,7 +503,7 @@ export function toNative(
 export function withDayOfYear(
   record: ShimPlainDateTimeRecord,
   dayOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
@@ -514,7 +518,7 @@ export function withDayOfYear(
 export function withDayOfMonth(
   record: ShimPlainDateTimeRecord,
   dayOfMonth: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
@@ -529,7 +533,7 @@ export function withDayOfMonth(
 export function withDayOfWeek(
   record: ShimPlainDateTimeRecord,
   dayOfWeek: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
@@ -544,7 +548,7 @@ export function withDayOfWeek(
 export function withWeekOfYear(
   record: ShimPlainDateTimeRecord,
   weekOfYear: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
@@ -562,7 +566,7 @@ export function withWeekOfYear(
 export function addYears(
   record: ShimPlainDateTimeRecord,
   years: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
@@ -577,7 +581,7 @@ export function addYears(
 export function addMonths(
   record: ShimPlainDateTimeRecord,
   months: number,
-  options?: Temporal.OverflowOptions,
+  options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
