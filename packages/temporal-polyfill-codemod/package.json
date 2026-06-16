@@ -1,7 +1,6 @@
 {
-  "private": true,
   "name": "temporal-polyfill-codemod",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Codemods for temporal-polyfill migrations",
   "author": {
     "name": "Adam Shaw",

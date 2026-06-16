@@ -120,8 +120,11 @@ importers:
 
   packages/temporal-polyfill:
     dependencies:
+      temporal-spec:
+        specifier: workspace:1.0.0
+        version: link:../temporal-spec
       temporal-utils:
-        specifier: workspace:*
+        specifier: workspace:1.0.1
         version: link:../temporal-utils
     devDependencies:
       '@biomejs/biome':
@@ -160,9 +163,6 @@ importers:
       rollup-plugin-sourcemaps:
         specifier: ^0.6.3
         version: 0.6.3(patch_hash=24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a)(@types/node@18.11.9)(rollup@4.9.6)
-      temporal-spec:
-        specifier: workspace:0.3.1
-        version: link:../temporal-spec
       terser:
         specifier: workspace:*
         version: link:../terser
@@ -217,7 +217,7 @@ importers:
         specifier: ^0.5.1
         version: 0.5.1
       temporal-spec:
-        specifier: workspace:0.3.1
+        specifier: workspace:*
         version: link:../temporal-spec
       typescript:
         specifier: ~5.3.3
