@@ -1,5 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -10,6 +9,7 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
+import { PlainMonthDayRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getPlainMonthDaySlots,
@@ -33,7 +33,7 @@ export type NativePlainMonthDayRecord = InstanceType<
 > &
   RecordTypes.PlainMonthDayRecord
 export const NativePlainMonthDayRecord = defineTemporalClass(
-  PlainMonthDayBranding,
+  PlainMonthDayRecordBranding,
   class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
     get calendarId() {
       return getNativePlainMonthDay(this).calendarId

@@ -1,6 +1,5 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -53,6 +52,7 @@ import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
+import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getPlainYearMonthSlots,
@@ -92,7 +92,7 @@ export type ShimPlainYearMonthRecord = InstanceType<
 > &
   RecordTypes.PlainYearMonthRecord
 export const ShimPlainYearMonthRecord = defineTemporalClass(
-  PlainYearMonthBranding,
+  PlainYearMonthRecordBranding,
   class implements YearMonthFields {
     declare readonly [RecordTypes.PlainYearMonthRecordBrand]: undefined
 

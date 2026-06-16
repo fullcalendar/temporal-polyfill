@@ -1,6 +1,5 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { InstantBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -55,6 +54,7 @@ import {
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
+import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
@@ -82,7 +82,7 @@ export const getShimInstantSlots: (record: unknown) => ShimInstantSlots =
 export type ShimInstantRecord = InstanceType<typeof ShimInstantRecord> &
   RecordTypes.InstantRecord
 export const ShimInstantRecord = defineTemporalClass(
-  InstantBranding,
+  InstantRecordBranding,
   class {
     declare readonly [RecordTypes.InstantRecordBrand]: undefined
 

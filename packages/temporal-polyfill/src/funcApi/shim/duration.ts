@@ -1,5 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { DurationBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -33,6 +32,7 @@ import type {
 import { totalDuration } from '../../internal/total'
 import { NumberSign, mapProps } from '../../internal/utils'
 import { RelativeToRecord } from '../commonTypes'
+import { DurationRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getDurationSlots,
@@ -50,7 +50,7 @@ export const getShimDurationSlots: (record: unknown) => ShimDurationSlots =
 export type ShimDurationRecord = InstanceType<typeof ShimDurationRecord> &
   RecordTypes.DurationRecord
 export const ShimDurationRecord = defineTemporalClass(
-  DurationBranding,
+  DurationRecordBranding,
   class implements DurationFields {
     declare readonly [RecordTypes.DurationRecordBrand]: undefined
 

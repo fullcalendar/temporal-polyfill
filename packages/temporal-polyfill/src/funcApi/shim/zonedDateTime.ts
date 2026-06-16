@@ -1,6 +1,5 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -91,6 +90,7 @@ import {
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { CalendarRecord } from '../calendarRecord'
 import { ZonedDateTimeFields } from '../commonTypes'
+import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getZonedDateTimeSlots,
@@ -163,7 +163,7 @@ export type ShimZonedDateTimeRecord = InstanceType<
 > &
   RecordTypes.ZonedDateTimeRecord
 export const ShimZonedDateTimeRecord = defineTemporalClass(
-  ZonedDateTimeBranding,
+  ZonedDateTimeRecordBranding,
   class {
     declare readonly [RecordTypes.ZonedDateTimeRecordBrand]: undefined
 

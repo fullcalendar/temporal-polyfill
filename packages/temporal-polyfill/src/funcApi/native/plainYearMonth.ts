@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { PlainYearMonthBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -13,6 +12,7 @@ import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
+import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -42,7 +42,7 @@ export type NativePlainYearMonthRecord = InstanceType<
 > &
   RecordTypes.PlainYearMonthRecord
 export const NativePlainYearMonthRecord = defineTemporalClass(
-  PlainYearMonthBranding,
+  PlainYearMonthRecordBranding,
   class implements YearMonthFields {
     get calendarId() {
       return getNativePlainYearMonth(this).calendarId

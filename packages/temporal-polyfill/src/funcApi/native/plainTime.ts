@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { PlainTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -12,6 +11,7 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
+import { PlainTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
@@ -30,7 +30,7 @@ export const getNativePlainTime: (record: unknown) => Temporal.PlainTime =
 export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord> &
   RecordTypes.PlainTimeRecord
 export const NativePlainTimeRecord = defineTemporalClass(
-  PlainTimeBranding,
+  PlainTimeRecordBranding,
   class implements TimeFields {
     get hour() {
       return getNativePlainTime(this).hour

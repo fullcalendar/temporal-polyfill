@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { PlainDateBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -17,6 +16,7 @@ import {
   NativeDiffFunc,
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
+import { PlainDateRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import { getPlainDateSlots, setPlainDateSlots } from '../temporalRecords'
@@ -57,7 +57,7 @@ export const getNativePlainDate: (record: unknown) => Temporal.PlainDate =
 export type NativePlainDateRecord = InstanceType<typeof NativePlainDateRecord> &
   RecordTypes.PlainDateRecord
 export const NativePlainDateRecord = defineTemporalClass(
-  PlainDateBranding,
+  PlainDateRecordBranding,
   class implements DateFields {
     get calendarId() {
       return getNativePlainDate(this).calendarId

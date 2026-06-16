@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { InstantBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -12,6 +11,7 @@ import type { InstantStringTimeZoneDisplayOptions } from '../../internal/tempora
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
+import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
@@ -34,7 +34,7 @@ export const getNativeInstant: (record: unknown) => Temporal.Instant =
 export type NativeInstantRecord = InstanceType<typeof NativeInstantRecord> &
   RecordTypes.InstantRecord
 export const NativeInstantRecord = defineTemporalClass(
-  InstantBranding,
+  InstantRecordBranding,
   class {
     get epochMilliseconds() {
       return getNativeInstant(this).epochMilliseconds

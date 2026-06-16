@@ -1,5 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { PlainMonthDayBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -40,6 +39,7 @@ import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
+import { PlainMonthDayRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getPlainMonthDaySlots,
@@ -65,7 +65,7 @@ export type ShimPlainMonthDayRecord = InstanceType<
 > &
   RecordTypes.PlainMonthDayRecord
 export const ShimPlainMonthDayRecord = defineTemporalClass(
-  PlainMonthDayBranding,
+  PlainMonthDayRecordBranding,
   class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
     declare readonly [RecordTypes.PlainMonthDayRecordBrand]: undefined
 

@@ -1,5 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { DurationBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -15,6 +14,7 @@ import type {
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
+import { DurationRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
   getDurationSlots,
@@ -30,7 +30,7 @@ export const getNativeDuration: (record: unknown) => Temporal.Duration =
 export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord> &
   RecordTypes.DurationRecord
 export const NativeDurationRecord = defineTemporalClass(
-  DurationBranding,
+  DurationRecordBranding,
   class implements DurationFields {
     get years() {
       return getNativeDuration(this).years

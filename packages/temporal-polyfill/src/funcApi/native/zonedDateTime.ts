@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { ZonedDateTimeBranding } from '../../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -13,6 +12,7 @@ import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
+import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import { normalizeRoundToOptions } from '../roundToUtils'
 import {
@@ -51,7 +51,7 @@ export type NativeZonedDateTimeRecord = InstanceType<
 > &
   RecordTypes.ZonedDateTimeRecord
 export const NativeZonedDateTimeRecord = defineTemporalClass(
-  ZonedDateTimeBranding,
+  ZonedDateTimeRecordBranding,
   class {
     get calendarId() {
       return getNativeZonedDateTime(this).calendarId
