@@ -15,6 +15,10 @@
     "type": "git",
     "url": "https://github.com/fullcalendar/temporal-polyfill.git"
   },
+  "files": [
+    "dist",
+    "!dist/*.tsbuildinfo"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -32,7 +36,8 @@
     }
   },
   "scripts": {
-    "build": "tsc --build tsconfig.build.json",
+    "build": "pnpm run clean && tsc --build tsconfig.build.json",
+    "dev": "pnpm run clean && tsc --build tsconfig.dev.json --watch",
     "lint": "biome check .",
     "lint:fix": "biome check --apply .",
     "test": "pnpm run vitest",
