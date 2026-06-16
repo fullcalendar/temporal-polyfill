@@ -1,4 +1,3 @@
-import { CalendarBranding } from '../apiHelpers/branding'
 import {
   attachDebugString,
   defineTemporalClass,
@@ -6,12 +5,13 @@ import {
 import { CalendarImpl } from '../internal/calendarImpl'
 import * as errorMessages from '../internal/errorMessages'
 import { throwRangeError } from '../internal/utils'
+import { CalendarRecordBranding } from './recordBranding'
 import type * as RecordTypes from './recordTypes'
 import { getCalendarSlots, setCalendarSlots } from './temporalRecords'
 
 export type CalendarRecord = InstanceType<typeof CalendarRecord>
 export const CalendarRecord = defineTemporalClass(
-  CalendarBranding,
+  CalendarRecordBranding,
   class implements RecordTypes.CalendarRecord {
     declare readonly [RecordTypes.CalendarRecordBrand]: undefined
 
