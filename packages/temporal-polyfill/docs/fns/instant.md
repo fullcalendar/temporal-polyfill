@@ -883,6 +883,8 @@ Temporal API:
 const text = instant.toString(options)
 ```
 
+If you aren't passing any display options, use [`toBasicString`](#tobasicstring) instead — it yields the same string and tree-shakes to a smaller bundle.
+
 ### `toBasicString`
 
 Signature:
@@ -902,6 +904,8 @@ Temporal API:
 ```ts
 const text = instant.toString()
 ```
+
+Prefer `toBasicString` over [`toString`](#tostring) when you don't need display options. It returns the same string as `toString` called with no options, but pulls in none of the option-handling code, so it tree-shakes to a smaller bundle.
 
 ### `toLocaleString`
 
