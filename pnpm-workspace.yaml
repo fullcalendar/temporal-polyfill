@@ -10,3 +10,4 @@ packages:
   - ./packages/temporal-utils
   - ./packages/export-size
   - ./packages/terser
+  - ./examples/*
