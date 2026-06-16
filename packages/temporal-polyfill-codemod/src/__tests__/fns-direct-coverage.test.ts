@@ -152,6 +152,18 @@ function directCallArgs(typeName: string, helperName: string): string | null {
     return `${receiver}, 'next'`
   }
 
+  if (helperName === 'toString') {
+    return `${receiver}, options`
+  }
+
+  if (helperName === 'toBasicString') {
+    return receiver
+  }
+
+  if (helperName === 'toLocaleString') {
+    return `${receiver}, 'en-US', options`
+  }
+
   if (helperName === 'toZonedDateTime') {
     return `${receiver}, { timeZone: 'UTC' }`
   }
@@ -167,16 +179,8 @@ function directCallArgs(typeName: string, helperName: string): string | null {
     return `${receiver}, { day: 1, year: 2024 }`
   }
 
-  if (helperName === 'toString') {
-    return `${receiver}, options`
-  }
-
-  if (helperName === 'toBasicString') {
+  if (helperName === 'toNative') {
     return receiver
-  }
-
-  if (helperName === 'toLocaleString') {
-    return `${receiver}, 'en-US', options`
   }
 
   return null

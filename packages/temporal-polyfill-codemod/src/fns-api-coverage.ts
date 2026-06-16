@@ -113,6 +113,10 @@ const formatting = {
   createFormat: 'diagnostic-only',
 } as const satisfies Record<string, FnsCodemodStatus>
 
+const nativeConversion = {
+  toNative: 'direct',
+} as const satisfies Record<string, FnsCodemodStatus>
+
 export const fnsApiCoverage = {
   Calendar: {
     getBasic: 'contextual-calendar',
@@ -151,6 +155,7 @@ export const fnsApiCoverage = {
     ...timeRounds,
     toZonedDateTimeISO: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   ZonedDateTime: {
     isRecord: 'direct',
@@ -185,6 +190,7 @@ export const fnsApiCoverage = {
     toPlainDate: 'direct',
     toPlainTime: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   PlainDateTime: {
     isRecord: 'direct',
@@ -213,6 +219,7 @@ export const fnsApiCoverage = {
     toPlainDate: 'direct',
     toPlainTime: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   PlainDate: {
     isRecord: 'direct',
@@ -234,6 +241,7 @@ export const fnsApiCoverage = {
     toPlainYearMonth: 'direct',
     toPlainMonthDay: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   PlainTime: {
     isRecord: 'direct',
@@ -251,6 +259,7 @@ export const fnsApiCoverage = {
     ...timeRounds,
     ...timeStartsAndEnds,
     ...formatting,
+    ...nativeConversion,
   },
   PlainYearMonth: {
     isRecord: 'direct',
@@ -278,6 +287,7 @@ export const fnsApiCoverage = {
     endOfYear: 'temporal-utils',
     toPlainDate: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   PlainMonthDay: {
     isRecord: 'direct',
@@ -288,6 +298,7 @@ export const fnsApiCoverage = {
     equals: 'direct',
     toPlainDate: 'direct',
     ...formatting,
+    ...nativeConversion,
   },
   Duration: {
     isRecord: 'direct',
@@ -307,6 +318,7 @@ export const fnsApiCoverage = {
     toString: 'direct',
     toBasicString: 'direct',
     toLocaleString: 'direct',
+    ...nativeConversion,
   },
   Now: {
     timeZoneId: 'direct',

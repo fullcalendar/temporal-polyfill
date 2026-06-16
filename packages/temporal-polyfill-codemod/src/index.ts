@@ -767,6 +767,19 @@ function rewriteRecordTypeCall(
     return state.j.memberExpression(args[0], state.j.identifier(exportName))
   }
 
+  if (exportName === 'toNative') {
+    if (args.length !== 1) {
+      warn(
+        state,
+        call,
+        `${typeName} ${exportName} call has an unexpected argument count`,
+      )
+      return null
+    }
+    // Migrated functional records are already native Temporal instances.
+    return args[0]
+  }
+
   if (exportName === 'toBasicString') {
     if (args.length !== 1) {
       warn(
