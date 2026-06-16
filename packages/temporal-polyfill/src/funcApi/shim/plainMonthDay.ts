@@ -37,6 +37,7 @@ import { parsePlainMonthDay } from '../../internal/isoParse'
 import { mergePlainMonthDayFields } from '../../internal/merge'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
@@ -145,6 +146,18 @@ export function fromString(
 ): ShimPlainMonthDayRecord {
   return createShimPlainMonthDayRecord(
     parsePlainMonthDay(s, createShimCalendarStringResolver(getCalendarRecord)),
+  )
+}
+
+export function toNative(
+  record: ShimPlainMonthDayRecord,
+): Temporal.PlainMonthDay {
+  const slots = getShimPlainMonthDaySlots(record)
+  return new NativeTemporal!.PlainMonthDay(
+    slots.month,
+    slots.day,
+    getCalendarSlotId(slots.calendar),
+    slots.year,
   )
 }
 

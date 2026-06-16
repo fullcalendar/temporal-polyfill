@@ -42,6 +42,10 @@ export const fromString: (s: string) => Record = NativeTemporal
   ? Native.fromString
   : Shim.fromString
 
+export const toNative: (record: Record) => Temporal.PlainTime = NativeTemporal
+  ? Native.toNative
+  : Shim.toNative
+
 export const withFields: (
   record: Record,
   mod: WithFields,

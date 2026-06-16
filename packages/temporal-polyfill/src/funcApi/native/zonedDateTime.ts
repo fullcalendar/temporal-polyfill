@@ -127,6 +127,10 @@ export function fromString(
   return createNativeZonedDateTimeRecord(resNative)
 }
 
+export const toNative: (
+  record: NativeZonedDateTimeRecord,
+) => Temporal.ZonedDateTime = getNativeZonedDateTime
+
 export function withFields(
   record: NativeZonedDateTimeRecord,
   mod: Partial<DateTimeFields>,

@@ -121,6 +121,9 @@ export function fromString(
   return createNativePlainDateRecord(resNative)
 }
 
+export const toNative: (record: NativePlainDateRecord) => Temporal.PlainDate =
+  getNativePlainDate
+
 export function getFields(record: NativePlainDateRecord): DateFields {
   const native = getNativePlainDate(record)
   return {

@@ -31,6 +31,7 @@ import type {
 } from '../../internal/temporalSpecHelpers'
 import { totalDuration } from '../../internal/total'
 import { NumberSign, mapProps } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { RelativeToRecord } from '../commonTypes'
 import { DurationRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -150,6 +151,22 @@ export function fromFields(
 
 export function fromString(s: string): ShimDurationRecord {
   return createShimDurationRecord(parseDuration(s))
+}
+
+export function toNative(duration: ShimDurationRecord): Temporal.Duration {
+  const slots = getShimDurationSlots(duration)
+  return new NativeTemporal!.Duration(
+    slots.years,
+    slots.months,
+    slots.weeks,
+    slots.days,
+    slots.hours,
+    slots.minutes,
+    slots.seconds,
+    slots.milliseconds,
+    slots.microseconds,
+    slots.nanoseconds,
+  )
 }
 
 export function sign(duration: ShimDurationRecord): NumberSign {

@@ -50,6 +50,7 @@ import { createDateSlots, createDurationSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
@@ -183,6 +184,18 @@ export function fromString(
 ): ShimPlainYearMonthRecord {
   return createShimPlainYearMonthRecord(
     parsePlainYearMonth(s, createShimCalendarStringResolver(getCalendarRecord)),
+  )
+}
+
+export function toNative(
+  record: ShimPlainYearMonthRecord,
+): Temporal.PlainYearMonth {
+  const slots = getShimPlainYearMonthSlots(record)
+  return new NativeTemporal!.PlainYearMonth(
+    slots.year,
+    slots.month,
+    getCalendarSlotId(slots.calendar),
+    slots.day,
   )
 }
 

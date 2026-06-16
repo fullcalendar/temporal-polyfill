@@ -86,6 +86,9 @@ export function fromString(s: string): NativePlainTimeRecord {
   return createNativePlainTimeRecord(resNative)
 }
 
+export const toNative: (record: NativePlainTimeRecord) => Temporal.PlainTime =
+  getNativePlainTime
+
 export function withFields(
   record: NativePlainTimeRecord,
   mod: Partial<TimeFields>,

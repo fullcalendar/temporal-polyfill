@@ -80,6 +80,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
@@ -233,6 +234,24 @@ export function fromString(
 ): ShimPlainDateTimeRecord {
   return createShimPlainDateTimeRecord(
     parsePlainDateTime(s, createShimCalendarStringResolver(getCalendarRecord)),
+  )
+}
+
+export function toNative(
+  record: ShimPlainDateTimeRecord,
+): Temporal.PlainDateTime {
+  const slots = getShimPlainDateTimeSlots(record)
+  return new NativeTemporal!.PlainDateTime(
+    slots.year,
+    slots.month,
+    slots.day,
+    slots.hour,
+    slots.minute,
+    slots.second,
+    slots.millisecond,
+    slots.microsecond,
+    slots.nanosecond,
+    getCalendarSlotId(slots.calendar),
   )
 }
 

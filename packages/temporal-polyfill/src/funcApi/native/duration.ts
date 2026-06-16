@@ -93,6 +93,9 @@ export function fromString(s: string): NativeDurationRecord {
   return createNativeDurationRecord(resNative)
 }
 
+export const toNative: (duration: NativeDurationRecord) => Temporal.Duration =
+  getNativeDuration
+
 export function sign(duration: NativeDurationRecord): NumberSign {
   const native = getNativeDuration(duration)
   return native.sign as NumberSign // !!!

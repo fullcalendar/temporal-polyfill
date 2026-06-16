@@ -53,6 +53,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -135,6 +136,11 @@ export function fromEpochNanoseconds(
 export function fromString(s: string): ShimInstantRecord {
   const resSlots = parseInstant(s)
   return createShimInstantRecord(resSlots)
+}
+
+export function toNative(record: ShimInstantRecord): Temporal.Instant {
+  const slots = getShimInstantSlots(record)
+  return new NativeTemporal!.Instant(slots.epochNanoseconds)
 }
 
 export function add(

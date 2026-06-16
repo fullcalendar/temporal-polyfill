@@ -64,6 +64,7 @@ import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import {
   DateTimeFormatLike,
@@ -203,6 +204,16 @@ export function fromString(
 ): ShimPlainDateRecord {
   return createShimPlainDateRecord(
     parsePlainDate(s, createShimCalendarStringResolver(getCalendarRecord)),
+  )
+}
+
+export function toNative(record: ShimPlainDateRecord): Temporal.PlainDate {
+  const slots = getShimPlainDateSlots(record)
+  return new NativeTemporal!.PlainDate(
+    slots.year,
+    slots.month,
+    slots.day,
+    getCalendarSlotId(slots.calendar),
   )
 }
 

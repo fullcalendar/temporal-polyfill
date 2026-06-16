@@ -50,6 +50,9 @@ export const fromString: (
   getCalendar: (calendarId: string) => CalendarFns.Record,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
+export const toNative: (record: Record) => Temporal.PlainYearMonth =
+  NativeTemporal ? Native.toNative : Shim.toNative
+
 export const daysInMonth: (record: Record) => number = NativeTemporal
   ? Native.daysInMonth
   : Shim.daysInMonth

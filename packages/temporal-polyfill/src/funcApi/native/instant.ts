@@ -89,6 +89,9 @@ export function fromString(s: string): NativeInstantRecord {
   return createNativeInstantRecord(resNative)
 }
 
+export const toNative: (record: NativeInstantRecord) => Temporal.Instant =
+  getNativeInstant
+
 export function add(
   record: NativeInstantRecord,
   durationRecord: RecordTypes.DurationRecord,

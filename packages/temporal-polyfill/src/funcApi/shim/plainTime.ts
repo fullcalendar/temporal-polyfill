@@ -37,6 +37,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -119,6 +120,18 @@ export function fromFields(
 
 export function fromString(s: string): ShimPlainTimeRecord {
   return createShimPlainTimeRecord(parsePlainTime(s))
+}
+
+export function toNative(record: ShimPlainTimeRecord): Temporal.PlainTime {
+  const slots = getShimPlainTimeSlots(record)
+  return new NativeTemporal!.PlainTime(
+    slots.hour,
+    slots.minute,
+    slots.second,
+    slots.millisecond,
+    slots.microsecond,
+    slots.nanosecond,
+  )
 }
 
 export function withFields(

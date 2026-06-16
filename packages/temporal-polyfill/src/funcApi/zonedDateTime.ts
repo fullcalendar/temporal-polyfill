@@ -47,6 +47,9 @@ export const fromString: (
   options?: FromOptions,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
+export const toNative: (record: Record) => Temporal.ZonedDateTime =
+  NativeTemporal ? Native.toNative : Shim.toNative
+
 export const withFields: (
   record: Record,
   mod: WithFields,

@@ -88,6 +88,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
+import { NativeTemporal } from '../../nativeSwitch'
 import { CalendarRecord } from '../calendarRecord'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
@@ -251,6 +252,17 @@ export function fromString(
       createShimCalendarStringResolver(getCalendarRecord),
       options,
     ),
+  )
+}
+
+export function toNative(
+  record: ShimZonedDateTimeRecord,
+): Temporal.ZonedDateTime {
+  const slots = getShimZonedDateTimeSlots(record)
+  return new NativeTemporal!.ZonedDateTime(
+    slots.epochNanoseconds,
+    slots.timeZone.id,
+    getCalendarSlotId(slots.calendar),
   )
 }
 

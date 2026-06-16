@@ -106,6 +106,12 @@ export function fromString(
   return createNativePlainYearMonthRecord(resNative)
 }
 
+// Native PlainYearMonth keeps its reference ISO day in an internal slot.
+// Returning the stored native object is the only lossless conversion here.
+export const toNative: (
+  record: NativePlainYearMonthRecord,
+) => Temporal.PlainYearMonth = getNativePlainYearMonth
+
 export function daysInMonth(record: NativePlainYearMonthRecord): number {
   return getNativePlainYearMonth(record).daysInMonth
 }

@@ -52,6 +52,10 @@ export const fromString: (
   getCalendar: (calendarId: string) => CalendarFns.Record,
 ) => Record = NativeTemporal ? Native.fromString : Shim.fromString
 
+export const toNative: (record: Record) => Temporal.PlainDate = NativeTemporal
+  ? Native.toNative
+  : Shim.toNative
+
 export const dayOfWeek: (record: Record) => number = NativeTemporal
   ? Native.dayOfWeek
   : Shim.dayOfWeek

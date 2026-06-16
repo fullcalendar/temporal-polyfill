@@ -130,6 +130,10 @@ export function fromString(
   return createNativePlainDateTimeRecord(resNative)
 }
 
+export const toNative: (
+  record: NativePlainDateTimeRecord,
+) => Temporal.PlainDateTime = getNativePlainDateTime
+
 export function withCalendar(
   record: NativePlainDateTimeRecord,
   calendarRecord: CalendarRecord,
