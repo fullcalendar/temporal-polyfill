@@ -2341,7 +2341,7 @@ const time = zonedDateTime.toPlainTime()
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.ZonedDateTime
+(record: Record) => Temporal.ZonedDateTime
 ```
 
 Fn API:
@@ -2358,8 +2358,7 @@ const native = zonedDateTime
 
 Produces a real `Temporal.ZonedDateTime` built directly from the record's
 `epochNanoseconds`, `timeZoneId`, and `calendarId`, with no string round-trip.
-The `temporal` argument defaults to `globalThis.Temporal`; pass an explicit
-Temporal implementation to target a specific one — otherwise `toNative` throws
-when no global `Temporal` is present. Because a migrated record is already a
+The native constructor comes from `globalThis.Temporal`; `toNative` throws when
+no global `Temporal` is present. Because a migrated record is already a
 `Temporal.ZonedDateTime`, the codemod rewrites the entire call to the bare record
 expression.

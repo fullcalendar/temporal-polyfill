@@ -986,7 +986,7 @@ const zonedDateTime = instant.toZonedDateTimeISO(timeZoneId)
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.Instant
+(record: Record) => Temporal.Instant
 ```
 
 Fn API:
@@ -1002,8 +1002,7 @@ const native = instant
 ```
 
 Produces a real `Temporal.Instant` built directly from the record's
-`epochNanoseconds`, with no string round-trip. The `temporal` argument defaults
-to `globalThis.Temporal`; pass an explicit Temporal implementation to target a
-specific one — otherwise `toNative` throws when no global `Temporal` is present.
+`epochNanoseconds`, with no string round-trip. The native constructor comes from
+`globalThis.Temporal`; `toNative` throws when no global `Temporal` is present.
 Because a migrated record is already a `Temporal.Instant`, the codemod rewrites
 the entire call to the bare record expression.

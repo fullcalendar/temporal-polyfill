@@ -1207,7 +1207,7 @@ This rewrite is appropriate when later uses rely on `format.format(time)`.
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainTime
+(record: Record) => Temporal.PlainTime
 ```
 
 Fn API:
@@ -1223,8 +1223,7 @@ const native = time
 ```
 
 Produces a real `Temporal.PlainTime` built directly from the record's ISO time
-slots, with no string round-trip. The `temporal` argument defaults to
-`globalThis.Temporal`; pass an explicit Temporal implementation to target a
-specific one — otherwise `toNative` throws when no global `Temporal` is present.
+slots, with no string round-trip. The native constructor comes from
+`globalThis.Temporal`; `toNative` throws when no global `Temporal` is present.
 Because a migrated record is already a `Temporal.PlainTime`, the codemod rewrites
 the entire call to the bare record expression.

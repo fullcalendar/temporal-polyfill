@@ -324,7 +324,7 @@ const date = monthDay.toPlainDate({ year: 2024 })
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainMonthDay
+(record: Record) => Temporal.PlainMonthDay
 ```
 
 Fn API:
@@ -341,8 +341,7 @@ const native = monthDay
 
 Produces a real `Temporal.PlainMonthDay` built directly from the record's ISO
 date slots (including the reference ISO year) and `calendarId`, with no string
-round-trip. The `temporal` argument defaults to `globalThis.Temporal`; pass an
-explicit Temporal implementation to target a specific one — otherwise `toNative`
+round-trip. The native constructor comes from `globalThis.Temporal`; `toNative`
 throws when no global `Temporal` is present. Because a migrated record is already
 a `Temporal.PlainMonthDay`, the codemod rewrites the entire call to the bare
 record expression.

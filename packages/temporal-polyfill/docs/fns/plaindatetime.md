@@ -2223,7 +2223,7 @@ const time = dateTime.toPlainTime()
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.PlainDateTime
+(record: Record) => Temporal.PlainDateTime
 ```
 
 Fn API:
@@ -2239,9 +2239,8 @@ const native = dateTime
 ```
 
 Produces a real `Temporal.PlainDateTime` built directly from the record's ISO
-date-time slots and `calendarId`, with no string round-trip. The `temporal`
-argument defaults to `globalThis.Temporal`; pass an explicit Temporal
-implementation to target a specific one — otherwise `toNative` throws when no
-global `Temporal` is present. Because a migrated record is already a
+date-time slots and `calendarId`, with no string round-trip. The native
+constructor comes from `globalThis.Temporal`; `toNative` throws when no global
+`Temporal` is present. Because a migrated record is already a
 `Temporal.PlainDateTime`, the codemod rewrites the entire call to the bare record
 expression.

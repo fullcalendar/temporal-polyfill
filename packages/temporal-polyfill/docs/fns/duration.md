@@ -449,7 +449,7 @@ const text = duration.toLocaleString(locales, options)
 Signature:
 
 ```ts
-(record: Record, temporal?: typeof Temporal) => Temporal.Duration
+(record: Record) => Temporal.Duration
 ```
 
 Fn API:
@@ -465,8 +465,7 @@ const native = duration
 ```
 
 Produces a real `Temporal.Duration` built directly from the record's duration
-fields. The `temporal` argument defaults to `globalThis.Temporal`; pass an
-explicit Temporal implementation to target a specific one — otherwise `toNative`
+fields. The native constructor comes from `globalThis.Temporal`; `toNative`
 throws when no global `Temporal` is present. Because a migrated record is already
 a `Temporal.Duration`, the codemod rewrites the entire call to the bare record
 expression.
