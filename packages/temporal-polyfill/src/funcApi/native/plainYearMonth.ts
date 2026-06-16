@@ -28,6 +28,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
+import { yearMonthFieldGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>
@@ -42,29 +43,9 @@ export type NativePlainYearMonthRecord = InstanceType<
   RecordTypes.PlainYearMonthRecord
 export const NativePlainYearMonthRecord = defineTemporalClass(
   PlainYearMonthRecordBranding,
-  class implements YearMonthFields {
+  class {
     get calendarId() {
       return getNativePlainYearMonth(this).calendarId
-    }
-
-    get era() {
-      return getNativePlainYearMonth(this).era
-    }
-
-    get eraYear() {
-      return getNativePlainYearMonth(this).eraYear
-    }
-
-    get year() {
-      return getNativePlainYearMonth(this).year
-    }
-
-    get monthCode() {
-      return getNativePlainYearMonth(this).monthCode
-    }
-
-    get month() {
-      return getNativePlainYearMonth(this).month
     }
 
     toJSON() {
@@ -75,6 +56,8 @@ export const NativePlainYearMonthRecord = defineTemporalClass(
       return getNativePlainYearMonth(this).valueOf()
     }
   },
+  getNativePlainYearMonth,
+  yearMonthFieldGetters,
 )
 
 export function createNativePlainYearMonthRecord(

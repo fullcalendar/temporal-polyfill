@@ -29,6 +29,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
+import { dateFieldGetters, timeGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
   NativePlainTimeRecord,
@@ -53,57 +54,9 @@ export type NativePlainDateTimeRecord = InstanceType<
   RecordTypes.PlainDateTimeRecord
 export const NativePlainDateTimeRecord = defineTemporalClass(
   PlainDateTimeRecordBranding,
-  class implements DateTimeFields {
+  class {
     get calendarId() {
       return getNativePlainDateTime(this).calendarId
-    }
-
-    get era() {
-      return getNativePlainDateTime(this).era
-    }
-
-    get eraYear() {
-      return getNativePlainDateTime(this).eraYear
-    }
-
-    get year() {
-      return getNativePlainDateTime(this).year
-    }
-
-    get month() {
-      return getNativePlainDateTime(this).month
-    }
-
-    get monthCode() {
-      return getNativePlainDateTime(this).monthCode
-    }
-
-    get day() {
-      return getNativePlainDateTime(this).day
-    }
-
-    get hour() {
-      return getNativePlainDateTime(this).hour
-    }
-
-    get minute() {
-      return getNativePlainDateTime(this).minute
-    }
-
-    get second() {
-      return getNativePlainDateTime(this).second
-    }
-
-    get millisecond() {
-      return getNativePlainDateTime(this).millisecond
-    }
-
-    get microsecond() {
-      return getNativePlainDateTime(this).microsecond
-    }
-
-    get nanosecond() {
-      return getNativePlainDateTime(this).nanosecond
     }
 
     toJSON() {
@@ -114,6 +67,9 @@ export const NativePlainDateTimeRecord = defineTemporalClass(
       return getNativePlainDateTime(this).valueOf()
     }
   },
+  getNativePlainDateTime,
+  dateFieldGetters,
+  timeGetters,
 )
 
 export function createNativePlainDateTimeRecord(

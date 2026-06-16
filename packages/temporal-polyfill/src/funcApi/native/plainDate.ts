@@ -30,6 +30,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
+import { dateFieldGetters } from './mixins'
 import {
   NativePlainDateTimeRecord,
   createNativePlainDateTimeRecord,
@@ -57,33 +58,9 @@ export type NativePlainDateRecord = InstanceType<typeof NativePlainDateRecord> &
   RecordTypes.PlainDateRecord
 export const NativePlainDateRecord = defineTemporalClass(
   PlainDateRecordBranding,
-  class implements DateFields {
+  class {
     get calendarId() {
       return getNativePlainDate(this).calendarId
-    }
-
-    get era() {
-      return getNativePlainDate(this).era
-    }
-
-    get eraYear() {
-      return getNativePlainDate(this).eraYear
-    }
-
-    get year() {
-      return getNativePlainDate(this).year
-    }
-
-    get month() {
-      return getNativePlainDate(this).month
-    }
-
-    get monthCode() {
-      return getNativePlainDate(this).monthCode
-    }
-
-    get day() {
-      return getNativePlainDate(this).day
     }
 
     toJSON() {
@@ -94,6 +71,8 @@ export const NativePlainDateRecord = defineTemporalClass(
       return getNativePlainDate(this).valueOf()
     }
   },
+  getNativePlainDate,
+  dateFieldGetters,
 )
 
 export function createNativePlainDateRecord(

@@ -138,6 +138,10 @@ export const ZonedDateTime = defineTemporalClass(
       return getCalendarSlotId(getZonedDateTimeSlots(this).calendar)
     }
 
+    get timeZoneId(): string {
+      return getZonedDateTimeSlots(this).timeZone.id
+    }
+
     get epochMilliseconds(): number {
       return getEpochMilli(getZonedDateTimeSlots(this))
     }
@@ -154,10 +158,6 @@ export const ZonedDateTime = defineTemporalClass(
 
     get offsetNanoseconds(): number {
       return zonedEpochSlotsToIso(getZonedDateTimeSlots(this)).offsetNanoseconds
-    }
-
-    get timeZoneId(): string {
-      return getZonedDateTimeSlots(this).timeZone.id
     }
 
     get hoursInDay(): number {

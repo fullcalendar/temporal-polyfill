@@ -29,6 +29,7 @@ import {
   getNativeDuration,
 } from './duration'
 import { NativeInstantRecord, createNativeInstantRecord } from './instant'
+import { dateFieldGetters, timeGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 import {
   NativePlainDateTimeRecord,
@@ -56,64 +57,16 @@ export const NativeZonedDateTimeRecord = defineTemporalClass(
       return getNativeZonedDateTime(this).calendarId
     }
 
+    get timeZoneId() {
+      return getNativeZonedDateTime(this).timeZoneId
+    }
+
     get epochMilliseconds() {
       return getNativeZonedDateTime(this).epochMilliseconds
     }
 
     get epochNanoseconds() {
       return getNativeZonedDateTime(this).epochNanoseconds
-    }
-
-    get timeZoneId() {
-      return getNativeZonedDateTime(this).timeZoneId
-    }
-
-    get era() {
-      return getNativeZonedDateTime(this).era
-    }
-
-    get eraYear() {
-      return getNativeZonedDateTime(this).eraYear
-    }
-
-    get year() {
-      return getNativeZonedDateTime(this).year
-    }
-
-    get month() {
-      return getNativeZonedDateTime(this).month
-    }
-
-    get monthCode() {
-      return getNativeZonedDateTime(this).monthCode
-    }
-
-    get day() {
-      return getNativeZonedDateTime(this).day
-    }
-
-    get hour() {
-      return getNativeZonedDateTime(this).hour
-    }
-
-    get minute() {
-      return getNativeZonedDateTime(this).minute
-    }
-
-    get second() {
-      return getNativeZonedDateTime(this).second
-    }
-
-    get millisecond() {
-      return getNativeZonedDateTime(this).millisecond
-    }
-
-    get microsecond() {
-      return getNativeZonedDateTime(this).microsecond
-    }
-
-    get nanosecond() {
-      return getNativeZonedDateTime(this).nanosecond
     }
 
     toJSON() {
@@ -124,6 +77,9 @@ export const NativeZonedDateTimeRecord = defineTemporalClass(
       return getNativeZonedDateTime(this).valueOf()
     }
   },
+  getNativeZonedDateTime,
+  dateFieldGetters,
+  timeGetters,
 )
 
 export function createNativeZonedDateTimeRecord(

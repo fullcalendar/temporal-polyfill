@@ -171,16 +171,16 @@ export const ShimZonedDateTimeRecord = defineTemporalClass(
       return getCalendarSlotId(getShimZonedDateTimeSlots(this).calendar)
     }
 
+    get timeZoneId() {
+      return getShimZonedDateTimeSlots(this).timeZone.id
+    }
+
     get epochMilliseconds() {
       return getEpochMilli(getShimZonedDateTimeSlots(this))
     }
 
     get epochNanoseconds() {
       return getEpochNano(getShimZonedDateTimeSlots(this))
-    }
-
-    get timeZoneId() {
-      return getShimZonedDateTimeSlots(this).timeZone.id
     }
 
     toJSON() {

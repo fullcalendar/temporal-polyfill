@@ -19,6 +19,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
+import { timeGetters } from './mixins'
 import { createRoundToOptions } from './roundUtils'
 
 type Format = DateTimeFormatLike<NativePlainTimeRecord>
@@ -30,31 +31,7 @@ export type NativePlainTimeRecord = InstanceType<typeof NativePlainTimeRecord> &
   RecordTypes.PlainTimeRecord
 export const NativePlainTimeRecord = defineTemporalClass(
   PlainTimeRecordBranding,
-  class implements TimeFields {
-    get hour() {
-      return getNativePlainTime(this).hour
-    }
-
-    get minute() {
-      return getNativePlainTime(this).minute
-    }
-
-    get second() {
-      return getNativePlainTime(this).second
-    }
-
-    get millisecond() {
-      return getNativePlainTime(this).millisecond
-    }
-
-    get microsecond() {
-      return getNativePlainTime(this).microsecond
-    }
-
-    get nanosecond() {
-      return getNativePlainTime(this).nanosecond
-    }
-
+  class {
     toJSON() {
       return getNativePlainTime(this).toJSON()
     }
@@ -63,6 +40,8 @@ export const NativePlainTimeRecord = defineTemporalClass(
       return getNativePlainTime(this).valueOf()
     }
   },
+  getNativePlainTime,
+  timeGetters,
 )
 
 export function createNativePlainTimeRecord(

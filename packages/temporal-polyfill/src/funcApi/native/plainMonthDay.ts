@@ -19,6 +19,7 @@ import {
   runNativeCalendarResolver,
 } from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
+import { monthCodeDayFieldGetters } from './mixins'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
@@ -33,17 +34,9 @@ export type NativePlainMonthDayRecord = InstanceType<
   RecordTypes.PlainMonthDayRecord
 export const NativePlainMonthDayRecord = defineTemporalClass(
   PlainMonthDayRecordBranding,
-  class implements Pick<MonthDayFields, 'monthCode' | 'day'> {
+  class {
     get calendarId() {
       return getNativePlainMonthDay(this).calendarId
-    }
-
-    get monthCode() {
-      return getNativePlainMonthDay(this).monthCode
-    }
-
-    get day() {
-      return getNativePlainMonthDay(this).day
     }
 
     toJSON() {
@@ -54,6 +47,8 @@ export const NativePlainMonthDayRecord = defineTemporalClass(
       return getNativePlainMonthDay(this).valueOf()
     }
   },
+  getNativePlainMonthDay,
+  monthCodeDayFieldGetters,
 )
 
 export function createNativePlainMonthDayRecord(

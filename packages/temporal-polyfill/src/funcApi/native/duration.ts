@@ -22,6 +22,7 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
+import { durationGetters } from './mixins'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
@@ -30,47 +31,7 @@ export type NativeDurationRecord = InstanceType<typeof NativeDurationRecord> &
   RecordTypes.DurationRecord
 export const NativeDurationRecord = defineTemporalClass(
   DurationRecordBranding,
-  class implements DurationFields {
-    get years() {
-      return getNativeDuration(this).years
-    }
-
-    get months() {
-      return getNativeDuration(this).months
-    }
-
-    get weeks() {
-      return getNativeDuration(this).weeks
-    }
-
-    get days() {
-      return getNativeDuration(this).days
-    }
-
-    get hours() {
-      return getNativeDuration(this).hours
-    }
-
-    get minutes() {
-      return getNativeDuration(this).minutes
-    }
-
-    get seconds() {
-      return getNativeDuration(this).seconds
-    }
-
-    get milliseconds() {
-      return getNativeDuration(this).milliseconds
-    }
-
-    get microseconds() {
-      return getNativeDuration(this).microseconds
-    }
-
-    get nanoseconds() {
-      return getNativeDuration(this).nanoseconds
-    }
-
+  class {
     toJSON() {
       return getNativeDuration(this).toJSON()
     }
@@ -79,6 +40,8 @@ export const NativeDurationRecord = defineTemporalClass(
       return getNativeDuration(this).valueOf()
     }
   },
+  getNativeDuration,
+  durationGetters,
 )
 
 export function createNativeDurationRecord(
