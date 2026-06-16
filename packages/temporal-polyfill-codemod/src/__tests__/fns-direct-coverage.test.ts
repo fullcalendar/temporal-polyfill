@@ -164,6 +164,10 @@ function directCallArgs(typeName: string, helperName: string): string | null {
     return `${receiver}, 'en-US', options`
   }
 
+  if (helperName === 'createFormat') {
+    return "'en-US', options"
+  }
+
   if (helperName === 'toZonedDateTime') {
     return `${receiver}, { timeZone: 'UTC' }`
   }

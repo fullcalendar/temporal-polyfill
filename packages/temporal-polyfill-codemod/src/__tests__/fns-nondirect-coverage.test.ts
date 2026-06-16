@@ -28,7 +28,7 @@ describe('non-direct fns API mappings', () => {
       continue
     }
 
-    it(`warns for standalone Calendar.${helperName}`, () => {
+    it(`rewrites standalone Calendar.${helperName}`, () => {
       const source = `
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
@@ -36,8 +36,11 @@ const result = CalendarFns.${helperName}(${calendarArgs(helperName)})
 `
       const result = transformSource(source, { path: 'input.ts' })
 
-      expect(result.diagnostics.length, helperName).toBeGreaterThan(0)
+      expect(result.diagnostics, helperName).toEqual([])
       expect(result.code, helperName).toContain(
+        `const result = ${calendarExpected(helperName)}`,
+      )
+      expect(result.code, helperName).not.toContain(
         'temporal-polyfill/fns/Calendar',
       )
     })
@@ -121,6 +124,28 @@ function calendarArgs(helperName: string): string {
     helperName === 'getExotic'
     ? "'buddhist'"
     : ''
+}
+
+function calendarExpected(helperName: string): string {
+  const knownIds: Record<string, string> = {
+    getISO: 'iso8601',
+    getGregory: 'gregory',
+    getBuddhist: 'buddhist',
+    getChinese: 'chinese',
+    getDangi: 'dangi',
+    getCoptic: 'coptic',
+    getEthiopic: 'ethiopic',
+    getEthiopicAmeteAlem: 'ethioaa',
+    getHebrew: 'hebrew',
+    getIndian: 'indian',
+    getJapanese: 'japanese',
+    getIslamicCivil: 'islamic-civil',
+    getIslamicTabular: 'islamic-tbla',
+    getIslamicUmmAlQura: 'islamic-umalqura',
+    getPersian: 'persian',
+    getROC: 'roc',
+  }
+  return `'${knownIds[helperName] ?? 'buddhist'}'`
 }
 
 function nonDirectArgs(typeName: string, helperName: string): string {

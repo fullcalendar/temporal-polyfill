@@ -54,12 +54,9 @@ describe('fixtures', () => {
     })
 
     expect(result.diagnostics.map((diagnostic) => diagnostic.message)).toEqual([
-      'PlainDate createFormat is not implemented by the codemod yet',
       'ZonedDateTime roundToHour options object already has smallestUnit; manual review needed',
-      'Untransformed CalendarFns.getBuddhist usage',
       'Untransformed PlainDateFns.isRecord usage',
       'Untransformed dynamic PlainDateFns usage',
-      'Untransformed PlainDateFns.createFormat usage',
       'Untransformed ZonedDateTimeFns.roundToHour usage',
     ])
   })

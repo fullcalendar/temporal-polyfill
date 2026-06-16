@@ -108,7 +108,7 @@ const date = PlainDateFns.create(2024, 5, 1)
       `
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-const result = PlainDateFns.createFormat('en-US')
+const predicate = PlainDateFns.isRecord
 `,
     )
 
@@ -122,7 +122,7 @@ const result = PlainDateFns.createFormat('en-US')
     expect(defaultResult.status).toBe(1)
     expect(allowedResult.status).toBe(0)
     expect(defaultResult.stdout).toContain(
-      'PlainDate createFormat is not implemented by the codemod yet',
+      'Untransformed PlainDateFns.isRecord usage',
     )
   })
 

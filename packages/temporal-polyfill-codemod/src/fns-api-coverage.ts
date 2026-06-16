@@ -110,7 +110,7 @@ const formatting = {
   toString: 'direct',
   toBasicString: 'direct',
   toLocaleString: 'direct',
-  createFormat: 'diagnostic-only',
+  createFormat: 'direct',
 } as const satisfies Record<string, FnsCodemodStatus>
 
 const temporalConversion = {

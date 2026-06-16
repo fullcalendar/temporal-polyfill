@@ -79,6 +79,87 @@ type E = CalendarFns.Record
     expect(result.code).not.toContain('temporal-polyfill/fns')
   })
 
+  it('keeps rewriting fns namespace types after unrelated qualified types', () => {
+    const source = `
+import type { JSX } from 'preact'
+import type * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+function handle(event: JSX.TargetedEvent<HTMLSelectElement>) {
+  return event.currentTarget.value
+}
+
+function getToday(calendar: CalendarFns.Record): PlainDateFns.Record {
+  return PlainDateFns.create(2024, 5, 1, calendar)
+}
+`
+
+    const result = transformSource(source, { path: 'input.tsx' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain(
+      'function handle(event: JSX.TargetedEvent<HTMLSelectElement>)',
+    )
+    expect(result.code).toContain(
+      'function getToday(calendar: string): Temporal.PlainDate',
+    )
+    expect(result.code).not.toContain('CalendarFns.Record')
+    expect(result.code).not.toContain('PlainDateFns.Record')
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
+  it('removes fns namespace imports after value and type references are rewritten', () => {
+    const source = `
+import type * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
+
+function flow(calendar: CalendarFns.Record, date: PlainDateFns.Record, birthday: PlainMonthDayFns.Record) {
+  const next = PlainDateFns.addDays(date, 1)
+  const monthDay = PlainDateFns.toPlainMonthDay(next)
+  return PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 }).withCalendar(calendar)
+}
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain(
+      'function flow(calendar: string, date: Temporal.PlainDate, birthday: Temporal.PlainMonthDay)',
+    )
+    expect(result.code).toContain('const next = date.add({')
+    expect(result.code).toContain('const monthDay = next.toPlainMonthDay()')
+    expect(result.code).toContain(
+      'return monthDay.toPlainDate({ year: 2024 }).withCalendar(calendar)',
+    )
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
+  it('rewrites createFormat to Intl.DateTimeFormat', () => {
+    const source = `
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+
+const dateFormat = PlainDateFns.createFormat(undefined, {
+  calendar: calendarId,
+  dateStyle: 'full',
+})
+const zdtFormat = ZonedDateTimeFns.createFormat('en-US', options)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain(
+      'const dateFormat = new Intl.DateTimeFormat(undefined, {',
+    )
+    expect(result.code).toContain(
+      "const zdtFormat = new Intl.DateTimeFormat('en-US', options)",
+    )
+    expect(result.code).not.toContain('createFormat')
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
   it('rewrites Instant direct Temporal mappings', () => {
     const source = `
 import * as InstantFns from 'temporal-polyfill/fns/Instant'
@@ -225,6 +306,28 @@ const zone = NowFns.timeZoneId()
     )
     expect(result.code).toContain('const now = Temporal.Now.instant()')
     expect(result.code).toContain('const zone = Temporal.Now.timeZoneId()')
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
+  it('rewrites nested Now calls before replacing outer fns calls', () => {
+    const source = `
+import * as NowFns from 'temporal-polyfill/fns/Now'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+const today = PlainDateFns.withCalendar(NowFns.plainDateISO(), calendar)
+const zdt = PlainDateFns.toZonedDateTime(date, NowFns.timeZoneId())
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain(
+      'const today = Temporal.Now.plainDateISO().withCalendar(calendar)',
+    )
+    expect(result.code).toContain(
+      'const zdt = date.toZonedDateTime(Temporal.Now.timeZoneId())',
+    )
+    expect(result.code).not.toContain('NowFns')
     expect(result.code).not.toContain('temporal-polyfill/fns')
   })
 

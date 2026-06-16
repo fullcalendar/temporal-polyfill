@@ -605,7 +605,7 @@ function rewriteTypeReferences(
     ) {
       const binding = namespaceBindingForLocal(state, typeName.left.name)
       if (binding == null) {
-        return
+        continue
       }
 
       const typeSource = perTypeTypeMap[binding.typeName]?.[typeName.right.name]
@@ -636,7 +636,10 @@ function rewriteCallExpressions(
   root: ReturnType<JSCodeshift>,
   state: TransformState,
 ): void {
-  for (const path of root.find(state.j.CallExpression).paths()) {
+  // Rewrite children before parents. When an outer fns call is replaced, any
+  // still-unvisited inner fns calls inside its arguments would otherwise be
+  // detached from the AST and never rewritten.
+  for (const path of root.find(state.j.CallExpression).paths().reverse()) {
     const calleeInfo = getFnsCallee(state, path.node.callee)
     if (calleeInfo == null) {
       continue
@@ -646,7 +649,14 @@ function rewriteCallExpressions(
     const replacement =
       binding.typeName === 'Now'
         ? rewriteNowCall(state, path.node, exportName)
-        : rewriteRecordTypeCall(state, path.node, binding.typeName, exportName)
+        : binding.typeName === 'Calendar'
+          ? rewriteCalendarCall(state, path.node)
+          : rewriteRecordTypeCall(
+              state,
+              path.node,
+              binding.typeName,
+              exportName,
+            )
 
     if (replacement != null) {
       path.replace(replacement)
@@ -792,6 +802,24 @@ function rewriteRecordTypeCall(
     return state.j.callExpression(
       state.j.memberExpression(args[0], state.j.identifier('toString')),
       [],
+    )
+  }
+
+  if (exportName === 'createFormat') {
+    if (args.length > 2) {
+      warn(
+        state,
+        call,
+        `${typeName} ${exportName} call has an unexpected argument count`,
+      )
+      return null
+    }
+    return state.j.newExpression(
+      state.j.memberExpression(
+        state.j.identifier('Intl'),
+        state.j.identifier('DateTimeFormat'),
+      ),
+      args,
     )
   }
 
@@ -1153,6 +1181,10 @@ function rewriteNowCall(
     ),
     call.arguments,
   )
+}
+
+function rewriteCalendarCall(state: TransformState, call: any): any | null {
+  return calendarIdExpressionForKnownContext(state, call)
 }
 
 function temporalMember(state: TransformState, property: string): any {
