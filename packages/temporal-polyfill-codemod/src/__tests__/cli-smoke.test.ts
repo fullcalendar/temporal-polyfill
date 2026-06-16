@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -52,6 +53,32 @@ const date = PlainDateFns.create(2024, 5, 1)
       'const date = new Temporal.PlainDate(2024, 5, 1)',
     )
     expect(readFileSync(filePath, 'utf8')).toContain('PlainDateFns.create')
+  })
+
+  it('runs the built CLI through a workspace symlink path', () => {
+    const dir = tempDir()
+    const packageLink = join(dir, 'node_modules', 'temporal-polyfill-codemod')
+    const filePath = tempFile(
+      'input.ts',
+      `
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+const date = PlainDateFns.create(2024, 5, 1)
+`,
+    )
+
+    mkdirSync(join(packageLink, '..'), { recursive: true })
+    symlinkSync(resolve('.'), packageLink, 'dir')
+
+    const result = runBuiltCliAt(
+      join(packageLink, 'dist', 'cli.js'),
+      'fns-to-temporal',
+      filePath,
+      '--dry',
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('scanned 1 file(s), changed 1 file(s)')
   })
 
   it('writes transforms through the built CLI', () => {
@@ -127,7 +154,18 @@ function runBuiltCli(...args: string[]): {
   stdout: string
   stderr: string
 } {
-  const result = spawnSync(process.execPath, [cliPath, ...args], {
+  return runBuiltCliAt(cliPath, ...args)
+}
+
+function runBuiltCliAt(
+  path: string,
+  ...args: string[]
+): {
+  status: number | null
+  stdout: string
+  stderr: string
+} {
+  const result = spawnSync(process.execPath, [path, ...args], {
     encoding: 'utf8',
     cwd: resolve('.'),
   })

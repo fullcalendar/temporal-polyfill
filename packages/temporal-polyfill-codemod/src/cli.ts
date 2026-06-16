@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readdirSync } from 'node:fs'
+import { readdirSync, realpathSync } from 'node:fs'
 import { readFile, stat, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
@@ -153,7 +153,13 @@ export async function runCli(
   return 0
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// pnpm workspace bins commonly execute through node_modules symlinks. Normalize
+// both paths so the CLI still starts when Node resolves the module to its real
+// package location.
+if (
+  process.argv[1] != null &&
+  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+) {
   runCli(process.argv.slice(2)).then(
     (exitCode) => {
       process.exit(exitCode)
