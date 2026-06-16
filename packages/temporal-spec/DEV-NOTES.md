@@ -54,25 +54,4 @@ index.d.ts is now DONE. COPY to index.d.cts
 
 ## Typechecking
 
-Keep tsconfig.json and tsconfig.cts.json separate.
-
-tsconfig.json checks:
-  index.d.ts
-  global.d.ts
-
-tsconfig.cts.json checks:
-  index.d.cts
-  global.d.cts
-
-Do not combine all four declaration files into one "files" list. The global
-declaration files are alternate published entrypoints for different module
-worlds. Loading global.d.ts and global.d.cts into the same TypeScript program
-would declare the same global Temporal type aliases twice, and type aliases do
-not merge.
-
-If an editor shows errors in the .d.cts files but `pnpm run typecheck` passes,
-check which TypeScript project the editor attached those files to. The .d.cts
-files are meant to be checked by tsconfig.cts.json. Some IDEs may instead put
-them in an inferred project, or may only be showing diagnostics from
-tsconfig.json, whose "files" list intentionally does not include the .d.cts
-entrypoints.
+Run `pnpm run typecheck`
