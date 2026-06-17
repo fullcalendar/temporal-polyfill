@@ -16,7 +16,7 @@ import { allCalendars as calendarPlugin } from './calendarPlugin.ts'
 import 'temporal-polyfill/full/global'
 
 /*
-Needed if using TypeScript <= 5
+Needed if using TypeScript < 6.0
 */
 import 'temporal-polyfill/types/global'
 

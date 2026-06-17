@@ -58,10 +58,17 @@ If using the global import (`import 'temporal-polyfill/global'`), you must worry
 ```diff
 {
   "compilerOptions": {
-+   "lib": ["esnext"],
-    // OR, more granularly:
-+   "lib": ["esnext.temporal", "esnext.intl", "esnext.date"],
-    // ...
++   "lib": ["esnext"]
+  }
+}
+```
+
+Or with more granularity:
+
+```diff
+{
+  "compilerOptions": {
++   "lib": ["esnext.temporal", "esnext.intl", "esnext.date"]
   }
 }
 ```
@@ -70,7 +77,7 @@ If using the global import (`import 'temporal-polyfill/global'`), you must worry
 
 ```diff
   import 'temporal-polyfill/global'
-+ import 'temporal-polyfill/global-types'
++ import 'temporal-polyfill/types/global'
 
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
