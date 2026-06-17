@@ -18,8 +18,8 @@ import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
   - [`fromFields`](#fromfields)
   - [`fromString`](#fromstring)
 - [Calendar And Offset Properties](#calendar-and-offset-properties)
-  - [`offsetNanoseconds`](#offsetnanoseconds)
   - [`offset`](#offset)
+  - [`offsetNanoseconds`](#offsetnanoseconds)
   - [`dayOfWeek`](#dayofweek)
   - [`daysInWeek`](#daysinweek)
   - [`weekOfYear`](#weekofyear)
@@ -259,26 +259,6 @@ The resolver argument has no direct counterpart and can usually be dropped once 
 
 ## Calendar And Offset Properties
 
-### `offsetNanoseconds`
-
-Signature:
-
-```ts
-(record: Record) => number
-```
-
-Tree-shakeable API:
-
-```ts
-const offsetNanoseconds = ZonedDateTimeFns.offsetNanoseconds(zonedDateTime)
-```
-
-Temporal API equivalent:
-
-```ts
-const offsetNanoseconds = zonedDateTime.offsetNanoseconds
-```
-
 ### `offset`
 
 Signature:
@@ -297,6 +277,26 @@ Temporal API equivalent:
 
 ```ts
 const offset = zonedDateTime.offset
+```
+
+### `offsetNanoseconds`
+
+Signature:
+
+```ts
+(record: Record) => number
+```
+
+Tree-shakeable API:
+
+```ts
+const offsetNanoseconds = ZonedDateTimeFns.offsetNanoseconds(zonedDateTime)
+```
+
+Temporal API equivalent:
+
+```ts
+const offsetNanoseconds = zonedDateTime.offsetNanoseconds
 ```
 
 ### `dayOfWeek`
