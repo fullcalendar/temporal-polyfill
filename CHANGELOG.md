@@ -1,5 +1,5 @@
 
-v1.0.0
+v1.0.1
 ------
 
 curl -sL "https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.2/global.min.js" | gzip -9 | wc -c
@@ -8,6 +8,7 @@ curl -sL "https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.2/global.min.js" | 
 old size: 20167
 new size: 19554 (default entrypoint)
 
+- chore: publish as `1.0.1` because npm already has an old `1.0.0`, which confuses dependency update tools (#88)
 
 - fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
 - fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
