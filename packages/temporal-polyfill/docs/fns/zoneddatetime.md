@@ -147,7 +147,7 @@ type Record = {
 The codemod examples assume the surrounding transform has already converted
 `ZonedDateTimeFns.Record` values into `Temporal.ZonedDateTime` instances.
 Calendar records need a separate calendar transform: when a tree-shakeable API call
-receives a `CalendarRecord`, the real Temporal API normally wants the calendar
+receives a `CalendarFns.Record`, the real Temporal API normally wants the calendar
 identifier or calendar-like value instead.
 
 ## Type Guard
@@ -183,7 +183,7 @@ if (value instanceof Temporal.ZonedDateTime) {
 Signature:
 
 ```ts
-(epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarRecord) => Record
+(epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -198,7 +198,7 @@ Temporal API equivalent:
 const zonedDateTime = new Temporal.ZonedDateTime(epochNanoseconds, timeZoneId, calendar)
 ```
 
-If the optional calendar argument is present, replace a known `CalendarRecord` expression with its calendar identifier.
+If the optional calendar argument is present, replace a known `CalendarFns.Record` expression with its calendar identifier.
 
 ### `fromFields`
 
@@ -220,14 +220,14 @@ Temporal API equivalent:
 const zonedDateTime = Temporal.ZonedDateTime.from(fields, options)
 ```
 
-If `fields.calendar` is still a `CalendarRecord`, replace it with the calendar identifier before calling the real Temporal API.
+If `fields.calendar` is still a `CalendarFns.Record`, replace it with the calendar identifier before calling the real Temporal API.
 
 ### `fromString`
 
 Signature:
 
 ```ts
-(s: string, getCalendar: (calendarId: string) => CalendarRecord, options?: ZonedFieldOptions) => Record
+(s: string, getCalendar: (calendarId: string) => CalendarFns.Record, options?: ZonedFieldOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -250,7 +250,7 @@ const zonedDateTime = Temporal.ZonedDateTime.from(
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
-`CalendarRecord`. Most callers supply
+`CalendarFns.Record`. Most callers supply
 [`getBasic`](calendar.md#getbasic) (ISO and Gregorian only) or
 [`getAny`](calendar.md#getany) (also exotic calendars); see the
 [Calendar docs](calendar.md) for the full set of resolvers.
@@ -526,7 +526,7 @@ const nextZonedDateTime = zonedDateTime.with(fields, options)
 Signature:
 
 ```ts
-(record: Record, calendarRecord: CalendarRecord) => Record
+(record: Record, calendarRecord: CalendarFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -541,7 +541,7 @@ Temporal API equivalent:
 const nextZonedDateTime = zonedDateTime.withCalendar(calendar)
 ```
 
-Replace a known `CalendarRecord` expression with its calendar identifier.
+Replace a known `CalendarFns.Record` expression with its calendar identifier.
 
 ### `withTimeZone`
 

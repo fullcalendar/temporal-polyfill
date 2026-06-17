@@ -137,7 +137,7 @@ type Record = {
 The codemod examples assume the surrounding transform has already converted
 `PlainDateTimeFns.Record` values into `Temporal.PlainDateTime` instances.
 Calendar records need a separate calendar transform: when a tree-shakeable API call
-receives a `CalendarRecord`, the real Temporal API normally wants the calendar
+receives a `CalendarFns.Record`, the real Temporal API normally wants the calendar
 identifier or calendar-like value instead.
 
 ## Type Guard
@@ -173,7 +173,7 @@ if (value instanceof Temporal.PlainDateTime) {
 Signature:
 
 ```ts
-(isoYear: number, isoMonth: number, isoDay: number, hour?: number, minute?: number, second?: number, millisecond?: number, microsecond?: number, nanosecond?: number, calendar?: CalendarRecord) => Record
+(isoYear: number, isoMonth: number, isoDay: number, hour?: number, minute?: number, second?: number, millisecond?: number, microsecond?: number, nanosecond?: number, calendar?: CalendarFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -188,14 +188,14 @@ Temporal API equivalent:
 const dateTime = new Temporal.PlainDateTime(2024, 5, 1, 9, 30)
 ```
 
-If the optional calendar argument is present, replace a known `CalendarRecord` expression with its calendar identifier.
+If the optional calendar argument is present, replace a known `CalendarFns.Record` expression with its calendar identifier.
 
 ### `fromFields`
 
 Signature:
 
 ```ts
-(fields: Partial<DateTimeFields> & { calendar: CalendarRecord }, options?: OverflowOptions) => Record
+(fields: Partial<DateTimeFields> & { calendar: CalendarFns.Record }, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -210,14 +210,14 @@ Temporal API equivalent:
 const dateTime = Temporal.PlainDateTime.from(fields, options)
 ```
 
-If `fields.calendar` is still a `CalendarRecord`, replace it with the calendar identifier before calling the real Temporal API.
+If `fields.calendar` is still a `CalendarFns.Record`, replace it with the calendar identifier before calling the real Temporal API.
 
 ### `fromString`
 
 Signature:
 
 ```ts
-(s: string, getCalendar: (calendarId: string) => CalendarRecord) => Record
+(s: string, getCalendar: (calendarId: string) => CalendarFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -238,7 +238,7 @@ const dateTime = Temporal.PlainDateTime.from('2024-05-01T12:30:00[u-ca=gregory]'
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
-`CalendarRecord`. Most callers supply
+`CalendarFns.Record`. Most callers supply
 [`getBasic`](calendar.md#getbasic) (ISO and Gregorian only) or
 [`getAny`](calendar.md#getany) (also exotic calendars); see the
 [Calendar docs](calendar.md) for the full set of resolvers.
@@ -434,7 +434,7 @@ const inLeapYear = dateTime.inLeapYear
 Signature:
 
 ```ts
-(record: Record, calendarRecord: CalendarRecord) => Record
+(record: Record, calendarRecord: CalendarFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -449,7 +449,7 @@ Temporal API equivalent:
 const nextDateTime = dateTime.withCalendar(calendar)
 ```
 
-Replace a known `CalendarRecord` expression with its calendar identifier.
+Replace a known `CalendarFns.Record` expression with its calendar identifier.
 
 ### `withFields`
 

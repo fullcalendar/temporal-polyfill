@@ -2,7 +2,7 @@
 
 Public functions exported for `Calendar`.
 
-`CalendarRecord` is an opaque handle used by the tree-shakeable API wherever a
+`Record` is an opaque handle used by the tree-shakeable API wherever a
 calendar is needed. In the real Temporal API, the matching value is usually the
 calendar identifier string itself.
 
@@ -42,7 +42,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 ## Record Shape
 
 ```ts
-type CalendarRecord = {
+type Record = {
   toJSON(): string
   valueOf(): string
 }
@@ -58,7 +58,7 @@ internal calendar behavior still uses the normalized calendar ID.
 
 Each getter below pairs its tree-shakeable API usage with the equivalent real
 Temporal API code, for readers curious how the two line up. In the real API a
-`CalendarRecord` is just the calendar identifier string, passed straight to the
+`Record` is just the calendar identifier string, passed straight to the
 surrounding date, date-time, month-day, year-month, or zoned-date-time
 operation.
 
@@ -76,7 +76,7 @@ Calendars](#exotic-calendars) instead.
 Signature:
 
 ```ts
-(calendarId: string) => CalendarRecord
+(calendarId: string) => Record
 ```
 
 Tree-shakeable API:
@@ -108,7 +108,7 @@ example above shows. Note that the bare string form has no equivalent of
 Signature:
 
 ```ts
-(name: string) => CalendarRecord
+(name: string) => Record
 ```
 
 Tree-shakeable API:
@@ -156,7 +156,7 @@ it to build or parse a value.
 Signature:
 
 ```ts
-(calendarId: string) => CalendarRecord
+(calendarId: string) => Record
 ```
 
 Tree-shakeable API:
@@ -198,7 +198,7 @@ memoized record. When the calendar ID is only known at runtime, use
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -220,7 +220,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -249,7 +249,7 @@ implementation — prefer them whenever the calendar is known at the call site.
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -271,7 +271,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -293,7 +293,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -315,7 +315,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -337,7 +337,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -359,7 +359,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -381,7 +381,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -403,7 +403,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -425,7 +425,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -447,7 +447,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -469,7 +469,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -491,7 +491,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -513,7 +513,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:
@@ -535,7 +535,7 @@ const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 Signature:
 
 ```ts
-() => CalendarRecord
+() => Record
 ```
 
 Tree-shakeable API:

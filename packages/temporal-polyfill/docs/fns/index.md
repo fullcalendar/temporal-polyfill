@@ -7,7 +7,7 @@ and shows the codemod-shaped rewrite to the real Temporal API.
 Abbreviations used by the type pages:
 
 - `Record` is the record type exported by the file being cataloged.
-- `CalendarRecord` is the opaque calendar handle used by tree-shakeable API
+- `CalendarFns.Record` is the opaque calendar handle used by tree-shakeable API
   functions that accept calendar behavior.
 - `OverflowOptions` is the calendar-field overflow options bag.
 - `RoundingMathOptions` contains rounding increment and rounding mode options.
@@ -25,7 +25,7 @@ Abbreviations used by the type pages:
 - [`Instant`](instant.md) - exact-time construction, epoch conversion, arithmetic, comparison, time-zone projection, and formatting.
 - [`Now`](now.md) - current-time helpers.
 - [`Duration`](duration.md) - duration construction, arithmetic, rounding, totaling, comparison, and formatting.
-- [`Calendar`](calendar.md) - `CalendarRecord` factories and calendar resolver helpers.
+- [`Calendar`](calendar.md) - `CalendarFns.Record` factories and calendar resolver helpers.
 - [`Types`](types.md) - TypeScript-only exports and their codemod targets for the real Temporal API.
 
 ## Temporal Interop
