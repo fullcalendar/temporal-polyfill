@@ -40,7 +40,7 @@ all-calendar builds, see [Entry Points](#entry-points) below.
 Or use a `<script>` tag with a CDN link:
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@{VERSION}/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
@@ -50,7 +50,7 @@ The default build covers ISO 8601 and Gregorian. For other calendars, load the
 all-calendars `/full/` build instead:
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/full/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@{VERSION}/full/global.min.js'></script>
 <script>
   // every calendar is bundled: hebrew, chinese, persian, islamic, …
   const date = Temporal.PlainDate.from('2024-01-01').withCalendar('hebrew')

@@ -35,7 +35,7 @@
     "minify": "./scripts/minify.js",
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",
-    "readme": "cp README.md dist",
+    "readme": "./scripts/readme.js",
     "changelog": "cp CHANGELOG.md dist",
     "license": "cp LICENSE dist",
     "test": "pnpm run vitest && pnpm run test262",
