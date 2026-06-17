@@ -20,11 +20,6 @@ import { getPlainTimeSlotsIfPresent } from './plainTime'
 import { getPlainYearMonthSlotsIfPresent } from './plainYearMonth'
 import { getZonedDateTimeSlotsIfPresent } from './zonedDateTime'
 
-/*
-Detects the concrete Temporal classes in this branch by probing their local
-WeakMaps directly. This keeps slot reads explicit without a shared
-registration table.
-*/
 export function getTemporalBrandingAndSlots(
   obj: unknown,
 ): TemporalBrandingAndSlots | undefined {
@@ -60,10 +55,6 @@ export function getTemporalBrandingAndSlots(
 export function validateBag<B>(bag: B): B {
   if (
     getTemporalBrandingAndSlots(bag) ||
-    // RejectObjectWithCalendarOrTimeZone is a public property-bag guard.
-    // It deliberately observes the spec field names even though internal
-    // slots store internal calendar/time-zone objects, but public bags still
-    // use the spec property names.
     (bag as any).calendar !== undefined ||
     (bag as any).timeZone !== undefined
   ) {

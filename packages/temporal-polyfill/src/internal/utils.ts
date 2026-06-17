@@ -380,8 +380,8 @@ export function roundExpand(num: number): number {
   return num < 0 ? Math.floor(num) : Math.ceil(num)
 }
 
-// Fabricate a fraction safely away from 0.5 while preserving the exact
-// before/on/after-half comparison.
+// Fabricate a fraction, avoiding lossiness near 0.5 that could push it to the
+// wrong side. Credit to temporal-polyfill-lite for this algorithm.
 export function fabricateNearHalfFraction(
   halfCompare: NumberSign,
   sign: NumberSign = 1,
