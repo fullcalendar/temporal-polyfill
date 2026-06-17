@@ -24,8 +24,8 @@
   "scripts": {
     "lint": "biome check . --max-diagnostics=1000",
     "lint:fix": "biome check --apply .",
-    "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:license npm:bundle",
-    "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:bundle:dev",
+    "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:changelog npm:license npm:bundle",
+    "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:readme npm:changelog npm:license npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",
     "tsc:all": "tsc -p tsconfig.json --noEmit --tsBuildInfoFile dist/.tsbuildinfo.all",
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
@@ -36,6 +36,7 @@
     "manifest": "./scripts/manifest.js",
     "manifest:dev": "./scripts/manifest.js --dev",
     "readme": "cp README.md dist",
+    "changelog": "cp CHANGELOG.md dist",
     "license": "cp LICENSE dist",
     "test": "pnpm run vitest && pnpm run test262",
     "vitest": "./scripts/vitest.js",
