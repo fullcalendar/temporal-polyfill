@@ -8,6 +8,28 @@ Most helpers preserve the input type. For example, passing a
 `Temporal.PlainDateTime` to `startOfMonth` returns a `Temporal.PlainDateTime`,
 while passing a `Temporal.ZonedDateTime` returns a `Temporal.ZonedDateTime`.
 
+## Requirements
+
+`temporal-utils` operates on native `Temporal` objects but does **not** include
+a Temporal implementation of its own. A global `Temporal` must already exist at
+runtime — note that every example below references `Temporal.*` directly to
+build its inputs. Ensure one is present in one of two ways:
+
+- **Native `Temporal`** — available in newer browsers and runtimes, but support
+  is still rolling out and remains incomplete.
+- **A polyfill** — recommended for now. We suggest
+  [`temporal-polyfill`](../temporal-polyfill/README.md), which installs a global
+  `Temporal`:
+
+  ```ts
+  import 'temporal-polyfill/global'
+  ```
+
+## Usage
+
+With a global `Temporal` in place, import the helpers you need from the package
+root:
+
 ```ts
 import {
   diffDays,

@@ -4,6 +4,10 @@ The tree-shakeable function-based API docs are organized by Temporal type or
 support object. Each page catalogs the public functions exported for that area
 and shows the codemod-shaped rewrite to the real Temporal API.
 
+Unlike the class-based entry points, the tree-shakeable API always uses the
+runtime's native `Temporal` when one is available, with no option to force the
+bundled JavaScript implementation.
+
 Abbreviations used by the type pages:
 
 - `Record` is the record type exported by the file being cataloged.

@@ -9,12 +9,13 @@ Only 20 kB, [spec compliant](#spec-compliance)
 ## Table of Contents
 
 - [Installation](#installation)
+- [Entry Points](#entry-points)
 - [TypeScript Types](#typescript-types)
 - [Comparison with `@js-temporal/polyfill`](#comparison-with-js-temporalpolyfill)
 - [Spec Compliance](#spec-compliance)
 - [Browser Support](#browser-support)
 - [BigInt Considerations](#bigint-considerations)
-- [Tree-shakeable API](#tree-shakeable-api) (coming soon)
+- [Tree-shakeable API](#tree-shakeable-api)
 
 
 ## Installation
@@ -23,15 +24,8 @@ Only 20 kB, [spec compliant](#spec-compliance)
 npm install temporal-polyfill
 ```
 
-Import as an ES module without side effects:
-
-```js
-import { Temporal } from 'temporal-polyfill'
-
-console.log(Temporal.Now.zonedDateTimeISO().toString())
-```
-
-Or, import globally:
+The simplest way to start is the global install, which adds `Temporal` to the
+global scope:
 
 ```js
 import 'temporal-polyfill/global'
@@ -39,7 +33,11 @@ import 'temporal-polyfill/global'
 console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
 
-Use a `<script>` tags with a CDN link:
+If the runtime already has a native `Temporal`, the polyfill steps aside and
+uses it. For side-effect-free imports, app-controlled installation, and
+all-calendar builds, see [Entry Points](#entry-points) below.
+
+Or use a `<script>` tag with a CDN link:
 
 ```html
 <script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js'></script>
@@ -47,6 +45,82 @@ Use a `<script>` tags with a CDN link:
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
 ```
+
+The default build covers ISO 8601 and Gregorian. For other calendars, load the
+all-calendars `/full/` build instead:
+
+```html
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/full/global.min.js'></script>
+<script>
+  // every calendar is bundled: hebrew, chinese, persian, islamic, …
+  const date = Temporal.PlainDate.from('2024-01-01').withCalendar('hebrew')
+
+  console.log(date.year) // 5784
+  console.log(date.toLocaleString('en-US', { calendar: 'hebrew' }))
+  // e.g. 'Tevet 20, 5784'
+</script>
+```
+
+
+## Entry Points
+
+`temporal-polyfill` offers a few entry points so you can choose **how** the
+polyfill is applied and **which calendars** are bundled. They're native-aware
+unless noted: when the runtime already has a built-in `Temporal`, the polyfill
+uses it instead of the bundled implementation.
+
+### How it's applied
+
+- **`temporal-polyfill/global`** — installs `Temporal` onto the global scope on import.
+- **`temporal-polyfill`** — no side effects; exports `Temporal` as a value to use directly (a ponyfill).
+- **`temporal-polyfill/implementation`** — like the ponyfill, but **always** the bundled implementation, never native.
+- **`temporal-polyfill/shim`** — no import side effects; you call `install()` yourself when ready.
+
+```js
+// Auto-install on the global scope.
+import 'temporal-polyfill/global'
+
+// Side-effect-free ponyfill — native when available, otherwise the bundled implementation.
+import { Temporal } from 'temporal-polyfill'
+
+// Side-effect-free, bundled implementation only (never native).
+import { Temporal } from 'temporal-polyfill/implementation'
+
+// App-controlled global installation.
+import { install, installImplementation } from 'temporal-polyfill/shim'
+install()               // installs the bundled implementation only if there's no native Temporal
+installImplementation() // always installs the bundled implementation, even over a native one
+```
+
+The `install()` / `installImplementation()` pair follows the TC39 shim
+convention (like `regexp.escape/shim`): `install()` defers to a native
+`Temporal`, while `installImplementation()` is unconditional.
+
+### Which calendars are included
+
+Each entry point above comes in two variants:
+
+- **Basic** (default) — the ISO 8601 and Gregorian calendars, for the smallest bundle.
+- **Full** (`/full/…`) — every calendar Temporal supports, such as Chinese, Hebrew, and Persian.
+
+```js
+// Basic — ISO + Gregorian
+import 'temporal-polyfill/global'
+import { Temporal } from 'temporal-polyfill'
+import { Temporal } from 'temporal-polyfill/implementation'
+import { install } from 'temporal-polyfill/shim'
+
+// Full — all calendars
+import 'temporal-polyfill/full/global'
+import { Temporal } from 'temporal-polyfill/full'
+import { Temporal } from 'temporal-polyfill/full/implementation'
+import { install } from 'temporal-polyfill/full/shim'
+```
+
+Only need a few operations? The [Tree-shakeable API](#tree-shakeable-api) lets
+you import individual functions — and individual calendars — so your bundle
+includes only what you use. It's always native-aware and needs no separate
+`/full` build.
 
 
 ## TypeScript Types
@@ -239,13 +313,23 @@ However, if you plan to use methods that accept/emit BigInts, your environment m
 
 ## Tree-shakeable API
 
-🚧 Coming Soon ... [READ PRELIMINARY DOCS](./docs/fns/index.md)
-
-For library authors and other devs who are hyper-concerned about bundle size, `temporal-polyfill` will be providing an alternate, function-based API designed for tree-shaking.
+For library authors and other developers who are hyper-concerned about bundle
+size, `temporal-polyfill` also ships an alternate, function-based API designed
+for tree-shaking. Instead of large `Temporal.*` classes, every operation is a
+standalone function that acts on a plain record, so a bundler keeps only the
+functions you actually import.
 
 ```js
-import * as ZonedDateTime from 'temporal-polyfill/fns/zoneddatetime'
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-const zdt = ZonedDateTime.from({ year: 2024, month: 1, day: 1 })
-const s = ZonedDateTime.toString(zdt) // not how you normally call a method!
+const date = PlainDateFns.create(2024, 1, 1)
+const later = PlainDateFns.addMonths(date, 2)
+
+PlainDateFns.toString(later) // '2024-03-01'
 ```
+
+Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
+example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
+See the **[Tree-shakeable API docs](./docs/fns/index.md)** for the full catalog
+of functions, their TypeScript type exports, and how each one maps back to the
+standard `Temporal` API.
