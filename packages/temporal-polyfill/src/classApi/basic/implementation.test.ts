@@ -83,6 +83,26 @@ describe('Intl.DateTimeFormat', () => {
       )
     })
   })
+
+  describe('formatToParts', () => {
+    it('formats PlainTime without falling through to valueOf', () => {
+      const format = new Intl.DateTimeFormat('en', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+      const time = Temporal.PlainTime.from('13:05')
+
+      expect(format.formatToParts(time)).toEqual(
+        new globalThis.Intl.DateTimeFormat('en', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'UTC',
+        }).formatToParts(new Date(Date.UTC(1970, 0, 1, 13, 5))),
+      )
+    })
+  })
 })
 
 describe('Intl', () => {

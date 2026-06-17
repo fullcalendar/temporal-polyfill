@@ -15,6 +15,7 @@ new size: 19554 (default entrypoint)
 - fix: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day (#84)
 - fix: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles (#75)
 - fix: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 (#74)
+- fix: `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` values in Node 22 instead of falling through to `valueOf()` and throwing `TypeError: Cannot use valueOf` (#95)
 - fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
 - fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
 
