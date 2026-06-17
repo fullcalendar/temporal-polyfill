@@ -1,8 +1,8 @@
-# ZonedDateTime Functional API
+# ZonedDateTime Tree-shakeable API
 
 Public functions exported for `ZonedDateTime`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
@@ -146,7 +146,7 @@ type Record = {
 
 The codemod examples assume the surrounding transform has already converted
 `ZonedDateTimeFns.Record` values into `Temporal.ZonedDateTime` instances.
-Calendar records need a separate calendar transform: when a functional API call
+Calendar records need a separate calendar transform: when a tree-shakeable API call
 receives a `CalendarRecord`, the real Temporal API normally wants the calendar
 identifier or calendar-like value instead.
 
@@ -160,7 +160,7 @@ Signature:
 (arg: unknown) => arg is Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 if (ZonedDateTimeFns.isRecord(value)) {
@@ -168,7 +168,7 @@ if (ZonedDateTimeFns.isRecord(value)) {
 }
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 if (value instanceof Temporal.ZonedDateTime) {
@@ -186,13 +186,13 @@ Signature:
 (epochNanoseconds: bigint, timeZoneId: string, calendar?: CalendarRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const zonedDateTime = ZonedDateTimeFns.create(epochNanoseconds, timeZoneId, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const zonedDateTime = new Temporal.ZonedDateTime(epochNanoseconds, timeZoneId, calendar)
@@ -208,13 +208,13 @@ Signature:
 (fields: ZonedFields, options?: ZonedFieldOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const zonedDateTime = ZonedDateTimeFns.fromFields(fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const zonedDateTime = Temporal.ZonedDateTime.from(fields, options)
@@ -230,7 +230,7 @@ Signature:
 (s: string, getCalendar: (calendarId: string) => CalendarRecord, options?: ZonedFieldOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
@@ -241,7 +241,7 @@ const zonedDateTime = ZonedDateTimeFns.fromString(
 )
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const zonedDateTime = Temporal.ZonedDateTime.from(
@@ -267,13 +267,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const offsetNanoseconds = ZonedDateTimeFns.offsetNanoseconds(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const offsetNanoseconds = zonedDateTime.offsetNanoseconds
@@ -287,13 +287,13 @@ Signature:
 (record: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const offset = ZonedDateTimeFns.offset(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const offset = zonedDateTime.offset
@@ -307,13 +307,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const dayOfWeek = ZonedDateTimeFns.dayOfWeek(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const dayOfWeek = zonedDateTime.dayOfWeek
@@ -327,13 +327,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const daysInWeek = ZonedDateTimeFns.daysInWeek(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const daysInWeek = zonedDateTime.daysInWeek
@@ -347,13 +347,13 @@ Signature:
 (record: Record) => number | undefined
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const weekOfYear = ZonedDateTimeFns.weekOfYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const weekOfYear = zonedDateTime.weekOfYear
@@ -367,13 +367,13 @@ Signature:
 (record: Record) => number | undefined
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const yearOfWeek = ZonedDateTimeFns.yearOfWeek(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const yearOfWeek = zonedDateTime.yearOfWeek
@@ -387,13 +387,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const dayOfYear = ZonedDateTimeFns.dayOfYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const dayOfYear = zonedDateTime.dayOfYear
@@ -407,13 +407,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const daysInMonth = ZonedDateTimeFns.daysInMonth(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const daysInMonth = zonedDateTime.daysInMonth
@@ -427,13 +427,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const daysInYear = ZonedDateTimeFns.daysInYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const daysInYear = zonedDateTime.daysInYear
@@ -447,13 +447,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const monthsInYear = ZonedDateTimeFns.monthsInYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const monthsInYear = zonedDateTime.monthsInYear
@@ -467,13 +467,13 @@ Signature:
 (record: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const inLeapYear = ZonedDateTimeFns.inLeapYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const inLeapYear = zonedDateTime.inLeapYear
@@ -487,13 +487,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const hoursInDay = ZonedDateTimeFns.hoursInDay(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const hoursInDay = zonedDateTime.hoursInDay
@@ -509,13 +509,13 @@ Signature:
 (record: Record, mod: Partial<DateTimeFields>, options?: ZonedFieldOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withFields(zonedDateTime, fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.with(fields, options)
@@ -529,13 +529,13 @@ Signature:
 (record: Record, calendarRecord: CalendarRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withCalendar(zonedDateTime, calendarRecord)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.withCalendar(calendar)
@@ -551,13 +551,13 @@ Signature:
 (record: Record, timeZoneId: string) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withTimeZone(zonedDateTime, timeZoneId)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.withTimeZone(timeZoneId)
@@ -571,13 +571,13 @@ Signature:
 (record: Record, plainTimeRecord?: PlainTimeRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withPlainTime(zonedDateTime, time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.withPlainTime(time)
@@ -593,13 +593,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withDayOfYear(zonedDateTime, dayOfYear, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { withDayOfYear } from 'temporal-utils'
@@ -615,13 +615,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withDayOfMonth(zonedDateTime, day, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.with({ day }, options)
@@ -635,13 +635,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withDayOfWeek(zonedDateTime, dayOfWeek, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { withDayOfWeek } from 'temporal-utils'
@@ -657,13 +657,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.withWeekOfYear(zonedDateTime, weekOfYear, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { withWeekOfYear } from 'temporal-utils'
@@ -681,13 +681,13 @@ Signature:
 (record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.add(zonedDateTime, duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add(duration, options)
@@ -703,13 +703,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addYears(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ years: value }, options)
@@ -723,13 +723,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addMonths(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ months: value }, options)
@@ -743,13 +743,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addWeeks(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ weeks: value }, options)
@@ -763,13 +763,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addDays(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ days: value }, options)
@@ -783,13 +783,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addHours(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ hours: value }, options)
@@ -803,13 +803,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addMinutes(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ minutes: value }, options)
@@ -823,13 +823,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addSeconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ seconds: value }, options)
@@ -843,13 +843,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addMilliseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ milliseconds: value }, options)
@@ -863,13 +863,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addMicroseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ microseconds: value }, options)
@@ -883,13 +883,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.addNanoseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.add({ nanoseconds: value }, options)
@@ -903,13 +903,13 @@ Signature:
 (record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtract(zonedDateTime, duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract(duration, options)
@@ -925,13 +925,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractYears(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ years: value }, options)
@@ -945,13 +945,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractMonths(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ months: value }, options)
@@ -965,13 +965,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractWeeks(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ weeks: value }, options)
@@ -985,13 +985,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractDays(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ days: value }, options)
@@ -1005,13 +1005,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractHours(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ hours: value }, options)
@@ -1025,13 +1025,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractMinutes(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ minutes: value }, options)
@@ -1045,13 +1045,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractSeconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ seconds: value }, options)
@@ -1065,13 +1065,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractMilliseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ milliseconds: value }, options)
@@ -1085,13 +1085,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractMicroseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ microseconds: value }, options)
@@ -1105,13 +1105,13 @@ Signature:
 (record: Record, value: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.subtractNanoseconds(zonedDateTime, value, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.subtract({ nanoseconds: value }, options)
@@ -1127,13 +1127,13 @@ Signature:
 (record: Record, otherRecord: Record, options?: DiffOptions<UnitName>) => DurationRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = ZonedDateTimeFns.diff(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = zonedDateTime.until(otherZonedDateTime, options)
@@ -1151,13 +1151,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const years = ZonedDateTimeFns.diffYears(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffYears } from 'temporal-utils'
@@ -1177,13 +1177,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const months = ZonedDateTimeFns.diffMonths(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMonths } from 'temporal-utils'
@@ -1203,13 +1203,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const weeks = ZonedDateTimeFns.diffWeeks(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffWeeks } from 'temporal-utils'
@@ -1229,13 +1229,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const days = ZonedDateTimeFns.diffDays(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffDays } from 'temporal-utils'
@@ -1255,13 +1255,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const hours = ZonedDateTimeFns.diffHours(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -1281,13 +1281,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const minutes = ZonedDateTimeFns.diffMinutes(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -1307,13 +1307,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const seconds = ZonedDateTimeFns.diffSeconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -1333,13 +1333,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const milliseconds = ZonedDateTimeFns.diffMilliseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -1359,13 +1359,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const microseconds = ZonedDateTimeFns.diffMicroseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -1385,13 +1385,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nanoseconds = ZonedDateTimeFns.diffNanoseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'
@@ -1409,13 +1409,13 @@ Signature:
 (record: Record, otherRecord: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const same = ZonedDateTimeFns.equals(zonedDateTime, otherZonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const same = zonedDateTime.equals(otherZonedDateTime)
@@ -1429,13 +1429,13 @@ Signature:
 (record: Record, otherRecord: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const order = ZonedDateTimeFns.compare(zonedDateTime, otherZonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const order = Temporal.ZonedDateTime.compare(zonedDateTime, otherZonedDateTime)
@@ -1458,7 +1458,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime)
@@ -1466,7 +1466,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { roundToYear } from 'temporal-utils'
@@ -1486,7 +1486,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime)
@@ -1494,7 +1494,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { roundToMonth } from 'temporal-utils'
@@ -1514,7 +1514,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime)
@@ -1522,7 +1522,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { roundToWeek } from 'temporal-utils'
@@ -1542,7 +1542,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToDay(zonedDateTime)
@@ -1550,7 +1550,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToDay(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToDay(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'day' })
@@ -1558,7 +1558,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'day' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToDay } from 'temporal-utils'
@@ -1576,7 +1576,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToHour(zonedDateTime)
@@ -1584,7 +1584,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToHour(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToHour(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'hour' })
@@ -1592,7 +1592,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'hour' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToHour } from 'temporal-utils'
@@ -1610,7 +1610,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToMinute(zonedDateTime)
@@ -1618,7 +1618,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToMinute(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToMinute(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'minute' })
@@ -1626,7 +1626,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'minute' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMinute } from 'temporal-utils'
@@ -1644,7 +1644,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToSecond(zonedDateTime)
@@ -1652,7 +1652,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToSecond(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToSecond(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'second' })
@@ -1660,7 +1660,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'second' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToSecond } from 'temporal-utils'
@@ -1678,7 +1678,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToMillisecond(zonedDateTime)
@@ -1686,7 +1686,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToMillisecond(zonedDateTime, 'ce
 const nextZonedDateTime = ZonedDateTimeFns.roundToMillisecond(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'millisecond' })
@@ -1694,7 +1694,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'millisecond' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMillisecond } from 'temporal-utils'
@@ -1712,7 +1712,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.roundToMicrosecond(zonedDateTime)
@@ -1720,7 +1720,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToMicrosecond(zonedDateTime, 'ce
 const nextZonedDateTime = ZonedDateTimeFns.roundToMicrosecond(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.round({ smallestUnit: 'microsecond' })
@@ -1728,7 +1728,7 @@ const nextZonedDateTime = zonedDateTime.round({ roundingMode: 'ceil', smallestUn
 const nextZonedDateTime = zonedDateTime.round({ ...options, smallestUnit: 'microsecond' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMicrosecond } from 'temporal-utils'
@@ -1746,13 +1746,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfYear } from 'temporal-utils'
@@ -1768,13 +1768,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfMonth(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMonth } from 'temporal-utils'
@@ -1790,13 +1790,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfWeek(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfWeek } from 'temporal-utils'
@@ -1812,13 +1812,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfDay(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextZonedDateTime = zonedDateTime.startOfDay()
@@ -1832,13 +1832,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfHour(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfHour } from 'temporal-utils'
@@ -1854,13 +1854,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfMinute(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMinute } from 'temporal-utils'
@@ -1876,13 +1876,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfSecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfSecond } from 'temporal-utils'
@@ -1898,13 +1898,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfMillisecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMillisecond } from 'temporal-utils'
@@ -1920,13 +1920,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.startOfMicrosecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMicrosecond } from 'temporal-utils'
@@ -1944,13 +1944,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfYear(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfYear } from 'temporal-utils'
@@ -1968,13 +1968,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfMonth(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMonth } from 'temporal-utils'
@@ -1992,13 +1992,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfWeek(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfWeek } from 'temporal-utils'
@@ -2016,13 +2016,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfDay(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfDay } from 'temporal-utils'
@@ -2040,13 +2040,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfHour(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfHour } from 'temporal-utils'
@@ -2064,13 +2064,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfMinute(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMinute } from 'temporal-utils'
@@ -2088,13 +2088,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfSecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfSecond } from 'temporal-utils'
@@ -2112,13 +2112,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfMillisecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMillisecond } from 'temporal-utils'
@@ -2136,13 +2136,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextZonedDateTime = ZonedDateTimeFns.endOfMicrosecond(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMicrosecond } from 'temporal-utils'
@@ -2161,13 +2161,13 @@ Signature:
 (record: Record, options: DirectionOptions) => Record | null
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const transition = ZonedDateTimeFns.getTimeZoneTransition(zonedDateTime, direction)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const transition = zonedDateTime.getTimeZoneTransition(direction)
@@ -2183,13 +2183,13 @@ Signature:
 (record: Record, options?: ZonedDateTimeDisplayOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = ZonedDateTimeFns.toString(zonedDateTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = zonedDateTime.toString(options)
@@ -2205,13 +2205,13 @@ Signature:
 (record: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = ZonedDateTimeFns.toBasicString(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = zonedDateTime.toString()
@@ -2227,13 +2227,13 @@ Signature:
 (record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = ZonedDateTimeFns.toLocaleString(zonedDateTime, locales, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = zonedDateTime.toLocaleString(locales, options)
@@ -2264,13 +2264,13 @@ Signature:
 (record: Record) => InstantRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const instant = ZonedDateTimeFns.toInstant(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const instant = zonedDateTime.toInstant()
@@ -2284,13 +2284,13 @@ Signature:
 (record: Record) => PlainDateTimeRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const dateTime = ZonedDateTimeFns.toPlainDateTime(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const dateTime = zonedDateTime.toPlainDateTime()
@@ -2304,13 +2304,13 @@ Signature:
 (record: Record) => PlainDateRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const date = ZonedDateTimeFns.toPlainDate(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const date = zonedDateTime.toPlainDate()
@@ -2324,13 +2324,13 @@ Signature:
 (record: Record) => PlainTimeRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const time = ZonedDateTimeFns.toPlainTime(zonedDateTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const time = zonedDateTime.toPlainTime()
@@ -2344,7 +2344,7 @@ Signature:
 (record: Record) => Temporal.ZonedDateTime
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const realZonedDateTime = ZonedDateTimeFns.toTemporal(zonedDateTime)

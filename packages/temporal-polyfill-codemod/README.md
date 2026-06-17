@@ -7,7 +7,7 @@ The first transform, `fns-to-temporal`, rewrites code that uses
 
 ## Philosophy
 
-The functional API records are not compatible with real Temporal objects. A
+The tree-shakeable API records are not compatible with real Temporal objects. A
 successful migration should remove `temporal-polyfill/fns` runtime usage from a
 file rather than mixing both models.
 

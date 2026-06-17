@@ -1,8 +1,8 @@
-# PlainYearMonth Functional API
+# PlainYearMonth Tree-shakeable API
 
 Public functions exported for `PlainYearMonth`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as PlainYearMonthFns from 'temporal-polyfill/fns/PlainYearMonth'
@@ -68,7 +68,7 @@ type Record = {
 
 The codemod examples assume the surrounding transform has already converted
 `PlainYearMonthFns.Record` values into `Temporal.PlainYearMonth` instances.
-Calendar records need a separate calendar transform: when a functional API call
+Calendar records need a separate calendar transform: when a tree-shakeable API call
 receives a `CalendarRecord`, the real Temporal API normally wants the calendar
 identifier or calendar-like value instead.
 
@@ -82,7 +82,7 @@ Signature:
 (arg: unknown) => arg is Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 if (PlainYearMonthFns.isRecord(value)) {
@@ -90,7 +90,7 @@ if (PlainYearMonthFns.isRecord(value)) {
 }
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 if (value instanceof Temporal.PlainYearMonth) {
@@ -108,13 +108,13 @@ Signature:
 (isoYear: number, isoMonth: number, calendar?: CalendarRecord, referenceIsoDay?: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const yearMonth = PlainYearMonthFns.create(2024, 5)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const yearMonth = new Temporal.PlainYearMonth(2024, 5)
@@ -130,13 +130,13 @@ Signature:
 (fields: Partial<YearMonthFields> & { calendar?: CalendarRecord }, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const yearMonth = PlainYearMonthFns.fromFields(fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const yearMonth = Temporal.PlainYearMonth.from(fields, options)
@@ -152,7 +152,7 @@ Signature:
 (s: string, getCalendar: (calendarId: string) => CalendarRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
@@ -163,7 +163,7 @@ const yearMonth = PlainYearMonthFns.fromString(
 )
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const yearMonth = Temporal.PlainYearMonth.from('2024-05[u-ca=gregory]')
@@ -187,13 +187,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const daysInMonth = PlainYearMonthFns.daysInMonth(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const daysInMonth = yearMonth.daysInMonth
@@ -207,13 +207,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const daysInYear = PlainYearMonthFns.daysInYear(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const daysInYear = yearMonth.daysInYear
@@ -227,13 +227,13 @@ Signature:
 (record: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const monthsInYear = PlainYearMonthFns.monthsInYear(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const monthsInYear = yearMonth.monthsInYear
@@ -247,13 +247,13 @@ Signature:
 (record: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const inLeapYear = PlainYearMonthFns.inLeapYear(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const inLeapYear = yearMonth.inLeapYear
@@ -269,13 +269,13 @@ Signature:
 (record: Record, mod: Partial<YearMonthFields>, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.withFields(yearMonth, fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.with(fields, options)
@@ -291,13 +291,13 @@ Signature:
 (record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.add(yearMonth, duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.add(duration, options)
@@ -313,13 +313,13 @@ Signature:
 (record: Record, years: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.addYears(yearMonth, years, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.add({ years }, options)
@@ -333,13 +333,13 @@ Signature:
 (record: Record, months: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.addMonths(yearMonth, months, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.add({ months }, options)
@@ -353,13 +353,13 @@ Signature:
 (record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.subtract(yearMonth, duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.subtract(duration, options)
@@ -375,13 +375,13 @@ Signature:
 (record: Record, years: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.subtractYears(yearMonth, years, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.subtract({ years }, options)
@@ -395,13 +395,13 @@ Signature:
 (record: Record, months: number, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.subtractMonths(yearMonth, months, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextYearMonth = yearMonth.subtract({ months }, options)
@@ -417,13 +417,13 @@ Signature:
 (record: Record, otherRecord: Record, options?: DiffOptions<YearMonthUnitName>) => DurationRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = PlainYearMonthFns.diff(yearMonth, otherYearMonth, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = yearMonth.until(otherYearMonth, options)
@@ -441,13 +441,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const years = PlainYearMonthFns.diffYears(yearMonth, otherYearMonth, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffYears } from 'temporal-utils'
@@ -467,13 +467,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const months = PlainYearMonthFns.diffMonths(yearMonth, otherYearMonth, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMonths } from 'temporal-utils'
@@ -491,13 +491,13 @@ Signature:
 (record: Record, otherRecord: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const same = PlainYearMonthFns.equals(yearMonth, otherYearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const same = yearMonth.equals(otherYearMonth)
@@ -511,13 +511,13 @@ Signature:
 (record: Record, otherRecord: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const order = PlainYearMonthFns.compare(yearMonth, otherYearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const order = Temporal.PlainYearMonth.compare(yearMonth, otherYearMonth)
@@ -539,7 +539,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth)
@@ -547,7 +547,7 @@ const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, 'ceil')
 const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { roundToYear } from 'temporal-utils'
@@ -567,13 +567,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.startOfYear(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfYear } from 'temporal-utils'
@@ -591,13 +591,13 @@ Signature:
 
 This returns the last month before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.endOfYear(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfYear } from 'temporal-utils'
@@ -615,13 +615,13 @@ Signature:
 (record: Record, options?: CalendarDisplayOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainYearMonthFns.toString(yearMonth, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = yearMonth.toString(options)
@@ -637,13 +637,13 @@ Signature:
 (record: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainYearMonthFns.toBasicString(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = yearMonth.toString()
@@ -659,13 +659,13 @@ Signature:
 (record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainYearMonthFns.toLocaleString(yearMonth, locales, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = yearMonth.toLocaleString(locales, options)
@@ -679,7 +679,7 @@ Signature:
 (locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const format = PlainYearMonthFns.createFormat('en-US', {
@@ -689,7 +689,7 @@ const format = PlainYearMonthFns.createFormat('en-US', {
 const text = format.format(yearMonth)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {
@@ -711,13 +711,13 @@ Signature:
 (record: Record, fields: DayFields) => PlainDateRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const date = PlainYearMonthFns.toPlainDate(yearMonth, { day: 1 })
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const date = yearMonth.toPlainDate({ day: 1 })
@@ -731,7 +731,7 @@ Signature:
 (record: Record) => Temporal.PlainYearMonth
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const realPlainYearMonth = PlainYearMonthFns.toTemporal(yearMonth)

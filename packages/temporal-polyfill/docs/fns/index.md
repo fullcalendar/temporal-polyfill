@@ -1,14 +1,14 @@
-# Functional API
+# Tree-shakeable API
 
-The functional API docs are organized by Temporal type or support object. Each
-page catalogs the public functions exported for that area and shows the
-codemod-shaped rewrite to the real Temporal API.
+The tree-shakeable function-based API docs are organized by Temporal type or
+support object. Each page catalogs the public functions exported for that area
+and shows the codemod-shaped rewrite to the real Temporal API.
 
 Abbreviations used by the type pages:
 
 - `Record` is the record type exported by the file being cataloged.
-- `CalendarRecord` is the opaque calendar handle used by function APIs that
-  accept calendar behavior.
+- `CalendarRecord` is the opaque calendar handle used by tree-shakeable API
+  functions that accept calendar behavior.
 - `OverflowOptions` is the calendar-field overflow options bag.
 - `RoundingMathOptions` contains rounding increment and rounding mode options.
   The unit is implied by the `roundTo*` function name. Round helpers also

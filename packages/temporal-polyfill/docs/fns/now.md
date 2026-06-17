@@ -1,8 +1,8 @@
-# Now Functional API
+# Now Tree-shakeable API
 
 Public functions exported for `Now`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as NowFns from 'temporal-polyfill/fns/Now'
@@ -30,13 +30,13 @@ Signature:
 () => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const timeZoneId = NowFns.timeZoneId()
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const timeZoneId = Temporal.Now.timeZoneId()
@@ -50,13 +50,13 @@ Signature:
 () => InstantRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const instant = NowFns.instant()
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const instant = Temporal.Now.instant()
@@ -70,13 +70,13 @@ Signature:
 (timeZoneId?: string) => ZonedDateTimeRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const zonedDateTime = NowFns.zonedDateTimeISO('America/New_York')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const zonedDateTime = Temporal.Now.zonedDateTimeISO('America/New_York')
@@ -90,13 +90,13 @@ Signature:
 (timeZoneId?: string) => PlainDateTimeRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const dateTime = NowFns.plainDateTimeISO('America/New_York')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const dateTime = Temporal.Now.plainDateTimeISO('America/New_York')
@@ -110,13 +110,13 @@ Signature:
 (timeZoneId?: string) => PlainDateRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const date = NowFns.plainDateISO('America/New_York')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const date = Temporal.Now.plainDateISO('America/New_York')
@@ -130,13 +130,13 @@ Signature:
 (timeZoneId?: string) => PlainTimeRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const time = NowFns.plainTimeISO('America/New_York')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const time = Temporal.Now.plainTimeISO('America/New_York')

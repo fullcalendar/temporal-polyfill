@@ -1,8 +1,8 @@
-# Duration Functional API
+# Duration Tree-shakeable API
 
 Public functions exported for `Duration`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as DurationFns from 'temporal-polyfill/fns/Duration'
@@ -73,7 +73,7 @@ Signature:
 (arg: unknown) => arg is Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 if (DurationFns.isRecord(value)) {
@@ -81,7 +81,7 @@ if (DurationFns.isRecord(value)) {
 }
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 if (value instanceof Temporal.Duration) {
@@ -99,13 +99,13 @@ Signature:
 (years?: number, months?: number, weeks?: number, days?: number, hours?: number, minutes?: number, seconds?: number, milliseconds?: number, microseconds?: number, nanoseconds?: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = DurationFns.create(0, 0, 0, 0, 1, 30)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = new Temporal.Duration(0, 0, 0, 0, 1, 30)
@@ -119,13 +119,13 @@ Signature:
 (fields: Partial<DurationFields>) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = DurationFns.fromFields(fields)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = Temporal.Duration.from(fields)
@@ -139,13 +139,13 @@ Signature:
 (s: string) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = DurationFns.fromString('PT1H30M')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = Temporal.Duration.from('PT1H30M')
@@ -161,13 +161,13 @@ Signature:
 (duration: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const sign = DurationFns.sign(duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const sign = duration.sign
@@ -181,13 +181,13 @@ Signature:
 (duration: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const blank = DurationFns.blank(duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const blank = duration.blank
@@ -203,13 +203,13 @@ Signature:
 (duration: Record, mod: Partial<DurationFields>) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.withFields(duration, fields)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.with(fields)
@@ -225,13 +225,13 @@ Signature:
 (duration: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.negated(duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.negated()
@@ -245,13 +245,13 @@ Signature:
 (duration: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.abs(duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.abs()
@@ -265,13 +265,13 @@ Signature:
 (duration: Record, otherDuration: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.add(duration, otherDuration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.add(otherDuration)
@@ -288,13 +288,13 @@ Signature:
 (duration: Record, otherDuration: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.subtract(duration, otherDuration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.subtract(otherDuration)
@@ -313,13 +313,13 @@ Signature:
 (duration: Record, options: DurationRoundingOptions<RelativeTo>) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextDuration = DurationFns.round(duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextDuration = duration.round(options)
@@ -336,13 +336,13 @@ Signature:
 (duration: Record, options: DurationTotalOptions<RelativeTo>) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const hours = DurationFns.total(duration, 'hours')
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const hours = duration.total('hours')
@@ -361,13 +361,13 @@ Signature:
 (duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const order = DurationFns.compare(duration, otherDuration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const order = Temporal.Duration.compare(duration, otherDuration, options)
@@ -386,13 +386,13 @@ Signature:
 (duration: Record, options?: TimeDisplayOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = DurationFns.toString(duration, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = duration.toString(options)
@@ -408,13 +408,13 @@ Signature:
 (duration: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = DurationFns.toBasicString(duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = duration.toString()
@@ -430,13 +430,13 @@ Signature:
 (duration: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = DurationFns.toLocaleString(duration, locales, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = duration.toLocaleString(locales, options)
@@ -452,7 +452,7 @@ Signature:
 (record: Record) => Temporal.Duration
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const realDuration = DurationFns.toTemporal(duration)

@@ -1,8 +1,8 @@
-# PlainTime Functional API
+# PlainTime Tree-shakeable API
 
 Public functions exported for `PlainTime`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as PlainTimeFns from 'temporal-polyfill/fns/PlainTime'
@@ -97,7 +97,7 @@ Signature:
 (arg: unknown) => arg is Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 if (PlainTimeFns.isRecord(value)) {
@@ -105,7 +105,7 @@ if (PlainTimeFns.isRecord(value)) {
 }
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 if (value instanceof Temporal.PlainTime) {
@@ -123,13 +123,13 @@ Signature:
 (hour?: number, minute?: number, second?: number, millisecond?: number, microsecond?: number, nanosecond?: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const time = PlainTimeFns.create(9, 30)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const time = new Temporal.PlainTime(9, 30)
@@ -143,13 +143,13 @@ Signature:
 (fields: Partial<TimeFields>, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const time = PlainTimeFns.fromFields(fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const time = Temporal.PlainTime.from(fields, options)
@@ -163,13 +163,13 @@ Signature:
 (s: string) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const time = PlainTimeFns.fromString(value)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const time = Temporal.PlainTime.from(value)
@@ -185,13 +185,13 @@ Signature:
 (record: Record, mod: Partial<TimeFields>, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.withFields(time, fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.with(fields, options)
@@ -207,13 +207,13 @@ Signature:
 (record: Record, duration: DurationRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.add(time, duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add(duration)
@@ -229,13 +229,13 @@ Signature:
 (record: Record, hours: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addHours(time, hours)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ hours })
@@ -249,13 +249,13 @@ Signature:
 (record: Record, minutes: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addMinutes(time, minutes)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ minutes })
@@ -269,13 +269,13 @@ Signature:
 (record: Record, seconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addSeconds(time, seconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ seconds })
@@ -289,13 +289,13 @@ Signature:
 (record: Record, milliseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addMilliseconds(time, milliseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ milliseconds })
@@ -309,13 +309,13 @@ Signature:
 (record: Record, microseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addMicroseconds(time, microseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ microseconds })
@@ -329,13 +329,13 @@ Signature:
 (record: Record, nanoseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.addNanoseconds(time, nanoseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.add({ nanoseconds })
@@ -349,13 +349,13 @@ Signature:
 (record: Record, duration: DurationRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtract(time, duration)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract(duration)
@@ -371,13 +371,13 @@ Signature:
 (record: Record, hours: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractHours(time, hours)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ hours })
@@ -391,13 +391,13 @@ Signature:
 (record: Record, minutes: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractMinutes(time, minutes)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ minutes })
@@ -411,13 +411,13 @@ Signature:
 (record: Record, seconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractSeconds(time, seconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ seconds })
@@ -431,13 +431,13 @@ Signature:
 (record: Record, milliseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractMilliseconds(time, milliseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ milliseconds })
@@ -451,13 +451,13 @@ Signature:
 (record: Record, microseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractMicroseconds(time, microseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ microseconds })
@@ -471,13 +471,13 @@ Signature:
 (record: Record, nanoseconds: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.subtractNanoseconds(time, nanoseconds)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.subtract({ nanoseconds })
@@ -493,13 +493,13 @@ Signature:
 (record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const duration = PlainTimeFns.diff(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const duration = time.until(otherTime, options)
@@ -517,13 +517,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const hours = PlainTimeFns.diffHours(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -543,13 +543,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const minutes = PlainTimeFns.diffMinutes(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -569,13 +569,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const seconds = PlainTimeFns.diffSeconds(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -595,13 +595,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const milliseconds = PlainTimeFns.diffMilliseconds(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -621,13 +621,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const microseconds = PlainTimeFns.diffMicroseconds(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -647,13 +647,13 @@ Signature:
 (record0: Record, record1: Record, options: RoundingMathOptions) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nanoseconds = PlainTimeFns.diffNanoseconds(time, otherTime, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'
@@ -671,13 +671,13 @@ Signature:
 (record: Record, otherRecord: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const same = PlainTimeFns.equals(time, otherTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const same = time.equals(otherTime)
@@ -691,13 +691,13 @@ Signature:
 (record: Record, otherRecord: Record) => number
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const order = PlainTimeFns.compare(time, otherTime)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const order = Temporal.PlainTime.compare(time, otherTime)
@@ -718,7 +718,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToHour(time)
@@ -726,7 +726,7 @@ const nextTime = PlainTimeFns.roundToHour(time, 'ceil')
 const nextTime = PlainTimeFns.roundToHour(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'hour' })
@@ -734,7 +734,7 @@ const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'hour' })
 const nextTime = time.round({ ...options, smallestUnit: 'hour' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToHour } from 'temporal-utils'
@@ -752,7 +752,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMinute(time)
@@ -760,7 +760,7 @@ const nextTime = PlainTimeFns.roundToMinute(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMinute(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'minute' })
@@ -768,7 +768,7 @@ const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'minute' })
 const nextTime = time.round({ ...options, smallestUnit: 'minute' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMinute } from 'temporal-utils'
@@ -786,7 +786,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToSecond(time)
@@ -794,7 +794,7 @@ const nextTime = PlainTimeFns.roundToSecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToSecond(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'second' })
@@ -802,7 +802,7 @@ const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'second' })
 const nextTime = time.round({ ...options, smallestUnit: 'second' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToSecond } from 'temporal-utils'
@@ -820,7 +820,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMillisecond(time)
@@ -828,7 +828,7 @@ const nextTime = PlainTimeFns.roundToMillisecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMillisecond(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'millisecond' })
@@ -836,7 +836,7 @@ const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'millisecond' 
 const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMillisecond } from 'temporal-utils'
@@ -854,7 +854,7 @@ Signature:
 (record: Record, options: RoundingMathOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMicrosecond(time)
@@ -862,7 +862,7 @@ const nextTime = PlainTimeFns.roundToMicrosecond(time, 'ceil')
 const nextTime = PlainTimeFns.roundToMicrosecond(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'microsecond' })
@@ -870,7 +870,7 @@ const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'microsecond' 
 const nextTime = time.round({ ...options, smallestUnit: 'microsecond' })
 ```
 
-Temporal API, generically, for second argument:
+Temporal API equivalent, generic second argument:
 
 ```ts
 import { roundToMicrosecond } from 'temporal-utils'
@@ -888,13 +888,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.startOfHour(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfHour } from 'temporal-utils'
@@ -910,13 +910,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.startOfMinute(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMinute } from 'temporal-utils'
@@ -932,13 +932,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.startOfSecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfSecond } from 'temporal-utils'
@@ -954,13 +954,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.startOfMillisecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMillisecond } from 'temporal-utils'
@@ -976,13 +976,13 @@ Signature:
 (record: Record) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.startOfMicrosecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { startOfMicrosecond } from 'temporal-utils'
@@ -1000,13 +1000,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.endOfHour(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfHour } from 'temporal-utils'
@@ -1024,13 +1024,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.endOfMinute(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMinute } from 'temporal-utils'
@@ -1048,13 +1048,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.endOfSecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfSecond } from 'temporal-utils'
@@ -1072,13 +1072,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.endOfMillisecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMillisecond } from 'temporal-utils'
@@ -1096,13 +1096,13 @@ Signature:
 
 This returns the last representable nanosecond before the exclusive end of the unit.
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.endOfMicrosecond(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 import { endOfMicrosecond } from 'temporal-utils'
@@ -1120,13 +1120,13 @@ Signature:
 (record: Record, options?: TimeDisplayOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainTimeFns.toString(time, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = time.toString(options)
@@ -1142,13 +1142,13 @@ Signature:
 (record: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainTimeFns.toBasicString(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = time.toString()
@@ -1164,13 +1164,13 @@ Signature:
 (record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainTimeFns.toLocaleString(time, locales, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = time.toLocaleString(locales, options)
@@ -1184,14 +1184,14 @@ Signature:
 (locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const format = PlainTimeFns.createFormat('en-US', { timeStyle: 'short' })
 const text = format.format(time)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', { timeStyle: 'short' })
@@ -1210,7 +1210,7 @@ Signature:
 (record: Record) => Temporal.PlainTime
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const realPlainTime = PlainTimeFns.toTemporal(time)

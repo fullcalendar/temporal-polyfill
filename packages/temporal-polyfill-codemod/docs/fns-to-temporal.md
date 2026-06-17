@@ -1,7 +1,7 @@
 # `fns-to-temporal` Codemod Reference
 
 This document is the implementation contract for migrating the
-`temporal-polyfill/fns` API to the real Temporal API. The per-type functional
+`temporal-polyfill/fns` API to the real Temporal API. The per-type tree-shakeable
 API docs remain the source of truth for individual helper mappings:
 
 - `packages/temporal-polyfill/docs/fns/index.md`
@@ -48,8 +48,8 @@ added later if CI or editor integrations need structured diagnostics.
 
 ## Goals
 
-Rewrite code that uses functional API records into code that uses real Temporal
-objects. Functional records are not compatible with real Temporal objects, so a
+Rewrite code that uses tree-shakeable API records into code that uses real Temporal
+objects. Tree-shakeable API records are not compatible with real Temporal objects, so a
 completed migration must not leave any `temporal-polyfill/fns` runtime usage in
 the migrated codebase.
 
@@ -60,7 +60,7 @@ statically.
 
 ## Import Shapes
 
-The codemod only recognizes public functional API imports.
+The codemod only recognizes public tree-shakeable API imports.
 
 Shared type imports from the root fns entrypoint:
 
@@ -167,7 +167,7 @@ needs a fixture proving that the rewrite is safe.
 
 ## Calendar Records
 
-Functional calendar records should rewrite to calendar ID strings.
+Tree-shakeable API calendar records should rewrite to calendar ID strings.
 
 `CalendarFns.Record` maps to:
 

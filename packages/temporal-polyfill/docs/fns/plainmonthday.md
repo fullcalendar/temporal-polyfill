@@ -1,8 +1,8 @@
-# PlainMonthDay Functional API
+# PlainMonthDay Tree-shakeable API
 
 Public functions exported for `PlainMonthDay`.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as PlainMonthDayFns from 'temporal-polyfill/fns/PlainMonthDay'
@@ -44,7 +44,7 @@ type Record = {
 
 The codemod examples assume the surrounding transform has already converted
 `PlainMonthDayFns.Record` values into `Temporal.PlainMonthDay` instances.
-Calendar records need a separate calendar transform: when a functional API call
+Calendar records need a separate calendar transform: when a tree-shakeable API call
 receives a `CalendarRecord`, the real Temporal API normally wants the calendar
 identifier or calendar-like value instead.
 
@@ -58,7 +58,7 @@ Signature:
 (arg: unknown) => arg is Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 if (PlainMonthDayFns.isRecord(value)) {
@@ -66,7 +66,7 @@ if (PlainMonthDayFns.isRecord(value)) {
 }
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 if (value instanceof Temporal.PlainMonthDay) {
@@ -84,13 +84,13 @@ Signature:
 (isoMonth: number, isoDay: number, calendar?: CalendarRecord, referenceIsoYear?: number) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const monthDay = PlainMonthDayFns.create(5, 1)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const monthDay = new Temporal.PlainMonthDay(5, 1)
@@ -108,13 +108,13 @@ Signature:
 (fields: Partial<MonthDayFields> & { calendar?: CalendarRecord }, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const monthDay = PlainMonthDayFns.fromFields(fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const monthDay = Temporal.PlainMonthDay.from(fields, options)
@@ -131,7 +131,7 @@ Signature:
 (s: string, getCalendar: (calendarId: string) => CalendarRecord) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
@@ -142,7 +142,7 @@ const monthDay = PlainMonthDayFns.fromString(
 )
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const monthDay = Temporal.PlainMonthDay.from('1972-05-01[u-ca=gregory]')
@@ -167,13 +167,13 @@ Signature:
 (record: Record, mod: Partial<MonthDayFields>, options?: OverflowOptions) => Record
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const nextMonthDay = PlainMonthDayFns.withFields(monthDay, fields, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const nextMonthDay = monthDay.with(fields, options)
@@ -189,13 +189,13 @@ Signature:
 (record: Record, otherRecord: Record) => boolean
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const same = PlainMonthDayFns.equals(monthDay, otherMonthDay)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const same = monthDay.equals(otherMonthDay)
@@ -211,13 +211,13 @@ Signature:
 (record: Record, options?: CalendarDisplayOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainMonthDayFns.toString(monthDay, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = monthDay.toString(options)
@@ -233,13 +233,13 @@ Signature:
 (record: Record) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainMonthDayFns.toBasicString(monthDay)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = monthDay.toString()
@@ -255,13 +255,13 @@ Signature:
 (record: Record, locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => string
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const text = PlainMonthDayFns.toLocaleString(monthDay, locales, options)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const text = monthDay.toLocaleString(locales, options)
@@ -275,7 +275,7 @@ Signature:
 (locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const format = PlainMonthDayFns.createFormat('en-US', {
@@ -285,7 +285,7 @@ const format = PlainMonthDayFns.createFormat('en-US', {
 const text = format.format(monthDay)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {
@@ -307,13 +307,13 @@ Signature:
 (record: Record, fields: EraYearOrYear) => PlainDateRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 })
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const date = monthDay.toPlainDate({ year: 2024 })
@@ -327,7 +327,7 @@ Signature:
 (record: Record) => Temporal.PlainMonthDay
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const realPlainMonthDay = PlainMonthDayFns.toTemporal(monthDay)

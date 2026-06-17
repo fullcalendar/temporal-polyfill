@@ -1,16 +1,16 @@
-# Functional API Type Exports
+# Tree-shakeable API Type Exports
 
-TypeScript-only exports from the functional API, and the type each one should
+TypeScript-only exports from the tree-shakeable API, and the type each one should
 become when code is rewritten to the object-oriented Temporal API.
 
-Examples use the functional API import paths:
+Examples use the tree-shakeable API import paths:
 
 ```ts
 import type { OverflowOptions } from 'temporal-polyfill/fns'
 import type { Record as PlainDateRecord } from 'temporal-polyfill/fns/PlainDate'
 ```
 
-After a codemod, functional records and option aliases should generally be
+After a codemod, tree-shakeable API records and option aliases should generally be
 rewritten to the `Temporal` namespace type used by the real API:
 
 ```ts
@@ -127,9 +127,9 @@ Codemod target:
 import type { RoundingMode } from 'temporal-utils'
 ```
 
-The functional API exports the projected property type, including `undefined`.
+The tree-shakeable API exports the projected property type, including `undefined`.
 `temporal-utils` owns this shared helper type because it is also used by
-single-unit rounding and diff utilities outside the functional API.
+single-unit rounding and diff utilities outside the tree-shakeable API.
 
 ### `RoundingMathOptions`
 
@@ -141,7 +141,7 @@ import type { RoundingMathOptions } from 'temporal-utils'
 
 Used by the helper functions that round or diff by a single unit.
 `temporal-utils` owns this shared helper type because it is also used by
-single-unit rounding and diff utilities outside the functional API.
+single-unit rounding and diff utilities outside the tree-shakeable API.
 
 ## Calendar
 
@@ -159,7 +159,7 @@ Temporal API type:
 string
 ```
 
-The functional calendar record usually becomes a calendar identifier string such
+The tree-shakeable API calendar record usually becomes a calendar identifier string such
 as `'iso8601'` or `'gregory'`. Use `Temporal.CalendarLike` only when preserving
 a wider annotation type.
 
@@ -202,7 +202,7 @@ Temporal API type:
 Temporal.InstantToStringOptions
 ```
 
-The functional type accepts a string-only `timeZone`; the Temporal API accepts
+The tree-shakeable API type accepts a string-only `timeZone`; the Temporal API accepts
 `Temporal.TimeZoneLike`.
 
 ## ZonedDateTime
@@ -231,7 +231,7 @@ Temporal API type:
 Temporal.ZonedDateTimeLikeObject
 ```
 
-Functional `calendar` is a `CalendarFns.Record`; Temporal `calendar` is a
+Tree-shakeable API `calendar` is a `CalendarFns.Record`; Temporal `calendar` is a
 string.
 
 ### `FromOptions`
@@ -316,7 +316,7 @@ Temporal API type:
 Temporal.DateTimeLikeObject
 ```
 
-Functional `calendar` is required and record-valued; Temporal `calendar` is
+Tree-shakeable API `calendar` is required and record-valued; Temporal `calendar` is
 optional and string-valued in the object type.
 
 ### `WithFields`
@@ -375,7 +375,7 @@ Temporal API type:
 Temporal.DateLikeObject
 ```
 
-Functional `calendar` is required and record-valued; Temporal `calendar` is
+Tree-shakeable API `calendar` is required and record-valued; Temporal `calendar` is
 optional and string-valued in the object type.
 
 ### `WithFields`
@@ -406,7 +406,7 @@ Temporal API type:
 Temporal.PlainDateToZonedDateTimeOptions
 ```
 
-Functional `plainTime` is a `PlainTimeFns.Record`; Temporal `plainTime` is
+Tree-shakeable API `plainTime` is a `PlainTimeFns.Record`; Temporal `plainTime` is
 `Temporal.PlainTimeLike`.
 
 ### `ToStringOptions`
@@ -497,7 +497,7 @@ Temporal API type:
 Temporal.YearMonthLikeObject
 ```
 
-Functional `calendar` is record-valued; Temporal `calendar` is string-valued.
+Tree-shakeable API `calendar` is record-valued; Temporal `calendar` is string-valued.
 
 ### `WithFields`
 
@@ -555,7 +555,7 @@ Temporal API type:
 Temporal.DateLikeObject
 ```
 
-Functional `calendar` is record-valued; Temporal `calendar` is string-valued.
+Tree-shakeable API `calendar` is record-valued; Temporal `calendar` is string-valued.
 
 ### `WithFields`
 
@@ -631,7 +631,7 @@ Temporal API type:
 Temporal.DurationRoundingOptions
 ```
 
-Functional `relativeTo` accepts functional records; Temporal `relativeTo`
+Tree-shakeable API `relativeTo` accepts record values; Temporal `relativeTo`
 accepts Temporal object-like values.
 
 ### `TotalUnit`
@@ -652,7 +652,7 @@ Temporal API type:
 Temporal.DurationTotalOptions
 ```
 
-Functional `relativeTo` accepts functional records; Temporal `relativeTo`
+Tree-shakeable API `relativeTo` accepts record values; Temporal `relativeTo`
 accepts Temporal object-like values.
 
 ### `RelativeToOptions`

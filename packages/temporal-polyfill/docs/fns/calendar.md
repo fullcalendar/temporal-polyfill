@@ -1,12 +1,12 @@
-# Calendar Functional API
+# Calendar Tree-shakeable API
 
 Public functions exported for `Calendar`.
 
-`CalendarRecord` is an opaque handle used by the functional API wherever a
+`CalendarRecord` is an opaque handle used by the tree-shakeable API wherever a
 calendar is needed. In the real Temporal API, the matching value is usually the
 calendar identifier string itself.
 
-Examples assume the functional API is imported as:
+Examples assume the tree-shakeable API is imported as:
 
 ```ts
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
@@ -49,14 +49,14 @@ type CalendarRecord = {
 ```
 
 The record has no public calendar fields. It is a branded handle that lets the
-functional API keep calendar behavior tree-shakeable without exposing the
+tree-shakeable API keep calendar behavior modular without exposing the
 full Temporal object model.
 
 Calendar records are memoized. The `getExotic` cache keys by the exact string
 passed in. Both `toJSON()` and `valueOf()` also return that exact string, while
 internal calendar behavior still uses the normalized calendar ID.
 
-Each getter below pairs its functional-API usage with the equivalent real
+Each getter below pairs its tree-shakeable API usage with the equivalent real
 Temporal API code, for readers curious how the two line up. In the real API a
 `CalendarRecord` is just the calendar identifier string, passed straight to the
 surrounding date, date-time, month-day, year-month, or zoned-date-time
@@ -79,7 +79,7 @@ Signature:
 (calendarId: string) => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getBasic('gregory')
@@ -90,7 +90,7 @@ const parsed = PlainDateFns.fromString(
 )
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'gregory'
@@ -111,14 +111,14 @@ Signature:
 (name: string) => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getExotic('buddhist')
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'buddhist'
@@ -132,7 +132,7 @@ const calendar = calendarId
 const date = new Temporal.PlainDate(2024, 5, 1, calendar)
 ```
 
-`getExotic` validates that `name` is one of the functional API's
+`getExotic` validates that `name` is one of the tree-shakeable API's
 supported Intl-backed calendars. It is the aggregator behind the [exotic
 calendars](#exotic-calendars) — each individual getter takes no arguments
 and returns the same memoized record as `getExotic` pinned to a fixed
@@ -159,7 +159,7 @@ Signature:
 (calendarId: string) => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getAny(calendarId)
@@ -170,7 +170,7 @@ const parsed = PlainDateFns.fromString(
 )
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = calendarId
@@ -184,7 +184,7 @@ any exotic calendar at runtime, it carries the same bundle cost as
 `getExotic` — every supported calendar is retained. Prefer
 `getBasic` or an individual exotic getter when the ID is known, and
 reserve `getAny` for fully dynamic IDs. The bare string form keeps the
-calendar selection but drops the functional API's memoized handle and
+calendar selection but drops the tree-shakeable API's memoized handle and
 Intl-calendar validation.
 
 ## Basic Calendars
@@ -201,14 +201,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getISO()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'iso8601'
@@ -223,14 +223,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getGregory()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'gregory'
@@ -252,14 +252,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getBuddhist()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'buddhist'
@@ -274,14 +274,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getChinese()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'chinese'
@@ -296,14 +296,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getDangi()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'dangi'
@@ -318,14 +318,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getCoptic()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'coptic'
@@ -340,14 +340,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getEthiopic()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'ethiopic'
@@ -362,14 +362,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getEthiopicAmeteAlem()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'ethioaa'
@@ -384,14 +384,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getHebrew()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'hebrew'
@@ -406,14 +406,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIndian()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'indian'
@@ -428,14 +428,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getJapanese()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'japanese'
@@ -450,14 +450,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicCivil()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-civil'
@@ -472,14 +472,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicTabular()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-tbla'
@@ -494,14 +494,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicUmmAlQura()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-umalqura'
@@ -516,14 +516,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getPersian()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'persian'
@@ -538,14 +538,14 @@ Signature:
 () => CalendarRecord
 ```
 
-Fn API:
+Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getROC()
 const date = PlainDateFns.create(2024, 5, 1, calendar)
 ```
 
-Temporal API:
+Temporal API equivalent:
 
 ```ts
 const calendar = 'roc'

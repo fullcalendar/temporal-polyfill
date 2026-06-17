@@ -14,7 +14,7 @@ Only 20 kB, [spec compliant](#spec-compliance)
 - [Spec Compliance](#spec-compliance)
 - [Browser Support](#browser-support)
 - [BigInt Considerations](#bigint-considerations)
-- [Tree-shakable API](#tree-shakable-api) (coming soon)
+- [Tree-shakeable API](#tree-shakeable-api) (coming soon)
 
 
 ## Installation
@@ -237,11 +237,11 @@ This polyfill does NOT depend on [BigInt](https://developer.mozilla.org/en-US/do
 However, if you plan to use methods that accept/emit BigInts, your environment must support it. Alternatively, you can avoid using these methods altogether. [There's a cheatsheet](https://gist.github.com/arshaw/1ef4bf945d68654b86cef2dd8471c48f) to help you.
 
 
-## Tree-shakable API
+## Tree-shakeable API
 
 🚧 Coming Soon ... [READ PRELIMINARY DOCS](./docs/fns/index.md)
 
-For library authors and other devs who are hyper-concerned about bundle size, `temporal-polyfill` will be providing an alternate API designed for tree-shaking.
+For library authors and other devs who are hyper-concerned about bundle size, `temporal-polyfill` will be providing an alternate, function-based API designed for tree-shaking.
 
 ```js
 import * as ZonedDateTime from 'temporal-polyfill/fns/zoneddatetime'
