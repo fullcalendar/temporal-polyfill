@@ -1,22 +1,28 @@
 # Tree-shakeable API
 
-The tree-shakeable function-based API docs are organized by Temporal type or
-support object. Each page catalogs the public functions exported for that area
-and shows the codemod-shaped rewrite to the real Temporal API.
+Instead of large `Temporal.*` classes, the tree-shakeable API exposes every
+operation as a standalone function that acts on a plain record, so a bundler
+keeps only the functions you actually import:
 
-Unlike the class-based entry points, the tree-shakeable API always uses the
-runtime's native `Temporal` when one is available, with no option to force the
-bundled JavaScript implementation.
+```js
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-Abbreviations used by the type pages:
+const date = PlainDateFns.create(2024, 1, 1)
+const later = PlainDateFns.addMonths(date, 2)
 
-- `Record` is the record type exported by the file being cataloged.
-- `CalendarFns.Record` is the opaque calendar handle used by tree-shakeable API
-  functions that accept calendar behavior.
-- `OverflowOptions` is the calendar-field overflow options bag.
-- `RoundingMathOptions` contains rounding increment and rounding mode options.
-  The unit is implied by the `roundTo*` function name. Round helpers also
-  accept a `RoundingMode` string as shorthand for `options.roundingMode`.
+PlainDateFns.toString(later) // '2024-03-01'
+```
+
+Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
+example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
+These docs are organized by Temporal type or support object: each page catalogs
+the public functions exported for that area and shows the codemod-shaped rewrite
+to the real Temporal API.
+
+The tree-shakeable API always uses the runtime's native `Temporal` when one is
+available. Unlike the class-based entry points — which offer
+`/implementation` variants for forcing the bundled JavaScript implementation —
+the tree-shakeable API has no such option.
 
 ## Catalog
 
@@ -47,3 +53,15 @@ before calling `toTemporal`; we recommend this package's own
 `temporal-polyfill/global` entrypoint for optimal code sharing.
 
 `toTemporal` throws when no global `Temporal` is present.
+
+## Abbreviations
+
+Abbreviations used by the type pages:
+
+- `Record` is the record type exported by the file being cataloged.
+- `CalendarFns.Record` is the opaque calendar handle used by tree-shakeable API
+  functions that accept calendar behavior.
+- `OverflowOptions` is the calendar-field overflow options bag.
+- `RoundingMathOptions` contains rounding increment and rounding mode options.
+  The unit is implied by the `roundTo*` function name. Round helpers also
+  accept a `RoundingMode` string as shorthand for `options.roundingMode`.
