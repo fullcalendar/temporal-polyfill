@@ -25,17 +25,17 @@ async function writePkgJson(pkgDir, isDev) {
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const exportName =
-      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const exportName = buildExportName(exportPath)
+    const distName = buildExportDistName(exportPath, exportConfig)
 
     const esmExtension =
       (exportConfig.iife ? extensions.esmWhenIifePrefix : '') + extensions.esm
-    const esmPath = './' + exportName + esmExtension
+    const esmPath = './' + distName + esmExtension
     const typesPath = isDev
       ? './.tsc/' +
         (exportConfig.types || exportConfig.src || exportName) +
         extensions.dts
-      : './' + exportName + extensions.dts
+      : './' + distName + extensions.dts
 
     distExportMap[exportPath] = {
       import: { types: typesPath, default: esmPath },
@@ -49,7 +49,7 @@ async function writePkgJson(pkgDir, isDev) {
     }
 
     if (exportConfig.iife) {
-      const iifePath = './' + exportName + extensions.iife
+      const iifePath = './' + distName + extensions.iife
       sideEffectsList.push(iifePath, esmPath)
     }
   }
@@ -68,4 +68,12 @@ async function writePkgJson(pkgDir, isDev) {
   delete distManifest.disabledBuildConfig // temporary
 
   await writeFile(distManifestPath, JSON.stringify(distManifest, undefined, 2))
+}
+
+function buildExportName(exportPath) {
+  return exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+}
+
+function buildExportDistName(exportPath, exportConfig) {
+  return exportConfig.dist || buildExportName(exportPath)
 }

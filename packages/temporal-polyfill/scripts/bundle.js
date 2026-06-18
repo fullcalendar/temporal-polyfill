@@ -85,8 +85,8 @@ function buildModuleInputs(pkgDir, exportMap) {
   const inputs = {}
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const exportName =
-      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const exportName = buildExportName(exportPath)
+    const distName = buildExportDistName(exportPath, exportConfig)
 
     // TODO: rename to 'transpiled' path?
     const srcPath = joinPaths(
@@ -95,7 +95,7 @@ function buildModuleInputs(pkgDir, exportMap) {
       (exportConfig.src || exportName) + '.js',
     )
 
-    inputs[exportName] = srcPath
+    inputs[distName] = srcPath
   }
 
   return inputs
@@ -106,10 +106,10 @@ function buildDtsInputs(pkgDir, exportMap) {
 
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
-    const exportName =
-      exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+    const exportName = buildExportName(exportPath)
+    const distName = buildExportDistName(exportPath, exportConfig)
 
-    inputs[exportName] = joinPaths(
+    inputs[distName] = joinPaths(
       pkgDir,
       'dist/.tsc',
       (exportConfig.types || exportConfig.src || exportName) + extensions.dts,
@@ -129,18 +129,17 @@ function buildIifeConfigs(pkgDir, pkgJson) {
   for (const exportPath in exportMap) {
     const exportConfig = exportMap[exportPath]
     if (exportConfig.iife) {
-      const exportName =
-        exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+      const distName = buildExportDistName(exportPath, exportConfig)
       const esmExtension = extensions.esmWhenIifePrefix + extensions.esm
 
       configs.push({
-        input: joinPaths(pkgDir, 'dist', exportName + esmExtension),
+        input: joinPaths(pkgDir, 'dist', distName + esmExtension),
         onwarn,
         external: isIifeExternalDependency,
         plugins: [nodeResolve()],
         output: {
           format: 'iife',
-          file: joinPaths('dist', exportName + extensions.iife),
+          file: joinPaths('dist', distName + extensions.iife),
           sourcemap: false,
           sourcemapExcludeSources: true,
           plugins: [terser(buildTerserReadableIifeOptions())],
@@ -199,6 +198,8 @@ function buildModuleConfigs({
   sourceDirectoryChunksPlugin,
   temporalReservedWords,
 }) {
+  const exportConfigByDistName = buildExportConfigByDistName(exportMap)
+
   return [
     {
       input,
@@ -209,14 +210,14 @@ function buildModuleConfigs({
         format: 'es',
         dir: 'dist',
         entryFileNames(chunkInfo) {
-          const exportName = chunkInfo.name
-          const exportPath = exportName === 'index' ? '.' : './' + exportName
+          const distName = chunkInfo.name
+          const exportConfig = exportConfigByDistName[distName]
 
           const esmExtension =
-            (exportMap[exportPath].iife ? extensions.esmWhenIifePrefix : '') +
+            (exportConfig.iife ? extensions.esmWhenIifePrefix : '') +
             extensions.esm
 
-          return exportName + esmExtension
+          return distName + esmExtension
         },
         chunkFileNames: chunkBase + extensions.esm,
         minifyInternalExports: false,
@@ -240,6 +241,29 @@ function buildModuleConfigs({
       },
     },
   ]
+}
+
+function buildExportConfigByDistName(exportMap) {
+  const exportConfigByDistName = {}
+
+  for (const exportPath in exportMap) {
+    const exportConfig = exportMap[exportPath]
+
+    // Rollup's input object uses the desired dist path as the entry name so
+    // entryFileNames can write nested index files without guessing collisions.
+    exportConfigByDistName[buildExportDistName(exportPath, exportConfig)] =
+      exportConfig
+  }
+
+  return exportConfigByDistName
+}
+
+function buildExportName(exportPath) {
+  return exportPath === '.' ? 'index' : exportPath.replace(/^\.\//, '')
+}
+
+function buildExportDistName(exportPath, exportConfig) {
+  return exportConfig.dist || buildExportName(exportPath)
 }
 
 function buildWithConfigs(configs) {

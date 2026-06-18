@@ -64,7 +64,8 @@
       },
       "./full": {
         "src": "classApi/full/index",
-        "types": "typeOverrides/index"
+        "types": "typeOverrides/index",
+        "dist": "full/index"
       },
       "./full/global": {
         "src": "classApi/full/global",
@@ -82,7 +83,8 @@
         "src": "classApi/globalTypes"
       },
       "./fns": {
-        "src": "funcApi/index"
+        "src": "funcApi/index",
+        "dist": "fns/index"
       },
       "./fns/Calendar": {
         "src": "funcApi/calendar"
