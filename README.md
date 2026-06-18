@@ -8,6 +8,7 @@ The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-co
 
 - 📦 [**temporal-polyfill**](#temporal-polyfill) — A lightweight, spec-compliant polyfill for Temporal
 - 🌳 [**Tree-shakeable function API**](#tree-shakeable-function-api) — The same polyfill as standalone, tree-shakeable functions
+- 🤝 [**Built to be shared**](#built-to-be-shared) — Why the function API is a great fit for component libraries
 - 🔄 [**temporal-polyfill-codemod**](#temporal-polyfill-codemod) — Convert the function API to idiomatic Temporal
 - 🛠️ [**temporal-utils**](#temporal-utils) — Handy helpers for idiomatic Temporal objects
 - 📐 [**temporal-spec**](#temporal-spec) — Standalone TypeScript type definitions for Temporal
@@ -52,9 +53,36 @@ const later = PlainDateFns.addMonths(date, 2)
 PlainDateFns.toString(later) // '2026-08-01'
 ```
 
-Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*`, such as `temporal-polyfill/fns/ZonedDateTime`. And it's not a one-way door: when native `Temporal` is everywhere you target, [the codemod](./codemod/README.md) rewrites your function calls into idiomatic `Temporal.*` expressions.
+Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*`, such as `temporal-polyfill/fns/ZonedDateTime`.
 
 📖 [**Read the full Tree-shakeable API docs →**](./docs/fns/index.md)
+
+---
+
+<a id="built-to-be-shared"></a>
+
+## 🤝 Built to be shared
+
+If you build a date picker, scheduler, or any calendar-driven component, you know the date-library dilemma: bundle `dayjs`/`date-fns`, hand-roll helpers around `Date`, or pull in an adapter like `date-io` and make your users pick a library. Each path bundles *another* date library into every app that installs your component.
+
+The [tree-shakeable API](./docs/fns/index.md) is designed to end that — and to make Temporal the shared standard third-party components can finally agree on.
+
+**Shared, not duplicated.** Depend on `temporal-polyfill` as a peer dependency and import only the tree-shakeable functions you need — you never force the full polyfill onto anyone. Whether to load it is the host app's call, driven by which browsers and runtimes they need to support (Safari and older environments still lack native `Temporal`). And because that's the *same package* your component already draws from, the shared internals dedupe instead of doubling up:
+
+```
+app
+|
+├─▶ temporal-polyfill/global ····┐
+|                  (optional)    |
+└─▶ <DatePicker>                 ├─▶ one shared copy of internals
+     |                           |
+     └─▶ temporal-polyfill/fns ··┘
+        (only select functions)
+```
+
+**A dependency you can delete.** Adopt the tree-shakeable API today, and when native Temporal is everywhere you target, [the codemod](./codemod/README.md) rewrites your code into idiomatic `Temporal.*` and the dependency falls away. No lock-in — and because each function maps one-to-one onto its `Temporal.*` equivalent, the migration is mechanical, with few edge cases and little to debug.
+
+📖 [**Read more: For component authors →**](./docs/fns/for-component-authors.md)
 
 ---
 

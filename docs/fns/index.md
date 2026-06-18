@@ -34,6 +34,10 @@ available. Unlike the class-based entry points — which offer
 `/implementation` variants for forcing the bundled JavaScript implementation —
 the tree-shakeable API has no such option.
 
+🤝 **Building a component library?** The tree-shakeable API is designed to be a
+shared, deletable peer dependency for third-party tools like date pickers and
+schedulers. See [For component authors](./for-component-authors.md).
+
 ## Catalog
 
 - [`PlainDate`](plaindate.md) - date construction, fields, arithmetic, comparison, conversion, start/end helpers, differences, and formatting.

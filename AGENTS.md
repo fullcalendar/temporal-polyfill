@@ -91,6 +91,17 @@ of treating the whole bucket as one opaque change.
   differences unless the fix is easy, local, and not a broad compatibility shim.
 
 
+## Documentation / READMEs
+
+When prose in one README mentions another package or topic that has its own
+dedicated README (or docs page), link directly to that final-destination
+README — do NOT link to an in-page section anchor that merely points onward to
+it. Prefer the fewest hops to the canonical doc.
+
+The one exception is a doc's own table-of-contents / "Contents" list and
+intra-doc navigation, where in-page `#anchor` links are expected.
+
+
 ## Code Comments
 
 Please add a healthy amount of comments to the code. With this temporal stuff,
