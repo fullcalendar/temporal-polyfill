@@ -270,11 +270,10 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
 
 ## Tree-shakeable API
 
-For library authors and other developers who are hyper-concerned about bundle
-size, `temporal-polyfill` also ships an alternate, function-based API designed
-for tree-shaking. Instead of large `Temporal.*` classes, every operation is a
-standalone function that acts on a plain record, so a bundler keeps only the
-functions you actually import.
+For anyone hyper-concerned about bundle size, `temporal-polyfill` also ships an
+alternate function API designed for tree-shaking. Instead of large `Temporal.*`
+classes, every operation is a standalone function that acts on a plain record,
+so a bundler keeps only the functions you actually import.
 
 ```js
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
@@ -284,6 +283,10 @@ const later = PlainDateFns.addMonths(date, 2)
 
 PlainDateFns.toString(later) // '2026-08-01'
 ```
+
+🤝 **Building a component library?** The function API is built to be a shared,
+deletable peer dependency for third-party tools like date pickers and
+schedulers. See [For component authors](../docs/fns/for-component-authors.md).
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
 example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
