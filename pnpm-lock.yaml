@@ -15,6 +15,28 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1
 
+  codemod:
+    dependencies:
+      jscodeshift:
+        specifier: ^0.15.2
+        version: 0.15.2
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
+      '@types/jscodeshift':
+        specifier: ^0.11.11
+        version: 0.11.11
+      '@types/node':
+        specifier: ^18.11.9
+        version: 18.11.9
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+      vitest:
+        specifier: ^1.2.2
+        version: 1.2.2(@types/node@18.11.9)
+
   examples/fns-and-global:
     dependencies:
       '@preact/preset-vite':
@@ -113,111 +135,6 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  polyfill:
-    dependencies:
-      temporal-spec:
-        specifier: workspace:1.0.0
-        version: link:../spec
-      temporal-utils:
-        specifier: workspace:1.0.1
-        version: link:../utils
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.5.1
-        version: 1.5.1
-      '@js-temporal/temporal-test262-runner':
-        specifier: github:fullcalendar/temporal-test262-runner#main
-        version: https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/158acce65b90a9874657b2d8f268d15ea6b85128
-      '@rollup/plugin-node-resolve':
-        specifier: ^15.2.3
-        version: 15.2.3(rollup@4.9.6)
-      '@rollup/plugin-terser':
-        specifier: ^1.0.0
-        version: 1.0.0(rollup@4.9.6)
-      '@swc/core':
-        specifier: ^1.15.40
-        version: 1.15.40
-      '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
-      concurrently:
-        specifier: ^8.2.0
-        version: 8.2.0
-      export-size:
-        specifier: workspace:*
-        version: link:../misc/export-size
-      gzip-size-cli:
-        specifier: ^5.1.0
-        version: 5.1.0
-      rollup:
-        specifier: ^4.9.6
-        version: 4.9.6
-      rollup-plugin-dts:
-        specifier: ^6.1.0
-        version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
-      terser:
-        specifier: workspace:*
-        version: link:../misc/terser
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-      vitest:
-        specifier: ^1.2.2
-        version: 1.2.2(@types/node@18.11.9)(terser@misc+terser)
-      yargs:
-        specifier: ^17.7.2
-        version: 17.7.2
-    publishDirectory: ./dist
-
-  codemod:
-    dependencies:
-      jscodeshift:
-        specifier: ^0.15.2
-        version: 0.15.2
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.5.1
-        version: 1.5.1
-      '@types/jscodeshift':
-        specifier: ^0.11.11
-        version: 0.11.11
-      '@types/node':
-        specifier: ^18.11.9
-        version: 18.11.9
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-      vitest:
-        specifier: ^1.2.2
-        version: 1.2.2(@types/node@18.11.9)
-
-  spec:
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.5.1
-        version: 1.5.1
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-
-  utils:
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.5.1
-        version: 1.5.1
-      '@js-temporal/polyfill':
-        specifier: ^0.5.1
-        version: 0.5.1
-      temporal-spec:
-        specifier: workspace:*
-        version: link:../spec
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-      vitest:
-        specifier: ^1.2.2
-        version: 1.2.2(@types/node@20.11.30)
-
   misc/terser:
     dependencies:
       '@jridgewell/source-map':
@@ -263,6 +180,92 @@ importers:
       source-map:
         specifier: ~0.8.0-beta.0
         version: 0.8.0-beta.0
+
+  polyfill:
+    dependencies:
+      temporal-spec:
+        specifier: workspace:1.0.0
+        version: link:../spec
+      temporal-utils:
+        specifier: workspace:1.0.1
+        version: link:../utils
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
+      '@js-temporal/temporal-test262-runner':
+        specifier: github:fullcalendar/temporal-test262-runner#main
+        version: https://codeload.github.com/fullcalendar/temporal-test262-runner/tar.gz/158acce65b90a9874657b2d8f268d15ea6b85128
+      '@rollup/plugin-node-resolve':
+        specifier: ^15.2.3
+        version: 15.2.3(rollup@4.9.6)
+      '@rollup/plugin-terser':
+        specifier: ^1.0.0
+        version: 1.0.0(rollup@4.9.6)
+      '@swc/core':
+        specifier: ^1.15.40
+        version: 1.15.40
+      '@types/node':
+        specifier: ^18.11.9
+        version: 18.11.9
+      concurrently:
+        specifier: ^8.2.0
+        version: 8.2.0
+      export-size:
+        specifier: workspace:*
+        version: link:../misc/export-size
+      gzip-size:
+        specifier: ^7.0.0
+        version: 7.0.0
+      gzip-size-cli:
+        specifier: ^5.1.0
+        version: 5.1.0
+      rollup:
+        specifier: ^4.9.6
+        version: 4.9.6
+      rollup-plugin-dts:
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
+      terser:
+        specifier: workspace:*
+        version: link:../misc/terser
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+      vitest:
+        specifier: ^1.2.2
+        version: 1.2.2(@types/node@18.11.9)(terser@misc+terser)
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
+    publishDirectory: ./dist
+
+  spec:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+
+  utils:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.5.1
+        version: 1.5.1
+      '@js-temporal/polyfill':
+        specifier: ^0.5.1
+        version: 0.5.1
+      temporal-spec:
+        specifier: workspace:*
+        version: link:../spec
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+      vitest:
+        specifier: ^1.2.2
+        version: 1.2.2(@types/node@20.11.30)
 
 packages:
 

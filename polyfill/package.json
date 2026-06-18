@@ -135,6 +135,7 @@
     "@types/node": "^18.11.9",
     "concurrently": "^8.2.0",
     "export-size": "workspace:*",
+    "gzip-size": "^7.0.0",
     "gzip-size-cli": "^5.1.0",
     "rollup": "^4.9.6",
     "rollup-plugin-dts": "^6.1.0",

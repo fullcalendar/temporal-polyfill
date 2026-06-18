@@ -12,8 +12,8 @@ here with the same Terser config, so the numbers are apples-to-apples.
 import { existsSync } from 'fs'
 import { dirname, join as joinPaths } from 'path'
 import { fileURLToPath } from 'url'
-import { gzipSync } from 'zlib'
 import { readFile, writeFile } from 'fs/promises'
+import { gzipSizeSync } from 'gzip-size'
 import { minify as minifyWithTerser } from 'terser'
 import { buildTerserMinifyOptions } from '../lib/minify-options.js'
 
@@ -43,7 +43,7 @@ async function run() {
       )
     }
     const code = await readFile(absPath, 'utf-8')
-    ours.push({ label, gzipped: gzipSize(code) })
+    ours.push({ label, gzipped: gzipSizeSync(code) })
   }
 
   // Resolve the competitor's latest published version + CDN URL, so the
@@ -63,18 +63,13 @@ async function run() {
   console.log(`Wrote ${resultsPath}`)
 }
 
-// Gzip already-minified code; returns byte count.
-function gzipSize(code) {
-  return gzipSync(Buffer.from(code)).length
-}
-
 // Minify with the package's Terser defaults, then gzip; returns byte count.
 async function minzippedSize(code) {
   const { code: minified } = await minifyWithTerser(
     code,
     buildTerserMinifyOptions(),
   )
-  return gzipSize(minified)
+  return gzipSizeSync(minified)
 }
 
 async function fetchLatestVersion(pkg) {
