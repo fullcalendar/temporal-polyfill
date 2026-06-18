@@ -3,13 +3,18 @@ v1.0.1
 ------
 
 curl -sL "https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.2/global.min.js" | gzip -9 | wc -c
+  20167
 
+curl -sL "https://cdn.jsdelivr.net/npm/@js-temporal/polyfill@0.5.1/dist/index.umd.min.js"  | gzip -9 | wc -c
+  57915
 
-old size: 20167
-new size: 19554 (default entrypoint)
+ours:
+  cat "/Users/adam/Code/temporal/packages/temporal-polyfill/dist/.global.min.js" | gzip -9 | wc -c
+  basic: 19551
+  cat "/Users/adam/Code/temporal/packages/temporal-polyfill/dist/full/.global.min.js" | gzip -9 | wc -c
+  full: 23338
 
 - chore: publish as `1.0.1` because npm already has an old `1.0.0`, which confuses dependency update tools (#88)
-
 - fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
 - fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
 - fix: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification (#92)

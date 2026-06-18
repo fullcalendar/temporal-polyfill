@@ -1,20 +1,22 @@
 
 # temporal-polyfill
 
-A lightweight polyfill for [Temporal](https://tc39.es/proposal-temporal/docs/), successor to the JavaScript `Date` object
+A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), successor to the JavaScript `Date` object
 
-Only 20 kB, [spec compliant](#spec-compliance)
+Less that 20 kB, [spec compliant](#spec-compliance)
+
+🌳 Need an even smaller footprint? Check out the [tree-shakeable API](#tree-shakeable-api)
 
 
 ## Table of Contents
 
 - [Installation](#installation)
-- [Entry Points](#entry-points)
-- [TypeScript Types](#typescript-types)
-- [Comparison with `@js-temporal/polyfill`](#comparison-with-js-temporalpolyfill)
+- [Package Entrypoints](#package-entrypoints)
+- [CDN Usage](#cdn-usage)
+- [Global TypeScript Types](#global-typescript-types)
 - [Spec Compliance](#spec-compliance)
-- [Browser Support](#browser-support)
-- [BigInt Considerations](#bigint-considerations)
+- [Supported Environments](#supported-environments)
+- [Comparison with `@js-temporal/polyfill`](#comparison-with-js-temporalpolyfill)
 - [Tree-shakeable API](#tree-shakeable-api)
 
 
@@ -24,20 +26,114 @@ Only 20 kB, [spec compliant](#spec-compliance)
 npm install temporal-polyfill
 ```
 
-The simplest way to start is the global install, which adds `Temporal` to the
-global scope:
-
 ```js
-import 'temporal-polyfill/global'
-
-console.log(Temporal.Now.zonedDateTimeISO().toString())
+import 'temporal-polyfill/global' // most common entrypoint
 ```
 
-If the runtime already has a native `Temporal`, the polyfill steps aside and
-uses it. For side-effect-free imports, app-controlled installation, and
-all-calendar builds, see [Entry Points](#entry-points) below.
+Or learn about [CDN usage](#cdn-usage)
 
-Or use a `<script>` tag with a CDN link:
+## Package Entrypoints
+
+The following entrypoints support the `iso8601` and `gregory` calendar systems only:
+
+- Global polyfill. Uses native if available. 👈 **What most people need**
+
+  ```js
+  import 'temporal-polyfill/global'
+
+  Temporal.Now.zonedDateTimeISO().toString()
+  ```
+
+- Local side-effect-free import (ponyfill). Uses native if available
+
+  ```js
+  import { Temporal } from 'temporal-polyfill'
+
+  Temporal.Now.zonedDateTimeISO().toString()
+  ```
+
+- Forced non-native side-effect-free import
+
+  ```js
+  import { Temporal } from 'temporal-polyfill/implementation'
+
+  Temporal.Now.zonedDateTimeISO().toString()
+  ```
+
+- Install the global polyfill *when* you want
+
+  ```js
+  import { install } from 'temporal-polyfill/shim'
+
+  install()
+
+  Temporal.Now.zonedDateTimeISO().toString()
+  ```
+
+- Install the non-native implementation globally based on a custom condition
+
+  ```js
+  import { installImplementation } from 'temporal-polyfill/shim'
+
+  if (!globalThis.Temporal || CUSTOM_CONDITION) {
+    installImplementation()
+  }
+
+  Temporal.Now.zonedDateTimeISO().toString()
+  ```
+
+The `/full/` entrypoints support an expanded set of calendar systems: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
+
+- Global polyfill. Uses native if available
+
+  ```js
+  import 'temporal-polyfill/full/global'
+
+  Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
+  ```
+
+- Local side-effect-free import (ponyfill). Uses native if available
+
+  ```js
+  import { Temporal } from 'temporal-polyfill/full'
+
+  Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
+  ```
+
+- Forced non-native side-effect-free import
+
+  ```js
+  import { Temporal } from 'temporal-polyfill/full/implementation'
+
+  Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
+  ```
+
+- Install the global polyfill *when* you want
+
+  ```js
+  import { install } from 'temporal-polyfill/full/shim'
+
+  install()
+
+  Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
+  ```
+
+- Install the non-native implementation globally based on a custom condition
+
+  ```js
+  import { installImplementation } from 'temporal-polyfill/full/shim'
+
+  if (!globalThis.Temporal || CUSTOM_CONDITION) {
+    installImplementation()
+  }
+
+  Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
+  ```
+
+
+## CDN Usage
+
+Globally install the polyfill that supports only the `iso8601` and `gregory` calendar systems. Uses native if available.
 
 ```html
 <script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@{VERSION}/global.min.js'></script>
@@ -46,88 +142,23 @@ Or use a `<script>` tag with a CDN link:
 </script>
 ```
 
-The default build covers ISO 8601 and Gregorian. For other calendars, load the
-all-calendars `/full/` build instead:
+Globally install the `/full/` polyfill that supports an expanded set of calendar systems: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
 
 ```html
 <script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@{VERSION}/full/global.min.js'></script>
 <script>
-  // every calendar is bundled: hebrew, chinese, persian, islamic, …
-  const date = Temporal.PlainDate.from('2024-01-01').withCalendar('hebrew')
-
-  console.log(date.year) // 5784
-  console.log(date.toLocaleString('en-US', { calendar: 'hebrew' }))
-  // e.g. 'Tevet 20, 5784'
+  console.log(Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString())
 </script>
 ```
 
 
-## Entry Points
+## Global TypeScript Types
 
-`temporal-polyfill` offers a few entry points so you can choose **how** the
-polyfill is applied and **which calendars** are bundled. They're native-aware
-unless noted: when the runtime already has a built-in `Temporal`, the polyfill
-uses it instead of the bundled implementation.
+If using the `temporal-polyfill/global` or `temporal-polyfill/full/global` entrypoints, you must configure types:
 
-### How it's applied
+### If using TypeScript 6.0 or later
 
-- **`temporal-polyfill/global`** — installs `Temporal` onto the global scope on import.
-- **`temporal-polyfill`** — no side effects; exports `Temporal` as a value to use directly (a ponyfill).
-- **`temporal-polyfill/implementation`** — like the ponyfill, but **always** the bundled implementation, never native.
-- **`temporal-polyfill/shim`** — no import side effects; you call `install()` yourself when ready.
-
-```js
-// Auto-install on the global scope.
-import 'temporal-polyfill/global'
-
-// Side-effect-free ponyfill — native when available, otherwise the bundled implementation.
-import { Temporal } from 'temporal-polyfill'
-
-// Side-effect-free, bundled implementation only (never native).
-import { Temporal } from 'temporal-polyfill/implementation'
-
-// App-controlled global installation.
-import { install, installImplementation } from 'temporal-polyfill/shim'
-install()               // installs the bundled implementation only if there's no native Temporal
-installImplementation() // always installs the bundled implementation, even over a native one
-```
-
-The `install()` / `installImplementation()` pair follows the TC39 shim
-convention (like `regexp.escape/shim`): `install()` defers to a native
-`Temporal`, while `installImplementation()` is unconditional.
-
-### Which calendars are included
-
-Each entry point above comes in two variants:
-
-- **Basic** (default) — the ISO 8601 and Gregorian calendars, for the smallest bundle.
-- **Full** (`/full/…`) — every calendar Temporal supports, such as Chinese, Hebrew, and Persian.
-
-```js
-// Basic — ISO + Gregorian
-import 'temporal-polyfill/global'
-import { Temporal } from 'temporal-polyfill'
-import { Temporal } from 'temporal-polyfill/implementation'
-import { install } from 'temporal-polyfill/shim'
-
-// Full — all calendars
-import 'temporal-polyfill/full/global'
-import { Temporal } from 'temporal-polyfill/full'
-import { Temporal } from 'temporal-polyfill/full/implementation'
-import { install } from 'temporal-polyfill/full/shim'
-```
-
-Only need a few operations? The [Tree-shakeable API](./docs/fns/index.md) lets
-you import individual functions — and individual calendars — so your bundle
-includes only what you use. It's always native-aware and needs no separate
-`/full` build.
-
-
-## TypeScript Types
-
-If using the global import (`import 'temporal-polyfill/global'`), you must worry about where your types are coming from. You can choose one of two options:
-
-**Options A)** If using TypeScript >= 6.0, modify your `tsconfig.json`:
+In your `tsconfig.json`:
 
 ```diff
 {
@@ -147,7 +178,9 @@ Or with more granularity:
 }
 ```
 
-**Options B)** If using TypeScript < 6.0, import types manually:
+### If using TypeScript 5.x or earlier
+
+Write an ESM import that loads the types:
 
 ```diff
   import 'temporal-polyfill/global'
@@ -156,8 +189,29 @@ Or with more granularity:
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 ```
 
-Other entry points (like `import {} from 'temporal-polyfill'`) will load types automatically.
+## Spec Compliance
 
+All time zones are supported. The following calendar systems are supported: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
+
+Compliance with the latest version of the Temporal spec is near-perfect [with just 1 intentional deviation](https://github.com/fullcalendar/temporal-polyfill/tree/main/packages/temporal-polyfill/scripts/test262-expected-failures/shim.txt).
+
+
+## Supported Environments
+
+<!--
+https://caniuse.com/bigint
+https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_calendar_parameter
+-->
+
+| Browser    | Minimum Release | For `chinese`, `dangi`, `islamic-umalqura` |
+| ---------- | --------------: | -----------------------------------------: |
+| Chrome     |   67 (May 2018) |                              80 (Feb 2020) |
+| Firefox    |   68 (Jul 2019) |                              76 (May 2020) |
+| Safari     |   14 (Sep 2020) |                            14.1 (Apr 2021) |
+| Safari iOS |   14 (Sep 2020) |                            14.5 (Apr 2021) |
+| Edge       |   79 (Jan 2020) |                              80 (Feb 2020) |
+
+Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
 
 ## Comparison with `@js-temporal/polyfill`
 
@@ -190,125 +244,30 @@ Other entry points (like `import {} from 'temporal-polyfill'`) will load types a
     <td>Champions of the <a href='https://github.com/tc39/proposal-temporal'>Temporal proposal</a></td>
   </tr>
   <tr>
-    <td>Minified+gzip size</td>
-    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>19.8 KB<a></td>
-    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>51.9 KB</a> (+162%)</td>
+    <td>Min+gzip size</td>
+    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>19.6 kB</a>, 23.3 kB (full)</td>
+    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>57.9 kB</a> (+196%, +148%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
     <td>
-      Mar 2025
+      June 2026
     </td>
     <td>
-      Mar 2025
+      March 2025
     </td>
   </tr>
   <tr>
     <td>BigInt approach</td>
-    <td>Internally avoids BigInt operations altogether</td>
+    <td>Uses real <code>bigint</code> sparingly</td>
     <td>Internally relies on <a href='https://github.com/GoogleChromeLabs/jsbi'>JSBI</a></td>
   </tr>
   <tr>
-    <td>Global usage in ESM</td>
-    <td>
-      <code>import 'temporal-polyfill/global'</code>
-    </td>
+    <td>Global Install</td>
+    <td>Possible via <a href='#package-entrypoints'>ESM</a> and <a href='#cdn-usage'>CDN</a></td>
     <td>Not currently possible</td>
   </tr>
 </table>
-
-
-## Spec Compliance
-
-All calendar systems (ex: `chinese`, `persian`) and all time zones are supported.
-
-Compliance with the latest version of the Temporal spec is near-perfect [with just 4 intentional deviations](https://github.com/fullcalendar/temporal-polyfill/blob/main/packages/temporal-polyfill/scripts/test262-config/expected-failures.txt).
-
-
-## Browser Support
-
-<table>
-  <tr>
-    <td colspan='6'>
-      <strong>Minimum required browsers for ISO/gregory calendars:</strong>
-    </td>
-  </tr>
-  <tr>
-    <!-- Computed from Libraries+Syntax in worksheet below  -->
-    <td>Chrome 60<br />(Jul 2017)</td>
-    <td>Firefox 55<br />(Aug 2017)</td>
-    <td>Safari 11.1<br />(Mar 2018)</td>
-    <td>Safari iOS 11.3<br />(Mar 2018)</td>
-    <td>Edge 79<br />(Jan 2020)</td>
-    <td>Node.js 14<br />(Apr 2020)</td>
-  </tr>
-  <tr>
-    <td colspan='6'>
-      <br />
-      <strong>If you transpile, you can support older browsers down to:</strong>
-    </td>
-  </tr>
-  <tr>
-    <!-- Computed from Libraries in worksheet below  -->
-    <td>Chrome 57<br />(Mar 2017)</td>
-    <td>Firefox 52<br />(Mar 2017)</td>
-    <td>Safari 10<br />(Sep 2016)</td>
-    <td>Safari iOS 10<br />(Sep 2016)</td>
-    <td>Edge 15<br />(Apr 2017)</td>
-    <td>Node.js 14<br />(Apr 2020)</td>
-  </tr>
-  <tr>
-    <td colspan='6'>
-      <br />
-      <strong>For non-ISO/gregory calendars, requirements are higher:</strong>
-    </td>
-  </tr>
-  <tr>
-    <!-- https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_calendar_parameter -->
-    <td>Chrome 80<br />(Feb 2020)</td>
-    <td>Firefox 76<br />(May 2020)</td>
-    <td>Safari 14.1<br />(Apr 2021)</td>
-    <td>Safari iOS 14.5<br />(Apr 2021)</td>
-    <td>Edge 80<br />(Feb 2020)</td>
-    <td>Node.js 14<br />(Apr 2020)</td>
-  </tr>
-</table>
-
-<!--
-## Browser Support Worksheet
-
-Use caniuse's star feature to find intersection of features.
-
-Libraries:
-- [Intl.DateTimeFormat IANA time zone names](https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_timezone_parameter_iana_time_zones)
-- [Number.isInteger](https://caniuse.com/mdn-javascript_builtins_number_isinteger)
-- [Number.isSafeInteger] (https://caniuse.com/mdn-javascript_builtins_number_issafeinteger)
-- [String::padStart](https://caniuse.com/mdn-javascript_builtins_string_padstart)
-- [WeakMap](https://caniuse.com/mdn-javascript_builtins_weakmap)
-
-Syntax:
-- [Classes](https://caniuse.com/es6-class)
-- [Exponentiation](https://caniuse.com/mdn-javascript_operators_exponentiation)
-- [Spread in array literals](https://caniuse.com/mdn-javascript_operators_spread_spread_in_arrays)
-- [Spread in function calls](https://caniuse.com/mdn-javascript_operators_spread_spread_in_function_calls)
-- [Spread in object literals](https://caniuse.com/mdn-javascript_operators_spread_spread_in_object_literals)
-
-BigInt (https://caniuse.com/bigint):
-- Chrome 67 (May 2018)
-- Firefox 68 (Jul 2019)
-- Safari 14 (Sep 2020)
-- Safari iOS 14 (Sep 2020)
-- Edge 79 (Jan 2020)
-
-Node.js is always 14 because the test-runner doesn't work with lower
--->
-
-
-## BigInt Considerations
-
-This polyfill does NOT depend on [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) support. Internally, no operations leverage BigInt arithmetics. :thumbsup:
-
-However, if you plan to use methods that accept/emit BigInts, your environment must support it. Alternatively, you can avoid using these methods altogether. [There's a cheatsheet](https://gist.github.com/arshaw/1ef4bf945d68654b86cef2dd8471c48f) to help you.
 
 
 ## Tree-shakeable API
@@ -330,6 +289,15 @@ PlainDateFns.toString(later) // '2024-03-01'
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
 example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
-See the **[Tree-shakeable API docs](./docs/fns/index.md)** for the full catalog
-of functions, their TypeScript type exports, and how each one maps back to the
-standard `Temporal` API.
+
+Best of all, this isn't a one-way door. When the time is right — once native
+`Temporal` is available in every environment you target, and you no longer need
+the polyfill — a built-in **codemod** rewrites your function calls back into
+idiomatic `Temporal.*` expressions. So `PlainDateFns.addMonths(date, 2)` becomes
+`date.add({ months: 2 })`, with no manual find-and-replace.
+
+📚➡️ [**Read the full Tree-shakeable API docs**](./docs/fns/index.md) ⬅️📚
+
+The docs cover the complete catalog of functions, their TypeScript type exports,
+the codemod workflow, and how each function maps back to the standard `Temporal`
+API.
