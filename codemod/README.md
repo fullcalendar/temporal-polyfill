@@ -1,9 +1,16 @@
+<!--
+  Links here are NOT rewritten on publish. Any link to another file in this repo
+  must be an absolute GitHub URL rooted at:
+    https://github.com/fullcalendar/temporal-polyfill/blob/main/
+  (use /tree/main/ instead of /blob/main/ when linking a directory)
+-->
+
 # temporal-polyfill-codemod
 
 Automated migrations for `temporal-polyfill` codebases.
 
 The current transform, `fns-to-temporal`, rewrites code that uses the
-tree-shakeable [`temporal-polyfill/fns` function API](../docs/fns/index.md)
+tree-shakeable [`temporal-polyfill/fns` function API](https://github.com/fullcalendar/temporal-polyfill/blob/main/docs/fns/index.md)
 into idiomatic Temporal — real `Temporal` objects and their methods.
 
 ```ts
@@ -133,4 +140,4 @@ pnpm run build
 ```
 
 The full transform contract — every supported import path, every deferred shape,
-and the exit-code matrix — lives in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+and the exit-code matrix — lives in [`ARCHITECTURE.md`](https://github.com/fullcalendar/temporal-polyfill/blob/main/codemod/ARCHITECTURE.md).

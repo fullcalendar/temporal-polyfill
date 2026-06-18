@@ -1,3 +1,10 @@
+<!--
+  Links here are NOT rewritten on publish. Any link to another file in this repo
+  must be an absolute GitHub URL rooted at:
+    https://github.com/fullcalendar/temporal-polyfill/blob/main/
+  (use /tree/main/ instead of /blob/main/ when linking a directory)
+-->
+
 # temporal-utils
 
 Small, application-level helpers for working with native [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal) objects
@@ -51,7 +58,7 @@ build its inputs. Ensure one is present in one of two ways:
 - **Native `Temporal`** — available in newer browsers and runtimes, but support
   is still rolling out and remains incomplete.
 - **A polyfill** — recommended for now. We suggest
-  [`temporal-polyfill`](../polyfill/README.md), which installs a global
+  [`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md), which installs a global
   `Temporal`:
 
   ```ts

@@ -1,3 +1,9 @@
+<!--
+  Links here are NOT rewritten on publish. Any link to another file in this repo
+  must be an absolute GitHub URL rooted at:
+    https://github.com/fullcalendar/temporal-polyfill/blob/main/
+  (use /tree/main/ instead of /blob/main/ when linking a directory)
+-->
 
 # temporal-spec
 
@@ -30,7 +36,7 @@ the declarations, and they tended to drift apart.
 
 `temporal-spec` centralizes those declarations into a standalone, dependency-free
 package. It's the type layer behind
-[`temporal-polyfill`](../polyfill/README.md),
+[`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md),
 and it's published separately so other Temporal implementations can reuse the
 exact same types.
 
@@ -142,4 +148,4 @@ These declarations are derived from the TypeScript project's `lib` files
 and [`esnext.date.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.date.d.ts)),
 which are Copyright (c) Microsoft Corporation.
 
-Licensed under the [Apache License, Version 2.0](./LICENSE).
+Licensed under the [Apache License, Version 2.0](https://github.com/fullcalendar/temporal-polyfill/blob/main/spec/LICENSE).
