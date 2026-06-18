@@ -1,11 +1,11 @@
 # temporal-polyfill monorepo
 
+> [!NOTE]
+> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](#) for everything new.
+
 A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object 🕒
 
 The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-compliant polyfill. The other packages orbit it: a tree-shakeable function API, a migration codemod, convenience helpers, and standalone TypeScript types.
-
-> [!NOTE]
-> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](#) for everything new.
 
 ## Contents
 
