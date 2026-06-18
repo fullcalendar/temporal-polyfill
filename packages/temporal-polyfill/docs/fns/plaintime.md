@@ -523,7 +523,7 @@ Tree-shakeable API:
 const hours = PlainTimeFns.diffHours(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -549,7 +549,7 @@ Tree-shakeable API:
 const minutes = PlainTimeFns.diffMinutes(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -575,7 +575,7 @@ Tree-shakeable API:
 const seconds = PlainTimeFns.diffSeconds(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -601,7 +601,7 @@ Tree-shakeable API:
 const milliseconds = PlainTimeFns.diffMilliseconds(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -627,7 +627,7 @@ Tree-shakeable API:
 const microseconds = PlainTimeFns.diffMicroseconds(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -653,7 +653,7 @@ Tree-shakeable API:
 const nanoseconds = PlainTimeFns.diffNanoseconds(time, otherTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'
@@ -894,7 +894,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.startOfHour(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfHour } from 'temporal-utils'
@@ -916,7 +916,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.startOfMinute(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMinute } from 'temporal-utils'
@@ -938,7 +938,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.startOfSecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfSecond } from 'temporal-utils'
@@ -960,7 +960,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.startOfMillisecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMillisecond } from 'temporal-utils'
@@ -982,7 +982,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.startOfMicrosecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMicrosecond } from 'temporal-utils'
@@ -1006,7 +1006,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.endOfHour(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfHour } from 'temporal-utils'
@@ -1030,7 +1030,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.endOfMinute(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMinute } from 'temporal-utils'
@@ -1054,7 +1054,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.endOfSecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfSecond } from 'temporal-utils'
@@ -1078,7 +1078,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.endOfMillisecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMillisecond } from 'temporal-utils'
@@ -1102,7 +1102,7 @@ Tree-shakeable API:
 const nextTime = PlainTimeFns.endOfMicrosecond(time)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMicrosecond } from 'temporal-utils'

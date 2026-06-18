@@ -507,7 +507,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.withDayOfYear(dateTime, dayOfYear, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { withDayOfYear } from 'temporal-utils'
@@ -549,7 +549,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.withDayOfWeek(dateTime, dayOfWeek, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { withDayOfWeek } from 'temporal-utils'
@@ -571,7 +571,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.withWeekOfYear(dateTime, weekOfYear, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { withWeekOfYear } from 'temporal-utils'
@@ -1065,7 +1065,7 @@ Tree-shakeable API:
 const years = PlainDateTimeFns.diffYears(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffYears } from 'temporal-utils'
@@ -1091,7 +1091,7 @@ Tree-shakeable API:
 const months = PlainDateTimeFns.diffMonths(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMonths } from 'temporal-utils'
@@ -1117,7 +1117,7 @@ Tree-shakeable API:
 const weeks = PlainDateTimeFns.diffWeeks(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffWeeks } from 'temporal-utils'
@@ -1143,7 +1143,7 @@ Tree-shakeable API:
 const days = PlainDateTimeFns.diffDays(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffDays } from 'temporal-utils'
@@ -1169,7 +1169,7 @@ Tree-shakeable API:
 const hours = PlainDateTimeFns.diffHours(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -1195,7 +1195,7 @@ Tree-shakeable API:
 const minutes = PlainDateTimeFns.diffMinutes(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -1221,7 +1221,7 @@ Tree-shakeable API:
 const seconds = PlainDateTimeFns.diffSeconds(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -1247,7 +1247,7 @@ Tree-shakeable API:
 const milliseconds = PlainDateTimeFns.diffMilliseconds(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -1273,7 +1273,7 @@ Tree-shakeable API:
 const microseconds = PlainDateTimeFns.diffMicroseconds(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -1299,7 +1299,7 @@ Tree-shakeable API:
 const nanoseconds = PlainDateTimeFns.diffNanoseconds(dateTime, otherDateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'
@@ -1374,7 +1374,7 @@ const nextDateTime = PlainDateTimeFns.roundToYear(dateTime, 'ceil')
 const nextDateTime = PlainDateTimeFns.roundToYear(dateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { roundToYear } from 'temporal-utils'
@@ -1402,7 +1402,7 @@ const nextDateTime = PlainDateTimeFns.roundToMonth(dateTime, 'ceil')
 const nextDateTime = PlainDateTimeFns.roundToMonth(dateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { roundToMonth } from 'temporal-utils'
@@ -1430,7 +1430,7 @@ const nextDateTime = PlainDateTimeFns.roundToWeek(dateTime, 'ceil')
 const nextDateTime = PlainDateTimeFns.roundToWeek(dateTime, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { roundToWeek } from 'temporal-utils'
@@ -1660,7 +1660,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfYear(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfYear } from 'temporal-utils'
@@ -1682,7 +1682,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfMonth(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMonth } from 'temporal-utils'
@@ -1704,7 +1704,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfWeek(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfWeek } from 'temporal-utils'
@@ -1726,7 +1726,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfDay(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfDay } from 'temporal-utils'
@@ -1748,7 +1748,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfHour(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfHour } from 'temporal-utils'
@@ -1770,7 +1770,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfMinute(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMinute } from 'temporal-utils'
@@ -1792,7 +1792,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfSecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfSecond } from 'temporal-utils'
@@ -1814,7 +1814,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfMillisecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMillisecond } from 'temporal-utils'
@@ -1836,7 +1836,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.startOfMicrosecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfMicrosecond } from 'temporal-utils'
@@ -1860,7 +1860,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfYear(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfYear } from 'temporal-utils'
@@ -1884,7 +1884,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfMonth(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMonth } from 'temporal-utils'
@@ -1908,7 +1908,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfWeek(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfWeek } from 'temporal-utils'
@@ -1932,7 +1932,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfDay(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfDay } from 'temporal-utils'
@@ -1956,7 +1956,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfHour(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfHour } from 'temporal-utils'
@@ -1980,7 +1980,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfMinute(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMinute } from 'temporal-utils'
@@ -2004,7 +2004,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfSecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfSecond } from 'temporal-utils'
@@ -2028,7 +2028,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfMillisecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMillisecond } from 'temporal-utils'
@@ -2052,7 +2052,7 @@ Tree-shakeable API:
 const nextDateTime = PlainDateTimeFns.endOfMicrosecond(dateTime)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfMicrosecond } from 'temporal-utils'

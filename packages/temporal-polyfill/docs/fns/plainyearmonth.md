@@ -447,7 +447,7 @@ Tree-shakeable API:
 const years = PlainYearMonthFns.diffYears(yearMonth, otherYearMonth, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffYears } from 'temporal-utils'
@@ -473,7 +473,7 @@ Tree-shakeable API:
 const months = PlainYearMonthFns.diffMonths(yearMonth, otherYearMonth, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { diffMonths } from 'temporal-utils'
@@ -547,7 +547,7 @@ const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, 'ceil')
 const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, options)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { roundToYear } from 'temporal-utils'
@@ -573,7 +573,7 @@ Tree-shakeable API:
 const nextYearMonth = PlainYearMonthFns.startOfYear(yearMonth)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { startOfYear } from 'temporal-utils'
@@ -597,7 +597,7 @@ Tree-shakeable API:
 const nextYearMonth = PlainYearMonthFns.endOfYear(yearMonth)
 ```
 
-Temporal API equivalent:
+Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
 
 ```ts
 import { endOfYear } from 'temporal-utils'
