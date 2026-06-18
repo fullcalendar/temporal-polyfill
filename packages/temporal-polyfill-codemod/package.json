@@ -11,7 +11,8 @@
   "copyright": "2026 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
+    "directory": "packages/temporal-polyfill-codemod"
   },
   "type": "module",
   "main": "./dist/index.js",

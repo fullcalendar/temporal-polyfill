@@ -12,7 +12,8 @@
   "copyright": "2026 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
+    "directory": "packages/temporal-utils"
   },
   "files": [
     "dist",
