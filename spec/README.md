@@ -30,7 +30,7 @@ the declarations, and they tended to drift apart.
 
 `temporal-spec` centralizes those declarations into a standalone, dependency-free
 package. It's the type layer behind
-[`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/tree/main/polyfill),
+[`temporal-polyfill`](../polyfill/README.md),
 and it's published separately so other Temporal implementations can reuse the
 exact same types.
 

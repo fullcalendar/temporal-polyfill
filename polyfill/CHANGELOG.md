@@ -1,34 +1,53 @@
 
-v1.0.1
-------
+# `temporal-polyfill` Changelog
 
-- chore: publish as `1.0.1` because npm already has an old `1.0.0`, which confuses dependency update tools (#88)
-- fix: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
-- fix: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
-- fix: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification (#92)
-- fix: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day (#84)
-- fix: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles (#75)
-- fix: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 (#74)
-- fix: `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` values in Node 22 instead of falling through to `valueOf()` and throwing `TypeError: Cannot use valueOf` (#95)
-- fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
-- fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
-- feature: native-aware by default — `temporal-polyfill`, `temporal-polyfill/global`, and `install()` now use the runtime's built-in `Temporal` when present, falling back to the bundled implementation only when it's missing. Previously the bundled implementation was always installed.
-- feature: new entry points for controlling installation — `temporal-polyfill/shim` (`install()` is native-aware, `installImplementation()` force-installs the bundled implementation) and `temporal-polyfill/implementation` (side-effect-free, bundled implementation only).
-- breaking: no more cjs in dist
-- Calendars more conformant
-- Removed Node 14 support
-- global.min.js no longer part of published dist (use jsdelivr)
+## v1.0.1
 
+- FEATURE: Tree-shakeable API [See docs](../docs/fns/index.md)
+- FEATURE: Unlike prior versions, leverage native Temporal if available
+- FEATURE: New entrypoints `/implementation` and `/shim` give greater control over native VS internal. [See docs](./README.md#package-entrypoints).
+- FEATURE: Global bundle size decrease. 20,212 B → 19,594 B (3%)
+- FEATURE: Conformance with latest spec (June 2026)
+- FEATURE: Better calendar-aware conformance because calendars math now done algorithmically when possible instead of relying entirely on faulty Intl-scraped data. Credit to [@internationalized/date]. Though requires different entrypoints.
+- BREAKING: The `iso8601` and `gregory` calendars are supported as-is, but users of other calendars must change their entrypoint. See Upgrade Notes below.
+- BREAKING: Support for browsers has been raised. Must support Bigint. See [support matrix](./README.md#supported-environments).
+- BREAKING: Raised minimum Node.js support to 16
+- BREAKING: Dropped CJS support and only supports ESM and global IIFE
+- BREAKING: The `global.min.js` file no longer included in NPM package,
+  but can still be accessed via jsdelivr CDN ([like this](https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/global.min.js))
+  because they auto-minify JS files.
+- FIX: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
+- FIX: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
+- FIX: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification (#92)
+- FIX: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day (#84)
+- FIX: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles (#75)
+- FIX: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 (#74)
+- FIX: `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` values in Node 22 instead of falling through to `valueOf()` and throwing `TypeError: Cannot use valueOf` (#95)
+- FIX: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
+- FIX: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
+- FIX: Uncaught TypeError: Cannot use `valueOf` when using `Temporal.PlainTime` (#95)
+- VERSION-NOTE: This first real 1.0 release is released as 1.0.1 because 1.0.0 was accidentally published as a blank package many years ago (related to #88).
 
-v0.3.2 (2026-03-10)
--------------------
+### Upgrade Notes
+
+If you use any of the following calendar systems, please use the `/full/` entrypoints now: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
+
+```diff
+- import 'temporal-polyfill/global'
++ import 'temporal-polyfill/full/global'
+
+- import { Temporal } from 'temporal-polyfill'
++ import { Temporal } from 'temporal-polyfill/full'
+```
+
+[@internationalized/date]: https://github.com/adobe/react-spectrum/tree/main/packages/@internationalized/date
+
+## v0.3.2 (2026-03-10)
 
 - feature: function API in dist, though poorly documented and in alpha
 - fix: incorrect placement of `/*@__PURE__*/` (#90)
 
-
-v0.3.1 (2026-03-09)
--------------------
+## v0.3.1 (2026-03-09)
 
 - feature: More readable objects on console (#46)
 - feature: support require(esm) in Node.js to avoid dual package hazard (#62)
@@ -38,9 +57,7 @@ v0.3.1 (2026-03-09)
 - fix: stop using locale `en-GB` for computations, not present in some environments (#76)
 - fix: result of `Temporal.Now.timeZoneId()` should not be cached (#63)
 
-
-v0.3.0 (2025-03-28)
--------------------
+## v0.3.0 (2025-03-28)
 
 - Updated to March 2025 version of Temporal spec (#47). Including but not limited to:
   - timeZones can ONLY be strings; no longer accepts custom objects
@@ -123,27 +140,21 @@ v0.3.0 (2025-03-28)
 
 [Learn more about these breaking changes &raquo;](https://github.com/js-temporal/temporal-polyfill/blob/main/CHANGELOG.md#050)
 
-
-v0.2.5 (2024-05-30)
--------------------
+## v0.2.5 (2024-05-30)
 
 - conformance to latest spec (May 2024)
 - fix: Chrome on Android reporting wrong era for islamic calendars (#39)
 - fix: Bug with eras on Firefox 96 - 105
   (https://bugzilla.mozilla.org/show_bug.cgi?id=1752253)
 
-
-v0.2.4 (2024-04-05)
--------------------
+## v0.2.4 (2024-04-05)
 
 - conformance to latest spec (Apr 2024)
 - fix: Typescript error when using CommonJS module outputs (#35)
 - fix: PlainTime.toString() throws error with SWC minifier (#36)
 - fix: temporal-spec types updated for weekOfYear/yearOfWeek
 
-
-v0.2.3 (2024-03-01)
--------------------
+## v0.2.3 (2024-03-01)
 
 - fix: more readable error message when no valid fields specified (#30)
 - fix: more readable error message when unit is out of range
@@ -156,9 +167,7 @@ v0.2.3 (2024-03-01)
   - prevent legacy ICU time zone IDs
   - don't normalize the islamicc calenadar name to islamic-civil
 
-
-v0.2.2 (2024-02-20)
--------------------
+## v0.2.2 (2024-02-20)
 
 - fix: when importing `'temporal-polyfill'` or `'temporal-polyfill/impl'`,
   the symbol `DateTimeFormat` is exported when in fact `Intl` should be exported
@@ -167,9 +176,7 @@ v0.2.2 (2024-02-20)
 - fix: closed off potential attack vector for ReDoS attacks on regular
   expressions that parse ISO datetime strings (76a6aca)
 
-
-v0.2.1 (2024-02-05)
--------------------
+## v0.2.1 (2024-02-05)
 
 - fix: `dayOfWeek`/`yearOfWeek`/`weekOfYear` incorrectly using local time (#26, #27)
 - fix: Compliant string-level normalization of time zone IDs (mentioned in #3)
@@ -178,9 +185,7 @@ v0.2.1 (2024-02-05)
 - fix: `Duration::toLocaleString` falls back to `toString`
 - feature: better tree-shakability for ESM
 
-
-v0.2.0 (2024-01-07)
--------------------
+## v0.2.0 (2024-01-07)
 
 - Updated with latest [test262](https://github.com/tc39/test262) conformance tests (Nov 2023) (#3).
 All tests passing barring intentional deviations from spec, documented in [README](README.md).
@@ -193,31 +198,23 @@ most notably changes to "user-visible operations".
 - Improved README content, including comparison with @js-temporal (#22)
 - Renamed github repo to fullcalendar/temporal-polyfill
 
-
-v0.1.1 (2023-02-15)
--------------------
+## v0.1.1 (2023-02-15)
 
 - fix: upgrade temporal-spec, which is now compatible with moduleResolution:node16 (#17 cont'd)
 - fix: don't fallback to native Temporal implementation for ponyfill (#19 cont'd)
 
-
-v0.1.0 (2023-02-09)
--------------------
+## v0.1.0 (2023-02-09)
 
 - fix: Support TypeScript 4.7 moduleResolution:node16 (#17)
 - fix: Avoiding fallback to native Temporal implementation (#19)
 
-
-v0.0.8 (2022-08-24)
--------------------
+## v0.0.8 (2022-08-24)
 
 - Support environments without BigInt. See browser version matrix in README.
 - Fixed TypeScript syntax error in `temporal-spec/index.d.ts` (#10)
 - Fixed missing .d.ts files for environments that don't support export maps.
 
-
-v0.0.7 (2022-05-06)
--------------------
+## v0.0.7 (2022-05-06)
 
 - BREAKING: side-effect-free entrypoint now exports named exports instead of default `Temporal`
   - No longer works: `import Temporal from 'temporal-polyfill'`
@@ -225,22 +222,16 @@ v0.0.7 (2022-05-06)
   - Allows access to `Intl` side-effect-free export
 - Uses types created by TC39 Committee
 
-
-v0.0.6 (2022-04-06)
--------------------
+## v0.0.6 (2022-04-06)
 
 - Improved spec-compliance. Passes all tests from @js-temporal/polyfill repo.
 
-
-v0.0.5 (2022-03-16)
--------------------
+## v0.0.5 (2022-03-16)
 
 - Intl.DateTimeFormat correctly polyfilled to customize output based on Temporal type
 - fixes to TimeZone object
 
-
-v0.0.4 (2022-03-10)
--------------------
+## v0.0.4 (2022-03-10)
 
 - improved support for non-ISO calendars
 - fixed `Now` methods returning wrong results (#5)
