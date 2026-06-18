@@ -111,13 +111,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const yearMonth = PlainYearMonthFns.create(2024, 5)
+const yearMonth = PlainYearMonthFns.create(2026, 6)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const yearMonth = new Temporal.PlainYearMonth(2024, 5)
+const yearMonth = new Temporal.PlainYearMonth(2026, 6)
 ```
 
 If the optional calendar argument is present, replace a known `CalendarFns.Record` expression with its calendar identifier. Preserve `referenceIsoDay` as the fourth constructor argument when present.
@@ -158,7 +158,7 @@ Tree-shakeable API:
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const yearMonth = PlainYearMonthFns.fromString(
-  '2024-05[u-ca=gregory]',
+  '2026-06[u-ca=gregory]',
   CalendarFns.getBasic,
 )
 ```
@@ -166,7 +166,7 @@ const yearMonth = PlainYearMonthFns.fromString(
 Temporal API equivalent:
 
 ```ts
-const yearMonth = Temporal.PlainYearMonth.from('2024-05[u-ca=gregory]')
+const yearMonth = Temporal.PlainYearMonth.from('2026-06[u-ca=gregory]')
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
@@ -288,7 +288,7 @@ const nextYearMonth = yearMonth.with(fields, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -350,7 +350,7 @@ const nextYearMonth = yearMonth.add({ months }, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -414,7 +414,7 @@ const nextYearMonth = yearMonth.subtract({ months }, options)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<YearMonthUnitName>) => DurationRecord
+(record: Record, otherRecord: Record, options?: DiffOptions<YearMonthUnitName>) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -708,7 +708,7 @@ This rewrite is appropriate when later uses rely on `format.format(yearMonth)`.
 Signature:
 
 ```ts
-(record: Record, fields: DayFields) => PlainDateRecord
+(record: Record, fields: DayFields) => PlainDateFns.Record
 ```
 
 Tree-shakeable API:

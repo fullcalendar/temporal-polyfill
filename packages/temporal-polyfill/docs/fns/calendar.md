@@ -83,9 +83,9 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getBasic('gregory')
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 const parsed = PlainDateFns.fromString(
-  '2024-05-01[u-ca=gregory]',
+  '2026-06-01[u-ca=gregory]',
   CalendarFns.getBasic,
 )
 ```
@@ -94,8 +94,8 @@ Temporal API equivalent:
 
 ```ts
 const calendar = 'gregory'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
-const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=gregory]')
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
+const parsed = Temporal.PlainDate.from('2026-06-01[u-ca=gregory]')
 ```
 
 `getBasic` accepts only `iso8601` and `gregory`. When it is passed as a
@@ -115,21 +115,21 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getExotic('buddhist')
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'buddhist'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 For dynamic calendar IDs, the real Temporal equivalent is the same:
 
 ```ts
 const calendar = calendarId
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 `getExotic` validates that `name` is one of the tree-shakeable API's
@@ -163,9 +163,9 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getAny(calendarId)
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 const parsed = PlainDateFns.fromString(
-  '2024-05-01[u-ca=buddhist]',
+  '2026-06-01[u-ca=buddhist]',
   CalendarFns.getAny,
 )
 ```
@@ -174,8 +174,8 @@ Temporal API equivalent:
 
 ```ts
 const calendar = calendarId
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
-const parsed = Temporal.PlainDate.from('2024-05-01[u-ca=buddhist]')
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
+const parsed = Temporal.PlainDate.from('2026-06-01[u-ca=buddhist]')
 ```
 
 `getAny` returns the shared ISO or Gregorian records for basic calendar
@@ -205,14 +205,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getISO()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'iso8601'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getGregory`
@@ -227,14 +227,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getGregory()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'gregory'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ## Exotic Calendars
@@ -256,14 +256,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getBuddhist()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'buddhist'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getChinese`
@@ -278,14 +278,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getChinese()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'chinese'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getDangi`
@@ -300,14 +300,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getDangi()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'dangi'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getCoptic`
@@ -322,14 +322,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getCoptic()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'coptic'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getEthiopic`
@@ -344,14 +344,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getEthiopic()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'ethiopic'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getEthiopicAmeteAlem`
@@ -366,14 +366,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getEthiopicAmeteAlem()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'ethioaa'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getHebrew`
@@ -388,14 +388,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getHebrew()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'hebrew'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getIndian`
@@ -410,14 +410,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIndian()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'indian'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getJapanese`
@@ -432,14 +432,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getJapanese()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'japanese'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getIslamicCivil`
@@ -454,14 +454,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicCivil()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-civil'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getIslamicTabular`
@@ -476,14 +476,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicTabular()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-tbla'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getIslamicUmmAlQura`
@@ -498,14 +498,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getIslamicUmmAlQura()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'islamic-umalqura'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getPersian`
@@ -520,14 +520,14 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getPersian()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'persian'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
 ### `getROC`
@@ -542,12 +542,12 @@ Tree-shakeable API:
 
 ```ts
 const calendar = CalendarFns.getROC()
-const date = PlainDateFns.create(2024, 5, 1, calendar)
+const date = PlainDateFns.create(2026, 6, 1, calendar)
 ```
 
 Temporal API equivalent:
 
 ```ts
 const calendar = 'roc'
-const date = new Temporal.PlainDate(2024, 5, 1, calendar)
+const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```

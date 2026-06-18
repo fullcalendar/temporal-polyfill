@@ -204,7 +204,7 @@ const nextTime = time.with(fields, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord) => Record
+(record: Record, duration: DurationFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -346,7 +346,7 @@ const nextTime = time.add({ nanoseconds })
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord) => Record
+(record: Record, duration: DurationFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -490,7 +490,7 @@ const nextTime = time.subtract({ nanoseconds })
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationRecord
+(record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationFns.Record
 ```
 
 Tree-shakeable API:

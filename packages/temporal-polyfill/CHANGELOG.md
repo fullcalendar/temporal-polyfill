@@ -12,7 +12,6 @@ v1.0.1
 - fix: `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` values in Node 22 instead of falling through to `valueOf()` and throwing `TypeError: Cannot use valueOf` (#95)
 - fix: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
 - fix: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
-
 - feature: native-aware by default — `temporal-polyfill`, `temporal-polyfill/global`, and `install()` now use the runtime's built-in `Temporal` when present, falling back to the bundled implementation only when it's missing. Previously the bundled implementation was always installed.
 - feature: new entry points for controlling installation — `temporal-polyfill/shim` (`install()` is native-aware, `installImplementation()` force-installs the bundled implementation) and `temporal-polyfill/implementation` (side-effect-free, bundled implementation only).
 - breaking: no more cjs in dist

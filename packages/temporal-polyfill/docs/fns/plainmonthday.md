@@ -304,19 +304,19 @@ This rewrite is appropriate when later uses rely on `format.format(monthDay)`.
 Signature:
 
 ```ts
-(record: Record, fields: EraYearOrYear) => PlainDateRecord
+(record: Record, fields: EraYearOrYear) => PlainDateFns.Record
 ```
 
 Tree-shakeable API:
 
 ```ts
-const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2024 })
+const date = PlainMonthDayFns.toPlainDate(monthDay, { year: 2026 })
 ```
 
 Temporal API equivalent:
 
 ```ts
-const date = monthDay.toPlainDate({ year: 2024 })
+const date = monthDay.toPlainDate({ year: 2026 })
 ```
 
 ### `toTemporal`

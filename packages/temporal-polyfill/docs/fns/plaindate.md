@@ -137,13 +137,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const date = PlainDateFns.create(2024, 5, 1)
+const date = PlainDateFns.create(2026, 6, 1)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const date = new Temporal.PlainDate(2024, 5, 1)
+const date = new Temporal.PlainDate(2026, 6, 1)
 ```
 
 If the optional calendar argument is present, replace a known `CalendarFns.Record`
@@ -186,7 +186,7 @@ Tree-shakeable API:
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const date = PlainDateFns.fromString(
-  '2024-05-01[u-ca=gregory]',
+  '2026-06-01[u-ca=gregory]',
   CalendarFns.getBasic,
 )
 ```
@@ -194,7 +194,7 @@ const date = PlainDateFns.fromString(
 Temporal API equivalent:
 
 ```ts
-const date = Temporal.PlainDate.from('2024-05-01[u-ca=gregory]')
+const date = Temporal.PlainDate.from('2026-06-01[u-ca=gregory]')
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
@@ -525,7 +525,7 @@ const nextDate = withWeekOfYear(date, weekOfYear, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -627,7 +627,7 @@ const nextDate = date.add({ days })
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -731,7 +731,7 @@ const nextDate = date.subtract({ days })
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<DateUnitName>) => DurationRecord
+(record: Record, otherRecord: Record, options?: DiffOptions<DateUnitName>) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -1219,8 +1219,8 @@ This rewrite is appropriate when later uses rely on `format.format(date)`.
 Signature:
 
 ```ts
-(record: Record, timeZoneId: string) => ZonedDateTimeRecord
-(record: Record, options: ToZonedDateTimeOptions) => ZonedDateTimeRecord
+(record: Record, timeZoneId: string) => ZonedDateTimeFns.Record
+(record: Record, options: ToZonedDateTimeOptions) => ZonedDateTimeFns.Record
 ```
 
 Tree-shakeable API:
@@ -1242,7 +1242,7 @@ If `options` is a string time zone, keep it as the single argument.
 Signature:
 
 ```ts
-(record: Record, plainTimeRecord?: PlainTimeRecord) => PlainDateTimeRecord
+(record: Record, plainTimeRecord?: PlainTimeFns.Record) => PlainDateTimeFns.Record
 ```
 
 Tree-shakeable API:
@@ -1257,14 +1257,14 @@ Temporal API equivalent:
 const dateTime = date.toPlainDateTime(time)
 ```
 
-Any `PlainTimeRecord` argument needs its own record-to-Temporal transform.
+Any `PlainTimeFns.Record` argument needs its own record-to-Temporal transform.
 
 ### `toPlainYearMonth`
 
 Signature:
 
 ```ts
-(record: Record) => PlainYearMonthRecord
+(record: Record) => PlainYearMonthFns.Record
 ```
 
 Tree-shakeable API:
@@ -1284,7 +1284,7 @@ const yearMonth = date.toPlainYearMonth()
 Signature:
 
 ```ts
-(record: Record) => PlainMonthDayRecord
+(record: Record) => PlainMonthDayFns.Record
 ```
 
 Tree-shakeable API:

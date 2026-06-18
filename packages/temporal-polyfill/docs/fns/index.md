@@ -7,10 +7,10 @@ keeps only the functions you actually import:
 ```js
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-const date = PlainDateFns.create(2024, 1, 1)
+const date = PlainDateFns.create(2026, 6, 1)
 const later = PlainDateFns.addMonths(date, 2)
 
-PlainDateFns.toString(later) // '2024-03-01'
+PlainDateFns.toString(later) // '2026-08-01'
 ```
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
@@ -59,8 +59,6 @@ before calling `toTemporal`; we recommend this package's own
 Abbreviations used by the type pages:
 
 - `Record` is the record type exported by the file being cataloged.
-- `CalendarFns.Record` is the opaque calendar handle used by tree-shakeable API
-  functions that accept calendar behavior.
 - `OverflowOptions` is the calendar-field overflow options bag.
 - `RoundingMathOptions` contains rounding increment and rounding mode options.
   The unit is implied by the `roundTo*` function name. Round helpers also

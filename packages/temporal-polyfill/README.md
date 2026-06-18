@@ -279,10 +279,10 @@ functions you actually import.
 ```js
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-const date = PlainDateFns.create(2024, 1, 1)
+const date = PlainDateFns.create(2026, 6, 1)
 const later = PlainDateFns.addMonths(date, 2)
 
-PlainDateFns.toString(later) // '2024-03-01'
+PlainDateFns.toString(later) // '2026-08-01'
 ```
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for

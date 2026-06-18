@@ -236,7 +236,7 @@ Tree-shakeable API:
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const zonedDateTime = ZonedDateTimeFns.fromString(
-  '2024-05-01T12:30:00-04:00[America/New_York][u-ca=gregory]',
+  '2026-06-01T12:30:00-04:00[America/New_York][u-ca=gregory]',
   CalendarFns.getBasic,
 )
 ```
@@ -245,7 +245,7 @@ Temporal API equivalent:
 
 ```ts
 const zonedDateTime = Temporal.ZonedDateTime.from(
-  '2024-05-01T12:30:00-04:00[America/New_York][u-ca=gregory]',
+  '2026-06-01T12:30:00-04:00[America/New_York][u-ca=gregory]',
 )
 ```
 
@@ -568,7 +568,7 @@ const nextZonedDateTime = zonedDateTime.withTimeZone(timeZoneId)
 Signature:
 
 ```ts
-(record: Record, plainTimeRecord?: PlainTimeRecord) => Record
+(record: Record, plainTimeRecord?: PlainTimeFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -583,7 +583,7 @@ Temporal API equivalent:
 const nextZonedDateTime = zonedDateTime.withPlainTime(time)
 ```
 
-Any `PlainTimeRecord` argument needs its own record-to-Temporal transform.
+Any `PlainTimeFns.Record` argument needs its own record-to-Temporal transform.
 
 ### `withDayOfYear`
 
@@ -678,7 +678,7 @@ const nextZonedDateTime = withWeekOfYear(zonedDateTime, weekOfYear, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -900,7 +900,7 @@ const nextZonedDateTime = zonedDateTime.add({ nanoseconds: value }, options)
 Signature:
 
 ```ts
-(record: Record, duration: DurationRecord, options?: OverflowOptions) => Record
+(record: Record, duration: DurationFns.Record, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -1124,7 +1124,7 @@ const nextZonedDateTime = zonedDateTime.subtract({ nanoseconds: value }, options
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<UnitName>) => DurationRecord
+(record: Record, otherRecord: Record, options?: DiffOptions<UnitName>) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -2261,7 +2261,7 @@ const text = format.format(zonedDateTime.epochMilliseconds)
 Signature:
 
 ```ts
-(record: Record) => InstantRecord
+(record: Record) => InstantFns.Record
 ```
 
 Tree-shakeable API:
@@ -2281,7 +2281,7 @@ const instant = zonedDateTime.toInstant()
 Signature:
 
 ```ts
-(record: Record) => PlainDateTimeRecord
+(record: Record) => PlainDateTimeFns.Record
 ```
 
 Tree-shakeable API:
@@ -2301,7 +2301,7 @@ const dateTime = zonedDateTime.toPlainDateTime()
 Signature:
 
 ```ts
-(record: Record) => PlainDateRecord
+(record: Record) => PlainDateFns.Record
 ```
 
 Tree-shakeable API:
@@ -2321,7 +2321,7 @@ const date = zonedDateTime.toPlainDate()
 Signature:
 
 ```ts
-(record: Record) => PlainTimeRecord
+(record: Record) => PlainTimeFns.Record
 ```
 
 Tree-shakeable API:

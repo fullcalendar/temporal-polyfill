@@ -111,13 +111,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const instant = InstantFns.create(1714570200000000000n)
+const instant = InstantFns.create(1780320600000000000n)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const instant = new Temporal.Instant(1714570200000000000n)
+const instant = new Temporal.Instant(1780320600000000000n)
 ```
 
 ### `fromEpochMilliseconds`
@@ -131,13 +131,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const instant = InstantFns.fromEpochMilliseconds(1714570200000)
+const instant = InstantFns.fromEpochMilliseconds(1780320600000)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const instant = Temporal.Instant.fromEpochMilliseconds(1714570200000)
+const instant = Temporal.Instant.fromEpochMilliseconds(1780320600000)
 ```
 
 ### `fromEpochNanoseconds`
@@ -151,13 +151,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const instant = InstantFns.fromEpochNanoseconds(1714570200000000000n)
+const instant = InstantFns.fromEpochNanoseconds(1780320600000000000n)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const instant = Temporal.Instant.fromEpochNanoseconds(1714570200000000000n)
+const instant = Temporal.Instant.fromEpochNanoseconds(1780320600000000000n)
 ```
 
 ### `fromString`
@@ -171,13 +171,13 @@ Signature:
 Tree-shakeable API:
 
 ```ts
-const instant = InstantFns.fromString('2024-05-01T13:30:00Z')
+const instant = InstantFns.fromString('2026-06-01T13:30:00Z')
 ```
 
 Temporal API equivalent:
 
 ```ts
-const instant = Temporal.Instant.from('2024-05-01T13:30:00Z')
+const instant = Temporal.Instant.from('2026-06-01T13:30:00Z')
 ```
 
 ## Arithmetic
@@ -187,7 +187,7 @@ const instant = Temporal.Instant.from('2024-05-01T13:30:00Z')
 Signature:
 
 ```ts
-(record: Record, durationRecord: DurationRecord) => Record
+(record: Record, durationRecord: DurationFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -329,7 +329,7 @@ const nextInstant = instant.add({ nanoseconds })
 Signature:
 
 ```ts
-(record: Record, durationRecord: DurationRecord) => Record
+(record: Record, durationRecord: DurationFns.Record) => Record
 ```
 
 Tree-shakeable API:
@@ -473,7 +473,7 @@ const nextInstant = instant.subtract({ nanoseconds })
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationRecord
+(record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -966,7 +966,7 @@ This rewrite is appropriate when later uses rely on `format.format(instant)`.
 Signature:
 
 ```ts
-(record: Record, timeZoneId: string) => ZonedDateTimeRecord
+(record: Record, timeZoneId: string) => ZonedDateTimeFns.Record
 ```
 
 Tree-shakeable API:

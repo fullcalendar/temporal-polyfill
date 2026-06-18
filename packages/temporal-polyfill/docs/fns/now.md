@@ -47,7 +47,7 @@ const timeZoneId = Temporal.Now.timeZoneId()
 Signature:
 
 ```ts
-() => InstantRecord
+() => InstantFns.Record
 ```
 
 Tree-shakeable API:
@@ -67,7 +67,7 @@ const instant = Temporal.Now.instant()
 Signature:
 
 ```ts
-(timeZoneId?: string) => ZonedDateTimeRecord
+(timeZoneId?: string) => ZonedDateTimeFns.Record
 ```
 
 Tree-shakeable API:
@@ -87,7 +87,7 @@ const zonedDateTime = Temporal.Now.zonedDateTimeISO('America/New_York')
 Signature:
 
 ```ts
-(timeZoneId?: string) => PlainDateTimeRecord
+(timeZoneId?: string) => PlainDateTimeFns.Record
 ```
 
 Tree-shakeable API:
@@ -107,7 +107,7 @@ const dateTime = Temporal.Now.plainDateTimeISO('America/New_York')
 Signature:
 
 ```ts
-(timeZoneId?: string) => PlainDateRecord
+(timeZoneId?: string) => PlainDateFns.Record
 ```
 
 Tree-shakeable API:
@@ -127,7 +127,7 @@ const date = Temporal.Now.plainDateISO('America/New_York')
 Signature:
 
 ```ts
-(timeZoneId?: string) => PlainTimeRecord
+(timeZoneId?: string) => PlainTimeFns.Record
 ```
 
 Tree-shakeable API:
