@@ -140,7 +140,7 @@ const time = new Temporal.PlainTime(9, 30)
 Signature:
 
 ```ts
-(fields: Partial<TimeFields>, options?: OverflowOptions) => Record
+(fields: PlainTimeFns.FromFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -182,7 +182,7 @@ const time = Temporal.PlainTime.from(value)
 Signature:
 
 ```ts
-(record: Record, mod: Partial<TimeFields>, options?: OverflowOptions) => Record
+(record: Record, mod: PlainTimeFns.WithFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:

@@ -205,7 +205,7 @@ If the optional calendar argument is present, replace a known `CalendarFns.Recor
 Signature:
 
 ```ts
-(fields: ZonedFields, options?: ZonedFieldOptions) => Record
+(fields: ZonedDateTimeFns.FromFields, options?: ZonedDateTimeFns.FromOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -227,7 +227,7 @@ If `fields.calendar` is still a `CalendarFns.Record`, replace it with the calend
 Signature:
 
 ```ts
-(s: string, getCalendar: (calendarId: string) => CalendarFns.Record, options?: ZonedFieldOptions) => Record
+(s: string, getCalendar: (calendarId: string) => CalendarFns.Record, options?: ZonedDateTimeFns.FromOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -506,7 +506,7 @@ const hoursInDay = zonedDateTime.hoursInDay
 Signature:
 
 ```ts
-(record: Record, mod: Partial<DateTimeFields>, options?: ZonedFieldOptions) => Record
+(record: Record, mod: ZonedDateTimeFns.WithFields, options?: ZonedDateTimeFns.WithOptions) => Record
 ```
 
 Tree-shakeable API:

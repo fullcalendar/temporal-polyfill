@@ -23,6 +23,7 @@ export type { Record }
 export type FromFields = ZonedDateTimeFields<CalendarFns.Record>
 export type FromOptions = Temporal.ZonedDateTimeFromOptions
 export type WithFields = Partial<DateTimeFields>
+export type WithOptions = Temporal.ZonedDateTimeFromOptions
 export type DiffOptions = Temporal.RoundingOptionsWithLargestUnit<
   Temporal.DateUnit | Temporal.TimeUnit
 >
@@ -50,7 +51,7 @@ export const fromString: (
 export const withFields: (
   record: Record,
   mod: WithFields,
-  options?: FromOptions,
+  options?: WithOptions,
 ) => Record = NativeTemporal ? Native.withFields : Shim.withFields
 
 export const withCalendar: (

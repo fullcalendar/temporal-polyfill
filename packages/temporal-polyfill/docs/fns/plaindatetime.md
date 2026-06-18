@@ -195,7 +195,7 @@ If the optional calendar argument is present, replace a known `CalendarFns.Recor
 Signature:
 
 ```ts
-(fields: Partial<DateTimeFields> & { calendar: CalendarFns.Record }, options?: OverflowOptions) => Record
+(fields: PlainDateTimeFns.FromFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -456,7 +456,7 @@ Replace a known `CalendarFns.Record` expression with its calendar identifier.
 Signature:
 
 ```ts
-(record: Record, mod: Partial<DateTimeFields>, options?: OverflowOptions) => Record
+(record: Record, mod: PlainDateTimeFns.WithFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:

@@ -105,7 +105,7 @@ fourth constructor argument when present.
 Signature:
 
 ```ts
-(fields: Partial<MonthDayFields> & { calendar?: CalendarFns.Record }, options?: OverflowOptions) => Record
+(fields: PlainMonthDayFns.FromFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -164,7 +164,7 @@ its import or local binding is unused.
 Signature:
 
 ```ts
-(record: Record, mod: Partial<MonthDayFields>, options?: OverflowOptions) => Record
+(record: Record, mod: PlainMonthDayFns.WithFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:

@@ -154,7 +154,7 @@ expression with its calendar identifier.
 Signature:
 
 ```ts
-(fields: Partial<DateFields> & { calendar: CalendarFns.Record }, options?: OverflowOptions) => Record
+(fields: PlainDateFns.FromFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -395,7 +395,7 @@ const inLeapYear = date.inLeapYear
 Signature:
 
 ```ts
-(record: Record, mod: Partial<DateFields>, options?: OverflowOptions) => Record
+(record: Record, mod: PlainDateFns.WithFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:

@@ -116,7 +116,7 @@ const duration = new Temporal.Duration(0, 0, 0, 0, 1, 30)
 Signature:
 
 ```ts
-(fields: Partial<DurationFields>) => Record
+(fields: DurationFns.FromFields) => Record
 ```
 
 Tree-shakeable API:
@@ -200,7 +200,7 @@ const blank = duration.blank
 Signature:
 
 ```ts
-(duration: Record, mod: Partial<DurationFields>) => Record
+(duration: Record, mod: DurationFns.WithFields) => Record
 ```
 
 Tree-shakeable API:

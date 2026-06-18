@@ -127,7 +127,7 @@ If the optional calendar argument is present, replace a known `CalendarFns.Recor
 Signature:
 
 ```ts
-(fields: Partial<YearMonthFields> & { calendar?: CalendarFns.Record }, options?: OverflowOptions) => Record
+(fields: PlainYearMonthFns.FromFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:
@@ -266,7 +266,7 @@ const inLeapYear = yearMonth.inLeapYear
 Signature:
 
 ```ts
-(record: Record, mod: Partial<YearMonthFields>, options?: OverflowOptions) => Record
+(record: Record, mod: PlainYearMonthFns.WithFields, options?: OverflowOptions) => Record
 ```
 
 Tree-shakeable API:

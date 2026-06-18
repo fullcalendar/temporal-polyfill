@@ -63,7 +63,7 @@ The following entrypoints support the `iso8601` and `gregory` calendar systems o
   ```js
   import { install } from 'temporal-polyfill/shim'
 
-  install()
+  install() // uses native if available
 
   Temporal.Now.zonedDateTimeISO().toString()
   ```
@@ -111,7 +111,7 @@ The `/full/` entrypoints support an expanded set of calendar systems: `buddhist`
   ```js
   import { install } from 'temporal-polyfill/full/shim'
 
-  install()
+  install() // uses native if available
 
   Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString()
   ```
