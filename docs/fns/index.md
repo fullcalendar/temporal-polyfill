@@ -15,28 +15,24 @@ const later = PlainDateFns.addMonths(date, 2)
 PlainDateFns.toString(later) // '2026-08-01'
 ```
 
-Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
-example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
-These docs are organized by Temporal type or support object: each page catalogs
-the public functions exported for that area, the TypeScript types it exports,
-and the codemod-shaped rewrite back to the real Temporal API.
-
-Best of all, this isn't a one-way door. When the time is right — once native
-`Temporal` is available in every environment you target, and you no longer need
-the polyfill — [temporal-polyfill-codemod](../../codemod/README.md)
-rewrites your function calls back into idiomatic `Temporal.*` expressions. So
-`PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`, with no
-manual find-and-replace. That rewrite is exactly what each page's "Temporal API
-equivalent" snippets describe.
-
-The tree-shakeable API always uses the runtime's native `Temporal` when one is
-available. Unlike the class-based entry points — which offer
-`/implementation` variants for forcing the bundled JavaScript implementation —
-the tree-shakeable API has no such option.
-
 🤝 **Building a component library?** The tree-shakeable API is designed to be a
 shared, deletable peer dependency for third-party tools like date pickers and
 schedulers. See [For component authors](./for-component-authors.md).
+
+Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
+example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
+Each page below catalogs that type's functions, its TypeScript type exports, and
+the codemod-shaped rewrite back to the real Temporal API.
+
+This isn't a one-way door: once native `Temporal` is everywhere you target,
+[temporal-polyfill-codemod](../../codemod/README.md) rewrites your function calls
+back into idiomatic `Temporal.*` — so `PlainDateFns.addMonths(date, 2)` becomes
+`date.add({ months: 2 })`. Each page's "Temporal API equivalent" snippets show
+that mapping.
+
+The tree-shakeable API always uses the runtime's native `Temporal` when present;
+unlike the class-based entry points, it offers no `/implementation` variant for
+forcing the bundled implementation.
 
 ## Catalog
 

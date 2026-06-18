@@ -261,7 +261,7 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
     <td>Internally relies on <a href='https://github.com/GoogleChromeLabs/jsbi'>JSBI</a></td>
   </tr>
   <tr>
-    <td>Global Install</td>
+    <td>Global install</td>
     <td>Possible via <a href='#package-entrypoints'>ESM</a> and <a href='#cdn-usage'>CDN</a></td>
     <td>Not currently possible</td>
   </tr>
