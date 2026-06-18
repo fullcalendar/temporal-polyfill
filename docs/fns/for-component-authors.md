@@ -62,7 +62,7 @@ component can resolve against. The functions operate on plain records and run
 without a global `Temporal`, but interop helpers like `toTemporal` still read
 the global at call time — see [Temporal Interop](./index.md#temporal-interop).
 
-Custom (non-ISO) calendars are where the function API asks the most of you: the
+Custom (non-ISO) calendars are where the tree-shakeable API asks the most of you: the
 class-based API resolves calendars for you, but the `fns` API expects you to
 query and pass calendar objects explicitly. Rather than detail every case here,
 see the [`fns-and-global` example project](../../examples/fns-and-global), which

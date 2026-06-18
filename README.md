@@ -8,8 +8,8 @@ The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-co
 
 - 📦 [**temporal-polyfill**](#temporal-polyfill) — A lightweight, spec-compliant polyfill for Temporal
 - 🌳 [**Tree-shakeable function API**](#tree-shakeable-function-api) — The same polyfill as standalone, tree-shakeable functions
-- 🤝 [**Built to be shared**](#built-to-be-shared) — Why the function API is a great fit for component libraries
-- 🔄 [**temporal-polyfill-codemod**](#temporal-polyfill-codemod) — Convert the function API to idiomatic Temporal
+- 🤝 [**Built to be shared**](#built-to-be-shared) — Why the tree-shakeable API is a great fit for component libraries
+- 🔄 [**temporal-polyfill-codemod**](#temporal-polyfill-codemod) — Convert the tree-shakeable API to idiomatic Temporal
 - 🛠️ [**temporal-utils**](#temporal-utils) — Handy helpers for idiomatic Temporal objects
 - 📐 [**temporal-spec**](#temporal-spec) — Standalone TypeScript type definitions for Temporal
 
@@ -117,7 +117,7 @@ It's deliberately conservative — anything it can't unambiguously rewrite is le
 
 ## 🛠️ temporal-utils
 
-Small, convenience helpers for the **idiomatic** `Temporal.*` API — not the function API above — providing the everyday `startOfMonth`, `endOfDay`, `diffDays`, and `roundToWeek` operations Temporal itself doesn't ship. They're what you reach for once you're writing real `Temporal` objects and methods (whether via the polyfill, native Temporal, or after running the codemod). Most helpers preserve the input type: pass a `PlainDate`, get a `PlainDate` back; pass a `ZonedDateTime`, get a `ZonedDateTime` back.
+Small, convenience helpers for the **idiomatic** `Temporal.*` API — not the tree-shakeable API above — providing the everyday `startOfMonth`, `endOfDay`, `diffDays`, and `roundToWeek` operations Temporal itself doesn't ship. They're what you reach for once you're writing real `Temporal` objects and methods (whether via the polyfill, native Temporal, or after running the codemod). Most helpers preserve the input type: pass a `PlainDate`, get a `PlainDate` back; pass a `ZonedDateTime`, get a `ZonedDateTime` back.
 
 ```sh
 npm install temporal-utils

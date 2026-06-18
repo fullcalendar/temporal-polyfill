@@ -3,7 +3,7 @@
 Automated migrations for `temporal-polyfill` codebases.
 
 The current transform, `fns-to-temporal`, rewrites code that uses the
-tree-shakable [`temporal-polyfill/fns` function API](../docs/fns/index.md)
+tree-shakeable [`temporal-polyfill/fns` function API](../docs/fns/index.md)
 into idiomatic Temporal — real `Temporal` objects and their methods.
 
 ```ts
@@ -20,7 +20,7 @@ const next = date.add({ days: 3 })
 ## Why migrate
 
 The `temporal-polyfill/fns` API is great for bundle size — every function is
-independently tree-shakable — but it operates on plain record objects, not real
+independently tree-shakeable — but it operates on plain record objects, not real
 Temporal instances. As Temporal ships natively across browsers and runtimes, the
 polyfill stops being necessary and standard, spec-shaped Temporal becomes the
 natural way to write this code. This codemod does the mechanical work of
