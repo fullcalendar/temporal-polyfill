@@ -1,12 +1,45 @@
-# Temporal Utils
+# temporal-utils
 
-`temporal-utils` contains small helpers for working with native Temporal
-objects. The main package entry point is for application-level helpers that
-operate on Temporal types directly.
+Small, application-level helpers for working with native [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal) objects
 
 Most helpers preserve the input type. For example, passing a
 `Temporal.PlainDateTime` to `startOfMonth` returns a `Temporal.PlainDateTime`,
 while passing a `Temporal.ZonedDateTime` returns a `Temporal.ZonedDateTime`.
+
+## Installation
+
+```
+npm install temporal-utils
+```
+
+`temporal-utils` does not ship a Temporal implementation of its own — a global
+`Temporal` must already exist at runtime. See [Requirements](#requirements).
+
+## Usage
+
+Import the helpers you need from the package root and call them on native
+Temporal objects. Each helper accepts a range of Temporal types and gives you
+back the same type you passed in:
+
+```ts
+import { startOfMonth, diffDays } from 'temporal-utils'
+
+// Pass a PlainDate, get a PlainDate back
+startOfMonth(Temporal.PlainDate.from('2024-07-20')).toString()
+// '2024-07-01'
+
+// Pass a ZonedDateTime, get a ZonedDateTime back
+startOfMonth(
+  Temporal.ZonedDateTime.from('2024-07-20T12:30[America/New_York]'),
+).toString()
+// '2024-07-01T00:00:00-04:00[America/New_York]'
+
+diffDays(
+  Temporal.PlainDate.from('2024-07-01'),
+  Temporal.PlainDate.from('2024-07-20'),
+)
+// 19
+```
 
 ## Requirements
 
@@ -25,22 +58,7 @@ build its inputs. Ensure one is present in one of two ways:
   import 'temporal-polyfill/global'
   ```
 
-## Usage
-
-With a global `Temporal` in place, import the helpers you need from the package
-root:
-
-```ts
-import {
-  diffDays,
-  endOfMonth,
-  roundToWeek,
-  startOfWeek,
-  withDayOfYear,
-} from 'temporal-utils'
-```
-
-## Contents
+## Function Reference
 
 - [Field Replacement](#field-replacement)
   - [`withDayOfYear`](#withdayofyear)
