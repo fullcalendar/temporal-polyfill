@@ -34,6 +34,9 @@ The tree-shakeable API always uses the runtime's native `Temporal` when present;
 unlike the class-based entry points, it offers no `/implementation` variant for
 forcing the bundled implementation.
 
+Some catalog entries are intentionally non-standard, with no direct `Temporal.*`
+equivalent — see [Non-standard functions](#non-standard-functions) for why.
+
 ## Catalog
 
 - [`PlainDate`](plaindate.md) - date construction, fields, arithmetic, comparison, conversion, start/end helpers, differences, and formatting.
@@ -47,6 +50,48 @@ forcing the bundled implementation.
 - [`Duration`](duration.md) - duration construction, arithmetic, rounding, totaling, comparison, and formatting.
 - [`Calendar`](calendar.md) - `CalendarFns.Record` factories and calendar resolver helpers.
 - [`Types`](types.md) - TypeScript-only exports and their codemod targets for the real Temporal API.
+
+## Non-standard functions
+
+Browsing the catalog, you'll spot functions with no direct `Temporal.*`
+counterpart — `addDays`, `toBasicString`, `startOfYear`, `roundToWeek`,
+`diffYears`. This is deliberate, not drift from the spec. They fall into three
+groups:
+
+1. **Narrowed forms of standard methods** — `addDays` is `.add({ days })`
+   restricted to days; `toBasicString` is `.toString()` restricted to a plain
+   ISO string. The unit or output shape is fixed at the call site.
+2. **Gaps the standard API doesn't fill** — operations Temporal simply lacks,
+   like `startOfYear` on a `ZonedDateTime`, `endOfMonth` on a `PlainDate`, or
+   `roundToWeek`.
+3. **Compressed multi-step operations** — one call in place of several method
+   calls and option bags. The unit-named diff helpers are the clearest case:
+   `diffYears(a, b)` returns a floating-point total that the standard API makes
+   you work for.
+
+### Why they live in this API
+
+Bundle size, mostly — and group 1 is the heart of it. When a function fixes its
+unit up front, it can take a shortcut straight to an internal that already
+exists: diffing days-and-smaller, or rounding to a single fixed unit, is far
+simpler than the fully general `add` / `round` / `diff` that must handle every
+unit and every option. Exposing those shortcuts as standalone functions lets a
+tree-shaking bundler keep only the cheap path.
+
+Splitting them into a separate add-on library wouldn't work cleanly — it would
+have to reach into this API's internals to get the same savings — so they're
+bundled right alongside the functions they build on.
+
+### It all maps back
+
+Non-standard doesn't mean dead end. When you
+[codemod to idiomatic Temporal](../../codemod/README.md), functions that mirror
+Temporal become the real method calls, and the non-standard helpers map to
+[`temporal-utils`](../../utils/README.md) — a companion package that performs the
+same operations on real `Temporal` objects with matching semantics. `startOfYear`,
+`roundToWeek`, `diffYears`, and the rest all have a direct equivalent there. So
+the non-standard surface is just the bundle-optimized front door to behavior that
+has a clean, supported home once you no longer need the polyfill.
 
 ## Temporal Interop
 
