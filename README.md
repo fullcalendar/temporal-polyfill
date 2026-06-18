@@ -1,8 +1,8 @@
 # temporal-polyfill monorepo
 
-A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object. 🕒
+A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object 🕒
 
-The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-compliant polyfill. The other packages orbit it: a tree-shakeable function API, application-level helpers, a migration codemod, and standalone TypeScript types.
+The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-compliant polyfill. The other packages orbit it: a tree-shakeable function API, a migration codemod, convenience helpers, and standalone TypeScript types.
 
 ## Contents
 
@@ -89,7 +89,7 @@ It's deliberately conservative — anything it can't unambiguously rewrite is le
 
 ## 🛠️ temporal-utils
 
-Small, application-level helpers for the **idiomatic** `Temporal.*` API — not the function API above — providing the everyday `startOfMonth`, `endOfDay`, `diffDays`, and `roundToWeek` operations Temporal itself doesn't ship. They're what you reach for once you're writing real `Temporal` objects and methods (whether via the polyfill, native Temporal, or after running the codemod). Most helpers preserve the input type: pass a `PlainDate`, get a `PlainDate` back; pass a `ZonedDateTime`, get a `ZonedDateTime` back.
+Small, convenience helpers for the **idiomatic** `Temporal.*` API — not the function API above — providing the everyday `startOfMonth`, `endOfDay`, `diffDays`, and `roundToWeek` operations Temporal itself doesn't ship. They're what you reach for once you're writing real `Temporal` objects and methods (whether via the polyfill, native Temporal, or after running the codemod). Most helpers preserve the input type: pass a `PlainDate`, get a `PlainDate` back; pass a `ZonedDateTime`, get a `ZonedDateTime` back.
 
 ```sh
 npm install temporal-utils

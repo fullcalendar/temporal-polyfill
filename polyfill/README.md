@@ -1,7 +1,7 @@
 
 # temporal-polyfill
 
-A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), successor to the JavaScript `Date` object
+A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), successor to the JavaScript `Date` object 🕒
 
 Less than 20 kB, [spec compliant](#spec-compliance)
 
