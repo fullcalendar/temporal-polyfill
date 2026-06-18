@@ -9,21 +9,18 @@
     "email": "arshaw@users.noreply.github.com",
     "url": "http://arshaw.com/"
   },
-  "contributors": [
-    {
-      "name": "Ishaan Bharal",
-      "email": "ishbharal@gmail.com"
-    }
-  ],
   "license": "MIT",
   "copyright": "2026 Adam Shaw",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fullcalendar/temporal-polyfill.git"
+    "url": "https://github.com/fullcalendar/temporal-polyfill.git",
+    "directory": "packages/temporal-polyfill"
   },
   "scripts": {
-    "lint": "biome check . --max-diagnostics=1000",
-    "lint:fix": "biome check --apply .",
+    "lint": "pnpm run lint:readme && biome check . --max-diagnostics=1000",
+    "lint:fix": "pnpm run lint:readme:fix && biome check --apply .",
+    "lint:readme": "node ./scripts/lint-readme-cdn-version.js",
+    "lint:readme:fix": "node ./scripts/lint-readme-cdn-version.js fix",
     "build": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest npm:readme npm:changelog npm:license npm:bundle",
     "dev": "./scripts/clean.js && pnpm run tsc && concurrently -c auto npm:manifest:dev npm:tsc:dev npm:readme npm:changelog npm:license npm:bundle:dev",
     "tsc": "tsc --build tsconfig.build.json",

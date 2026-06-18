@@ -1,25 +1,22 @@
 #!/usr/bin/env node
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { join as joinPaths } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const placeholder = '{VERSION}'
-const githubBranchUrl =
-  'https://github.com/fullcalendar/temporal-polyfill/tree/main/'
-const githubReadmeDirUrl = `${githubBranchUrl}packages/temporal-polyfill/`
-const pkgDir = dirname(dirname(fileURLToPath(import.meta.url)))
-const pkgJson = JSON.parse(await readFile(join(pkgDir, 'package.json'), 'utf8'))
-const srcReadme = await readFile(join(pkgDir, 'README.md'), 'utf8')
+const currentDir = fileURLToPath(new URL('.', import.meta.url))
+const pkgDir = joinPaths(currentDir, '..')
+const pkgJson = JSON.parse(
+  await readFile(joinPaths(pkgDir, 'package.json'), 'utf8'),
+)
+const srcReadme = await readFile(joinPaths(pkgDir, 'README.md'), 'utf8')
 
-if (!srcReadme.includes(placeholder)) {
-  throw new Error(`README.md must contain ${placeholder}`)
-}
+const githubReadmeDirUrl = getGithubReadmeDirUrl(pkgJson)
 
-await mkdir(join(pkgDir, 'dist'), { recursive: true })
+await mkdir(joinPaths(pkgDir, 'dist'), { recursive: true })
 await writeFile(
-  join(pkgDir, 'dist/README.md'),
-  rewriteRelativeLinks(srcReadme.replaceAll(placeholder, pkgJson.version)),
+  joinPaths(pkgDir, 'dist/README.md'),
+  rewriteRelativeLinks(srcReadme),
 )
 
 // NPM renders the generated README outside the repo, so local package links need
@@ -43,4 +40,12 @@ function isRelativeRepoLink(url) {
     !url.startsWith('//') &&
     !/^[a-z][a-z0-9+.-]*:/i.test(url)
   )
+}
+
+function getGithubReadmeDirUrl(pkgJson) {
+  const repoUrl = pkgJson.repository.url.replace(/\.git$/, '')
+  const packageDir = pkgJson.repository.directory || ''
+  const packagePath = packageDir ? `${packageDir}/` : ''
+
+  return `${repoUrl}/tree/main/${packagePath}`
 }

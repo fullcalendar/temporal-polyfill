@@ -6,12 +6,6 @@
     "email": "arshaw@users.noreply.github.com",
     "url": "http://arshaw.com/"
   },
-  "contributors": [
-    {
-      "name": "Ishaan Bharal",
-      "email": "ishbharal@gmail.com"
-    }
-  ],
   "license": "MIT",
   "copyright": "2026 Adam Shaw",
   "type": "module",
