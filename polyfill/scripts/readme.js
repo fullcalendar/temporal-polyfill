@@ -22,16 +22,21 @@ await writeFile(
 // NPM renders the generated README outside the repo, so local package links need
 // to point back to GitHub while same-document anchors keep working normally.
 function rewriteRelativeLinks(markdown) {
-  return markdown.replace(
-    /(!?\[[^\]]*\]\()([^)\s]+)(\))/g,
-    (match, open, url, close) => {
+  return markdown
+    .replace(/(!?\[[^\]]*\]\()([^)\s]+)(\))/g, (match, open, url, close) => {
       if (isRelativeRepoLink(url)) {
         return open + new URL(url, githubReadmeDirUrl).href + close
       }
 
       return match
-    },
-  )
+    })
+    .replace(/\bhref=(['"])([^'"]+)\1/g, (match, quote, url) => {
+      if (isRelativeRepoLink(url)) {
+        return `href=${quote}${new URL(url, githubReadmeDirUrl).href}${quote}`
+      }
+
+      return match
+    })
 }
 
 function isRelativeRepoLink(url) {

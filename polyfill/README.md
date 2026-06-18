@@ -242,9 +242,9 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
     <td>Champions of the <a href='https://github.com/tc39/proposal-temporal'>Temporal proposal</a></td>
   </tr>
   <tr>
-    <td>Min+gzip size</td>
-    <td><a href='https://bundlephobia.com/package/temporal-polyfill'>19.6 kB</a>, 23.3 kB (full)</td>
-    <td><a href='https://bundlephobia.com/package/@js-temporal/polyfill'>57.9 kB</a> (+196%, +148%)</td>
+    <td><a href='./scripts/size-comparison/RESULTS.md'>Min+gzip size</a></td>
+    <td>19.6 kB, 23.5 kB (full)</td>
+    <td>52.1 kB (+166%, +122%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
