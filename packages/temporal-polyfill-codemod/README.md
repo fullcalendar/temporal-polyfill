@@ -1,345 +1,130 @@
 # temporal-polyfill-codemod
 
-Codemods for migrating `temporal-polyfill` code.
+Automated migrations for `temporal-polyfill` codebases.
 
-The first transform, `fns-to-temporal`, rewrites code that uses
-`temporal-polyfill/fns` records into code that uses real Temporal objects.
+The current transform, `fns-to-temporal`, rewrites code that uses the
+tree-shakable `temporal-polyfill/fns` function API into idiomatic Temporal —
+real `Temporal` objects and their methods.
 
-## Philosophy
+```ts
+// Before
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 
-The tree-shakeable API records are not compatible with real Temporal objects. A
-successful migration should remove `temporal-polyfill/fns` runtime usage from a
-file rather than mixing both models.
+const date = PlainDateFns.create(2024, 5, 1)
+const next = PlainDateFns.addDays(date, 3)
 
-The transform is intentionally conservative:
+// After
+const date = new Temporal.PlainDate(2024, 5, 1)
+const next = date.add({ days: 3 })
+```
 
-- Prefer the simplest equivalent global `Temporal` API.
-- Use `temporal-utils` only when Temporal has no direct equivalent.
-- Leave ambiguous or unsafe code unchanged and print a diagnostic.
-- Continue processing after diagnostics so one run reports all problems.
-- Exit nonzero by default if any diagnostics were emitted.
+## Why migrate
 
-The codemod targets global `Temporal`. It does not add
-`import { Temporal } from 'temporal-polyfill'`.
+The `temporal-polyfill/fns` API is great for bundle size — every function is
+independently tree-shakable — but it operates on plain record objects, not real
+Temporal instances. As Temporal ships natively across browsers and runtimes, the
+polyfill stops being necessary and standard, spec-shaped Temporal becomes the
+natural way to write this code. This codemod does the mechanical work of
+converting an entire codebase over.
 
-## Usage
+The transform targets the global `Temporal` object. It does not add
+`import { Temporal } from 'temporal-polyfill'` — wire up your Temporal source
+(global polyfill or native) however your project prefers.
 
-Install or run the package with your package manager once it is published:
+## Quick start
+
+Run it against a file or directory:
 
 ```sh
 npx temporal-polyfill-codemod fns-to-temporal <path>
 ```
 
-```sh
-pnpm dlx temporal-polyfill-codemod fns-to-temporal <path>
-```
-
-Build the package first when running from the monorepo checkout:
-
-```sh
-pnpm --dir packages/temporal-polyfill-codemod run build
-```
-
-Run the transform:
-
-```sh
-temporal-polyfill-codemod fns-to-temporal <path>
-```
-
-Preview changes without writing:
+Preview the changes without touching your files:
 
 ```sh
 temporal-polyfill-codemod fns-to-temporal <path> --dry --print
 ```
 
-Allow diagnostics without a nonzero exit code:
+Directories are walked recursively; `node_modules`, `dist`, and dot-directories
+are skipped. Supported extensions: `js, jsx, ts, tsx, mjs, cjs, mts, cts`.
 
-```sh
-temporal-polyfill-codemod fns-to-temporal <path> --allow-warnings
-```
+The codemod preserves your formatting where it can but doesn't run a formatter —
+run yours afterward.
 
-Supported input extensions:
+## What it migrates
 
-```txt
-js, jsx, ts, tsx, mjs, cjs, mts, cts
-```
+The transform covers the common shapes you'll have across a codebase:
 
-When a directory is passed, `node_modules`, `dist`, and dot-directories are
-skipped.
-
-The codemod preserves source formatting where practical but does not run a code
-formatter. Run your project formatter after migration.
-
-## Supported Source Shapes
-
-The transform supports exact fns package imports:
+**Constructors and methods** — `fns` calls become constructors and instance
+methods:
 
 ```ts
-import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
-import { create, addDays } from 'temporal-polyfill/fns/PlainDate'
-import type { Record } from 'temporal-polyfill/fns/PlainDate'
-import type { RoundingMode } from 'temporal-polyfill/fns'
+PlainDateFns.create(2024, 5, 1)        // → new Temporal.PlainDate(2024, 5, 1)
+PlainDateFns.addDays(date, 3)          // → date.add({ days: 3 })
+PlainDateFns.compare(a, b)             // → Temporal.PlainDate.compare(a, b)
 ```
 
-Supported runtime import paths are:
-
-```txt
-temporal-polyfill/fns/Calendar
-temporal-polyfill/fns/Instant
-temporal-polyfill/fns/ZonedDateTime
-temporal-polyfill/fns/PlainDateTime
-temporal-polyfill/fns/PlainDate
-temporal-polyfill/fns/PlainTime
-temporal-polyfill/fns/PlainYearMonth
-temporal-polyfill/fns/PlainMonthDay
-temporal-polyfill/fns/Duration
-temporal-polyfill/fns/Now
-```
-
-The root `temporal-polyfill/fns` import is supported for documented shared type
-exports only.
-
-The transform does not rewrite default imports, re-exports, require calls,
-dynamic imports, computed fns property access, namespace destructuring, or
-function references. Those shapes are left unchanged with diagnostics.
-
-## Diagnostics
-
-Diagnostics are warnings in the printed report, but they are migration-blocking
-by default because leftover fns records are incompatible with real Temporal
-objects.
-
-The default behavior is:
-
-- Process every file.
-- Apply every safe rewrite.
-- Print all diagnostics.
-- Exit with code `1` if any diagnostics were emitted.
-
-Use `--allow-warnings` only when you intentionally want to inspect partial
-results despite remaining manual work.
-
-### Exit Codes
-
-The CLI exits with:
-
-- `0` when all scanned files were processed and no diagnostics were emitted.
-- `0` with `--allow-warnings` when warnings were emitted but no file-level
-  errors occurred.
-- `1` when warnings were emitted without `--allow-warnings`.
-- `1` when any file could not be read, parsed, transformed, or written.
-
-Parser and file errors are reported per file. One bad file does not stop the
-rest of the run.
-
-### Warning Example
-
-This call is left unchanged because the object literal already controls
-`smallestUnit`, which conflicts with the unit implied by `roundToHour`:
+**Calendar records → calendar IDs** — in slots where Temporal expects a
+calendar ID string:
 
 ```ts
-ZonedDateTimeFns.roundToHour(zdt, { smallestUnit: 'minute' })
+PlainDateFns.create(2024, 5, 1, CalendarFns.getBuddhist())
+// → new Temporal.PlainDate(2024, 5, 1, 'buddhist')
 ```
 
-The report includes diagnostics like:
+**Types** — record and option types are rewritten to their `Temporal`
+equivalents (falling back to `temporal-utils` where Temporal has no equivalent):
+
+```ts
+type DateValue = PlainDateRecord     // → Temporal.PlainDate
+type CalendarValue = CalendarRecord  // → string
+```
+
+**Type guards** — `isRecord` checks become `instanceof`:
+
+```ts
+if (PlainDateFns.isRecord(value)) { /* ... */ }
+// → if (value instanceof Temporal.PlainDate) { /* ... */ }
+```
+
+Some `fns` helpers have no direct Temporal equivalent and are rewritten to
+[`temporal-utils`](https://www.npmjs.com/package/temporal-utils) instead. When
+that happens the codemod prints a note so you can add the dependency — it won't
+edit your `package.json`. If the import would collide with a local name, it's
+aliased automatically.
+
+## When it can't migrate something
+
+The codemod is deliberately conservative: it only rewrites code when the
+intended Temporal expression is unambiguous from the syntax. Anything it isn't
+sure about — function references passed around as values, dynamic/computed
+property access, namespace destructuring, `roundTo*` calls whose options already
+conflict with the implied unit — is **left unchanged** and reported as a
+diagnostic.
+
+Because leftover `fns` records aren't interchangeable with real Temporal
+objects, these diagnostics are migration-blocking by default: the run prints
+every issue it found and exits with code `1` so CI catches an incomplete
+migration. Pass `--allow-warnings` to inspect partial results without the
+nonzero exit. A file that can't be parsed is reported individually and doesn't
+stop the rest of the run.
+
+Example diagnostic:
 
 ```txt
 warning: ZonedDateTime roundToHour options object already has smallestUnit; manual review needed
 warning: Untransformed ZonedDateTimeFns.roundToHour usage
 ```
 
-### Error Example
-
-A syntax error in an input file is reported as an error for that file. The CLI
-continues scanning later files and exits with code `1`.
+Work through the reported spots by hand, then re-run until the codemod is clean.
 
 ## TypeScript
 
-The transform rewrites TypeScript types to global `Temporal` types, but it does
-not install or inject Temporal declarations.
-
-If the migrated TypeScript project does not already provide global Temporal
-types, choose and configure the type source separately.
-
-## temporal-utils
-
-Some fns helpers do not have direct Temporal equivalents. Those helpers are
-intended to rewrite to `temporal-utils`.
-
-If a generated `temporal-utils` import would collide with a local binding, the
-codemod aliases the import:
-
-```ts
-import { startOfWeek as startOfWeekTemporalUtils } from 'temporal-utils'
-```
-
-If the file already imports the same helper from `temporal-utils`, the codemod
-reuses that existing local name.
-
-The codemod does not edit `package.json`. If a run introduces imports from
-`temporal-utils`, the CLI prints a summary note so the package owner can add the
-dependency where appropriate.
-
-## Known Limitations
-
-The first implementation is intentionally conservative. These cases require
-manual review or a later transform pass:
-
-- `roundTo*` calls with object literals that already contain `smallestUnit` are
-  left unchanged with diagnostics.
-- `createFormat` is currently diagnostic-only.
-- Function references, predicate references, dynamic namespace access, and
-  namespace destructuring are left unchanged with diagnostics.
-- Standalone `CalendarFns.get*()` calls are left unchanged unless they appear in
-  a known Temporal-consuming calendar slot.
-- The codemod does not edit `package.json`.
-- The codemod does not install or inject TypeScript Temporal declarations.
-
-## Examples
-
-### Construction
-
-Before:
-
-```ts
-import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
-
-const date = PlainDateFns.create(2024, 5, 1)
-```
-
-After:
-
-```ts
-const date = new Temporal.PlainDate(2024, 5, 1)
-```
-
-### Named Imports
-
-Before:
-
-```ts
-import { addDays, compare } from 'temporal-polyfill/fns/PlainDate'
-
-const next = addDays(date, 3)
-const order = compare(date, otherDate)
-```
-
-After:
-
-```ts
-const next = date.add({ days: 3 })
-const order = Temporal.PlainDate.compare(date, otherDate)
-```
-
-### Calendar Records
-
-Calendar records become calendar ID strings in known Temporal-consuming slots.
-
-Before:
-
-```ts
-import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
-import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
-
-const date = PlainDateFns.create(2024, 5, 1, CalendarFns.getBuddhist())
-```
-
-After:
-
-```ts
-const date = new Temporal.PlainDate(2024, 5, 1, 'buddhist')
-```
-
-Resolver calls become their calendar ID argument in known calendar slots:
-
-```ts
-PlainDateFns.withCalendar(date, CalendarFns.getAny(calendarId))
-```
-
-becomes:
-
-```ts
-date.withCalendar(calendarId)
-```
-
-Standalone calendar record values are left unchanged with a diagnostic because
-the codemod cannot prove the surrounding code expects a calendar ID string.
-
-### Type Imports
-
-Before:
-
-```ts
-import type { OverflowOptions, RoundingMode } from 'temporal-polyfill/fns'
-import type { Record as PlainDateRecord } from 'temporal-polyfill/fns/PlainDate'
-import type { Record as CalendarRecord } from 'temporal-polyfill/fns/Calendar'
-
-type DateValue = PlainDateRecord
-type CalendarValue = CalendarRecord
-type Overflow = OverflowOptions
-type Mode = RoundingMode
-```
-
-After:
-
-```ts
-import type { RoundingMode } from 'temporal-utils'
-
-type DateValue = Temporal.PlainDate
-type CalendarValue = string
-type Overflow = Temporal.OverflowOptions
-type Mode = RoundingMode
-```
-
-### Type Guards
-
-Before:
-
-```ts
-if (PlainDateFns.isRecord(value)) {
-  value.day
-}
-```
-
-After:
-
-```ts
-if (value instanceof Temporal.PlainDate) {
-  value.day
-}
-```
-
-Predicate references are not rewritten yet:
-
-```ts
-values.filter(PlainDateFns.isRecord)
-```
-
-That shape is left unchanged with a diagnostic.
-
-### Unsupported Or Ambiguous Shapes
-
-These are intentionally left unchanged with diagnostics:
-
-```ts
-const fn = PlainDateFns.addDays
-fn(date, 3)
-```
-
-```ts
-PlainDateFns[name](date, 3)
-```
-
-```ts
-const { create } = PlainDateFns
-```
-
-The transform only rewrites code when the target Temporal expression is clear
-from syntax.
+Types are rewritten to global `Temporal` types, but the codemod doesn't install
+or inject Temporal type declarations. If your project doesn't already provide
+global Temporal types, set that up separately.
 
 ## Development
-
-Run checks for this package:
 
 ```sh
 pnpm --dir packages/temporal-polyfill-codemod run lint
@@ -347,14 +132,5 @@ pnpm --dir packages/temporal-polyfill-codemod run test
 pnpm --dir packages/temporal-polyfill-codemod run build
 ```
 
-The test suite includes:
-
-- runtime API coverage against the fns docs
-- generated direct-rewrite tests
-- generated diagnostic tests for deferred helpers
-- exhaustive type-rewrite tests
-- unit tests for CLI behavior
-- smoke tests against the built `dist/cli.js`
-
-The detailed implementation contract lives in
-`docs/fns-to-temporal.md`.
+The full transform contract — every supported import path, every deferred shape,
+and the exit-code matrix — lives in [`ARCHITECTURE.md`](ARCHITECTURE.md).

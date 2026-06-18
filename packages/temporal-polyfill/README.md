@@ -5,7 +5,7 @@ A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/W
 
 Less than 20 kB, [spec compliant](#spec-compliance)
 
-🌳 Need an even smaller footprint? Check out the [tree-shakeable API](#tree-shakeable-api)
+🌳 Need an even smaller footprint? Check out the [tree-shakeable API](./docs/fns/index.md)
 
 ## Table of Contents
 

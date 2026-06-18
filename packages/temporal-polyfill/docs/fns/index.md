@@ -1,8 +1,10 @@
 # Tree-shakeable API
 
-Instead of large `Temporal.*` classes, the tree-shakeable API exposes every
-operation as a standalone function that acts on a plain record, so a bundler
-keeps only the functions you actually import:
+For library authors and other developers who are hyper-concerned about bundle
+size, `temporal-polyfill` ships an alternate, function-based API designed for
+tree-shaking. Instead of large `Temporal.*` classes, every operation is a
+standalone function that acts on a plain record, so a bundler keeps only the
+functions you actually import:
 
 ```js
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
@@ -16,8 +18,16 @@ PlainDateFns.toString(later) // '2026-08-01'
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
 example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
 These docs are organized by Temporal type or support object: each page catalogs
-the public functions exported for that area and shows the codemod-shaped rewrite
-to the real Temporal API.
+the public functions exported for that area, the TypeScript types it exports,
+and the codemod-shaped rewrite back to the real Temporal API.
+
+Best of all, this isn't a one-way door. When the time is right — once native
+`Temporal` is available in every environment you target, and you no longer need
+the polyfill — [temporal-polyfill-codemod](../../../temporal-polyfill-codemod/README.md)
+rewrites your function calls back into idiomatic `Temporal.*` expressions. So
+`PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`, with no
+manual find-and-replace. That rewrite is exactly what each page's "Temporal API
+equivalent" snippets describe.
 
 The tree-shakeable API always uses the runtime's native `Temporal` when one is
 available. Unlike the class-based entry points — which offer
