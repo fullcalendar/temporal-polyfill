@@ -1,8 +1,3 @@
 node_modules
+.pnpm-store
 .claude/worktrees
-
-/packages/*/dist/*
-/!packages/*/dist/.npmignore
-/packages/*/export-size-output
-
-/examples/*/dist

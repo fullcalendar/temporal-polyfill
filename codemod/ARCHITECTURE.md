@@ -4,9 +4,9 @@ This document is the implementation contract for migrating the
 `temporal-polyfill/fns` API to the real Temporal API. The per-type tree-shakeable
 API docs remain the source of truth for individual helper mappings:
 
-- `packages/temporal-polyfill/docs/fns/index.md`
-- `packages/temporal-polyfill/docs/fns/types.md`
-- `packages/temporal-polyfill/docs/fns/*.md`
+- `docs/fns/index.md`
+- `docs/fns/types.md`
+- `docs/fns/*.md`
 
 The codemod-specific rules below cover import handling, diagnostics, fallback
 helpers, and cases where a syntactic rewrite would be unsafe.
@@ -14,7 +14,7 @@ helpers, and cases where a syntactic rewrite would be unsafe.
 ## Coverage Matrix
 
 `src/fns-api-coverage.ts` is the explicit coverage matrix for the documented
-runtime fns API. Each helper in `packages/temporal-polyfill/docs/fns/*.md`
+runtime fns API. Each helper in `docs/fns/*.md`
 except `index.md` and `types.md` must be classified there.
 
 Statuses:
@@ -31,7 +31,7 @@ helper that is no longer documented.
 
 ## Package
 
-- Package directory: `packages/temporal-polyfill-codemod`
+- Package directory: `codemod`
 - Package name: `temporal-polyfill-codemod`
 - Initial package visibility: private
 - Transform name: `fns-to-temporal`
@@ -257,7 +257,7 @@ values.filter(PlainDateFns.isRecord)
 ## Type Rewrites
 
 Type-only imports should be transformed from the first implementation pass. Use
-`packages/temporal-polyfill/docs/fns/types.md` as the mapping source.
+`docs/fns/types.md` as the mapping source.
 
 Examples:
 

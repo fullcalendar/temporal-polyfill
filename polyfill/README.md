@@ -5,7 +5,7 @@ A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/W
 
 Less than 20 kB, [spec compliant](#spec-compliance)
 
-🌳 Need an even smaller footprint? Check out the [tree-shakeable API](./docs/fns/index.md)
+🌳 Need an even smaller footprint? Check out the [tree-shakeable API](../docs/fns/index.md)
 
 ## Table of Contents
 
@@ -191,7 +191,7 @@ Write an ESM import that loads the types:
 
 All time zones are supported. The following calendar systems are supported: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
 
-Compliance with the latest version of the Temporal spec is near-perfect [with just 1 intentional deviation](https://github.com/fullcalendar/temporal-polyfill/tree/main/packages/temporal-polyfill/scripts/test262-expected-failures/shim.txt).
+Compliance with the latest version of the Temporal spec is near-perfect [with just 1 intentional deviation](https://github.com/fullcalendar/temporal-polyfill/tree/main/polyfill/scripts/test262-expected-failures/shim.txt).
 
 
 ## Supported Environments
@@ -290,12 +290,12 @@ example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTim
 
 Best of all, this isn't a one-way door. When the time is right — once native
 `Temporal` is available in every environment you target, and you no longer need
-the polyfill — [temporal-polyfill-codemod](../temporal-polyfill-codemod/README.md)
+the polyfill — [temporal-polyfill-codemod](../codemod/README.md)
 rewrites your function calls back into idiomatic `Temporal.*` expressions.
 So `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`,
 with no manual find-and-replace.
 
-📚➡️ [**Read the full Tree-shakeable API docs**](./docs/fns/index.md) ⬅️📚
+📚➡️ [**Read the full Tree-shakeable API docs**](../docs/fns/index.md) ⬅️📚
 
 The docs cover the complete catalog of functions, their TypeScript type exports,
 the codemod workflow, and how each function maps back to the standard `Temporal`

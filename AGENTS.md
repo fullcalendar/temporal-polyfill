@@ -1,5 +1,5 @@
 
-Scope all work within the <repo-root>/packages/temporal-polyfill package.
+Scope all work within the <repo-root>/polyfill package.
 CD into that directory before running any npm-scripts.
 
 If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
@@ -13,7 +13,7 @@ Always use the npm script for typechecking — do not invoke `tsc` directly or
 craft custom `tsc` commands. Running `tsc` by hand can leave `tsconfig.tsbuildinfo`
 metadata files stranded in the source tree.
 
-From `packages/temporal-polyfill`:
+From `polyfill`:
 
 ```
 pnpm run tsc:all
@@ -22,7 +22,7 @@ pnpm run tsc:all
 
 ## Linting
 
-After any code change, always check linting from `packages/temporal-polyfill`:
+After any code change, always check linting from `polyfill`:
 
 ```
 pnpm run lint
@@ -46,7 +46,7 @@ SECOND, run `pnpm install` from the repo root
 ## Test Failures
 
 A big subproject is fixing test262 failures. To run ALL tests,
-CD into the `packages/temporal-polyfill` directory and run:
+CD into the `polyfill` directory and run:
 
 ```
 pnpm run test262 --no-max
@@ -55,22 +55,22 @@ pnpm run test262 --no-max
 To run individual test files:
 
 ```
-# format: pnpm run test262 ../../test262/test/<path-to-test-file>.js`
+# format: pnpm run test262 ../test262/test/<path-to-test-file>.js`
 # example:
-pnpm run test262 ../../test262/test/built-ins/Temporal/Instant/basic.js
+pnpm run test262 ../test262/test/built-ins/Temporal/Instant/basic.js
 ```
 
 The test262 runner accepts multiple file paths in one invocation. For example:
 
 ```
 pnpm run test262 \
-  ../../test262/test/built-ins/Temporal/PlainYearMonth/prototype/add/options-read-before-algorithmic-validation.js \
-  ../../test262/test/built-ins/Temporal/PlainYearMonth/prototype/subtract/options-read-before-algorithmic-validation.js \
+  ../test262/test/built-ins/Temporal/PlainYearMonth/prototype/add/options-read-before-algorithmic-validation.js \
+  ../test262/test/built-ins/Temporal/PlainYearMonth/prototype/subtract/options-read-before-algorithmic-validation.js \
   --no-max
 ```
 
 When adding intentional expected failures, use
-`packages/temporal-polyfill/scripts/test262-config/expected-failures.txt`.
+`polyfill/scripts/test262-config/expected-failures.txt`.
 Do not add general failures to the node-version-specific expected-failures
 files unless the failure really is specific to that Node version range.
 
@@ -100,22 +100,19 @@ small portions of code can back be packed with a lot of meaning.
 ## Bundle Size
 
 Before making size-oriented changes, measure and record the baseline size first.
-When recording size measurements, append clearly-labeled entries to
-`packages/temporal-polyfill/size-audit/BYTES.txt` so future work has a running
-history of before/after numbers.
 
-The size command depends on the `packages/export-size` submodule's built
+The size command depends on the `misc/export-size` submodule's built
 output. Always build `export-size` first:
 
 ```
-cd <repo-root>/packages/export-size
+cd <repo-root>/misc/export-size
 pnpm run build
 ```
 
-Then measure from `packages/temporal-polyfill`:
+Then measure from `polyfill`:
 
 ```
-cd <repo-root>/packages/temporal-polyfill
+cd <repo-root>/polyfill
 pnpm run size --raw
 ```
 
@@ -133,8 +130,3 @@ Size of ./dist/full/.global.min.js ...
 
 In this example, record `20443, Full: 24247`. Ignore the later `export
 min+gzip` table for size-audit entries.
-
-After a size-oriented code change is settled, run build and sizing. If sizing
-increased, do not revert the code automatically; pause so the user can inspect
-the built artifacts. If sizing stayed the same or decreased, record the final
-number in `packages/temporal-polyfill/size-audit/BYTES.txt`.

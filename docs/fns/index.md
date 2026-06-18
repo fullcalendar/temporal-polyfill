@@ -23,7 +23,7 @@ and the codemod-shaped rewrite back to the real Temporal API.
 
 Best of all, this isn't a one-way door. When the time is right — once native
 `Temporal` is available in every environment you target, and you no longer need
-the polyfill — [temporal-polyfill-codemod](../../../temporal-polyfill-codemod/README.md)
+the polyfill — [temporal-polyfill-codemod](../../codemod/README.md)
 rewrites your function calls back into idiomatic `Temporal.*` expressions. So
 `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`, with no
 manual find-and-replace. That rewrite is exactly what each page's "Temporal API

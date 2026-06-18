@@ -599,7 +599,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.withDayOfYear(zonedDateTime, dayOfYear, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { withDayOfYear } from 'temporal-utils'
@@ -641,7 +641,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.withDayOfWeek(zonedDateTime, dayOfWeek, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { withDayOfWeek } from 'temporal-utils'
@@ -663,7 +663,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.withWeekOfYear(zonedDateTime, weekOfYear, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { withWeekOfYear } from 'temporal-utils'
@@ -1157,7 +1157,7 @@ Tree-shakeable API:
 const years = ZonedDateTimeFns.diffYears(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffYears } from 'temporal-utils'
@@ -1183,7 +1183,7 @@ Tree-shakeable API:
 const months = ZonedDateTimeFns.diffMonths(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMonths } from 'temporal-utils'
@@ -1209,7 +1209,7 @@ Tree-shakeable API:
 const weeks = ZonedDateTimeFns.diffWeeks(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffWeeks } from 'temporal-utils'
@@ -1235,7 +1235,7 @@ Tree-shakeable API:
 const days = ZonedDateTimeFns.diffDays(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffDays } from 'temporal-utils'
@@ -1261,7 +1261,7 @@ Tree-shakeable API:
 const hours = ZonedDateTimeFns.diffHours(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -1287,7 +1287,7 @@ Tree-shakeable API:
 const minutes = ZonedDateTimeFns.diffMinutes(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -1313,7 +1313,7 @@ Tree-shakeable API:
 const seconds = ZonedDateTimeFns.diffSeconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -1339,7 +1339,7 @@ Tree-shakeable API:
 const milliseconds = ZonedDateTimeFns.diffMilliseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -1365,7 +1365,7 @@ Tree-shakeable API:
 const microseconds = ZonedDateTimeFns.diffMicroseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -1391,7 +1391,7 @@ Tree-shakeable API:
 const nanoseconds = ZonedDateTimeFns.diffNanoseconds(zonedDateTime, otherZonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'
@@ -1466,7 +1466,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToYear(zonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { roundToYear } from 'temporal-utils'
@@ -1494,7 +1494,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToMonth(zonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { roundToMonth } from 'temporal-utils'
@@ -1522,7 +1522,7 @@ const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime, 'ceil')
 const nextZonedDateTime = ZonedDateTimeFns.roundToWeek(zonedDateTime, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { roundToWeek } from 'temporal-utils'
@@ -1752,7 +1752,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfYear(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfYear } from 'temporal-utils'
@@ -1774,7 +1774,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfMonth(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfMonth } from 'temporal-utils'
@@ -1796,7 +1796,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfWeek(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfWeek } from 'temporal-utils'
@@ -1838,7 +1838,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfHour(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfHour } from 'temporal-utils'
@@ -1860,7 +1860,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfMinute(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfMinute } from 'temporal-utils'
@@ -1882,7 +1882,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfSecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfSecond } from 'temporal-utils'
@@ -1904,7 +1904,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfMillisecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfMillisecond } from 'temporal-utils'
@@ -1926,7 +1926,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.startOfMicrosecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { startOfMicrosecond } from 'temporal-utils'
@@ -1950,7 +1950,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfYear(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfYear } from 'temporal-utils'
@@ -1974,7 +1974,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfMonth(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfMonth } from 'temporal-utils'
@@ -1998,7 +1998,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfWeek(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfWeek } from 'temporal-utils'
@@ -2022,7 +2022,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfDay(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfDay } from 'temporal-utils'
@@ -2046,7 +2046,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfHour(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfHour } from 'temporal-utils'
@@ -2070,7 +2070,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfMinute(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfMinute } from 'temporal-utils'
@@ -2094,7 +2094,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfSecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfSecond } from 'temporal-utils'
@@ -2118,7 +2118,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfMillisecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfMillisecond } from 'temporal-utils'
@@ -2142,7 +2142,7 @@ Tree-shakeable API:
 const nextZonedDateTime = ZonedDateTimeFns.endOfMicrosecond(zonedDateTime)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { endOfMicrosecond } from 'temporal-utils'

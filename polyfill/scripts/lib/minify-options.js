@@ -122,10 +122,7 @@ export function buildSwcMinifyOptions() {
 const startsWithLetterRegExp = /^[a-zA-Z]/
 
 export async function readTemporalReservedWords(pkgDir) {
-  const code = await readFile(
-    joinPaths(pkgDir, '../temporal-spec/global.d.ts'),
-    'utf-8',
-  )
+  const code = await readFile(joinPaths(pkgDir, '../spec/global.d.ts'), 'utf-8')
   return code
     .split(/\W+/)
     .filter((symbol) => symbol && startsWithLetterRegExp.test(symbol))

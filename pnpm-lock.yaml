@@ -25,10 +25,10 @@ importers:
         version: 10.29.2
       temporal-polyfill:
         specifier: workspace:*
-        version: link:../../packages/temporal-polyfill/dist
+        version: link:../../polyfill/dist
       temporal-polyfill-codemod:
         specifier: workspace:*
-        version: link:../../packages/temporal-polyfill-codemod
+        version: link:../../codemod
       vite:
         specifier: ^7.0.0
         version: 7.3.5(jiti@1.21.0)
@@ -37,7 +37,7 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
-  packages/export-size:
+  misc/export-size:
     dependencies:
       '@babel/parser':
         specifier: ^7.23.0
@@ -81,7 +81,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^1.0.0-beta.27
-        version: 1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@packages+terser))
+        version: 1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@misc+terser))
       '@types/cli-progress':
         specifier: ^3.11.4
         version: 3.11.4
@@ -113,14 +113,14 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  packages/temporal-polyfill:
+  polyfill:
     dependencies:
       temporal-spec:
         specifier: workspace:1.0.0
-        version: link:../temporal-spec
+        version: link:../spec
       temporal-utils:
         specifier: workspace:1.0.1
-        version: link:../temporal-utils
+        version: link:../utils
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1
@@ -145,7 +145,7 @@ importers:
         version: 8.2.0
       export-size:
         specifier: workspace:*
-        version: link:../export-size
+        version: link:../misc/export-size
       gzip-size-cli:
         specifier: ^5.1.0
         version: 5.1.0
@@ -157,19 +157,19 @@ importers:
         version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
       terser:
         specifier: workspace:*
-        version: link:../terser
+        version: link:../misc/terser
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
       vitest:
         specifier: ^1.2.2
-        version: 1.2.2(@types/node@18.11.9)(terser@packages+terser)
+        version: 1.2.2(@types/node@18.11.9)(terser@misc+terser)
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
     publishDirectory: ./dist
 
-  packages/temporal-polyfill-codemod:
+  codemod:
     dependencies:
       jscodeshift:
         specifier: ^0.15.2
@@ -191,7 +191,7 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(@types/node@18.11.9)
 
-  packages/temporal-spec:
+  spec:
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1
@@ -200,7 +200,7 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
-  packages/temporal-utils:
+  utils:
     devDependencies:
       '@biomejs/biome':
         specifier: 1.5.1
@@ -210,7 +210,7 @@ importers:
         version: 0.5.1
       temporal-spec:
         specifier: workspace:*
-        version: link:../temporal-spec
+        version: link:../spec
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -218,7 +218,7 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(@types/node@20.11.30)
 
-  packages/terser:
+  misc/terser:
     dependencies:
       '@jridgewell/source-map':
         specifier: ^0.3.3
@@ -4191,7 +4191,7 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@antfu/eslint-config@1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@packages+terser))':
+  '@antfu/eslint-config@1.0.0-beta.27(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@misc+terser))':
     dependencies:
       '@antfu/eslint-define-config': 1.23.0-2
       '@stylistic/eslint-plugin': 0.0.11(eslint@8.51.0)(typescript@5.2.2)
@@ -4210,7 +4210,7 @@ snapshots:
       eslint-plugin-sort-keys: 2.3.5
       eslint-plugin-unicorn: 48.0.1(eslint@8.51.0)
       eslint-plugin-unused-imports: 3.0.0(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)
-      eslint-plugin-vitest: 0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@packages+terser))
+      eslint-plugin-vitest: 0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@misc+terser))
       eslint-plugin-vue: 9.20.1(eslint@8.51.0)
       eslint-plugin-yml: 1.12.2(eslint@8.51.0)
       globals: 13.24.0
@@ -5031,7 +5031,7 @@ snapshots:
     dependencies:
       serialize-javascript: 7.0.5
       smob: 1.6.2
-      terser: link:packages/terser
+      terser: link:misc/terser
     optionalDependencies:
       rollup: 4.9.6
 
@@ -6197,13 +6197,13 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)
 
-  eslint-plugin-vitest@0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@packages+terser)):
+  eslint-plugin-vitest@0.3.20(@typescript-eslint/eslint-plugin@6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)(vitest@1.2.2(@types/node@20.8.7)(terser@misc+terser)):
     dependencies:
       '@typescript-eslint/utils': 6.19.1(eslint@8.51.0)(typescript@5.2.2)
       eslint: 8.51.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 6.19.1(@typescript-eslint/parser@6.19.1(eslint@8.51.0)(typescript@5.2.2))(eslint@8.51.0)(typescript@5.2.2)
-      vitest: 1.2.2(@types/node@20.8.7)(terser@packages+terser)
+      vitest: 1.2.2(@types/node@20.8.7)(terser@misc+terser)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -8038,13 +8038,13 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@1.2.2(@types/node@18.11.9)(terser@packages+terser):
+  vite-node@1.2.2(@types/node@18.11.9)(terser@misc+terser):
     dependencies:
       cac: 6.7.14
       debug: 4.3.4
       pathe: 1.1.2
       picocolors: 1.0.0
-      vite: 5.0.12(@types/node@18.11.9)(terser@packages+terser)
+      vite: 5.0.12(@types/node@18.11.9)(terser@misc+terser)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -8072,13 +8072,13 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@1.2.2(@types/node@20.8.7)(terser@packages+terser):
+  vite-node@1.2.2(@types/node@20.8.7)(terser@misc+terser):
     dependencies:
       cac: 6.7.14
       debug: 4.3.4
       pathe: 1.1.2
       picocolors: 1.0.0
-      vite: 5.0.12(@types/node@20.8.7)(terser@packages+terser)
+      vite: 5.0.12(@types/node@20.8.7)(terser@misc+terser)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -8109,7 +8109,7 @@ snapshots:
       '@types/node': 18.11.9
       fsevents: 2.3.3
 
-  vite@5.0.12(@types/node@18.11.9)(terser@packages+terser):
+  vite@5.0.12(@types/node@18.11.9)(terser@misc+terser):
     dependencies:
       esbuild: 0.19.11
       postcss: 8.4.33
@@ -8117,7 +8117,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 18.11.9
       fsevents: 2.3.3
-      terser: link:packages/terser
+      terser: link:misc/terser
 
   vite@5.0.12(@types/node@20.11.30):
     dependencies:
@@ -8128,7 +8128,7 @@ snapshots:
       '@types/node': 20.11.30
       fsevents: 2.3.3
 
-  vite@5.0.12(@types/node@20.8.7)(terser@packages+terser):
+  vite@5.0.12(@types/node@20.8.7)(terser@misc+terser):
     dependencies:
       esbuild: 0.19.11
       postcss: 8.4.33
@@ -8136,7 +8136,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.8.7
       fsevents: 2.3.3
-      terser: link:packages/terser
+      terser: link:misc/terser
     optional: true
 
   vite@7.3.5(jiti@1.21.0):
@@ -8185,7 +8185,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.2.2(@types/node@18.11.9)(terser@packages+terser):
+  vitest@1.2.2(@types/node@18.11.9)(terser@misc+terser):
     dependencies:
       '@vitest/expect': 1.2.2
       '@vitest/runner': 1.2.2
@@ -8205,8 +8205,8 @@ snapshots:
       strip-literal: 1.3.0
       tinybench: 2.6.0
       tinypool: 0.8.2
-      vite: 5.0.12(@types/node@18.11.9)(terser@packages+terser)
-      vite-node: 1.2.2(@types/node@18.11.9)(terser@packages+terser)
+      vite: 5.0.12(@types/node@18.11.9)(terser@misc+terser)
+      vite-node: 1.2.2(@types/node@18.11.9)(terser@misc+terser)
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 18.11.9
@@ -8253,7 +8253,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.2.2(@types/node@20.8.7)(terser@packages+terser):
+  vitest@1.2.2(@types/node@20.8.7)(terser@misc+terser):
     dependencies:
       '@vitest/expect': 1.2.2
       '@vitest/runner': 1.2.2
@@ -8273,8 +8273,8 @@ snapshots:
       strip-literal: 1.3.0
       tinybench: 2.6.0
       tinypool: 0.8.2
-      vite: 5.0.12(@types/node@20.8.7)(terser@packages+terser)
-      vite-node: 1.2.2(@types/node@20.8.7)(terser@packages+terser)
+      vite: 5.0.12(@types/node@20.8.7)(terser@misc+terser)
+      vite-node: 1.2.2(@types/node@20.8.7)(terser@misc+terser)
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 20.8.7

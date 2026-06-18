@@ -9,9 +9,9 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/*.code-search": true,
-    "packages/locale-data/data/**": true
+    "misc/locale-data/data/**": true
   },
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
-  "js/ts.tsdk.path": "packages/temporal-polyfill/node_modules/typescript/lib",
-  "biome.lspBin": "packages/temporal-polyfill/node_modules/@biomejs/biome/bin/biome"
+  "js/ts.tsdk.path": "polyfill/node_modules/typescript/lib",
+  "biome.lspBin": "polyfill/node_modules/@biomejs/biome/bin/biome"
 }

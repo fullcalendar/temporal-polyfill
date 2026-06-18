@@ -9,7 +9,7 @@ import { rerunUnderRequestedTestNode } from './lib/utils.js'
 
 const scriptsDir = joinPaths(process.argv[1], '..')
 const pkgDir = joinPaths(scriptsDir, '..')
-const monorepoDir = joinPaths(pkgDir, '../..')
+const monorepoDir = joinPaths(pkgDir, '..')
 
 yargs(hideBin(process.argv))
   .command(

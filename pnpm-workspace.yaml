@@ -1,13 +1,15 @@
 packages:
-  # - ./packages/datetimeformat-tokens
-  # - ./packages/durationformat-polyfill
-  # - ./packages/locale-data
-  # - ./packages/locale-textinfo
-  # - ./packages/locale-weekinfo
-  - ./packages/temporal-polyfill
-  - ./packages/temporal-polyfill-codemod
-  - ./packages/temporal-spec
-  - ./packages/temporal-utils
-  - ./packages/export-size
-  - ./packages/terser
+  - ./spec
+  - ./polyfill
+  - ./codemod
+  - ./utils
   - ./examples/*
+
+  - ./misc/export-size
+  - ./misc/terser
+
+  # - ./misc/datetimeformat-tokens
+  # - ./misc/durationformat-polyfill
+  # - ./misc/locale-data
+  # - ./misc/locale-textinfo
+  # - ./misc/locale-weekinfo

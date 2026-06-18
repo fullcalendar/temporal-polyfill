@@ -5,10 +5,9 @@
       "**/node_modules/**",
       "**/dist/**",
       "**/export-size-output/**",
+      "spec",
       "test262",
-      "packages/export-size",
-      "packages/temporal-spec",
-      "packages/temporal-test262-runner"
+      "misc/export-size"
     ]
   },
   "linter": {

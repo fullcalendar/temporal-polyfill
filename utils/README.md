@@ -18,7 +18,7 @@ build its inputs. Ensure one is present in one of two ways:
 - **Native `Temporal`** — available in newer browsers and runtimes, but support
   is still rolling out and remains incomplete.
 - **A polyfill** — recommended for now. We suggest
-  [`temporal-polyfill`](../temporal-polyfill/README.md), which installs a global
+  [`temporal-polyfill`](../polyfill/README.md), which installs a global
   `Temporal`:
 
   ```ts

@@ -3,7 +3,7 @@
 import {
   execLive,
   rerunUnderRequestedTestNode,
-} from '../../temporal-polyfill/scripts/lib/utils.js'
+} from '../../polyfill/scripts/lib/utils.js'
 
 if (
   !(await rerunUnderRequestedTestNode(

@@ -506,7 +506,7 @@ Tree-shakeable API:
 const hours = InstantFns.diffHours(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffHours } from 'temporal-utils'
@@ -532,7 +532,7 @@ Tree-shakeable API:
 const minutes = InstantFns.diffMinutes(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMinutes } from 'temporal-utils'
@@ -558,7 +558,7 @@ Tree-shakeable API:
 const seconds = InstantFns.diffSeconds(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffSeconds } from 'temporal-utils'
@@ -584,7 +584,7 @@ Tree-shakeable API:
 const milliseconds = InstantFns.diffMilliseconds(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMilliseconds } from 'temporal-utils'
@@ -610,7 +610,7 @@ Tree-shakeable API:
 const microseconds = InstantFns.diffMicroseconds(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffMicroseconds } from 'temporal-utils'
@@ -636,7 +636,7 @@ Tree-shakeable API:
 const nanoseconds = InstantFns.diffNanoseconds(instant, otherInstant, options)
 ```
 
-Temporal API equivalent (with help of [temporal-utils](../../../temporal-utils/README.md)):
+Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 
 ```ts
 import { diffNanoseconds } from 'temporal-utils'

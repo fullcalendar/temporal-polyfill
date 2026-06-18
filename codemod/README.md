@@ -3,7 +3,7 @@
 Automated migrations for `temporal-polyfill` codebases.
 
 The current transform, `fns-to-temporal`, rewrites code that uses the
-tree-shakable [`temporal-polyfill/fns` function API](../temporal-polyfill/docs/fns/index.md)
+tree-shakable [`temporal-polyfill/fns` function API](../docs/fns/index.md)
 into idiomatic Temporal — real `Temporal` objects and their methods.
 
 ```ts
@@ -127,7 +127,7 @@ global Temporal types, set that up separately.
 ## Development
 
 ```sh
-cd packages/temporal-polyfill-codemod
+cd codemod
 pnpm run lint
 pnpm run test
 pnpm run build

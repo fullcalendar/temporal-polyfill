@@ -4,21 +4,21 @@
       "name": "Test262: Debug File",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
+      "cwd": "${workspaceFolder}/polyfill",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "test262", "--no-timeout", "${file}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true,
       "outFiles": [
-        "${workspaceFolder}/packages/temporal-polyfill/dist/**/*.(m|c|)js"
+        "${workspaceFolder}/polyfill/dist/**/*.(m|c|)js"
       ]
     },
     {
       "name": "Test262: Debug File (Node 16)",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/packages/temporal-polyfill",
+      "cwd": "${workspaceFolder}/polyfill",
       "runtimeVersion": "16",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "test262", "--", "--no-timeout", "${file}"],
@@ -26,7 +26,7 @@
       "internalConsoleOptions": "neverOpen",
       "autoAttachChildProcesses": true,
       "outFiles": [
-        "${workspaceFolder}/packages/temporal-polyfill/dist/**/*.(m|c|)js"
+        "${workspaceFolder}/polyfill/dist/**/*.(m|c|)js"
       ]
     },
     {

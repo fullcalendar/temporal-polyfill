@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { fnsApiCoverage } from '../fns-api-coverage.js'
 
-const docsDir = join('..', 'temporal-polyfill', 'docs', 'fns')
+const docsDir = join('..', 'docs', 'fns')
 const docFileByType: Record<string, string> = {
   Calendar: 'calendar.md',
   Instant: 'instant.md',

@@ -1,15 +1,15 @@
-[submodule "scripts/data/moment"]
+[submodule "misc/locale-data/data/moment"]
 	path = misc/locale-data/data/moment
 	url = https://github.com/moment/moment.git
-[submodule "scripts/data/fullcalendar"]
+[submodule "misc/locale-data/data/fullcalendar"]
 	path = misc/locale-data/data/fullcalendar
 	url = https://github.com/fullcalendar/fullcalendar.git
 [submodule "test262"]
 	path = test262
 	url = https://github.com/tc39/test262.git
-[submodule "packages/export-size"]
+[submodule "misc/export-size"]
 	path = misc/export-size
 	url = https://github.com/fullcalendar/export-size.git
-[submodule "packages/terser"]
+[submodule "misc/terser"]
 	path = misc/terser
 	url = https://github.com/fullcalendar/terser.git

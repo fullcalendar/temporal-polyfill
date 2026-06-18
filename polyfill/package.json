@@ -14,7 +14,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/fullcalendar/temporal-polyfill.git",
-    "directory": "packages/temporal-polyfill"
+    "directory": "polyfill"
   },
   "scripts": {
     "lint": "pnpm run lint:readme && biome check . --max-diagnostics=1000",
@@ -26,8 +26,8 @@
     "tsc": "tsc --build tsconfig.build.json",
     "tsc:all": "tsc -p tsconfig.json --noEmit --tsBuildInfoFile dist/.tsbuildinfo.all",
     "tsc:dev": "tsc --build tsconfig.build.json --watch --preserveWatchOutput --pretty",
-    "bundle": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js",
-    "bundle:dev": "pnpm --dir ../temporal-utils run build && ./scripts/bundle.js --dev",
+    "bundle": "pnpm --dir ../utils run build && ./scripts/bundle.js",
+    "bundle:dev": "pnpm --dir ../utils run build && ./scripts/bundle.js --dev",
     "gzip-reuse": "./scripts/gzip-reuse.js",
     "minify": "./scripts/minify.js",
     "manifest": "./scripts/manifest.js",
