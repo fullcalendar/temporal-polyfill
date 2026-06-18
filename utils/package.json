@@ -2,7 +2,7 @@
   "name": "temporal-utils",
   "version": "1.0.1",
   "title": "Temporal Utils",
-  "description": "Temporal Utils",
+  "description": "Convenience helpers for native Temporal objects",
   "author": {
     "name": "Adam Shaw",
     "email": "arshaw@users.noreply.github.com",
