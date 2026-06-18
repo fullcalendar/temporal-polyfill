@@ -4,7 +4,7 @@ name: CI
 on:
   push:
     branches:
-      - v1-clean
+      - main
 
 env:
   TZ: "America/New_York"
