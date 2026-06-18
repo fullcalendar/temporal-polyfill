@@ -295,7 +295,7 @@ rewrites your function calls back into idiomatic `Temporal.*` expressions.
 So `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`,
 with no manual find-and-replace.
 
-📚➡️ [**Read the full Tree-shakeable API docs**](../docs/fns/index.md) ⬅️📚
+📖 [**Read the full Tree-shakeable API docs →**](../docs/fns/index.md)
 
 The docs cover the complete catalog of functions, their TypeScript type exports,
 the codemod workflow, and how each function maps back to the standard `Temporal`

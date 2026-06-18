@@ -9,7 +9,6 @@ into idiomatic Temporal — real `Temporal` objects and their methods.
 ```ts
 // Before
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
-
 const date = PlainDateFns.create(2024, 5, 1)
 const next = PlainDateFns.addDays(date, 3)
 
