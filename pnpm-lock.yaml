@@ -7,11 +7,6 @@ settings:
 overrides:
   terser: workspace:*
 
-patchedDependencies:
-  rollup-plugin-sourcemaps@0.6.3:
-    hash: 24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a
-    path: patches/rollup-plugin-sourcemaps@0.6.3.patch
-
 importers:
 
   .:
@@ -160,9 +155,6 @@ importers:
       rollup-plugin-dts:
         specifier: ^6.1.0
         version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
-      rollup-plugin-sourcemaps:
-        specifier: ^0.6.3
-        version: 0.6.3(patch_hash=24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a)(@types/node@18.11.9)(rollup@4.9.6)
       terser:
         specifier: workspace:*
         version: link:../terser
@@ -1181,12 +1173,6 @@ packages:
       rollup:
         optional: true
 
-  '@rollup/pluginutils@3.1.0':
-    resolution: {integrity: sha512-GksZ6pr6TpIjHm8h9lSQ8pi8BE9VeubNT0OMJ3B5uZJ8pz73NPiqOtCog/x2/QzM1ENChPKxMDhiQuRHsqc+lg==}
-    engines: {node: '>= 8.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0
-
   '@rollup/pluginutils@4.2.1':
     resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
     engines: {node: '>= 8.0.0'}
@@ -1499,9 +1485,6 @@ packages:
   '@types/cli-progress@3.11.4':
     resolution: {integrity: sha512-yufTxeeNCZuEIxx2uebK8lpSAsJM4lvzakm/VxzYhDtqhXCzwH9jpn7nPCxzrROuEbLATqhFq4MIPoG0tlrsvw==}
 
-  '@types/estree@0.0.39':
-    resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
-
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
@@ -1736,11 +1719,6 @@ packages:
 
   astring@1.9.0:
     resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
-    hasBin: true
-
-  atob@2.1.2:
-    resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
-    engines: {node: '>= 4.5.0'}
     hasBin: true
 
   available-typed-arrays@1.0.5:
@@ -2027,10 +2005,6 @@ packages:
   decamelize@5.0.1:
     resolution: {integrity: sha512-VfxadyCECXgQlkoEAjeghAr5gY3Hf+IKjKb+X8tGVDtveCjN+USwprd2q3QXBR9T1+x2DG0XZF5/w+7HAtSaXA==}
     engines: {node: '>=10'}
-
-  decode-uri-component@0.2.2:
-    resolution: {integrity: sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==}
-    engines: {node: '>=0.10'}
 
   deep-eql@4.1.3:
     resolution: {integrity: sha512-WaEtAOpRA1MQ0eohqZjpGD8zdI0Ovsm8mmFhaDN8dvDZzyoUMcYDnf5Y6iu7HTXxf8JDS23qWa4a+hKCDyOPzw==}
@@ -2371,9 +2345,6 @@ packages:
   estraverse@5.3.0:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
     engines: {node: '>=4.0'}
-
-  estree-walker@1.0.1:
-    resolution: {integrity: sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==}
 
   estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
@@ -3546,16 +3517,6 @@ packages:
       rollup: ^3.29.4 || ^4
       typescript: ^4.5 || ^5.0
 
-  rollup-plugin-sourcemaps@0.6.3:
-    resolution: {integrity: sha512-paFu+nT1xvuO1tPFYXGe+XnQvg4Hjqv/eIhG8i5EspfYYPBKL57X7iVbfv55aNVASg3dzWvES9dmWsL2KhfByw==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      '@types/node': '>=10.0.0'
-      rollup: '>=0.31.2'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-
   rollup@2.80.0:
     resolution: {integrity: sha512-cIFJOD1DESzpjOBl763Kp1AH7UE/0fcdHe6rZXUdQ9c50uvgigvW97u3IcSeBwOkgqL/PXPBktBCh0KEu5L8XQ==}
     engines: {node: '>=10.0.0'}
@@ -3693,10 +3654,6 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
-
-  source-map-resolve@0.6.0:
-    resolution: {integrity: sha512-KXBr9d/fO/bWo97NXsPIAW1bFSBOuCnjbNTBMO7N59hsv5i9yzRDfcYwwt0l04+VqnKC+EwzvJZIP/qkuMgR/w==}
-    deprecated: See https://github.com/lydell/source-map-resolve#deprecated
 
   source-map-support@0.5.21:
     resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
@@ -5078,13 +5035,6 @@ snapshots:
     optionalDependencies:
       rollup: 4.9.6
 
-  '@rollup/pluginutils@3.1.0(rollup@4.9.6)':
-    dependencies:
-      '@types/estree': 0.0.39
-      estree-walker: 1.0.1
-      picomatch: 2.3.1
-      rollup: 4.9.6
-
   '@rollup/pluginutils@4.2.1':
     dependencies:
       estree-walker: 2.0.2
@@ -5335,8 +5285,6 @@ snapshots:
   '@types/cli-progress@3.11.4':
     dependencies:
       '@types/node': 20.11.30
-
-  '@types/estree@0.0.39': {}
 
   '@types/estree@1.0.5': {}
 
@@ -5600,8 +5548,6 @@ snapshots:
   astral-regex@2.0.0: {}
 
   astring@1.9.0: {}
-
-  atob@2.1.2: {}
 
   available-typed-arrays@1.0.5: {}
 
@@ -5890,8 +5836,6 @@ snapshots:
   decamelize@4.0.0: {}
 
   decamelize@5.0.1: {}
-
-  decode-uri-component@0.2.2: {}
 
   deep-eql@4.1.3:
     dependencies:
@@ -6436,8 +6380,6 @@ snapshots:
   estraverse@4.3.0: {}
 
   estraverse@5.3.0: {}
-
-  estree-walker@1.0.1: {}
 
   estree-walker@2.0.2: {}
 
@@ -7598,14 +7540,6 @@ snapshots:
     optionalDependencies:
       '@babel/code-frame': 7.23.5
 
-  rollup-plugin-sourcemaps@0.6.3(patch_hash=24bf1c6dfd00ccbf1b56154e8c3961227aa52fc34cf3a75c7e3f023962ef815a)(@types/node@18.11.9)(rollup@4.9.6):
-    dependencies:
-      '@rollup/pluginutils': 3.1.0(rollup@4.9.6)
-      rollup: 4.9.6
-      source-map-resolve: 0.6.0
-    optionalDependencies:
-      '@types/node': 18.11.9
-
   rollup@2.80.0:
     optionalDependencies:
       fsevents: 2.3.3
@@ -7776,11 +7710,6 @@ snapshots:
   source-map-js@1.0.2: {}
 
   source-map-js@1.2.1: {}
-
-  source-map-resolve@0.6.0:
-    dependencies:
-      atob: 2.1.2
-      decode-uri-component: 0.2.2
 
   source-map-support@0.5.21:
     dependencies:
