@@ -1,7 +1,7 @@
 
 # temporal-spec
 
-TypeScript type definitions for [Temporal](https://tc39.es/proposal-temporal/docs/), the successor to the JavaScript `Date` object.
+TypeScript type definitions for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the successor to the JavaScript `Date` object.
 
 This package ships **only** type declarations — no runtime code. It describes the
 shape of the Temporal API (plus the Temporal-related additions to `Intl` and

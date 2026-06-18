@@ -1,6 +1,6 @@
 # Temporal Monorepo
 
-A collection of packages for working with [Temporal](https://tc39.es/proposal-temporal/docs/), the modern successor to the JavaScript `Date` object. 🕒
+A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object. 🕒
 
 ## Packages
 
