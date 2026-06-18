@@ -23,6 +23,7 @@ const perPathTypes: Record<string, Record<string, string>> = {
     Format: 'Intl.DateTimeFormat',
     FromFields: 'Temporal.ZonedDateTimeLikeObject',
     FromOptions: 'Temporal.ZonedDateTimeFromOptions',
+    WithOptions: 'Temporal.ZonedDateTimeFromOptions',
     WithFields:
       'Temporal.PartialTemporalLike<Temporal.ZonedDateTimeLikeObject>',
     DiffOptions:
@@ -112,6 +113,28 @@ describe('fns type export mappings', () => {
         )
       }
     }
+  })
+
+  it('rewrites ZonedDateTime FromOptions and WithOptions namespace references', () => {
+    const result = transformSource(
+      [
+        "import type * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'",
+        '',
+        'type From = ZonedDateTimeFns.FromOptions',
+        'type With = ZonedDateTimeFns.WithOptions',
+      ].join('\n'),
+      { path: 'input.ts' },
+    )
+    const normalizedCode = normalizeWhitespace(result.code)
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+    expect(normalizedCode).toContain(
+      normalizeWhitespace('type From = Temporal.ZonedDateTimeFromOptions'),
+    )
+    expect(normalizedCode).toContain(
+      normalizeWhitespace('type With = Temporal.ZonedDateTimeFromOptions'),
+    )
   })
 })
 

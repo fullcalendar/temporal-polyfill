@@ -71,6 +71,7 @@ const perTypeTypeMap: Record<string, Record<string, string>> = {
     Format: 'Intl.DateTimeFormat',
     FromFields: 'Temporal.ZonedDateTimeLikeObject',
     FromOptions: 'Temporal.ZonedDateTimeFromOptions',
+    WithOptions: 'Temporal.ZonedDateTimeFromOptions',
     WithFields:
       'Temporal.PartialTemporalLike<Temporal.ZonedDateTimeLikeObject>',
     DiffOptions:
