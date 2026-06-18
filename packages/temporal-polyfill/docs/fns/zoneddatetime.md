@@ -2241,9 +2241,9 @@ const text = zonedDateTime.toLocaleString(locales, options)
 
 ### `createFormat`
 
-❌ **This function does not exist.** It was never part of the Fns API and has no
-direct equivalent. Use `Intl.DateTimeFormat` directly instead, pulling the time
-zone off the record and formatting its `epochMilliseconds`:
+❌ **This function does not exist.** It was never part of the tree-shakeable API
+and has no direct equivalent. Use `Intl.DateTimeFormat` directly instead,
+pulling the time zone off the record and formatting its `epochMilliseconds`:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {

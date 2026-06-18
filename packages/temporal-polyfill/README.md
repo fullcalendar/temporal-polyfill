@@ -117,7 +117,7 @@ import { Temporal } from 'temporal-polyfill/full/implementation'
 import { install } from 'temporal-polyfill/full/shim'
 ```
 
-Only need a few operations? The [Tree-shakeable API](#tree-shakeable-api) lets
+Only need a few operations? The [Tree-shakeable API](./docs/fns/index.md) lets
 you import individual functions — and individual calendars — so your bundle
 includes only what you use. It's always native-aware and needs no separate
 `/full` build.
