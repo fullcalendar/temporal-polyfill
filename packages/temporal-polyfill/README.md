@@ -7,7 +7,6 @@ Less that 20 kB, [spec compliant](#spec-compliance)
 
 🌳 Need an even smaller footprint? Check out the [tree-shakeable API](#tree-shakeable-api)
 
-
 ## Table of Contents
 
 - [Installation](#installation)
@@ -18,7 +17,6 @@ Less that 20 kB, [spec compliant](#spec-compliance)
 - [Supported Environments](#supported-environments)
 - [Comparison with `@js-temporal/polyfill`](#comparison-with-js-temporalpolyfill)
 - [Tree-shakeable API](#tree-shakeable-api)
-
 
 ## Installation
 
@@ -204,7 +202,7 @@ https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_o
 -->
 
 | Browser    | Minimum Release | For `chinese`, `dangi`, `islamic-umalqura` |
-| ---------- | --------------: | -----------------------------------------: |
+| :--------- | --------------: | -----------------------------------------: |
 | Chrome     |   67 (May 2018) |                              80 (Feb 2020) |
 | Firefox    |   68 (Jul 2019) |                              76 (May 2020) |
 | Safari     |   14 (Sep 2020) |                            14.1 (Apr 2021) |
@@ -292,9 +290,10 @@ example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTim
 
 Best of all, this isn't a one-way door. When the time is right — once native
 `Temporal` is available in every environment you target, and you no longer need
-the polyfill — a built-in **codemod** rewrites your function calls back into
-idiomatic `Temporal.*` expressions. So `PlainDateFns.addMonths(date, 2)` becomes
-`date.add({ months: 2 })`, with no manual find-and-replace.
+the polyfill — [temporal-polyfill-codemod](../temporal-polyfill-codemod/README.md)
+rewrites your function calls back into idiomatic `Temporal.*` expressions.
+So `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`,
+with no manual find-and-replace.
 
 📚➡️ [**Read the full Tree-shakeable API docs**](./docs/fns/index.md) ⬅️📚
 
