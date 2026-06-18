@@ -107,6 +107,16 @@ global types, you may not need this package at all — just enable the lib:
 }
 ```
 
+Or with more granularity:
+
+```diff
+{
+  "compilerOptions": {
++   "lib": ["esnext.temporal", "esnext.intl", "esnext.date"]
+  }
+}
+```
+
 `temporal-spec` remains useful when you:
 
 - are on **TypeScript < 6.0**, which has no built-in Temporal types

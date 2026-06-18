@@ -154,7 +154,7 @@ Globally install the `/full/` polyfill that supports an expanded set of calendar
 
 If using the `temporal-polyfill/global` or `temporal-polyfill/full/global` entrypoints, you must configure types:
 
-### If using TypeScript 6.0 or later
+### If using TypeScript >= 6.0
 
 In your `tsconfig.json`:
 
@@ -176,7 +176,7 @@ Or with more granularity:
 }
 ```
 
-### If using TypeScript 5.x or earlier
+### If using TypeScript < 6.0
 
 Write an ESM import that loads the types:
 

@@ -127,9 +127,10 @@ global Temporal types, set that up separately.
 ## Development
 
 ```sh
-pnpm --dir packages/temporal-polyfill-codemod run lint
-pnpm --dir packages/temporal-polyfill-codemod run test
-pnpm --dir packages/temporal-polyfill-codemod run build
+cd packages/temporal-polyfill-codemod
+pnpm run lint
+pnpm run test
+pnpm run build
 ```
 
 The full transform contract — every supported import path, every deferred shape,
