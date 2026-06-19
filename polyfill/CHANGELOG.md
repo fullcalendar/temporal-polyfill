@@ -8,10 +8,10 @@
 - Tree-shakeable API 🌳 [See docs](../docs/fns/index.md)
 - Uses native Temporal when available (prior versions never did)
 - New `/implementation` and `/shim` entrypoints for finer control over native vs. polyfilled. [See docs](./README.md#package-entrypoints)
-- Smaller global bundle: 20,212 B → 19,594 B (3%)
+- Smaller global bundle: 20,212 B → 19,594 B (-3%)
 - Conformance
   - Conformance with latest spec (June 2026)
-  - Accurate method `function.length` and non-constructable functions
+  - Accurate method descriptors: `function.length` and non-constructable
   - Better non-ISO calendar system conformance — calendar math is now algorithmic where possible instead of relying on faulty Intl-scraped data (credit to [@internationalized/date]). Requires different entrypoints. See Upgrade Notes below
 
 ### 💥 Breaking
