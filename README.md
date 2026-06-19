@@ -1,7 +1,7 @@
 # temporal-polyfill monorepo
 
 > [!NOTE]
-> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](#) for everything new.
+> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](https://github.com/fullcalendar/temporal-polyfill/releases/tag/temporal-polyfill%401.0.1) for everything new.
 
 A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object 🕒
 

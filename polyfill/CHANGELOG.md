@@ -1,3 +1,10 @@
+<!--
+NOTE: Links to URLs like
+../docs/fns/index.md
+./README.md#package-entrypoints
+./README.md#supported-environments
+don't work in GH release markdown. must be absolute
+-->
 
 # `temporal-polyfill` Changelog
 
@@ -5,9 +12,9 @@
 
 ### ✨ Features
 
-- Tree-shakeable API 🌳 [See docs](../docs/fns/index.md)
+- Tree-shakeable API 🌳 [See docs](https://github.com/fullcalendar/temporal-polyfill/blob/main/docs/fns/index.md)
 - Uses native Temporal when available (prior versions never did)
-- New `/implementation` and `/shim` entrypoints for finer control over native vs. polyfilled. [See docs](./README.md#package-entrypoints)
+- New `/implementation` and `/shim` entrypoints for finer control over native vs. polyfilled. [See docs](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md#package-entrypoints)
 - Smaller global bundle: 20,212 B → 19,594 B (-3%)
 - Conformance
   - Conformance with latest spec (June 2026)
@@ -17,7 +24,7 @@
 ### 💥 Breaking
 
 - `iso8601` and `gregory` work as before, but other calendars now need a different entrypoint. See Upgrade Notes below
-- Raised minimum browser support; BigInt now required. See [support matrix](./README.md#supported-environments)
+- Raised minimum browser support; BigInt now required. See [support matrix](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md#supported-environments)
 - Raised minimum Node.js support to 16
 - Dropped CJS; ESM and global IIFE only
 - `global.min.js` is no longer in the NPM package, but remains on the jsdelivr CDN ([like this](https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/global.min.js)), which auto-minifies
