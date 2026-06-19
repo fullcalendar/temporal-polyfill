@@ -1,4 +1,4 @@
-# Tree-shakeable API
+# Tree-shakeable API 🌳
 
 For library authors and other developers who are hyper-concerned about bundle
 size, `temporal-polyfill` ships an alternate, function-based API designed for

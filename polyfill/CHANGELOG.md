@@ -3,32 +3,26 @@
 
 ## v1.0.1
 
-- FEATURE: Tree-shakeable API [See docs](../docs/fns/index.md)
-- FEATURE: Unlike prior versions, leverage native Temporal if available
-- FEATURE: New entrypoints `/implementation` and `/shim` give greater control over native VS internal. [See docs](./README.md#package-entrypoints).
-- FEATURE: Global bundle size decrease. 20,212 B → 19,594 B (3%)
-- FEATURE: Conformance with latest spec (June 2026)
-- FEATURE: Better calendar-aware conformance because calendars math now done algorithmically when possible instead of relying entirely on faulty Intl-scraped data. Credit to [@internationalized/date]. Though requires different entrypoints.
-- BREAKING: The `iso8601` and `gregory` calendars are supported as-is, but users of other calendars must change their entrypoint. See Upgrade Notes below.
-- BREAKING: Support for browsers has been raised. Must support Bigint. See [support matrix](./README.md#supported-environments).
-- BREAKING: Raised minimum Node.js support to 16
-- BREAKING: Dropped CJS support and only supports ESM and global IIFE
-- BREAKING: The `global.min.js` file no longer included in NPM package,
-  but can still be accessed via jsdelivr CDN ([like this](https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/global.min.js))
-  because they auto-minify JS files.
-- FIX: `Temporal.Duration.round()` no longer throws `RangeError: Invalid protocol results` for zero durations with `relativeTo` (#87)
-- FIX: `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing `RangeError: Invalid protocol results` (#55)
-- FIX: `Temporal.Duration.from()` no longer double-rounds huge subsecond values, avoiding false out-of-range errors for valid nanosecond durations and preserving exact microsecond stringification (#92)
-- FIX: Day rounding no longer loses tiny sub-day remainders for large `Temporal.Duration` and `Temporal.PlainDateTime` differences, so modes like `ceil` correctly round up when the exact value is just past a whole day (#84)
-- FIX: `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year when formatting with date styles (#75)
-- FIX: `Temporal.PlainDate.prototype.withCalendar()` now preserves the correct Buddhist calendar month for historical ISO dates such as 1582-01-01 (#74)
-- FIX: `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` values in Node 22 instead of falling through to `valueOf()` and throwing `TypeError: Cannot use valueOf` (#95)
-- FIX: `Temporal.ZonedDateTime.from()` now accepts Brazilian time-zone wall times near close-together 2000 offset transitions, including `America/Noronha` and `America/Boa_Vista` (#73)
-- FIX: `Temporal.ZonedDateTime.from()` no longer clamps future time-zone offset calculations, preserving the expected `+02:00` summer offset for future `Europe/Berlin` dates such as 2044-06-10 (#49)
-- FIX: Uncaught TypeError: Cannot use `valueOf` when using `Temporal.PlainTime` (#95)
-- VERSION-NOTE: This first real 1.0 release is released as 1.0.1 because 1.0.0 was accidentally published as a blank package many years ago (related to #88).
+### ✨ Features
 
-### Upgrade Notes
+- Tree-shakeable API 🌳 [See docs](../docs/fns/index.md)
+- Uses native Temporal when available (prior versions never did)
+- New `/implementation` and `/shim` entrypoints for finer control over native vs. polyfilled. [See docs](./README.md#package-entrypoints)
+- Smaller global bundle: 20,212 B → 19,594 B (3%)
+- Conformance
+  - Conformance with latest spec (June 2026)
+  - Accurate method `function.length` and non-constructable functions
+  - Better non-ISO calendar system conformance — calendar math is now algorithmic where possible instead of relying on faulty Intl-scraped data (credit to [@internationalized/date]). Requires different entrypoints. See Upgrade Notes below
+
+### 💥 Breaking
+
+- `iso8601` and `gregory` work as before, but other calendars now need a different entrypoint. See Upgrade Notes below
+- Raised minimum browser support; BigInt now required. See [support matrix](./README.md#supported-environments)
+- Raised minimum Node.js support to 16
+- Dropped CJS; ESM and global IIFE only
+- `global.min.js` is no longer in the NPM package, but remains on the jsdelivr CDN ([like this](https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/global.min.js)), which auto-minifies
+
+### 🛠️ Upgrade Notes
 
 If you use any of the following calendar systems, please use the `/full/` entrypoints now: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
 
@@ -39,6 +33,22 @@ If you use any of the following calendar systems, please use the `/full/` entryp
 - import { Temporal } from 'temporal-polyfill'
 + import { Temporal } from 'temporal-polyfill/full'
 ```
+
+### 🐛 Bugfixes
+
+- `Temporal.Duration.round()` no longer throws for zero durations with `relativeTo` (#87)
+- `Temporal.Duration.prototype.total()` now returns `0` for blank durations with `relativeTo` instead of throwing (#55)
+- `Temporal.Duration.from()` no longer double-rounds huge subsecond values, fixing false out-of-range errors and microsecond stringification (#92)
+- Day rounding no longer drops tiny sub-day remainders on large `Temporal.Duration` / `Temporal.PlainDateTime` diffs, so `ceil` rounds up correctly when just past a whole day (#84)
+- `Temporal.PlainMonthDay.prototype.toLocaleString()` no longer includes the internal reference year in date styles (#75)
+- `Temporal.PlainDate.prototype.withCalendar()` now keeps the correct Buddhist month for historical ISO dates like 1582-01-01 (#74)
+- `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` in Node 22 instead of throwing `TypeError: Cannot use valueOf` (#95)
+- `Temporal.ZonedDateTime.from()` now accepts Brazilian wall times near close-together 2000 offset transitions, e.g. `America/Noronha` and `America/Boa_Vista` (#73)
+- `Temporal.ZonedDateTime.from()` no longer clamps future offset calculations, preserving the `+02:00` summer offset for future `Europe/Berlin` dates like 2044-06-10 (#49)
+
+### 🔢 Version Number
+
+This first real 1.0 release is numbered 1.0.1 because 1.0.0 was accidentally published as a blank package years ago (related to #88).
 
 [@internationalized/date]: https://github.com/adobe/react-spectrum/tree/main/packages/@internationalized/date
 

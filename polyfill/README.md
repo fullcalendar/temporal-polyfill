@@ -268,7 +268,7 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
 </table>
 
 
-## Tree-shakeable API
+## Tree-shakeable API 🌳
 
 For anyone hyper-concerned about bundle size, `temporal-polyfill` also ships an
 alternate function API designed for tree-shaking. Instead of large `Temporal.*`
