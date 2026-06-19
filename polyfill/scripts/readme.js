@@ -60,7 +60,9 @@ function toGithubUrl(url) {
   const pathPart = suffix ? url.slice(0, url.length - suffix.length) : url
 
   const localPath = resolvePath(pkgDir, pathPart)
-  const repoRelPath = relativePath(repoRootDir, localPath).split(pathSep).join('/')
+  const repoRelPath = relativePath(repoRootDir, localPath)
+    .split(pathSep)
+    .join('/')
   const kind = resolveLinkKind(localPath)
 
   return `${repoUrl}/${kind}/main/${repoRelPath}${suffix}`
@@ -72,7 +74,9 @@ function resolveLinkKind(localPath) {
   try {
     return statSync(localPath).isDirectory() ? 'tree' : 'blob'
   } catch {
-    console.warn(`readme.js: link target not found, assuming file: ${localPath}`)
+    console.warn(
+      `readme.js: link target not found, assuming file: ${localPath}`,
+    )
     return 'blob'
   }
 }
