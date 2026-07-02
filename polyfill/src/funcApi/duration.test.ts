@@ -67,6 +67,22 @@ describe('fromString', () => {
     const dur = DurationFns.fromString('P1D')
     expectDurationEquals(dur, { days: 1 })
   })
+
+  it('parses time components after the designator', () => {
+    expectDurationEquals(DurationFns.fromString('P1DT1H'), {
+      days: 1,
+      hours: 1,
+    })
+    expectDurationEquals(DurationFns.fromString('PT1H'), { hours: 1 })
+    expectDurationEquals(DurationFns.fromString('PT1M'), { minutes: 1 })
+    expectDurationEquals(DurationFns.fromString('PT1S'), { seconds: 1 })
+  })
+
+  it('rejects a time designator with no following time component', () => {
+    expect(() => DurationFns.fromString('P05DT')).toThrow(RangeError)
+    expect(() => DurationFns.fromString('P1DT')).toThrow(RangeError)
+    expect(() => DurationFns.fromString('PT')).toThrow(RangeError)
+  })
 })
 
 describe('fromFields', () => {

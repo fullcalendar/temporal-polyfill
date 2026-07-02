@@ -546,7 +546,10 @@ const durationRegExp = createRegExp(
     '(\\d+M)?' + // 3:months
     '(\\d+W)?' + // 4:weeks
     '(\\d+D)?' + // 5:days
-    '(?:T' +
+    // Spec grammar (DurationTime) requires the time designator `T` to be
+    // followed by at least one H/M/S component. Each of those starts with a
+    // digit, so a `(?=\d)` lookahead rejects a dangling `T` (e.g. "P05DT").
+    '(?:T(?=\\d)' +
     `(?:(\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
     `(?:(\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
     `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
