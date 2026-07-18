@@ -58,29 +58,21 @@ export function defineTemporalClass(
     cls.prototype,
     createStringTagDescriptors('Temporal.' + branding),
   )
-  for (const getterMap of getterMaps) {
-    defineSlotGetters(cls.prototype, getSlots!, getterMap)
-  }
-  return cls
-}
-
-function defineSlotGetters<Slots>(
-  destPrototype: object,
-  getSlots: (obj: unknown) => Slots,
-  getterMap: GetterMap<Slots>,
-): void {
+  // Merge first so each class installs all generated getters in one descriptor
+  // pass. The fresh target keeps the shared getter maps immutable.
   Object.defineProperties(
-    destPrototype,
+    cls.prototype,
     mapProps(
       (getter) => ({
         get() {
-          return getter(getSlots(this))
+          return getter(getSlots!(this))
         },
         configurable: true,
       }),
-      getterMap,
+      Object.assign({}, ...getterMaps),
     ),
   )
+  return cls
 }
 
 interface JsonDebuggable {
