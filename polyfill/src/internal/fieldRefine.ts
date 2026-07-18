@@ -48,9 +48,7 @@ export const dateFieldRefiners = {
   // The monthCode refiner only validates type. Range validation is deferred to
   // createPlainDateFromFields/createPlainYearMonthFromFields/createPlainMonthDayFromFields so missing-field
   // TypeError precedes invalid-monthCode RangeError.
-  monthCode(monthCode: unknown, entityName = 'monthCode') {
-    return coerceMonthCodeString(monthCode, entityName)
-  },
+  monthCode: coerceMonthCodeString,
   day: toPositiveIntegerWithTruncation,
 }
 
@@ -64,7 +62,12 @@ export const durationFieldRefiners = zipPropsConst(
   toStrictInteger,
 )
 
-export const offsetFieldRefiners = {
+export const dateTimeFieldRefiners = {
+  ...dateFieldRefiners,
+  ...timeFieldRefiners,
+}
+
+export const zonedDateTimeFieldRefiners = {
   offset(offsetString: unknown) {
     const s = toStringViaPrimitive(offsetString as string)
     // The public field is named "offset" and is supplied as a string, but after
@@ -72,16 +75,7 @@ export const offsetFieldRefiners = {
     // keeps the observable string coercion here and avoids later reparsing.
     return parseOffsetNano(s)
   },
-}
-
-export const dateTimeFieldRefiners = {
-  ...dateFieldRefiners,
-  ...timeFieldRefiners,
-}
-
-export const zonedDateTimeFieldRefiners = {
   ...dateTimeFieldRefiners,
-  ...offsetFieldRefiners,
 }
 
 /*

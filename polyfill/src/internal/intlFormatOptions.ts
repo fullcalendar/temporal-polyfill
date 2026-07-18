@@ -177,18 +177,6 @@ const dateTimeDefaultShapeFields: Intl.DateTimeFormatOptions = {
   ...dateDefaultShapeFields,
   ...timeDefaultShapeFields,
 }
-const zonedDateTimeDefaultShapeFields: Intl.DateTimeFormatOptions = {
-  ...dateTimeDefaultShapeFields,
-  timeZoneName: 'short',
-}
-const yearMonthDefaultShapeFields: Intl.DateTimeFormatOptions = {
-  year: 'numeric',
-  month: 'numeric',
-}
-const monthDayDefaultShapeFields: Intl.DateTimeFormatOptions = {
-  month: 'numeric',
-  day: 'numeric',
-}
 
 const dateShapeFieldNames = ['weekday', 'year', 'month', 'day', 'dateStyle']
 const timeShapeFieldNames = [
@@ -215,7 +203,10 @@ export const transformZonedOptions = createOptionsTransformer(
   /* shapeFieldNames = */ dateTimeShapeFieldNames,
   /* invalidShapeFieldNames = */ [],
   /* ignoredFieldNames = */ [],
-  /* defaultShapeFields = */ zonedDateTimeDefaultShapeFields,
+  /* defaultShapeFields = */ {
+    ...dateTimeDefaultShapeFields,
+    timeZoneName: 'short',
+  },
 )
 
 export const transformDateTimeOptions = createOptionsTransformer(
@@ -245,7 +236,10 @@ export const transformYearMonthOptions = createOptionsTransformer(
   // remaining date/time shape fields as meaningful conflicts.
   /* invalidShapeFieldNames = */ yearMonthIgnoredFieldNames,
   /* ignoredFieldNames = */ ['timeZoneName'],
-  /* defaultShapeFields = */ yearMonthDefaultShapeFields,
+  /* defaultShapeFields = */ {
+    year: 'numeric',
+    month: 'numeric',
+  },
   /* dateStyleReplacementFields = */ {
     full: { year: 'numeric', month: 'long' },
     long: { year: 'numeric', month: 'long' },
@@ -260,7 +254,10 @@ export const transformMonthDayOptions = createOptionsTransformer(
   // remaining date/time shape fields as meaningful conflicts.
   /* invalidShapeFieldNames = */ monthDayIgnoredFieldNames,
   /* ignoredFieldNames = */ ['timeZoneName', 'era'],
-  /* defaultShapeFields = */ monthDayDefaultShapeFields,
+  /* defaultShapeFields = */ {
+    month: 'numeric',
+    day: 'numeric',
+  },
   /* dateStyleReplacementFields = */ {
     full: { month: 'long', day: 'numeric' },
     long: { month: 'long', day: 'numeric' },
