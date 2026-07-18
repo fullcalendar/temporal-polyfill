@@ -18,7 +18,7 @@ import {
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toBigInt, toStrictInteger } from '../../internal/cast'
 import {
-  compareZonedDateTimes,
+  compareZonedEpochSlots,
   zonedDateTimesEqual,
 } from '../../internal/compare'
 import {
@@ -463,7 +463,7 @@ export function compare(
 ): NumberSign {
   const slots = getShimZonedDateTimeSlots(record)
   const otherSlots = getShimZonedDateTimeSlots(otherRecord)
-  return compareZonedDateTimes(slots, otherSlots)
+  return compareZonedEpochSlots(slots, otherSlots)
 }
 
 export function toLocaleString(

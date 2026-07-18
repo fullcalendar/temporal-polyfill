@@ -14,7 +14,7 @@ import {
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toBigInt } from '../../internal/cast'
 import {
-  compareZonedDateTimes,
+  compareZonedEpochSlots,
   zonedDateTimesEqual,
 } from '../../internal/compare'
 import {
@@ -125,7 +125,7 @@ export const ZonedDateTime = defineTemporalClass(
     }
 
     static compare(arg0: ZonedDateTimeArg, arg1: ZonedDateTimeArg): NumberSign {
-      return compareZonedDateTimes(
+      return compareZonedEpochSlots(
         toZonedDateTimeSlots(arg0),
         toZonedDateTimeSlots(arg1),
       )

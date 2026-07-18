@@ -30,23 +30,14 @@ import {
 // High-Level Compare
 // -----------------------------------------------------------------------------
 
-export function compareInstants(
-  instantSlots0: EpochNanoFields,
-  instantSlots1: EpochNanoFields,
+// Compares the epoch-nanosecond slots shared by Instant and ZonedDateTime.
+export function compareZonedEpochSlots(
+  zonedEpochSlots0: EpochNanoFields,
+  zonedEpochSlots1: EpochNanoFields,
 ): NumberSign {
   return compareBigInts(
-    instantSlots0.epochNanoseconds,
-    instantSlots1.epochNanoseconds,
-  )
-}
-
-export function compareZonedDateTimes(
-  zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
-): NumberSign {
-  return compareBigInts(
-    zonedDateTimeSlots0.epochNanoseconds,
-    zonedDateTimeSlots1.epochNanoseconds,
+    zonedEpochSlots0.epochNanoseconds,
+    zonedEpochSlots1.epochNanoseconds,
   )
 }
 
@@ -127,7 +118,7 @@ export function instantsEqual(
   instantSlots0: EpochNanoFields,
   instantSlots1: EpochNanoFields,
 ): boolean {
-  return !compareInstants(instantSlots0, instantSlots1)
+  return !compareZonedEpochSlots(instantSlots0, instantSlots1)
 }
 
 export function zonedDateTimesEqual(
@@ -135,7 +126,7 @@ export function zonedDateTimesEqual(
   zonedDateTimeSlots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): boolean {
   return (
-    !compareZonedDateTimes(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
+    !compareZonedEpochSlots(zonedDateTimeSlots0, zonedDateTimeSlots1) &&
     zonedDateTimeSlots0.timeZone.compareKey ===
       zonedDateTimeSlots1.timeZone.compareKey &&
     zonedDateTimeSlots0.calendar === zonedDateTimeSlots1.calendar

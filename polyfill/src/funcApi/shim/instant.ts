@@ -13,7 +13,7 @@ import {
   bigNanoInSec,
 } from '../../internal/bigNano'
 import { toBigInt, toStrictInteger } from '../../internal/cast'
-import { compareInstants, instantsEqual } from '../../internal/compare'
+import { compareZonedEpochSlots, instantsEqual } from '../../internal/compare'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -189,7 +189,7 @@ export function compare(
 ): NumberSign {
   const slots = getShimInstantSlots(record)
   const otherSlots = getShimInstantSlots(otherRecord)
-  return compareInstants(slots, otherSlots)
+  return compareZonedEpochSlots(slots, otherSlots)
 }
 
 export function toZonedDateTimeISO(

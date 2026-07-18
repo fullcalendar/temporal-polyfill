@@ -8,7 +8,7 @@ import {
 } from '../../apiHelpers/classStyle'
 import { bigNanoInMilli } from '../../internal/bigNano'
 import { requireNumberIsInteger, toBigInt } from '../../internal/cast'
-import { compareInstants, instantsEqual } from '../../internal/compare'
+import { compareZonedEpochSlots, instantsEqual } from '../../internal/compare'
 import {
   epochMilliToInstant,
   epochNanoToInstant,
@@ -76,7 +76,7 @@ export const Instant = defineTemporalClass(
     }
 
     static compare(a: InstantArg, b: InstantArg): NumberSign {
-      return compareInstants(toInstantSlots(a), toInstantSlots(b))
+      return compareZonedEpochSlots(toInstantSlots(a), toInstantSlots(b))
     }
 
     get epochMilliseconds(): number {
