@@ -9,16 +9,6 @@ type DateStyleReplacementFields = Record<
   Intl.DateTimeFormatOptions
 >
 
-interface OptionsAnalysis {
-  dateStyle: Intl.DateTimeFormatOptions['dateStyle']
-  timeStyle: Intl.DateTimeFormatOptions['timeStyle']
-  granularShapeFields: OptionFields
-  modifierFields: OptionFields
-  otherFields: OptionFields
-  hasInvalidGranularShapeFields: boolean
-  hasInvalidStyleFields: boolean
-}
-
 export type OptionsTransformer = (
   options: Intl.DateTimeFormatOptions,
   // Allows an options bag to contain fields that do not apply to this Temporal
@@ -27,53 +17,6 @@ export type OptionsTransformer = (
   // Temporal.prototype.toLocaleString paths do not.
   allowPartialOverlap?: boolean,
 ) => Intl.DateTimeFormatOptions
-
-function analyzeOptions(
-  options: Intl.DateTimeFormatOptions,
-  shapeFieldNameSet: ReadonlySet<string>,
-  invalidShapeFieldNameSet: ReadonlySet<string>,
-  ignoredFieldNameSet: ReadonlySet<string>,
-): OptionsAnalysis {
-  const analysis: OptionsAnalysis = {
-    dateStyle: undefined,
-    timeStyle: undefined,
-    granularShapeFields: {},
-    modifierFields: {},
-    otherFields: {},
-    hasInvalidGranularShapeFields: false,
-    hasInvalidStyleFields: false,
-  }
-
-  for (const name of Object.keys(options)) {
-    const value = options[name as keyof Intl.DateTimeFormatOptions]
-
-    if (value === undefined || ignoredFieldNameSet.has(name)) {
-      continue
-    }
-
-    if (shapeFieldNameSet.has(name)) {
-      if (name === 'dateStyle') {
-        analysis.dateStyle = value as Intl.DateTimeFormatOptions['dateStyle']
-      } else if (name === 'timeStyle') {
-        analysis.timeStyle = value as Intl.DateTimeFormatOptions['timeStyle']
-      } else {
-        analysis.granularShapeFields[name] = value
-      }
-    } else if (name === 'era') {
-      analysis.modifierFields[name] = value
-    } else if (invalidShapeFieldNameSet.has(name)) {
-      if (name === 'dateStyle' || name === 'timeStyle') {
-        analysis.hasInvalidStyleFields = true
-      } else {
-        analysis.hasInvalidGranularShapeFields = true
-      }
-    } else {
-      analysis.otherFields[name] = value
-    }
-  }
-
-  return analysis
-}
 
 function createOptionsTransformer(
   // Fields that define the visible output shape for this Temporal type.
@@ -100,27 +43,54 @@ function createOptionsTransformer(
     options: Intl.DateTimeFormatOptions,
     allowPartialOverlap?: boolean,
   ): Intl.DateTimeFormatOptions => {
-    const analysis = analyzeOptions(
-      options,
-      shapeFieldNameSet,
-      invalidShapeFieldNameSet,
-      ignoredFieldNameSet,
-    )
+    let dateStyle: Intl.DateTimeFormatOptions['dateStyle']
+    let timeStyle: Intl.DateTimeFormatOptions['timeStyle']
+    const granularShapeFields: OptionFields = {}
+    const modifierFields: OptionFields = {}
+    const otherFields: OptionFields = {}
+    let hasInvalidGranularShapeFields = false
+    let hasInvalidStyleFields = false
 
-    const hasDateStyle = analysis.dateStyle !== undefined
-    const hasTimeStyle = analysis.timeStyle !== undefined
+    for (const name of Object.keys(options)) {
+      const value = options[name as keyof Intl.DateTimeFormatOptions]
+
+      if (value === undefined || ignoredFieldNameSet.has(name)) {
+        continue
+      }
+
+      if (shapeFieldNameSet.has(name)) {
+        if (name === 'dateStyle') {
+          dateStyle = value as Intl.DateTimeFormatOptions['dateStyle']
+        } else if (name === 'timeStyle') {
+          timeStyle = value as Intl.DateTimeFormatOptions['timeStyle']
+        } else {
+          granularShapeFields[name] = value
+        }
+      } else if (name === 'era') {
+        modifierFields[name] = value
+      } else if (invalidShapeFieldNameSet.has(name)) {
+        if (name === 'dateStyle' || name === 'timeStyle') {
+          hasInvalidStyleFields = true
+        } else {
+          hasInvalidGranularShapeFields = true
+        }
+      } else {
+        otherFields[name] = value
+      }
+    }
+
+    const hasDateStyle = dateStyle !== undefined
+    const hasTimeStyle = timeStyle !== undefined
     const hasAnyStyle = hasDateStyle || hasTimeStyle
-    const hasGranularShapeFields =
-      Object.keys(analysis.granularShapeFields).length > 0
-    const hasInvalids =
-      analysis.hasInvalidGranularShapeFields || analysis.hasInvalidStyleFields
+    const hasGranularShapeFields = Object.keys(granularShapeFields).length > 0
+    const hasInvalids = hasInvalidGranularShapeFields || hasInvalidStyleFields
     const hasShapeFields =
       hasGranularShapeFields || hasDateStyle || hasTimeStyle
-    const hasModifierFields = Object.keys(analysis.modifierFields).length > 0
+    const hasModifierFields = Object.keys(modifierFields).length > 0
     const hasStyleConflictFields =
       hasGranularShapeFields ||
       hasModifierFields ||
-      analysis.hasInvalidGranularShapeFields
+      hasInvalidGranularShapeFields
 
     if (
       (!allowPartialOverlap && hasInvalids) ||
@@ -138,24 +108,24 @@ function createOptionsTransformer(
 
     Object.assign(
       transformedOptions,
-      analysis.granularShapeFields,
-      analysis.modifierFields,
-      analysis.otherFields,
+      granularShapeFields,
+      modifierFields,
+      otherFields,
     )
 
     if (hasDateStyle) {
       if (dateStyleReplacementFields) {
         Object.assign(
           transformedOptions,
-          dateStyleReplacementFields[analysis.dateStyle!],
+          dateStyleReplacementFields[dateStyle!],
         )
       } else {
-        transformedOptions.dateStyle = analysis.dateStyle
+        transformedOptions.dateStyle = dateStyle
       }
     }
 
     if (hasTimeStyle) {
-      transformedOptions.timeStyle = analysis.timeStyle
+      transformedOptions.timeStyle = timeStyle
     }
 
     return transformedOptions
