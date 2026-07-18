@@ -62,14 +62,6 @@ export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
 export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
 
-export const durationFieldIndexes = durationFieldNamesAsc.reduce(
-  (indexes, fieldName, i) => {
-    indexes[fieldName] = i
-    return indexes
-  },
-  {} as { [K in DurationFieldName]: number },
-)
-
 // Field Defaults
 // -----------------------------------------------------------------------------
 

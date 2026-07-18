@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import { toIntegerWithTrunc, toString } from './cast'
-import { DurationFieldName, durationFieldIndexes } from './durationFields'
+import { DurationFieldName, durationFieldNamesAsc } from './durationFields'
 import * as errorMessages from './errorMessages'
 import {
   calendarDisplayMap,
@@ -96,9 +96,9 @@ export function coerceUnitOption<O>(
   let unit = unitNameMap[unitStr as keyof typeof unitNameMap]
 
   if (unit === undefined) {
-    unit = durationFieldIndexes[unitStr as DurationFieldName]
+    unit = durationFieldNamesAsc.indexOf(unitStr as DurationFieldName)
   }
-  if (unit === undefined) {
+  if (unit < 0) {
     throwRangeError(
       errorMessages.invalidChoice(optionName, unitStr, unitNameMap),
     )

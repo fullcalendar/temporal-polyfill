@@ -106,21 +106,16 @@ export function plainDateTimeToZonedDateTime(
   timeZone: TimeZone,
   options?: Temporal.DisambiguationOptions,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const epochNano = dateToEpochNano(timeZone, plainDateTimeSlots, options)
+  const epochNano = getSingleInstantFor(
+    timeZone,
+    plainDateTimeSlots,
+    refineEpochDisambigOptions(options),
+  )
   return createZonedEpochNanoSlots(
     checkEpochNanoInBounds(epochNano),
     timeZone,
     plainDateTimeSlots.calendar,
   )
-}
-
-function dateToEpochNano(
-  timeZone: TimeZone,
-  isoDateTime: CalendarDateTimeFields,
-  options?: Temporal.DisambiguationOptions,
-): bigint {
-  const epochDisambig = refineEpochDisambigOptions(options)
-  return getSingleInstantFor(timeZone, isoDateTime, epochDisambig)
 }
 
 // PlainDate -> *

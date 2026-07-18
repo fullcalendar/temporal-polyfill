@@ -121,7 +121,15 @@ export function createIntlScrapedCalendar(
 export function createIntlScrapedCalendarData(
   normCalendarId: string,
 ): IntlScrapedCalendarData {
-  const intlFormat = createCalendarIntlFormat(normCalendarId)
+  // Offset math needs midnight as 00:00, not h24's 24:00.
+  const intlFormat = new RawDateTimeFormat('en-u-hc-h23', {
+    calendar: normCalendarId,
+    timeZone: utcTimeZoneId,
+    era: 'short', // 'narrow' is too terse for japanese months
+    year: 'numeric',
+    month: 'short', // easier to identify monthCodes
+    day: 'numeric',
+  })
 
   function rawEpochMilliToIntlFields(epochMilli: number) {
     const intlParts = formatEpochMilliToPartsRecord(intlFormat, epochMilli)
@@ -182,24 +190,11 @@ function createIntlYearDataCache(
       epochMilli += (1 - intlFields.day) * milliInUtcDay
 
       // Yet-to-be-created hybrid calendar systems (such as one that bridges
-      // from Julian-to-Gregorian) could theoretically skips days in a month,
-      // making that day # of the last day != # days in the month:
-      // https://github.com/tc39/proposal-temporal/issues/1315#issuecomment-781264909
-      //
-      // This would break our algorithm as epochMilli would be moved *before*
-      // the start-of-month. The code below nudges the day back in bounds.
-      //
-      // if (epochMilli < 0) {
-      //   while (
-      //     epochMilliToIntlFields(epochMilli).monthString !==
-      //     intlFields.monthString
-      //   ) {
-      //     epochMilli += milliInUtcDay
-      //   }
-      // }
-      //
-      // However, other parts of the code (like computeIntlEpochMilli) would
-      // somehow need to be adjusted too. Not worth it.
+      // from Julian-to-Gregorian) could theoretically skip days in a month,
+      // making that day # of the last day != # days in the month. This would
+      // break our algorithm by moving epochMilli before the start-of-month.
+      // Supporting that would also require changes in computeIntlEpochMilli,
+      // so it is intentionally left outside this implementation.
 
       // only record the epochMilli if current year
       if (intlFields.year === year) {
@@ -257,18 +252,6 @@ function parseIntlYear(intlParts: Record<string, string>): {
     eraYear: undefined,
     year: parseInt(intlParts.relatedYear || intlParts.year),
   }
-}
-
-function createCalendarIntlFormat(normCalendarId: string): Intl.DateTimeFormat {
-  // Offset math needs midnight as 00:00, not h24's 24:00.
-  return new RawDateTimeFormat('en-u-hc-h23', {
-    calendar: normCalendarId,
-    timeZone: utcTimeZoneId,
-    era: 'short', // 'narrow' is too terse for japanese months
-    year: 'numeric',
-    month: 'short', // easier to identify monthCodes
-    day: 'numeric',
-  })
 }
 
 // Intl-Calendar methods

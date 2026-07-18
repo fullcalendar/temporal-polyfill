@@ -13,7 +13,6 @@ import {
 import * as errorMessages from '../internal/errorMessages'
 import {
   DateTimeFormatRangeArgs,
-  DateTimeFormatShellInternals,
   createDateTimeFormatShell,
 } from '../internal/intlDateTimeFormatShell'
 import {
@@ -50,10 +49,68 @@ export function createDateTimeFormatClass(
       // One Intl.DateTimeFormat per Temporal type branding; each type needs
       // distinct option filtering (e.g. dates drop time fields, times drop date
       // fields) so they can't share a single formatter.
-      const getTemporalFormat = memoize(
-        (branding: string): Intl.DateTimeFormat =>
-          createUncachedTemporalDateTimeFormat(internals, branding),
-      )
+      const getTemporalFormat = memoize((branding: string) => {
+        // Permit fields for other Temporal types if this type still has overlap
+        // with the formatter's copied options.
+        const allowPartialOverlap = true
+        let options: Intl.DateTimeFormatOptions
+
+        switch (branding) {
+          case InstantBranding:
+            options = transformInstantOptions(
+              internals.copiedOptions,
+              /* allowPartialOverlap = */ allowPartialOverlap,
+            )
+            break
+          case PlainDateTimeBranding:
+            options = applyPlainFormatTimeZone(
+              transformDateTimeOptions(
+                internals.copiedOptions,
+                /* allowPartialOverlap = */ allowPartialOverlap,
+              ),
+            )
+            break
+          case PlainDateBranding:
+            options = applyPlainFormatTimeZone(
+              transformDateOptions(
+                internals.copiedOptions,
+                /* allowPartialOverlap = */ allowPartialOverlap,
+              ),
+            )
+            break
+          case PlainTimeBranding:
+            options = applyPlainFormatTimeZone(
+              transformTimeOptions(
+                internals.copiedOptions,
+                /* allowPartialOverlap = */ allowPartialOverlap,
+              ),
+            )
+            break
+          case PlainYearMonthBranding:
+            options = applyPlainFormatTimeZone(
+              transformYearMonthOptions(
+                internals.copiedOptions,
+                /* allowPartialOverlap = */ allowPartialOverlap,
+              ),
+            )
+            break
+          case PlainMonthDayBranding:
+            options = applyPlainFormatTimeZone(
+              transformMonthDayOptions(
+                internals.copiedOptions,
+                /* allowPartialOverlap = */ allowPartialOverlap,
+              ),
+            )
+            break
+          default:
+            // Direct Intl.DateTimeFormat formatting deliberately rejects
+            // ZonedDateTime; ZonedDateTime.prototype.toLocaleString formats
+            // through an Instant instead.
+            throwTypeError(errorMessages.invalidFormatType(branding))
+        }
+
+        return new RawDateTimeFormat(internals.resolvedLocale, options)
+      })
 
       return {
         getArgsForSingle(formattable) {
@@ -123,72 +180,6 @@ export function createDateTimeFormatClass(
   )
 
   return ShimDateTimeFormat as unknown as typeof Intl.DateTimeFormat
-}
-
-function createUncachedTemporalDateTimeFormat(
-  internals: DateTimeFormatShellInternals,
-  branding: string,
-): Intl.DateTimeFormat {
-  // Permit fields for other Temporal types if this type still has overlap with
-  // the formatter's copied options.
-  const allowPartialOverlap = true
-  let options: Intl.DateTimeFormatOptions
-
-  switch (branding) {
-    case InstantBranding:
-      options = transformInstantOptions(
-        internals.copiedOptions,
-        /* allowPartialOverlap = */ allowPartialOverlap,
-      )
-      break
-    case PlainDateTimeBranding:
-      options = applyPlainFormatTimeZone(
-        transformDateTimeOptions(
-          internals.copiedOptions,
-          /* allowPartialOverlap = */ allowPartialOverlap,
-        ),
-      )
-      break
-    case PlainDateBranding:
-      options = applyPlainFormatTimeZone(
-        transformDateOptions(
-          internals.copiedOptions,
-          /* allowPartialOverlap = */ allowPartialOverlap,
-        ),
-      )
-      break
-    case PlainTimeBranding:
-      options = applyPlainFormatTimeZone(
-        transformTimeOptions(
-          internals.copiedOptions,
-          /* allowPartialOverlap = */ allowPartialOverlap,
-        ),
-      )
-      break
-    case PlainYearMonthBranding:
-      options = applyPlainFormatTimeZone(
-        transformYearMonthOptions(
-          internals.copiedOptions,
-          /* allowPartialOverlap = */ allowPartialOverlap,
-        ),
-      )
-      break
-    case PlainMonthDayBranding:
-      options = applyPlainFormatTimeZone(
-        transformMonthDayOptions(
-          internals.copiedOptions,
-          /* allowPartialOverlap = */ allowPartialOverlap,
-        ),
-      )
-      break
-    default:
-      // Direct Intl.DateTimeFormat formatting deliberately rejects
-      // ZonedDateTime; ZonedDateTime.prototype.toLocaleString formats through
-      // an Instant instead.
-      throwTypeError(errorMessages.invalidFormatType(branding))
-  }
-
-  return new RawDateTimeFormat(internals.resolvedLocale, options)
 }
 
 function checkTemporalDateTimeFormatCompatible(
