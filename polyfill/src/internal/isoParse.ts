@@ -286,11 +286,13 @@ export function parsePlainTime(s: string): TimeFields {
 export function parseDuration(
   s: string,
 ): DurationFields & { sign: NumberSign } {
-  const parsed = parseDurationFields(requireString(s))
-  if (!parsed) {
+  const parts = durationRegExp.exec(requireString(s))
+  if (!parts) {
     throwFailedParse(s)
   }
-  return createDurationSlots(validateDurationFields(parsed))
+  return createDurationSlots(
+    validateDurationFields(organizeDurationParts(parts)),
+  )
 }
 
 // If `s` is a Temporal string, extract its calendar annotation.
@@ -600,11 +602,6 @@ function parseTimeOnlyParts(s: string): string[] | undefined {
   }
 
   return parts
-}
-
-function parseDurationFields(s: string): DurationFields | undefined {
-  const parts = durationRegExp.exec(s)
-  return parts ? organizeDurationParts(parts) : undefined
 }
 
 // Parts Organization
