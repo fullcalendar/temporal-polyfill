@@ -257,23 +257,19 @@ export function parsePlainMonthDay(
 export function parsePlainTime(s: string): TimeFields {
   s = requireString(s)
 
-  let organized: TimeFields | DateTimeLikeOrganized | undefined =
-    parseTimeOnly(s)
+  let organized: TimeFields | undefined = parseTimeOnly(s)
 
   if (!organized) {
-    organized = parseDateTimeLike(s)
+    const dateTime = parseDateTimeLike(s)
 
-    if (organized) {
-      if (!(organized as DateTimeLikeOrganized).hasTime) {
-        throwFailedParse(s) // Must have time for PlainTime
-      }
-      if ((organized as DateTimeLikeOrganized).hasZ) {
-        throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
-      }
-      requireIsoCalendar(organized as DateTimeLikeOrganized)
-    } else {
-      throwFailedParse(s)
+    if (!dateTime || !dateTime.hasTime) {
+      throwFailedParse(s) // Must have time for PlainTime
     }
+    if (dateTime.hasZ) {
+      throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
+    }
+    requireIsoCalendar(dateTime)
+    organized = dateTime
   }
 
   let altParsed: DateOrganized | undefined
