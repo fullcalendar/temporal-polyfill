@@ -505,18 +505,13 @@ function timeRegExpStr(separatorIndex: number): string {
   )
 }
 
-// Offsets reuse the same separator consistency rule as times, just after the
-// sign: `+05:30:45` and `+053045` pass, but `+05:3045` and `+0530:45` fail.
-function offsetRegExpStr(separatorIndex: number): string {
-  return signRegExpStr + timeRegExpStr(separatorIndex)
-}
-
 const dateTimeRegExpStr =
   dateRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:dateSep, 5:month, 6:day
   '(?:[T ]' +
   timeRegExpStr(8) + // 7:hour, 8:timeSep, 9:minute, 10:second, 11:afterDecimal
   '(Z|' + // 12:zOrOffset
-  offsetRegExpStr(15) + // 13:offsetSign, 14:hour, 15:sep, 16:minute, 17:second, 18:afterDecimal
+  signRegExpStr + // 13:offsetSign
+  timeRegExpStr(15) + // 14:hour, 15:sep, 16:minute, 17:second, 18:afterDecimal
   ')?' +
   ')?'
 
@@ -535,7 +530,7 @@ const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
 const timeRegExp = createRegExp(
   'T?' +
     timeRegExpStr(2) + // 1:hour, 2:sep, 3:minute, 4:second, 5:afterDecimal
-    `(${offsetRegExpStr(9)})?` + // 6:offset, 7:sign, 8:hour, 9:sep, 10:minute, 11:second, 12:afterDecimal
+    `(${signRegExpStr}${timeRegExpStr(9)})?` + // 6:offset, 7:sign, 8:hour, 9:sep, 10:minute, 11:second, 12:afterDecimal
     annotationsRegExpStr, // 13
 )
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
