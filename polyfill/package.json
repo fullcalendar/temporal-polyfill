@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "temporal-polyfill",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "Temporal Polyfill",
   "description": "A lightweight polyfill for Temporal, successor to the JavaScript Date object",
   "author": {
@@ -122,7 +122,7 @@
     "linkDirectory": true
   },
   "dependencies": {
-    "temporal-spec": "workspace:1.0.0",
+    "temporal-spec": "workspace:1.0.1",
     "temporal-utils": "workspace:1.0.1"
   },
   "devDependencies": {

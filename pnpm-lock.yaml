@@ -184,7 +184,7 @@ importers:
   polyfill:
     dependencies:
       temporal-spec:
-        specifier: workspace:1.0.0
+        specifier: workspace:1.0.1
         version: link:../spec
       temporal-utils:
         specifier: workspace:1.0.1
