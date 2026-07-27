@@ -13,7 +13,6 @@ import {
 import * as errorMessages from '../../internal/errorMessages'
 import {
   type CalendarDateFields,
-  type CalendarEraFields,
   type CalendarYearMonthFields,
 } from '../../internal/fieldTypes'
 import {
@@ -36,8 +35,6 @@ import {
 } from '../../internal/utils'
 
 export interface IntlDateFields {
-  era: string | undefined
-  eraYear: number | undefined
   year: number
   month: number
   monthString: string
@@ -112,7 +109,6 @@ export function createIntlScrapedCalendar(
       intlData,
       config.leapMonthMeta,
     ),
-    computeEraFields: bindArgs(computeIntlEraFields, intlData),
     addMonths: bindArgs(addIntlMonths, intlData),
     diffMonthSlots: bindArgs(diffIntlMonthSlots, intlData),
   }
@@ -235,22 +231,10 @@ function parseIntlDateFields(
   intlParts: Record<string, string>,
 ): IntlDateFields {
   return {
-    ...parseIntlYear(intlParts),
+    year: parseInt(intlParts.relatedYear || intlParts.year),
     month: 0,
     monthString: intlParts.month,
     day: parseInt(intlParts.day),
-  }
-}
-
-function parseIntlYear(intlParts: Record<string, string>): {
-  era: string | undefined
-  eraYear: number | undefined
-  year: number
-} {
-  return {
-    era: undefined,
-    eraYear: undefined,
-    year: parseInt(intlParts.relatedYear || intlParts.year),
   }
 }
 
@@ -389,14 +373,6 @@ function computeIntlMonthsInYear(
   year: number,
 ): number {
   return intlData.queryYearData(year).monthEpochMillis.length
-}
-
-function computeIntlEraFields(
-  intlData: IntlScrapedCalendarData,
-  isoDate: CalendarDateFields,
-): CalendarEraFields {
-  const intlFields = intlData.queryFields(isoDate)
-  return { era: intlFields.era, eraYear: intlFields.eraYear }
 }
 
 function computeIntlYearMonthFieldsForMonthDay(

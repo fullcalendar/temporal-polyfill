@@ -55,7 +55,7 @@ export interface ExoticCalendarWithoutId {
   computeDaysInMonth(year: number, month: number): number
   computeDaysInYear(year: number): number
   computeLeapMonth(year: number): number | undefined
-  computeEraFields(isoDate: CalendarDateFields): CalendarEraFields
+  computeEraFields?(isoDate: CalendarDateFields): CalendarEraFields
   addMonths(
     year: number,
     month: number,

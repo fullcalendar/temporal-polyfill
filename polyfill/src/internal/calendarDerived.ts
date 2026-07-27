@@ -43,7 +43,7 @@ export function computeCalendarEraFields(
   return calendar === gregoryCalendarImpl
     ? computeGregoryEraFields(isoDate)
     : calendar
-      ? calendar.computeEraFields(isoDate)
+      ? calendar.computeEraFields?.(isoDate) || {}
       : {}
 }
 
