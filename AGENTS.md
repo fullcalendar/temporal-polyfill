@@ -69,10 +69,23 @@ pnpm run test262 \
   --no-max
 ```
 
-When adding intentional expected failures, use
-`polyfill/scripts/test262-config/expected-failures.txt`.
-Do not add general failures to the node-version-specific expected-failures
-files unless the failure really is specific to that Node version range.
+Expected failures live in `polyfill/scripts/test262-expected-failures/`. The
+runner picks which files apply from the current lane — see the
+`expectedFailureFiles` list in `polyfill/scripts/test262.js`:
+
+- `shim.txt` — the general list for the shim lane. **Add intentional expected
+  failures here.**
+- `shim-node-lte*.txt` / `shim-node-gte*.txt` — host-Intl and other environment
+  quirks tied to a Node version range. Do not add general failures here unless
+  the failure really is specific to that range.
+- `native.txt` — used instead of the shim lists when Node has native Temporal
+  (>=26), where the runner tests the native-precedence artifact.
+- `calendar*.txt`, `shim-builtin-calls.txt`, `minified-function-length.txt` —
+  selected automatically for the basic (non-`full`) artifact, far-range calendar
+  dates, and minifier lanes. Leave these to their stated purpose.
+
+Each file opens with a comment naming its category (`ENV-ISSUE`, `WONTFIX`,
+`BUILTIN-USAGE`, etc.). Match that convention when adding entries.
 
 When fixing test262 failures, default to addressing the work as a sequence of
 individual sub-fixes/root causes, and review or explain them one-by-one instead
