@@ -13,12 +13,12 @@ import {
 import * as errorMessages from './errorMessages'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
-  MarkerMoveOps,
+  RelativeOps,
   RelativeToSlots,
-  checkMarkerSpanInBounds,
-  createMarkerSpanOps,
   isUniformUnit,
-  moveMarkerToEpochNano,
+  isZonedEpochSlots,
+  moveRelativeToEpochNano,
+  spanRelativeDuration,
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
@@ -42,8 +42,9 @@ export function totalDuration<RA>(
     refineRelativeTo,
   )
   const maxUnit = Math.max(totalUnit, maxDurationUnit)
+  const isZoned = relativeToSlots && isZonedEpochSlots(relativeToSlots)
 
-  if (!relativeToSlots && isUniformUnit(maxUnit, relativeToSlots)) {
+  if (!relativeToSlots && isUniformUnit(maxUnit, isZoned)) {
     return totalDayTimeDuration(slots, totalUnit as DayTimeUnit)
   }
 
@@ -55,32 +56,25 @@ export function totalDuration<RA>(
   // zoned `day` total must compute the adjacent day-length window, and that
   // window can cross the representable Instant boundary even when the duration
   // itself is zero.
-  if (!slots.sign && isUniformUnit(totalUnit, relativeToSlots)) {
+  if (!slots.sign && isUniformUnit(totalUnit, isZoned)) {
     return 0
   }
 
-  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
-  const endMarker = markerSpanOps.moveMarker(markerSpanOps.marker, slots)
-
-  // sanitize start/end markers
-  // see DifferencePlainDateTimeWithRounding
-  checkMarkerSpanInBounds(markerSpanOps, endMarker)
-
-  const balancedDuration = markerSpanOps.diffMarkers(
-    markerSpanOps.marker,
-    endMarker,
+  const [balancedDuration, endEpochNano, relativeOps] = spanRelativeDuration(
+    relativeToSlots,
+    slots,
     totalUnit,
   )
 
-  if (isUniformUnit(totalUnit, relativeToSlots)) {
+  if (isUniformUnit(totalUnit, isZoned)) {
     return totalDayTimeDuration(balancedDuration, totalUnit as DayTimeUnit)
   }
 
   return totalRelativeDuration(
     balancedDuration,
-    markerSpanOps.markerToEpochNano(endMarker),
+    endEpochNano,
     totalUnit,
-    markerSpanOps,
+    relativeOps,
   )
 }
 
@@ -88,7 +82,7 @@ export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: bigint,
   totalUnit: Unit, // always >=Day
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
 ): number {
   // The spec treats zero relative durations as positive when probing the
   // surrounding unit window. That matters at the upper Instant boundary:
@@ -98,7 +92,7 @@ export function totalRelativeDuration(
     clearDurationFields(totalUnit, durationFields),
     totalUnit,
     sign,
-    markerMoveOps,
+    relativeOps,
     endEpochNano,
   )
   const epochNano0 = nudgeWindow.epochNano0
@@ -128,7 +122,7 @@ export function clampRelativeDuration(
   durationFields: DurationFields,
   clampUnit: Unit, // always >=Day
   clampDistance: number,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
   epochNanoProgress?: bigint,
 ) {
   const unitName = durationFieldNamesAsc[clampUnit]
@@ -138,7 +132,7 @@ export function clampRelativeDuration(
     startDurationFields,
     unitName,
     clampDistance,
-    markerMoveOps,
+    relativeOps,
   )
 
   // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
@@ -163,7 +157,7 @@ export function clampRelativeDuration(
       startDurationFields,
       unitName,
       clampDistance,
-      markerMoveOps,
+      relativeOps,
     )
   }
 
@@ -178,15 +172,15 @@ function computeRelativeDurationWindow(
   startDurationFields: DurationFields,
   unitName: DurationFieldName,
   clampDistance: number,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
 ) {
   const endDurationFields = {
     ...startDurationFields,
     [unitName]: startDurationFields[unitName] + clampDistance,
   }
 
-  const epochNano0 = moveMarkerToEpochNano(markerMoveOps, startDurationFields)
-  const epochNano1 = moveMarkerToEpochNano(markerMoveOps, endDurationFields)
+  const epochNano0 = moveRelativeToEpochNano(relativeOps, startDurationFields)
+  const epochNano1 = moveRelativeToEpochNano(relativeOps, endDurationFields)
   return { epochNano0, epochNano1, endDurationFields }
 }
 

@@ -21,10 +21,10 @@ import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
-  checkMarkerSpanInBounds,
-  createMarkerSpanOps,
+  addRelativeDurations,
   isUniformUnit,
   isZonedEpochSlots,
+  spanRelativeDuration,
 } from './relativeMath'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { createDurationSlots } from './slots'
@@ -63,7 +63,12 @@ export function addDurations<RA>(
     getMaxDurationUnit(otherSlots),
   ) as Unit
 
-  if (isUniformUnit(maxUnit, relativeToSlots)) {
+  if (
+    isUniformUnit(
+      maxUnit,
+      relativeToSlots && isZonedEpochSlots(relativeToSlots),
+    )
+  ) {
     return addDayTimeDurationsChecked(
       doSubtract,
       slots,
@@ -80,16 +85,9 @@ export function addDurations<RA>(
     otherSlots = negateDurationFields(otherSlots) as any // !!!
   }
 
-  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
-  const midMarker = markerSpanOps.moveMarker(markerSpanOps.marker, slots)
-  const endMarker = markerSpanOps.moveMarker(midMarker, otherSlots)
-  const balancedDuration = markerSpanOps.diffMarkers(
-    markerSpanOps.marker,
-    endMarker,
-    maxUnit,
+  return createDurationSlots(
+    addRelativeDurations(relativeToSlots, slots, otherSlots, maxUnit),
   )
-
-  return createDurationSlots(balancedDuration)
 }
 
 export function addDurationsWithoutRelativeTo(
@@ -193,14 +191,13 @@ export function roundDuration<RA>(
     )
   }
 
+  const isZoned = relativeToSlots && isZonedEpochSlots(relativeToSlots)
+
   // A blank duration usually returns itself. The exception is zoned sub-day
   // rounding with a day-or-larger largest unit: even a zero duration rounds
   // through the day-length path, which observes the next-day boundary.
   const needsZonedDayLength =
-    relativeToSlots &&
-    isZonedEpochSlots(relativeToSlots) &&
-    largestUnit >= Unit.Day &&
-    smallestUnit < Unit.Day
+    isZoned && largestUnit >= Unit.Day && smallestUnit < Unit.Day
 
   if (!slots.sign && !needsZonedDayLength) {
     return slots
@@ -210,30 +207,24 @@ export function roundDuration<RA>(
     throwRangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
-  const endMarker = markerSpanOps.moveMarker(markerSpanOps.marker, slots)
-
-  // sanitize start/end markers
-  // see DifferencePlainDateTimeWithRounding
-  checkMarkerSpanInBounds(markerSpanOps, endMarker)
-
-  let balancedDuration = markerSpanOps.diffMarkers(
-    markerSpanOps.marker,
-    endMarker,
+  const [balancedDuration, endEpochNano, relativeOps] = spanRelativeDuration(
+    relativeToSlots,
+    slots,
     largestUnit,
   )
 
-  balancedDuration = roundRelativeDuration(
-    balancedDuration,
-    markerSpanOps.markerToEpochNano(endMarker),
-    largestUnit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    markerSpanOps,
+  return createDurationSlots(
+    roundRelativeDuration(
+      balancedDuration,
+      endEpochNano,
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      relativeOps,
+      isZoned,
+    ),
   )
-
-  return createDurationSlots(balancedDuration)
 }
 
 // Sign / Abs / Blank

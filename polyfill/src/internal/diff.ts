@@ -28,19 +28,14 @@ import {
   addDateMonths,
   computeYearMovedMonth,
   moveByDays,
-  moveDate,
-  moveDateTime,
-  moveDateTimeUnchecked,
-  moveDateUnchecked,
   moveToStartOfMonth,
-  moveZonedEpochSlots,
 } from './move'
 import { Overflow, RoundingModeEnum } from './optionsModel'
 import { refineDiffOptions } from './optionsRoundingRefine'
 import {
-  MarkerToEpochNano,
-  MoveMarker,
-  createMarkerMoveOps,
+  createDateRelativeOps,
+  createDateTimeRelativeOps,
+  createZonedRelativeOps,
 } from './relativeMath'
 import {
   computeBigNanoInc,
@@ -54,7 +49,6 @@ import {
   EpochNanoFields,
   ZonedEpochNanoFields,
   createDurationSlots,
-  getEpochNano,
 } from './slots'
 import { checkIsoDateInBounds } from './temporalLimits'
 import { timeFieldsToNano } from './timeFieldMath'
@@ -63,7 +57,6 @@ import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { DayTimeUnit, TimeUnit, Unit, nanoInUtcDay } from './units'
 import {
   NumberSign,
-  bindArgs,
   compareBigInts,
   compareNumbers,
   divTrunc,
@@ -146,11 +139,8 @@ export function diffZonedDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      createMarkerMoveOps(
-        slots0,
-        getEpochNano as MarkerToEpochNano,
-        moveZonedEpochSlots as MoveMarker,
-      ),
+      createZonedRelativeOps(calendar, timeZone, slots0),
+      true, // isZoned
     )
   }
 
@@ -203,12 +193,7 @@ export function diffPlainDateTimes(
       smallestUnit,
       roundingInc,
       roundingMode,
-      createMarkerMoveOps(
-        plainDateTimeSlots0,
-        isoDateTimeToEpochNano as MarkerToEpochNano,
-        bindArgs(moveDateTime, calendar) as MoveMarker,
-        bindArgs(moveDateTimeUnchecked, calendar) as MoveMarker,
-      ),
+      createDateTimeRelativeOps(calendar, plainDateTimeSlots0),
     )
   }
 
@@ -313,12 +298,7 @@ function diffDateLike(
         smallestUnit,
         roundingInc,
         roundingMode,
-        createMarkerMoveOps(
-          startIsoDate,
-          isoDateToEpochNano as MarkerToEpochNano,
-          bindArgs(moveDate, calendar) as MoveMarker,
-          bindArgs(moveDateUnchecked, calendar) as MoveMarker,
-        ),
+        createDateRelativeOps(calendar, startIsoDate),
       )
     }
   }

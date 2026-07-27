@@ -22,10 +22,9 @@ import { moveByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
 import {
-  MarkerMoveOps,
+  RelativeOps,
   isUniformUnit,
-  isZonedEpochSlots,
-  moveMarkerToEpochNanoUnchecked,
+  moveRelativeToEpochNano,
 } from './relativeMath'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
@@ -337,7 +336,8 @@ export function roundRelativeDuration(
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
+  isZoned?: boolean, // days are non-uniform, so sub-day rounding needs the zone
 ): DurationFields {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
     return durationFields
@@ -349,11 +349,9 @@ export function roundRelativeDuration(
   // direction as the spec-default tie direction.
   const sign = (computeDurationSign(durationFields) || 1) as NumberSign
   const nudgeFunc = (
-    !isUniformUnit(smallestUnit, markerMoveOps.marker)
+    !isUniformUnit(smallestUnit, isZoned)
       ? nudgeRelativeDuration
-      : isZonedEpochSlots(markerMoveOps.marker) &&
-          smallestUnit < Unit.Day &&
-          largestUnit >= Unit.Day
+      : isZoned && smallestUnit < Unit.Day && largestUnit >= Unit.Day
         ? nudgeZonedTimeDuration
         : nudgeDayTimeDuration
   ) as typeof nudgeRelativeDuration // most general
@@ -366,7 +364,7 @@ export function roundRelativeDuration(
     smallestUnit,
     roundingInc,
     roundingMode,
-    markerMoveOps,
+    relativeOps,
   )
 
   // grew a day/week/month/year?
@@ -377,7 +375,7 @@ export function roundRelativeDuration(
       largestUnit,
       Math.max(Unit.Day, smallestUnit), // force to Day or larger
       sign,
-      markerMoveOps,
+      relativeOps,
     )
   }
 
@@ -534,7 +532,7 @@ function nudgeZonedTimeDuration(
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number, // always >=Day
   roundingMode: RoundingModeEnum,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
 ): [
   nudgedDurationFields: DurationFields,
   nudgedEpochNano: bigint,
@@ -548,7 +546,7 @@ function nudgeZonedTimeDuration(
     { ...durationFields, ...durationTimeFieldDefaults },
     Unit.Day, // clampUnit
     sign, // clampDistance
-    markerMoveOps,
+    relativeOps,
     endEpochNano,
   )
   const dayEpochNano0 = dayWindow.epochNano0
@@ -587,7 +585,7 @@ function nudgeRelativeDuration(
   smallestUnit: Unit, // always >Day
   roundingInc: number,
   roundingMode: RoundingModeEnum,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
 ): [
   durationFields: DurationFields,
   movedEpochNano: bigint,
@@ -617,7 +615,7 @@ function nudgeRelativeDuration(
     baseDurationFields,
     smallestUnit, // clampUnit
     roundingInc * sign, // clampDistance
-    markerMoveOps,
+    relativeOps,
     endEpochNano,
   )
   const epochNano0 = nudgeWindow.epochNano0
@@ -651,7 +649,7 @@ function bubbleRelativeDuration(
   largestUnit: Unit,
   smallestUnit: Unit, // guaranteed Day/Week/Month/Year
   sign: NumberSign,
-  markerMoveOps: MarkerMoveOps,
+  relativeOps: RelativeOps,
 ): DurationFields {
   for (
     let currentUnit: Unit = smallestUnit + 1;
@@ -666,8 +664,8 @@ function bubbleRelativeDuration(
     const baseDurationFields = clearDurationFields(currentUnit, durationFields)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
-    const thresholdEpochNano = moveMarkerToEpochNanoUnchecked(
-      markerMoveOps,
+    const thresholdEpochNano = moveRelativeToEpochNano(
+      relativeOps,
       baseDurationFields,
     )
     const thresholdCompare = compareBigInts(endEpochNano, thresholdEpochNano)

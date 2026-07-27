@@ -89,6 +89,11 @@ export function moveEpochNano(
 /*
 Pass the original zoned slots object when possible so zonedEpochSlotsToIso's
 WeakMap memoization can reuse repeated offset/ISO conversions.
+
+Mirrors AddZonedDateTime, which range-checks twice: the intermediate ISO date
+via CalendarDateAdd (the `moveDate` below) and the resulting epoch-nanoseconds
+via IsValidEpochNanoseconds. Both are mandatory, so there is no unchecked
+variant of this function — see MarkerMoveOps.
 */
 export function moveZonedEpochSlots(
   slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
@@ -126,24 +131,12 @@ export function moveZonedEpochSlots(
   }
 }
 
+/*
+Mirrors AddDateTime. The date-time range check here subsumes the date-level one
+moveDate already applied: same date range, plus the rejection of lower-edge
+midnight that only PlainDateTime imposes.
+*/
 export function moveDateTime(
-  calendar: CalendarImpl,
-  isoDateTimeFields: CalendarDateTimeFields,
-  durationFields: DurationFields,
-  options?: Temporal.OverflowOptions,
-): CalendarDateTimeFields {
-  // checkIsoDateTimeInBounds subsumes the date-only check that moveDate would
-  // have applied (same epoch-nano range, plus the lower-edge-midnight case), so
-  // the unchecked variant can supply the whole computation.
-  return checkIsoDateTimeInBounds(
-    moveDateTimeUnchecked(calendar, isoDateTimeFields, durationFields, options),
-  )
-}
-
-// Rounding windows can extend beyond Temporal's limits even when both the
-// input and rounded result are valid. Keep their marker math separate from the
-// range-checked operation used to produce public PlainDateTime values.
-export function moveDateTimeUnchecked(
   calendar: CalendarImpl,
   isoDateTimeFields: CalendarDateTimeFields,
   durationFields: DurationFields,
@@ -155,7 +148,7 @@ export function moveDateTimeUnchecked(
     durationFields,
   )
 
-  const movedIsoDateFields = moveDateUnchecked(
+  const movedIsoDateFields = moveDate(
     calendar,
     isoDateTimeFields,
     {
@@ -166,11 +159,18 @@ export function moveDateTimeUnchecked(
     options,
   )
 
-  return combineDateAndTime(movedIsoDateFields, movedTimeFields)
+  return checkIsoDateTimeInBounds(
+    combineDateAndTime(movedIsoDateFields, movedTimeFields),
+  )
 }
 
 /*
-Skips calendar if moving days only
+Mirrors CalendarDateAdd, including its ISODateWithinLimits rejection. That check
+is date-level: checkIsoDateInBounds probes the date at noon, so it admits the
+extra ISO day at each edge that PlainDateTime only partly allows. Relative
+rounding leans on exactly that — see moveRelativeToEpochNano.
+
+Skips the calendar if moving days only.
 */
 export function moveDate(
   calendar: CalendarImpl,
@@ -178,22 +178,8 @@ export function moveDate(
   durationFields: DurationFields,
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
-  return checkIsoDateInBounds(
-    moveDateUnchecked(calendar, isoDateFields, durationFields, options),
-  )
-}
-
-// Performs calendar movement without imposing Temporal's representation
-// limits. Callers must validate the result unless it is only an internal
-// rounding boundary.
-export function moveDateUnchecked(
-  calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
-  durationFields: DurationFields,
-  options?: Temporal.OverflowOptions,
-): CalendarDateFields {
   if (durationFields.years || durationFields.months || durationFields.weeks) {
-    return dateAddWithOverflowUnchecked(
+    return dateAddWithOverflow(
       calendar,
       isoDateFields,
       durationFields,
@@ -208,7 +194,7 @@ export function moveDateUnchecked(
     Number(durationTimeToBigNano(durationFields) / bigNanoInUtcDay)
 
   if (days) {
-    return moveByDays(isoDateFields, days)
+    return checkIsoDateInBounds(moveByDays(isoDateFields, days))
   }
 
   return isoDateFields
@@ -252,22 +238,6 @@ function dateAddWithOverflow(
   durationFields: DurationFields,
   overflow: Overflow,
 ): CalendarDateFields {
-  return checkIsoDateInBounds(
-    dateAddWithOverflowUnchecked(
-      calendar,
-      isoDateFields,
-      durationFields,
-      overflow,
-    ),
-  )
-}
-
-function dateAddWithOverflowUnchecked(
-  calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
-  durationFields: DurationFields,
-  overflow: Overflow,
-): CalendarDateFields {
   let { years, months, weeks, days } = durationFields
   let isoDate: CalendarDateFields
 
@@ -285,7 +255,7 @@ function dateAddWithOverflowUnchecked(
     isoDate = moveByDays(isoDate, weeks * 7 + days)
   }
 
-  return isoDate
+  return checkIsoDateInBounds(isoDate)
 }
 
 export function addCalendarMonths(
