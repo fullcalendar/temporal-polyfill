@@ -1103,6 +1103,7 @@ intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
 intl402/Temporal/ZonedDateTime/prototype/monthCode/chinese-calendar-dates.js
 intl402/Temporal/ZonedDateTime/prototype/monthCode/dangi-calendar-dates.js
 intl402/Temporal/ZonedDateTime/prototype/monthCode/leap-months-hebrew.js
+intl402/Temporal/ZonedDateTime/prototype/round/same-date-starts-twice.js
 intl402/Temporal/ZonedDateTime/prototype/since/basic-buddhist.js
 intl402/Temporal/ZonedDateTime/prototype/since/basic-chinese.js
 intl402/Temporal/ZonedDateTime/prototype/since/basic-coptic.js
