@@ -211,7 +211,7 @@ https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_o
 
 Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023). [CI](../.github/workflows/ci.yml) runs the full test suite against Node 16, 18, 20, 22, 24, and 26.
 
-\* The `Temporal` API is unaffected by known `islamic-umalqura` engine quirks. Formatting directly with `Intl.DateTimeFormat` still exposes them ([Chromium issue 40856332](https://issues.chromium.org/issues/40856332)), just as it would with a native `Temporal`; patching `Intl` is out of scope here.
+\* The `Temporal` API is unaffected by known `islamic-umalqura` engine quirks. Formatting directly with `Intl.DateTimeFormat` still exposes them ([Chromium issue](https://issues.chromium.org/issues/40856332)), just as it would with a native `Temporal`; patching `Intl` is out of scope here.
 
 ## Comparison with `@js-temporal/polyfill`
 
