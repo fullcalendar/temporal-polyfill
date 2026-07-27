@@ -3,7 +3,7 @@
 
 A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), successor to the JavaScript `Date` object 🕒
 
-Less than 20 kB, [spec compliant](#spec-compliance)
+Only 19.5 kB and [spec compliant](#spec-compliance)
 
 🌳 Need an even smaller footprint? Check out the [tree-shakeable API](../docs/fns/index.md)
 
