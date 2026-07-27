@@ -84,6 +84,102 @@ describe('Intl.DateTimeFormat', () => {
     })
   })
 
+  // The wrapper hands native Intl a stand-in that records which options native
+  // actually read, then reuses that record to build the per-Temporal-type
+  // formatters. Anything the record misses is silently dropped from those
+  // formatters, so resolvedOptions() and format(<Temporal object>) disagree.
+  //
+  // TODO: Contribute these to test262. intl402/DateTimeFormat/ has no case
+  // combining an exotic options bag with Temporal formatting: the only tests
+  // building one use Object.create(null) or use it as a receiver rather than as
+  // options.
+  describe('option observation', () => {
+    // A PlainDate carries no time zone, so the wrapper formats it through an
+    // inner UTC formatter. Native needs an explicit UTC time zone to match.
+    const isoDate = '2020-05-15'
+    const nativeMonthDay = new globalThis.Intl.DateTimeFormat('en', {
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${isoDate}T00:00:00Z`))
+
+    // Logs every trap native Intl could possibly trip, not just `get`, so an
+    // extra enumeration pass shows up as a diff rather than going unnoticed.
+    function recordOptionOps(options: Intl.DateTimeFormatOptions) {
+      const ops: string[] = []
+      const proxy = new Proxy(options, {
+        get(target, key, receiver) {
+          ops.push(`get ${String(key)}`)
+          return Reflect.get(target, key, receiver)
+        },
+        has(target, key) {
+          ops.push(`has ${String(key)}`)
+          return Reflect.has(target, key)
+        },
+        ownKeys(target) {
+          ops.push('ownKeys')
+          return Reflect.ownKeys(target)
+        },
+        getOwnPropertyDescriptor(target, key) {
+          ops.push(`getOwnPropertyDescriptor ${String(key)}`)
+          return Reflect.getOwnPropertyDescriptor(target, key)
+        },
+        getPrototypeOf(target) {
+          ops.push('getPrototypeOf')
+          return Reflect.getPrototypeOf(target)
+        },
+      })
+      return { ops, proxy }
+    }
+
+    it('observes the caller options exactly like native Intl.DateTimeFormat', () => {
+      const optionValues: Intl.DateTimeFormatOptions = {
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'UTC',
+      }
+
+      const native = recordOptionOps({ ...optionValues })
+      expect(
+        new globalThis.Intl.DateTimeFormat('en', native.proxy),
+      ).toBeTruthy()
+
+      const shim = recordOptionOps({ ...optionValues })
+      expect(new Intl.DateTimeFormat('en', shim.proxy)).toBeTruthy()
+
+      // Comparing against native rather than a hardcoded list keeps this from
+      // breaking when a future ECMA-402 adds an option name.
+      expect(shim.ops).toEqual(native.ops)
+
+      // The specific regression: the wrapper used to enumerate the bag after
+      // construction to learn which options the caller supplied.
+      expect(shim.ops.filter((op) => !op.startsWith('get '))).toEqual([])
+    })
+
+    it('applies inherited options when formatting Temporal objects', () => {
+      // Own-key enumeration cannot see these, but native Intl reads them.
+      const options = Object.create({ month: 'long', day: 'numeric' })
+      const format = new Intl.DateTimeFormat('en', options)
+
+      expect(format.resolvedOptions().month).toBe('long')
+      expect(format.format(Temporal.PlainDate.from(isoDate))).toBe(
+        nativeMonthDay,
+      )
+    })
+
+    it('applies non-enumerable own options when formatting Temporal objects', () => {
+      const options: Intl.DateTimeFormatOptions = {}
+      Object.defineProperty(options, 'month', { value: 'long' })
+      Object.defineProperty(options, 'day', { value: 'numeric' })
+      const format = new Intl.DateTimeFormat('en', options)
+
+      expect(format.resolvedOptions().month).toBe('long')
+      expect(format.format(Temporal.PlainDate.from(isoDate))).toBe(
+        nativeMonthDay,
+      )
+    })
+  })
+
   describe('formatToParts', () => {
     it('formats PlainTime without falling through to valueOf', () => {
       const format = new Intl.DateTimeFormat('en', {

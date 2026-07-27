@@ -59,14 +59,39 @@ export function createDateTimeFormatShell<R>(
       options: Intl.DateTimeFormatOptions = Object.create(null),
     ) {
       const transformedOptions = transformOptions(options)
-      const baseFormat = new RawDateTimeFormat(locales, transformedOptions)
+      const observedOptionNames: OptionNames = []
+
+      // Hand native Intl a stand-in that forwards each option read to the
+      // caller and records which ones it asked for. Caller proxies and
+      // inherited accessors then see exactly native's Get operations, with no
+      // second enumeration pass.
+      //
+      // The Proxy target must be a fresh empty object, NOT the caller's
+      // options. Proxy invariant checks consult the target's own property
+      // descriptors, so targeting a user-supplied object makes a nested user
+      // proxy observe getOwnPropertyDescriptor calls native never performs. An
+      // empty, extensible, property-less target constrains nothing, leaving the
+      // `get` trap free to answer for any name -- including options a future
+      // ECMA-402 adds, which a hardcoded name list would silently drop.
+      const trackedOptions = new Proxy(Object.create(null), {
+        get(_target: object, name: OptionNames[number]): unknown {
+          const value = transformedOptions[name]
+          if (value !== undefined) {
+            observedOptionNames.push(name)
+          }
+          return value
+        },
+      })
+
+      const baseFormat = new RawDateTimeFormat(locales, trackedOptions)
       const resolvedOptions = baseFormat.resolvedOptions()
 
-      // Copy the caller's own option keys from native resolved data. Providers
-      // may need to create inner DTFs later, and re-reading user options then
-      // would make formatting observably access options more than once.
+      // Copy the options that native Intl actually observed from native
+      // resolved data. Providers may need to create inner DTFs later, and
+      // re-reading user options then would make formatting observably access
+      // options more than once.
       const copiedOptions = pluckProps(
-        Object.keys(options) as OptionNames,
+        observedOptionNames,
         resolvedOptions as Intl.DateTimeFormatOptions,
       )
 
@@ -137,7 +162,6 @@ export function createDateTimeFormatShell<R>(
   // constructor-no-instanceof). Wrap the shell class in a function; descriptor
   // copying below restores the builtin name/length shape.
   function DateTimeFormat(
-    this: any,
     locales?: LocalesArg,
     options?: Intl.DateTimeFormatOptions,
   ) {

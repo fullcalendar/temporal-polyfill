@@ -11,9 +11,9 @@ import {
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
-  createMarkerSpanOps,
   isUniformUnit,
-  moveMarkerToEpochNano,
+  isZonedEpochSlots,
+  moveRelativeEndpointToEpochNano,
 } from './relativeMath'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import type { RelativeToOptions } from './temporalSpecHelpers'
@@ -59,7 +59,12 @@ export function compareDurations<RA>(
     return 0
   }
 
-  if (isUniformUnit(maxUnit, relativeToSlots)) {
+  if (
+    isUniformUnit(
+      maxUnit,
+      relativeToSlots && isZonedEpochSlots(relativeToSlots),
+    )
+  ) {
     return compareBigInts(
       durationDayTimeToBigNano(durationSlots0),
       durationDayTimeToBigNano(durationSlots1),
@@ -70,11 +75,9 @@ export function compareDurations<RA>(
     throwRangeError(errorMessages.missingRelativeTo)
   }
 
-  const markerSpanOps = createMarkerSpanOps(relativeToSlots)
-
   return compareBigInts(
-    moveMarkerToEpochNano(markerSpanOps, durationSlots0),
-    moveMarkerToEpochNano(markerSpanOps, durationSlots1),
+    moveRelativeEndpointToEpochNano(relativeToSlots, durationSlots0),
+    moveRelativeEndpointToEpochNano(relativeToSlots, durationSlots1),
   )
 }
 

@@ -89,6 +89,11 @@ export function moveEpochNano(
 /*
 Pass the original zoned slots object when possible so zonedEpochSlotsToIso's
 WeakMap memoization can reuse repeated offset/ISO conversions.
+
+Mirrors AddZonedDateTime, which range-checks twice: the intermediate ISO date
+via CalendarDateAdd (the `moveDate` below) and the resulting epoch-nanoseconds
+via IsValidEpochNanoseconds. Both are mandatory, so there is no unchecked
+variant of this function — see MarkerMoveOps.
 */
 export function moveZonedEpochSlots(
   slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
@@ -126,6 +131,11 @@ export function moveZonedEpochSlots(
   }
 }
 
+/*
+Mirrors AddDateTime. The date-time range check here subsumes the date-level one
+moveDate already applied: same date range, plus the rejection of lower-edge
+midnight that only PlainDateTime imposes.
+*/
 export function moveDateTime(
   calendar: CalendarImpl,
   isoDateTimeFields: CalendarDateTimeFields,
@@ -149,16 +159,18 @@ export function moveDateTime(
     options,
   )
 
-  const movedIsoDateTimeFields = combineDateAndTime(
-    movedIsoDateFields,
-    movedTimeFields,
+  return checkIsoDateTimeInBounds(
+    combineDateAndTime(movedIsoDateFields, movedTimeFields),
   )
-  checkIsoDateTimeInBounds(movedIsoDateTimeFields)
-  return movedIsoDateTimeFields
 }
 
 /*
-Skips calendar if moving days only
+Mirrors CalendarDateAdd, including its ISODateWithinLimits rejection. That check
+is date-level: checkIsoDateInBounds probes the date at noon, so it admits the
+extra ISO day at each edge that PlainDateTime only partly allows. Relative
+rounding leans on exactly that — see moveRelativeToEpochNano.
+
+Skips the calendar if moving days only.
 */
 export function moveDate(
   calendar: CalendarImpl,

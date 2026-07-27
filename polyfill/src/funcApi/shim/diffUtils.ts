@@ -2,7 +2,6 @@ import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import { type CalendarImpl } from '../../internal/calendarImpl'
 import { diffCalendarDates, prepareZonedEpochDiff } from '../../internal/diff'
-import { DurationFields } from '../../internal/durationFields'
 import {
   isoDateTimeToEpochNano,
   isoDateToEpochNano,
@@ -13,17 +12,13 @@ import {
   TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
-import {
-  moveDate,
-  moveDateTime,
-  moveZonedEpochSlots,
-} from '../../internal/move'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
-  MarkerToEpochNano,
-  MovableMarker,
-  MoveMarker,
-  createMarkerMoveOps,
+  RelativeOps,
+  ZonedEpochMarker,
+  createDateRelativeOps,
+  createDateTimeRelativeOps,
+  createZonedRelativeOps,
 } from '../../internal/relativeMath'
 import { roundNumberToInc } from '../../internal/round'
 import { getCommonCalendar, getCommonTimeZone } from '../../internal/slotUtils'
@@ -109,9 +104,7 @@ function diffZonedLargeUnits(
   return diffDateUnits(
     getEpochNano as MarkerToEpochNano,
     bindArgs(prepareZonedEpochDiff, timeZone) as unknown as MarkersToIsoFields,
-    moveZonedEpochSlots as MoveMarker,
-    (f0: CalendarDateFields, f1: CalendarDateFields) =>
-      diffCalendarDates(calendar, f0, f1, unit),
+    createZonedRelativeOps(calendar, timeZone, record0),
     unit,
     record0,
     record1,
@@ -130,10 +123,7 @@ function diffPlainDateLargeUnits(
   return diffDateUnits(
     isoDateToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(moveDate, calendar) as MoveMarker,
-    // TODO: use bindArgs here too?
-    (f0: CalendarDateFields, f1: CalendarDateFields) =>
-      diffCalendarDates(calendar, f0, f1, unit),
+    createDateRelativeOps(calendar, record0),
     unit,
     record0,
     record1,
@@ -152,10 +142,7 @@ function diffPlainDateTimeLargeUnits(
   return diffDateUnits(
     isoDateTimeToEpochNano as MarkerToEpochNano,
     identityMarkersToIsoFields as MarkersToIsoFields,
-    bindArgs(moveDateTime, calendar) as MoveMarker,
-    // TODO: use bindArgs here too?
-    (f0: CalendarDateFields, f1: CalendarDateFields) =>
-      diffCalendarDates(calendar, f0, f1, unit),
+    createDateTimeRelativeOps(calendar, record0),
     unit,
     record0,
     record1,
@@ -166,9 +153,18 @@ function diffPlainDateTimeLargeUnits(
 // Date Units (years, months, weeks, days)
 // -----------------------------------------------------------------------------
 
+/*
+The pair of records being diffed. Unlike the rounding core's origin, which is
+always an ISO date-time, these keep their original shape so each unit-diff
+function can convert them the cheapest way.
+*/
+type DiffMarker = CalendarDateFields | CalendarDateTimeFields | ZonedEpochMarker
+
+type MarkerToEpochNano<M = DiffMarker> = (marker: M) => bigint
+
 type MarkersToIsoFields = (
-  m0: MovableMarker,
-  m1: MovableMarker,
+  m0: DiffMarker,
+  m1: DiffMarker,
   sign: NumberSign,
 ) => [CalendarDateFields, CalendarDateFields, ...any[]]
 
@@ -182,14 +178,10 @@ function identityMarkersToIsoFields(
 function diffDateUnits(
   markerToEpochNano: MarkerToEpochNano,
   markersToIsoFields: MarkersToIsoFields,
-  moveMarker: MoveMarker,
-  diffIsoFields: (
-    f0: CalendarDateFields,
-    f1: CalendarDateFields,
-  ) => DurationFields,
+  relativeOps: RelativeOps,
   unit: Unit, // guaranteed Y/M/W
-  marker0: MovableMarker,
-  marker1: MovableMarker,
+  marker0: DiffMarker,
+  marker1: DiffMarker,
   options: RoundingMathOptions | RoundingMode | undefined,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
@@ -202,13 +194,21 @@ function diffDateUnits(
   }
 
   const [isoFields0, isoFields1] = markersToIsoFields(marker0, marker1, sign)
-  const durationFields = diffIsoFields(isoFields0, isoFields1)
+
+  // Always the same calendar the ops were built with, so read it from there
+  // rather than having each caller pass a closure that repeats it.
+  const durationFields = diffCalendarDates(
+    relativeOps.calendar,
+    isoFields0,
+    isoFields1,
+    unit,
+  )
 
   let res = totalRelativeDuration(
     durationFields,
     endEpochNano,
     unit,
-    createMarkerMoveOps(marker0, markerToEpochNano, moveMarker),
+    relativeOps,
   )
 
   if (roundingInc) {
@@ -262,8 +262,8 @@ function diffPlainDayLikeUnit(
   markerToEpochNano: MarkerToEpochNano,
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
-  record0: MovableMarker,
-  record1: MovableMarker,
+  record0: DiffMarker,
+  record1: DiffMarker,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
   const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
