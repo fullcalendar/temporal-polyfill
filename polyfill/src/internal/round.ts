@@ -25,7 +25,7 @@ import {
   MarkerMoveOps,
   isUniformUnit,
   isZonedEpochSlots,
-  moveMarkerToEpochNano,
+  moveMarkerToEpochNanoUnchecked,
 } from './relativeMath'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
@@ -651,7 +651,7 @@ function bubbleRelativeDuration(
     const baseDurationFields = clearDurationFields(currentUnit, durationFields)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
-    const thresholdEpochNano = moveMarkerToEpochNano(
+    const thresholdEpochNano = moveMarkerToEpochNanoUnchecked(
       markerMoveOps,
       baseDurationFields,
     )

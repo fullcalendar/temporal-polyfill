@@ -30,6 +30,8 @@ import {
   moveByDays,
   moveDate,
   moveDateTime,
+  moveDateTimeUnchecked,
+  moveDateUnchecked,
   moveToStartOfMonth,
   moveZonedEpochSlots,
 } from './move'
@@ -205,6 +207,7 @@ export function diffPlainDateTimes(
         plainDateTimeSlots0,
         isoDateTimeToEpochNano as MarkerToEpochNano,
         bindArgs(moveDateTime, calendar) as MoveMarker,
+        bindArgs(moveDateTimeUnchecked, calendar) as MoveMarker,
       ),
     )
   }
@@ -314,6 +317,7 @@ function diffDateLike(
           startIsoDate,
           isoDateToEpochNano as MarkerToEpochNano,
           bindArgs(moveDate, calendar) as MoveMarker,
+          bindArgs(moveDateUnchecked, calendar) as MoveMarker,
         ),
       )
     }

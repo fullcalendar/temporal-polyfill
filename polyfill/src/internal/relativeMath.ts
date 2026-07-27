@@ -5,7 +5,11 @@ import { isoDateTimeToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { moveDateTime, moveZonedEpochSlots } from './move'
+import {
+  moveDateTime,
+  moveDateTimeUnchecked,
+  moveZonedEpochSlots,
+} from './move'
 import { ZonedEpochNanoFields, getEpochNano } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { Unit } from './units'
@@ -44,6 +48,13 @@ export interface MarkerMoveOps {
   marker: MovableMarker
   markerToEpochNano: MarkerToEpochNano
   moveMarker: MoveMarker
+
+  // Optional because only calendar-date markers can produce a bubbling
+  // threshold outside Temporal's limits. Zoned markers move by epoch-nanos and
+  // stay in range, so they fall back to `moveMarker`. Every marker that CAN
+  // overshoot must supply this, or bubbling near a limit throws — see
+  // moveMarkerToEpochNanoUnchecked.
+  moveMarkerUnchecked?: MoveMarker
 }
 
 // See comments for `createMarkerSpanOps`
@@ -64,8 +75,9 @@ export function createMarkerMoveOps(
   marker: MovableMarker,
   markerToEpochNano: MarkerToEpochNano,
   moveMarker: MoveMarker,
+  moveMarkerUnchecked?: MoveMarker,
 ): MarkerMoveOps {
-  return { marker, markerToEpochNano, moveMarker }
+  return { marker, markerToEpochNano, moveMarker, moveMarkerUnchecked }
 }
 
 // Only ever used within roundDuration and totalDuration,
@@ -105,6 +117,7 @@ export function createMarkerSpanOps(
     marker,
     markerToEpochNano: isoDateTimeToEpochNano as MarkerToEpochNano,
     moveMarker: bindArgs(moveDateTime, calendar) as Callable,
+    moveMarkerUnchecked: bindArgs(moveDateTimeUnchecked, calendar) as Callable,
     diffMarkers: bindArgs(diffDateTimesExact, calendar) as Callable,
   }
 }
@@ -119,6 +132,20 @@ export function moveMarkerToEpochNano(
 ): bigint {
   return markerMoveOps.markerToEpochNano(
     markerMoveOps.moveMarker(markerMoveOps.marker, durationFields),
+  )
+}
+
+// Window boundaries are comparison-only markers, so they may cross Temporal's
+// representation limits even though real duration endpoints may not.
+export function moveMarkerToEpochNanoUnchecked(
+  markerMoveOps: MarkerMoveOps,
+  durationFields: DurationFields,
+): bigint {
+  return markerMoveOps.markerToEpochNano(
+    (markerMoveOps.moveMarkerUnchecked || markerMoveOps.moveMarker)(
+      markerMoveOps.marker,
+      durationFields,
+    ),
   )
 }
 
