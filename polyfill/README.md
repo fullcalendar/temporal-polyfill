@@ -191,7 +191,7 @@ Write an ESM import that loads the types:
 
 All time zones are supported. The following calendar systems are supported: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
 
-Compliance with the latest version of the Temporal spec is near-perfect [with just 1 intentional deviation](./scripts/test262-expected-failures/shim.txt).
+Compliance with the latest version of the Temporal spec is near-perfect [with just 2 intentional deviations](./scripts/test262-expected-failures/shim.txt).
 
 
 ## Supported Environments
