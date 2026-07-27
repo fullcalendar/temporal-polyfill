@@ -3,7 +3,7 @@
 
 ## v1.0.1
 
-- FIX: Intl export is value at runtime but type-only in declarations (#97)
+- FIX: `Intl` export is value at runtime but type-only in declarations (#97)
 - FIX: Restrict `Duration.total`'s string argument to units that don't require `relativeTo`
 
 ## v1.0.0
