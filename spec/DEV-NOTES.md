@@ -40,9 +40,18 @@ and change it to
     //...
     interface DateTimeFormat extends Omit<globalThis.Intl.DateTimeFormat, 'format' | 'formatToParts' | 'formatRange' | 'formatRangeToParts'> {
     }
+    const DateTimeFormat: Omit<typeof globalThis.Intl.DateTimeFormat, 'prototype'> & {
+      new (locales?: globalThis.Intl.LocalesArgument, options?: globalThis.Intl.DateTimeFormatOptions): DateTimeFormat
+      (locales?: globalThis.Intl.LocalesArgument, options?: globalThis.Intl.DateTimeFormatOptions): DateTimeFormat
+      readonly prototype: DateTimeFormat
+    }
   }
 and just this literal type definition, which does NOT live on Date:
   export function toTemporalInstant(this: Date): Temporal.Instant;
+
+Keep the `Intl.DateTimeFormat` value declaration above. `temporal-polyfill`
+reexports these declarations as its public type surface, so omitting the value
+would make its runtime `Intl` export type-only under `verbatimModuleSyntax`.
 
 WORKAROUNDS:
   and ALL Intl -> globalThis.Intl. examples:

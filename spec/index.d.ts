@@ -713,6 +713,21 @@ export namespace Intl {
       endDate: FormattableTemporalObject | Date | number,
     ): globalThis.Intl.DateTimeRangeFormatPart[]
   }
+
+  const DateTimeFormat: Omit<
+    typeof globalThis.Intl.DateTimeFormat,
+    'prototype'
+  > & {
+    new (
+      locales?: globalThis.Intl.LocalesArgument,
+      options?: globalThis.Intl.DateTimeFormatOptions,
+    ): DateTimeFormat
+    (
+      locales?: globalThis.Intl.LocalesArgument,
+      options?: globalThis.Intl.DateTimeFormatOptions,
+    ): DateTimeFormat
+    readonly prototype: DateTimeFormat
+  }
 }
 
 export function toTemporalInstant(this: Date): Temporal.Instant
