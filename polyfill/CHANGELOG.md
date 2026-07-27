@@ -8,6 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## v1.0.2
+
+- TASK: Update to latest spec (2026-07-27) (#94, #3)
+- FIX: Duration.from doesn't reject some invalid strings (#65, #96), thx @apoorva-01
+- FIX: via `temporal-spec`, Intl export runtime value (#97)
+
 ## v1.0.1
 
 ### ✨ Features
@@ -52,6 +58,7 @@ If you use any of the following calendar systems, please use the `/full/` entryp
 - `Intl.DateTimeFormat.prototype.formatToParts()` now formats polyfilled `Temporal.PlainTime` in Node 22 instead of throwing `TypeError: Cannot use valueOf` (#95)
 - `Temporal.ZonedDateTime.from()` now accepts Brazilian wall times near close-together 2000 offset transitions, e.g. `America/Noronha` and `America/Boa_Vista` (#73)
 - `Temporal.ZonedDateTime.from()` no longer clamps future offset calculations, preserving the `+02:00` summer offset for future `Europe/Berlin` dates like 2044-06-10 (#49)
+- `Duration.toLocaleString`'s options argument has incorrect type definition (#59) (via `temporal-spec`)
 
 ### 🔢 Version Number
 
