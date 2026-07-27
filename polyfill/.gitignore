@@ -1,2 +1,3 @@
 dist/*
 !dist/.npmignore
+export-size-output/
