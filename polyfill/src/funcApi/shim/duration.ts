@@ -181,7 +181,7 @@ export function round(
 export function total(
   duration: ShimDurationRecord,
   options:
-    | TemporalSpec.PluralizeUnit<TemporalSpec.DateUnit | TemporalSpec.TimeUnit>
+    | TemporalSpec.PluralizeUnit<'day' | TemporalSpec.TimeUnit>
     | DurationTotalOptions<ShimRelativeToRecord>,
 ): number {
   return totalDuration(

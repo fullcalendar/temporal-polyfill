@@ -226,7 +226,7 @@ export function refineUnitRoundOptions(
 
 export function refineTotalOptions<RA, R>(
   options:
-    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
     | DurationTotalOptions<RA>,
   refineRelativeTo: (relativeTo?: RA) => R | undefined,
 ): [Unit, R | undefined] {

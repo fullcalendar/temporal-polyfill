@@ -517,7 +517,7 @@ export namespace Temporal {
     subtract(other: DurationLike): Duration
     round(roundTo: PluralizeUnit<'day' | TimeUnit>): Duration
     round(roundTo: DurationRoundingOptions): Duration
-    total(totalOf: PluralizeUnit<DateUnit | TimeUnit>): number
+    total(totalOf: PluralizeUnit<'day' | TimeUnit>): number
     total(totalOf: DurationTotalOptions): number
     toString(options?: DurationToStringOptions): string
     toLocaleString(

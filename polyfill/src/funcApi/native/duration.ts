@@ -166,7 +166,7 @@ export function round(
 export function total(
   duration: NativeDurationRecord,
   options:
-    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
     | DurationTotalOptions<NativeRelativeToRecord>,
 ): number {
   const native = getNativeDuration(duration)

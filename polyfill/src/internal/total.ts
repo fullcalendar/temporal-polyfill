@@ -33,7 +33,7 @@ export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
   slots: DurationFields & { sign: NumberSign },
   options:
-    | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+    | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
     | DurationTotalOptions<RA>,
 ): number {
   const maxDurationUnit = getMaxDurationUnit(slots)

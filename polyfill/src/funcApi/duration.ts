@@ -19,9 +19,7 @@ export type ToStringOptions = Temporal.DurationToStringOptions
 export type RoundingUnit = Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
 export type RoundingOptions =
   TemporalSpecHelpers.DurationRoundingOptions<RelativeTo>
-export type TotalUnit = Temporal.PluralizeUnit<
-  Temporal.DateUnit | Temporal.TimeUnit
->
+export type TotalUnit = Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
 export type DurationTotalOptions =
   TemporalSpecHelpers.DurationTotalOptions<RelativeTo>
 export type RelativeToOptions =

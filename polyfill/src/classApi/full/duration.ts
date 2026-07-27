@@ -165,7 +165,7 @@ export const Duration = defineTemporalClass(
     total(totalOf: Temporal.DurationTotalOptions): number
     total(
       totalOf:
-        | Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
+        | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
         | Temporal.DurationTotalOptions,
     ): number {
       return totalDuration(
