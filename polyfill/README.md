@@ -134,7 +134,7 @@ The `/full/` entrypoints support an expanded set of calendar systems: `buddhist`
 Globally install the polyfill that supports only the `iso8601` and `gregory` calendar systems. Uses native if available.
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.2/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().toString())
 </script>
@@ -143,7 +143,7 @@ Globally install the polyfill that supports only the `iso8601` and `gregory` cal
 Globally install the `/full/` polyfill that supports an expanded set of calendar systems: `buddhist`, `chinese`, `coptic`, `dangi`, `ethiopic`, `ethioaa`, `hebrew`, `indian`, `islamic-civil`, `islamic-tbla`, `islamic-umalqura`, `japanese`, `persian`, and `roc`.
 
 ```html
-<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.1/full/global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/temporal-polyfill@1.0.2/full/global.min.js'></script>
 <script>
   console.log(Temporal.Now.zonedDateTimeISO().withCalendar('buddhist').toString())
 </script>
