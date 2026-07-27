@@ -13,6 +13,7 @@ don't work in GH release markdown. must be absolute
 - TASK: Update to latest spec (2026-07-27) (#94, #3)
 - FIX: Duration.from doesn't reject some invalid strings (#65, #96), thx @apoorva-01
 - FIX: via `temporal-spec`, Intl export runtime value (#97)
+- FEATURE: Reduce min+gzip size by ~0.3%
 
 ## v1.0.1
 

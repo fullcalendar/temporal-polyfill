@@ -243,8 +243,8 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
   </tr>
   <tr>
     <td><a href='./scripts/size-comparison/RESULTS.md'>Min+gzip size</a></td>
-    <td>19.6 kB, 23.5 kB (full)</td>
-    <td>52.1 kB (+166%, +122%)</td>
+    <td>19.5 kB, 23.4 kB (full)</td>
+    <td>52.1 kB (+167%, +123%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
