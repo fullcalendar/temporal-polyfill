@@ -14,6 +14,19 @@
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
 
+# WONTFIX
+# We don't implement ChainDateTimeFormat (normative optional), the ES5-era
+# compatibility path where calling Intl.DateTimeFormat as a function on a
+# DateTimeFormat-shaped receiver initializes that receiver in place, stashing
+# the real formatter behind %Intl%.[[FallbackSymbol]] for UnwrapDateTimeFormat
+# to find. It exists only to keep pre-class subclassing idioms working, is
+# unrelated to Temporal, and a faithful implementation would need a symbol that
+# is per-realm and shared with Intl.NumberFormat, which a shell scoped to one
+# constructor cannot mint.
+intl402/DateTimeFormat/intl-legacy-constructed-symbol-on-unwrap.js
+intl402/DateTimeFormat/intl-legacy-constructed-symbol-property.js
+intl402/DateTimeFormat/intl-legacy-constructed-symbol.js
+
 # ENV-ISSUE
 # Temporal test262 runner does not support $262.createRealm()
 intl402/DateTimeFormat/proto-from-ctor-realm.js
