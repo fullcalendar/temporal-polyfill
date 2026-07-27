@@ -209,7 +209,7 @@ https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_o
 | Safari iOS |   14 (Sep 2020) |                            14.5 (Apr 2021) |
 | Edge       |   79 (Jan 2020) |                              80 (Feb 2020) |
 
-Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023)
+Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023). [CI](../.github/workflows/ci.yml) runs the full test suite against Node 16, 18, 20, 22, 24, and 26.
 
 ## Comparison with `@js-temporal/polyfill`
 
