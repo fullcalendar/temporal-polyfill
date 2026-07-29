@@ -8,6 +8,14 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## v1.0.3
+
+- FIX: Restore `module-sync` export condition, dropped in v1.0.0 (#62). CommonJS
+  consumers failed to even resolve the package (`ERR_PACKAGE_PATH_NOT_EXPORTED`).
+  All entrypoints now expose `module-sync` alongside `import`, both pointing at
+  the same ESM file, which Node v22.12+ and v20.19+ load synchronously from
+  `require()`.
+
 ## v1.0.2
 
 - TASK: Update to latest spec (2026-07-27) (#94, #3)

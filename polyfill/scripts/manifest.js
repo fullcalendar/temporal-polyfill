@@ -39,6 +39,19 @@ async function writePkgJson(pkgDir, isDev) {
 
     distExportMap[exportPath] = {
       import: { types: typesPath, default: esmPath },
+      // `module-sync` matches for both `import` and `require()`, so it's less
+      // specific than `import` and goes after it, per Node's most-specific-first
+      // ordering rule. Order doesn't change what `require()` gets — `import` is
+      // mutually exclusive with `require`, so it can never win there — but it
+      // does keep `import` resolving through the entry that carries `types`.
+      // The point of the condition: without it, `require()` matches none of the
+      // keys and fails at resolution with ERR_PACKAGE_PATH_NOT_EXPORTED. Node
+      // v22.12+ / v20.19+ then loads this ESM file synchronously, which is only
+      // valid because the bundles have no top-level await (otherwise:
+      // ERR_REQUIRE_ASYNC_MODULE). Node versions predating require(esm), and
+      // bundlers, ignore the condition entirely — they're no worse off than
+      // before. Both keys point at one file, so there's no dual-package hazard.
+      'module-sync': esmPath,
     }
 
     if (!rootEsmPath) {
