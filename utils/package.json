@@ -24,15 +24,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./protected": {
       "types": "./dist/protected.d.ts",
-      "import": "./dist/protected.js"
+      "default": "./dist/protected.js"
     },
     "./protected-error-messages": {
       "types": "./dist/protected-error-messages.d.ts",
-      "import": "./dist/protected-error-messages.js"
+      "default": "./dist/protected-error-messages.js"
     }
   },
   "scripts": {
