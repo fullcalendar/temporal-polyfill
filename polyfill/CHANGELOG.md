@@ -8,6 +8,11 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## v1.0.3
+
+- FIX: Regression with `package.json#exports` where require(esm) from cjs would not work in v1 (#99, #62)
+- TASK: Update to latest test262 (no modifications required)
+
 ## v1.0.2
 
 - TASK: Update to latest spec (2026-07-27) (#94, #3)
