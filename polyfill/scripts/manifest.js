@@ -38,7 +38,11 @@ async function writePkgJson(pkgDir, isDev) {
       : './' + distName + extensions.dts
 
     distExportMap[exportPath] = {
-      import: { types: typesPath, default: esmPath },
+      // `default` lets every resolver select the ESM bundle. Modern Node can
+      // load this synchronous module graph from require(), while older Node
+      // resolves it first and then reports the more useful ERR_REQUIRE_ESM.
+      types: typesPath,
+      default: esmPath,
     }
 
     if (!rootEsmPath) {
