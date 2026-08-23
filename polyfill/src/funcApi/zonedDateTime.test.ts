@@ -2601,6 +2601,15 @@ describe('diffWeeks', () => {
     expect(weeks).toBe(1)
     expect(weeksInc).toBe(3)
   })
+
+  // Regression test: diffing equal ZonedDateTimes used to throw.
+  it('gives 0 when diffing equal ZonedDateTimes instead of throwing', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-05T00:30:00[America/New_York]',
+      CalendarFns.getBasic,
+    )
+    expect(ZonedDateTimeFns.diffWeeks(zdt, zdt)).toBe(0)
+  })
 })
 
 describe('diffDays', () => {
@@ -2648,6 +2657,23 @@ describe('diffDays', () => {
     })
     expect(days).toBe(10)
     expect(daysInc).toBe(14)
+  })
+
+  // Regression test: diffing equal ZonedDateTimes used to throw.
+  it('gives 0 when diffing equal ZonedDateTimes instead of throwing', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-05T00:30:00[America/New_York]',
+      CalendarFns.getBasic,
+    )
+    expect(ZonedDateTimeFns.diffDays(zdt, zdt)).toBe(0)
+  })
+
+  it('gives 0 when diffing equal UTC ZonedDateTimes instead of throwing', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2024-03-05T00:30:00[UTC]',
+      CalendarFns.getBasic,
+    )
+    expect(ZonedDateTimeFns.diffDays(zdt, zdt)).toBe(0)
   })
 })
 

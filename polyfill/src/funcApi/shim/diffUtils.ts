@@ -236,6 +236,13 @@ function diffZonedDayLikeUnits(
     record1.epochNanoseconds,
     record0.epochNanoseconds,
   )
+
+  // `prepareZonedEpochDiff` requires a non-zero `sign` and returns `undefined`
+  // otherwise, so short-circuit here, same as `diffDateUnits` above.
+  if (!sign) {
+    return 0
+  }
+
   const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
     timeZone,
     record0,
