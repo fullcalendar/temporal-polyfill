@@ -257,7 +257,11 @@ export function nanoToRoundedTimeUnit(
   nanoAmount: number,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Nanosecond,
+  )
 
   if (roundingInc) {
     nanoAmount = roundNumberToInc(
@@ -265,9 +269,17 @@ export function nanoToRoundedTimeUnit(
       nanoInUnit * roundingInc,
       roundingMode!,
     )
+  } else if (defaultRoundingInc) {
+    nanoAmount =
+      Math.trunc(nanoAmount / defaultRoundingInc) * defaultRoundingInc
   }
 
-  return nanoAmount / nanoInUnit
+  if (roundingInc) {
+    return nanoAmount ? nanoAmount / nanoInUnit : 0
+  }
+
+  const whole = Math.trunc(nanoAmount / nanoInUnit)
+  return whole + (nanoAmount % nanoInUnit) / nanoInUnit
 }
 
 // Epoch-based amounts can be larger than Number's safe integer range, so they
@@ -278,7 +290,11 @@ export function bigNanoToRoundedTimeUnit(
   nanoAmount: bigint,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Nanosecond,
+  )
 
   if (roundingInc) {
     nanoAmount = roundBigNanoToInc(
@@ -287,6 +303,9 @@ export function bigNanoToRoundedTimeUnit(
       BigInt(nanoInUnit) * BigInt(roundingInc),
       roundingMode!,
     )
+  } else if (defaultRoundingInc) {
+    const bigDefaultRoundingInc = BigInt(defaultRoundingInc)
+    nanoAmount = (nanoAmount / bigDefaultRoundingInc) * bigDefaultRoundingInc
   }
 
   return roundingInc

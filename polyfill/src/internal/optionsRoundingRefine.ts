@@ -204,11 +204,40 @@ For funcApi
 export function refineUnitDiffOptions(
   smallestUnit: Unit,
   options: RoundingMathOptions | RoundingMode,
-): RoundingMathTuple | [undefined, undefined] {
-  if (options !== undefined) {
-    return refineRoundingMathOptions(smallestUnit, options, true)
+  defaultSmallestUnit = smallestUnit,
+): [
+  roundingInc: number | undefined,
+  roundingMode: RoundingModeEnum | undefined,
+  defaultRoundingInc: number | undefined,
+] {
+  if (options == null) {
+    return [undefined, undefined, undefined]
   }
-  return [] as unknown as [undefined, undefined]
+
+  if (typeof options === 'string' || options.roundingMode) {
+    const [roundingInc, roundingMode] = refineRoundingMathOptions(
+      smallestUnit,
+      options,
+      true,
+    )
+    return [roundingInc, roundingMode, undefined]
+  }
+
+  // Without an explicit mode, temporal-utils leaves smallestUnit unspecified
+  // in the underlying until() call. The increment therefore rounds at that
+  // Temporal type's default precision before total() converts to the requested
+  // output unit. Still refine an increment of 1 for option validation, but do
+  // not make callers take the no-op pre-rounding path.
+  const [defaultRoundingInc] = refineRoundingMathOptions(
+    defaultSmallestUnit,
+    options,
+    true,
+  )
+  return [
+    undefined,
+    undefined,
+    defaultRoundingInc === 1 ? undefined : defaultRoundingInc,
+  ]
 }
 
 /*

@@ -1,38 +1,65 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import { type CalendarImpl } from '../../internal/calendarImpl'
-import { diffCalendarDates, prepareZonedEpochDiff } from '../../internal/diff'
 import {
+  diffCalendarDates,
+  diffDateTimesExact,
+  prepareZonedEpochDiff,
+} from '../../internal/diff'
+import {
+  DurationFields,
+  clearDurationFields,
+  durationFieldNamesAsc,
+} from '../../internal/durationFields'
+import {
+  computeDurationSign,
+  nanoToDurationTimeFields,
+} from '../../internal/durationMath'
+import {
+  epochNanoToIsoDateTime,
   isoDateTimeToEpochNano,
   isoDateToEpochNano,
 } from '../../internal/epochMath'
+import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
 } from '../../internal/fieldTypes'
 import { combineDateAndTime } from '../../internal/fieldUtils'
+import { moveByDays } from '../../internal/move'
+import { type RoundingModeEnum } from '../../internal/optionsModel'
 import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import {
   RelativeOps,
-  ZonedEpochMarker,
   createDateRelativeOps,
   createDateTimeRelativeOps,
   createZonedRelativeOps,
+  moveRelativeToEpochNano,
 } from '../../internal/relativeMath'
 import { roundNumberToInc } from '../../internal/round'
 import { getCommonCalendar, getCommonTimeZone } from '../../internal/slotUtils'
 import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
+import {
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+} from '../../internal/temporalLimits'
 import { timeFieldsToNano } from '../../internal/timeFieldMath'
-import { totalRelativeDuration } from '../../internal/total'
+import { type TimeZone } from '../../internal/timeZone'
+import { getSingleInstantFor } from '../../internal/timeZoneMath'
+import {
+  clampRelativeDuration,
+  computeEpochNanoFrac,
+  totalRelativeDuration,
+} from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
-import { bindArgs, compareBigInts } from '../../internal/utils'
+import { bindArgs, compareBigInts, divTrunc } from '../../internal/utils'
 import { bigNanoToRoundedTimeUnit, nanoToRoundedTimeUnit } from './roundUtils'
 
-export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
-export const diffZonedMonths = bindArgs(diffZonedLargeUnits, Unit.Month)
-export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnits, Unit.Week, 7)
-export const diffZonedDays = bindArgs(diffZonedDayLikeUnits, Unit.Day, 1)
+export const diffZonedYears = bindArgs(diffZonedLargeUnit, Unit.Year)
+export const diffZonedMonths = bindArgs(diffZonedLargeUnit, Unit.Month)
+export const diffZonedWeeks = bindArgs(diffZonedDayLikeUnit, Unit.Week, 7)
+export const diffZonedDays = bindArgs(diffZonedDayLikeUnit, Unit.Day, 1)
 export const diffZonedEpochNanoTimeUnit = bindArgs(
   diffEpochNanoTimeUnit,
   getEpochNano as MarkerToEpochNano,
@@ -89,45 +116,119 @@ export function adaptRecordTimeUnitDiff<Record, Slots>(
     diffSlots(unit, nanoInUnit, getSlots(record0), getSlots(record1), options)
 }
 
-// Large Units (years, months)
+// Zoned Large Units (years, months)
 // -----------------------------------------------------------------------------
 
-function diffZonedLargeUnits(
+function diffZonedLargeUnit(
   unit: Unit,
   record0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   record1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Nanosecond,
+  )
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
+  const rawEndEpochNano = record1.epochNanoseconds
+  const sign = compareBigInts(rawEndEpochNano, record0.epochNanoseconds)
 
-  return diffDateUnits(
-    getEpochNano as MarkerToEpochNano,
-    bindArgs(prepareZonedEpochDiff, timeZone) as unknown as MarkersToIsoFields,
-    createZonedRelativeOps(calendar, timeZone, record0),
+  // DifferenceTemporalZonedDateTime returns before comparing time zones when
+  // the instants are equal. Preserve that observable validation order here.
+  if (!sign) {
+    return 0
+  }
+
+  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
+  const endEpochNano = defaultRoundingInc
+    ? truncateEpochNanoDiff(
+        record0.epochNanoseconds,
+        rawEndEpochNano,
+        defaultRoundingInc,
+      )
+    : rawEndEpochNano
+  const roundedSign = compareBigInts(endEpochNano, record0.epochNanoseconds)
+
+  if (!roundedSign) {
+    return 0
+  }
+
+  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
+    timeZone,
+    record0,
+    { ...record1, epochNanoseconds: endEpochNano },
+    roundedSign,
+  )!
+  const durationFields = {
+    ...diffCalendarDates(calendar, isoFields0, isoFields1, unit),
+    ...nanoToDurationTimeFields(remainderNano),
+  }
+
+  return totalAndRoundZonedDateUnit(
     unit,
     record0,
-    record1,
-    options,
+    endEpochNano,
+    calendar,
+    timeZone,
+    durationFields,
+    roundingInc,
+    roundingMode,
   )
 }
+
+// Plain Large Units (years, months)
+// -----------------------------------------------------------------------------
 
 function diffPlainDateLargeUnits(
   unit: Unit,
   record0: CalendarDateFields & { calendar: CalendarImpl },
   record1: CalendarDateFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
+  skipSingleUnitRound = false,
+  defaultSmallestUnit: Unit.Day | Unit.Month = Unit.Day,
 ): number {
   const calendar = getCommonCalendar(record0.calendar, record1.calendar)
 
   return diffDateUnits(
     isoDateToEpochNano as MarkerToEpochNano,
-    identityMarkersToIsoFields as MarkersToIsoFields,
     createDateRelativeOps(calendar, record0),
     unit,
     record0,
     record1,
     options,
+    skipSingleUnitRound,
+    defaultSmallestUnit,
+  )
+}
+
+export function diffPlainYearMonthMonths(
+  record0: CalendarDateFields & { calendar: CalendarImpl },
+  record1: CalendarDateFields & { calendar: CalendarImpl },
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  return diffPlainDateLargeUnits(
+    Unit.Month,
+    record0,
+    record1,
+    options,
+    true,
+    Unit.Month,
+  )
+}
+
+export function diffPlainYearMonthYears(
+  record0: CalendarDateFields & { calendar: CalendarImpl },
+  record1: CalendarDateFields & { calendar: CalendarImpl },
+  options?: RoundingMathOptions | RoundingMode,
+): number {
+  return diffPlainDateLargeUnits(
+    Unit.Year,
+    record0,
+    record1,
+    options,
+    false,
+    Unit.Month,
   )
 }
 
@@ -137,16 +238,36 @@ function diffPlainDateTimeLargeUnits(
   record1: CalendarDateTimeFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
-
-  return diffDateUnits(
-    isoDateTimeToEpochNano as MarkerToEpochNano,
-    identityMarkersToIsoFields as MarkersToIsoFields,
-    createDateTimeRelativeOps(calendar, record0),
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
     unit,
-    record0,
-    record1,
     options,
+    Unit.Nanosecond,
+  )
+  const calendar = getCommonCalendar(record0.calendar, record1.calendar)
+  const startEpochNano = isoDateTimeToEpochNano(record0)
+  const rawEndEpochNano = isoDateTimeToEpochNano(record1)
+  const endEpochNano = defaultRoundingInc
+    ? truncateEpochNanoDiff(startEpochNano, rawEndEpochNano, defaultRoundingInc)
+    : rawEndEpochNano
+  const roundedRecord1 = defaultRoundingInc
+    ? { ...epochNanoToIsoDateTime(endEpochNano), calendar: record1.calendar }
+    : record1
+
+  if (!roundingInc) {
+    checkPlainRelativeToBounds(record0, record1)
+  }
+
+  if (endEpochNano === startEpochNano) {
+    return 0
+  }
+
+  return totalAndRoundRelativeDateUnit(
+    unit,
+    diffDateTimesExact(calendar, record0, roundedRecord1, unit),
+    endEpochNano,
+    roundingInc,
+    roundingMode,
+    createDateTimeRelativeOps(calendar, record0),
   )
 }
 
@@ -158,111 +279,333 @@ The pair of records being diffed. Unlike the rounding core's origin, which is
 always an ISO date-time, these keep their original shape so each unit-diff
 function can convert them the cheapest way.
 */
-type DiffMarker = CalendarDateFields | CalendarDateTimeFields | ZonedEpochMarker
+type DiffMarker = CalendarDateFields | CalendarDateTimeFields
 
-type MarkerToEpochNano<M = DiffMarker> = (marker: M) => bigint
-
-type MarkersToIsoFields = (
-  m0: DiffMarker,
-  m1: DiffMarker,
-  sign: -1 | 1,
-) => [CalendarDateFields, CalendarDateFields, ...any[]]
-
-function identityMarkersToIsoFields(
-  m0: CalendarDateFields,
-  m1: CalendarDateFields,
-): [CalendarDateFields, CalendarDateFields] {
-  return [m0, m1]
-}
+type MarkerToEpochNano<M = DiffMarker | ZonedEpochNanoFields> = (
+  marker: M,
+) => bigint
 
 function diffDateUnits(
   markerToEpochNano: MarkerToEpochNano,
-  markersToIsoFields: MarkersToIsoFields,
   relativeOps: RelativeOps,
   unit: Unit, // guaranteed Y/M/W
   marker0: DiffMarker,
   marker1: DiffMarker,
   options: RoundingMathOptions | RoundingMode | undefined,
+  skipSingleUnitRound = false,
+  defaultSmallestUnit: Unit.Day | Unit.Month = Unit.Day,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    defaultSmallestUnit,
+  )
   const startEpochNano = markerToEpochNano(marker0)
-  const endEpochNano = markerToEpochNano(marker1)
+  let endEpochNano = markerToEpochNano(marker1)
+
+  if (!roundingInc) {
+    checkPlainRelativeToBounds(marker0, marker1)
+  }
 
   const sign = compareBigInts(endEpochNano, startEpochNano)
   if (!sign) {
     return 0
   }
 
-  const [isoFields0, isoFields1] = markersToIsoFields(marker0, marker1, sign)
-
   // Always the same calendar the ops were built with, so read it from there
   // rather than having each caller pass a closure that repeats it.
   const durationFields = diffCalendarDates(
     relativeOps.calendar,
-    isoFields0,
-    isoFields1,
+    marker0,
+    marker1,
     unit,
   )
 
-  let res = totalRelativeDuration(
-    durationFields,
-    endEpochNano,
-    unit,
-    relativeOps,
-  )
-
-  if (roundingInc) {
-    res = roundNumberToInc(res, roundingInc, roundingMode!)
+  if (defaultRoundingInc) {
+    const defaultFieldName = durationFieldNamesAsc[defaultSmallestUnit]
+    durationFields[defaultFieldName] =
+      divTrunc(durationFields[defaultFieldName], defaultRoundingInc) *
+      defaultRoundingInc
+    endEpochNano = moveRelativeToEpochNano(relativeOps, durationFields)
   }
 
-  return res
+  if (roundingInc === 1 && skipSingleUnitRound) {
+    return durationFields[durationFieldNamesAsc[unit]]
+  }
+
+  return totalAndRoundRelativeDateUnit(
+    unit,
+    durationFields,
+    endEpochNano,
+    roundingInc,
+    roundingMode,
+    relativeOps,
+  )
 }
 
-// Day-Like Units (weeks, days)
+// Zoned Day-Like Units (weeks, days)
 // -----------------------------------------------------------------------------
 
-function diffZonedDayLikeUnits(
+function diffZonedDayLikeUnit(
   unit: Unit.Week | Unit.Day,
   daysInUnit: number,
   record0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   record1: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  options?: RoundingMathOptions | RoundingMode | undefined,
+  options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-
-  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
-
-  const sign = compareBigInts(
-    record1.epochNanoseconds,
-    record0.epochNanoseconds,
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Nanosecond,
   )
+  getCommonCalendar(record0.calendar, record1.calendar)
+  const rawEndEpochNano = record1.epochNanoseconds
+  const sign = compareBigInts(rawEndEpochNano, record0.epochNanoseconds)
 
-  // `prepareZonedEpochDiff` requires a non-zero `sign` and returns `undefined`
-  // otherwise, so short-circuit here, same as `diffDateUnits` above.
   if (!sign) {
     return 0
   }
 
-  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
-    timeZone,
-    record0,
-    record1,
-    sign,
-  )!
-  // `isoFields0` is the start date-time, so it supplies the original wall-clock
-  // time for the adjusted end date. The start side already has that time.
-  const nanoDiff =
-    isoDateTimeToEpochNano(combineDateAndTime(isoFields1, isoFields0)) -
-    isoDateTimeToEpochNano(isoFields0) +
-    BigInt(remainderNano)
+  const timeZone = getCommonTimeZone(record0.timeZone, record1.timeZone)
+  const endEpochNano = defaultRoundingInc
+    ? truncateEpochNanoDiff(
+        record0.epochNanoseconds,
+        rawEndEpochNano,
+        defaultRoundingInc,
+      )
+    : rawEndEpochNano
+  const roundedSign = compareBigInts(endEpochNano, record0.epochNanoseconds)
 
-  let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
-
-  if (roundingInc) {
-    res = roundNumberToInc(res, roundingInc, roundingMode!)
+  if (!roundedSign) {
+    return 0
   }
 
-  return res
+  const [isoFields0, isoFields1] = prepareZonedEpochDiff(
+    timeZone,
+    record0,
+    { ...record1, epochNanoseconds: endEpochNano },
+    roundedSign,
+  )!
+  const dayDiff = divideBigNanoToExactNumber(
+    isoDateToEpochNano(isoFields1) - isoDateToEpochNano(isoFields0),
+    nanoInUtcDay,
+  )
+  const unitDiff = Math.trunc(dayDiff / daysInUnit)
+  return totalAndRoundZonedDayLikeUnit(
+    daysInUnit,
+    isoFields0,
+    record0.epochNanoseconds,
+    endEpochNano,
+    timeZone,
+    unitDiff,
+    roundingInc,
+    roundingMode,
+  )
+}
+
+function totalAndRoundZonedDayLikeUnit(
+  daysInUnit: number,
+  originIsoFields: CalendarDateTimeFields,
+  originEpochNano: bigint,
+  endEpochNano: bigint,
+  timeZone: TimeZone,
+  unitDiff: number,
+  roundingInc: number | undefined,
+  roundingMode: RoundingModeEnum | undefined,
+): number {
+  const sign = compareBigInts(endEpochNano, originEpochNano) as -1 | 1
+  const windowInc = roundingInc || 1
+  let windowStartValue = roundingInc
+    ? divTrunc(unitDiff, roundingInc) * roundingInc
+    : unitDiff
+  let [windowEpochNano0, windowEpochNano1] = computeZonedDayLikeWindow(
+    daysInUnit,
+    originIsoFields,
+    originEpochNano,
+    timeZone,
+    windowStartValue,
+    windowInc * sign,
+  )
+
+  // Usually the prepared whole-unit count already brackets the endpoint. If
+  // a time-zone transition collapses that window, advance once just like the
+  // general relative-duration clamp operation.
+  if (
+    !epochNanoIsWithinWindow(
+      endEpochNano,
+      windowEpochNano0,
+      windowEpochNano1,
+      sign,
+    )
+  ) {
+    windowStartValue += windowInc * sign
+    const shiftedWindow = computeZonedDayLikeWindow(
+      daysInUnit,
+      originIsoFields,
+      originEpochNano,
+      timeZone,
+      windowStartValue,
+      windowInc * sign,
+    )
+    windowEpochNano0 = shiftedWindow[0]
+    windowEpochNano1 = shiftedWindow[1]
+  }
+
+  const fraction = roundingInc
+    ? computeEpochNanoFrac(endEpochNano, windowEpochNano0, windowEpochNano1)
+    : Number(endEpochNano - windowEpochNano0) /
+      Number(windowEpochNano1 - windowEpochNano0)
+  const exactValue = windowStartValue + fraction * sign * windowInc
+
+  return roundingInc
+    ? roundNumberToInc(exactValue, roundingInc, roundingMode!)
+    : exactValue
+}
+
+function computeZonedDayLikeWindow(
+  daysInUnit: number,
+  originIsoFields: CalendarDateTimeFields,
+  originEpochNano: bigint,
+  timeZone: TimeZone,
+  startValue: number,
+  unitDelta: number,
+): [bigint, bigint] {
+  return [
+    moveZonedDayLikeValue(
+      daysInUnit,
+      originIsoFields,
+      originEpochNano,
+      timeZone,
+      startValue,
+    ),
+    moveZonedDayLikeValue(
+      daysInUnit,
+      originIsoFields,
+      originEpochNano,
+      timeZone,
+      startValue + unitDelta,
+    ),
+  ]
+}
+
+function moveZonedDayLikeValue(
+  daysInUnit: number,
+  originIsoFields: CalendarDateTimeFields,
+  originEpochNano: bigint,
+  timeZone: TimeZone,
+  value: number,
+): bigint {
+  if (!value) {
+    return originEpochNano
+  }
+
+  return getSingleInstantFor(
+    timeZone,
+    combineDateAndTime(
+      moveByDays(originIsoFields, value * daysInUnit),
+      originIsoFields,
+    ),
+  )
+}
+
+function epochNanoIsWithinWindow(
+  epochNano: bigint,
+  epochNano0: bigint,
+  epochNano1: bigint,
+  sign: -1 | 1,
+): boolean {
+  return sign > 0
+    ? epochNano0 <= epochNano && epochNano <= epochNano1
+    : epochNano1 <= epochNano && epochNano <= epochNano0
+}
+
+function totalAndRoundZonedDateUnit(
+  unit: Unit,
+  record0: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  endEpochNano: bigint,
+  calendar: CalendarImpl,
+  timeZone: ZonedEpochNanoFields['timeZone'],
+  durationFields: DurationFields,
+  roundingInc: number | undefined,
+  roundingMode: RoundingModeEnum | undefined,
+): number {
+  return totalAndRoundRelativeDateUnit(
+    unit,
+    durationFields,
+    endEpochNano,
+    roundingInc,
+    roundingMode,
+    createZonedRelativeOps(calendar, timeZone, record0),
+  )
+}
+
+function totalAndRoundRelativeDateUnit(
+  unit: Unit,
+  durationFields: DurationFields,
+  endEpochNano: bigint,
+  roundingInc: number | undefined,
+  roundingMode: RoundingModeEnum | undefined,
+  relativeOps: RelativeOps,
+): number {
+  return roundingInc
+    ? roundRelativeDateUnit(
+        unit,
+        durationFields,
+        endEpochNano,
+        roundingInc,
+        roundingMode!,
+        relativeOps,
+      )
+    : totalRelativeDuration(durationFields, endEpochNano, unit, relativeOps)
+}
+
+/*
+The public diff helpers always round with the same largest and smallest unit,
+so they only need the nudge step from the general relative-duration rounder.
+Keeping that focused operation here avoids pulling the rebalancing machinery
+into every tree-shaken date-unit diff.
+*/
+function roundRelativeDateUnit(
+  unit: Unit,
+  durationFields: DurationFields,
+  endEpochNano: bigint,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+  relativeOps: RelativeOps,
+): number {
+  const sign = computeDurationSign(durationFields) || 1
+  const unitFieldName = durationFieldNamesAsc[unit]
+
+  // Weeks are seven-day groups in all currently supported calendars. Fold any
+  // balanced day remainder into the week value before choosing its window.
+  if (unit === Unit.Week) {
+    durationFields = {
+      ...durationFields,
+      weeks: durationFields.weeks + Math.trunc(durationFields.days / 7),
+    }
+  }
+
+  const baseDurationFields = clearDurationFields(unit, durationFields)
+  baseDurationFields[unitFieldName] =
+    divTrunc(durationFields[unitFieldName], roundingInc) * roundingInc
+
+  const nudgeWindow = clampRelativeDuration(
+    baseDurationFields,
+    unit,
+    roundingInc * sign,
+    relativeOps,
+    endEpochNano,
+  )
+  const fraction = computeEpochNanoFrac(
+    endEpochNano,
+    nudgeWindow.epochNano0,
+    nudgeWindow.epochNano1,
+  )
+  const exactValue =
+    nudgeWindow.startDurationFields[unitFieldName] +
+    fraction * sign * roundingInc
+
+  return roundNumberToInc(exactValue, roundingInc, roundingMode)
 }
 
 function diffPlainDayLikeUnit(
@@ -273,16 +616,65 @@ function diffPlainDayLikeUnit(
   record1: DiffMarker,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
-  const nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Nanosecond,
+  )
+  let nanoDiff = markerToEpochNano(record1) - markerToEpochNano(record0)
 
-  let res = divideBigNanoToExactNumber(nanoDiff, nanoInUtcDay) / daysInUnit
+  if (defaultRoundingInc) {
+    const bigDefaultRoundingInc = BigInt(defaultRoundingInc)
+    nanoDiff = (nanoDiff / bigDefaultRoundingInc) * bigDefaultRoundingInc
+  }
+
+  if (!roundingInc && (unit === Unit.Week || nanoDiff)) {
+    checkPlainRelativeToBounds(record0, record1)
+  }
+
+  const nanoInUnit = nanoInUtcDay * daysInUnit
+  const bigNanoInUnit = BigInt(nanoInUnit)
+  const wholeUnits = Number(nanoDiff / bigNanoInUnit)
+
+  if (unit === Unit.Week && nanoDiff) {
+    const sign = compareBigInts(nanoDiff, 0n)
+    const windowInc = roundingInc || 1
+    const windowStart = roundingInc
+      ? divTrunc(wholeUnits, roundingInc) * roundingInc
+      : wholeUnits
+    checkIsoDateInBounds(moveByDays(record0, windowStart * daysInUnit))
+    checkIsoDateInBounds(
+      moveByDays(record0, (windowStart + windowInc * sign) * daysInUnit),
+    )
+  }
+
+  let res = wholeUnits + Number(nanoDiff % bigNanoInUnit) / nanoInUnit
 
   if (roundingInc) {
     res = roundNumberToInc(res, roundingInc, roundingMode!)
   }
 
   return res
+}
+
+function truncateEpochNanoDiff(
+  startEpochNano: bigint,
+  endEpochNano: bigint,
+  roundingInc: number,
+): bigint {
+  const bigRoundingInc = BigInt(roundingInc)
+  return (
+    startEpochNano +
+    ((endEpochNano - startEpochNano) / bigRoundingInc) * bigRoundingInc
+  )
+}
+
+function checkPlainRelativeToBounds(
+  marker0: DiffMarker,
+  marker1: DiffMarker,
+): void {
+  checkIsoDateTimeInBounds(combineDateAndTime(marker0, timeFieldDefaults))
+  checkIsoDateTimeInBounds(combineDateAndTime(marker1, timeFieldDefaults))
 }
 
 // Time Units

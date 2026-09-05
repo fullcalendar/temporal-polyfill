@@ -37,6 +37,7 @@ import {
   DateFields,
   TimeFields,
 } from '../../internal/fieldTypes'
+import { combineDateAndTime } from '../../internal/fieldUtils'
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
@@ -60,10 +61,13 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from '../../internal/slotsFromRefinedFields'
-import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import {
+  checkIsoDateInBounds,
+  checkIsoDateTimeInBounds,
+} from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
-import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { NumberSign, bindArgs, divTrunc, mapProps } from '../../internal/utils'
 import {
   DateTimeFormatLike,
   PlainDateToZonedDateTimeOptions,
@@ -695,14 +699,49 @@ function diffPlainDateDayLikeUnit(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [roundingInc, roundingMode] = refineUnitDiffOptions(unit, options)
+  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
+    unit,
+    options,
+    Unit.Day,
+  )
   const slots0 = getShimPlainDateSlots(record0)
   const slots1 = getShimPlainDateSlots(record1)
+  getCommonCalendar(slots0.calendar, slots1.calendar)
 
   // PlainDate day/week diffs are ISO day distances. Avoid the shared
   // date/date-time/zoned marker converter used by the cross-type helper.
-  let res =
-    (isoDateToEpochDays(slots1) - isoDateToEpochDays(slots0)) / daysInUnit
+  let dayDiff = isoDateToEpochDays(slots1) - isoDateToEpochDays(slots0)
+
+  if (defaultRoundingInc) {
+    const wholeUnitDays =
+      unit === Unit.Day ? 0 : divTrunc(dayDiff, daysInUnit) * daysInUnit
+    const remainderDays = dayDiff - wholeUnitDays
+    dayDiff =
+      wholeUnitDays +
+      divTrunc(remainderDays, defaultRoundingInc) * defaultRoundingInc
+  }
+
+  const sign = Math.sign(dayDiff)
+
+  if (!roundingInc && (unit === Unit.Week || sign)) {
+    checkIsoDateTimeInBounds(combineDateAndTime(slots0, timeFieldDefaults))
+    checkIsoDateTimeInBounds(combineDateAndTime(slots1, timeFieldDefaults))
+  }
+
+  const wholeUnits = Math.trunc(dayDiff / daysInUnit)
+
+  if (unit === Unit.Week && sign) {
+    const windowInc = roundingInc || 1
+    const windowStart = roundingInc
+      ? divTrunc(wholeUnits, roundingInc) * roundingInc
+      : wholeUnits
+    checkIsoDateInBounds(moveByDays(slots0, windowStart * daysInUnit))
+    checkIsoDateInBounds(
+      moveByDays(slots0, (windowStart + windowInc * sign) * daysInUnit),
+    )
+  }
+
+  let res = wholeUnits + (dayDiff % daysInUnit) / daysInUnit
 
   if (roundingInc) {
     res = roundNumberToInc(res, roundingInc, roundingMode!)

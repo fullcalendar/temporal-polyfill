@@ -825,11 +825,10 @@ export function diffWeeks(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainWeeks(
-    getShimPlainDateTimeSlots(record0),
-    getShimPlainDateTimeSlots(record1),
-    options,
-  )
+  const slots0 = getShimPlainDateTimeSlots(record0)
+  const slots1 = getShimPlainDateTimeSlots(record1)
+  getCommonCalendar(slots0.calendar, slots1.calendar)
+  return diffPlainWeeks(slots0, slots1, options)
 }
 
 export function diffDays(
@@ -837,11 +836,10 @@ export function diffDays(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDays(
-    getShimPlainDateTimeSlots(record0),
-    getShimPlainDateTimeSlots(record1),
-    options,
-  )
+  const slots0 = getShimPlainDateTimeSlots(record0)
+  const slots1 = getShimPlainDateTimeSlots(record1)
+  getCommonCalendar(slots0.calendar, slots1.calendar)
+  return diffPlainDays(slots0, slots1, options)
 }
 
 const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
