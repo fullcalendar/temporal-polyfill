@@ -180,6 +180,7 @@ function refineRoundingMathOptions(
   smallestUnit: Unit,
   options: RoundingMathOptions | RoundingMode,
   allowManyLargeUnits?: boolean,
+  defaultRoundingMode = RoundingModeEnum.HalfExpand,
 ): RoundingMathTuple {
   options = normalizeOptionsOrString<
     RoundingMathOptions,
@@ -188,7 +189,7 @@ function refineRoundingMathOptions(
 
   // alphabetical
   let roundingInc = coerceRoundingIncInteger(options)
-  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
+  const roundingMode = coerceRoundingMode(options, defaultRoundingMode)
 
   roundingInc = validateRoundingInc(
     roundingInc,
@@ -199,45 +200,31 @@ function refineRoundingMathOptions(
 }
 
 /*
-For funcApi
+Refines temporal-utils' two diff paths without manufacturing Temporal options.
+An explicit rounding mode makes the requested unit both largest and smallest;
+otherwise until() uses the type's default precision before Duration::total.
 */
 export function refineUnitDiffOptions(
-  smallestUnit: Unit,
-  options: RoundingMathOptions | RoundingMode,
-  defaultSmallestUnit = smallestUnit,
+  unit: Unit,
+  options: RoundingMathOptions | RoundingMode | undefined,
+  defaultSmallestUnit: Unit,
 ): [
-  roundingInc: number | undefined,
-  roundingMode: RoundingModeEnum | undefined,
-  defaultRoundingInc: number | undefined,
+  smallestUnit: Unit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+  shouldTotal: boolean,
 ] {
-  if (options == null) {
-    return [undefined, undefined, undefined]
-  }
-
-  if (typeof options === 'string' || options.roundingMode) {
-    const [roundingInc, roundingMode] = refineRoundingMathOptions(
-      smallestUnit,
-      options,
-      true,
-    )
-    return [roundingInc, roundingMode, undefined]
-  }
-
-  // Without an explicit mode, temporal-utils leaves smallestUnit unspecified
-  // in the underlying until() call. The increment therefore rounds at that
-  // Temporal type's default precision before total() converts to the requested
-  // output unit. Still refine an increment of 1 for option validation, but do
-  // not make callers take the no-op pre-rounding path.
-  const [defaultRoundingInc] = refineRoundingMathOptions(
-    defaultSmallestUnit,
-    options,
+  const shouldTotal =
+    typeof options !== 'string' && !(options && options.roundingMode)
+  const smallestUnit = shouldTotal ? defaultSmallestUnit : unit
+  const [roundingInc, roundingMode] = refineRoundingMathOptions(
+    smallestUnit,
+    options || {},
     true,
+    shouldTotal ? RoundingModeEnum.Trunc : RoundingModeEnum.HalfExpand,
   )
-  return [
-    undefined,
-    undefined,
-    defaultRoundingInc === 1 ? undefined : defaultRoundingInc,
-  ]
+
+  return [smallestUnit, roundingInc, roundingMode, shouldTotal]
 }
 
 /*

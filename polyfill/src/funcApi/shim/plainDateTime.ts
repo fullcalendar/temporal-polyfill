@@ -825,10 +825,11 @@ export function diffWeeks(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const slots0 = getShimPlainDateTimeSlots(record0)
-  const slots1 = getShimPlainDateTimeSlots(record1)
-  getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffPlainWeeks(slots0, slots1, options)
+  return diffPlainWeeks(
+    getShimPlainDateTimeSlots(record0),
+    getShimPlainDateTimeSlots(record1),
+    options,
+  )
 }
 
 export function diffDays(
@@ -836,10 +837,11 @@ export function diffDays(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const slots0 = getShimPlainDateTimeSlots(record0)
-  const slots1 = getShimPlainDateTimeSlots(record1)
-  getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffPlainDays(slots0, slots1, options)
+  return diffPlainDays(
+    getShimPlainDateTimeSlots(record0),
+    getShimPlainDateTimeSlots(record1),
+    options,
+  )
 }
 
 const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
@@ -847,24 +849,12 @@ const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
   ShimPlainDateTimeSlots
 >(diffPlainDateTimeEpochNanoTimeUnit, getShimPlainDateTimeSlots)
 
-export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Minute,
-  nanoInMinute,
-)
-export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
-export const diffMilliseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Millisecond,
-  nanoInMilli,
-)
-export const diffMicroseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Microsecond,
-  nanoInMicro,
-)
-export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour)
+export const diffMinutes = bindArgs(diffRecordTimeUnit, Unit.Minute)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second)
+export const diffMilliseconds = bindArgs(diffRecordTimeUnit, Unit.Millisecond)
+export const diffMicroseconds = bindArgs(diffRecordTimeUnit, Unit.Microsecond)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond)
 
 function moveByTimeUnit(
   nanoInUnit: number,

@@ -439,21 +439,9 @@ const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
   ShimPlainTimeSlots
 >(diffPlainTimeNanoOfDayTimeUnit, getShimPlainTimeSlots)
 
-export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Minute,
-  nanoInMinute,
-)
-export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
-export const diffMilliseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Millisecond,
-  nanoInMilli,
-)
-export const diffMicroseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Microsecond,
-  nanoInMicro,
-)
-export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour)
+export const diffMinutes = bindArgs(diffRecordTimeUnit, Unit.Minute)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second)
+export const diffMilliseconds = bindArgs(diffRecordTimeUnit, Unit.Millisecond)
+export const diffMicroseconds = bindArgs(diffRecordTimeUnit, Unit.Microsecond)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond)

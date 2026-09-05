@@ -27,17 +27,13 @@ import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { diffPlainDates } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
-import {
-  isoDateToEpochDays,
-  isoDateToEpochMilli,
-} from '../../internal/epochMath'
+import { isoDateToEpochMilli } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
 import {
   CalendarDateFields,
   DateFields,
   TimeFields,
 } from '../../internal/fieldTypes'
-import { combineDateAndTime } from '../../internal/fieldUtils'
 import {
   applyPlainFormatTimeZone,
   checkResolvedCalendarCompatible,
@@ -52,8 +48,7 @@ import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { mergePlainDateFields } from '../../internal/merge'
 import { moveByDays, moveDate } from '../../internal/move'
-import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
-import { IsoDateTimeInterval, roundNumberToInc } from '../../internal/round'
+import { IsoDateTimeInterval } from '../../internal/round'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import {
@@ -61,13 +56,10 @@ import {
   createPlainMonthDayFromFields,
   createPlainYearMonthFromFields,
 } from '../../internal/slotsFromRefinedFields'
-import {
-  checkIsoDateInBounds,
-  checkIsoDateTimeInBounds,
-} from '../../internal/temporalLimits'
+import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
-import { NumberSign, bindArgs, divTrunc, mapProps } from '../../internal/utils'
+import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import {
   DateTimeFormatLike,
   PlainDateToZonedDateTimeOptions,
@@ -86,7 +78,12 @@ import {
   refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
-import { diffPlainMonths, diffPlainYears } from './diffUtils'
+import {
+  diffPlainDateDays,
+  diffPlainDateWeeks,
+  diffPlainMonths,
+  diffPlainYears,
+} from './diffUtils'
 import {
   ShimDurationRecord,
   createShimDurationRecord,
@@ -681,7 +678,11 @@ export function diffWeeks(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateDayLikeUnit(Unit.Week, 7, record0, record1, options)
+  return diffPlainDateWeeks(
+    getShimPlainDateSlots(record0),
+    getShimPlainDateSlots(record1),
+    options,
+  )
 }
 
 export function diffDays(
@@ -689,65 +690,11 @@ export function diffDays(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateDayLikeUnit(Unit.Day, 1, record0, record1, options)
-}
-
-function diffPlainDateDayLikeUnit(
-  unit: Unit.Week | Unit.Day,
-  daysInUnit: number,
-  record0: ShimPlainDateRecord,
-  record1: ShimPlainDateRecord,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
-    unit,
+  return diffPlainDateDays(
+    getShimPlainDateSlots(record0),
+    getShimPlainDateSlots(record1),
     options,
-    Unit.Day,
   )
-  const slots0 = getShimPlainDateSlots(record0)
-  const slots1 = getShimPlainDateSlots(record1)
-  getCommonCalendar(slots0.calendar, slots1.calendar)
-
-  // PlainDate day/week diffs are ISO day distances. Avoid the shared
-  // date/date-time/zoned marker converter used by the cross-type helper.
-  let dayDiff = isoDateToEpochDays(slots1) - isoDateToEpochDays(slots0)
-
-  if (defaultRoundingInc) {
-    const wholeUnitDays =
-      unit === Unit.Day ? 0 : divTrunc(dayDiff, daysInUnit) * daysInUnit
-    const remainderDays = dayDiff - wholeUnitDays
-    dayDiff =
-      wholeUnitDays +
-      divTrunc(remainderDays, defaultRoundingInc) * defaultRoundingInc
-  }
-
-  const sign = Math.sign(dayDiff)
-
-  if (!roundingInc && (unit === Unit.Week || sign)) {
-    checkIsoDateTimeInBounds(combineDateAndTime(slots0, timeFieldDefaults))
-    checkIsoDateTimeInBounds(combineDateAndTime(slots1, timeFieldDefaults))
-  }
-
-  const wholeUnits = Math.trunc(dayDiff / daysInUnit)
-
-  if (unit === Unit.Week && sign) {
-    const windowInc = roundingInc || 1
-    const windowStart = roundingInc
-      ? divTrunc(wholeUnits, roundingInc) * roundingInc
-      : wholeUnits
-    checkIsoDateInBounds(moveByDays(slots0, windowStart * daysInUnit))
-    checkIsoDateInBounds(
-      moveByDays(slots0, (windowStart + windowInc * sign) * daysInUnit),
-    )
-  }
-
-  let res = wholeUnits + (dayDiff % daysInUnit) / daysInUnit
-
-  if (roundingInc) {
-    res = roundNumberToInc(res, roundingInc, roundingMode!)
-  }
-
-  return res
 }
 
 function roundToInterval(

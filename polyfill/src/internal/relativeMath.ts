@@ -154,27 +154,51 @@ export function spanRelativeDuration(
   endEpochNano: bigint,
   relativeOps: RelativeOps,
 ] {
-  const { calendar } = relativeToSlots
-
   if (isZonedEpochSlots(relativeToSlots)) {
-    const { timeZone } = relativeToSlots
-
-    // AddZonedDateTime range-checks the intermediate ISO date and the resulting
-    // epoch-nanoseconds, so no separate endpoint validation is needed.
-    const endSlots = moveZonedEpochSlots(relativeToSlots, durationFields)
-
-    return [
-      diffZonedEpochsExact(
-        timeZone,
-        calendar,
-        relativeToSlots,
-        endSlots,
-        largestUnit,
-      ),
-      endSlots.epochNanoseconds,
-      createZonedRelativeOps(calendar, timeZone, relativeToSlots),
-    ]
+    return spanZonedRelativeDuration(
+      relativeToSlots,
+      durationFields,
+      largestUnit,
+    )
   }
+
+  return spanPlainRelativeDuration(relativeToSlots, durationFields, largestUnit)
+}
+
+// Zoned callers that already know their relativeTo flavor can use this branch
+// directly, allowing the plain branch to tree-shake out.
+export function spanZonedRelativeDuration(
+  relativeToSlots: ZonedEpochMarker,
+  durationFields: DurationFields,
+  largestUnit: Unit,
+): [DurationFields, bigint, RelativeOps] {
+  const { calendar, timeZone } = relativeToSlots
+
+  // AddZonedDateTime range-checks the intermediate ISO date and the resulting
+  // epoch-nanoseconds, so no separate endpoint validation is needed.
+  const endSlots = moveZonedEpochSlots(relativeToSlots, durationFields)
+
+  return [
+    diffZonedEpochsExact(
+      timeZone,
+      calendar,
+      relativeToSlots,
+      endSlots,
+      largestUnit,
+    ),
+    endSlots.epochNanoseconds,
+    createZonedRelativeOps(calendar, timeZone, relativeToSlots),
+  ]
+}
+
+// Plain callers that already know their relativeTo flavor can use this branch
+// directly, allowing the zoned branch to tree-shake out.
+export function spanPlainRelativeDuration(
+  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
+  durationFields: DurationFields,
+  largestUnit: Unit,
+): [DurationFields, bigint, RelativeOps] {
+  const { calendar } = relativeToSlots
 
   // A plain relativeTo is always a bare date, so the origin is midnight.
   // Both endpoints get rejected as date-times before diffing, matching

@@ -1,5 +1,4 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { divideBigNanoToExactNumber } from '../../internal/bigNano'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -26,14 +25,8 @@ import {
   RoundingMathTuple,
   RoundingModeEnum,
 } from '../../internal/optionsModel'
-import { refineUnitDiffOptions } from '../../internal/optionsRoundingRefine'
 import { validateRoundingInc } from '../../internal/optionsValidate'
-import {
-  IsoDateTimeInterval,
-  roundBigNanoToInc,
-  roundNumberToInc,
-  roundWithMode,
-} from '../../internal/round'
+import { IsoDateTimeInterval, roundWithMode } from '../../internal/round'
 import { computeEpochNanoFrac } from '../../internal/total'
 import { TimeUnit, Unit } from '../../internal/units'
 import { bindArgs, zeroOutProps } from '../../internal/utils'
@@ -241,74 +234,4 @@ export function refineRoundToOptions(
     solarMode,
   )
   return [roundingInc, roundingMode]
-}
-
-// Time Unit
-// -----------------------------------------------------------------------------
-// Called only by diffUtils.ts
-// Unlike class API, this func API is able to return floating-point unit-numbers
-// for the diff functions, thus the more involved math like divideBigNanoToExactNumber
-
-// Callers compute the signed nanosecond amount. This number path handles the
-// bounded time-of-day case where the amount fits safely in Number.
-export function nanoToRoundedTimeUnit(
-  unit: TimeUnit,
-  nanoInUnit: number, // overengineered for caller to supply? SEE ABOVE COMMENT
-  nanoAmount: number,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
-    unit,
-    options,
-    Unit.Nanosecond,
-  )
-
-  if (roundingInc) {
-    nanoAmount = roundNumberToInc(
-      nanoAmount,
-      nanoInUnit * roundingInc,
-      roundingMode!,
-    )
-  } else if (defaultRoundingInc) {
-    nanoAmount =
-      Math.trunc(nanoAmount / defaultRoundingInc) * defaultRoundingInc
-  }
-
-  if (roundingInc) {
-    return nanoAmount ? nanoAmount / nanoInUnit : 0
-  }
-
-  const whole = Math.trunc(nanoAmount / nanoInUnit)
-  return whole + (nanoAmount % nanoInUnit) / nanoInUnit
-}
-
-// Epoch-based amounts can be larger than Number's safe integer range, so they
-// stay in bigint until rounding or exact fractional division needs a Number.
-export function bigNanoToRoundedTimeUnit(
-  unit: TimeUnit,
-  nanoInUnit: number, // overengineered for caller to supply? SEE ABOVE COMMENT
-  nanoAmount: bigint,
-  options?: RoundingMathOptions | RoundingMode,
-): number {
-  const [roundingInc, roundingMode, defaultRoundingInc] = refineUnitDiffOptions(
-    unit,
-    options,
-    Unit.Nanosecond,
-  )
-
-  if (roundingInc) {
-    nanoAmount = roundBigNanoToInc(
-      nanoAmount,
-      // Like computeBigNanoInc, multiply after converting to bigint
-      BigInt(nanoInUnit) * BigInt(roundingInc),
-      roundingMode!,
-    )
-  } else if (defaultRoundingInc) {
-    const bigDefaultRoundingInc = BigInt(defaultRoundingInc)
-    nanoAmount = (nanoAmount / bigDefaultRoundingInc) * bigDefaultRoundingInc
-  }
-
-  return roundingInc
-    ? Number(nanoAmount / BigInt(nanoInUnit))
-    : divideBigNanoToExactNumber(nanoAmount, nanoInUnit)
 }

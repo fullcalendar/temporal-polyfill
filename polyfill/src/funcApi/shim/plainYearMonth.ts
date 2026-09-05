@@ -42,13 +42,10 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { mergePlainYearMonthFields } from '../../internal/merge'
-import { moveToStartOfMonth, moveYearMonth } from '../../internal/move'
+import { moveYearMonth } from '../../internal/move'
 import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots, createDurationSlots } from '../../internal/slots'
-import {
-  checkIsoDateInBounds,
-  checkIsoYearMonthInBounds,
-} from '../../internal/temporalLimits'
+import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
@@ -470,8 +467,11 @@ export function diffYears(
   record1: ShimPlainYearMonthRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [slots0, slots1] = prepareYearMonthDiffSlots(record0, record1)
-  return diffPlainYearMonthYears(slots0, slots1, options)
+  return diffPlainYearMonthYears(
+    getShimPlainYearMonthSlots(record0),
+    getShimPlainYearMonthSlots(record1),
+    options,
+  )
 }
 
 export function diffMonths(
@@ -479,37 +479,9 @@ export function diffMonths(
   record1: ShimPlainYearMonthRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  const [slots0, slots1] = prepareYearMonthDiffSlots(record0, record1)
-  return diffPlainYearMonthMonths(slots0, slots1, options)
-}
-
-// PlainYearMonth differences use month precision, so the reference ISO day
-// carried in each record must not influence the result.
-function prepareYearMonthDiffSlots(
-  record0: ShimPlainYearMonthRecord,
-  record1: ShimPlainYearMonthRecord,
-): [ShimPlainYearMonthSlots, ShimPlainYearMonthSlots] {
-  const recordSlots0 = getShimPlainYearMonthSlots(record0)
-  const recordSlots1 = getShimPlainYearMonthSlots(record1)
-  const calendar = getCommonCalendar(
-    recordSlots0.calendar,
-    recordSlots1.calendar,
+  return diffPlainYearMonthMonths(
+    getShimPlainYearMonthSlots(record0),
+    getShimPlainYearMonthSlots(record1),
+    options,
   )
-  const slots0 = {
-    ...moveToStartOfMonth(calendar, recordSlots0),
-    calendar,
-  }
-  const slots1 = {
-    ...moveToStartOfMonth(calendar, recordSlots1),
-    calendar,
-  }
-
-  // Equal values short-circuit before the first-of-month range checks in the
-  // standard API. Non-equal values must make both implicit dates concrete.
-  if (compareIsoDateFields(slots0, slots1)) {
-    checkIsoDateInBounds(slots0)
-    checkIsoDateInBounds(slots1)
-  }
-
-  return [slots0, slots1]
 }

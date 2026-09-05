@@ -43,15 +43,7 @@ import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import {
-  TimeUnit,
-  Unit,
-  nanoInHour,
-  nanoInMicro,
-  nanoInMilli,
-  nanoInMinute,
-  nanoInSec,
-} from '../../internal/units'
+import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { DateTimeFormatLike } from '../commonTypes'
 import { InstantRecordBranding } from '../recordBranding'
@@ -434,21 +426,9 @@ const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
   ShimInstantSlots
 >(diffInstantEpochNanoTimeUnit, getShimInstantSlots)
 
-export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour, nanoInHour)
-export const diffMinutes = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Minute,
-  nanoInMinute,
-)
-export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second, nanoInSec)
-export const diffMilliseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Millisecond,
-  nanoInMilli,
-)
-export const diffMicroseconds = bindArgs(
-  diffRecordTimeUnit,
-  Unit.Microsecond,
-  nanoInMicro,
-)
-export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond, 1)
+export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour)
+export const diffMinutes = bindArgs(diffRecordTimeUnit, Unit.Minute)
+export const diffSeconds = bindArgs(diffRecordTimeUnit, Unit.Second)
+export const diffMilliseconds = bindArgs(diffRecordTimeUnit, Unit.Millisecond)
+export const diffMicroseconds = bindArgs(diffRecordTimeUnit, Unit.Microsecond)
+export const diffNanoseconds = bindArgs(diffRecordTimeUnit, Unit.Nanosecond)

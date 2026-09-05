@@ -36,11 +36,11 @@ export function totalDuration<RA>(
     | Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
     | DurationTotalOptions<RA>,
 ): number {
-  const maxDurationUnit = getMaxDurationUnit(slots)
   const [totalUnit, relativeToSlots] = refineTotalOptions(
     options,
     refineRelativeTo,
   )
+  const maxDurationUnit = getMaxDurationUnit(slots)
   const maxUnit = Math.max(totalUnit, maxDurationUnit)
   const isZoned = relativeToSlots && isZonedEpochSlots(relativeToSlots)
 
@@ -105,7 +105,7 @@ export function totalRelativeDuration(
   return integerPart + (numerator / denom) * sign
 }
 
-function totalDayTimeDuration(
+export function totalDayTimeDuration(
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
