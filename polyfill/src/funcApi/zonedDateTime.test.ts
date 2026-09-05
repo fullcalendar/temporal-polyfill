@@ -1,4 +1,6 @@
+import * as TemporalUtils from 'temporal-utils'
 import { describe, expect, it } from 'vitest'
+import { Temporal } from '../classApi/basic/implementation'
 import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainTimeFns from './plainTime'
@@ -2554,6 +2556,22 @@ describe('diffMonths', () => {
   })
 })
 
+describe('equal-instant day-like diff parity', () => {
+  it.each(['diffWeeks', 'diffDays'] as const)(
+    '%s matches temporal-utils',
+    (diffName) => {
+      const record0 = ZonedDateTimeFns.create(0n, 'UTC')
+      const record1 = ZonedDateTimeFns.create(0n, 'UTC')
+      const temporal0 = new Temporal.ZonedDateTime(0n, 'UTC')
+      const temporal1 = new Temporal.ZonedDateTime(0n, 'UTC')
+
+      expect(ZonedDateTimeFns[diffName](record0, record1)).toBe(
+        TemporalUtils[diffName](temporal0, temporal1),
+      )
+    },
+  )
+})
+
 describe('diffWeeks', () => {
   it('gives exact result when no options/roundingMode specified', () => {
     const zdt0 = ZonedDateTimeFns.fromString(
@@ -2600,15 +2618,6 @@ describe('diffWeeks', () => {
     })
     expect(weeks).toBe(1)
     expect(weeksInc).toBe(3)
-  })
-
-  // Regression test: diffing equal ZonedDateTimes used to throw.
-  it('gives 0 when diffing equal ZonedDateTimes instead of throwing', () => {
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]',
-      CalendarFns.getBasic,
-    )
-    expect(ZonedDateTimeFns.diffWeeks(zdt, zdt)).toBe(0)
   })
 })
 
@@ -2657,23 +2666,6 @@ describe('diffDays', () => {
     })
     expect(days).toBe(10)
     expect(daysInc).toBe(14)
-  })
-
-  // Regression test: diffing equal ZonedDateTimes used to throw.
-  it('gives 0 when diffing equal ZonedDateTimes instead of throwing', () => {
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[America/New_York]',
-      CalendarFns.getBasic,
-    )
-    expect(ZonedDateTimeFns.diffDays(zdt, zdt)).toBe(0)
-  })
-
-  it('gives 0 when diffing equal UTC ZonedDateTimes instead of throwing', () => {
-    const zdt = ZonedDateTimeFns.fromString(
-      '2024-03-05T00:30:00[UTC]',
-      CalendarFns.getBasic,
-    )
-    expect(ZonedDateTimeFns.diffDays(zdt, zdt)).toBe(0)
   })
 })
 

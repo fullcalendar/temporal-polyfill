@@ -26,7 +26,7 @@ import { ZonedEpochNanoFields, getEpochNano } from '../../internal/slots'
 import { timeFieldsToNano } from '../../internal/timeFieldMath'
 import { totalRelativeDuration } from '../../internal/total'
 import { TimeUnit, Unit, nanoInUtcDay } from '../../internal/units'
-import { NumberSign, bindArgs, compareBigInts } from '../../internal/utils'
+import { bindArgs, compareBigInts } from '../../internal/utils'
 import { bigNanoToRoundedTimeUnit, nanoToRoundedTimeUnit } from './roundUtils'
 
 export const diffZonedYears = bindArgs(diffZonedLargeUnits, Unit.Year)
@@ -165,7 +165,7 @@ type MarkerToEpochNano<M = DiffMarker> = (marker: M) => bigint
 type MarkersToIsoFields = (
   m0: DiffMarker,
   m1: DiffMarker,
-  sign: NumberSign,
+  sign: -1 | 1,
 ) => [CalendarDateFields, CalendarDateFields, ...any[]]
 
 function identityMarkersToIsoFields(

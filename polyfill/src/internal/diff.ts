@@ -657,7 +657,7 @@ export function prepareZonedEpochDiff(
   timeZone: TimeZone,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   slots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  sign: NumberSign, // guaranteed non-zero
+  sign: -1 | 1,
 ): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
   const startIsoDate = zonedEpochSlotsToIso(slots0)
   const endIsoDate = zonedEpochSlotsToIso(slots1)
