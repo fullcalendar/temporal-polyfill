@@ -8,6 +8,17 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## Unreleased
+
+- FIX: Improve behavioral parity between the tree-shakeable and class-based APIs:
+  - `diffYears`/`diffMonths`/`diffWeeks`/`diffDays`:
+    - `ZonedDateTime` handles equal instants, fractional units, DST transitions, skipped dates, rounding, and calendar validation (#103, #104)
+    - `PlainDateTime` includes time remainders and uses correct relative calendar-unit rounding, floating-point precision, calendar validation, and range validation
+    - `PlainDate` uses correct relative calendar-unit rounding, floating-point precision, calendar validation, and range validation
+    - `PlainYearMonth` ignores the internal reference ISO day, uses month precision, and handles rounding and range boundaries correctly
+  - `PlainTime` `diffHours`/`diffMinutes`/`diffSeconds`/`diffMilliseconds`/`diffMicroseconds`/`diffNanoseconds` preserve fractional precision and return positive zero for results that round to zero
+  - All `diff*` functions apply `roundingIncrement` without `roundingMode` at each Temporal type's default smallest unit before totaling in the requested unit
+
 ## v1.0.4
 
 - FIX: `/full` entrypoint not deferring to native Temporal (#102), thx @leemr

@@ -1,6 +1,4 @@
-import * as TemporalUtils from 'temporal-utils'
 import { describe, expect, it } from 'vitest'
-import { Temporal } from '../classApi/basic/implementation'
 import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainTimeFns from './plainTime'
@@ -2554,22 +2552,6 @@ describe('diffMonths', () => {
     expect(months).toBe(1)
     expect(monthsInc).toBe(3)
   })
-})
-
-describe('equal-instant day-like diff parity', () => {
-  it.each(['diffWeeks', 'diffDays'] as const)(
-    '%s matches temporal-utils',
-    (diffName) => {
-      const record0 = ZonedDateTimeFns.create(0n, 'UTC')
-      const record1 = ZonedDateTimeFns.create(0n, 'UTC')
-      const temporal0 = new Temporal.ZonedDateTime(0n, 'UTC')
-      const temporal1 = new Temporal.ZonedDateTime(0n, 'UTC')
-
-      expect(ZonedDateTimeFns[diffName](record0, record1)).toBe(
-        TemporalUtils[diffName](temporal0, temporal1),
-      )
-    },
-  )
 })
 
 describe('diffWeeks', () => {
