@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { FixedTimeZone } from '../internal/timeZone'
 import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainTimeFns from './plainTime'
@@ -409,6 +410,30 @@ describe('startOfDay', () => {
 })
 
 describe('getTimeZoneTransition', () => {
+  itSkipNative.each(['next', 'previous'] as const)(
+    'keeps a %s transition at epoch zero',
+    (direction) => {
+      // Stub only the host lookup, leaving the public result adapter under test.
+      const transition = vi
+        .spyOn(FixedTimeZone.prototype, 'getTransition')
+        .mockReturnValue(0n)
+      try {
+        const value = ZonedDateTimeFns.create(
+          direction === 'next' ? -1n : 1n,
+          'UTC',
+          CalendarFns.getGregory(),
+        )
+        const result = ZonedDateTimeFns.getTimeZoneTransition(value, direction)
+        expect(result).not.toBeNull()
+        expect(result!.epochNanoseconds).toBe(0n)
+        expect(result!.timeZoneId).toBe('UTC')
+        expect(result!.calendarId).toBe('gregory')
+      } finally {
+        transition.mockRestore()
+      }
+    },
+  )
+
   it('can return the next transition', () => {
     const zdt0 = ZonedDateTimeFns.create(
       1711962000000000000n,

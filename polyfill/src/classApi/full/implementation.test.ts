@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { FixedTimeZone } from '../../internal/timeZone'
 import { Temporal as TemporalFull } from './implementation'
 
 describe('full entrypoint', () => {
@@ -38,4 +39,39 @@ describe('integration recreations', () => {
       expect(date.month).toBe(1)
     })
   })
+})
+
+describe('Temporal.ZonedDateTime transition result boundaries', () => {
+  it.each(['next', 'previous'] as const)(
+    'returns null when there is no %s transition',
+    (direction) => {
+      const value = new TemporalFull.ZonedDateTime(1n, 'UTC')
+      expect(value.getTimeZoneTransition(direction)).toBeNull()
+    },
+  )
+
+  it.each(['next', 'previous'] as const)(
+    'keeps a %s transition at epoch zero',
+    (direction) => {
+      // Inject the internal result so this regression is independent of whether
+      // the host time-zone database contains a transition exactly at the epoch.
+      const transition = vi
+        .spyOn(FixedTimeZone.prototype, 'getTransition')
+        .mockReturnValue(0n)
+      try {
+        const value = new TemporalFull.ZonedDateTime(
+          direction === 'next' ? -1n : 1n,
+          'UTC',
+          'gregory',
+        )
+        const result = value.getTimeZoneTransition(direction)
+        expect(result).not.toBeNull()
+        expect(result!.epochNanoseconds).toBe(0n)
+        expect(result!.timeZoneId).toBe('UTC')
+        expect(result!.calendarId).toBe('gregory')
+      } finally {
+        transition.mockRestore()
+      }
+    },
+  )
 })
