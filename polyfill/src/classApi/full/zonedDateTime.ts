@@ -347,7 +347,8 @@ export const ZonedDateTime = defineTemporalClass(
       const slots = getZonedDateTimeSlots(this)
       const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
 
-      if (newEpochNano) {
+      // Epoch zero is a valid transition; only undefined means no transition.
+      if (newEpochNano !== undefined) {
         return createZonedDateTime({
           ...slots,
           epochNanoseconds: newEpochNano,

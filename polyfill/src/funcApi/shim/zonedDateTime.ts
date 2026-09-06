@@ -443,7 +443,8 @@ export function getTimeZoneTransition(
 ): ShimZonedDateTimeRecord | null {
   const slots = getShimZonedDateTimeSlots(record)
   const epochNanoseconds = getTimeZoneTransitionEpochNanoseconds(slots, options)
-  return epochNanoseconds
+  // Epoch zero is a valid transition; only undefined means no transition.
+  return epochNanoseconds !== undefined
     ? createShimZonedDateTimeRecord({ ...slots, epochNanoseconds })
     : null
 }

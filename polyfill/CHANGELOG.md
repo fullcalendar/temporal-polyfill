@@ -10,6 +10,8 @@ don't work in GH release markdown. must be absolute
 
 ## Unreleased
 
+- FIX: Tree-shakeable API year/month rounding and alignment helpers use correct non-ISO calendar boundaries instead of mixing calendar year/month values with ISO fields
+- FIX: `ZonedDateTime.getTimeZoneTransition` preserves transitions at epoch nanoseconds `0n` instead of returning `null`, in both class-based and tree-shakeable APIs
 - FIX: Improve behavioral parity between the tree-shakeable and class-based APIs:
   - `diffYears`/`diffMonths`/`diffWeeks`/`diffDays`:
     - `ZonedDateTime` handles equal instants, fractional units, DST transitions, skipped dates, rounding, and calendar validation (#103, #104)

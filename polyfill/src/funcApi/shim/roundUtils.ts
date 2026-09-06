@@ -43,27 +43,21 @@ const clearTimeFields = bindArgs(
 export function computeYearFloor(
   calendar: CalendarImpl,
   slots: CalendarDateFields,
-): CalendarDateTimeFields & { year: number } {
+): CalendarDateTimeFields {
   const { year: year0 } = computeCalendarDateFields(calendar, slots)
-  return {
-    ...computeCalendarDateTimeFromParts(calendar, year0),
-    year: year0,
-  }
+  // Boundary fields must stay ISO; calendar years can differ from ISO years.
+  return computeCalendarDateTimeFromParts(calendar, year0)
 }
 
 export function computeMonthFloor(
   calendar: CalendarImpl,
   slots: CalendarDateFields,
-): CalendarDateTimeFields & { year: number; month: number } {
+): CalendarDateTimeFields {
   const { year: year0, month: month0 } = computeCalendarDateFields(
     calendar,
     slots,
   )
-  return {
-    ...computeCalendarDateTimeFromParts(calendar, year0, month0),
-    year: year0,
-    month: month0,
-  }
+  return computeCalendarDateTimeFromParts(calendar, year0, month0)
 }
 
 export function computeIsoWeekFloor(
@@ -122,7 +116,7 @@ export function computeYearInterval(
   slots: CalendarDateFields,
 ): IsoDateTimeInterval {
   const isoFields0 = computeYearFloor(calendar, slots)
-  const year1 = isoFields0.year + 1
+  const year1 = computeCalendarDateFields(calendar, slots).year + 1
   return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1)]
 }
 
@@ -131,10 +125,12 @@ export function computeMonthInterval(
   slots: CalendarDateFields,
 ): IsoDateTimeInterval {
   const isoFields0 = computeMonthFloor(calendar, slots)
+  // Advance in calendar units, then convert the next boundary back to ISO.
+  const { year, month } = computeCalendarDateFields(calendar, slots)
   const { year: year1, month: month1 } = addCalendarMonths(
     calendar,
-    isoFields0.year,
-    isoFields0.month,
+    year,
+    month,
     1,
   )
   return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1, month1)]
