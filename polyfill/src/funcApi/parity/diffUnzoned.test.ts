@@ -13,13 +13,13 @@ import {
   diffYears,
 } from 'temporal-utils'
 import { describe, expect, it } from 'vitest'
-import { Temporal } from '../classApi/basic/implementation'
-import * as CalendarFns from './calendar'
-import * as InstantFns from './instant'
-import * as PlainDateFns from './plainDate'
-import * as PlainDateTimeFns from './plainDateTime'
-import * as PlainTimeFns from './plainTime'
-import * as PlainYearMonthFns from './plainYearMonth'
+import { Temporal } from '../../classApi/basic/implementation'
+import * as CalendarFns from '../calendar'
+import * as InstantFns from '../instant'
+import * as PlainDateFns from '../plainDate'
+import * as PlainDateTimeFns from '../plainDateTime'
+import * as PlainTimeFns from '../plainTime'
+import * as PlainYearMonthFns from '../plainYearMonth'
 
 type DateDiffName = 'years' | 'months' | 'weeks' | 'days'
 type TimeDiffName =

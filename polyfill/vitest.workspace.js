@@ -21,7 +21,7 @@ function createFuncApiProject(forceShim) {
     },
     test: {
       name: forceShim ? 'funcApi-force-shim' : 'funcApi-native',
-      include: ['src/funcApi/*.test.ts'],
+      include: ['src/funcApi/**/*.test.ts'],
     },
   }
 }

@@ -7,9 +7,9 @@ import {
   diffYears,
 } from 'temporal-utils'
 import { describe, expect, it } from 'vitest'
-import { Temporal } from '../classApi/basic/implementation'
-import * as CalendarFns from './calendar'
-import * as ZonedDateTimeFns from './zonedDateTime'
+import { Temporal } from '../../classApi/basic/implementation'
+import * as CalendarFns from '../calendar'
+import * as ZonedDateTimeFns from '../zonedDateTime'
 
 type DiffName = 'years' | 'months' | 'weeks' | 'days'
 type DiffOptions = RoundingMathOptions | RoundingMode | undefined
