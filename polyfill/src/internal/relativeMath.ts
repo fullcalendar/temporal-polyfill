@@ -219,41 +219,6 @@ export function spanPlainRelativeDuration(
 }
 
 /*
-Applies two durations to relativeTo in sequence and diffs the result back
-against the origin. Mirrors AddDurations, which applies its Add operation once
-per duration; each application range-checks, so an intermediate that overshoots
-throws even when the end lands back inside the limits.
-*/
-export function addRelativeDurations(
-  relativeToSlots: RelativeToSlots,
-  durationFields0: DurationFields,
-  durationFields1: DurationFields,
-  largestUnit: Unit,
-): DurationFields {
-  const { calendar } = relativeToSlots
-
-  if (isZonedEpochSlots(relativeToSlots)) {
-    const { timeZone } = relativeToSlots
-    const midSlots = moveZonedEpochSlots(relativeToSlots, durationFields0)
-    const endSlots = moveZonedEpochSlots(midSlots, durationFields1)
-
-    return diffZonedEpochsExact(
-      timeZone,
-      calendar,
-      relativeToSlots,
-      endSlots,
-      largestUnit,
-    )
-  }
-
-  const origin = combineDateAndTime(relativeToSlots, timeFieldDefaults)
-  const mid = moveDateTime(calendar, origin, durationFields0)
-  const end = moveDateTime(calendar, mid, durationFields1)
-
-  return diffDateTimesExact(calendar, origin, end, largestUnit)
-}
-
-/*
 Moves relativeTo by a duration and returns only the resulting instant. Used by
 Duration::compare, which never needs the endpoint as a date-time.
 */

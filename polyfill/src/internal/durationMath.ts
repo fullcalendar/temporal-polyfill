@@ -17,21 +17,15 @@ import {
 } from './durationFields'
 import * as errorMessages from './errorMessages'
 import { Overflow } from './optionsModel'
-import { normalizeOptions } from './optionsNormalize'
 import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
-  addRelativeDurations,
-  isUniformUnit,
   isZonedEpochSlots,
   spanRelativeDuration,
 } from './relativeMath'
 import { roundDayTimeDuration, roundRelativeDuration } from './round'
 import { createDurationSlots } from './slots'
-import type {
-  DurationRoundingOptions,
-  RelativeToOptions,
-} from './temporalSpecHelpers'
+import type { DurationRoundingOptions } from './temporalSpecHelpers'
 import { nanoToGivenFields } from './unitMath'
 import {
   DayTimeUnit,
@@ -48,47 +42,6 @@ const maxDurationSeconds = 2 ** 53
 
 // Adding
 // -----------------------------------------------------------------------------
-
-export function addDurations<RA>(
-  refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
-  doSubtract: boolean,
-  slots: DurationFields,
-  otherSlots: DurationFields,
-  options?: RelativeToOptions<RA>,
-): DurationFields & { sign: NumberSign } {
-  const normalOptions = normalizeOptions(options)
-  const relativeToSlots = refineRelativeTo(normalOptions.relativeTo)
-  const maxUnit = Math.max(
-    getMaxDurationUnit(slots),
-    getMaxDurationUnit(otherSlots),
-  ) as Unit
-
-  if (
-    isUniformUnit(
-      maxUnit,
-      relativeToSlots && isZonedEpochSlots(relativeToSlots),
-    )
-  ) {
-    return addDayTimeDurationsChecked(
-      doSubtract,
-      slots,
-      otherSlots,
-      maxUnit as DayTimeUnit,
-    )
-  }
-
-  if (!relativeToSlots) {
-    throwRangeError(errorMessages.missingRelativeTo)
-  }
-
-  if (doSubtract) {
-    otherSlots = negateDurationFields(otherSlots) as any // !!!
-  }
-
-  return createDurationSlots(
-    addRelativeDurations(relativeToSlots, slots, otherSlots, maxUnit),
-  )
-}
 
 export function addDurationsWithoutRelativeTo(
   doSubtract: boolean,
@@ -118,9 +71,9 @@ function addDayTimeDurationsChecked(
   otherSlots: DurationFields,
   maxUnit: DayTimeUnit,
 ): DurationFields & { sign: NumberSign } {
-  // With no relativeTo, only day-and-smaller units have fixed lengths.
-  // Calendar units have to stay on the relative path so months, years, and
-  // calendar-dependent weeks cannot silently collapse into fixed nanoseconds.
+  // Duration addition only supports day-and-smaller units. Calendar units
+  // cannot be balanced without a reference date, which this operation does
+  // not accept.
   return createDurationSlots(
     validateDurationFields(
       addDayTimeDurations(

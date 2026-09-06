@@ -16,7 +16,7 @@ import {
 import { DurationFields } from '../../internal/durationFields'
 import {
   absDuration,
-  addDurations,
+  addDurationsWithoutRelativeTo,
   negateDuration,
   roundDuration,
   validateDurationFields,
@@ -119,32 +119,22 @@ export const Duration = defineTemporalClass(
       return createDuration(absDuration(getDurationSlots(this)))
     }
 
-    add(
-      otherArg: DurationArg,
-      options: Temporal.DurationRelativeToOptions | undefined = undefined,
-    ): Duration {
+    add(otherArg: DurationArg): Duration {
       return createDuration(
-        addDurations(
-          refinePublicRelativeTo,
+        addDurationsWithoutRelativeTo(
           false,
           getDurationSlots(this),
           toDurationSlots(otherArg),
-          options,
         ),
       )
     }
 
-    subtract(
-      otherArg: DurationArg,
-      options: Temporal.DurationRelativeToOptions | undefined = undefined,
-    ): Duration {
+    subtract(otherArg: DurationArg): Duration {
       return createDuration(
-        addDurations(
-          refinePublicRelativeTo,
+        addDurationsWithoutRelativeTo(
           true,
           getDurationSlots(this),
           toDurationSlots(otherArg),
-          options,
         ),
       )
     }
