@@ -96,18 +96,22 @@ export function refineMaybeZonedDateTimeObjectLike(
     /* disallowEmpty */ false,
   ) as ZonedDateTimeRefinedObject
 
-  if (fields.timeZone !== undefined) {
-    const [year, monthCodeParts] = refineCalendarDateFields(
-      fields as any,
-      calendar,
-    )
-    const isoDateFields = createPlainDateFromRefinedFields(
-      fields as any,
-      calendar,
-      year,
-      monthCodeParts,
-      Overflow.Constrain,
-    )
+  // Preserve the timeZone presence read before date resolution. Both relativeTo
+  // flavors then resolve the same constrained date before time/zone conversion.
+  const isZoned = fields.timeZone !== undefined
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields as any,
+    calendar,
+  )
+  const isoDateFields = createPlainDateFromRefinedFields(
+    fields as any,
+    calendar,
+    year,
+    monthCodeParts,
+    Overflow.Constrain,
+  )
+
+  if (isZoned) {
     const timeFields = resolveTimeFields(fields)
 
     const timeZoneId = refineTimeZoneString(fields.timeZone)
@@ -124,17 +128,6 @@ export function refineMaybeZonedDateTimeObjectLike(
     return { epochNanoseconds, timeZone, calendar }
   }
 
-  const [year, monthCodeParts] = refineCalendarDateFields(
-    fields as any,
-    calendar,
-  )
-  const isoDateFields = createPlainDateFromRefinedFields(
-    fields as any,
-    calendar,
-    year,
-    monthCodeParts,
-    Overflow.Constrain,
-  )
   return isoDateFields
 }
 
