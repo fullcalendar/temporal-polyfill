@@ -59,9 +59,8 @@ import {
   createPlainDateTimeFromRefinedFields,
   createPlainMonthDayFromRefinedFields,
   createPlainYearMonthFromRefinedFields,
-  refinePlainDateFields,
+  refineCalendarDateFields,
   refinePlainMonthDayFields,
-  refinePlainYearMonthFields,
 } from './slotsFromRefinedFields'
 import { queryTimeZone } from './timeZone'
 import { getMatchingInstantFor } from './timeZoneMath'
@@ -98,7 +97,7 @@ export function refineMaybeZonedDateTimeObjectLike(
   ) as ZonedDateTimeRefinedObject
 
   if (fields.timeZone !== undefined) {
-    const [year, monthCodeParts] = refinePlainDateFields(
+    const [year, monthCodeParts] = refineCalendarDateFields(
       fields as any,
       calendar,
     )
@@ -125,7 +124,10 @@ export function refineMaybeZonedDateTimeObjectLike(
     return { epochNanoseconds, timeZone, calendar }
   }
 
-  const [year, monthCodeParts] = refinePlainDateFields(fields as any, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields as any,
+    calendar,
+  )
   const isoDateFields = createPlainDateFromRefinedFields(
     fields as any,
     calendar,
@@ -157,7 +159,10 @@ export function refineZonedDateTimeObjectLike(
 
   const timeZoneId = refineTimeZoneString(fields.timeZone!)
 
-  const [year, monthCodeParts] = refinePlainDateFields(fields as any, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields as any,
+    calendar,
+  )
   const [overflow, offsetDisambig, epochDisambig] =
     refineZonedFieldOptions(options)
   const isoDateFields = createPlainDateFromRefinedFields(
@@ -201,7 +206,10 @@ export function refinePlainDateTimeObjectLike(
     /* disallowEmpty */ false,
   ) as Partial<DateTimeFields>
 
-  const [year, monthCodeParts] = refinePlainDateFields(fields as any, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields as any,
+    calendar,
+  )
   const overflow = refineOverflowOptions(options)
   const isoDateInternals = createPlainDateFromRefinedFields(
     fields as any,
@@ -237,7 +245,10 @@ export function refinePlainDateObjectLike(
     /* requiredFieldNames */ requireFields,
   )
 
-  const [year, monthCodeParts] = refinePlainDateFields(fields as any, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields as any,
+    calendar,
+  )
   const overflow = refineOverflowOptions(options)
   return createPlainDateFromRefinedFields(
     fields as any,
@@ -266,9 +277,10 @@ export function refinePlainYearMonthObjectLike(
     /* requiredFieldNames */ requireFields,
   )
 
-  const [year, monthCodeParts] = refinePlainYearMonthFields(
+  const [year, monthCodeParts] = refineCalendarDateFields(
     fields as any,
     calendar,
+    /* allowMissingDay */ true,
   )
   const overflow = refineOverflowOptions(options)
   return createPlainYearMonthFromRefinedFields(

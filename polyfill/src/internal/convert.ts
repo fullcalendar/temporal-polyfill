@@ -39,9 +39,8 @@ import {
   createPlainDateFromRefinedFields,
   createPlainMonthDayFromRefinedFields,
   createPlainYearMonthFromRefinedFields,
-  refinePlainDateFields,
+  refineCalendarDateFields,
   refinePlainMonthDayFields,
-  refinePlainYearMonthFields,
 } from './slotsFromRefinedFields'
 import { checkEpochNanoInBounds } from './temporalLimits'
 import { TimeZone, queryTimeZone } from './timeZone'
@@ -246,9 +245,10 @@ export function convertToPlainYearMonth(
     /* fieldRefiners */ dateFieldRefiners,
   )
   const refinedFields = fields as Partial<YearMonthFields>
-  const [year, monthCodeParts] = refinePlainYearMonthFields(
+  const [year, monthCodeParts] = refineCalendarDateFields(
     refinedFields,
     calendar,
+    /* allowMissingDay */ true,
   )
   return createPlainYearMonthFromRefinedFields(
     refinedFields,
@@ -278,7 +278,7 @@ function createPlainDateFromMergedFields(
     [],
   )
 
-  const [year, monthCodeParts] = refinePlainDateFields(
+  const [year, monthCodeParts] = refineCalendarDateFields(
     mergedFields as any,
     calendar,
   )

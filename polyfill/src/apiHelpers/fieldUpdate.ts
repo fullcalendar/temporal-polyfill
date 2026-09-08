@@ -30,9 +30,8 @@ import {
   createPlainDateFromRefinedFields,
   createPlainMonthDayFromRefinedFields,
   createPlainYearMonthFromRefinedFields,
-  refinePlainDateFields,
+  refineCalendarDateFields,
   refinePlainMonthDayFields,
-  refinePlainYearMonthFields,
 } from '../internal/slotsFromRefinedFields'
 
 export function withPlainDateFields(
@@ -42,7 +41,7 @@ export function withPlainDateFields(
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = slots
   const fields = mergePlainDateFields(calendar, slots, modFields)
-  const [year, monthCodeParts] = refinePlainDateFields(fields, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(fields, calendar)
   const overflow = refineOverflowOptions(options)
 
   return createPlainDateFromRefinedFields(
@@ -67,7 +66,10 @@ export function withPlainDateTimeFields(
     slots,
     modFields,
   )
-  const [year, monthCodeParts] = refinePlainDateFields(calendarFields, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    calendarFields,
+    calendar,
+  )
   const overflow = refineOverflowOptions(options)
 
   return updatePlainDateTimeFields(
@@ -87,7 +89,11 @@ export function withPlainYearMonthFields(
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = slots
   const fields = mergePlainYearMonthFields(calendar, slots, modFields)
-  const [year, monthCodeParts] = refinePlainYearMonthFields(fields, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    fields,
+    calendar,
+    /* allowMissingDay */ true,
+  )
   const overflow = refineOverflowOptions(options)
 
   return createPlainYearMonthFromRefinedFields(
@@ -139,7 +145,10 @@ export function withZonedDateTimeFields(
     slots,
     modFields,
   )
-  const [year, monthCodeParts] = refinePlainDateFields(calendarFields, calendar)
+  const [year, monthCodeParts] = refineCalendarDateFields(
+    calendarFields,
+    calendar,
+  )
   const [overflow, offsetDisambig, epochDisambig] = refineZonedFieldOptions(
     options,
     OffsetDisambig.Prefer,

@@ -51,23 +51,29 @@ export function createPlainDateTimeFromRefinedFields(
   return createDateTimeSlots(isoDateTime, calendar)
 }
 
-type RefinedPlainDateFields = [
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-]
-
-// Performs the observable field work that must precede reading options.
-export function refinePlainDateFields(
+// Performs the observable year/month field work that must precede option reads.
+// Full dates also require a day. Check all required fields before parsing
+// monthCode, then resolve the year, preserving the validation/coercion order.
+export function refineCalendarDateFields(
   fields: Partial<DateFields>,
   calendar: CalendarImpl,
-): RefinedPlainDateFields {
-  validateRequiredYearMonthFields(fields, calendar)
-  if (fields.day === undefined) {
+  allowMissingDay?: boolean,
+): [year: number, monthCodeParts: MonthCodeParts | undefined] {
+  const eraOrigins = getCalendarEraOrigins(calendar)
+  if (
+    fields.year === undefined &&
+    (fields.era === undefined || fields.eraYear === undefined)
+  ) {
+    throwTypeError(errorMessages.missingYear(eraOrigins))
+  }
+  if (fields.monthCode === undefined && fields.month === undefined) {
+    throwTypeError(errorMessages.missingMonth)
+  }
+  if (!allowMissingDay && fields.day === undefined) {
     throwTypeError(errorMessages.missingField('day'))
   }
 
-  // Parsing monthCode must remain observable before numeric year coercion,
-  // despite year occupying the first position in the returned tuple.
+  // Parse monthCode before numeric year coercion, despite the tuple order.
   const monthCodeParts = parseMonthCodeField(fields)
   const year = resolveCalendarYear(fields, calendar)
   return [year, monthCodeParts]
@@ -109,41 +115,6 @@ function parseMonthCodeField(
     // calendar/year, but `L99M` should fail before year numeric coercion.
     return parseMonthCode(fields.monthCode)
   }
-}
-
-function validateRequiredYearMonthFields(
-  fields: Partial<YearMonthFields>,
-  calendar: CalendarImpl,
-): void {
-  // Pre-check required fields so that missing-field TypeError is thrown BEFORE
-  // any RangeError from monthCode parsing or bounds checking.
-  // This ensures correct error ordering per spec (e.g. calendarresolvefields-error-ordering tests).
-  const eraOrigins = getCalendarEraOrigins(calendar)
-  if (
-    fields.year === undefined &&
-    (fields.era === undefined || fields.eraYear === undefined)
-  ) {
-    throwTypeError(errorMessages.missingYear(eraOrigins))
-  }
-  if (fields.monthCode === undefined && fields.month === undefined) {
-    throwTypeError(errorMessages.missingMonth)
-  }
-}
-
-type RefinedPlainYearMonthFields = [
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-]
-
-// Performs required-field checks and coercions that precede overflow options.
-export function refinePlainYearMonthFields(
-  fields: Partial<YearMonthFields>,
-  calendar: CalendarImpl,
-): RefinedPlainYearMonthFields {
-  validateRequiredYearMonthFields(fields, calendar)
-  const monthCodeParts = parseMonthCodeField(fields)
-  const year = resolveCalendarYear(fields, calendar)
-  return [year, monthCodeParts]
 }
 
 export function createPlainYearMonthFromRefinedFields(
