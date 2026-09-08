@@ -69,60 +69,55 @@ export function roundZonedEpochSlotsToUnit(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  return smallestUnit === Unit.Day
-    ? roundZonedEpochSlotsToDay(slots, roundingMode)
-    : roundZonedEpochSlotsToTime(slots, smallestUnit, roundingInc, roundingMode)
+  return createZonedEpochNanoSlots(
+    smallestUnit === Unit.Day
+      ? roundZonedEpochToDay(slots, roundingMode)
+      : roundZonedEpochToTime(slots, smallestUnit, roundingInc, roundingMode),
+    slots.timeZone,
+    slots.calendar,
+  )
 }
 
 // A calendar day is the window between consecutive local starts of day.
 // Its duration may differ from 24 hours, and repeated boundaries need clamping.
-export function roundZonedEpochSlotsToDay(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+// Return only the rounded epoch so callers can construct their result slots.
+export function roundZonedEpochToDay(
+  slots: ZonedEpochNanoFields,
   roundingMode: RoundingModeEnum,
-): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const { epochNanoseconds, timeZone, calendar } = slots
+): bigint {
   const [epochNano0, epochNano1] = computeZonedDayEpochInterval(slots)
-  return {
-    epochNanoseconds: roundWithMode(
-      computeZonedDayRoundFrac(epochNanoseconds, epochNano0, epochNano1),
-      roundingMode,
-    )
-      ? epochNano1
-      : epochNano0,
-    timeZone,
-    calendar,
-  }
+  return roundWithMode(
+    computeZonedDayRoundFrac(slots.epochNanoseconds, epochNano0, epochNano1),
+    roundingMode,
+  )
+    ? epochNano1
+    : epochNano0
 }
 
 // Time-unit rounding preserves the old offset when resolving a repeated time.
 // This path does not need the adjacent local-day boundary computation.
-export function roundZonedEpochSlotsToTime(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+export function roundZonedEpochToTime(
+  slots: ZonedEpochNanoFields,
   smallestUnit: TimeUnit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
-): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const { epochNanoseconds, timeZone, calendar } = slots
+): bigint {
   if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return { epochNanoseconds, timeZone, calendar }
+    return slots.epochNanoseconds
   }
   const isoDateTime = zonedEpochSlotsToIso(slots)
-  return {
-    epochNanoseconds: getMatchingInstantFor(
-      timeZone,
-      roundDateTimeToNano(
-        isoDateTime,
-        computeNanoInc(smallestUnit, roundingInc),
-        roundingMode,
-      ),
-      isoDateTime.offsetNanoseconds,
-      OffsetDisambig.Prefer,
-      EpochDisambig.Compat,
-      true,
+  return getMatchingInstantFor(
+    slots.timeZone,
+    roundDateTimeToNano(
+      isoDateTime,
+      computeNanoInc(smallestUnit, roundingInc),
+      roundingMode,
     ),
-    timeZone,
-    calendar,
-  }
+    isoDateTime.offsetNanoseconds,
+    OffsetDisambig.Prefer,
+    EpochDisambig.Compat,
+    true,
+  )
 }
 
 // Duration rounding entry points

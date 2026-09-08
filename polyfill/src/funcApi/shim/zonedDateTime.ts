@@ -83,9 +83,9 @@ import {
   alignZonedEpoch,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
-  roundZonedEpochSlotsToDay,
-  roundZonedEpochSlotsToTime,
+  roundZonedEpochToDay,
   roundZonedEpochToInterval,
+  roundZonedEpochToTime,
 } from '../../internal/round'
 import { getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
@@ -603,7 +603,11 @@ function roundToTimeUnit(
     options,
   )
   return createShimZonedDateTimeRecord(
-    roundZonedEpochSlotsToTime(slots, smallestUnit, roundingInc, roundingMode),
+    createZonedEpochNanoSlots(
+      roundZonedEpochToTime(slots, smallestUnit, roundingInc, roundingMode),
+      slots.timeZone,
+      slots.calendar,
+    ),
   )
 }
 
@@ -614,7 +618,11 @@ export function roundToDay(
   const slots = getShimZonedDateTimeSlots(record)
   const [, roundingMode] = refineRoundToOptions(Unit.Day, options)
   return createShimZonedDateTimeRecord(
-    roundZonedEpochSlotsToDay(slots, roundingMode),
+    createZonedEpochNanoSlots(
+      roundZonedEpochToDay(slots, roundingMode),
+      slots.timeZone,
+      slots.calendar,
+    ),
   )
 }
 export const roundToHour = bindArgs(roundToTimeUnit, Unit.Hour)
