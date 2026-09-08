@@ -45,8 +45,8 @@ happen before those deferred coercions.
 */
 
 export function resolveCalendarYear(
-  calendar: CalendarImpl,
   fields: Partial<DateFields>,
+  calendar: CalendarImpl,
 ): number {
   const exoticCalendar = calendar || undefined
   const eraOrigins = getCalendarEraOrigins(calendar)
@@ -95,11 +95,11 @@ export function resolveCalendarYear(
 }
 
 export function resolveCalendarMonth(
-  calendar: CalendarImpl,
   fields: Partial<MonthFields>,
+  calendar: CalendarImpl,
   year: number,
+  monthCodeParts: MonthCodeParts | undefined,
   overflow: Overflow,
-  monthCodeParts?: MonthCodeParts,
 ): number {
   let { month, monthCode } = fields
 
@@ -132,10 +132,10 @@ export function resolveCalendarMonth(
 }
 
 export function resolveCalendarDay(
-  calendar: CalendarImpl,
   fields: DayFields,
-  month: number,
+  calendar: CalendarImpl,
   year: number,
+  month: number,
   overflow?: Overflow,
 ): number {
   return clampProp(

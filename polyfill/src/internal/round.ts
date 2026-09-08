@@ -1,5 +1,6 @@
 import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
+import type { IsoDateTimeInterval } from './calendarInterval'
 import {
   DurationFields,
   clearDurationFields,
@@ -23,6 +24,8 @@ import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
 import {
   RelativeOps,
+  clampRelativeDuration,
+  computeEpochNanoFrac,
   isUniformUnit,
   moveRelativeToEpochNano,
 } from './relativeMath'
@@ -34,7 +37,6 @@ import {
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
-import { clampRelativeDuration, computeEpochNanoFrac } from './total'
 import {
   DayTimeUnit,
   TimeUnit,
@@ -53,6 +55,7 @@ import {
 
 // Pre-Refined Rounding
 // -----------------------------------------------------------------------------
+// These entry points accept already-parsed units, increments, and modes.
 
 /*
 Rounds a ZonedDateTime after public callers have already refined the options
@@ -66,58 +69,177 @@ export function roundZonedEpochSlotsToUnit(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  let { epochNanoseconds } = slots
-  const { timeZone, calendar } = slots
+  return smallestUnit === Unit.Day
+    ? roundZonedEpochSlotsToDay(slots, roundingMode)
+    : roundZonedEpochSlotsToTime(slots, smallestUnit, roundingInc, roundingMode)
+}
 
-  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return { epochNanoseconds, timeZone, calendar }
-  }
-
-  if (smallestUnit === Unit.Day) {
-    // No Temporal-bounds check is needed: the whole ISO day around a valid ZDT
-    // is representable. Still verify custom time-zone protocol results below.
-    const isoDateTime = zonedEpochSlotsToIso(slots)
-    const isoFields0 = combineDateAndTime(isoDateTime, timeFieldDefaults)
-    const isoFields1 = combineDateAndTime(
-      moveByDays(isoFields0, 1),
-      timeFieldDefaults,
-    )
-    const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
-    const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
-    epochNanoseconds = roundWithMode(
+// A calendar day is the window between consecutive local starts of day.
+// Its duration may differ from 24 hours, and repeated boundaries need clamping.
+export function roundZonedEpochSlotsToDay(
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  roundingMode: RoundingModeEnum,
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
+  const { epochNanoseconds, timeZone, calendar } = slots
+  const [epochNano0, epochNano1] = computeZonedDayEpochInterval(slots)
+  return {
+    epochNanoseconds: roundWithMode(
       computeZonedDayRoundFrac(epochNanoseconds, epochNano0, epochNano1),
       roundingMode,
     )
       ? epochNano1
-      : epochNano0
-  } else {
-    const isoDateTime = zonedEpochSlotsToIso(slots)
-    const offsetNano = isoDateTime.offsetNanoseconds
+      : epochNano0,
+    timeZone,
+    calendar,
+  }
+}
 
-    const roundedIsoDateTime = roundDateTimeToNano(
-      isoDateTime,
-      computeNanoInc(smallestUnit, roundingInc),
-      roundingMode,
-    )
-    epochNanoseconds = getMatchingInstantFor(
+// Time-unit rounding preserves the old offset when resolving a repeated time.
+// This path does not need the adjacent local-day boundary computation.
+export function roundZonedEpochSlotsToTime(
+  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  smallestUnit: TimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
+  const { epochNanoseconds, timeZone, calendar } = slots
+  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+    return { epochNanoseconds, timeZone, calendar }
+  }
+  const isoDateTime = zonedEpochSlotsToIso(slots)
+  return {
+    epochNanoseconds: getMatchingInstantFor(
       timeZone,
-      roundedIsoDateTime,
-      offsetNano,
-      OffsetDisambig.Prefer, // keep old offsetNano if possible
+      roundDateTimeToNano(
+        isoDateTime,
+        computeNanoInc(smallestUnit, roundingInc),
+        roundingMode,
+      ),
+      isoDateTime.offsetNanoseconds,
+      OffsetDisambig.Prefer,
       EpochDisambig.Compat,
-      true, // fuzzy
+      true,
+    ),
+    timeZone,
+    calendar,
+  }
+}
+
+// Duration rounding entry points
+// -----------------------------------------------------------------------------
+// These compose numeric rounding with relative-unit balancing when required.
+
+export function roundRelativeDuration(
+  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
+  endEpochNano: bigint,
+  largestUnit: Unit,
+  smallestUnit: Unit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+  relativeOps: RelativeOps,
+  isZoned?: boolean, // days are non-uniform, so sub-day rounding needs the zone
+): DurationFields {
+  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
+    return durationFields
+  }
+
+  // Most zero durations are short-circuited by callers. Zoned sub-day rounding
+  // can intentionally reach here for a blank duration because the next-day
+  // boundary is observable through the time-zone protocol, so use the positive
+  // direction as the spec-default tie direction.
+  const sign = (computeDurationSign(durationFields) || 1) as NumberSign
+  const nudgeFunc = (
+    !isUniformUnit(smallestUnit, isZoned)
+      ? nudgeRelativeDuration
+      : isZoned && smallestUnit < Unit.Day && largestUnit >= Unit.Day
+        ? nudgeZonedTimeDuration
+        : nudgeDayTimeDuration
+  ) as typeof nudgeRelativeDuration // most general
+
+  let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
+    sign,
+    durationFields,
+    endEpochNano,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+    relativeOps,
+  )
+
+  // grew a day/week/month/year?
+  if (grewBigUnit && smallestUnit !== Unit.Week) {
+    roundedDurationFields = bubbleRelativeDuration(
+      roundedDurationFields,
+      roundedEpochNano,
+      largestUnit,
+      Math.max(Unit.Day, smallestUnit), // force to Day or larger
+      sign,
+      relativeOps,
     )
   }
 
-  return { epochNanoseconds, timeZone, calendar }
+  return roundedDurationFields
 }
 
-// Zoned Utils
+/*
+No rebalancing to units larger than days!
+Returns ALL duration fields, some zeroed out
+*/
+export function roundDayTimeDuration(
+  durationFields: DurationFields,
+  largestUnit: DayTimeUnit,
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): DurationFields {
+  const bigNano = durationDayTimeToBigNano(durationFields)
+  const roundedBigNano = roundBigNanoToInc(
+    bigNano,
+    computeBigNanoInc(smallestUnit, roundingInc),
+    roundingMode,
+  )
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationDayTimeFields(roundedBigNano, largestUnit),
+  }
+}
+
+/*
+No rebalancing to units larger than days!
+Returns partial result, to be merged with other duration fields
+*/
+export function roundDayTimeDurationByInc(
+  durationFields: DurationFields,
+  nanoInc: number,
+  roundingMode: RoundingModeEnum,
+): Partial<DurationFields> {
+  // force <= Day
+  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day)
+  const bigNano = durationDayTimeToBigNano(durationFields)
+  const roundedBigNano = roundBigNanoToInc(
+    bigNano,
+    BigInt(nanoInc),
+    roundingMode,
+  )
+  return nanoToDurationDayTimeFields(roundedBigNano, maxUnit)
+}
+
+// Zoned interval operations
 // -----------------------------------------------------------------------------
+// These map local calendar boundaries into epoch intervals before rounding.
 
 export function computeZonedHoursInDay(
   slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): number {
+  const [epochNano0, epochNano1] = computeZonedDayEpochInterval(slots)
+
+  return divideBigNanoToExactNumber(epochNano1 - epochNano0, nanoInHour)
+}
+
+function computeZonedDayEpochInterval(
+  slots: ZonedEpochNanoFields,
+): [bigint, bigint] {
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots)
   const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
@@ -128,13 +250,7 @@ export function computeZonedHoursInDay(
 
   const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
-
-  const hoursExact = divideBigNanoToExactNumber(
-    epochNano1 - epochNano0,
-    nanoInHour,
-  )
-
-  return hoursExact
+  return [epochNano0, epochNano1]
 }
 
 export function computeZonedStartOfDay(
@@ -209,8 +325,9 @@ function computeZonedDayRoundFrac(
   )
 }
 
-// Rounding Time-based Units
+// Date and time rounding
 // -----------------------------------------------------------------------------
+// These structured operations apply fixed nanosecond increments to wall time.
 
 export function roundDateTimeToNano(
   isoDateTime: CalendarDateTimeFields,
@@ -253,6 +370,10 @@ export function roundToMinute(offsetNano: number): number {
   return roundNumberToInc(offsetNano, nanoInMinute, RoundingModeEnum.HalfExpand)
 }
 
+// Numeric rounding primitives
+// -----------------------------------------------------------------------------
+// These are the lowest-level increment and rounding-mode operations.
+
 export function computeNanoInc(
   smallestUnit: DayTimeUnit,
   roundingInc: number,
@@ -267,123 +388,6 @@ export function computeBigNanoInc(
   return BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
 }
 
-// Interval / Floor Funcs
-// -----------------------------------------------------------------------------
-
-export type IsoDateTimeInterval = [
-  CalendarDateTimeFields,
-  CalendarDateTimeFields,
-]
-
-// for date-times
-// to convert date -> date-time, merge the date fields with timeFieldDefaults.
-export function computeDayFloor(
-  slots: CalendarDateTimeFields,
-): CalendarDateTimeFields {
-  return combineDateAndTime(slots, timeFieldDefaults)
-}
-
-// Duration
-// -----------------------------------------------------------------------------
-
-/*
-No rebalancing to units larger than days!
-Returns partial result, to be merged with other duration fields
-*/
-export function roundDayTimeDurationByInc(
-  durationFields: DurationFields,
-  nanoInc: number,
-  roundingMode: RoundingModeEnum,
-): Partial<DurationFields> {
-  // force <= Day
-  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day)
-  const bigNano = durationDayTimeToBigNano(durationFields)
-  const roundedBigNano = roundBigNanoToInc(
-    bigNano,
-    BigInt(nanoInc),
-    roundingMode,
-  )
-  return nanoToDurationDayTimeFields(roundedBigNano, maxUnit)
-}
-
-/*
-No rebalancing to units larger than days!
-Returns ALL duration fields, some zeroed out
-*/
-export function roundDayTimeDuration(
-  durationFields: DurationFields,
-  largestUnit: DayTimeUnit,
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): DurationFields {
-  const bigNano = durationDayTimeToBigNano(durationFields)
-  const roundedBigNano = roundBigNanoToInc(
-    bigNano,
-    computeBigNanoInc(smallestUnit, roundingInc),
-    roundingMode,
-  )
-  return {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(roundedBigNano, largestUnit),
-  }
-}
-
-export function roundRelativeDuration(
-  durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
-  endEpochNano: bigint,
-  largestUnit: Unit,
-  smallestUnit: Unit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-  relativeOps: RelativeOps,
-  isZoned?: boolean, // days are non-uniform, so sub-day rounding needs the zone
-): DurationFields {
-  if (smallestUnit === Unit.Nanosecond && roundingInc === 1) {
-    return durationFields
-  }
-
-  // Most zero durations are short-circuited by callers. Zoned sub-day rounding
-  // can intentionally reach here for a blank duration because the next-day
-  // boundary is observable through the time-zone protocol, so use the positive
-  // direction as the spec-default tie direction.
-  const sign = (computeDurationSign(durationFields) || 1) as NumberSign
-  const nudgeFunc = (
-    !isUniformUnit(smallestUnit, isZoned)
-      ? nudgeRelativeDuration
-      : isZoned && smallestUnit < Unit.Day && largestUnit >= Unit.Day
-        ? nudgeZonedTimeDuration
-        : nudgeDayTimeDuration
-  ) as typeof nudgeRelativeDuration // most general
-
-  let [roundedDurationFields, roundedEpochNano, grewBigUnit] = nudgeFunc(
-    sign,
-    durationFields,
-    endEpochNano,
-    largestUnit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    relativeOps,
-  )
-
-  // grew a day/week/month/year?
-  if (grewBigUnit && smallestUnit !== Unit.Week) {
-    roundedDurationFields = bubbleRelativeDuration(
-      roundedDurationFields,
-      roundedEpochNano,
-      largestUnit,
-      Math.max(Unit.Day, smallestUnit), // force to Day or larger
-      sign,
-      relativeOps,
-    )
-  }
-
-  return roundedDurationFields
-}
-
-// Rounding Numbers
-// -----------------------------------------------------------------------------
 /*
   NOTE: these functions accept an "inc" that can be derived with
     computeNanoInc
@@ -472,8 +476,9 @@ export function roundWithMode(
   return roundingModeFuncs[roundingMode](num)
 }
 
-// Nudge
+// Relative-duration rounding algorithms
 // -----------------------------------------------------------------------------
+// These private strategies nudge within a unit window and bubble overflow upward.
 /*
 These functions actually do the heavy-lifting of rounding to a higher/lower marker,
 and return the (day) delta. Also return the (potentially) unbalanced new duration.
@@ -638,10 +643,6 @@ function nudgeRelativeDuration(
     nudgeWindow.shifted || roundedToEnd, // guaranteed big unit because of big smallestUnit
   ]
 }
-
-// Bubbling
-// (for when larger units might bubble up)
-// -----------------------------------------------------------------------------
 
 function bubbleRelativeDuration(
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)

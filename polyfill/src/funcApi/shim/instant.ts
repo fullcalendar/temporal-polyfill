@@ -5,6 +5,12 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffInstants } from '../../apiHelpers/dateTimeDiff'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
+import {
+  adaptRecordTimeUnitDiff,
+  diffInstantEpochNanoTimeUnit,
+} from '../../apiHelpers/unitDiff'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -19,7 +25,6 @@ import {
   epochNanoToInstant,
   instantToZonedDateTime,
 } from '../../internal/convert'
-import { diffInstants } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
@@ -28,7 +33,7 @@ import {
   formatInstantIsoAuto,
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
-import { moveEpochNano } from '../../internal/move'
+import { moveEpochNano, moveEpochNanoByNano } from '../../internal/move'
 import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
@@ -51,15 +56,11 @@ import type * as RecordTypes from '../recordTypes'
 import { getInstantSlots, setInstantSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  adaptRecordTimeUnitDiff,
-  diffInstantEpochNanoTimeUnit,
-} from './diffUtils'
-import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import { refineRoundToOptions } from './roundUtils'
+
 import {
   ShimZonedDateTimeRecord,
   createShimZonedDateTimeRecord,
@@ -265,7 +266,7 @@ function moveByNanoseconds(
 ): ShimInstantRecord {
   const slots = getShimInstantSlots(record)
   const resSlots = createEpochNanoSlots(
-    checkEpochNanoInBounds(slots.epochNanoseconds + nanoseconds),
+    moveEpochNanoByNano(slots.epochNanoseconds, nanoseconds),
   )
   return createShimInstantRecord(resSlots)
 }

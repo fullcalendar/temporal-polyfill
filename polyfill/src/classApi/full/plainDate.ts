@@ -6,6 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffPlainDates } from '../../apiHelpers/dateTimeDiff'
+import { withPlainDateFields } from '../../apiHelpers/fieldUpdate'
 import {
   dateDerivedGetters,
   dateFieldGetters,
@@ -20,7 +22,6 @@ import {
   zonedDateTimeToPlainDate,
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
-import { diffPlainDates } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
@@ -37,13 +38,12 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
-import { mergePlainDateFields } from '../../internal/merge'
 import { moveDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
 import {
   CalendarArg,
@@ -128,9 +128,8 @@ export const PlainDate = defineTemporalClass(
       mod: Partial<DateFields>,
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDate {
-      const slots = getPlainDateSlots(this)
       return createPlainDate(
-        mergePlainDateFields(slots, validateBag(mod), options),
+        withPlainDateFields(getPlainDateSlots(this), validateBag(mod), options),
       )
     }
 
@@ -152,7 +151,7 @@ export const PlainDate = defineTemporalClass(
             slots.calendar,
             slots,
             toDurationSlots(durationArg),
-            options,
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -170,7 +169,7 @@ export const PlainDate = defineTemporalClass(
             slots.calendar,
             slots,
             negateDurationFields(toDurationSlots(durationArg)),
-            options,
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -185,10 +184,7 @@ export const PlainDate = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateSlots(this)
       const other = toPlainDateSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDates(false, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainDates(false, slots, other, options))
     }
 
     since(
@@ -199,10 +195,7 @@ export const PlainDate = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateSlots(this)
       const other = toPlainDateSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDates(true, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainDates(true, slots, other, options))
     }
 
     equals(otherArg: PlainDateArg): boolean {
@@ -224,13 +217,13 @@ export const PlainDate = defineTemporalClass(
             plainTime: (options as { plainTime?: PlainTimeArg }).plainTime,
           }
 
+      const slots = getPlainDateSlots(this)
+      const timeZoneId = refineTimeZoneArg(optionsObj.timeZone)
+      const plainTimeArg = optionsObj.plainTime
+      const timeFields =
+        plainTimeArg !== undefined ? toPlainTimeSlots(plainTimeArg) : undefined
       return createZonedDateTime(
-        plainDateToZonedDateTime(
-          refineTimeZoneArg,
-          toPlainTimeSlots,
-          getPlainDateSlots(this),
-          optionsObj,
-        ),
+        plainDateToZonedDateTime(slots, queryTimeZone(timeZoneId), timeFields),
       )
     }
 

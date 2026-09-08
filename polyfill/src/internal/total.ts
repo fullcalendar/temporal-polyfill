@@ -1,6 +1,6 @@
 import { divideBigNanoToExactNumber } from './bigNano'
+import { type CalendarImpl } from './calendarImpl'
 import {
-  DurationFieldName,
   DurationFields,
   clearDurationFields,
   durationFieldNamesAsc,
@@ -11,23 +11,29 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { CalendarDateFields } from './fieldTypes'
+import { moveToStartOfMonth } from './move'
 import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   RelativeOps,
   RelativeToSlots,
+  ZonedEpochMarker,
+  clampRelativeDuration,
   isUniformUnit,
   isZonedEpochSlots,
-  moveRelativeToEpochNano,
+  spanPlainIsoRelativeDuration,
+  spanPlainRelativeDuration,
   spanRelativeDuration,
+  spanZonedIsoRelativeDuration,
+  spanZonedRelativeDuration,
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
-import {
-  NumberSign,
-  compareBigInts,
-  fabricateNearHalfFraction,
-  throwRangeError,
-} from './utils'
+import { NumberSign, throwRangeError } from './utils'
+
+// Option-refining total entry point
+// -----------------------------------------------------------------------------
+// This highest layer reads public options before selecting a total strategy.
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -78,6 +84,93 @@ export function totalDuration<RA>(
   )
 }
 
+// Pre-refined relative total entry points
+// -----------------------------------------------------------------------------
+// These flavor-specific compositions assume the total unit is already parsed.
+
+export function totalPlainCalendarDuration(
+  durationFields: DurationFields,
+  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
+  totalUnit: Unit,
+): number {
+  const [balancedDuration, endEpochNano, relativeOps] =
+    spanPlainRelativeDuration(relativeToSlots, durationFields, totalUnit)
+
+  return totalRelativeDuration(
+    balancedDuration,
+    endEpochNano,
+    totalUnit,
+    relativeOps,
+  )
+}
+
+export function totalZonedCalendarDuration(
+  durationFields: DurationFields,
+  relativeToSlots: ZonedEpochMarker,
+  totalUnit: Unit,
+): number {
+  const [balancedDuration, endEpochNano, relativeOps] =
+    spanZonedRelativeDuration(relativeToSlots, durationFields, totalUnit)
+
+  return totalRelativeDuration(
+    balancedDuration,
+    endEpochNano,
+    totalUnit,
+    relativeOps,
+  )
+}
+
+// PlainYearMonth arithmetic uses the first day as its reference date even when
+// the stored ISO reference day differs.
+export function totalPlainYearMonthDuration(
+  durationFields: DurationFields,
+  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
+  totalUnit: Unit.Year | Unit.Month,
+): number {
+  const { calendar } = relativeToSlots
+  return totalPlainCalendarDuration(
+    durationFields,
+    { ...moveToStartOfMonth(calendar, relativeToSlots), calendar },
+    totalUnit,
+  )
+}
+
+export function totalPlainIsoDuration(
+  durationFields: DurationFields,
+  relativeToFields: CalendarDateFields,
+  totalUnit: Unit.Day | Unit.Week,
+): number {
+  const [balancedDuration, endEpochNano, relativeOps] =
+    spanPlainIsoRelativeDuration(relativeToFields, durationFields, totalUnit)
+
+  return totalRelativeDuration(
+    balancedDuration,
+    endEpochNano,
+    totalUnit,
+    relativeOps,
+  )
+}
+
+export function totalZonedIsoDuration(
+  durationFields: DurationFields,
+  relativeToSlots: ZonedEpochMarker,
+  totalUnit: Unit.Day | Unit.Week,
+): number {
+  const [balancedDuration, endEpochNano, relativeOps] =
+    spanZonedIsoRelativeDuration(relativeToSlots, durationFields, totalUnit)
+
+  return totalRelativeDuration(
+    balancedDuration,
+    endEpochNano,
+    totalUnit,
+    relativeOps,
+  )
+}
+
+// Totaling cores
+// -----------------------------------------------------------------------------
+// These lower-level operations total either a relative interval or uniform time.
+
 export function totalRelativeDuration(
   durationFields: DurationFields,
   endEpochNano: bigint,
@@ -113,122 +206,4 @@ export function totalDayTimeDuration(
     durationDayTimeToBigNano(durationFields),
     unitNanoMap[totalUnit],
   )
-}
-
-// Utils for points-within-intervals
-// -----------------------------------------------------------------------------
-
-export function clampRelativeDuration(
-  durationFields: DurationFields,
-  clampUnit: Unit, // always >=Day
-  clampDistance: number,
-  relativeOps: RelativeOps,
-  epochNanoProgress?: bigint,
-) {
-  const unitName = durationFieldNamesAsc[clampUnit]
-  let startDurationFields = durationFields
-  let shifted = false
-  let window = computeRelativeDurationWindow(
-    startDurationFields,
-    unitName,
-    clampDistance,
-    relativeOps,
-  )
-
-  // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
-  // that constrain, like Jan 31 -> Feb 29, the balanced duration can describe a
-  // point just beyond the first truncated window. The spec retries one window
-  // later in that case; Duration.total() uses the same operation with trunc.
-  if (
-    epochNanoProgress &&
-    !epochNanoIsWithinWindow(
-      epochNanoProgress,
-      window.epochNano0,
-      window.epochNano1,
-      Math.sign(clampDistance),
-    )
-  ) {
-    startDurationFields = {
-      ...durationFields,
-      [unitName]: durationFields[unitName] + clampDistance,
-    }
-    shifted = true
-    window = computeRelativeDurationWindow(
-      startDurationFields,
-      unitName,
-      clampDistance,
-      relativeOps,
-    )
-  }
-
-  return {
-    ...window,
-    startDurationFields,
-    shifted,
-  }
-}
-
-function computeRelativeDurationWindow(
-  startDurationFields: DurationFields,
-  unitName: DurationFieldName,
-  clampDistance: number,
-  relativeOps: RelativeOps,
-) {
-  const endDurationFields = {
-    ...startDurationFields,
-    [unitName]: startDurationFields[unitName] + clampDistance,
-  }
-
-  const epochNano0 = moveRelativeToEpochNano(relativeOps, startDurationFields)
-  const epochNano1 = moveRelativeToEpochNano(relativeOps, endDurationFields)
-  return { epochNano0, epochNano1, endDurationFields }
-}
-
-function epochNanoIsWithinWindow(
-  epochNanoProgress: bigint,
-  epochNano0: bigint,
-  epochNano1: bigint,
-  sign: number,
-): boolean {
-  if (sign > 0) {
-    return (
-      compareBigInts(epochNano0, epochNanoProgress) <= 0 &&
-      compareBigInts(epochNanoProgress, epochNano1) <= 0
-    )
-  }
-
-  return (
-    compareBigInts(epochNano1, epochNanoProgress) <= 0 &&
-    compareBigInts(epochNanoProgress, epochNano0) <= 0
-  )
-}
-
-export function computeEpochNanoFrac(
-  epochNanoProgress: bigint,
-  epochNano0: bigint,
-  epochNano1: bigint,
-): number {
-  const denomBig = epochNano1 - epochNano0
-  const numeratorBig = epochNanoProgress - epochNano0
-  if (!numeratorBig) {
-    return 0
-  }
-
-  const absNumerator = numeratorBig < 0n ? -numeratorBig : numeratorBig
-  const absDenom = denomBig < 0n ? -denomBig : denomBig
-  const fracSign =
-    compareBigInts(numeratorBig, 0n) === compareBigInts(denomBig, 0n) ? 1 : -1
-
-  if (compareBigInts(absNumerator, absDenom) <= 0) {
-    if (absNumerator === absDenom) {
-      return fracSign
-    }
-
-    return fabricateNearHalfFraction(
-      compareBigInts(absNumerator * 2n, absDenom),
-      fracSign,
-    )
-  }
-
-  return Number(numeratorBig) / Number(denomBig)
 }

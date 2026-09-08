@@ -6,12 +6,13 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffPlainTimes } from '../../apiHelpers/dateTimeDiff'
+import { withPlainTimeFields } from '../../apiHelpers/fieldUpdate'
 import { timeGetters } from '../../apiHelpers/shimMixins'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { zonedDateTimeToPlainTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { TimeFields } from '../../internal/fieldTypes'
 import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
@@ -19,7 +20,6 @@ import { transformTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
-import { mergePlainTimeFields } from '../../internal/merge'
 import { moveTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
@@ -87,11 +87,7 @@ export const PlainTime = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainTime {
       return createPlainTime(
-        mergePlainTimeFields(
-          getPlainTimeSlots(this),
-          validateBag(mod),
-          options,
-        ),
+        withPlainTimeFields(getPlainTimeSlots(this), validateBag(mod), options),
       )
     }
 

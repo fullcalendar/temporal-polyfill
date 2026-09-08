@@ -2,36 +2,18 @@ import {
   requireString,
   toIntegerWithTrunc,
   toPositiveIntegerWithTruncation,
+  toPrimitiveWithStringHint,
   toStrictInteger,
-  toStringViaPrimitive,
+  toString,
 } from './cast'
 import { durationFieldNamesAsc } from './durationFields'
 import * as errorMessages from './errorMessages'
 import { timeFieldNamesAsc } from './fieldNames'
 import { parseOffsetNano } from './offsetParse'
-import { Overflow } from './optionsModel'
 import { throwTypeError, zipPropsConst } from './utils'
 
-export type DateOptionsTuple = [overflow: Overflow, ...extraOptions: unknown[]]
-export type DateOptionsRefiner<T extends DateOptionsTuple> = () => T
 type FieldRefiner = (fieldVal: any, fieldName: string) => unknown
 export type FieldRefinerMap = Record<string, FieldRefiner | undefined>
-
-function coerceMonthCodeString(monthCode: unknown, entityName: string): string {
-  if (typeof monthCode === 'string') {
-    return monthCode
-  }
-
-  if (monthCode && typeof monthCode === 'object') {
-    const monthCodeToString = monthCode.toString
-
-    if (typeof monthCodeToString === 'function') {
-      return requireString(monthCodeToString.call(monthCode), entityName)
-    }
-  }
-
-  return requireString(monthCode as string, entityName)
-}
 
 // These maps define the first, property-by-property refinement pass over user
 // bags. A refiner may only coerce the observable public type, or it may also
@@ -39,16 +21,21 @@ function coerceMonthCodeString(monthCode: unknown, entityName: string): string {
 // Calendar-sensitive validation stays in bagFromFields.ts because its exact
 // position relative to option reads is observable by test262.
 export const dateFieldRefiners = {
-  era: toStringViaPrimitive,
+  era: toString,
   // `year` and `eraYear` are intentionally absent. resolveCalendarYear()
   // coerces them
   // after required-field checks and monthCode syntax parsing, preserving the
   // observable error order required by the from-fields algorithms.
   month: toPositiveIntegerWithTruncation,
   // The monthCode refiner only validates type. Range validation is deferred to
-  // createPlainDateFromFields/createPlainYearMonthFromFields/createPlainMonthDayFromFields so missing-field
+  // the refinePlain*Fields functions so missing-field
   // TypeError precedes invalid-monthCode RangeError.
-  monthCode: coerceMonthCodeString,
+  monthCode(monthCode: unknown, fieldName: string) {
+    return requireString(
+      toPrimitiveWithStringHint(monthCode) as string,
+      fieldName,
+    )
+  },
   day: toPositiveIntegerWithTruncation,
 }
 
@@ -69,7 +56,7 @@ export const dateTimeFieldRefiners = {
 
 export const zonedDateTimeFieldRefiners = {
   offset(offsetString: unknown) {
-    const s = toStringViaPrimitive(offsetString as string)
+    const s = requireString(toPrimitiveWithStringHint(offsetString) as string)
     // The public field is named "offset" and is supplied as a string, but after
     // this first bag phase the internal field value is offset nanoseconds. This
     // keeps the observable string coercion here and avoids later reparsing.

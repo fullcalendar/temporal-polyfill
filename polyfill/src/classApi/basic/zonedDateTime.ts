@@ -6,6 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffZonedDateTimes } from '../../apiHelpers/dateTimeDiff'
+import { withZonedDateTimeFields } from '../../apiHelpers/fieldUpdate'
 import {
   dateDerivedGetters,
   dateFieldGetters,
@@ -24,7 +26,6 @@ import {
   zonedDateTimeToPlainTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffZonedDateTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import {
   DateTimeFields,
@@ -41,18 +42,21 @@ import {
   formatZonedDateTimeIso,
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
-import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedEpochSlots } from '../../internal/move'
-import { refineZonedFieldOptions } from '../../internal/optionsFieldRefine'
+import {
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
+import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
 import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
   roundZonedEpochSlotsToUnit,
 } from '../../internal/round'
-import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
+import { getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,
@@ -63,10 +67,7 @@ import {
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
-import {
-  getTimeZoneTransitionEpochNanoseconds,
-  zonedEpochSlotsToIso,
-} from '../../internal/timeZoneMath'
+import { zonedEpochSlotsToIso } from '../../internal/timeZoneMath'
 import { DayTimeUnit } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
 import {
@@ -169,7 +170,7 @@ export const ZonedDateTime = defineTemporalClass(
       options: Temporal.ZonedDateTimeFromOptions | undefined = undefined,
     ): ZonedDateTime {
       return createZonedDateTime(
-        mergeZonedDateTimeFields(
+        withZonedDateTimeFields(
           getZonedDateTimeSlots(this),
           validateBag(mod),
           options,
@@ -208,7 +209,11 @@ export const ZonedDateTime = defineTemporalClass(
     ): ZonedDateTime {
       const slots = getZonedDateTimeSlots(this)
       return createZonedDateTime(
-        moveZonedEpochSlots(slots, toDurationSlots(durationArg), options),
+        moveZonedEpochSlots(
+          slots,
+          toDurationSlots(durationArg),
+          refineOverflowOptions(options),
+        ),
       )
     }
 
@@ -221,7 +226,7 @@ export const ZonedDateTime = defineTemporalClass(
         moveZonedEpochSlots(
           slots,
           negateDurationFields(toDurationSlots(durationArg)),
-          options,
+          refineOverflowOptions(options),
         ),
       )
     }
@@ -236,11 +241,8 @@ export const ZonedDateTime = defineTemporalClass(
     ): Duration {
       const slots = getZonedDateTimeSlots(this)
       const other = toZonedDateTimeSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
       return createDuration(
-        createDurationSlots(
-          diffZonedDateTimes(false, calendar, slots, other, options),
-        ),
+        createDurationSlots(diffZonedDateTimes(false, slots, other, options)),
       )
     }
 
@@ -254,11 +256,8 @@ export const ZonedDateTime = defineTemporalClass(
     ): Duration {
       const slots = getZonedDateTimeSlots(this)
       const other = toZonedDateTimeSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
       return createDuration(
-        createDurationSlots(
-          diffZonedDateTimes(true, calendar, slots, other, options),
-        ),
+        createDurationSlots(diffZonedDateTimes(true, slots, other, options)),
       )
     }
 
@@ -348,7 +347,10 @@ export const ZonedDateTime = defineTemporalClass(
         | Temporal.TransitionOptions['direction'],
     ): ZonedDateTime | null {
       const slots = getZonedDateTimeSlots(this)
-      const newEpochNano = getTimeZoneTransitionEpochNanoseconds(slots, options)
+      const newEpochNano = slots.timeZone.getTransition(
+        slots.epochNanoseconds,
+        refineDirectionOptions(options),
+      )
 
       // Epoch zero is a valid transition; only undefined means no transition.
       if (newEpochNano !== undefined) {

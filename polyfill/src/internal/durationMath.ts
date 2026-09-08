@@ -8,6 +8,7 @@ import {
   bigNanoInUtcDay,
 } from './bigNano'
 import {
+  DurationCalendarFieldName,
   DurationFields,
   DurationTimeFields,
   durationCalendarFieldNamesAsc,
@@ -230,13 +231,7 @@ export function computeDurationSign(
 
 export function validateDurationFields(fields: DurationFields): DurationFields {
   for (const calendarUnit of durationCalendarFieldNamesAsc) {
-    clampEntity(
-      calendarUnit,
-      fields[calendarUnit],
-      -maxCalendarUnit,
-      maxCalendarUnit,
-      Overflow.Reject,
-    )
+    validateDurationCalendarUnit(calendarUnit, fields[calendarUnit])
   }
 
   // Duration time values may exceed MAX_SAFE_INTEGER only as a fractional
@@ -245,6 +240,20 @@ export function validateDurationFields(fields: DurationFields): DurationFields {
   validateDurationTimeUnit(Number(bigNano / bigNanoInSec))
 
   return fields
+}
+
+// Fixed-unit APIs use this without constructing a complete Duration record.
+export function validateDurationCalendarUnit(
+  unit: DurationCalendarFieldName,
+  value: number,
+): number {
+  return clampEntity(
+    unit,
+    value,
+    -maxCalendarUnit,
+    maxCalendarUnit,
+    Overflow.Reject,
+  )
 }
 
 export function validateDurationTimeUnit(n: number): void {

@@ -4,6 +4,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { withPlainMonthDayFields } from '../../apiHelpers/fieldUpdate'
 import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
@@ -31,7 +32,6 @@ import {
   formatPlainMonthDayIso,
 } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
-import { mergePlainMonthDayFields } from '../../internal/merge'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { DateTimeFormatLike } from '../commonTypes'
@@ -142,8 +142,11 @@ export function withFields(
   mod: Partial<MonthDayFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
-  const slots = getShimPlainMonthDaySlots(record)
-  const resSlots = mergePlainMonthDayFields(slots, validateBag(mod), options)
+  const resSlots = withPlainMonthDayFields(
+    getShimPlainMonthDaySlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimPlainMonthDayRecord(resSlots)
 }
 

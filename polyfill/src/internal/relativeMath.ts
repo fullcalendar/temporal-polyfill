@@ -1,17 +1,36 @@
+import { bigNanoInUtcDay } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
-import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
-import { DurationFields } from './durationFields'
-import { durationHasDateParts } from './durationMath'
+import {
+  diffDateTimesExact,
+  diffIsoDates,
+  diffIsoEpochs,
+  diffZonedDateParts,
+  diffZonedEpochsExact,
+} from './diff'
+import {
+  DurationFieldName,
+  DurationFields,
+  durationFieldNamesAsc,
+} from './durationFields'
+import { durationHasDateParts, durationTimeToBigNano } from './durationMath'
 import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { moveDate, moveDateTime, moveZonedEpochSlots } from './move'
+import {
+  moveDate,
+  moveDateTime,
+  moveDateTimeByNano,
+  moveEpochNanoByNano,
+  moveIsoDurationDate,
+  moveZonedEpochSlots,
+} from './move'
 import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
+import { compareBigInts, fabricateNearHalfFraction } from './utils'
 
 // the relative-to "origin"
 export type RelativeToSlots =
@@ -24,32 +43,31 @@ export type MovedDateToEpochNano = (movedIsoDate: CalendarDateFields) => bigint
 
 // Relative Ops
 // -----------------------------------------------------------------------------
+// These adapters configure the movement and epoch-conversion mechanics used by
+// the generic relative rounding and totaling layers.
 
 /*
 Everything the relative (calendar-aware) rounding core needs in order to probe
 the epoch-nanosecond boundaries of a calendar unit.
 
-Modeled on the spec, where RoundRelativeDuration and TotalRelativeDuration take
-a concrete (isoDateTime, timeZone, calendar) triple rather than a set of
-injected marker operations. Two differences from the spec's shape:
+The origin's epoch is stored directly, and the caller supplies two operations:
 
-- The origin is only its DATE part. Every probe adds whole calendar units, so
-  the origin's wall-clock time never varies and does not need to be carried
-  through the core.
-- That time, along with the time zone, is closed over by the one operation that
-  differs between flavors: turning a moved ISO date back into
-  epoch-nanoseconds. Injecting it keeps the rounding core free of any static
-  reference to time-zone or time-field machinery, so a funcApi build that only
-  touches plain dates tree-shakes both away.
+- Date movement closes over the origin's ISO date and chooses calendar arithmetic
+  for year/month operations or ISO movement for fixed day/week helpers. Each
+  movement retains the required intermediate date bounds check.
+- Date-to-epoch conversion closes over the origin's time and time zone only when
+  needed. Plain-date operations can retain a direct ISO date conversion.
+
+Selecting these operations keeps calendar-month and time-zone dependencies out
+of fixed helpers that do not need them.
 
 Zoned-ness is deliberately NOT recorded here. Nothing about probing needs it;
 it only selects a rounding strategy, so it travels as an argument to
 roundRelativeDuration alongside the units it is weighed against.
 */
 export interface RelativeOps {
-  origin: CalendarDateFields
   originEpochNano: bigint
-  calendar: CalendarImpl
+  moveDate: (duration: DurationFields) => CalendarDateFields
   movedDateToEpochNano: MovedDateToEpochNano
 }
 
@@ -61,9 +79,8 @@ export function createDateRelativeOps(
   origin: CalendarDateFields,
 ): RelativeOps {
   return {
-    origin,
     originEpochNano: isoDateToEpochNano(origin),
-    calendar,
+    moveDate: (duration) => moveDate(calendar, origin, duration),
     movedDateToEpochNano: isoDateToEpochNano,
   }
 }
@@ -74,9 +91,17 @@ export function createDateTimeRelativeOps(
   origin: CalendarDateTimeFields,
 ): RelativeOps {
   return {
-    origin,
     originEpochNano: isoDateTimeToEpochNano(origin),
-    calendar,
+    moveDate: (duration) => moveDate(calendar, origin, duration),
+    movedDateToEpochNano: (movedIsoDate) =>
+      isoDateTimeToEpochNano(combineDateAndTime(movedIsoDate, origin)),
+  }
+}
+
+export function createPlainIsoOps(origin: CalendarDateTimeFields): RelativeOps {
+  return {
+    originEpochNano: isoDateTimeToEpochNano(origin),
+    moveDate: (duration) => moveIsoDurationDate(origin, duration),
     movedDateToEpochNano: (movedIsoDate) =>
       isoDateTimeToEpochNano(combineDateAndTime(movedIsoDate, origin)),
   }
@@ -91,47 +116,34 @@ export function createZonedRelativeOps(
   const origin = zonedEpochSlotsToIso(slots)
 
   return {
-    origin,
-
     // NOT re-derived from the origin above. When the origin's wall-clock time
     // is ambiguous or skipped, converting it back would land on a different
     // instant than the one the ZonedDateTime actually holds.
     originEpochNano: slots.epochNanoseconds,
 
-    calendar,
+    moveDate: (duration) => moveDate(calendar, origin, duration),
     movedDateToEpochNano: (movedIsoDate) =>
       getSingleInstantFor(timeZone, combineDateAndTime(movedIsoDate, origin)),
   }
 }
 
-/*
-Moves the origin by a DATE-ONLY duration and returns epoch-nanoseconds.
-
-This is the spec's window/threshold math: add through CalendarDateAdd on the ISO
-date, re-attach the origin's wall-clock time, then convert. The only range check
-is the date-level one inside moveDate, which probes the date at noon and so
-admits the extra ISO day at each edge. No date-time check applies here, which is
-what lets a bubbling threshold sit outside the representable date-time range
-while still rejecting a genuinely out-of-range calendar date.
-*/
-export function moveRelativeToEpochNano(
-  relativeOps: RelativeOps,
-  dateDuration: DurationFields,
-): bigint {
-  // A zero-length move reuses the origin's own epoch-nanoseconds rather than
-  // round-tripping the wall-clock origin, which would distort the window across
-  // a time-zone transition. Mirrors ComputeNudgeWindow's same-as-origin case.
-  if (!durationHasDateParts(dateDuration)) {
-    return relativeOps.originEpochNano
+export function createZonedIsoOps(slots: ZonedEpochNanoFields): RelativeOps {
+  const origin = zonedEpochSlotsToIso(slots)
+  return {
+    originEpochNano: slots.epochNanoseconds,
+    moveDate: (duration) => moveIsoDurationDate(origin, duration),
+    movedDateToEpochNano: (movedIsoDate) =>
+      getSingleInstantFor(
+        slots.timeZone,
+        combineDateAndTime(movedIsoDate, origin),
+      ),
   }
-
-  return relativeOps.movedDateToEpochNano(
-    moveDate(relativeOps.calendar, relativeOps.origin, dateDuration),
-  )
 }
 
 // Duration spans
 // -----------------------------------------------------------------------------
+// Span operations construct a real duration endpoint, then balance it back
+// against its relative origin for rounding or totaling.
 
 /*
 Builds the endpoint of `relativeTo + durationFields`, diffs it back against the
@@ -218,6 +230,69 @@ export function spanPlainRelativeDuration(
   ]
 }
 
+// ISO day/week spans avoid retaining calendar month/year movement while
+// preserving the same midnight anchor and endpoint range checks.
+export function spanPlainIsoRelativeDuration(
+  relativeToFields: CalendarDateFields,
+  durationFields: DurationFields,
+  largestUnit: Unit.Day | Unit.Week,
+): [DurationFields, bigint, RelativeOps] {
+  const origin = checkIsoDateTimeInBounds(
+    combineDateAndTime(relativeToFields, timeFieldDefaults),
+  )
+  const end = moveDateTimeByNano(
+    origin,
+    BigInt(durationFields.weeks * 7 + durationFields.days) * bigNanoInUtcDay +
+      durationTimeToBigNano(durationFields),
+  )
+  const endEpochNano = isoDateTimeToEpochNano(end)
+
+  return [
+    diffIsoEpochs(largestUnit, isoDateTimeToEpochNano(origin), endEpochNano),
+    endEpochNano,
+    createPlainIsoOps(origin),
+  ]
+}
+
+// ISO day/week spans reconstruct the endpoint without retaining general
+// calendar movement, while preserving zoned ambiguity and bounds behavior.
+export function spanZonedIsoRelativeDuration(
+  relativeToSlots: ZonedEpochMarker,
+  durationFields: DurationFields,
+  largestUnit: Unit.Day | Unit.Week,
+): [DurationFields, bigint, RelativeOps] {
+  const { timeZone } = relativeToSlots
+  const diffDate = (start: CalendarDateFields, end: CalendarDateFields) =>
+    diffIsoDates(largestUnit === Unit.Week, start, end)
+  let epochNanoseconds = relativeToSlots.epochNanoseconds
+
+  if (durationFields.weeks || durationFields.days) {
+    const origin = zonedEpochSlotsToIso(relativeToSlots)
+    epochNanoseconds = getSingleInstantFor(
+      timeZone,
+      combineDateAndTime(moveIsoDurationDate(origin, durationFields), origin),
+    )
+  }
+
+  const endSlots = {
+    ...relativeToSlots,
+    epochNanoseconds: moveEpochNanoByNano(
+      epochNanoseconds,
+      durationTimeToBigNano(durationFields),
+    ),
+  }
+
+  return [
+    diffZonedDateParts(timeZone, relativeToSlots, endSlots, diffDate),
+    endSlots.epochNanoseconds,
+    createZonedIsoOps(relativeToSlots),
+  ]
+}
+
+// Relative endpoint movement
+// -----------------------------------------------------------------------------
+// This entry point constructs the actual endpoint of a supplied duration.
+
 /*
 Moves relativeTo by a duration and returns only the resulting instant. Used by
 Duration::compare, which never needs the endpoint as a date-time.
@@ -239,8 +314,156 @@ export function moveRelativeEndpointToEpochNano(
   )
 }
 
-// Utils
+// Relative marker movement
 // -----------------------------------------------------------------------------
+// Marker movement probes unit boundaries without constructing a public result.
+
+/*
+Moves the origin by a DATE-ONLY duration to probe a rounding or totaling marker.
+Unlike moveRelativeEndpointToEpochNano, this does not construct the duration's
+actual endpoint.
+
+This is the spec's window/threshold math: add through CalendarDateAdd on the ISO
+date, re-attach the origin's wall-clock time, then convert. The only range check
+is the date-level one inside moveDate, which probes the date at noon and so
+admits the extra ISO day at each edge.
+*/
+export function moveRelativeToEpochNano(
+  relativeOps: RelativeOps,
+  dateDuration: DurationFields,
+): bigint {
+  // A zero-length move reuses the origin's own epoch-nanoseconds rather than
+  // round-tripping the wall-clock origin, which would distort the window across
+  // a time-zone transition. Mirrors ComputeNudgeWindow's same-as-origin case.
+  if (!durationHasDateParts(dateDuration)) {
+    return relativeOps.originEpochNano
+  }
+
+  return relativeOps.movedDateToEpochNano(relativeOps.moveDate(dateDuration))
+}
+
+// Relative interval windows
+// -----------------------------------------------------------------------------
+// Window mechanics position an epoch within adjacent relative-unit boundaries.
+
+export function clampRelativeDuration(
+  durationFields: DurationFields,
+  clampUnit: Unit,
+  clampDistance: number,
+  relativeOps: RelativeOps,
+  epochNanoProgress?: bigint,
+) {
+  const unitName = durationFieldNamesAsc[clampUnit]
+  let startDurationFields = durationFields
+  let shifted = false
+  let window = computeRelativeDurationWindow(
+    startDurationFields,
+    unitName,
+    clampDistance,
+    relativeOps,
+  )
+
+  // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
+  // that constrain, like Jan 31 -> Feb 29, the balanced duration can describe a
+  // point just beyond the first truncated window. The spec retries one window
+  // later in that case; Duration.total() uses the same operation with trunc.
+  if (
+    epochNanoProgress &&
+    !epochNanoIsWithinWindow(
+      epochNanoProgress,
+      window.epochNano0,
+      window.epochNano1,
+      Math.sign(clampDistance),
+    )
+  ) {
+    startDurationFields = {
+      ...durationFields,
+      [unitName]: durationFields[unitName] + clampDistance,
+    }
+    shifted = true
+    window = computeRelativeDurationWindow(
+      startDurationFields,
+      unitName,
+      clampDistance,
+      relativeOps,
+    )
+  }
+
+  return {
+    ...window,
+    startDurationFields,
+    shifted,
+  }
+}
+
+function computeRelativeDurationWindow(
+  startDurationFields: DurationFields,
+  unitName: DurationFieldName,
+  clampDistance: number,
+  relativeOps: RelativeOps,
+) {
+  const endDurationFields = {
+    ...startDurationFields,
+    [unitName]: startDurationFields[unitName] + clampDistance,
+  }
+
+  const epochNano0 = moveRelativeToEpochNano(relativeOps, startDurationFields)
+  const epochNano1 = moveRelativeToEpochNano(relativeOps, endDurationFields)
+  return { epochNano0, epochNano1, endDurationFields }
+}
+
+function epochNanoIsWithinWindow(
+  epochNanoProgress: bigint,
+  epochNano0: bigint,
+  epochNano1: bigint,
+  sign: number,
+): boolean {
+  if (sign > 0) {
+    return (
+      compareBigInts(epochNano0, epochNanoProgress) <= 0 &&
+      compareBigInts(epochNanoProgress, epochNano1) <= 0
+    )
+  }
+
+  return (
+    compareBigInts(epochNano1, epochNanoProgress) <= 0 &&
+    compareBigInts(epochNanoProgress, epochNano0) <= 0
+  )
+}
+
+export function computeEpochNanoFrac(
+  epochNanoProgress: bigint,
+  epochNano0: bigint,
+  epochNano1: bigint,
+): number {
+  const denomBig = epochNano1 - epochNano0
+  const numeratorBig = epochNanoProgress - epochNano0
+  if (!numeratorBig) {
+    return 0
+  }
+
+  const absNumerator = numeratorBig < 0n ? -numeratorBig : numeratorBig
+  const absDenom = denomBig < 0n ? -denomBig : denomBig
+  const fracSign =
+    compareBigInts(numeratorBig, 0n) === compareBigInts(denomBig, 0n) ? 1 : -1
+
+  if (compareBigInts(absNumerator, absDenom) <= 0) {
+    if (absNumerator === absDenom) {
+      return fracSign
+    }
+
+    return fabricateNearHalfFraction(
+      compareBigInts(absNumerator * 2n, absDenom),
+      fracSign,
+    )
+  }
+
+  return Number(numeratorBig) / Number(denomBig)
+}
+
+// Relative-type predicates
+// -----------------------------------------------------------------------------
+// These small helpers select the appropriate relative arithmetic family.
 
 export function isZonedEpochSlots(
   slots: RelativeToSlots,

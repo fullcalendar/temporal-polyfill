@@ -1,11 +1,12 @@
 import type { Temporal } from 'temporal-spec'
-import * as TemporalUtils from 'temporal-utils'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
+import * as TemporalUtils from 'temporal-utils'
 import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
 import { dateFieldGetters, timeGetters } from '../../apiHelpers/nativeMixins'
+import { normalizeRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
@@ -13,7 +14,6 @@ import { NativeTemporal } from '../../nativeSwitch'
 import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
-import { normalizeRoundToOptions } from '../roundToUtils'
 import {
   getZonedDateTimeSlots,
   setZonedDateTimeSlots,

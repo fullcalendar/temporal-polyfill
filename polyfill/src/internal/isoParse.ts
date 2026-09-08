@@ -5,7 +5,7 @@ import {
   computeCalendarMonthCodeParts,
 } from './calendarDerived'
 import { type CalendarImpl } from './calendarImpl'
-import { requireString, toStringViaPrimitive } from './cast'
+import { requireString, toPrimitiveWithStringHint } from './cast'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { negateDurationFields, validateDurationFields } from './durationMath'
 import * as errorMessages from './errorMessages'
@@ -78,7 +78,7 @@ function throwFailedParse(s: string): never {
 export function parseInstant(s: string): EpochNanoFields {
   // instead of 'requiring' like other types,
   // coerce, because there's no fromFields, so no need to differentiate param type
-  s = toStringViaPrimitive(s)
+  s = requireString(toPrimitiveWithStringHint(s) as string)
 
   const organized = parseDateTimeLike(s)
   if (!organized) {

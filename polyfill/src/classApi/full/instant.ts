@@ -6,6 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffInstants } from '../../apiHelpers/dateTimeDiff'
 import { bigNanoInMilli } from '../../internal/bigNano'
 import { requireNumberIsInteger, toBigInt } from '../../internal/cast'
 import { compareZonedEpochSlots, instantsEqual } from '../../internal/compare'
@@ -14,7 +15,6 @@ import {
   epochNanoToInstant,
   instantToZonedDateTime,
 } from '../../internal/convert'
-import { diffInstants } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'

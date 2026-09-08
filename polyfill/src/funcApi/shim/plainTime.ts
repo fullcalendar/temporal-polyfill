@@ -5,12 +5,18 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffPlainTimes } from '../../apiHelpers/dateTimeDiff'
+import { reversedMove } from '../../apiHelpers/dateTimeMove'
+import { withPlainTimeFields } from '../../apiHelpers/fieldUpdate'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { timeGetters } from '../../apiHelpers/shimMixins'
-import { bigNanoInUtcDay } from '../../internal/bigNano'
+import {
+  adaptRecordTimeUnitDiff,
+  diffPlainTimeNanoOfDayTimeUnit,
+} from '../../apiHelpers/unitDiff'
 import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { TimeFields } from '../../internal/fieldTypes'
 import { applyPlainFormatTimeZone } from '../../internal/intlFormatArgs'
@@ -18,13 +24,10 @@ import { transformTimeOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
-import { mergePlainTimeFields } from '../../internal/merge'
-import { moveTime } from '../../internal/move'
+import { moveTime, moveTimeByNano } from '../../internal/move'
 import { computeNanoInc, roundTimeToNano } from '../../internal/round'
 import {
-  nanoToTimeAndDay,
   timeFieldsToMilli,
-  timeFieldsToNano,
   validateTimeFields,
 } from '../../internal/timeFieldMath'
 import {
@@ -43,16 +46,11 @@ import type * as RecordTypes from '../recordTypes'
 import { getPlainTimeSlots, setPlainTimeSlots } from '../temporalRecords'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  adaptRecordTimeUnitDiff,
-  diffPlainTimeNanoOfDayTimeUnit,
-} from './diffUtils'
-import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import { reversedMove } from './moveUtils'
-import { refineRoundToOptions } from './roundUtils'
+
 import { validateBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainTimeRecord>
@@ -127,8 +125,11 @@ export function withFields(
   mod: Partial<TimeFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainTimeRecord {
-  const slots = getShimPlainTimeSlots(record)
-  const resSlots = mergePlainTimeFields(slots, validateBag(mod), options)
+  const resSlots = withPlainTimeFields(
+    getShimPlainTimeSlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimPlainTimeRecord(resSlots)
 }
 
@@ -262,21 +263,8 @@ function moveByTimeUnit(
   units: number,
 ): ShimPlainTimeRecord {
   const slots = getShimPlainTimeSlots(record)
-  const movedNano =
-    BigInt(timeFieldsToNano(slots)) +
-    BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
-
-  // Like nanoToTimeAndDay's floor-mod day split, but kept in bigint space until
-  // after wrapping. These two paths should probably converge someday.
-  // PlainTime has no date component, so overflowing past midnight wraps within
-  // the ISO day and deliberately discards the day delta.
-  const wrappedNano =
-    ((movedNano % bigNanoInUtcDay) + bigNanoInUtcDay) % bigNanoInUtcDay
-
-  return createShimPlainTimeRecord(
-    // result is guaranteed exact TimeFields shape
-    nanoToTimeAndDay(Number(wrappedNano))[0],
-  )
+  const delta = BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
+  return createShimPlainTimeRecord(moveTimeByNano(slots, delta)[0])
 }
 
 export const addHours = bindArgs(moveByTimeUnit, nanoInHour)

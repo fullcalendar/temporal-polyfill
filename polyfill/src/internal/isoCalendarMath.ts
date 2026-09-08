@@ -113,7 +113,7 @@ export function computeIsoDayOfYear(isoDateFields: CalendarDateFields): number {
 
 export function computeIsoWeekFields(
   isoDateFields: CalendarDateFields,
-): CalendarWeekFields {
+): Required<CalendarWeekFields> {
   let yearOfWeek = isoDateFields.year
   // ISO week 1 is the week containing Jan 4, equivalently the week containing
   // the year's first Thursday. With Monday=1..Sunday=7, this gives the

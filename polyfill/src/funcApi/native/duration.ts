@@ -170,8 +170,6 @@ export function total(
     | DurationTotalOptions<NativeRelativeToRecord>,
 ): number {
   const native = getNativeDuration(duration)
-
-  // TODO: better pattern for this?
   if (typeof options === 'string') {
     return native.total(options)
   }
@@ -179,7 +177,6 @@ export function total(
     ...options,
     relativeTo: refineRelativeTo(options.relativeTo),
   }
-
   return native.total(refinedOptions)
 }
 

@@ -29,10 +29,8 @@ export type DurationFields = DurationDateFields & DurationTimeFields
 // -----------------------------------------------------------------------------
 
 export type DurationYearMonthFieldName = 'years' | 'months'
-export type DurationDateFieldName =
-  | DurationYearMonthFieldName
-  | 'weeks'
-  | 'days'
+export type DurationCalendarFieldName = DurationYearMonthFieldName | 'weeks'
+export type DurationDateFieldName = DurationCalendarFieldName | 'days'
 export type DurationTimeFieldName =
   | 'hours'
   | 'minutes'
@@ -60,7 +58,9 @@ export const durationTimeFieldNamesAsc = durationFieldNamesAsc.slice(
 ) as DurationTimeFieldName[]
 
 export const durationDateFieldNamesAsc = durationFieldNamesAsc.slice(Unit.Day)
-export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(1)
+export const durationCalendarFieldNamesAsc = durationDateFieldNamesAsc.slice(
+  1,
+) as DurationCalendarFieldName[]
 
 // Field Defaults
 // -----------------------------------------------------------------------------

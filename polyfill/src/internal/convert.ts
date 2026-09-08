@@ -1,4 +1,3 @@
-import type { Temporal } from 'temporal-spec'
 import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { type CalendarImpl } from './calendarImpl'
@@ -26,7 +25,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { mergeCalendarFields } from './merge'
-import { refineEpochDisambigOptions } from './optionsFieldRefine'
+import { EpochDisambig, Overflow } from './optionsModel'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,
@@ -37,9 +36,12 @@ import {
   createZonedEpochNanoSlots,
 } from './slots'
 import {
-  createPlainDateFromFields,
-  createPlainMonthDayFromFields,
-  createPlainYearMonthFromFields,
+  createPlainDateFromRefinedFields,
+  createPlainMonthDayFromRefinedFields,
+  createPlainYearMonthFromRefinedFields,
+  refinePlainDateFields,
+  refinePlainMonthDayFields,
+  refinePlainYearMonthFields,
 } from './slotsFromRefinedFields'
 import { checkEpochNanoInBounds } from './temporalLimits'
 import { TimeZone, queryTimeZone } from './timeZone'
@@ -104,12 +106,12 @@ export function zonedDateTimeToPlainTime(
 export function plainDateTimeToZonedDateTime(
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
   timeZone: TimeZone,
-  options?: Temporal.DisambiguationOptions,
+  epochDisambig: EpochDisambig,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const epochNano = getSingleInstantFor(
     timeZone,
     plainDateTimeSlots,
-    refineEpochDisambigOptions(options),
+    epochDisambig,
   )
   return createZonedEpochNanoSlots(
     checkEpochNanoInBounds(epochNano),
@@ -121,18 +123,12 @@ export function plainDateTimeToZonedDateTime(
 // PlainDate -> *
 // -----------------------------------------------------------------------------
 
-export function plainDateToZonedDateTime<PA>(
-  refineTimeZoneString: (timeZoneString: string) => string,
-  refinePlainTimeArg: (plainTimeArg: PA) => TimeFields,
+// Missing time means start of day; explicit midnight resolves as a local time.
+export function plainDateToZonedDateTime(
   plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
-  options: { timeZone: string; plainTime?: PA },
+  timeZone: TimeZone,
+  timeFields: TimeFields | undefined,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const timeZoneId = refineTimeZoneString(options.timeZone)
-  const plainTimeArg = options.plainTime
-  const timeFields =
-    plainTimeArg !== undefined ? refinePlainTimeArg(plainTimeArg) : undefined
-
-  const timeZone = queryTimeZone(timeZoneId)
   let epochNano: bigint
 
   if (timeFields) {
@@ -221,13 +217,23 @@ export function convertToPlainMonthDay(
     /* validFieldNames */ monthCodeDayFieldNamesAlpha,
     /* fieldRefiners */ dateFieldRefiners,
   )
-  return createPlainMonthDayFromFields(calendar, fields as Partial<DateFields>)
+  const refinedFields = fields as unknown as Partial<DateFields> & DayFields
+  const [year, monthCodeParts] = refinePlainMonthDayFields(
+    refinedFields,
+    calendar,
+  )
+  return createPlainMonthDayFromRefinedFields(
+    refinedFields,
+    calendar,
+    year,
+    monthCodeParts,
+    Overflow.Constrain,
+  )
 }
 
 export function convertToPlainYearMonth(
   calendar: CalendarImpl,
   input: { year: number; monthCode: string },
-  options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const validFieldNames = getCalendarFieldNames(
     calendar,
@@ -239,10 +245,17 @@ export function convertToPlainYearMonth(
     /* validFieldNames */ validFieldNames,
     /* fieldRefiners */ dateFieldRefiners,
   )
-  return createPlainYearMonthFromFields(
+  const refinedFields = fields as Partial<YearMonthFields>
+  const [year, monthCodeParts] = refinePlainYearMonthFields(
+    refinedFields,
     calendar,
-    fields as Partial<YearMonthFields>,
-    options,
+  )
+  return createPlainYearMonthFromRefinedFields(
+    refinedFields,
+    calendar,
+    year,
+    monthCodeParts,
+    Overflow.Constrain,
   )
 }
 
@@ -265,7 +278,17 @@ function createPlainDateFromMergedFields(
     [],
   )
 
-  return createPlainDateFromFields(calendar, mergedFields as any)
+  const [year, monthCodeParts] = refinePlainDateFields(
+    mergedFields as any,
+    calendar,
+  )
+  return createPlainDateFromRefinedFields(
+    mergedFields as any,
+    calendar,
+    year,
+    monthCodeParts,
+    Overflow.Constrain,
+  )
 }
 
 // PlainTime -> *

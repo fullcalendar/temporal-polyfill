@@ -6,6 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffPlainDateTimes } from '../../apiHelpers/dateTimeDiff'
+import { withPlainDateTimeFields } from '../../apiHelpers/fieldUpdate'
 import {
   dateDerivedGetters,
   dateFieldGetters,
@@ -22,7 +24,6 @@ import {
   zonedDateTimeToPlainDateTime,
 } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainDateTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateTimeToEpochMilli } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
@@ -42,13 +43,14 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { validateIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
-import { mergePlainDateTimeFields } from '../../internal/merge'
 import { moveDateTime } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import {
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+} from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundDateTimeToNano } from '../../internal/round'
-import { getCommonCalendar } from '../../internal/slotUtils'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -156,7 +158,7 @@ export const PlainDateTime = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDateTime {
       return createPlainDateTime(
-        mergePlainDateTimeFields(
+        withPlainDateTimeFields(
           getPlainDateTimeSlots(this),
           validateBag(mod),
           options,
@@ -195,7 +197,7 @@ export const PlainDateTime = defineTemporalClass(
             slots.calendar,
             slots,
             toDurationSlots(durationArg),
-            options,
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -213,7 +215,7 @@ export const PlainDateTime = defineTemporalClass(
             slots.calendar,
             slots,
             negateDurationFields(toDurationSlots(durationArg)),
-            options,
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -230,10 +232,7 @@ export const PlainDateTime = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateTimeSlots(this)
       const other = toPlainDateTimeSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDateTimes(false, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainDateTimes(false, slots, other, options))
     }
 
     since(
@@ -246,10 +245,7 @@ export const PlainDateTime = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateTimeSlots(this)
       const other = toPlainDateTimeSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainDateTimes(true, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainDateTimes(true, slots, other, options))
     }
 
     round(
@@ -288,7 +284,7 @@ export const PlainDateTime = defineTemporalClass(
         plainDateTimeToZonedDateTime(
           getPlainDateTimeSlots(this),
           queryTimeZone(refineTimeZoneArg(timeZoneArg)),
-          options,
+          refineEpochDisambigOptions(options),
         ),
       )
     }

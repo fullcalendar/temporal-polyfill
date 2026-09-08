@@ -6,6 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { withPlainMonthDayFields } from '../../apiHelpers/fieldUpdate'
 import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import {
   CalendarImpl,
@@ -35,7 +36,6 @@ import {
 } from '../../internal/isoCalendarMath'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
-import { mergePlainMonthDayFields } from '../../internal/merge'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
@@ -96,7 +96,7 @@ export const PlainMonthDay = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainMonthDay {
       return createPlainMonthDay(
-        mergePlainMonthDayFields(
+        withPlainMonthDayFields(
           getPlainMonthDaySlots(this),
           validateBag(mod),
           options,

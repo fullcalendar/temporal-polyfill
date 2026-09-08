@@ -1,11 +1,8 @@
-import type { Temporal } from 'temporal-spec'
 import { bigNanoInUtcDay } from './bigNano'
-import { type CalendarImpl } from './calendarImpl'
 import { epochNanoToIsoDateTime, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
 import { EpochDisambig, OffsetDisambig } from './optionsModel'
-import { refineDirectionOptions } from './optionsTransitionRefine'
 import { roundToMinute } from './round'
 import { ZonedEpochNanoFields } from './slots'
 import {
@@ -26,19 +23,6 @@ export type FixedIsoZonedFields = CalendarDateTimeFields & {
 }
 
 export type ZonedDateTimeFields = DateTimeFields & { offset: string }
-
-// Time-zone transitions
-// -----------------------------------------------------------------------------
-
-export function getTimeZoneTransitionEpochNanoseconds(
-  slots: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  options: Temporal.TransitionOptions | Temporal.TransitionOptions['direction'],
-): bigint | undefined {
-  return slots.timeZone.getTransition(
-    slots.epochNanoseconds,
-    refineDirectionOptions(options),
-  )
-}
 
 // ISO <-> Epoch conversions (on passed-in instances)
 // -----------------------------------------------------------------------------

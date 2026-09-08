@@ -1,18 +1,38 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/calendarPosition'
+import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffPlainDates } from '../../apiHelpers/dateTimeDiff'
+import {
+  moveByDaysStrict,
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+} from '../../apiHelpers/dateTimeMove'
+import { withPlainDateFields } from '../../apiHelpers/fieldUpdate'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { dateFieldGetters } from '../../apiHelpers/shimMixins'
+import {
+  diffPlainDateDays,
+  diffPlainDateWeeks,
+  diffPlainMonths,
+  diffPlainYears,
+} from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
   computeCalendarInLeapYear,
-  computeCalendarMonthCode,
   computeCalendarMonthsInYear,
   computeCalendarWeekOfYear,
   computeCalendarYearOfWeek,
@@ -21,11 +41,11 @@ import {
   type CalendarImpl,
   getCalendarSlotId,
 } from '../../internal/calendarImpl'
+import { IsoDateTimeInterval } from '../../internal/calendarInterval'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { plainDateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
-import { diffPlainDates } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import { timeFieldDefaults } from '../../internal/fieldNames'
@@ -46,17 +66,16 @@ import {
 } from '../../internal/isoCalendarMath'
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
-import { mergePlainDateFields } from '../../internal/merge'
 import { moveByDays, moveDate } from '../../internal/move'
-import { IsoDateTimeInterval } from '../../internal/round'
-import { getCommonCalendar } from '../../internal/slotUtils'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import {
   createPlainDateTimeFromRefinedFields,
-  createPlainMonthDayFromFields,
-  createPlainYearMonthFromFields,
+  createPlainMonthDayFromCalendarFields,
+  createPlainYearMonthFromCalendarFields,
 } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
+import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
@@ -79,26 +98,10 @@ import {
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  diffPlainDateDays,
-  diffPlainDateWeeks,
-  diffPlainMonths,
-  diffPlainYears,
-} from './diffUtils'
-import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-} from './moveUtils'
 import {
   ShimPlainDateTimeRecord,
   createShimPlainDateTimeRecord,
@@ -112,7 +115,7 @@ import {
   ShimPlainYearMonthRecord,
   createShimPlainYearMonthRecord,
 } from './plainYearMonth'
-import { refineRoundToOptions } from './roundUtils'
+
 import {
   computeIsoWeekCeil,
   computeIsoWeekFloor,
@@ -124,7 +127,7 @@ import {
   computeYearFloor,
   computeYearInterval,
   roundDateToInterval,
-} from './roundUtils'
+} from '../../internal/calendarInterval'
 import { validateBag } from './temporalRecords'
 import {
   ShimZonedDateTimeRecord,
@@ -212,8 +215,11 @@ export function withFields(
   mod: Partial<DateFields>,
   options?: TemporalSpec.OverflowOptions,
 ) {
-  const slots = getShimPlainDateSlots(record)
-  const resSlots = mergePlainDateFields(slots, validateBag(mod), options)
+  const resSlots = withPlainDateFields(
+    getShimPlainDateSlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimPlainDateRecord(resSlots)
 }
 
@@ -278,7 +284,12 @@ export function add(
   const slots = getShimPlainDateSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateSlots(
-    moveDate(slots.calendar, slots, durationSlots, options),
+    moveDate(
+      slots.calendar,
+      slots,
+      durationSlots,
+      refineOverflowOptions(options),
+    ),
     slots.calendar,
   )
   return createShimPlainDateRecord(resSlots)
@@ -296,7 +307,7 @@ export function subtract(
       slots.calendar,
       slots,
       negateDurationFields(durationSlots),
-      options,
+      refineOverflowOptions(options),
     ),
     slots.calendar,
   )
@@ -311,8 +322,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainDateSlots(record)
   const otherSlots = getShimPlainDateSlots(otherRecord)
-  const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
-  const resSlots = diffPlainDates(false, calendar, slots, otherSlots, options)
+  const resSlots = diffPlainDates(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -391,11 +401,17 @@ export function toZonedDateTime(
 ): ShimZonedDateTimeRecord {
   const optionsObj =
     typeof options === 'string' ? { timeZone: options } : options
+  const slots = getShimPlainDateSlots(record)
+  const timeZoneId = refineTimeZoneId(optionsObj.timeZone)
+  const plainTimeArg = optionsObj.plainTime
+  const timeFields =
+    plainTimeArg !== undefined
+      ? getPlainTimeSlots<TimeFields>(plainTimeArg)
+      : undefined
   const resSlots = plainDateToZonedDateTime(
-    refineTimeZoneId,
-    getPlainTimeSlots,
-    getShimPlainDateSlots(record),
-    optionsObj,
+    slots,
+    queryTimeZone(timeZoneId),
+    timeFields,
   )
   return createShimZonedDateTimeRecord(resSlots)
 }
@@ -419,11 +435,12 @@ export function toPlainYearMonth(
   record: ShimPlainDateRecord,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainDateSlots(record)
-  const calendarDate = computeCalendarDateFields(slots.calendar, slots)
-  const resSlots = createPlainYearMonthFromFields(slots.calendar, {
-    year: calendarDate.year,
-    monthCode: computeCalendarMonthCode(slots.calendar, slots),
-  })
+  const { year, month } = computeCalendarDateFields(slots.calendar, slots)
+  const resSlots = createPlainYearMonthFromCalendarFields(
+    slots.calendar,
+    year,
+    month,
+  )
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -431,11 +448,13 @@ export function toPlainMonthDay(
   record: ShimPlainDateRecord,
 ): ShimPlainMonthDayRecord {
   const slots = getShimPlainDateSlots(record)
-  const calendarDate = computeCalendarDateFields(slots.calendar, slots)
-  const resSlots = createPlainMonthDayFromFields(slots.calendar, {
-    monthCode: computeCalendarMonthCode(slots.calendar, slots),
-    day: calendarDate.day,
-  })
+  const { year, month, day } = computeCalendarDateFields(slots.calendar, slots)
+  const resSlots = createPlainMonthDayFromCalendarFields(
+    slots.calendar,
+    year,
+    month,
+    day,
+  )
   return createShimPlainMonthDayRecord(resSlots)
 }
 

@@ -1,11 +1,35 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/calendarPosition'
+import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffZonedDateTimes } from '../../apiHelpers/dateTimeDiff'
+import {
+  moveByDaysStrict,
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  reversedMove,
+} from '../../apiHelpers/dateTimeMove'
+import { withZonedDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
+import {
+  adaptRecordTimeUnitDiff,
+  diffZonedDays,
+  diffZonedEpochNanoTimeUnit,
+  diffZonedMonths,
+  diffZonedWeeks,
+  diffZonedYears,
+} from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -16,6 +40,7 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import type { IsoDateTimeInterval } from '../../internal/calendarInterval'
 import { toBigInt, toStrictInteger } from '../../internal/cast'
 import {
   compareZonedEpochSlots,
@@ -28,7 +53,6 @@ import {
   zonedDateTimeToPlainTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffZonedDateTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import {
   CalendarDateFields,
@@ -50,19 +74,20 @@ import {
   formatZonedDateTimeIsoAuto,
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
-import { mergeZonedDateTimeFields } from '../../internal/merge'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveZonedEpochSlots } from '../../internal/move'
+import { moveEpochNanoByNano, moveZonedEpochSlots } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
+import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
 import {
-  IsoDateTimeInterval,
   alignZonedEpoch,
   computeZonedHoursInDay,
   computeZonedStartOfDay,
-  roundZonedEpochSlotsToUnit,
+  roundZonedEpochSlotsToDay,
+  roundZonedEpochSlotsToTime,
   roundZonedEpochToInterval,
 } from '../../internal/round'
-import { getCommonCalendar, getZonedTimeZoneId } from '../../internal/slotUtils'
+import { getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
   createZonedEpochNanoSlots,
@@ -75,11 +100,10 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
   getMatchingInstantFor,
   getSingleInstantFor,
-  getTimeZoneTransitionEpochNanoseconds,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
 import {
-  DayTimeUnit,
+  TimeUnit,
   Unit,
   nanoInHour,
   nanoInMicro,
@@ -101,30 +125,11 @@ import {
   refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import {
-  adaptRecordTimeUnitDiff,
-  diffZonedDays,
-  diffZonedEpochNanoTimeUnit,
-  diffZonedMonths,
-  diffZonedWeeks,
-  diffZonedYears,
-} from './diffUtils'
-import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
 import { ShimInstantRecord, createShimInstantRecord } from './instant'
-import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-  reversedMove,
-} from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import {
   ShimPlainDateTimeRecord,
@@ -135,7 +140,7 @@ import {
   createShimPlainTimeRecord,
   getShimPlainTimeSlots,
 } from './plainTime'
-import { refineRoundToOptions } from './roundUtils'
+
 import {
   computeDayCeil,
   computeIsoWeekCeil,
@@ -147,7 +152,7 @@ import {
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
-} from './roundUtils'
+} from '../../internal/calendarInterval'
 import { validateBag } from './temporalRecords'
 
 type ShimZonedDateTimeFields = ZonedDateTimeFields<RecordTypes.CalendarRecord>
@@ -259,8 +264,11 @@ export function withFields(
   mod: Partial<DateTimeFields>,
   options?: TemporalSpec.ZonedDateTimeFromOptions,
 ): ShimZonedDateTimeRecord {
-  const slots = getShimZonedDateTimeSlots(record)
-  const resSlots = mergeZonedDateTimeFields(slots, validateBag(mod), options)
+  const resSlots = withZonedDateTimeFields(
+    getShimZonedDateTimeSlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimZonedDateTimeRecord(resSlots)
 }
 
@@ -387,7 +395,11 @@ export function add(
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
-  const resSlots = moveZonedEpochSlots(slots, durationSlots, options)
+  const resSlots = moveZonedEpochSlots(
+    slots,
+    durationSlots,
+    refineOverflowOptions(options),
+  )
   return createShimZonedDateTimeRecord(resSlots)
 }
 
@@ -401,7 +413,7 @@ export function subtract(
   const resSlots = moveZonedEpochSlots(
     slots,
     negateDurationFields(durationSlots),
-    options,
+    refineOverflowOptions(options),
   )
   return createShimZonedDateTimeRecord(resSlots)
 }
@@ -416,14 +428,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimZonedDateTimeSlots(record)
   const otherSlots = getShimZonedDateTimeSlots(otherRecord)
-  const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
-  const resSlots = diffZonedDateTimes(
-    false,
-    calendar,
-    slots,
-    otherSlots,
-    options,
-  )
+  const resSlots = diffZonedDateTimes(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -442,7 +447,10 @@ export function getTimeZoneTransition(
     | TemporalSpec.TransitionOptions['direction'],
 ): ShimZonedDateTimeRecord | null {
   const slots = getShimZonedDateTimeSlots(record)
-  const epochNanoseconds = getTimeZoneTransitionEpochNanoseconds(slots, options)
+  const epochNanoseconds = slots.timeZone.getTransition(
+    slots.epochNanoseconds,
+    refineDirectionOptions(options),
+  )
   // Epoch zero is a valid transition; only undefined means no transition.
   return epochNanoseconds !== undefined
     ? createShimZonedDateTimeRecord({ ...slots, epochNanoseconds })
@@ -582,8 +590,8 @@ export const roundToWeek = bindArgs(
   computeIsoWeekInterval,
 )
 
-function roundToDayTimeUnit(
-  smallestUnit: DayTimeUnit,
+function roundToTimeUnit(
+  smallestUnit: TimeUnit,
   record: ShimZonedDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): ShimZonedDateTimeRecord {
@@ -595,16 +603,25 @@ function roundToDayTimeUnit(
     options,
   )
   return createShimZonedDateTimeRecord(
-    roundZonedEpochSlotsToUnit(slots, smallestUnit, roundingInc, roundingMode),
+    roundZonedEpochSlotsToTime(slots, smallestUnit, roundingInc, roundingMode),
   )
 }
 
-export const roundToDay = bindArgs(roundToDayTimeUnit, Unit.Day)
-export const roundToHour = bindArgs(roundToDayTimeUnit, Unit.Hour)
-export const roundToMinute = bindArgs(roundToDayTimeUnit, Unit.Minute)
-export const roundToSecond = bindArgs(roundToDayTimeUnit, Unit.Second)
-export const roundToMillisecond = bindArgs(roundToDayTimeUnit, Unit.Millisecond)
-export const roundToMicrosecond = bindArgs(roundToDayTimeUnit, Unit.Microsecond)
+export function roundToDay(
+  record: ShimZonedDateTimeRecord,
+  options?: RoundingMathOptions | RoundingMode,
+): ShimZonedDateTimeRecord {
+  const slots = getShimZonedDateTimeSlots(record)
+  const [, roundingMode] = refineRoundToOptions(Unit.Day, options)
+  return createShimZonedDateTimeRecord(
+    roundZonedEpochSlotsToDay(slots, roundingMode),
+  )
+}
+export const roundToHour = bindArgs(roundToTimeUnit, Unit.Hour)
+export const roundToMinute = bindArgs(roundToTimeUnit, Unit.Minute)
+export const roundToSecond = bindArgs(roundToTimeUnit, Unit.Second)
+export const roundToMillisecond = bindArgs(roundToTimeUnit, Unit.Millisecond)
+export const roundToMicrosecond = bindArgs(roundToTimeUnit, Unit.Microsecond)
 
 // Non-standard: Start-of-Unit
 // -----------------------------------------------------------------------------
@@ -785,11 +802,10 @@ function moveByTimeUnit(
   units: number,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
-  const epochNanoseconds =
-    slots.epochNanoseconds + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
+  const delta = BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
   return createShimZonedDateTimeRecord({
     ...slots,
-    epochNanoseconds: checkEpochNanoInBounds(epochNanoseconds),
+    epochNanoseconds: moveEpochNanoByNano(slots.epochNanoseconds, delta),
   })
 }
 

@@ -5,7 +5,15 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffPlainYearMonth } from '../../apiHelpers/dateTimeDiff'
+import { reversedMove } from '../../apiHelpers/dateTimeMove'
+import { withPlainYearMonthFields } from '../../apiHelpers/fieldUpdate'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { yearMonthFieldGetters } from '../../apiHelpers/shimMixins'
+import {
+  diffPlainYearMonthMonths,
+  diffPlainYearMonthYears,
+} from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
@@ -20,9 +28,10 @@ import {
 } from '../../internal/compare'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
-import { diffPlainYearMonth } from '../../internal/diff'
-import { durationFieldDefaults } from '../../internal/durationFields'
-import { validateDurationFields } from '../../internal/durationMath'
+import {
+  negateDurationFields,
+  validateDurationCalendarUnit,
+} from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
   CalendarDateFields,
@@ -41,10 +50,10 @@ import {
   formatYearMonthIsoAuto,
 } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
-import { mergePlainYearMonthFields } from '../../internal/merge'
-import { moveYearMonth } from '../../internal/move'
-import { getCommonCalendar } from '../../internal/slotUtils'
-import { createDateSlots, createDurationSlots } from '../../internal/slots'
+import { moveYearMonth, moveYearMonthByUnits } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { Overflow } from '../../internal/optionsModel'
+import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
@@ -60,21 +69,19 @@ import {
   refineShimCalendarArgMaybe,
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
-import { diffPlainYearMonthMonths, diffPlainYearMonthYears } from './diffUtils'
 import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import { reversedMove } from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
-import { refineRoundToOptions } from './roundUtils'
+
 import {
   computeYearCeil,
   computeYearFloor,
   computeYearInterval,
   roundDateToInterval,
-} from './roundUtils'
+} from '../../internal/calendarInterval'
 import { validateBag } from './temporalRecords'
 
 type Format = DateTimeFormatLike<ShimPlainYearMonthRecord>
@@ -186,8 +193,11 @@ export function withFields(
   mod: Partial<YearMonthFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainYearMonthRecord {
-  const slots = getShimPlainYearMonthSlots(record)
-  const resSlots = mergePlainYearMonthFields(slots, validateBag(mod), options)
+  const resSlots = withPlainYearMonthFields(
+    getShimPlainYearMonthSlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -199,7 +209,12 @@ export function add(
   const slots = getShimPlainYearMonthSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateSlots(
-    moveYearMonth(false, slots.calendar, slots, durationSlots, options),
+    moveYearMonth(
+      slots.calendar,
+      slots,
+      durationSlots,
+      refineOverflowOptions(options),
+    ),
     slots.calendar,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -213,7 +228,12 @@ export function subtract(
   const slots = getShimPlainYearMonthSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateSlots(
-    moveYearMonth(true, slots.calendar, slots, durationSlots, options),
+    moveYearMonth(
+      slots.calendar,
+      slots,
+      negateDurationFields(durationSlots),
+      refineOverflowOptions(options),
+    ),
     slots.calendar,
   )
   return createShimPlainYearMonthRecord(resSlots)
@@ -227,14 +247,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const otherSlots = getShimPlainYearMonthSlots(otherRecord)
-  const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
-  const resSlots = diffPlainYearMonth(
-    false,
-    calendar,
-    slots,
-    otherSlots,
-    options,
-  )
+  const resSlots = diffPlainYearMonth(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -345,17 +358,12 @@ export function addYears(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const resSlots = createDateSlots(
-    moveYearMonth(
-      false,
+    moveYearMonthByUnits(
       slots.calendar,
       slots,
-      createDurationSlots(
-        validateDurationFields({
-          ...durationFieldDefaults,
-          years: toStrictInteger(years),
-        }),
-      ),
-      options,
+      validateDurationCalendarUnit('years', toStrictInteger(years)),
+      0,
+      refineOverflowOptions(options),
     ),
     slots.calendar,
   )
@@ -369,17 +377,12 @@ export function addMonths(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const resSlots = createDateSlots(
-    moveYearMonth(
-      false,
+    moveYearMonthByUnits(
       slots.calendar,
       slots,
-      createDurationSlots(
-        validateDurationFields({
-          ...durationFieldDefaults,
-          months: toStrictInteger(months),
-        }),
-      ),
-      options,
+      0,
+      validateDurationCalendarUnit('months', toStrictInteger(months)),
+      refineOverflowOptions(options),
     ),
     slots.calendar,
   )
@@ -445,14 +448,12 @@ export function endOfYear(
   return createShimPlainYearMonthRecord(
     // move back a month
     createDateSlots(
-      moveYearMonth(
-        true,
+      moveYearMonthByUnits(
         slots.calendar,
         computeYearCeil(slots.calendar, slots),
-        createDurationSlots({
-          ...durationFieldDefaults,
-          months: 1,
-        }),
+        0,
+        -1,
+        Overflow.Constrain,
       ),
       slots.calendar,
     ),

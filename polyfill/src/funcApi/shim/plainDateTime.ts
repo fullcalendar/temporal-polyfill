@@ -1,11 +1,35 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/calendarPosition'
+import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
+import { diffPlainDateTimes } from '../../apiHelpers/dateTimeDiff'
+import {
+  moveByDaysStrict,
+  moveByIsoWeeks,
+  moveByMonths,
+  moveByYears,
+  reversedMove,
+} from '../../apiHelpers/dateTimeMove'
+import { withPlainDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
+import {
+  adaptRecordTimeUnitDiff,
+  diffPlainDateTimeEpochNanoTimeUnit,
+  diffPlainDateTimeMonths,
+  diffPlainDateTimeYears,
+  diffPlainDays,
+  diffPlainWeeks,
+} from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -16,6 +40,10 @@ import {
   computeCalendarYearOfWeek,
 } from '../../internal/calendarDerived'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
+import {
+  type IsoDateTimeInterval,
+  computeDayFloor,
+} from '../../internal/calendarInterval'
 import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import {
   compareIsoDateTimeFields,
@@ -23,7 +51,6 @@ import {
 } from '../../internal/compare'
 import { plainDateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
-import { diffPlainDateTimes } from '../../internal/diff'
 import { negateDurationFields } from '../../internal/durationMath'
 import {
   epochNanoToIsoDateTime,
@@ -52,15 +79,12 @@ import {
   formatPlainDateTimeIso,
 } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
-import { mergePlainDateTimeFields } from '../../internal/merge'
-import { moveDateTime } from '../../internal/move'
+import { moveDateTime, moveDateTimeByNano } from '../../internal/move'
 import {
-  IsoDateTimeInterval,
-  computeDayFloor,
-  computeNanoInc,
-  roundDateTimeToNano,
-} from '../../internal/round'
-import { getCommonCalendar } from '../../internal/slotUtils'
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+} from '../../internal/optionsFieldRefine'
+import { computeNanoInc, roundDateTimeToNano } from '../../internal/round'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -95,33 +119,14 @@ import {
 } from './calendarResolve'
 import { createDateTimeFormatFactory } from './dateTimeFormat'
 import {
-  adaptRecordTimeUnitDiff,
-  diffPlainDateTimeEpochNanoTimeUnit,
-  diffPlainDateTimeMonths,
-  diffPlainDateTimeYears,
-  diffPlainDays,
-  diffPlainWeeks,
-} from './diffUtils'
-import {
   ShimDurationRecord,
   createShimDurationRecord,
   getShimDurationSlots,
 } from './duration'
-import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-  reversedMove,
-} from './moveUtils'
 import { ShimPlainDateRecord, createShimPlainDateRecord } from './plainDate'
 import type { ShimPlainTimeRecord } from './plainTime'
 import { createShimPlainTimeRecord } from './plainTime'
-import { refineRoundToOptions } from './roundUtils'
+
 import {
   computeIsoWeekCeil,
   computeIsoWeekFloor,
@@ -133,7 +138,7 @@ import {
   computeYearFloor,
   computeYearInterval,
   roundDateTimeToInterval,
-} from './roundUtils'
+} from '../../internal/calendarInterval'
 import { validateBag } from './temporalRecords'
 import {
   ShimZonedDateTimeRecord,
@@ -250,8 +255,11 @@ export function withFields(
   mod: Partial<DateTimeFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
-  const slots = getShimPlainDateTimeSlots(record)
-  const resSlots = mergePlainDateTimeFields(slots, validateBag(mod), options)
+  const resSlots = withPlainDateTimeFields(
+    getShimPlainDateTimeSlots(record),
+    validateBag(mod),
+    options,
+  )
   return createShimPlainDateTimeRecord(resSlots)
 }
 
@@ -326,7 +334,12 @@ export function add(
   const slots = getShimPlainDateTimeSlots(record)
   const durationSlots = getShimDurationSlots(durationRecord)
   const resSlots = createDateTimeSlots(
-    moveDateTime(slots.calendar, slots, durationSlots, options),
+    moveDateTime(
+      slots.calendar,
+      slots,
+      durationSlots,
+      refineOverflowOptions(options),
+    ),
     slots.calendar,
   )
   return createShimPlainDateTimeRecord(resSlots)
@@ -344,7 +357,7 @@ export function subtract(
       slots.calendar,
       slots,
       negateDurationFields(durationSlots),
-      options,
+      refineOverflowOptions(options),
     ),
     slots.calendar,
   )
@@ -361,14 +374,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const otherSlots = getShimPlainDateTimeSlots(otherRecord)
-  const calendar = getCommonCalendar(slots.calendar, otherSlots.calendar)
-  const resSlots = diffPlainDateTimes(
-    false,
-    calendar,
-    slots,
-    otherSlots,
-    options,
-  )
+  const resSlots = diffPlainDateTimes(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -453,7 +459,7 @@ export function toZonedDateTime(
   const resSlots = plainDateTimeToZonedDateTime(
     getShimPlainDateTimeSlots(record),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
-    options,
+    refineEpochDisambigOptions(options),
   )
   return createShimZonedDateTimeRecord(resSlots)
 }
@@ -862,16 +868,9 @@ function moveByTimeUnit(
   units: number,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
-  const epochNano0 = isoDateTimeToEpochNano(slots)
-  const epochNano1 =
-    epochNano0 + BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
-  const isoDateTime1 = epochNanoToIsoDateTime(epochNano1)
+  const delta = BigInt(toStrictInteger(units)) * BigInt(nanoInUnit)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
-      isoDateTime1,
-      isoDateTime1,
-      slots.calendar,
-    ),
+    createDateTimeSlots(moveDateTimeByNano(slots, delta), slots.calendar),
   )
 }
 

@@ -6,6 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
+import { diffPlainYearMonth } from '../../apiHelpers/dateTimeDiff'
+import { withPlainYearMonthFields } from '../../apiHelpers/fieldUpdate'
 import {
   yearMonthDerivedGetters,
   yearMonthFieldGetters,
@@ -18,7 +20,7 @@ import {
 } from '../../internal/compare'
 import { convertPlainYearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
-import { diffPlainYearMonth } from '../../internal/diff'
+import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
   CalendarDateFields,
@@ -34,10 +36,8 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
-import { mergePlainYearMonthFields } from '../../internal/merge'
 import { moveYearMonth } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { getCommonCalendar } from '../../internal/slotUtils'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { NumberSign, isObjectLike } from '../../internal/utils'
@@ -108,7 +108,7 @@ export const PlainYearMonth = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainYearMonth {
       return createPlainYearMonth(
-        mergePlainYearMonthFields(
+        withPlainYearMonthFields(
           getPlainYearMonthSlots(this),
           validateBag(mod),
           options,
@@ -124,11 +124,10 @@ export const PlainYearMonth = defineTemporalClass(
       return createPlainYearMonth(
         createDateSlots(
           moveYearMonth(
-            false,
             slots.calendar,
             slots,
             toDurationSlots(durationArg),
-            options,
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -143,11 +142,10 @@ export const PlainYearMonth = defineTemporalClass(
       return createPlainYearMonth(
         createDateSlots(
           moveYearMonth(
-            true,
             slots.calendar,
             slots,
-            toDurationSlots(durationArg),
-            options,
+            negateDurationFields(toDurationSlots(durationArg)),
+            refineOverflowOptions(options),
           ),
           slots.calendar,
         ),
@@ -162,10 +160,7 @@ export const PlainYearMonth = defineTemporalClass(
     ): Duration {
       const slots = getPlainYearMonthSlots(this)
       const other = toPlainYearMonthSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainYearMonth(false, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainYearMonth(false, slots, other, options))
     }
 
     since(
@@ -176,10 +171,7 @@ export const PlainYearMonth = defineTemporalClass(
     ): Duration {
       const slots = getPlainYearMonthSlots(this)
       const other = toPlainYearMonthSlots(otherArg)
-      const calendar = getCommonCalendar(slots.calendar, other.calendar)
-      return createDuration(
-        diffPlainYearMonth(true, calendar, slots, other, options),
-      )
+      return createDuration(diffPlainYearMonth(true, slots, other, options))
     }
 
     equals(otherArg: PlainYearMonthArg): boolean {

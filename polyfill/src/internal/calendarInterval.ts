@@ -1,44 +1,43 @@
-import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
-} from '../../internal/calendarDerived'
-import { type CalendarImpl } from '../../internal/calendarImpl'
-import {
-  isoDateTimeToEpochNano,
-  isoDateToEpochNano,
-} from '../../internal/epochMath'
-import { timeFieldDefaults, timeFieldNamesAsc } from '../../internal/fieldNames'
+} from './calendarDerived'
+import { type CalendarImpl } from './calendarImpl'
+import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
+import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
-} from '../../internal/fieldTypes'
-import { combineDateAndTime } from '../../internal/fieldUtils'
-import { computeIsoDayOfWeek } from '../../internal/isoCalendarMath'
-import { addCalendarMonths, moveByDays } from '../../internal/move'
-import {
-  coerceRoundingIncInteger,
-  coerceRoundingMode,
-} from '../../internal/optionsCoerce'
-import {
-  RoundingMathTuple,
-  RoundingModeEnum,
-} from '../../internal/optionsModel'
-import { validateRoundingInc } from '../../internal/optionsValidate'
-import { IsoDateTimeInterval, roundWithMode } from '../../internal/round'
-import { computeEpochNanoFrac } from '../../internal/total'
-import { TimeUnit, Unit } from '../../internal/units'
-import { bindArgs, zeroOutProps } from '../../internal/utils'
-import { normalizeRoundToOptions } from '../roundToUtils'
+} from './fieldTypes'
+import { combineDateAndTime } from './fieldUtils'
+import { computeIsoDayOfWeek } from './isoCalendarMath'
+import { addCalendarMonths, moveByDays } from './move'
+import { RoundingModeEnum } from './optionsModel'
+import { computeEpochNanoFrac } from './relativeMath'
+import { roundWithMode } from './round'
+import { TimeUnit, Unit } from './units'
+import { bindArgs, zeroOutProps } from './utils'
 
 const clearTimeFields = bindArgs(
   zeroOutProps,
   timeFieldNamesAsc,
 ) as unknown as (unit: TimeUnit, timeFields: TimeFields) => TimeFields
 
+export type IsoDateTimeInterval = [
+  CalendarDateTimeFields,
+  CalendarDateTimeFields,
+]
+
 // Floor
 // -----------------------------------------------------------------------------
+
+// For date-times; dates can be combined with timeFieldDefaults first.
+export function computeDayFloor(
+  slots: CalendarDateTimeFields,
+): CalendarDateTimeFields {
+  return combineDateAndTime(slots, timeFieldDefaults)
+}
 
 export function computeYearFloor(
   calendar: CalendarImpl,
@@ -202,32 +201,4 @@ function roundEpochNanoToInterval<S extends CalendarDateFields>(
   const frac = computeEpochNanoFrac(epochNano, epochNano0, epochNano1)
   const grow = roundWithMode(frac, roundingMode)
   return grow ? isoFields1 : isoFields0
-}
-
-// Options
-// -----------------------------------------------------------------------------
-
-/*
-Refines roundTo*-style args where smallestUnit is already known separately
-(as a positional arg) and the options bag only carries roundingIncrement/
-roundingMode. Avoids synthesizing a raw options object for re-parsing.
-*/
-export function refineRoundToOptions(
-  smallestUnit: Unit,
-  options?: RoundingMathOptions | RoundingMode,
-  solarMode?: boolean, // Instant: increments validated against a full day
-): RoundingMathTuple {
-  options = normalizeRoundToOptions(options)
-
-  // alphabetical
-  let roundingInc = coerceRoundingIncInteger(options)
-  const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
-
-  roundingInc = validateRoundingInc(
-    roundingInc,
-    smallestUnit,
-    undefined,
-    solarMode,
-  )
-  return [roundingInc, roundingMode]
 }

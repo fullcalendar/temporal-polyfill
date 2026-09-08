@@ -100,13 +100,33 @@ export function toString(arg: string): string {
 }
 
 /*
-see ToPrimitiveAndRequireString
+Implements ToPrimitive with the string hint. Date's built-in implementation
+performs the same toString-then-valueOf fallback as OrdinaryToPrimitive, which
+keeps this helper focused on coercion rather than the caller's type requirement.
 */
-export function toStringViaPrimitive(arg: string, entityName?: string): string {
-  if (isObjectLike(arg)) {
-    return String(arg)
+export function toPrimitiveWithStringHint(arg: unknown): unknown {
+  if (!isObjectLike(arg)) {
+    return arg
   }
-  return requireString(arg, entityName)
+
+  const exoticToPrimitive = (arg as { [Symbol.toPrimitive]?: unknown })[
+    Symbol.toPrimitive
+  ]
+  if (exoticToPrimitive != null) {
+    if (typeof exoticToPrimitive !== 'function') {
+      throwTypeError()
+    }
+
+    const primitive = Reflect.apply(exoticToPrimitive, arg, ['string'])
+    if (isObjectLike(primitive)) {
+      throwTypeError()
+    }
+    return primitive
+  }
+
+  // Date's implementation is generic and performs OrdinaryToPrimitive with
+  // toString before valueOf when given the string hint.
+  return Date.prototype[Symbol.toPrimitive].call(arg, 'string')
 }
 
 // Spec: booleans must be converted to BigInt before number check.
