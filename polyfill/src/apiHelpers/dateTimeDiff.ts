@@ -51,9 +51,7 @@ export function diffInstants(
     roundingMode,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffZonedDateTimes(
@@ -78,9 +76,7 @@ export function diffZonedDateTimes(
     roundingMode,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainDateTimes(
@@ -108,9 +104,7 @@ export function diffPlainDateTimes(
     roundingMode,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainDates(
@@ -136,9 +130,7 @@ export function diffPlainDates(
     roundingMode,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainYearMonth(
@@ -164,9 +156,7 @@ export function diffPlainYearMonth(
     roundingMode,
   )
 
-  return createDurationSlots(
-    invert ? negateDurationFields(durationFields) : durationFields,
-  )
+  return createDiffDurationSlots(invert, durationFields)
 }
 
 export function diffPlainTimes(
@@ -187,6 +177,15 @@ export function diffPlainTimes(
     roundingMode,
   )
 
+  return createDiffDurationSlots(invert, durationFields)
+}
+
+// Finish every public diff the same way: since negates the rounded fields,
+// then slot construction computes the sign from that final duration.
+function createDiffDurationSlots(
+  invert: boolean,
+  durationFields: DurationFields,
+): DurationFields & { sign: NumberSign } {
   return createDurationSlots(
     invert ? negateDurationFields(durationFields) : durationFields,
   )
