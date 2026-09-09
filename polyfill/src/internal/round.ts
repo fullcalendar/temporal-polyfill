@@ -86,12 +86,12 @@ export function roundZonedEpochToDay(
   roundingMode: RoundingModeEnum,
 ): bigint {
   const [epochNano0, epochNano1] = computeZonedDayEpochInterval(slots)
-  return roundWithMode(
-    computeZonedDayRoundFrac(slots.epochNanoseconds, epochNano0, epochNano1),
+  return roundZonedEpochToBounds(
+    slots.epochNanoseconds,
+    epochNano0,
+    epochNano1,
     roundingMode,
   )
-    ? epochNano1
-    : epochNano0
 }
 
 // Time-unit rounding preserves the old offset when resolving a repeated time.
@@ -299,25 +299,30 @@ export function roundZonedEpochToInterval(
   const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
   const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
 
-  const frac = computeZonedDayRoundFrac(epochNano, epochNano0, epochNano1)
-  const grow = roundWithMode(frac, roundingMode)
-  const epochNanoRounded = grow ? epochNano1 : epochNano0
-  return epochNanoRounded
+  return roundZonedEpochToBounds(
+    epochNano,
+    epochNano0,
+    epochNano1,
+    roundingMode,
+  )
 }
 
-// A backwards transition can repeat the start of the following local date. An
+// Select a boundary using the same fraction and rounding rules for all zoned
+// calendar intervals. A backwards transition can repeat the next local start. An
 // instant in the repeated portion still rounds within its own ISO date, even
 // when it is at or after the earlier instant chosen for the next start of day.
-function computeZonedDayRoundFrac(
+function roundZonedEpochToBounds(
   epochNano: bigint,
   epochNano0: bigint,
   epochNano1: bigint,
-): number {
-  return computeEpochNanoFrac(
+  roundingMode: RoundingModeEnum,
+): bigint {
+  const frac = computeEpochNanoFrac(
     epochNano < epochNano1 ? epochNano : epochNano1 - 1n,
     epochNano0,
     epochNano1,
   )
+  return roundWithMode(frac, roundingMode) ? epochNano1 : epochNano0
 }
 
 // Date and time rounding
