@@ -1,6 +1,6 @@
 import { Overflow } from '../options/model'
 import type { MonthCodeParts } from './calendarMonthCode'
-import { isoArgsToEpochDays } from './epochMath'
+import { isoPartsToEpochDays } from './epochMath'
 import { calendarDateFieldNamesAsc } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import type {
@@ -86,43 +86,32 @@ export function diffIsoMonthSlots(
   return (year1 - year0) * isoMonthsInYear + month1 - month0
 }
 
-export function computeIsoDayOfWeek(isoDateFields: CalendarDateFields): number {
+export function computeIsoDayOfWeek(isoDate: CalendarDateFields): number {
   return (
     modFloor(
-      isoArgsToEpochDays(
-        isoDateFields.year,
-        isoDateFields.month,
-        isoDateFields.day,
-      ) + 4,
+      isoPartsToEpochDays(isoDate.year, isoDate.month, isoDate.day) + 4,
       7,
     ) || 7
   )
 }
 
-export function computeIsoDayOfYear(isoDateFields: CalendarDateFields): number {
+export function computeIsoDayOfYear(isoDate: CalendarDateFields): number {
   return (
-    isoArgsToEpochDays(
-      isoDateFields.year,
-      isoDateFields.month,
-      isoDateFields.day,
-    ) -
-    isoArgsToEpochDays(isoDateFields.year) +
+    isoPartsToEpochDays(isoDate.year, isoDate.month, isoDate.day) -
+    isoPartsToEpochDays(isoDate.year) +
     1
   )
 }
 
 export function computeIsoWeekFields(
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
 ): Required<CalendarWeekFields> {
-  let yearOfWeek = isoDateFields.year
+  let yearOfWeek = isoDate.year
   // ISO week 1 is the week containing Jan 4, equivalently the week containing
   // the year's first Thursday. With Monday=1..Sunday=7, this gives the
   // tentative ISO week number directly for most dates.
   let weekOfYear = Math.floor(
-    (computeIsoDayOfYear(isoDateFields) -
-      computeIsoDayOfWeek(isoDateFields) +
-      10) /
-      7,
+    (computeIsoDayOfYear(isoDate) - computeIsoDayOfWeek(isoDate) + 10) / 7,
   )
   let weeksInYear = computeIsoWeeksInYear(yearOfWeek)
 

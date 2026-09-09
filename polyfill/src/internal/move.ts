@@ -52,7 +52,7 @@ import { clampEntity, throwRangeError } from './utils'
 
 export function moveYearMonth(
   calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   durationSlots: DurationFields,
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateFields {
@@ -64,9 +64,7 @@ export function moveYearMonth(
   }
 
   // Overflow has already been observed before lower-unit validation above.
-  const first = checkIsoDateInBounds(
-    moveToStartOfMonth(calendar, isoDateFields),
-  )
+  const first = checkIsoDateInBounds(moveToStartOfMonth(calendar, isoDate))
   return moveToStartOfMonth(
     calendar,
     moveDate(calendar, first, durationSlots, overflow),
@@ -77,14 +75,12 @@ export function moveYearMonth(
 // Validate the intermediate dates even though the final type has month precision.
 export function moveYearMonthByUnits(
   calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   years: number,
   months: number,
   overflow: Overflow,
 ): CalendarDateFields {
-  const first = checkIsoDateInBounds(
-    moveToStartOfMonth(calendar, isoDateFields),
-  )
+  const first = checkIsoDateInBounds(moveToStartOfMonth(calendar, isoDate))
   const moved =
     years || months
       ? checkIsoDateInBounds(
@@ -145,19 +141,16 @@ midnight that only PlainDateTime imposes.
 */
 export function moveDateTime(
   calendar: CalendarImpl,
-  isoDateTimeFields: CalendarDateTimeFields,
+  isoDateTime: CalendarDateTimeFields,
   durationFields: DurationFields,
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateTimeFields {
   // could have over 24 hours in certain zones
-  const [movedTimeFields, dayDelta] = moveTime(
-    isoDateTimeFields,
-    durationFields,
-  )
+  const [movedTimeFields, dayDelta] = moveTime(isoDateTime, durationFields)
 
   const movedIsoDateFields = moveDate(
     calendar,
-    isoDateTimeFields,
+    isoDateTime,
     {
       ...durationFields, // date parts
       ...durationTimeFieldDefaults, // time parts (zero-out so no balancing-up to days)
@@ -215,34 +208,34 @@ Skips the calendar if moving days only.
 */
 export function moveDate(
   calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   durationFields: DurationFields,
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateFields {
   let { years, months, weeks, days } = durationFields
-  let isoDate: CalendarDateFields
+  let movedIsoDate: CalendarDateFields
 
   days += Number(durationTimeToBigNano(durationFields) / bigNanoInUtcDay)
 
   if (years || months) {
-    isoDate = moveDateByCalendarUnits(
+    movedIsoDate = moveDateByCalendarUnits(
       calendar,
-      isoDateFields,
+      isoDate,
       years,
       months,
       overflow,
     )
   } else if (weeks || days) {
-    isoDate = isoDateFields
+    movedIsoDate = isoDate
   } else {
-    return isoDateFields
+    return isoDate
   }
 
   if (weeks || days) {
-    isoDate = moveDateByDays(isoDate, weeks * 7 + days)
+    movedIsoDate = moveDateByDays(movedIsoDate, weeks * 7 + days)
   }
 
-  return checkIsoDateInBounds(isoDate)
+  return checkIsoDateInBounds(movedIsoDate)
 }
 
 // Move only by ISO days or seven-day weeks while retaining moveDate's required
@@ -262,20 +255,20 @@ export function moveDateByDayWeekUnits(
 
 export function moveToStartOfMonth(
   calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
 ): CalendarDateFields {
-  const dayOfMonth = computeCalendarDateFields(calendar, isoDateFields).day
-  return moveDateByDays(isoDateFields, 1 - dayOfMonth)
+  const dayOfMonth = computeCalendarDateFields(calendar, isoDate).day
+  return moveDateByDays(isoDate, 1 - dayOfMonth)
 }
 
 export function moveDateByCalendarUnits(
   calendar: CalendarImpl,
-  isoDateFields: CalendarDateFields,
+  isoDate: CalendarDateFields,
   years: number,
   months: number,
   overflow: Overflow,
 ): CalendarDateFields {
-  const dateParts = computeCalendarDateFields(calendar, isoDateFields)
+  const dateParts = computeCalendarDateFields(calendar, isoDate)
   let { year, month, day } = dateParts
 
   if (years) {
@@ -389,8 +382,11 @@ export function moveTimeByNano(
 }
 
 // Exact epoch movement is shared by Instant and zoned time-unit helpers.
-export function moveEpochNanoByNano(epoch: bigint, delta: bigint): bigint {
-  return checkEpochNanoInBounds(epoch + delta)
+export function moveEpochNanoByNano(
+  epochNano: bigint,
+  deltaNano: bigint,
+): bigint {
+  return checkEpochNanoInBounds(epochNano + deltaNano)
 }
 
 export function moveDateByDays(

@@ -95,22 +95,22 @@ export function compareIsoDateTimeFields(
 }
 
 export function compareIsoDateFields(
-  isoFields0: CalendarDateFields,
-  isoFields1: CalendarDateFields,
+  isoDate0: CalendarDateFields,
+  isoDate1: CalendarDateFields,
 ): NumberSign {
   return compareNumbers(
-    isoDateToEpochDays(isoFields0),
-    isoDateToEpochDays(isoFields1),
+    isoDateToEpochDays(isoDate0),
+    isoDateToEpochDays(isoDate1),
   )
 }
 
 export function compareTimeFields(
-  isoFields0: TimeFields,
-  isoFields1: TimeFields,
+  timeFields0: TimeFields,
+  timeFields1: TimeFields,
 ): NumberSign {
   return compareNumbers(
-    timeFieldsToNano(isoFields0),
-    timeFieldsToNano(isoFields1),
+    timeFieldsToNano(timeFields0),
+    timeFieldsToNano(timeFields1),
   )
 }
 

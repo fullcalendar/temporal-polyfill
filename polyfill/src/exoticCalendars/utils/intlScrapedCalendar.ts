@@ -7,8 +7,8 @@ import {
 import {
   diffEpochMilliDays,
   epochMilliToIsoDateTime,
-  isoArgsToEpochDays,
   isoDateToEpochMilli,
+  isoPartsToEpochDays,
 } from '../../internal/epochMath'
 import * as errorMessages from '../../internal/errorMessages'
 import {
@@ -151,8 +151,8 @@ function createIntlFieldCache(
   // Key by the internal ISO-date field object, not by caller text. This sits
   // above queryYearData: repeated property access can skip the full Intl scrape,
   // while year data remains the shared source for month-boundary lookups.
-  return memoize((isoDateFields: CalendarDateFields) => {
-    const epochMilli = isoDateToEpochMilli(isoDateFields)
+  return memoize((isoDate: CalendarDateFields) => {
+    const epochMilli = isoDateToEpochMilli(isoDate)
     const intlFields = epochMilliToIntlFields(epochMilli)
     return {
       ...intlFields,
@@ -170,7 +170,7 @@ function createIntlYearDataCache(
   const yearCorrection = yearAtEpoch - isoEpochOriginYear
 
   function buildYear(year: number) {
-    let epochMilli = isoArgsToEpochDays(year - yearCorrection) * milliInUtcDay
+    let epochMilli = isoPartsToEpochDays(year - yearCorrection) * milliInUtcDay
     let intlFields: IntlDateFields
     let iterations = 0
     const millisReversed: number[] = []

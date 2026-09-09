@@ -545,13 +545,13 @@ export function diffZonedDateParts(
     }
   }
 
-  const [isoFields0, isoFields1, remainderNano] = prepareZonedEpochDiff(
+  const [startIsoDateTime, endIsoDate, remainderNano] = prepareZonedEpochDiff(
     timeZone,
     startZoned,
     endZoned,
     sign,
   )
-  const dateDiff = diffDate(isoFields0, isoFields1)
+  const dateDiff = diffDate(startIsoDateTime, endIsoDate)
 
   return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
 }

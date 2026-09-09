@@ -343,7 +343,7 @@ export function createZonedDateTimeFromMergedFields(
   epochDisambig: EpochDisambig,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { calendar, timeZone } = zonedDateTimeSlots
-  const isoDateFields = createDateFromRefinedFields(
+  const isoDate = createDateFromRefinedFields(
     calendarFields,
     calendar,
     year,
@@ -355,7 +355,7 @@ export function createZonedDateTimeFromMergedFields(
   return createZonedEpochNanoSlots(
     getMatchingInstantFor(
       timeZone,
-      combineDateAndTime(isoDateFields, timeFields),
+      combineDateAndTime(isoDate, timeFields),
       // Existing fields and user .with() fields are both past the first bag
       // refinement phase, so "offset" is the offset in nanoseconds here.
       mergedAllFields.offset,

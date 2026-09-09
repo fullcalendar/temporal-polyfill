@@ -64,8 +64,9 @@ export function refineDiffOptions<
 ): DiffTuple {
   options = normalizeOptions(options)
 
+  // alphabetical
   let largestUnit = coerceLargestUnit(options, minUnit)
-  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingInc = coerceRoundingIncInteger(options) // "roundingIncrement"
   let roundingMode = coerceRoundingMode(options, defaultRoundingMode)
   let smallestUnit = coerceSmallestUnit(options, minUnit, true)
 
@@ -104,10 +105,10 @@ export function refineDurationRoundOptions<RA, R>(
     typeof smallestUnitStr
   >(options, smallestUnitStr)
 
-  // alphabetcal
+  // alphabetical
   let largestUnit = coerceLargestUnit(options)
   const relativeToInternals = refineRelativeTo(options[relativeToName])
-  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingInc = coerceRoundingIncInteger(options) // "roundingIncrement"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
   let smallestUnit = coerceSmallestUnit(options)
 
@@ -155,7 +156,7 @@ export function refineRoundingOptions<UN extends 'day' | Temporal.TimeUnit>(
   >(options, smallestUnitStr)
 
   // alphabetical
-  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingInc = coerceRoundingIncInteger(options) // "roundingIncrement"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
   let smallestUnit = coerceSmallestUnit(options)
 
@@ -188,7 +189,7 @@ function refineRoundingMathOptions(
   >(options, roundingModeName)
 
   // alphabetical
-  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingInc = coerceRoundingIncInteger(options) // "roundingIncrement"
   const roundingMode = coerceRoundingMode(options, defaultRoundingMode)
 
   roundingInc = validateRoundingInc(
@@ -240,7 +241,7 @@ export function refineUnitRoundOptions(
   options = normalizeUnitRoundOptions(options)
 
   // alphabetical
-  let roundingInc = coerceRoundingIncInteger(options)
+  let roundingInc = coerceRoundingIncInteger(options) // "roundingIncrement"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.HalfExpand)
 
   roundingInc = validateRoundingInc(
@@ -280,7 +281,7 @@ export function refineTotalOptions<RA, R>(
 
   // alphabetical
   const relativeToInternals = refineRelativeTo(options[relativeToName])
-  let totalUnit = coerceTotalUnit(options)
+  let totalUnit = coerceTotalUnit(options) // "unit"
   totalUnit = requirePropDefined(totalUnitStr, totalUnit)
 
   return [

@@ -103,7 +103,7 @@ export function refineMaybeZonedDateTimeObjectLike(
     fields as any,
     calendar,
   )
-  const isoDateFields = createDateFromRefinedFields(
+  const isoDate = createDateFromRefinedFields(
     fields as any,
     calendar,
     year,
@@ -119,7 +119,7 @@ export function refineMaybeZonedDateTimeObjectLike(
 
     const epochNanoseconds = getMatchingInstantFor(
       timeZone,
-      combineDateAndTime(isoDateFields, timeFields),
+      combineDateAndTime(isoDate, timeFields),
       // After readAndRefineBagFields(), the public "offset" field is stored
       // internally as offset nanoseconds.
       fields.offset,
@@ -128,7 +128,7 @@ export function refineMaybeZonedDateTimeObjectLike(
     return { epochNanoseconds, timeZone, calendar }
   }
 
-  return isoDateFields
+  return isoDate
 }
 
 export function refineZonedDateTimeObjectLike(
@@ -158,7 +158,7 @@ export function refineZonedDateTimeObjectLike(
   )
   const [overflow, offsetDisambig, epochDisambig] =
     refineZonedFieldOptions(options)
-  const isoDateFields = createDateFromRefinedFields(
+  const isoDate = createDateFromRefinedFields(
     fields as any,
     calendar,
     year,
@@ -170,7 +170,7 @@ export function refineZonedDateTimeObjectLike(
 
   const epochNanoseconds = getMatchingInstantFor(
     timeZone,
-    combineDateAndTime(isoDateFields, timeFields),
+    combineDateAndTime(isoDate, timeFields),
     // After readAndRefineBagFields(), the public "offset" field is stored
     // internally as offset nanoseconds.
     fields.offset,

@@ -515,27 +515,23 @@ function formatIsoDateTimeFields(
   )
 }
 
-function formatIsoDateFields(isoDateFields: CalendarDateFields): string {
-  return (
-    formatIsoYearMonthFields(isoDateFields) +
-    '-' +
-    padNumber2(isoDateFields.day)
-  )
+function formatIsoDateFields(isoDate: CalendarDateFields): string {
+  return formatIsoYearMonthFields(isoDate) + '-' + padNumber2(isoDate.day)
 }
 
-function formatIsoYearMonthFields(isoDateFields: CalendarDateFields): string {
-  const { year } = isoDateFields
+function formatIsoYearMonthFields(isoDate: CalendarDateFields): string {
+  const { year } = isoDate
   return (
     (year < 0 || year > 9999
       ? getSignStr(year) + padNumber(6, Math.abs(year))
       : padNumber(4, year)) +
     '-' +
-    padNumber2(isoDateFields.month)
+    padNumber2(isoDate.month)
   )
 }
 
-function formatIsoMonthDayFields(isoDateFields: CalendarDateFields): string {
-  return padNumber2(isoDateFields.month) + '-' + padNumber2(isoDateFields.day)
+function formatIsoMonthDayFields(isoDate: CalendarDateFields): string {
+  return padNumber2(isoDate.month) + '-' + padNumber2(isoDate.day)
 }
 
 function formatTimeFields(

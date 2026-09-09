@@ -76,13 +76,13 @@ export function isoDateToEpochMilli(isoDate: CalendarDateFields): number {
 // -----------------------------------------------------------------------------
 
 export function isoDateToEpochDays(isoDate: CalendarDateFields): number {
-  return isoArgsToEpochDays(isoDate.year, isoDate.month, isoDate.day)
+  return isoPartsToEpochDays(isoDate.year, isoDate.month, isoDate.day)
 }
 
 // Month and day intentionally balance like Date.UTC(), but the year is projected
 // into a safe 400-year Gregorian cycle first. This keeps ISO date math valid for
 // Temporal's full plain-object range without relying on Date TimeClip.
-export function isoArgsToEpochDays(
+export function isoPartsToEpochDays(
   isoYear: number,
   isoMonth = 1,
   isoDay = 1,

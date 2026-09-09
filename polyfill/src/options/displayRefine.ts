@@ -39,7 +39,7 @@ function refineTimeDisplayTuple(
   maxSmallestUnit: TimeUnit = Unit.Minute,
 ): TimeDisplayTuple {
   // alphabetical
-  const subsecDigits = coerceFractionalSecondDigits(options)
+  const subsecDigits = coerceFractionalSecondDigits(options) // "fractionalSecondDigits"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
 
@@ -90,12 +90,12 @@ export function refineZonedDateTimeDisplayOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const calendarDisplay = coerceCalendarDisplay(options)
-  const subsecDigits = coerceFractionalSecondDigits(options)
-  const offsetDisplay = coerceOffsetDisplay(options)
+  const calendarDisplay = coerceCalendarDisplay(options) // "calendarName"
+  const subsecDigits = coerceFractionalSecondDigits(options) // "fractionalSecondDigits"
+  const offsetDisplay = coerceOffsetDisplay(options) // "offset"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
-  const timeZoneDisplay = coerceTimeZoneDisplay(options)
+  const timeZoneDisplay = coerceTimeZoneDisplay(options) // "timeZoneName"
 
   const unitDisplayTuple = resolveSmallestUnitAndSubsecDigits(
     validateUnitRange(
@@ -122,7 +122,7 @@ export function refineInstantDisplayOptions<
   options = normalizeOptions(options)
 
   // alphabetical
-  const subsecDigits = coerceFractionalSecondDigits(options)
+  const subsecDigits = coerceFractionalSecondDigits(options) // "fractionalSecondDigits"
   const roundingMode = coerceRoundingMode(options, RoundingModeEnum.Trunc)
   const smallestUnit = coerceSmallestUnit(options)
   const timeZoneArg = options.timeZone

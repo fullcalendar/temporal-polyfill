@@ -33,7 +33,7 @@ export function refineZonedFieldOptions(
   options = normalizeOptions(options)
 
   // alphabetical
-  const epochDisambig = coerceEpochDisambig(options) // "disambig"
+  const epochDisambig = coerceEpochDisambig(options) // "disambiguation"
   const offsetDisambig = coerceOffsetDisambig(options, defaultOffsetDisambig) // "offset"
   const overflow = coerceOverflow(options) // "overflow"
 

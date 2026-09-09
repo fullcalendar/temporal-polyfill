@@ -118,8 +118,8 @@ export function alignZonedEpoch(
 ): bigint {
   const { calendar, timeZone } = slots
   const isoDateTime = zonedEpochSlotsToIso(slots)
-  const isoFields1 = computeAlignment(calendar, isoDateTime)
-  const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
+  const isoDateTime1 = computeAlignment(calendar, isoDateTime)
+  const epochNano1 = getStartOfDayInstantFor(timeZone, isoDateTime1)
   return epochNano1
 }
 
@@ -137,11 +137,11 @@ export function roundZonedEpochToInterval(
 ): bigint {
   const { calendar, timeZone } = slots
   const isoSlots = zonedEpochSlotsToIso(slots)
-  const [isoFields0, isoFields1] = computeInterval(calendar, isoSlots)
+  const [isoDateTime0, isoDateTime1] = computeInterval(calendar, isoSlots)
 
   const epochNano = slots.epochNanoseconds
-  const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
-  const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(timeZone, isoDateTime0)
+  const epochNano1 = getStartOfDayInstantFor(timeZone, isoDateTime1)
 
   return roundZonedEpochToBounds(
     epochNano,
@@ -552,14 +552,14 @@ function computeZonedDayEpochInterval(
 ): [bigint, bigint] {
   const { timeZone } = slots
   const isoDate = zonedEpochSlotsToIso(slots)
-  const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
-  const isoFields1 = combineDateAndTime(
-    moveDateByDays(isoFields0, 1),
+  const isoDateTime0 = combineDateAndTime(isoDate, timeFieldDefaults)
+  const isoDateTime1 = combineDateAndTime(
+    moveDateByDays(isoDateTime0, 1),
     timeFieldDefaults,
   )
 
-  const epochNano0 = getStartOfDayInstantFor(timeZone, isoFields0)
-  const epochNano1 = getStartOfDayInstantFor(timeZone, isoFields1)
+  const epochNano0 = getStartOfDayInstantFor(timeZone, isoDateTime0)
+  const epochNano1 = getStartOfDayInstantFor(timeZone, isoDateTime1)
   return [epochNano0, epochNano1]
 }
 

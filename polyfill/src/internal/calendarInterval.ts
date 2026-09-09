@@ -117,16 +117,16 @@ export function computeYearInterval(
   calendar: CalendarImpl,
   slots: CalendarDateFields,
 ): IsoDateTimeInterval {
-  const isoFields0 = computeYearFloor(calendar, slots)
+  const isoDateTime0 = computeYearFloor(calendar, slots)
   const year1 = computeCalendarDateFields(calendar, slots).year + 1
-  return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1)]
+  return [isoDateTime0, computeCalendarDateTimeFromParts(calendar, year1)]
 }
 
 export function computeMonthInterval(
   calendar: CalendarImpl,
   slots: CalendarDateFields,
 ): IsoDateTimeInterval {
-  const isoFields0 = computeMonthFloor(calendar, slots)
+  const isoDateTime0 = computeMonthFloor(calendar, slots)
   // Advance in calendar units, then convert the next boundary back to ISO.
   const { year, month } = computeCalendarDateFields(calendar, slots)
   const { year: year1, month: month1 } = addCalendarMonths(
@@ -135,19 +135,22 @@ export function computeMonthInterval(
     month,
     1,
   )
-  return [isoFields0, computeCalendarDateTimeFromParts(calendar, year1, month1)]
+  return [
+    isoDateTime0,
+    computeCalendarDateTimeFromParts(calendar, year1, month1),
+  ]
 }
 
 export function computeIsoWeekInterval(
   calendar: CalendarImpl,
   slots: CalendarDateFields,
 ): IsoDateTimeInterval {
-  const isoFields0 = computeIsoWeekFloor(calendar, slots)
-  const isoFields1 = combineDateAndTime(
-    moveDateByDays(isoFields0, 7),
+  const isoDateTime0 = computeIsoWeekFloor(calendar, slots)
+  const isoDateTime1 = combineDateAndTime(
+    moveDateByDays(isoDateTime0, 7),
     timeFieldDefaults,
   )
-  return [isoFields0, isoFields1]
+  return [isoDateTime0, isoDateTime1]
 }
 
 export function roundDateToInterval<S extends CalendarDateFields>(
@@ -198,10 +201,10 @@ function roundEpochNanoToInterval<S extends CalendarDateFields>(
   epochNano: bigint,
   roundingMode: RoundingModeEnum,
 ): CalendarDateTimeFields {
-  const [isoFields0, isoFields1] = computeInterval(calendar, slots)
-  const epochNano0 = isoDateTimeToEpochNano(isoFields0)
-  const epochNano1 = isoDateTimeToEpochNano(isoFields1)
+  const [isoDateTime0, isoDateTime1] = computeInterval(calendar, slots)
+  const epochNano0 = isoDateTimeToEpochNano(isoDateTime0)
+  const epochNano1 = isoDateTimeToEpochNano(isoDateTime1)
   const frac = computeEpochNanoFrac(epochNano, epochNano0, epochNano1)
   const grow = roundWithMode(frac, roundingMode)
-  return grow ? isoFields1 : isoFields0
+  return grow ? isoDateTime1 : isoDateTime0
 }

@@ -2,8 +2,8 @@ import { bigNanoInSec } from './bigNano'
 import {
   epochNanoToSec,
   epochNanoToSecMod,
-  isoArgsToEpochDays,
   isoDateToEpochDays,
+  isoPartsToEpochDays,
 } from './epochMath'
 import { CalendarDateTimeFields } from './fieldTypes'
 import { normalizeEraName } from './intlCalendarConfig'
@@ -352,7 +352,7 @@ function createComputeOffsetSec(
       epochSec * milliInSec,
     )
     const zonedEpochSec =
-      isoArgsToEpochDays(
+      isoPartsToEpochDays(
         parseIntlPartsYear(intlParts),
         parseInt(intlParts.month),
         parseInt(intlParts.day),
