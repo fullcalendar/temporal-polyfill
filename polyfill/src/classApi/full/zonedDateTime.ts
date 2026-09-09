@@ -27,6 +27,7 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
+import { epochNanoToMilli } from '../../internal/epochMath'
 import {
   DateTimeFields,
   ZonedDateTimeLikeObject,
@@ -54,8 +55,6 @@ import {
   ZonedEpochNanoFields,
   createDurationSlots,
   createZonedEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -141,11 +140,11 @@ export const ZonedDateTime = defineTemporalClass(
     }
 
     get epochMilliseconds(): number {
-      return getEpochMilli(getZonedDateTimeSlots(this))
+      return epochNanoToMilli(getZonedDateTimeSlots(this).epochNanoseconds)
     }
 
     get epochNanoseconds(): bigint {
-      return getEpochNano(getZonedDateTimeSlots(this))
+      return getZonedDateTimeSlots(this).epochNanoseconds
     }
 
     get offset(): string {
@@ -321,7 +320,7 @@ export const ZonedDateTime = defineTemporalClass(
         ),
       )
       checkResolvedCalendarCompatible(format, slots)
-      return format.format(getEpochMilli(slots))
+      return format.format(epochNanoToMilli(slots.epochNanoseconds))
     }
 
     toString(

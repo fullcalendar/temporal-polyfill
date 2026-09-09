@@ -7,6 +7,7 @@ import {
   PlainYearMonthBranding,
 } from '../apiHelpers/branding'
 import {
+  epochNanoToMilli,
   isoDateTimeToEpochMilli,
   isoDateToEpochMilli,
 } from '../internal/epochMath'
@@ -28,7 +29,6 @@ import {
   transformYearMonthOptions,
 } from '../internal/intlFormatOptions'
 import { RawDateTimeFormat, RawFormattable } from '../internal/intlFormatUtils'
-import { getEpochMilli } from '../internal/slots'
 import { timeFieldsToMilli } from '../internal/timeFieldMath'
 import { memoize, throwTypeError } from '../internal/utils'
 
@@ -207,7 +207,7 @@ function checkTemporalDateTimeFormatCompatible(
 function temporalDateTimeToEpochMilli(branding: string, slots: object): number {
   switch (branding) {
     case InstantBranding:
-      return getEpochMilli(slots as any)
+      return epochNanoToMilli((slots as any).epochNanoseconds)
     case PlainDateTimeBranding:
       return isoDateTimeToEpochMilli(slots as any)
     case PlainDateBranding:

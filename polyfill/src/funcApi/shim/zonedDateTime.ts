@@ -51,6 +51,7 @@ import {
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
+import { epochNanoToMilli } from '../../internal/epochMath'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -89,8 +90,6 @@ import { getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
   createZonedEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -183,11 +182,11 @@ export const ShimZonedDateTimeRecord = defineTemporalClass(
     }
 
     get epochMilliseconds() {
-      return getEpochMilli(getShimZonedDateTimeSlots(this))
+      return epochNanoToMilli(getShimZonedDateTimeSlots(this).epochNanoseconds)
     }
 
     get epochNanoseconds() {
-      return getEpochNano(getShimZonedDateTimeSlots(this))
+      return getShimZonedDateTimeSlots(this).epochNanoseconds
     }
 
     toJSON() {
@@ -491,7 +490,7 @@ export function toLocaleString(
     ),
   )
   checkResolvedCalendarCompatible(format, slots)
-  return format.format(getEpochMilli(slots))
+  return format.format(epochNanoToMilli(slots.epochNanoseconds))
 }
 
 export function toInstant(record: ShimZonedDateTimeRecord): ShimInstantRecord {

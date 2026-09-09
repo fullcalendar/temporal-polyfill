@@ -25,6 +25,7 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { negateDurationFields } from '../../internal/durationMath'
+import { epochNanoToMilli } from '../../internal/epochMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import {
@@ -37,12 +38,7 @@ import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
 } from '../../internal/round'
-import {
-  EpochNanoFields,
-  createEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
-} from '../../internal/slots'
+import { EpochNanoFields, createEpochNanoSlots } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import type { InstantStringTimeZoneDisplayOptions } from '../../internal/temporalSpecHelpers'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -81,11 +77,11 @@ export const ShimInstantRecord = defineTemporalClass(
     declare readonly [RecordTypes.InstantRecordBrand]: undefined
 
     get epochMilliseconds() {
-      return getEpochMilli(getShimInstantSlots(this))
+      return epochNanoToMilli(getShimInstantSlots(this).epochNanoseconds)
     }
 
     get epochNanoseconds() {
-      return getEpochNano(getShimInstantSlots(this))
+      return getShimInstantSlots(this).epochNanoseconds
     }
 
     toJSON() {
@@ -203,15 +199,15 @@ export const createFormat: (
   (internals) => ({
     getArgsForSingle: (record) => {
       const slots = getShimInstantSlots(record)
-      return [internals.baseFormat, getEpochMilli(slots)]
+      return [internals.baseFormat, epochNanoToMilli(slots.epochNanoseconds)]
     },
     getArgsForRange: (record0, record1) => {
       const slots0 = getShimInstantSlots(record0)
       const slots1 = getShimInstantSlots(record1)
       return [
         internals.baseFormat,
-        getEpochMilli(slots0),
-        getEpochMilli(slots1),
+        epochNanoToMilli(slots0.epochNanoseconds),
+        epochNanoToMilli(slots1.epochNanoseconds),
       ]
     },
   }),
@@ -229,7 +225,7 @@ export function toLocaleString(
     locales,
     transformInstantOptions(options),
   )
-  return format.format(getEpochMilli(slots))
+  return format.format(epochNanoToMilli(slots.epochNanoseconds))
 }
 
 export function toString(

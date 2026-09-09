@@ -16,6 +16,7 @@ import {
   instantToZonedDateTime,
 } from '../../internal/convert'
 import { negateDurationFields } from '../../internal/durationMath'
+import { epochNanoToMilli } from '../../internal/epochMath'
 import { transformInstantOptions } from '../../internal/intlFormatOptions'
 import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
@@ -25,12 +26,7 @@ import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
 } from '../../internal/round'
-import {
-  EpochNanoFields,
-  createEpochNanoSlots,
-  getEpochMilli,
-  getEpochNano,
-} from '../../internal/slots'
+import { EpochNanoFields, createEpochNanoSlots } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { TimeUnit, Unit } from '../../internal/units'
@@ -80,11 +76,11 @@ export const Instant = defineTemporalClass(
     }
 
     get epochMilliseconds(): number {
-      return getEpochMilli(getInstantSlots(this))
+      return epochNanoToMilli(getInstantSlots(this).epochNanoseconds)
     }
 
     get epochNanoseconds(): bigint {
-      return getEpochNano(getInstantSlots(this))
+      return getInstantSlots(this).epochNanoseconds
     }
 
     add(durationArg: DurationArg): Instant {
@@ -184,7 +180,7 @@ export const Instant = defineTemporalClass(
         locales,
         transformInstantOptions(options),
       )
-      return format.format(getEpochMilli(slots))
+      return format.format(epochNanoToMilli(slots.epochNanoseconds))
     }
 
     toString(

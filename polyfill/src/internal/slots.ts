@@ -1,7 +1,6 @@
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { computeDurationSign } from './durationMath'
-import { epochNanoToMilli } from './epochMath'
 import { calendarDateFieldNamesAsc, timeFieldNamesAsc } from './fieldNames'
 import {
   CalendarDateFields,
@@ -73,14 +72,3 @@ export function createDurationSlots(
 
 export type EpochNanoFields = { epochNanoseconds: bigint }
 export type ZonedEpochNanoFields = EpochNanoFields & { timeZone: TimeZone }
-
-// Epoch Slot Getters
-// -----------------------------------------------------------------------------
-
-export function getEpochMilli(slots: EpochNanoFields): number {
-  return epochNanoToMilli(slots.epochNanoseconds)
-}
-
-export function getEpochNano(slots: EpochNanoFields): bigint {
-  return slots.epochNanoseconds
-}
