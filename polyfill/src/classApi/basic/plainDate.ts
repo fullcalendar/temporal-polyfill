@@ -16,10 +16,10 @@ import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import {
-  convertToPlainMonthDay,
-  convertToPlainYearMonth,
-  plainDateToZonedDateTime,
-  zonedDateTimeToPlainDate,
+  dateToZonedDateTime,
+  fieldsToMonthDay,
+  fieldsToYearMonth,
+  zonedDateTimeToDate,
 } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
@@ -224,7 +224,7 @@ export const PlainDate = defineTemporalClass(
       const timeFields =
         plainTimeArg !== undefined ? toPlainTimeSlots(plainTimeArg) : undefined
       return createZonedDateTime(
-        plainDateToZonedDateTime(slots, queryTimeZone(timeZoneId), timeFields),
+        dateToZonedDateTime(slots, queryTimeZone(timeZoneId), timeFields),
       )
     }
 
@@ -244,14 +244,14 @@ export const PlainDate = defineTemporalClass(
     toPlainYearMonth(): PlainYearMonth {
       const slots = getPlainDateSlots(this)
       return createPlainYearMonth(
-        convertToPlainYearMonth(slots.calendar, this as unknown as PlainDate),
+        fieldsToYearMonth(slots.calendar, this as unknown as PlainDate),
       )
     }
 
     toPlainMonthDay(): PlainMonthDay {
       const slots = getPlainDateSlots(this)
       return createPlainMonthDay(
-        convertToPlainMonthDay(slots.calendar, this as unknown as PlainDate),
+        fieldsToMonthDay(slots.calendar, this as unknown as PlainDate),
       )
     }
 
@@ -321,7 +321,7 @@ export function toPlainDateSlots(
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
-      return zonedDateTimeToPlainDate(zonedDateTimeSlots)
+      return zonedDateTimeToDate(zonedDateTimeSlots)
     }
 
     const calendar = getCalendarFromBag(arg as DateLikeObject)

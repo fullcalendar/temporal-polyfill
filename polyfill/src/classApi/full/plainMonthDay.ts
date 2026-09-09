@@ -15,7 +15,7 @@ import {
 } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
-import { convertPlainMonthDayToDate } from '../../internal/convert'
+import { monthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
@@ -111,11 +111,7 @@ export const PlainMonthDay = defineTemporalClass(
     toPlainDate(bag: YearFields): PlainDate {
       const slots = getPlainMonthDaySlots(this)
       return createPlainDate(
-        convertPlainMonthDayToDate(
-          slots.calendar,
-          this as unknown as PlainMonthDay,
-          bag,
-        ),
+        monthDayToDate(slots.calendar, this as unknown as PlainMonthDay, bag),
       )
     }
 

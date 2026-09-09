@@ -49,7 +49,7 @@ import {
   compareIsoDateTimeFields,
   plainDateTimesEqual,
 } from '../../internal/compare'
-import { plainDateTimeToZonedDateTime } from '../../internal/convert'
+import { dateTimeToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
 import {
@@ -456,7 +456,7 @@ export function toZonedDateTime(
   timeZoneId: string,
   options?: TemporalSpec.DisambiguationOptions,
 ): ShimZonedDateTimeRecord {
-  const resSlots = plainDateTimeToZonedDateTime(
+  const resSlots = dateTimeToZonedDateTime(
     getShimPlainDateTimeSlots(record),
     queryTimeZone(refineTimeZoneId(timeZoneId)),
     refineEpochDisambigOptions(options),

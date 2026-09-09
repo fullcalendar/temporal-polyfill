@@ -26,7 +26,7 @@ import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { convertPlainYearMonthToDate } from '../../internal/convert'
+import { yearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import {
   negateDurationFields,
@@ -325,7 +325,7 @@ export function toPlainDate(
   fields: DayFields,
 ): ShimPlainDateRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const resSlots = convertPlainYearMonthToDate(slots.calendar, record, fields)
+  const resSlots = yearMonthToDate(slots.calendar, record, fields)
   return createShimPlainDateRecord(resSlots)
 }
 

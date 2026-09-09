@@ -1,12 +1,12 @@
 import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
 import {
-  diffDateRounded,
-  diffDateTimeRounded,
+  diffDateTimesRounded,
+  diffDatesRounded,
   diffEpochNanosRounded,
-  diffTimeRounded,
-  diffYearMonthRounded,
-  diffZonedDateTimeRounded,
+  diffTimesRounded,
+  diffYearMonthsRounded,
+  diffZonedDateTimesRounded,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { negateDurationFields } from '../internal/durationMath'
@@ -66,7 +66,7 @@ export function diffZonedDateTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour)
 
-  const durationFields = diffZonedDateTimeRounded(
+  const durationFields = diffZonedDateTimesRounded(
     calendar,
     slots0,
     slots1,
@@ -94,7 +94,7 @@ export function diffDateTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
 
-  const durationFields = diffDateTimeRounded(
+  const durationFields = diffDateTimesRounded(
     calendar,
     plainDateTimeSlots0,
     plainDateTimeSlots1,
@@ -120,7 +120,7 @@ export function diffDates(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
 
-  const durationFields = diffDateRounded(
+  const durationFields = diffDatesRounded(
     calendar,
     plainDateSlots0,
     plainDateSlots1,
@@ -146,7 +146,7 @@ export function diffYearMonths(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
 
-  const durationFields = diffYearMonthRounded(
+  const durationFields = diffYearMonthsRounded(
     calendar,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
@@ -168,7 +168,7 @@ export function diffTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
-  const durationFields = diffTimeRounded(
+  const durationFields = diffTimesRounded(
     plainTimeSlots0,
     plainTimeSlots1,
     largestUnit as TimeUnit,

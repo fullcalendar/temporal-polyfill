@@ -67,7 +67,7 @@ import {
 // while sharing all temporal arithmetic, range checks, and algorithm-dependent
 // validation below.
 
-export function diffZonedDateTimeRounded(
+export function diffZonedDateTimesRounded(
   calendar: CalendarImpl,
   startZoned: ZonedEpochNanoFields,
   endZoned: ZonedEpochNanoFields,
@@ -96,7 +96,7 @@ export function diffZonedDateTimeRounded(
       )
 }
 
-export function diffDateTimeRounded(
+export function diffDateTimesRounded(
   calendar: CalendarImpl,
   startIsoDateTime: CalendarDateTimeFields,
   endIsoDateTime: CalendarDateTimeFields,
@@ -125,7 +125,7 @@ export function diffDateTimeRounded(
       )
 }
 
-export function diffYearMonthRounded(
+export function diffYearMonthsRounded(
   calendar: CalendarImpl,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
@@ -155,7 +155,7 @@ export function diffYearMonthRounded(
   )
 }
 
-export function diffDateRounded(
+export function diffDatesRounded(
   calendar: CalendarImpl,
   startIsoDate: CalendarDateFields,
   endIsoDate: CalendarDateFields,
@@ -186,7 +186,7 @@ export function diffDateRounded(
       )
 }
 
-export function diffTimeRounded(
+export function diffTimesRounded(
   plainTimeSlots0: TimeFields,
   plainTimeSlots1: TimeFields,
   largestUnit: TimeUnit,

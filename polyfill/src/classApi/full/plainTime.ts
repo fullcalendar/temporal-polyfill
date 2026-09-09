@@ -11,7 +11,7 @@ import { withTimeFields } from '../../apiHelpers/fieldUpdate'
 import { timeGetters } from '../../apiHelpers/shimMixins'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
-import { zonedDateTimeToPlainTime } from '../../internal/convert'
+import { zonedDateTimeToTime } from '../../internal/convert'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
 import { TimeFields } from '../../internal/fieldTypes'
@@ -226,7 +226,7 @@ export function toPlainTimeSlots(
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
-      return zonedDateTimeToPlainTime(zonedDateTimeSlots)
+      return zonedDateTimeToTime(zonedDateTimeSlots)
     }
 
     return refinePlainTimeObjectLike(arg as Partial<TimeFields>, options)

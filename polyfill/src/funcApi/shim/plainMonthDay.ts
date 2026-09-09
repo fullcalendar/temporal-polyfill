@@ -9,7 +9,7 @@ import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'
-import { convertPlainMonthDayToDate } from '../../internal/convert'
+import { monthDayToDate } from '../../internal/convert'
 import { refinePlainMonthDayObjectLike } from '../../internal/createFromFields'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
 import {
@@ -215,7 +215,7 @@ export function toPlainDate(
   fields: EraYearOrYear,
 ): ShimPlainDateRecord {
   const slots = getShimPlainMonthDaySlots(record)
-  const resSlots = convertPlainMonthDayToDate(slots.calendar, record, fields)
+  const resSlots = monthDayToDate(slots.calendar, record, fields)
   return createShimPlainDateRecord(resSlots)
 }
 

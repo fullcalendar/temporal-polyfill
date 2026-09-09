@@ -20,8 +20,8 @@ import {
   plainDateTimesEqual,
 } from '../../internal/compare'
 import {
-  plainDateTimeToZonedDateTime,
-  zonedDateTimeToPlainDateTime,
+  dateTimeToZonedDateTime,
+  zonedDateTimeToDateTime,
 } from '../../internal/convert'
 import { refinePlainDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
@@ -281,7 +281,7 @@ export const PlainDateTime = defineTemporalClass(
       options: Temporal.DisambiguationOptions | undefined = undefined,
     ): ZonedDateTime {
       return createZonedDateTime(
-        plainDateTimeToZonedDateTime(
+        dateTimeToZonedDateTime(
           getPlainDateTimeSlots(this),
           queryTimeZone(refineTimeZoneArg(timeZoneArg)),
           refineEpochDisambigOptions(options),
@@ -368,7 +368,7 @@ export function toPlainDateTimeSlots(
     const zonedDateTimeSlots = getZonedDateTimeSlotsIfPresent(arg)
     if (zonedDateTimeSlots) {
       refineOverflowOptions(options) // parse unused options
-      return zonedDateTimeToPlainDateTime(zonedDateTimeSlots)
+      return zonedDateTimeToDateTime(zonedDateTimeSlots)
     }
 
     const calendar = getCalendarFromBag(arg as DateLikeObject)

@@ -5,7 +5,7 @@ import {
   diffDateDayWeekUnitsRounded,
   diffDateTimeCalendarUnitsRounded,
   diffDateTimeDayWeekUnitsRounded,
-  diffYearMonthRounded,
+  diffYearMonthsRounded,
   diffZonedCalendarUnitsRounded,
   diffZonedDayWeekUnitsRounded,
 } from '../internal/diff'
@@ -183,7 +183,7 @@ function diffYearMonthCalendarUnit(
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const [smallestUnit, roundingInc, roundingMode, shouldTotal] =
     refineUnitDiffOptions(unit, options, Unit.Month)
-  const durationFields = diffYearMonthRounded(
+  const durationFields = diffYearMonthsRounded(
     calendar,
     slots0,
     slots1,

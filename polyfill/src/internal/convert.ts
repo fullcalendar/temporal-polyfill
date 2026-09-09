@@ -75,7 +75,7 @@ export function zonedDateTimeToInstant(
   return createEpochNanoSlots(zonedDateTimeSlots0.epochNanoseconds)
 }
 
-export function zonedDateTimeToPlainDateTime(
+export function zonedDateTimeToDateTime(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
   return createDateTimeSlots(
@@ -84,7 +84,7 @@ export function zonedDateTimeToPlainDateTime(
   )
 }
 
-export function zonedDateTimeToPlainDate(
+export function zonedDateTimeToDate(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): CalendarDateFields & { calendar: CalendarImpl } {
   return createDateSlots(
@@ -93,16 +93,16 @@ export function zonedDateTimeToPlainDate(
   )
 }
 
-export function zonedDateTimeToPlainTime(
+export function zonedDateTimeToTime(
   zonedDateTimeSlots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
 ): TimeFields {
   return createTimeSlots(zonedEpochSlotsToIso(zonedDateTimeSlots0))
 }
 
-// PlainDateTime -> *
+// DateTime -> *
 // -----------------------------------------------------------------------------
 
-export function plainDateTimeToZonedDateTime(
+export function dateTimeToZonedDateTime(
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
   timeZone: TimeZone,
   epochDisambig: EpochDisambig,
@@ -119,11 +119,11 @@ export function plainDateTimeToZonedDateTime(
   )
 }
 
-// PlainDate -> *
+// Date -> *
 // -----------------------------------------------------------------------------
 
 // Missing time means start of day; explicit midnight resolves as a local time.
-export function plainDateToZonedDateTime(
+export function dateToZonedDateTime(
   plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
   timeZone: TimeZone,
   timeFields: TimeFields | undefined,
@@ -153,10 +153,10 @@ path. Keep them here with the other toX-style conversions, but preserve that
 field-pipeline boundary.
 */
 
-// PlainYearMonth -> *
+// YearMonth -> *
 // -----------------------------------------------------------------------------
 
-export function convertPlainYearMonthToDate(
+export function yearMonthToDate(
   calendar: CalendarImpl,
   input: YearMonthFields,
   bag: DayFields,
@@ -177,13 +177,13 @@ export function convertPlainYearMonthToDate(
     [],
   )
 
-  return createPlainDateFromMergedFields(calendar, inputFields, extraFields)
+  return mergeFieldsIntoDate(calendar, inputFields, extraFields)
 }
 
-// PlainMonthDay -> *
+// MonthDay -> *
 // -----------------------------------------------------------------------------
 
-export function convertPlainMonthDayToDate(
+export function monthDayToDate(
   calendar: CalendarImpl,
   input: { monthCode: string; day: number },
   bag: EraYearOrYear,
@@ -204,10 +204,10 @@ export function convertPlainMonthDayToDate(
     [],
   )
 
-  return createPlainDateFromMergedFields(calendar, inputFields, extraFields)
+  return mergeFieldsIntoDate(calendar, inputFields, extraFields)
 }
 
-export function convertToPlainMonthDay(
+export function fieldsToMonthDay(
   calendar: CalendarImpl,
   input: { monthCode: string; day: number }, // TODO: better type for this?
 ): CalendarDateFields & { calendar: CalendarImpl } {
@@ -227,7 +227,7 @@ export function convertToPlainMonthDay(
   )
 }
 
-export function convertToPlainYearMonth(
+export function fieldsToYearMonth(
   calendar: CalendarImpl,
   input: { year: number; monthCode: string },
 ): CalendarDateFields & { calendar: CalendarImpl } {
@@ -256,7 +256,7 @@ export function convertToPlainYearMonth(
   )
 }
 
-function createPlainDateFromMergedFields(
+function mergeFieldsIntoDate(
   calendar: CalendarImpl,
   inputFields: Record<string, unknown>,
   extraFields: Record<string, unknown>,
@@ -288,13 +288,13 @@ function createPlainDateFromMergedFields(
   )
 }
 
-// PlainTime -> *
+// Time -> *
 // -----------------------------------------------------------------------------
 
 /*
 Only used by funcApi
 */
-export function plainTimeToZonedDateTime<PA>(
+export function timeToZonedDateTime<PA>(
   refineTimeZoneString: (timeZoneString: string) => string,
   refinePlainDateArg: (
     plainDateArg: PA,

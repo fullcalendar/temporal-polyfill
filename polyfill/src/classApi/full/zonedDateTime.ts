@@ -20,10 +20,10 @@ import {
   zonedDateTimesEqual,
 } from '../../internal/compare'
 import {
+  zonedDateTimeToDate,
+  zonedDateTimeToDateTime,
   zonedDateTimeToInstant,
-  zonedDateTimeToPlainDate,
-  zonedDateTimeToPlainDateTime,
-  zonedDateTimeToPlainTime,
+  zonedDateTimeToTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
@@ -296,20 +296,16 @@ export const ZonedDateTime = defineTemporalClass(
 
     toPlainDateTime(): PlainDateTime {
       return createPlainDateTime(
-        zonedDateTimeToPlainDateTime(getZonedDateTimeSlots(this)),
+        zonedDateTimeToDateTime(getZonedDateTimeSlots(this)),
       )
     }
 
     toPlainDate(): PlainDate {
-      return createPlainDate(
-        zonedDateTimeToPlainDate(getZonedDateTimeSlots(this)),
-      )
+      return createPlainDate(zonedDateTimeToDate(getZonedDateTimeSlots(this)))
     }
 
     toPlainTime(): PlainTime {
-      return createPlainTime(
-        zonedDateTimeToPlainTime(getZonedDateTimeSlots(this)),
-      )
+      return createPlainTime(zonedDateTimeToTime(getZonedDateTimeSlots(this)))
     }
 
     toLocaleString(

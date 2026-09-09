@@ -47,10 +47,10 @@ import {
   zonedDateTimesEqual,
 } from '../../internal/compare'
 import {
+  zonedDateTimeToDate,
+  zonedDateTimeToDateTime,
   zonedDateTimeToInstant,
-  zonedDateTimeToPlainDate,
-  zonedDateTimeToPlainDateTime,
-  zonedDateTimeToPlainTime,
+  zonedDateTimeToTime,
 } from '../../internal/convert'
 import { refineZonedDateTimeObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
@@ -500,23 +500,21 @@ export function toInstant(record: ShimZonedDateTimeRecord): ShimInstantRecord {
 export function toPlainDateTime(
   record: ShimZonedDateTimeRecord,
 ): ShimPlainDateTimeRecord {
-  const resSlots = zonedDateTimeToPlainDateTime(
-    getShimZonedDateTimeSlots(record),
-  )
+  const resSlots = zonedDateTimeToDateTime(getShimZonedDateTimeSlots(record))
   return createShimPlainDateTimeRecord(resSlots)
 }
 
 export function toPlainDate(
   record: ShimZonedDateTimeRecord,
 ): ShimPlainDateRecord {
-  const resSlots = zonedDateTimeToPlainDate(getShimZonedDateTimeSlots(record))
+  const resSlots = zonedDateTimeToDate(getShimZonedDateTimeSlots(record))
   return createShimPlainDateRecord(resSlots)
 }
 
 export function toPlainTime(
   record: ShimZonedDateTimeRecord,
 ): ShimPlainTimeRecord {
-  const resSlots = zonedDateTimeToPlainTime(getShimZonedDateTimeSlots(record))
+  const resSlots = zonedDateTimeToTime(getShimZonedDateTimeSlots(record))
   return createShimPlainTimeRecord(resSlots)
 }
 

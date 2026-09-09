@@ -44,7 +44,7 @@ import {
 import { IsoDateTimeInterval } from '../../internal/calendarInterval'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
-import { plainDateToZonedDateTime } from '../../internal/convert'
+import { dateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
@@ -408,7 +408,7 @@ export function toZonedDateTime(
     plainTimeArg !== undefined
       ? getPlainTimeSlots<TimeFields>(plainTimeArg)
       : undefined
-  const resSlots = plainDateToZonedDateTime(
+  const resSlots = dateToZonedDateTime(
     slots,
     queryTimeZone(timeZoneId),
     timeFields,

@@ -18,7 +18,7 @@ import {
   compareIsoDateFields,
   plainYearMonthsEqual,
 } from '../../internal/compare'
-import { convertPlainYearMonthToDate } from '../../internal/convert'
+import { yearMonthToDate } from '../../internal/convert'
 import { refinePlainYearMonthObjectLike } from '../../internal/createFromFields'
 import { negateDurationFields } from '../../internal/durationMath'
 import { isoDateToEpochMilli } from '../../internal/epochMath'
@@ -184,11 +184,7 @@ export const PlainYearMonth = defineTemporalClass(
     toPlainDate(bag: { day: number }): PlainDate {
       const slots = getPlainYearMonthSlots(this)
       return createPlainDate(
-        convertPlainYearMonthToDate(
-          slots.calendar,
-          this as unknown as PlainYearMonth,
-          bag,
-        ),
+        yearMonthToDate(slots.calendar, this as unknown as PlainYearMonth, bag),
       )
     }
 
