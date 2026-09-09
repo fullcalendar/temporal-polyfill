@@ -4,6 +4,7 @@ import { LocalesArg } from '../internal/intlFormatUtils'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
 import {
+  DateFromFields,
   DateTimeFormatLike,
   PlainDateToZonedDateTimeOptions,
 } from './commonTypes'
@@ -25,7 +26,7 @@ import type * as ZonedDateTimeFns from './zonedDateTime'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-export type FromFields = Partial<DateFields & { calendar: CalendarFns.Record }>
+export type FromFields = DateFromFields<CalendarFns.Record>
 export type WithFields = Partial<DateFields>
 export type DiffOptions =
   Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit>

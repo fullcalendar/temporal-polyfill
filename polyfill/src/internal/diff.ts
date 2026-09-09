@@ -550,7 +550,7 @@ export function diffZonedDateParts(
     startZoned,
     endZoned,
     sign,
-  )!
+  )
   const dateDiff = diffDate(isoFields0, isoFields1)
 
   return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
@@ -582,15 +582,12 @@ function diffDateTimesBig(
   return { ...dateDiff, ...nanoToDurationTimeFields(timeNano) }
 }
 
-/*
-HACK: callers should always assert defined result
-*/
 export function prepareZonedEpochDiff(
   timeZone: TimeZone,
   startZoned: ZonedEpochNanoFields,
   endZoned: ZonedEpochNanoFields,
   sign: -1 | 1,
-): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
+): [CalendarDateTimeFields, CalendarDateFields, number] {
   const startIsoDate = zonedEpochSlotsToIso(startZoned)
   const endIsoDate = zonedEpochSlotsToIso(endZoned)
   const endEpochNano = endZoned.epochNanoseconds
@@ -610,14 +607,19 @@ export function prepareZonedEpochDiff(
   // that direction gets a single extra retry.
   const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
 
-  for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
+  // The condition-less `for` lets TypeScript see that the final candidate is
+  // returned unconditionally, so the result type needs no `undefined`.
+  for (; ; dayCorrection++) {
     const midIsoDate = moveDateByDays(endIsoDate, dayCorrection * -sign)
     const midEpochNano = getSingleInstantFor(
       timeZone,
       combineDateAndTime(midIsoDate, startIsoDate),
     )
 
-    if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
+    if (
+      dayCorrection === maxDayCorrection ||
+      compareBigInts(endEpochNano, midEpochNano) !== -sign
+    ) {
       const remainderNano = Number(endEpochNano - midEpochNano)
       return [startIsoDate, midIsoDate, remainderNano]
     }

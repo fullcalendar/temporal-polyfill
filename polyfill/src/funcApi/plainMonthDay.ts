@@ -3,7 +3,7 @@ import { EraYearOrYear, MonthDayFields } from '../internal/fieldTypes'
 import { LocalesArg } from '../internal/intlFormatUtils'
 import { NativeTemporal } from '../nativeSwitch'
 import type * as CalendarFns from './calendar'
-import { DateTimeFormatLike } from './commonTypes'
+import { DateTimeFormatLike, MonthDayFromFields } from './commonTypes'
 import type { OverflowOptions } from './index'
 import * as Native from './native/plainMonthDay'
 import type * as PlainDateFns from './plainDate'
@@ -13,11 +13,7 @@ import { isPlainMonthDayRecord } from './temporalRecords'
 
 export type { Record }
 export type Format = DateTimeFormatLike<Record>
-export type FromFields = Partial<
-  MonthDayFields & {
-    calendar: CalendarFns.Record
-  }
->
+export type FromFields = MonthDayFromFields<CalendarFns.Record>
 export type WithFields = Partial<MonthDayFields>
 export type ToStringOptions = Temporal.PlainDateToStringOptions
 

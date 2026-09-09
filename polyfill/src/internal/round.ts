@@ -362,10 +362,8 @@ function nudgeRelativeDuration(
 
   // convert days to whole weeks
   if (smallestUnit === Unit.Week) {
-    // HACK to assume 7 days in a week. Works okay for now since applies to all current calendars.
-    // Necessary because week nudging works from duration fields; the marker
-    // context gives us movement/epoch math but not calendar-specific week data.
-    // https://github.com/tc39/proposal-temporal/issues/2837
+    // Leftover days are already zeroed in baseDurationFields and reappear
+    // as the nudge-window fraction below.
     durationFields = {
       ...durationFields,
       weeks: durationFields.weeks + Math.trunc(durationFields.days / 7),

@@ -111,7 +111,7 @@ export function fromFields(
 ): NativeZonedDateTimeRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.ZonedDateTime.from(
-    { ...fields, calendar } as any, // !!! TODO - day is required
+    { ...fields, calendar },
     options,
   )
   return createNativeZonedDateTimeRecord(resNative)

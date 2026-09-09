@@ -78,6 +78,7 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
 import {
+  DateFromFields,
   DateTimeFormatLike,
   PlainDateToZonedDateTimeOptions,
 } from '../commonTypes'
@@ -191,7 +192,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateFields & { calendar: RecordTypes.CalendarRecord }>,
+  fields: DateFromFields<RecordTypes.CalendarRecord>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)

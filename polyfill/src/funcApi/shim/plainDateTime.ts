@@ -106,7 +106,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { DateTimeFormatLike } from '../commonTypes'
+import { DateTimeFormatLike, DateTimeFromFields } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -226,7 +226,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateTimeFields & { calendar: RecordTypes.CalendarRecord }>,
+  fields: DateTimeFromFields<RecordTypes.CalendarRecord>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
   const calendarImpl = refineShimCalendarArgMaybe(fields.calendar)

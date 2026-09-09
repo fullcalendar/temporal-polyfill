@@ -33,7 +33,6 @@ export function createZonedEpochNanoSlots(
   }
 }
 
-// TODO: rename splitDateTimeSlots
 export function createDateTimeSlots(
   isoDateTime: CalendarDateTimeFields,
   calendar?: CalendarImpl,
@@ -46,7 +45,6 @@ export function createDateTimeSlots(
   )
 }
 
-// TODO: rename spliceDateSlots
 export function createDateSlots(
   isoDate: CalendarDateFields,
   calendar?: CalendarImpl,
@@ -55,7 +53,6 @@ export function createDateSlots(
   return pluckProps(calendarDateFieldNamesAsc, isoDate, { calendar })
 }
 
-// TODO: rename pluckTimeSlots
 export function createTimeSlots(time: TimeFields): TimeFields {
   return pluckProps(timeFieldNamesAsc, time)
 }

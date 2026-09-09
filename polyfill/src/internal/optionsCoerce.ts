@@ -73,9 +73,16 @@ export function coerceFractionalSecondDigits(options: {
   return subsecDigits
 }
 
+// The call shape of a bound unit coercer. With ensureDefined, `undefined` and
+// 'auto' both become minUnit, so the result is always a Unit; otherwise `null`
+// means 'auto' and `undefined` means absent.
+type UnitOptionCoercer<O> = {
+  (options: O, minUnit: Unit, ensureDefined: true): Unit
+  (options: O, minUnit?: Unit, ensureDefined?: false): Unit | null | undefined
+}
+
 /*
 `null` means 'auto'
-TODO: create better type where if ensureDefined, then return-type is non null/defined
 */
 export function coerceUnitOption<O>(
   optionName: keyof O & string,
@@ -138,7 +145,9 @@ export const coerceSmallestUnit = bindArgs(
     Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>
   >,
   smallestUnitStr,
-)
+) as unknown as UnitOptionCoercer<
+  Temporal.RoundingOptions<Temporal.DateUnit | Temporal.TimeUnit>
+>
 // generic. callers should type-narrow the results
 export const coerceLargestUnit = bindArgs(
   coerceUnitOption<
@@ -147,11 +156,13 @@ export const coerceLargestUnit = bindArgs(
     >
   >,
   largestUnitStr,
-)
+) as unknown as UnitOptionCoercer<
+  Temporal.RoundingOptionsWithLargestUnit<Temporal.DateUnit | Temporal.TimeUnit>
+>
 export const coerceTotalUnit = bindArgs(
   coerceUnitOption<Pick<Temporal.DurationTotalOptions, 'unit'>>,
   totalUnitStr,
-)
+) as unknown as UnitOptionCoercer<Pick<Temporal.DurationTotalOptions, 'unit'>>
 export const coerceOverflow = bindArgs(
   coerceChoiceOption<Temporal.OverflowOptions>,
   'overflow',

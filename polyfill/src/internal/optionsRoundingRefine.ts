@@ -67,7 +67,7 @@ export function refineDiffOptions<
   let largestUnit = coerceLargestUnit(options, minUnit)
   let roundingInc = coerceRoundingIncInteger(options)
   let roundingMode = coerceRoundingMode(options, defaultRoundingMode)
-  let smallestUnit = coerceSmallestUnit(options, minUnit, true)!
+  let smallestUnit = coerceSmallestUnit(options, minUnit, true)
 
   largestUnit = validateUnitRange(largestUnitStr, largestUnit, minUnit, maxUnit)
   smallestUnit = validateUnitRange(

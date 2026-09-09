@@ -34,7 +34,7 @@ import {
 import { parsePlainMonthDay } from '../../internal/isoParse'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
-import { DateTimeFormatLike } from '../commonTypes'
+import { DateTimeFormatLike, MonthDayFromFields } from '../commonTypes'
 import { PlainMonthDayRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
 import {
@@ -114,7 +114,7 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<MonthDayFields & { calendar: RecordTypes.CalendarRecord }>,
+  fields: MonthDayFromFields<RecordTypes.CalendarRecord>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
   const inputCalendar = fields.calendar

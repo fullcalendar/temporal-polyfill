@@ -97,7 +97,7 @@ export function refineMonthDayFields(
   const monthCodeParts = parseMonthCodeField(fields)
 
   const yearMaybe =
-    fields.eraYear !== undefined || fields.year !== undefined // HACK
+    fields.eraYear !== undefined || fields.year !== undefined
       ? resolveCalendarYear(fields, calendar)
       : undefined
 
@@ -180,7 +180,6 @@ export function createMonthDayFromRefinedFields(
   let monthCodeNumber: number
   let isLeapMonth: boolean
 
-  // TODO: make this DRY the HACK in refinePlainMonthDayObjectLike?
   if (yearMaybe === undefined && isIso) {
     yearMaybe = isoEpochFirstLeapYear
   }
@@ -230,11 +229,12 @@ export function createMonthDayFromRefinedFields(
     // already parsed this before option reads, so reuse that tuple here.
     ;[monthCodeNumber, isLeapMonth] = monthCodeParts!
 
-    // This is ALSO a HACK for maxLengthOfMonthCodeInAnyYear in reference implementation's createPlainMonthDayFromFields
-    // to limit the day in calendar with predictable max-days-in-month without the year
+    // Mirrors the reference implementation's maxLengthOfMonthCodeInAnyYear:
+    // limit the day using a year with predictable max-days-in-month.
     const referenceYear = calendar
       ? calendar.monthDayReferenceYear
       : isoEpochFirstLeapYear
+
     if (referenceYear !== undefined) {
       // ISO-derived calendars share Gregorian month lengths, but their
       // calendar year may not be the ISO year. The reference year corresponds

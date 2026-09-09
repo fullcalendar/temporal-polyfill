@@ -12,6 +12,7 @@ import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import {
+  DateFromFields,
   DateTimeFormatLike,
   NativeDiffFunc,
   PlainDateToZonedDateTimeOptions,
@@ -101,12 +102,12 @@ export function create(
 }
 
 export function fromFields(
-  fields: Partial<DateFields & { calendar: RecordTypes.CalendarRecord }>,
+  fields: DateFromFields<RecordTypes.CalendarRecord>,
   options?: Temporal.OverflowOptions,
 ): NativePlainDateRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.PlainDate.from(
-    { ...fields, calendar } as any, // !!! TODO - day is required
+    { ...fields, calendar },
     options,
   )
   return createNativePlainDateRecord(resNative)

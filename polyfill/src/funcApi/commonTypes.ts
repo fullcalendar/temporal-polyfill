@@ -1,4 +1,9 @@
-import { DateTimeFields } from '../internal/fieldTypes'
+import {
+  DateFields,
+  DateTimeFields,
+  DayFields,
+  MonthDayFields,
+} from '../internal/fieldTypes'
 import type { RoundingMathOptions, RoundingMode } from './index'
 
 export type DateTimeFormatLike<R> = Omit<
@@ -32,9 +37,28 @@ export type NativeDiffFunc<T> = (
   options?: RoundingMathOptions | RoundingMode,
 ) => number
 
-// temporal-spec can't be used as-is because calendar is a *record* here
-export type ZonedDateTimeFields<CalendarRecord> = Partial<DateTimeFields> & {
-  calendar?: CalendarRecord
-  offset?: string
-  timeZone: string
-}
+// Field bags accepted by fromFields. temporal-spec's *LikeObject types can't
+// be used as-is because calendar is a *record* here, but they agree on shape:
+// anything with a day requires it (PlainDate, PlainDateTime, PlainMonthDay,
+// ZonedDateTime), while PlainYearMonth's bag stays fully optional.
+export type DateFromFields<CalendarRecord> = Partial<DateFields> &
+  DayFields & {
+    calendar?: CalendarRecord
+  }
+
+export type DateTimeFromFields<CalendarRecord> = Partial<DateTimeFields> &
+  DayFields & {
+    calendar?: CalendarRecord
+  }
+
+export type MonthDayFromFields<CalendarRecord> = Partial<MonthDayFields> &
+  DayFields & {
+    calendar?: CalendarRecord
+  }
+
+export type ZonedDateTimeFields<CalendarRecord> = Partial<DateTimeFields> &
+  DayFields & {
+    calendar?: CalendarRecord
+    offset?: string
+    timeZone: string
+  }
