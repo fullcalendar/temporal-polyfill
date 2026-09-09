@@ -11,7 +11,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffPlainDateTimes } from '../../apiHelpers/dateTimeDiff'
+import { diffDateTimes } from '../../apiHelpers/dateTimeDiff'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
@@ -19,16 +19,16 @@ import {
   moveByYears,
   reversedMove,
 } from '../../apiHelpers/dateTimeMove'
-import { withPlainDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { withDateTimeFields } from '../../apiHelpers/fieldUpdate'
 import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
 import {
   adaptRecordTimeUnitDiff,
-  diffPlainDateTimeEpochNanoTimeUnit,
-  diffPlainDateTimeMonths,
-  diffPlainDateTimeYears,
-  diffPlainDays,
-  diffPlainWeeks,
+  diffDateTimeDays,
+  diffDateTimeEpochNanoTimeUnit,
+  diffDateTimeMonths,
+  diffDateTimeWeeks,
+  diffDateTimeYears,
 } from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDayOfYear,
@@ -84,13 +84,13 @@ import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
 } from '../../internal/optionsFieldRefine'
-import { computeNanoInc, roundDateTimeToNano } from '../../internal/round'
+import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
 import {
   createDateSlots,
   createDateTimeSlots,
   createTimeSlots,
 } from '../../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { createDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
@@ -255,7 +255,7 @@ export function withFields(
   mod: Partial<DateTimeFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainDateTimeRecord {
-  const resSlots = withPlainDateTimeFields(
+  const resSlots = withDateTimeFields(
     getShimPlainDateTimeSlots(record),
     validateBag(mod),
     options,
@@ -270,7 +270,7 @@ export function withPlainTime(
   const slots = getShimPlainDateTimeSlots(record)
   const timeFields =
     getPlainTimeSlotsIfPresent<TimeFields>(plainTimeRecord) || plainTimeRecord
-  const resSlots = createPlainDateTimeFromRefinedFields(
+  const resSlots = createDateTimeFromRefinedFields(
     slots,
     timeFields,
     slots.calendar,
@@ -374,7 +374,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainDateTimeSlots(record)
   const otherSlots = getShimPlainDateTimeSlots(otherRecord)
-  const resSlots = diffPlainDateTimes(false, slots, otherSlots, options)
+  const resSlots = diffDateTimes(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -512,7 +512,7 @@ export function withDayOfYear(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveToDayOfYear(slots.calendar, slots, dayOfYear, options),
       slots,
       slots.calendar,
@@ -527,7 +527,7 @@ export function withDayOfMonth(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveToDayOfMonth(slots.calendar, slots, dayOfMonth, options),
       slots,
       slots.calendar,
@@ -542,7 +542,7 @@ export function withDayOfWeek(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveToDayOfWeek(slots.calendar, slots, dayOfWeek, options),
       slots,
       slots.calendar,
@@ -557,7 +557,7 @@ export function withWeekOfYear(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveToWeekOfYear(slots.calendar, slots, weekOfYear, options),
       slots,
       slots.calendar,
@@ -575,7 +575,7 @@ export function addYears(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveByYears(slots.calendar, slots, years, options),
       slots,
       slots.calendar,
@@ -590,7 +590,7 @@ export function addMonths(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveByMonths(slots.calendar, slots, months, options),
       slots,
       slots.calendar,
@@ -604,7 +604,7 @@ export function addWeeks(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveByIsoWeeks(slots.calendar, slots, weeks),
       slots,
       slots.calendar,
@@ -618,7 +618,7 @@ export function addDays(
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
+    createDateTimeFromRefinedFields(
       moveByDaysStrict(slots.calendar, slots, days),
       slots,
       slots.calendar,
@@ -679,7 +679,7 @@ function roundToDayTimeUnit(
   )
   return createShimPlainDateTimeRecord(
     createDateTimeSlots(
-      roundDateTimeToNano(
+      roundDateTimeToInc(
         slots,
         computeNanoInc(smallestUnit, roundingInc),
         roundingMode,
@@ -807,7 +807,7 @@ export function diffYears(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateTimeYears(
+  return diffDateTimeYears(
     getShimPlainDateTimeSlots(record0),
     getShimPlainDateTimeSlots(record1),
     options,
@@ -819,7 +819,7 @@ export function diffMonths(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateTimeMonths(
+  return diffDateTimeMonths(
     getShimPlainDateTimeSlots(record0),
     getShimPlainDateTimeSlots(record1),
     options,
@@ -831,7 +831,7 @@ export function diffWeeks(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainWeeks(
+  return diffDateTimeWeeks(
     getShimPlainDateTimeSlots(record0),
     getShimPlainDateTimeSlots(record1),
     options,
@@ -843,7 +843,7 @@ export function diffDays(
   record1: ShimPlainDateTimeRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDays(
+  return diffDateTimeDays(
     getShimPlainDateTimeSlots(record0),
     getShimPlainDateTimeSlots(record1),
     options,
@@ -853,7 +853,7 @@ export function diffDays(
 const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
   ShimPlainDateTimeRecord,
   ShimPlainDateTimeSlots
->(diffPlainDateTimeEpochNanoTimeUnit, getShimPlainDateTimeSlots)
+>(diffDateTimeEpochNanoTimeUnit, getShimPlainDateTimeSlots)
 
 export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour)
 export const diffMinutes = bindArgs(diffRecordTimeUnit, Unit.Minute)
@@ -892,11 +892,7 @@ function roundToInterval(
     roundingMode,
   )
   return createShimPlainDateTimeRecord(
-    createPlainDateTimeFromRefinedFields(
-      isoDateTime,
-      isoDateTime,
-      slots.calendar,
-    ),
+    createDateTimeFromRefinedFields(isoDateTime, isoDateTime, slots.calendar),
   )
 }
 
@@ -918,11 +914,7 @@ function aligned(
     }
 
     return createShimPlainDateTimeRecord(
-      createPlainDateTimeFromRefinedFields(
-        isoDateTime,
-        isoDateTime,
-        slots.calendar,
-      ),
+      createDateTimeFromRefinedFields(isoDateTime, isoDateTime, slots.calendar),
     )
   }
 }

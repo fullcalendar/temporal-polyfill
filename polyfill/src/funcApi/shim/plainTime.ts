@@ -5,14 +5,14 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffPlainTimes } from '../../apiHelpers/dateTimeDiff'
+import { diffTimes } from '../../apiHelpers/dateTimeDiff'
 import { reversedMove } from '../../apiHelpers/dateTimeMove'
-import { withPlainTimeFields } from '../../apiHelpers/fieldUpdate'
+import { withTimeFields } from '../../apiHelpers/fieldUpdate'
 import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { timeGetters } from '../../apiHelpers/shimMixins'
 import {
   adaptRecordTimeUnitDiff,
-  diffPlainTimeNanoOfDayTimeUnit,
+  diffTimeNanoOfDayTimeUnit,
 } from '../../apiHelpers/unitDiff'
 import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -25,7 +25,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { moveTime, moveTimeByNano } from '../../internal/move'
-import { computeNanoInc, roundTimeToNano } from '../../internal/round'
+import { computeNanoInc, roundTimeToInc } from '../../internal/round'
 import {
   timeFieldsToMilli,
   validateTimeFields,
@@ -125,7 +125,7 @@ export function withFields(
   mod: Partial<TimeFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainTimeRecord {
-  const resSlots = withPlainTimeFields(
+  const resSlots = withTimeFields(
     getShimPlainTimeSlots(record),
     validateBag(mod),
     options,
@@ -163,9 +163,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainTimeSlots(record)
   const otherSlots = getShimPlainTimeSlots(otherRecord)
-  return createShimDurationRecord(
-    diffPlainTimes(false, slots, otherSlots, options),
-  )
+  return createShimDurationRecord(diffTimes(false, slots, otherSlots, options))
 }
 
 export function equals(
@@ -297,7 +295,7 @@ function roundToUnit(
     options,
   )
   return createShimPlainTimeRecord(
-    roundTimeToNano(
+    roundTimeToInc(
       slots,
       computeNanoInc(smallestUnit, roundingInc),
       roundingMode,
@@ -425,7 +423,7 @@ export function endOfMicrosecond(
 const diffRecordTimeUnit = adaptRecordTimeUnitDiff<
   ShimPlainTimeRecord,
   ShimPlainTimeSlots
->(diffPlainTimeNanoOfDayTimeUnit, getShimPlainTimeSlots)
+>(diffTimeNanoOfDayTimeUnit, getShimPlainTimeSlots)
 
 export const diffHours = bindArgs(diffRecordTimeUnit, Unit.Hour)
 export const diffMinutes = bindArgs(diffRecordTimeUnit, Unit.Minute)

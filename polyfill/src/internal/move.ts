@@ -38,6 +38,10 @@ import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
 import { clampEntity, throwRangeError } from './utils'
 
+// Naming throughout this file: `move*` takes a DurationFields (or a raw
+// nanosecond/day delta in the `*By*` primitives), while `add*` takes bare
+// year/month counts and works in calendar coordinates.
+
 // Pre-refined value movement
 // -----------------------------------------------------------------------------
 // Entry points that public add/subtract paths reach after refining their
@@ -203,7 +207,7 @@ export function moveEpochNano(
 Mirrors CalendarDateAdd, including its ISODateWithinLimits rejection. That check
 is date-level: checkIsoDateInBounds probes the date at noon, so it admits the
 extra ISO day at each edge that PlainDateTime only partly allows. Relative
-rounding leans on exactly that — see moveRelativeToEpochNano.
+rounding leans on exactly that — see moveRelativeMarkerToEpochNano.
 
 Skips the calendar if moving days only.
 */
@@ -235,7 +239,7 @@ export function moveDate(
 
 // Move only by ISO days or seven-day weeks while retaining moveDate's required
 // intermediate date bounds check.
-export function moveIsoDurationDate(
+export function moveDateByDayWeekUnits(
   origin: CalendarDateFields,
   durationFields: DurationFields,
 ): CalendarDateFields {
@@ -274,7 +278,7 @@ export function addDateMonths(
       month,
     )
     year += years
-    month = computeYearMovedMonth(
+    month = resolveMonthInMovedYear(
       calendar,
       monthCodeNumber,
       isLeapMonth,
@@ -323,7 +327,9 @@ export function addCalendarMonths(
     : addIsoMonths(year, month, monthDelta)
 }
 
-export function computeYearMovedMonth(
+// Year arithmetic keeps the source monthCode and re-resolves it as an ordinal
+// month in the destination year, which may or may not contain that leap month.
+export function resolveMonthInMovedYear(
   calendar: CalendarImpl,
   monthCodeNumber: number,
   isLeapMonth: boolean,

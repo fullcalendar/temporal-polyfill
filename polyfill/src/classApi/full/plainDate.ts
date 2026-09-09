@@ -6,8 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffPlainDates } from '../../apiHelpers/dateTimeDiff'
-import { withPlainDateFields } from '../../apiHelpers/fieldUpdate'
+import { diffDates } from '../../apiHelpers/dateTimeDiff'
+import { withDateFields } from '../../apiHelpers/fieldUpdate'
 import {
   dateDerivedGetters,
   dateFieldGetters,
@@ -41,7 +41,7 @@ import { parsePlainDate } from '../../internal/isoParse'
 import { moveDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { createDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
@@ -129,7 +129,7 @@ export const PlainDate = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDate {
       return createPlainDate(
-        withPlainDateFields(getPlainDateSlots(this), validateBag(mod), options),
+        withDateFields(getPlainDateSlots(this), validateBag(mod), options),
       )
     }
 
@@ -184,7 +184,7 @@ export const PlainDate = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateSlots(this)
       const other = toPlainDateSlots(otherArg)
-      return createDuration(diffPlainDates(false, slots, other, options))
+      return createDuration(diffDates(false, slots, other, options))
     }
 
     since(
@@ -195,7 +195,7 @@ export const PlainDate = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateSlots(this)
       const other = toPlainDateSlots(otherArg)
-      return createDuration(diffPlainDates(true, slots, other, options))
+      return createDuration(diffDates(true, slots, other, options))
     }
 
     equals(otherArg: PlainDateArg): boolean {
@@ -232,7 +232,7 @@ export const PlainDate = defineTemporalClass(
     ): PlainDateTime {
       const slots = getPlainDateSlots(this)
       return createPlainDateTime(
-        createPlainDateTimeFromRefinedFields(
+        createDateTimeFromRefinedFields(
           slots,
           optionalToPlainTimeFields(plainTimeArg),
           slots.calendar,

@@ -47,8 +47,8 @@ import {
   createZonedEpochNanoSlots,
 } from './slots'
 import {
-  createPlainDateFromRefinedFields,
-  createPlainDateTimeFromRefinedFields,
+  createDateFromRefinedFields,
+  createDateTimeFromRefinedFields,
 } from './slotsFromRefinedFields'
 import { constrainTimeFields } from './timeFieldMath'
 import { getMatchingInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
@@ -115,51 +115,17 @@ function spliceFields(
   }
 }
 
-// High-Level Mod
+// Field merging and completion
 // -----------------------------------------------------------------------------
-
-// Field updates have explicit refinement and completion phases. Field
-// refinement happens first; the API layer then refines options before
-// completion performs the overflow-dependent calendar or time resolution.
-
-export function updateZonedDateTimeFields(
-  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
-  calendarFields: Partial<DateFields>,
-  mergedAllFields: DateTimeFields & { offset: number | undefined },
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-  overflow: Overflow,
-  offsetDisambig: OffsetDisambig,
-  epochDisambig: EpochDisambig,
-): ZonedEpochNanoFields & { calendar: CalendarImpl } {
-  const { calendar, timeZone } = zonedDateTimeSlots
-  const isoDateFields = createPlainDateFromRefinedFields(
-    calendarFields,
-    calendar,
-    year,
-    monthCodeParts,
-    overflow,
-  )
-  const timeFields = constrainTimeFields(mergedAllFields, overflow)
-
-  return createZonedEpochNanoSlots(
-    getMatchingInstantFor(
-      timeZone,
-      combineDateAndTime(isoDateFields, timeFields),
-      // Existing fields and user .with() fields are both past the first bag
-      // refinement phase, so "offset" is the offset in nanoseconds here.
-      mergedAllFields.offset,
-      offsetDisambig,
-      epochDisambig,
-    ),
-    timeZone,
-    calendar,
-  )
-}
+// Field updates have explicit phases. The `merge*` functions read the bag and
+// merge it with the receiver's fields, before any options are observed. The
+// API layer then refines options, and the `create*FromMergedFields` functions
+// perform the overflow-dependent calendar or time resolution, mirroring the
+// `create*FromRefinedFields` pipeline in slotsFromRefinedFields.
 
 type MergedZonedDateTimeFields = [
-  calendarFields: Partial<DateFields>,
   mergedFields: DateTimeFields & { offset: number | undefined },
+  calendarFields: Partial<DateFields>,
 ]
 
 export function mergeZonedDateTimeFields(
@@ -209,44 +175,21 @@ export function mergeZonedDateTimeFields(
   }
 
   return [
-    mergedCalendarFields as Partial<DateFields>,
     mergedAllFields as DateTimeFields & { offset: number | undefined },
+    mergedCalendarFields as Partial<DateFields>,
   ]
 }
 
-export function updatePlainDateTimeFields(
-  mergedAllFields: DateTimeFields,
-  calendarFields: Partial<DateFields>,
-  calendar: CalendarImpl,
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-  overflow: Overflow,
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  const plainDateSlots = createPlainDateFromRefinedFields(
-    calendarFields,
-    calendar,
-    year,
-    monthCodeParts,
-    overflow,
-  )
-
-  return createPlainDateTimeFromRefinedFields(
-    plainDateSlots,
-    constrainTimeFields(mergedAllFields, overflow),
-    calendar,
-  )
-}
-
-type MergedPlainDateTimeFields = [
+type MergedDateTimeFields = [
   mergedFields: DateTimeFields,
   calendarFields: Partial<DateFields>,
 ]
 
-export function mergePlainDateTimeFields(
+export function mergeDateTimeFields(
   calendar: CalendarImpl,
   plainDateTimeSlots: CalendarDateTimeFields & { calendar: CalendarImpl },
   modFields: Partial<DateTimeFields>,
-): MergedPlainDateTimeFields {
+): MergedDateTimeFields {
   const validFieldNames = getCalendarFieldNames(
     calendar,
     dateTimeFieldNamesAlpha,
@@ -289,7 +232,7 @@ export function mergePlainDateTimeFields(
   ]
 }
 
-export function mergePlainDateFields(
+export function mergeDateFields(
   calendar: CalendarImpl,
   plainDateSlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<DateFields>,
@@ -323,7 +266,7 @@ export function mergePlainDateFields(
   return mergedFields as Partial<DateFields>
 }
 
-export function mergePlainYearMonthFields(
+export function mergeYearMonthFields(
   calendar: CalendarImpl,
   plainYearMonthSlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<YearMonthFields>,
@@ -356,7 +299,7 @@ export function mergePlainYearMonthFields(
   return mergedFields as Partial<YearMonthFields>
 }
 
-export function mergePlainMonthDayFields(
+export function mergeMonthDayFields(
   calendar: CalendarImpl,
   plainMonthDaySlots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<MonthDayFields>,
@@ -389,17 +332,70 @@ export function mergePlainMonthDayFields(
   return mergedFields as Partial<DateFields> & { day: number }
 }
 
-export function mergeDurationFields(
-  slots: DurationFields,
-  fields: Partial<DurationFields>,
-): DurationFields & { sign: NumberSign } {
-  return createDurationSlots(mergeDurationBag(slots, fields))
+export function createZonedDateTimeFromMergedFields(
+  zonedDateTimeSlots: ZonedEpochNanoFields & { calendar: CalendarImpl },
+  mergedAllFields: DateTimeFields & { offset: number | undefined },
+  calendarFields: Partial<DateFields>,
+  year: number,
+  monthCodeParts: MonthCodeParts | undefined,
+  overflow: Overflow,
+  offsetDisambig: OffsetDisambig,
+  epochDisambig: EpochDisambig,
+): ZonedEpochNanoFields & { calendar: CalendarImpl } {
+  const { calendar, timeZone } = zonedDateTimeSlots
+  const isoDateFields = createDateFromRefinedFields(
+    calendarFields,
+    calendar,
+    year,
+    monthCodeParts,
+    overflow,
+  )
+  const timeFields = constrainTimeFields(mergedAllFields, overflow)
+
+  return createZonedEpochNanoSlots(
+    getMatchingInstantFor(
+      timeZone,
+      combineDateAndTime(isoDateFields, timeFields),
+      // Existing fields and user .with() fields are both past the first bag
+      // refinement phase, so "offset" is the offset in nanoseconds here.
+      mergedAllFields.offset,
+      offsetDisambig,
+      epochDisambig,
+    ),
+    timeZone,
+    calendar,
+  )
 }
 
-// Low-Level Mod ("merging")
-// -----------------------------------------------------------------------------
+export function createDateTimeFromMergedFields(
+  mergedAllFields: DateTimeFields,
+  calendarFields: Partial<DateFields>,
+  calendar: CalendarImpl,
+  year: number,
+  monthCodeParts: MonthCodeParts | undefined,
+  overflow: Overflow,
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
+  const plainDateSlots = createDateFromRefinedFields(
+    calendarFields,
+    calendar,
+    year,
+    monthCodeParts,
+    overflow,
+  )
 
-export function mergePlainTimeFields(
+  return createDateTimeFromRefinedFields(
+    plainDateSlots,
+    constrainTimeFields(mergedAllFields, overflow),
+    calendar,
+  )
+}
+
+// Calendar-agnostic merging
+// -----------------------------------------------------------------------------
+// Time and Duration bags have no calendar-dependent fields, so merging is a
+// plain property overlay.
+
+export function mergeTimeFields(
   initialFields: TimeFields,
   modFields: Partial<TimeFields>,
 ): Partial<TimeFields> {
@@ -411,6 +407,13 @@ export function mergePlainTimeFields(
   )
 
   return { ...origFields, ...newFields }
+}
+
+export function mergeDurationFields(
+  slots: DurationFields,
+  fields: Partial<DurationFields>,
+): DurationFields & { sign: NumberSign } {
+  return createDurationSlots(mergeDurationBag(slots, fields))
 }
 
 function mergeDurationBag(

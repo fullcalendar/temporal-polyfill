@@ -27,7 +27,7 @@ import {
   clampRelativeDuration,
   computeEpochNanoFrac,
   isUniformUnit,
-  moveRelativeToEpochNano,
+  moveRelativeMarkerToEpochNano,
 } from './relativeMath'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
@@ -285,7 +285,7 @@ export function roundZonedEpochToTime(
   const isoDateTime = zonedEpochSlotsToIso(slots)
   return getMatchingInstantFor(
     slots.timeZone,
-    roundDateTimeToNano(
+    roundDateTimeToInc(
       isoDateTime,
       computeNanoInc(smallestUnit, roundingInc),
       roundingMode,
@@ -303,7 +303,7 @@ export function roundZonedEpochToTime(
 // and PlainTime call these directly with pre-refined settings, and the zoned
 // time-unit strategy above rounds the wall-clock time before re-resolving it.
 
-export function roundDateTimeToNano(
+export function roundDateTimeToInc(
   isoDateTime: CalendarDateTimeFields,
   nanoInc: number,
   roundingMode: RoundingModeEnum,
@@ -311,7 +311,7 @@ export function roundDateTimeToNano(
   // Time rounding can carry into the neighboring ISO date. Keep the original
   // date and time together here so the day delta is applied to the same
   // wall-clock value that produced the rounded time.
-  const [roundedTimeFields, dayDelta] = roundTimeToNano(
+  const [roundedTimeFields, dayDelta] = roundTimeToInc(
     isoDateTime,
     nanoInc,
     roundingMode,
@@ -326,7 +326,7 @@ export function roundDateTimeToNano(
   return roundedIsoDateTime
 }
 
-export function roundTimeToNano(
+export function roundTimeToInc(
   timeFields: TimeFields,
   nanoInc: number,
   roundingMode: RoundingModeEnum,
@@ -524,7 +524,7 @@ function bubbleRelativeDuration(
     const baseDurationFields = clearDurationFields(currentUnit, durationFields)
     baseDurationFields[durationFieldNamesAsc[currentUnit]] += sign
 
-    const thresholdEpochNano = moveRelativeToEpochNano(
+    const thresholdEpochNano = moveRelativeMarkerToEpochNano(
       relativeOps,
       baseDurationFields,
     )

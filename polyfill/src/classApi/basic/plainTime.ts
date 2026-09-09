@@ -6,8 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffPlainTimes } from '../../apiHelpers/dateTimeDiff'
-import { withPlainTimeFields } from '../../apiHelpers/fieldUpdate'
+import { diffTimes } from '../../apiHelpers/dateTimeDiff'
+import { withTimeFields } from '../../apiHelpers/fieldUpdate'
 import { timeGetters } from '../../apiHelpers/shimMixins'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
@@ -24,7 +24,7 @@ import { moveTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
-import { computeNanoInc, roundTimeToNano } from '../../internal/round'
+import { computeNanoInc, roundTimeToInc } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   timeFieldsToMilli,
@@ -87,7 +87,7 @@ export const PlainTime = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainTime {
       return createPlainTime(
-        withPlainTimeFields(getPlainTimeSlots(this), validateBag(mod), options),
+        withTimeFields(getPlainTimeSlots(this), validateBag(mod), options),
       )
     }
 
@@ -114,7 +114,7 @@ export const PlainTime = defineTemporalClass(
         | undefined = undefined,
     ): Duration {
       return createDuration(
-        diffPlainTimes(
+        diffTimes(
           false,
           getPlainTimeSlots(this),
           toPlainTimeSlots(otherArg),
@@ -130,7 +130,7 @@ export const PlainTime = defineTemporalClass(
         | undefined = undefined,
     ): Duration {
       return createDuration(
-        diffPlainTimes(
+        diffTimes(
           true,
           getPlainTimeSlots(this),
           toPlainTimeSlots(otherArg),
@@ -150,7 +150,7 @@ export const PlainTime = defineTemporalClass(
         Unit.Hour,
       ) as [TimeUnit, number, RoundingModeEnum]
       return createPlainTime(
-        roundTimeToNano(
+        roundTimeToInc(
           slots,
           computeNanoInc(smallestUnit, roundingInc),
           roundingMode,

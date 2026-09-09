@@ -6,8 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffPlainYearMonth } from '../../apiHelpers/dateTimeDiff'
-import { withPlainYearMonthFields } from '../../apiHelpers/fieldUpdate'
+import { diffYearMonths } from '../../apiHelpers/dateTimeDiff'
+import { withYearMonthFields } from '../../apiHelpers/fieldUpdate'
 import {
   yearMonthDerivedGetters,
   yearMonthFieldGetters,
@@ -111,7 +111,7 @@ export const PlainYearMonth = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainYearMonth {
       return createPlainYearMonth(
-        withPlainYearMonthFields(
+        withYearMonthFields(
           getPlainYearMonthSlots(this),
           validateBag(mod),
           options,
@@ -163,7 +163,7 @@ export const PlainYearMonth = defineTemporalClass(
     ): Duration {
       const slots = getPlainYearMonthSlots(this)
       const other = toPlainYearMonthSlots(otherArg)
-      return createDuration(diffPlainYearMonth(false, slots, other, options))
+      return createDuration(diffYearMonths(false, slots, other, options))
     }
 
     since(
@@ -174,7 +174,7 @@ export const PlainYearMonth = defineTemporalClass(
     ): Duration {
       const slots = getPlainYearMonthSlots(this)
       const other = toPlainYearMonthSlots(otherArg)
-      return createDuration(diffPlainYearMonth(true, slots, other, options))
+      return createDuration(diffYearMonths(true, slots, other, options))
     }
 
     equals(otherArg: PlainYearMonthArg): boolean {

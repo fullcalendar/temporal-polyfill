@@ -21,14 +21,14 @@ import {
   clampRelativeDuration,
   isUniformUnit,
   isZonedEpochSlots,
-  spanPlainIsoRelativeDuration,
+  spanPlainDayWeekRelativeDuration,
   spanPlainRelativeDuration,
   spanRelativeDuration,
-  spanZonedIsoRelativeDuration,
+  spanZonedDayWeekRelativeDuration,
   spanZonedRelativeDuration,
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
-import { DayTimeUnit, Unit, unitNanoMap } from './units'
+import { DayTimeUnit, DayWeekUnit, Unit, unitNanoMap } from './units'
 import { NumberSign, throwRangeError } from './utils'
 
 // Option-refining total entry point
@@ -90,7 +90,7 @@ export function totalDuration<RA>(
 // PlainYearMonth arithmetic uses the first day as its reference date even when
 // the stored ISO reference day differs. Wraps the plain calendar composition.
 
-export function totalPlainYearMonthDuration(
+export function totalYearMonthDuration(
   durationFields: DurationFields,
   relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
   totalUnit: Unit.Year | Unit.Month,
@@ -140,13 +140,13 @@ export function totalPlainCalendarDuration(
   )
 }
 
-export function totalZonedIsoDuration(
+export function totalZonedDayWeekDuration(
   durationFields: DurationFields,
   relativeToSlots: ZonedEpochMarker,
-  totalUnit: Unit.Day | Unit.Week,
+  totalUnit: DayWeekUnit,
 ): number {
   const [balancedDuration, endEpochNano, relativeOps] =
-    spanZonedIsoRelativeDuration(relativeToSlots, durationFields, totalUnit)
+    spanZonedDayWeekRelativeDuration(relativeToSlots, durationFields, totalUnit)
 
   return totalRelativeDuration(
     balancedDuration,
@@ -156,13 +156,17 @@ export function totalZonedIsoDuration(
   )
 }
 
-export function totalPlainIsoDuration(
+export function totalPlainDayWeekDuration(
   durationFields: DurationFields,
   relativeToFields: CalendarDateFields,
-  totalUnit: Unit.Day | Unit.Week,
+  totalUnit: DayWeekUnit,
 ): number {
   const [balancedDuration, endEpochNano, relativeOps] =
-    spanPlainIsoRelativeDuration(relativeToFields, durationFields, totalUnit)
+    spanPlainDayWeekRelativeDuration(
+      relativeToFields,
+      durationFields,
+      totalUnit,
+    )
 
   return totalRelativeDuration(
     balancedDuration,

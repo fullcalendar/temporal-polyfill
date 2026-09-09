@@ -1,13 +1,13 @@
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import { type CalendarImpl } from '../internal/calendarImpl'
 import {
-  computeCalendarDateDiff,
-  computeCalendarDateTimeDiff,
-  computeIsoDateDiff,
-  computeIsoDateTimeDiff,
-  computePlainYearMonthDiff,
-  computeZonedCalendarDiff,
-  computeZonedIsoDiff,
+  diffDateCalendarUnitsRounded,
+  diffDateDayWeekUnitsRounded,
+  diffDateTimeCalendarUnitsRounded,
+  diffDateTimeDayWeekUnitsRounded,
+  diffYearMonthRounded,
+  diffZonedCalendarUnitsRounded,
+  diffZonedDayWeekUnitsRounded,
 } from '../internal/diff'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import {
@@ -20,23 +20,23 @@ import { getCommonCalendar } from '../internal/slotUtils'
 import { EpochNanoFields, ZonedEpochNanoFields } from '../internal/slots'
 import {
   totalPlainCalendarDuration,
-  totalPlainIsoDuration,
-  totalPlainYearMonthDuration,
+  totalPlainDayWeekDuration,
+  totalYearMonthDuration,
   totalZonedCalendarDuration,
-  totalZonedIsoDuration,
+  totalZonedDayWeekDuration,
 } from '../internal/total'
 import {
   computeEpochNanoUnitDiff,
   computeIsoDateTimeUnitDiff,
-  computePlainTimeUnitDiff,
+  computeTimeUnitDiff,
 } from '../internal/unitDiff'
-import { TimeUnit, Unit } from '../internal/units'
+import { DayWeekUnit, TimeUnit, Unit } from '../internal/units'
 import { bindArgs } from '../internal/utils'
 
-export const diffZonedYears = bindArgs(diffZonedUnit, Unit.Year)
-export const diffZonedMonths = bindArgs(diffZonedUnit, Unit.Month)
-export const diffZonedWeeks = bindArgs(diffZonedIsoUnit, Unit.Week)
-export const diffZonedDays = bindArgs(diffZonedIsoUnit, Unit.Day)
+export const diffZonedYears = bindArgs(diffZonedCalendarUnit, Unit.Year)
+export const diffZonedMonths = bindArgs(diffZonedCalendarUnit, Unit.Month)
+export const diffZonedWeeks = bindArgs(diffZonedDayWeekUnit, Unit.Week)
+export const diffZonedDays = bindArgs(diffZonedDayWeekUnit, Unit.Day)
 
 // Exact-time differences do not require a shared time zone or calendar math.
 export function diffZonedEpochNanoTimeUnit(
@@ -50,19 +50,16 @@ export function diffZonedEpochNanoTimeUnit(
 }
 
 export const diffInstantEpochNanoTimeUnit = diffInstantTimeUnit
-export const diffPlainYears = bindArgs(diffPlainDateUnit, Unit.Year)
-export const diffPlainMonths = bindArgs(diffPlainDateUnit, Unit.Month)
-export const diffPlainDateWeeks = bindArgs(diffPlainDateIsoUnit, Unit.Week)
-export const diffPlainDateDays = bindArgs(diffPlainDateIsoUnit, Unit.Day)
-export const diffPlainDateTimeYears = bindArgs(diffPlainDateTimeUnit, Unit.Year)
-export const diffPlainDateTimeMonths = bindArgs(
-  diffPlainDateTimeUnit,
-  Unit.Month,
-)
-export const diffPlainWeeks = bindArgs(diffPlainIsoUnit, Unit.Week)
-export const diffPlainDays = bindArgs(diffPlainIsoUnit, Unit.Day)
+export const diffDateYears = bindArgs(diffDateCalendarUnit, Unit.Year)
+export const diffDateMonths = bindArgs(diffDateCalendarUnit, Unit.Month)
+export const diffDateWeeks = bindArgs(diffDateDayWeekUnit, Unit.Week)
+export const diffDateDays = bindArgs(diffDateDayWeekUnit, Unit.Day)
+export const diffDateTimeYears = bindArgs(diffDateTimeCalendarUnit, Unit.Year)
+export const diffDateTimeMonths = bindArgs(diffDateTimeCalendarUnit, Unit.Month)
+export const diffDateTimeWeeks = bindArgs(diffDateTimeDayWeekUnit, Unit.Week)
+export const diffDateTimeDays = bindArgs(diffDateTimeDayWeekUnit, Unit.Day)
 
-export function diffPlainDateTimeEpochNanoTimeUnit(
+export function diffDateTimeEpochNanoTimeUnit(
   unit: TimeUnit,
   slots0: CalendarDateTimeFields & { calendar: CalendarImpl },
   slots1: CalendarDateTimeFields & { calendar: CalendarImpl },
@@ -102,7 +99,7 @@ export function adaptRecordTimeUnitDiff<Record, Slots>(
     diffSlots(unit, getSlots(record0), getSlots(record1), options)
 }
 
-function diffZonedUnit(
+function diffZonedCalendarUnit(
   unit: Unit,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   slots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
@@ -111,7 +108,7 @@ function diffZonedUnit(
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const [smallestUnit, roundingInc, roundingMode, shouldTotal] =
     refineUnitDiffOptions(unit, options, Unit.Nanosecond)
-  const durationFields = computeZonedCalendarDiff(
+  const durationFields = diffZonedCalendarUnitsRounded(
     calendar,
     slots0,
     slots1,
@@ -125,7 +122,7 @@ function diffZonedUnit(
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
-function diffPlainDateUnit(
+function diffDateCalendarUnit(
   unit: Unit,
   slots0: CalendarDateFields & { calendar: CalendarImpl },
   slots1: CalendarDateFields & { calendar: CalendarImpl },
@@ -134,7 +131,7 @@ function diffPlainDateUnit(
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const [smallestUnit, roundingInc, roundingMode, shouldTotal] =
     refineUnitDiffOptions(unit, options, Unit.Day)
-  const durationFields = computeCalendarDateDiff(
+  const durationFields = diffDateCalendarUnitsRounded(
     calendar,
     slots0,
     slots1,
@@ -148,7 +145,7 @@ function diffPlainDateUnit(
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
-function diffPlainDateTimeUnit(
+function diffDateTimeCalendarUnit(
   unit: Unit,
   slots0: CalendarDateTimeFields & { calendar: CalendarImpl },
   slots1: CalendarDateTimeFields & { calendar: CalendarImpl },
@@ -157,7 +154,7 @@ function diffPlainDateTimeUnit(
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const [smallestUnit, roundingInc, roundingMode, shouldTotal] =
     refineUnitDiffOptions(unit, options, Unit.Nanosecond)
-  const durationFields = computeCalendarDateTimeDiff(
+  const durationFields = diffDateTimeCalendarUnitsRounded(
     calendar,
     slots0,
     slots1,
@@ -171,16 +168,13 @@ function diffPlainDateTimeUnit(
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
-export const diffPlainYearMonthYears = bindArgs(
-  diffPlainYearMonthUnit,
-  Unit.Year,
-)
-export const diffPlainYearMonthMonths = bindArgs(
-  diffPlainYearMonthUnit,
+export const diffYearMonthYears = bindArgs(diffYearMonthCalendarUnit, Unit.Year)
+export const diffYearMonthMonths = bindArgs(
+  diffYearMonthCalendarUnit,
   Unit.Month,
 )
 
-function diffPlainYearMonthUnit(
+function diffYearMonthCalendarUnit(
   unit: Unit.Year | Unit.Month,
   slots0: CalendarDateFields & { calendar: CalendarImpl },
   slots1: CalendarDateFields & { calendar: CalendarImpl },
@@ -189,7 +183,7 @@ function diffPlainYearMonthUnit(
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const [smallestUnit, roundingInc, roundingMode, shouldTotal] =
     refineUnitDiffOptions(unit, options, Unit.Month)
-  const durationFields = computePlainYearMonthDiff(
+  const durationFields = diffYearMonthRounded(
     calendar,
     slots0,
     slots1,
@@ -199,7 +193,7 @@ function diffPlainYearMonthUnit(
     roundingMode,
   )
   return shouldTotal
-    ? totalPlainYearMonthDuration(durationFields, slots0, unit)
+    ? totalYearMonthDuration(durationFields, slots0, unit)
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
@@ -224,7 +218,7 @@ function diffInstantTimeUnit(
   )
 }
 
-export function diffPlainTimeNanoOfDayTimeUnit(
+export function diffTimeNanoOfDayTimeUnit(
   unit: TimeUnit,
   slots0: TimeFields,
   slots1: TimeFields,
@@ -235,7 +229,7 @@ export function diffPlainTimeNanoOfDayTimeUnit(
     options,
     Unit.Nanosecond,
   )
-  return computePlainTimeUnitDiff(
+  return computeTimeUnitDiff(
     slots0,
     slots1,
     unit,
@@ -245,8 +239,8 @@ export function diffPlainTimeNanoOfDayTimeUnit(
   )
 }
 
-function diffZonedIsoUnit(
-  unit: Unit.Day | Unit.Week,
+function diffZonedDayWeekUnit(
+  unit: DayWeekUnit,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
   slots1: ZonedEpochNanoFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
@@ -257,7 +251,7 @@ function diffZonedIsoUnit(
     options,
     Unit.Nanosecond,
   )
-  const durationFields = computeZonedIsoDiff(
+  const durationFields = diffZonedDayWeekUnitsRounded(
     unit,
     slots0,
     slots1,
@@ -266,12 +260,12 @@ function diffZonedIsoUnit(
     mode,
   )
   return shouldTotal
-    ? totalZonedIsoDuration(durationFields, slots0, unit)
+    ? totalZonedDayWeekDuration(durationFields, slots0, unit)
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
-function diffPlainDateIsoUnit(
-  unit: Unit.Day | Unit.Week,
+function diffDateDayWeekUnit(
+  unit: DayWeekUnit,
   slots0: CalendarDateFields & { calendar: CalendarImpl },
   slots1: CalendarDateFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
@@ -282,7 +276,7 @@ function diffPlainDateIsoUnit(
     options,
     Unit.Day,
   )
-  const durationFields = computeIsoDateDiff(
+  const durationFields = diffDateDayWeekUnitsRounded(
     unit,
     slots0,
     slots1,
@@ -291,12 +285,12 @@ function diffPlainDateIsoUnit(
     mode,
   )
   return shouldTotal
-    ? totalPlainIsoDuration(durationFields, slots0, unit)
+    ? totalPlainDayWeekDuration(durationFields, slots0, unit)
     : durationFields[durationFieldNamesAsc[unit]]
 }
 
-function diffPlainIsoUnit(
-  unit: Unit.Day | Unit.Week,
+function diffDateTimeDayWeekUnit(
+  unit: DayWeekUnit,
   slots0: CalendarDateTimeFields & { calendar: CalendarImpl },
   slots1: CalendarDateTimeFields & { calendar: CalendarImpl },
   options?: RoundingMathOptions | RoundingMode,
@@ -307,7 +301,7 @@ function diffPlainIsoUnit(
     options,
     Unit.Nanosecond,
   )
-  const durationFields = computeIsoDateTimeDiff(
+  const durationFields = diffDateTimeDayWeekUnitsRounded(
     unit,
     slots0,
     slots1,
@@ -316,6 +310,6 @@ function diffPlainIsoUnit(
     mode,
   )
   return shouldTotal
-    ? totalPlainIsoDuration(durationFields, slots0, unit)
+    ? totalPlainDayWeekDuration(durationFields, slots0, unit)
     : durationFields[durationFieldNamesAsc[unit]]
 }

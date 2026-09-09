@@ -33,9 +33,9 @@ import {
 } from './optionsModel'
 import {
   roundBigNanoToDayOriginInc,
-  roundDateTimeToNano,
+  roundDateTimeToInc,
   roundDayTimeDurationByInc,
-  roundTimeToNano,
+  roundTimeToInc,
   roundToMinute,
 } from './round'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
@@ -213,7 +213,7 @@ export function formatDateTimeIso(
   // Formatting rounds the complete PlainDateTime as one wall-clock value. Passing
   // a single record keeps the date and time fields from drifting apart across
   // midnight rounding.
-  const roundedIsoFields = roundDateTimeToNano(
+  const roundedIsoFields = roundDateTimeToInc(
     isoDateTime,
     nanoInc,
     roundingMode,
@@ -387,7 +387,7 @@ function formatTimeIso(
   subsecDigits: SubsecDigits | -1 | undefined,
 ): string {
   return formatTimeFields(
-    roundTimeToNano(fields, nanoInc, roundingMode)[0],
+    roundTimeToInc(fields, nanoInc, roundingMode)[0],
     subsecDigits,
   )
 }

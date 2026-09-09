@@ -51,7 +51,7 @@ export function computeIsoDateTimeUnitDiff(
   )
 }
 
-export function computePlainTimeUnitDiff(
+export function computeTimeUnitDiff(
   start: TimeFields,
   end: TimeFields,
   unit: TimeUnit,

@@ -6,7 +6,7 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { withPlainMonthDayFields } from '../../apiHelpers/fieldUpdate'
+import { withMonthDayFields } from '../../apiHelpers/fieldUpdate'
 import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import {
   CalendarImpl,
@@ -96,7 +96,7 @@ export const PlainMonthDay = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainMonthDay {
       return createPlainMonthDay(
-        withPlainMonthDayFields(
+        withMonthDayFields(
           getPlainMonthDaySlots(this),
           validateBag(mod),
           options,

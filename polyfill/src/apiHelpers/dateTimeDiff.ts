@@ -1,12 +1,12 @@
 import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
 import {
-  computePlainDateDiff,
-  computePlainDateTimeDiff,
-  computePlainTimeDiff,
-  computePlainYearMonthDiff,
-  computeZonedDateTimeDiff,
-  diffEpochNanos,
+  diffDateRounded,
+  diffDateTimeRounded,
+  diffEpochNanosRounded,
+  diffTimeRounded,
+  diffYearMonthRounded,
+  diffZonedDateTimeRounded,
 } from '../internal/diff'
 import { DurationFields } from '../internal/durationFields'
 import { negateDurationFields } from '../internal/durationMath'
@@ -42,7 +42,7 @@ export function diffInstants(
       RoundingModeEnum,
     ]
 
-  const durationFields = diffEpochNanos(
+  const durationFields = diffEpochNanosRounded(
     instantSlots0.epochNanoseconds,
     instantSlots1.epochNanoseconds,
     largestUnit,
@@ -66,7 +66,7 @@ export function diffZonedDateTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour)
 
-  const durationFields = computeZonedDateTimeDiff(
+  const durationFields = diffZonedDateTimeRounded(
     calendar,
     slots0,
     slots1,
@@ -79,7 +79,7 @@ export function diffZonedDateTimes(
   return createDiffDurationSlots(invert, durationFields)
 }
 
-export function diffPlainDateTimes(
+export function diffDateTimes(
   invert: boolean,
   plainDateTimeSlots0: CalendarDateTimeFields & { calendar: CalendarImpl },
   plainDateTimeSlots1: CalendarDateTimeFields & { calendar: CalendarImpl },
@@ -94,7 +94,7 @@ export function diffPlainDateTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day)
 
-  const durationFields = computePlainDateTimeDiff(
+  const durationFields = diffDateTimeRounded(
     calendar,
     plainDateTimeSlots0,
     plainDateTimeSlots1,
@@ -107,7 +107,7 @@ export function diffPlainDateTimes(
   return createDiffDurationSlots(invert, durationFields)
 }
 
-export function diffPlainDates(
+export function diffDates(
   invert: boolean,
   plainDateSlots0: CalendarDateFields & { calendar: CalendarImpl },
   plainDateSlots1: CalendarDateFields & { calendar: CalendarImpl },
@@ -120,7 +120,7 @@ export function diffPlainDates(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Day, Unit.Year, Unit.Day)
 
-  const durationFields = computePlainDateDiff(
+  const durationFields = diffDateRounded(
     calendar,
     plainDateSlots0,
     plainDateSlots1,
@@ -133,7 +133,7 @@ export function diffPlainDates(
   return createDiffDurationSlots(invert, durationFields)
 }
 
-export function diffPlainYearMonth(
+export function diffYearMonths(
   invert: boolean,
   plainYearMonthSlots0: CalendarDateFields & { calendar: CalendarImpl },
   plainYearMonthSlots1: CalendarDateFields & { calendar: CalendarImpl },
@@ -146,7 +146,7 @@ export function diffPlainYearMonth(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Year, Unit.Year, Unit.Month)
 
-  const durationFields = computePlainYearMonthDiff(
+  const durationFields = diffYearMonthRounded(
     calendar,
     plainYearMonthSlots0,
     plainYearMonthSlots1,
@@ -159,7 +159,7 @@ export function diffPlainYearMonth(
   return createDiffDurationSlots(invert, durationFields)
 }
 
-export function diffPlainTimes(
+export function diffTimes(
   invert: boolean,
   plainTimeSlots0: TimeFields,
   plainTimeSlots1: TimeFields,
@@ -168,7 +168,7 @@ export function diffPlainTimes(
   const [largestUnit, smallestUnit, roundingInc, roundingMode] =
     refineDiffOptions(invert, options, Unit.Hour, Unit.Hour)
 
-  const durationFields = computePlainTimeDiff(
+  const durationFields = diffTimeRounded(
     plainTimeSlots0,
     plainTimeSlots1,
     largestUnit as TimeUnit,

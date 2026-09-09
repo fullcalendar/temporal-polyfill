@@ -11,14 +11,14 @@ import type {
   YearMonthFields,
 } from '../internal/fieldTypes'
 import {
-  mergePlainDateFields,
-  mergePlainDateTimeFields,
-  mergePlainMonthDayFields,
-  mergePlainTimeFields,
-  mergePlainYearMonthFields,
+  createDateTimeFromMergedFields,
+  createZonedDateTimeFromMergedFields,
+  mergeDateFields,
+  mergeDateTimeFields,
+  mergeMonthDayFields,
+  mergeTimeFields,
+  mergeYearMonthFields,
   mergeZonedDateTimeFields,
-  updatePlainDateTimeFields,
-  updateZonedDateTimeFields,
 } from '../internal/merge'
 import {
   refineOverflowOptions,
@@ -27,24 +27,24 @@ import {
 import { OffsetDisambig } from '../internal/optionsModel'
 import { ZonedEpochNanoFields } from '../internal/slots'
 import {
-  createPlainDateFromRefinedFields,
-  createPlainMonthDayFromRefinedFields,
-  createPlainYearMonthFromRefinedFields,
+  createDateFromRefinedFields,
+  createMonthDayFromRefinedFields,
+  createYearMonthFromRefinedFields,
   refineCalendarDateFields,
-  refinePlainMonthDayFields,
+  refineMonthDayFields,
 } from '../internal/slotsFromRefinedFields'
 
-export function withPlainDateFields(
+export function withDateFields(
   slots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<DateFields>,
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = slots
-  const fields = mergePlainDateFields(calendar, slots, modFields)
+  const fields = mergeDateFields(calendar, slots, modFields)
   const [year, monthCodeParts] = refineCalendarDateFields(fields, calendar)
   const overflow = refineOverflowOptions(options)
 
-  return createPlainDateFromRefinedFields(
+  return createDateFromRefinedFields(
     fields,
     calendar,
     year,
@@ -55,13 +55,13 @@ export function withPlainDateFields(
 
 // Implements the shared public PlainDateTime field-update pipeline. Callers
 // validate their API-specific bag representation before entering this helper.
-export function withPlainDateTimeFields(
+export function withDateTimeFields(
   slots: CalendarDateTimeFields & { calendar: CalendarImpl },
   modFields: Partial<DateTimeFields>,
   options?: Temporal.OverflowOptions,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
   const { calendar } = slots
-  const [mergedFields, calendarFields] = mergePlainDateTimeFields(
+  const [mergedFields, calendarFields] = mergeDateTimeFields(
     calendar,
     slots,
     modFields,
@@ -72,7 +72,7 @@ export function withPlainDateTimeFields(
   )
   const overflow = refineOverflowOptions(options)
 
-  return updatePlainDateTimeFields(
+  return createDateTimeFromMergedFields(
     mergedFields,
     calendarFields,
     calendar,
@@ -82,13 +82,13 @@ export function withPlainDateTimeFields(
   )
 }
 
-export function withPlainYearMonthFields(
+export function withYearMonthFields(
   slots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<YearMonthFields>,
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = slots
-  const fields = mergePlainYearMonthFields(calendar, slots, modFields)
+  const fields = mergeYearMonthFields(calendar, slots, modFields)
   const [year, monthCodeParts] = refineCalendarDateFields(
     fields,
     calendar,
@@ -96,7 +96,7 @@ export function withPlainYearMonthFields(
   )
   const overflow = refineOverflowOptions(options)
 
-  return createPlainYearMonthFromRefinedFields(
+  return createYearMonthFromRefinedFields(
     fields,
     calendar,
     year,
@@ -105,17 +105,17 @@ export function withPlainYearMonthFields(
   )
 }
 
-export function withPlainMonthDayFields(
+export function withMonthDayFields(
   slots: CalendarDateFields & { calendar: CalendarImpl },
   modFields: Partial<MonthDayFields>,
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   const { calendar } = slots
-  const fields = mergePlainMonthDayFields(calendar, slots, modFields)
-  const [year, monthCodeParts] = refinePlainMonthDayFields(fields, calendar)
+  const fields = mergeMonthDayFields(calendar, slots, modFields)
+  const [year, monthCodeParts] = refineMonthDayFields(fields, calendar)
   const overflow = refineOverflowOptions(options)
 
-  return createPlainMonthDayFromRefinedFields(
+  return createMonthDayFromRefinedFields(
     fields,
     calendar,
     year,
@@ -124,12 +124,12 @@ export function withPlainMonthDayFields(
   )
 }
 
-export function withPlainTimeFields(
+export function withTimeFields(
   slots: TimeFields,
   modFields: Partial<TimeFields>,
   options?: Temporal.OverflowOptions,
 ): TimeFields {
-  const refinedFields = mergePlainTimeFields(slots, modFields)
+  const refinedFields = mergeTimeFields(slots, modFields)
   const overflow = refineOverflowOptions(options)
   return resolveTimeFields(refinedFields, overflow)
 }
@@ -140,7 +140,7 @@ export function withZonedDateTimeFields(
   options?: Temporal.ZonedDateTimeFromOptions,
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { calendar } = slots
-  const [calendarFields, mergedFields] = mergeZonedDateTimeFields(
+  const [mergedFields, calendarFields] = mergeZonedDateTimeFields(
     calendar,
     slots,
     modFields,
@@ -154,10 +154,10 @@ export function withZonedDateTimeFields(
     OffsetDisambig.Prefer,
   )
 
-  return updateZonedDateTimeFields(
+  return createZonedDateTimeFromMergedFields(
     slots,
-    calendarFields,
     mergedFields,
+    calendarFields,
     year,
     monthCodeParts,
     overflow,

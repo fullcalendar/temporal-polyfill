@@ -5,14 +5,14 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffPlainYearMonth } from '../../apiHelpers/dateTimeDiff'
+import { diffYearMonths } from '../../apiHelpers/dateTimeDiff'
 import { reversedMove } from '../../apiHelpers/dateTimeMove'
-import { withPlainYearMonthFields } from '../../apiHelpers/fieldUpdate'
+import { withYearMonthFields } from '../../apiHelpers/fieldUpdate'
 import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { yearMonthFieldGetters } from '../../apiHelpers/shimMixins'
 import {
-  diffPlainYearMonthMonths,
-  diffPlainYearMonthYears,
+  diffYearMonthMonths,
+  diffYearMonthYears,
 } from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDaysInMonth,
@@ -193,7 +193,7 @@ export function withFields(
   mod: Partial<YearMonthFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainYearMonthRecord {
-  const resSlots = withPlainYearMonthFields(
+  const resSlots = withYearMonthFields(
     getShimPlainYearMonthSlots(record),
     validateBag(mod),
     options,
@@ -247,7 +247,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainYearMonthSlots(record)
   const otherSlots = getShimPlainYearMonthSlots(otherRecord)
-  const resSlots = diffPlainYearMonth(false, slots, otherSlots, options)
+  const resSlots = diffYearMonths(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -468,7 +468,7 @@ export function diffYears(
   record1: ShimPlainYearMonthRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainYearMonthYears(
+  return diffYearMonthYears(
     getShimPlainYearMonthSlots(record0),
     getShimPlainYearMonthSlots(record1),
     options,
@@ -480,7 +480,7 @@ export function diffMonths(
   record1: ShimPlainYearMonthRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainYearMonthMonths(
+  return diffYearMonthMonths(
     getShimPlainYearMonthSlots(record0),
     getShimPlainYearMonthSlots(record1),
     options,

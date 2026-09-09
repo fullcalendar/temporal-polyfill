@@ -11,21 +11,21 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffPlainDates } from '../../apiHelpers/dateTimeDiff'
+import { diffDates } from '../../apiHelpers/dateTimeDiff'
 import {
   moveByDaysStrict,
   moveByIsoWeeks,
   moveByMonths,
   moveByYears,
 } from '../../apiHelpers/dateTimeMove'
-import { withPlainDateFields } from '../../apiHelpers/fieldUpdate'
+import { withDateFields } from '../../apiHelpers/fieldUpdate'
 import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
 import { dateFieldGetters } from '../../apiHelpers/shimMixins'
 import {
-  diffPlainDateDays,
-  diffPlainDateWeeks,
-  diffPlainMonths,
-  diffPlainYears,
+  diffDateDays,
+  diffDateMonths,
+  diffDateWeeks,
+  diffDateYears,
 } from '../../apiHelpers/unitDiff'
 import {
   computeCalendarDateFields,
@@ -70,9 +70,9 @@ import { moveByDays, moveDate } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import {
-  createPlainDateTimeFromRefinedFields,
-  createPlainMonthDayFromCalendarFields,
-  createPlainYearMonthFromCalendarFields,
+  createDateTimeFromRefinedFields,
+  createMonthDayFromCalendarParts,
+  createYearMonthFromCalendarParts,
 } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
@@ -215,7 +215,7 @@ export function withFields(
   mod: Partial<DateFields>,
   options?: TemporalSpec.OverflowOptions,
 ) {
-  const resSlots = withPlainDateFields(
+  const resSlots = withDateFields(
     getShimPlainDateSlots(record),
     validateBag(mod),
     options,
@@ -322,7 +322,7 @@ export function diff(
 ): ShimDurationRecord {
   const slots = getShimPlainDateSlots(record)
   const otherSlots = getShimPlainDateSlots(otherRecord)
-  const resSlots = diffPlainDates(false, slots, otherSlots, options)
+  const resSlots = diffDates(false, slots, otherSlots, options)
   return createShimDurationRecord(resSlots)
 }
 
@@ -423,7 +423,7 @@ export function toPlainDateTime(
   const slots = getShimPlainDateSlots(record)
   const timeFields =
     getPlainTimeSlotsIfPresent<TimeFields>(plainTimeRecord) || plainTimeRecord
-  const resSlots = createPlainDateTimeFromRefinedFields(
+  const resSlots = createDateTimeFromRefinedFields(
     slots,
     timeFields,
     slots.calendar,
@@ -436,11 +436,7 @@ export function toPlainYearMonth(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainDateSlots(record)
   const { year, month } = computeCalendarDateFields(slots.calendar, slots)
-  const resSlots = createPlainYearMonthFromCalendarFields(
-    slots.calendar,
-    year,
-    month,
-  )
+  const resSlots = createYearMonthFromCalendarParts(slots.calendar, year, month)
   return createShimPlainYearMonthRecord(resSlots)
 }
 
@@ -449,7 +445,7 @@ export function toPlainMonthDay(
 ): ShimPlainMonthDayRecord {
   const slots = getShimPlainDateSlots(record)
   const { year, month, day } = computeCalendarDateFields(slots.calendar, slots)
-  const resSlots = createPlainMonthDayFromCalendarFields(
+  const resSlots = createMonthDayFromCalendarParts(
     slots.calendar,
     year,
     month,
@@ -673,7 +669,7 @@ export function diffYears(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainYears(
+  return diffDateYears(
     getShimPlainDateSlots(record0),
     getShimPlainDateSlots(record1),
     options,
@@ -685,7 +681,7 @@ export function diffMonths(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainMonths(
+  return diffDateMonths(
     getShimPlainDateSlots(record0),
     getShimPlainDateSlots(record1),
     options,
@@ -697,7 +693,7 @@ export function diffWeeks(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateWeeks(
+  return diffDateWeeks(
     getShimPlainDateSlots(record0),
     getShimPlainDateSlots(record1),
     options,
@@ -709,7 +705,7 @@ export function diffDays(
   record1: ShimPlainDateRecord,
   options?: RoundingMathOptions | RoundingMode,
 ): number {
-  return diffPlainDateDays(
+  return diffDateDays(
     getShimPlainDateSlots(record0),
     getShimPlainDateSlots(record1),
     options,

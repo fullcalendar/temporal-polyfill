@@ -73,7 +73,7 @@ type RefinedPlainMonthDayFields = [
 ]
 
 // Performs required-field checks and coercions that precede overflow options.
-export function refinePlainMonthDayFields(
+export function refineMonthDayFields(
   fields: Partial<DateFields>, // guaranteed `day`
   calendar: CalendarImpl,
 ): RefinedPlainMonthDayFields {
@@ -109,7 +109,7 @@ export function refinePlainMonthDayFields(
 // Complete construction after field preparation and the caller's option reads.
 // Date-time inputs already contain a resolved ISO date and time.
 
-export function createPlainDateTimeFromRefinedFields(
+export function createDateTimeFromRefinedFields(
   isoDate: CalendarDateFields,
   // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
   timeFields: TimeFields | undefined = timeFieldDefaults,
@@ -125,7 +125,7 @@ export function createPlainDateTimeFromRefinedFields(
 
 // Resolves fields after the caller has read the overflow option at the required
 // point between field refinement and calendar-dependent month/day resolution.
-export function createPlainDateFromRefinedFields(
+export function createDateFromRefinedFields(
   fields: Partial<DateFields>,
   calendar: CalendarImpl,
   year: number,
@@ -150,7 +150,7 @@ export function createPlainDateFromRefinedFields(
   return createDateSlots(checkIsoDateInBounds(isoDate), calendar)
 }
 
-export function createPlainYearMonthFromRefinedFields(
+export function createYearMonthFromRefinedFields(
   fields: Partial<YearMonthFields>,
   calendar: CalendarImpl,
   year: number,
@@ -164,10 +164,10 @@ export function createPlainYearMonthFromRefinedFields(
     monthCodeParts,
     overflow,
   )
-  return createPlainYearMonthFromCalendarFields(calendar, year, month)
+  return createYearMonthFromCalendarParts(calendar, year, month)
 }
 
-export function createPlainMonthDayFromRefinedFields(
+export function createMonthDayFromRefinedFields(
   fields: Partial<DateFields> & DayFields,
   calendar: CalendarImpl,
   year: number | undefined,
@@ -277,7 +277,7 @@ export function createPlainMonthDayFromRefinedFields(
     }
   }
 
-  return createPlainMonthDayFromCalendarParts(
+  return createMonthDayFromMonthCodeParts(
     calendar,
     monthCodeNumber,
     isLeapMonth,
@@ -294,7 +294,7 @@ export function createPlainMonthDayFromRefinedFields(
 
 // Creates a PlainYearMonth from calendar coordinates that are already known
 // to be resolved, avoiding field-style month validation for trusted inputs.
-export function createPlainYearMonthFromCalendarFields(
+export function createYearMonthFromCalendarParts(
   calendar: CalendarImpl,
   year: number,
   month: number,
@@ -305,7 +305,7 @@ export function createPlainYearMonthFromCalendarFields(
 
 // Creates a PlainMonthDay from a trusted calendar date without rebuilding and
 // reparsing a synthetic public monthCode field.
-export function createPlainMonthDayFromCalendarFields(
+export function createMonthDayFromCalendarParts(
   calendar: CalendarImpl,
   year: number,
   month: number,
@@ -316,7 +316,7 @@ export function createPlainMonthDayFromCalendarFields(
     year,
     month,
   )
-  return createPlainMonthDayFromCalendarParts(
+  return createMonthDayFromMonthCodeParts(
     calendar,
     monthCodeNumber,
     isLeapMonth,
@@ -326,7 +326,7 @@ export function createPlainMonthDayFromCalendarFields(
   )
 }
 
-function createPlainMonthDayFromCalendarParts(
+function createMonthDayFromMonthCodeParts(
   calendar: CalendarImpl,
   monthCodeNumber: number,
   isLeapMonthArg: boolean,

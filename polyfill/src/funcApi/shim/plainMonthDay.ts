@@ -4,7 +4,7 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { withPlainMonthDayFields } from '../../apiHelpers/fieldUpdate'
+import { withMonthDayFields } from '../../apiHelpers/fieldUpdate'
 import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
@@ -142,7 +142,7 @@ export function withFields(
   mod: Partial<MonthDayFields>,
   options?: TemporalSpec.OverflowOptions,
 ): ShimPlainMonthDayRecord {
-  const resSlots = withPlainMonthDayFields(
+  const resSlots = withMonthDayFields(
     getShimPlainMonthDaySlots(record),
     validateBag(mod),
     options,

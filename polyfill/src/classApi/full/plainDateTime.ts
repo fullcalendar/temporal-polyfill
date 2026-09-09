@@ -6,8 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffPlainDateTimes } from '../../apiHelpers/dateTimeDiff'
-import { withPlainDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { diffDateTimes } from '../../apiHelpers/dateTimeDiff'
+import { withDateTimeFields } from '../../apiHelpers/fieldUpdate'
 import {
   dateDerivedGetters,
   dateFieldGetters,
@@ -50,13 +50,13 @@ import {
 } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
-import { computeNanoInc, roundDateTimeToNano } from '../../internal/round'
+import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
 import {
   createDateSlots,
   createDateTimeSlots,
   createTimeSlots,
 } from '../../internal/slots'
-import { createPlainDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
+import { createDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { DayTimeUnit } from '../../internal/units'
@@ -155,7 +155,7 @@ export const PlainDateTime = defineTemporalClass(
       options: Temporal.OverflowOptions | undefined = undefined,
     ): PlainDateTime {
       return createPlainDateTime(
-        withPlainDateTimeFields(
+        withDateTimeFields(
           getPlainDateTimeSlots(this),
           validateBag(mod),
           options,
@@ -175,7 +175,7 @@ export const PlainDateTime = defineTemporalClass(
     ): PlainDateTime {
       const slots = getPlainDateTimeSlots(this)
       return createPlainDateTime(
-        createPlainDateTimeFromRefinedFields(
+        createDateTimeFromRefinedFields(
           slots,
           optionalToPlainTimeFields(plainTimeArg),
           slots.calendar,
@@ -229,7 +229,7 @@ export const PlainDateTime = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateTimeSlots(this)
       const other = toPlainDateTimeSlots(otherArg)
-      return createDuration(diffPlainDateTimes(false, slots, other, options))
+      return createDuration(diffDateTimes(false, slots, other, options))
     }
 
     since(
@@ -242,7 +242,7 @@ export const PlainDateTime = defineTemporalClass(
     ): Duration {
       const slots = getPlainDateTimeSlots(this)
       const other = toPlainDateTimeSlots(otherArg)
-      return createDuration(diffPlainDateTimes(true, slots, other, options))
+      return createDuration(diffDateTimes(true, slots, other, options))
     }
 
     round(
@@ -256,7 +256,7 @@ export const PlainDateTime = defineTemporalClass(
       ) as [DayTimeUnit, number, RoundingModeEnum]
       return createPlainDateTime(
         createDateTimeSlots(
-          roundDateTimeToNano(
+          roundDateTimeToInc(
             slots,
             computeNanoInc(smallestUnit, roundingInc),
             roundingMode,

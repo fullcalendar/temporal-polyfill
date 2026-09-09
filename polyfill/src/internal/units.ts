@@ -23,6 +23,10 @@ export type TimeUnit =
 
 export type DayTimeUnit = Unit.Day | TimeUnit
 
+// The day/week class: moved through ISO day arithmetic with seven-day weeks,
+// never through the calendar implementation. Zoned days still vary in length.
+export type DayWeekUnit = Unit.Day | Unit.Week
+
 export const unitNameMap = {
   nanosecond: Unit.Nanosecond,
   microsecond: Unit.Microsecond,
