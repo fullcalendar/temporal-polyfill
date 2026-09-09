@@ -6,6 +6,9 @@ If needed, the `pnpm` binary is located at `/Users/adam/Library/pnpm/pnpm`
 
 Don't bother running bare `pnpm run size` ever
 
+Always brace `if` statements and loops, with the body on separate lines.
+(Biome does not support this well as a linting rule. We will eventually switch to Oxlint)
+
 
 ## Typechecking
 
