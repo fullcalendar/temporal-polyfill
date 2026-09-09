@@ -34,22 +34,10 @@ import {
 } from './temporalLimits'
 import { constrainToRange, throwRangeError, throwTypeError } from './utils'
 
-// Built-in *-from-fields
+// Field preparation before options
 // -----------------------------------------------------------------------------
-
-export function createPlainDateTimeFromRefinedFields(
-  isoDate: CalendarDateFields,
-  // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
-  timeFields: TimeFields | undefined = timeFieldDefaults,
-  calendar: CalendarImpl,
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  // Calendar/date pipelines and time pipelines resolve their own fields before
-  // reaching this point. The only cross-field validation left is whether the
-  // combined PlainDateTime is inside Temporal's supported ISO range.
-  const isoDateTime = combineDateAndTime(isoDate, timeFields)
-  checkIsoDateTimeInBounds(isoDateTime)
-  return createDateTimeSlots(isoDateTime, calendar)
-}
+// Callers run this stage before reading options, then pass the prepared values
+// to construction below. Source order does not control observable option reads.
 
 // Performs the observable year/month field work that must precede option reads.
 // Full dates also require a day. Check all required fields before parsing
@@ -77,72 +65,6 @@ export function refineCalendarDateFields(
   const monthCodeParts = parseMonthCodeField(fields)
   const year = resolveCalendarYear(fields, calendar)
   return [year, monthCodeParts]
-}
-
-// Resolves fields after the caller has read the overflow option at the required
-// point between field refinement and calendar-dependent month/day resolution.
-export function createPlainDateFromRefinedFields(
-  fields: Partial<DateFields>,
-  calendar: CalendarImpl,
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-  overflow: Overflow,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const month = resolveCalendarMonth(
-    fields,
-    calendar,
-    year,
-    monthCodeParts,
-    overflow,
-  )
-  const day = resolveCalendarDay(
-    fields as DayFields,
-    calendar,
-    year,
-    month,
-    overflow,
-  )
-  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, day)
-  return createDateSlots(checkIsoDateInBounds(isoDate), calendar)
-}
-
-function parseMonthCodeField(
-  fields: Partial<DateFields>,
-): MonthCodeParts | undefined {
-  if (fields.monthCode !== undefined) {
-    // Syntax is part of resolving the supplied fields, not calendar suitability.
-    // `M99L` is syntactically valid and is rejected later against the chosen
-    // calendar/year, but `L99M` should fail before year numeric coercion.
-    return parseMonthCode(fields.monthCode)
-  }
-}
-
-export function createPlainYearMonthFromRefinedFields(
-  fields: Partial<YearMonthFields>,
-  calendar: CalendarImpl,
-  year: number,
-  monthCodeParts: MonthCodeParts | undefined,
-  overflow: Overflow,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const month = resolveCalendarMonth(
-    fields,
-    calendar,
-    year,
-    monthCodeParts,
-    overflow,
-  )
-  return createPlainYearMonthFromCalendarFields(calendar, year, month)
-}
-
-// Creates a PlainYearMonth from calendar coordinates that are already known
-// to be resolved, avoiding field-style month validation for trusted inputs.
-export function createPlainYearMonthFromCalendarFields(
-  calendar: CalendarImpl,
-  year: number,
-  month: number,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
-  return createDateSlots(checkIsoYearMonthInBounds(isoDate), calendar)
 }
 
 type RefinedPlainMonthDayFields = [
@@ -180,6 +102,69 @@ export function refinePlainMonthDayFields(
       : undefined
 
   return [yearMaybe, monthCodeParts]
+}
+
+// Construction from refined fields
+// -----------------------------------------------------------------------------
+// Complete construction after field preparation and the caller's option reads.
+// Date-time inputs already contain a resolved ISO date and time.
+
+export function createPlainDateTimeFromRefinedFields(
+  isoDate: CalendarDateFields,
+  // biome-ignore lint/style/useDefaultParameterLast: Keep date and time adjacent at call sites.
+  timeFields: TimeFields | undefined = timeFieldDefaults,
+  calendar: CalendarImpl,
+): CalendarDateTimeFields & { calendar: CalendarImpl } {
+  // Calendar/date pipelines and time pipelines resolve their own fields before
+  // reaching this point. The only cross-field validation left is whether the
+  // combined PlainDateTime is inside Temporal's supported ISO range.
+  const isoDateTime = combineDateAndTime(isoDate, timeFields)
+  checkIsoDateTimeInBounds(isoDateTime)
+  return createDateTimeSlots(isoDateTime, calendar)
+}
+
+// Resolves fields after the caller has read the overflow option at the required
+// point between field refinement and calendar-dependent month/day resolution.
+export function createPlainDateFromRefinedFields(
+  fields: Partial<DateFields>,
+  calendar: CalendarImpl,
+  year: number,
+  monthCodeParts: MonthCodeParts | undefined,
+  overflow: Overflow,
+): CalendarDateFields & { calendar: CalendarImpl } {
+  const month = resolveCalendarMonth(
+    fields,
+    calendar,
+    year,
+    monthCodeParts,
+    overflow,
+  )
+  const day = resolveCalendarDay(
+    fields as DayFields,
+    calendar,
+    year,
+    month,
+    overflow,
+  )
+  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, day)
+  return createDateSlots(checkIsoDateInBounds(isoDate), calendar)
+}
+
+export function createPlainYearMonthFromRefinedFields(
+  fields: Partial<YearMonthFields>,
+  calendar: CalendarImpl,
+  year: number,
+  monthCodeParts: MonthCodeParts | undefined,
+  overflow: Overflow,
+): CalendarDateFields & { calendar: CalendarImpl } {
+  const month = resolveCalendarMonth(
+    fields,
+    calendar,
+    year,
+    monthCodeParts,
+    overflow,
+  )
+  return createPlainYearMonthFromCalendarFields(calendar, year, month)
 }
 
 export function createPlainMonthDayFromRefinedFields(
@@ -302,6 +287,22 @@ export function createPlainMonthDayFromRefinedFields(
   )
 }
 
+// Construction from resolved calendar coordinates
+// -----------------------------------------------------------------------------
+// Build YearMonth/MonthDay slots from calendar coordinates that are already
+// trusted, skipping the field-style validation of the layer above.
+
+// Creates a PlainYearMonth from calendar coordinates that are already known
+// to be resolved, avoiding field-style month validation for trusted inputs.
+export function createPlainYearMonthFromCalendarFields(
+  calendar: CalendarImpl,
+  year: number,
+  month: number,
+): CalendarDateFields & { calendar: CalendarImpl } {
+  const isoDate = computeCalendarIsoFieldsFromParts(calendar, year, month, 1)
+  return createDateSlots(checkIsoYearMonthInBounds(isoDate), calendar)
+}
+
 // Creates a PlainMonthDay from a trusted calendar date without rebuilding and
 // reparsing a synthetic public monthCode field.
 export function createPlainMonthDayFromCalendarFields(
@@ -395,4 +396,19 @@ function createPlainMonthDayFromCalendarParts(
     ),
     calendar,
   )
+}
+
+// Parsing helpers
+// -----------------------------------------------------------------------------
+// Decode a monthCode string into its numeric parts.
+
+function parseMonthCodeField(
+  fields: Partial<DateFields>,
+): MonthCodeParts | undefined {
+  if (fields.monthCode !== undefined) {
+    // Syntax is part of resolving the supplied fields, not calendar suitability.
+    // `M99L` is syntactically valid and is rejected later against the chosen
+    // calendar/year, but `L99M` should fail before year numeric coercion.
+    return parseMonthCode(fields.monthCode)
+  }
 }

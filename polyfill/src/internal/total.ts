@@ -33,7 +33,8 @@ import { NumberSign, throwRangeError } from './utils'
 
 // Option-refining total entry point
 // -----------------------------------------------------------------------------
-// This highest layer reads public options before selecting a total strategy.
+// Duration.total itself: reads and validates options, then dispatches to a
+// pre-refined composition below.
 
 export function totalDuration<RA>(
   refineRelativeTo: (relativeToArg?: RA) => RelativeToSlots | undefined,
@@ -84,25 +85,28 @@ export function totalDuration<RA>(
   )
 }
 
-// Pre-refined relative total entry points
+// YearMonth reference normalization
 // -----------------------------------------------------------------------------
-// These flavor-specific compositions assume the total unit is already parsed.
+// PlainYearMonth arithmetic uses the first day as its reference date even when
+// the stored ISO reference day differs. Wraps the plain calendar composition.
 
-export function totalPlainCalendarDuration(
+export function totalPlainYearMonthDuration(
   durationFields: DurationFields,
   relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
-  totalUnit: Unit,
+  totalUnit: Unit.Year | Unit.Month,
 ): number {
-  const [balancedDuration, endEpochNano, relativeOps] =
-    spanPlainRelativeDuration(relativeToSlots, durationFields, totalUnit)
-
-  return totalRelativeDuration(
-    balancedDuration,
-    endEpochNano,
+  const { calendar } = relativeToSlots
+  return totalPlainCalendarDuration(
+    durationFields,
+    { ...moveToStartOfMonth(calendar, relativeToSlots), calendar },
     totalUnit,
-    relativeOps,
   )
 }
+
+// Pre-refined relative total compositions
+// -----------------------------------------------------------------------------
+// One composition per relativeTo flavor and unit kind. Each spans the duration
+// against its origin and hands the endpoints to a totaling core.
 
 export function totalZonedCalendarDuration(
   durationFields: DurationFields,
@@ -120,28 +124,13 @@ export function totalZonedCalendarDuration(
   )
 }
 
-// PlainYearMonth arithmetic uses the first day as its reference date even when
-// the stored ISO reference day differs.
-export function totalPlainYearMonthDuration(
+export function totalPlainCalendarDuration(
   durationFields: DurationFields,
   relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
-  totalUnit: Unit.Year | Unit.Month,
-): number {
-  const { calendar } = relativeToSlots
-  return totalPlainCalendarDuration(
-    durationFields,
-    { ...moveToStartOfMonth(calendar, relativeToSlots), calendar },
-    totalUnit,
-  )
-}
-
-export function totalPlainIsoDuration(
-  durationFields: DurationFields,
-  relativeToFields: CalendarDateFields,
-  totalUnit: Unit.Day | Unit.Week,
+  totalUnit: Unit,
 ): number {
   const [balancedDuration, endEpochNano, relativeOps] =
-    spanPlainIsoRelativeDuration(relativeToFields, durationFields, totalUnit)
+    spanPlainRelativeDuration(relativeToSlots, durationFields, totalUnit)
 
   return totalRelativeDuration(
     balancedDuration,
@@ -167,9 +156,26 @@ export function totalZonedIsoDuration(
   )
 }
 
+export function totalPlainIsoDuration(
+  durationFields: DurationFields,
+  relativeToFields: CalendarDateFields,
+  totalUnit: Unit.Day | Unit.Week,
+): number {
+  const [balancedDuration, endEpochNano, relativeOps] =
+    spanPlainIsoRelativeDuration(relativeToFields, durationFields, totalUnit)
+
+  return totalRelativeDuration(
+    balancedDuration,
+    endEpochNano,
+    totalUnit,
+    relativeOps,
+  )
+}
+
 // Totaling cores
 // -----------------------------------------------------------------------------
-// These lower-level operations total either a relative interval or uniform time.
+// Compute the fractional total: relative units via a clamped window and epoch
+// fraction, uniform day/time units via nanosecond division.
 
 export function totalRelativeDuration(
   durationFields: DurationFields,

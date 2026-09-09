@@ -38,10 +38,11 @@ import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
 import { clampEntity, throwRangeError } from './utils'
 
-// Structured move entry points
+// Pre-refined value movement
 // -----------------------------------------------------------------------------
-// These operations move Temporal-shaped values and enforce their relevant
-// calendar, date-time, or epoch bounds.
+// Entry points that public add/subtract paths reach after refining their
+// arguments, one per value kind: YearMonth, ZonedDateTime, PlainDateTime,
+// PlainTime, and Instant. Each applies the range checks its type requires.
 
 export function moveYearMonth(
   calendar: CalendarImpl,
@@ -164,6 +165,40 @@ export function moveDateTime(
   )
 }
 
+// The ISO date and time are already valid. Only the combined result is checked;
+// a standalone Instant check would incorrectly reject plain date-time edges.
+export function moveDateTimeByNano(
+  fields: CalendarDateTimeFields,
+  delta: bigint,
+): CalendarDateTimeFields {
+  const [time, days] = moveTimeByNano(fields, delta)
+  return checkIsoDateTimeInBounds(
+    combineDateAndTime(moveByDays(fields, days), time),
+  )
+}
+
+export function moveTime(
+  timeFields: TimeFields,
+  durationFields: DurationFields,
+): [TimeFields, number] {
+  return moveTimeByNano(timeFields, durationTimeToBigNano(durationFields))
+}
+
+export function moveEpochNano(
+  epochNano: bigint,
+  durationFields: DurationFields,
+): bigint {
+  return moveEpochNanoByNano(
+    epochNano,
+    durationOnlyTimeToBigNano(durationFields),
+  )
+}
+
+// Date movement
+// -----------------------------------------------------------------------------
+// Move an ISO date by a duration, mirroring CalendarDateAdd. Calendar units
+// route through the month arithmetic below; day/week units stay in ISO space.
+
 /*
 Mirrors CalendarDateAdd, including its ISODateWithinLimits rejection. That check
 is date-level: checkIsoDateInBounds probes the date at noon, so it admits the
@@ -198,27 +233,6 @@ export function moveDate(
   return checkIsoDateInBounds(isoDate)
 }
 
-export function moveTime(
-  timeFields: TimeFields,
-  durationFields: DurationFields,
-): [TimeFields, number] {
-  return moveTimeByNano(timeFields, durationTimeToBigNano(durationFields))
-}
-
-export function moveEpochNano(
-  epochNano: bigint,
-  durationFields: DurationFields,
-): bigint {
-  return moveEpochNanoByNano(
-    epochNano,
-    durationOnlyTimeToBigNano(durationFields),
-  )
-}
-
-// Fixed ISO and nanosecond movement
-// -----------------------------------------------------------------------------
-// These lower-level operations move without calendar month/year arithmetic.
-
 // Move only by ISO days or seven-day weeks while retaining moveDate's required
 // intermediate date bounds check.
 export function moveIsoDurationDate(
@@ -230,50 +244,10 @@ export function moveIsoDurationDate(
   )
 }
 
-// Balance in bigint space before converting the within-day remainder to Number.
-// The returned day carry is for date-time movement; PlainTime discards it.
-export function moveTimeByNano(
-  timeFields: TimeFields,
-  durationBigNano: bigint,
-): [TimeFields, number] {
-  const durDays = Number(durationBigNano / bigNanoInUtcDay)
-  const durTimeNano = Number(durationBigNano % bigNanoInUtcDay)
-  const [newTimeFields, overflowDays] = nanoToTimeAndDay(
-    timeFieldsToNano(timeFields) + durTimeNano,
-  )
-  return [newTimeFields, durDays + overflowDays]
-}
-
-// The ISO date and time are already valid. Only the combined result is checked;
-// a standalone Instant check would incorrectly reject plain date-time edges.
-export function moveDateTimeByNano(
-  fields: CalendarDateTimeFields,
-  delta: bigint,
-): CalendarDateTimeFields {
-  const [time, days] = moveTimeByNano(fields, delta)
-  return checkIsoDateTimeInBounds(
-    combineDateAndTime(moveByDays(fields, days), time),
-  )
-}
-
-// Exact epoch movement is shared by Instant and zoned time-unit helpers.
-export function moveEpochNanoByNano(epoch: bigint, delta: bigint): bigint {
-  return checkEpochNanoInBounds(epoch + delta)
-}
-
-export function moveByDays(
-  isoDate: CalendarDateFields,
-  days: number,
-): CalendarDateFields {
-  if (days) {
-    return epochDaysToIsoDate(isoDateToEpochDays(isoDate) + days)
-  }
-  return isoDate
-}
-
-// Calendar month movement
+// Calendar date operations
 // -----------------------------------------------------------------------------
-// These primitives translate calendar month/year coordinates back to ISO dates.
+// Operations on ISO dates that need the calendar's view of months: snap to the
+// first of the month, or add years/months with overflow handling.
 
 export function moveToStartOfMonth(
   calendar: CalendarImpl,
@@ -332,6 +306,12 @@ export function addDateMonths(
   return computeCalendarIsoFieldsFromParts(calendar, year, month, day)
 }
 
+// Calendar coordinate helpers
+// -----------------------------------------------------------------------------
+// Arithmetic on calendar year/month coordinates rather than ISO dates, including
+// the leap-month resolution used when a month code does not exist in the target
+// year.
+
 export function addCalendarMonths(
   calendar: CalendarImpl,
   year: number,
@@ -374,4 +354,38 @@ export function computeYearMovedMonth(
   }
 
   return monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)
+}
+
+// Fixed day and nanosecond primitives
+// -----------------------------------------------------------------------------
+// Calendar-free movement: shift time fields by nanoseconds (carrying days),
+// shift an epoch by nanoseconds, and shift an ISO date by whole days.
+
+// Balance in bigint space before converting the within-day remainder to Number.
+// The returned day carry is for date-time movement; PlainTime discards it.
+export function moveTimeByNano(
+  timeFields: TimeFields,
+  durationBigNano: bigint,
+): [TimeFields, number] {
+  const durDays = Number(durationBigNano / bigNanoInUtcDay)
+  const durTimeNano = Number(durationBigNano % bigNanoInUtcDay)
+  const [newTimeFields, overflowDays] = nanoToTimeAndDay(
+    timeFieldsToNano(timeFields) + durTimeNano,
+  )
+  return [newTimeFields, durDays + overflowDays]
+}
+
+// Exact epoch movement is shared by Instant and zoned time-unit helpers.
+export function moveEpochNanoByNano(epoch: bigint, delta: bigint): bigint {
+  return checkEpochNanoInBounds(epoch + delta)
+}
+
+export function moveByDays(
+  isoDate: CalendarDateFields,
+  days: number,
+): CalendarDateFields {
+  if (days) {
+    return epochDaysToIsoDate(isoDateToEpochDays(isoDate) + days)
+  }
+  return isoDate
 }

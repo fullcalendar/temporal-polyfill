@@ -62,10 +62,11 @@ import {
 
 // Pre-refined diff entry points
 // -----------------------------------------------------------------------------
+// Shared diff cores that receive fully refined settings, one per value kind.
+// This keeps each public API's observable option access in its own wrapper
+// while sharing all temporal arithmetic, range checks, and algorithm-dependent
+// validation below.
 
-// Shared diff cores receive fully refined settings. This keeps each public
-// API's observable option access in its own wrapper while sharing all temporal
-// arithmetic, range checks, and algorithm-dependent validation below it.
 export function computeZonedDateTimeDiff(
   calendar: CalendarImpl,
   startZoned: ZonedEpochNanoFields,
@@ -205,46 +206,45 @@ export function computePlainTimeDiff(
   return durationFields
 }
 
-// Rounded calendar and ISO diff strategies
+// Rounded diff strategies
 // -----------------------------------------------------------------------------
-// These pre-refined branches compose exact diffing with relative rounding and
-// are shared by duration-returning and numeric unit-diff entry points.
+// Exact diff followed by rounding, split by unit kind: calendar units go
+// through RelativeOps rounding, ISO day/week units through fixed arithmetic,
+// and pure time units through epoch nanoseconds.
 
-// ISO date inputs; calendar units are resolved by the calendar implementation.
-// Date-only precision can skip rounding, including YearMonth's month precision.
-export function computeCalendarDateDiff(
+// Calendar-unit branch shared with fixed helpers; no public options or direction.
+export function computeZonedCalendarDiff(
   calendar: CalendarImpl,
-  startIsoDate: CalendarDateFields,
-  endIsoDate: CalendarDateFields,
+  startZoned: ZonedEpochNanoFields,
+  endZoned: ZonedEpochNanoFields,
   largestUnit: Unit,
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
-  smallestPrecision: Unit = Unit.Day,
 ): DurationFields {
-  const endEpochNano = isoDateToEpochNano(endIsoDate)
-  if (!compareIsoDate(startIsoDate, endIsoDate)) {
+  const endEpochNano = endZoned.epochNanoseconds
+  if (endEpochNano === startZoned.epochNanoseconds) {
     return durationFieldDefaults
   }
-
   let durationFields: DurationFields
-  durationFields = diffCalendarDates(
+  const timeZone = getCommonTimeZone(startZoned.timeZone, endZoned.timeZone)
+  durationFields = diffZonedEpochsExact(
+    timeZone,
     calendar,
-    startIsoDate,
-    endIsoDate,
+    startZoned,
+    endZoned,
     largestUnit,
   )
-  if (!(smallestUnit === smallestPrecision && roundingInc === 1)) {
-    durationFields = roundRelativeDuration(
-      durationFields,
-      endEpochNano,
-      largestUnit,
-      smallestUnit,
-      roundingInc,
-      roundingMode,
-      createDateRelativeOps(calendar, startIsoDate),
-    )
-  }
+  durationFields = roundRelativeDuration(
+    durationFields,
+    endEpochNano,
+    largestUnit,
+    smallestUnit,
+    roundingInc,
+    roundingMode,
+    createZonedRelativeOps(calendar, timeZone, startZoned),
+    true,
+  )
   return durationFields
 }
 
@@ -286,12 +286,50 @@ export function computeCalendarDateTimeDiff(
   return durationFields
 }
 
-// Calendar-unit branch shared with fixed helpers; no public options or direction.
-export function computeZonedCalendarDiff(
+// ISO date inputs; calendar units are resolved by the calendar implementation.
+// Date-only precision can skip rounding, including YearMonth's month precision.
+export function computeCalendarDateDiff(
   calendar: CalendarImpl,
+  startIsoDate: CalendarDateFields,
+  endIsoDate: CalendarDateFields,
+  largestUnit: Unit,
+  smallestUnit: Unit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+  smallestPrecision: Unit = Unit.Day,
+): DurationFields {
+  const endEpochNano = isoDateToEpochNano(endIsoDate)
+  if (!compareIsoDate(startIsoDate, endIsoDate)) {
+    return durationFieldDefaults
+  }
+
+  let durationFields: DurationFields
+  durationFields = diffCalendarDates(
+    calendar,
+    startIsoDate,
+    endIsoDate,
+    largestUnit,
+  )
+  if (!(smallestUnit === smallestPrecision && roundingInc === 1)) {
+    durationFields = roundRelativeDuration(
+      durationFields,
+      endEpochNano,
+      largestUnit,
+      smallestUnit,
+      roundingInc,
+      roundingMode,
+      createDateRelativeOps(calendar, startIsoDate),
+    )
+  }
+  return durationFields
+}
+
+// Zoned day/week differences use ISO date movement while retaining zoned
+// relative rounding for variable-length local days.
+export function computeZonedIsoDiff(
+  unit: Unit.Day | Unit.Week,
   startZoned: ZonedEpochNanoFields,
   endZoned: ZonedEpochNanoFields,
-  largestUnit: Unit,
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
@@ -300,57 +338,20 @@ export function computeZonedCalendarDiff(
   if (endEpochNano === startZoned.epochNanoseconds) {
     return durationFieldDefaults
   }
-  let durationFields: DurationFields
+
   const timeZone = getCommonTimeZone(startZoned.timeZone, endZoned.timeZone)
-  durationFields = diffZonedEpochsExact(
-    timeZone,
-    calendar,
-    startZoned,
-    endZoned,
-    largestUnit,
-  )
-  durationFields = roundRelativeDuration(
-    durationFields,
+  return roundRelativeDuration(
+    diffZonedDateParts(timeZone, startZoned, endZoned, (start, end) =>
+      diffIsoDates(unit === Unit.Week, start, end),
+    ),
     endEpochNano,
-    largestUnit,
+    unit,
     smallestUnit,
     roundingInc,
     roundingMode,
-    createZonedRelativeOps(calendar, timeZone, startZoned),
+    createZonedIsoOps(startZoned),
     true,
   )
-  return durationFields
-}
-
-// Diff ISO dates in fixed day/week units while keeping epoch-based relative
-// rounding internal to the duration-producing layer.
-export function computeIsoDateDiff(
-  unit: Unit.Day | Unit.Week,
-  startIsoDate: CalendarDateFields,
-  endIsoDate: CalendarDateFields,
-  smallestUnit: Unit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): DurationFields {
-  const startEpochNano = isoDateToEpochNano(startIsoDate)
-  const endEpochNano = isoDateToEpochNano(endIsoDate)
-  const durationFields = diffIsoDates(
-    unit === Unit.Week,
-    startIsoDate,
-    endIsoDate,
-  )
-  return endEpochNano === startEpochNano ||
-    (smallestUnit === Unit.Day && roundingInc === 1)
-    ? durationFields
-    : roundRelativeDuration(
-        durationFields,
-        endEpochNano,
-        unit,
-        smallestUnit,
-        roundingInc,
-        roundingMode,
-        createPlainIsoOps(combineDateAndTime(startIsoDate, timeFieldDefaults)),
-      )
 }
 
 // Diff ISO date-times in fixed day/week units. Epoch nanoseconds are an
@@ -391,39 +392,62 @@ export function computeIsoDateTimeDiff(
   )
 }
 
-// Zoned day/week differences use ISO date movement while retaining zoned
-// relative rounding for variable-length local days.
-export function computeZonedIsoDiff(
+// Diff ISO dates in fixed day/week units while keeping epoch-based relative
+// rounding internal to the duration-producing layer.
+export function computeIsoDateDiff(
   unit: Unit.Day | Unit.Week,
-  startZoned: ZonedEpochNanoFields,
-  endZoned: ZonedEpochNanoFields,
+  startIsoDate: CalendarDateFields,
+  endIsoDate: CalendarDateFields,
   smallestUnit: Unit,
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): DurationFields {
-  const endEpochNano = endZoned.epochNanoseconds
-  if (endEpochNano === startZoned.epochNanoseconds) {
-    return durationFieldDefaults
-  }
-
-  const timeZone = getCommonTimeZone(startZoned.timeZone, endZoned.timeZone)
-  return roundRelativeDuration(
-    diffZonedDateParts(timeZone, startZoned, endZoned, (start, end) =>
-      diffIsoDates(unit === Unit.Week, start, end),
-    ),
-    endEpochNano,
-    unit,
-    smallestUnit,
-    roundingInc,
-    roundingMode,
-    createZonedIsoOps(startZoned),
-    true,
+  const startEpochNano = isoDateToEpochNano(startIsoDate)
+  const endEpochNano = isoDateToEpochNano(endIsoDate)
+  const durationFields = diffIsoDates(
+    unit === Unit.Week,
+    startIsoDate,
+    endIsoDate,
   )
+  return endEpochNano === startEpochNano ||
+    (smallestUnit === Unit.Day && roundingInc === 1)
+    ? durationFields
+    : roundRelativeDuration(
+        durationFields,
+        endEpochNano,
+        unit,
+        smallestUnit,
+        roundingInc,
+        roundingMode,
+        createPlainIsoOps(combineDateAndTime(startIsoDate, timeFieldDefaults)),
+      )
 }
 
-// Exact structured diffing
+export function diffEpochNanos(
+  startEpochNano: bigint,
+  endEpochNano: bigint,
+  largestUnit: DayTimeUnit,
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): DurationFields {
+  return {
+    ...durationFieldDefaults,
+    ...nanoToDurationDayTimeFields(
+      roundBigNanoToInc(
+        endEpochNano - startEpochNano,
+        computeBigNanoInc(smallestUnit, roundingInc),
+        roundingMode,
+      ),
+      largestUnit,
+    ),
+  }
+}
+
+// Exact date-time diff dispatch
 // -----------------------------------------------------------------------------
-// These operations balance dates and date-times without applying rounding.
+// Unrounded diffs for zoned and plain date-times. Sub-day largest units are a
+// plain epoch subtraction; larger units decompose into date and time parts.
 
 export function diffZonedEpochsExact(
   timeZone: TimeZone,
@@ -446,6 +470,44 @@ export function diffZonedEpochsExact(
     diffCalendarDates(calendar, start, end, largestUnit),
   )
 }
+
+export function diffDateTimesExact(
+  calendar: CalendarImpl,
+  startIsoDateTime: CalendarDateTimeFields,
+  endIsoDateTime: CalendarDateTimeFields,
+  largestUnit: Unit,
+): DurationFields {
+  const startEpochNano = isoDateTimeToEpochNano(startIsoDateTime)
+  const endEpochNano = isoDateTimeToEpochNano(endIsoDateTime)
+  const sign = compareBigInts(endEpochNano, startEpochNano)
+
+  if (!sign) {
+    return durationFieldDefaults
+  }
+  if (largestUnit <= Unit.Day) {
+    return {
+      ...durationFieldDefaults,
+      ...nanoToDurationDayTimeFields(
+        endEpochNano - startEpochNano,
+        largestUnit as DayTimeUnit,
+      ),
+    }
+  }
+
+  return diffDateTimesBig(
+    calendar,
+    startIsoDateTime,
+    endIsoDateTime,
+    sign,
+    largestUnit,
+  )
+}
+
+// Date-time decomposition
+// -----------------------------------------------------------------------------
+// Split a date-time diff into a date diff plus a time remainder, correcting the
+// intermediate date by a day when the wall-clock times conflict. The zoned
+// variants also resolve the intermediate wall-clock through the time zone.
 
 // Inputs carry valid epochs. Prepare wall-clock date parts once, then let the
 // caller select calendar-month or ISO day/week arithmetic for that interval.
@@ -492,38 +554,6 @@ export function diffZonedDateParts(
   return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
 }
 
-export function diffDateTimesExact(
-  calendar: CalendarImpl,
-  startIsoDateTime: CalendarDateTimeFields,
-  endIsoDateTime: CalendarDateTimeFields,
-  largestUnit: Unit,
-): DurationFields {
-  const startEpochNano = isoDateTimeToEpochNano(startIsoDateTime)
-  const endEpochNano = isoDateTimeToEpochNano(endIsoDateTime)
-  const sign = compareBigInts(endEpochNano, startEpochNano)
-
-  if (!sign) {
-    return durationFieldDefaults
-  }
-  if (largestUnit <= Unit.Day) {
-    return {
-      ...durationFieldDefaults,
-      ...nanoToDurationDayTimeFields(
-        endEpochNano - startEpochNano,
-        largestUnit as DayTimeUnit,
-      ),
-    }
-  }
-
-  return diffDateTimesBig(
-    calendar,
-    startIsoDateTime,
-    endIsoDateTime,
-    sign,
-    largestUnit,
-  )
-}
-
 function diffDateTimesBig(
   calendar: CalendarImpl,
   startIsoDateTime: CalendarDateTimeFields,
@@ -549,6 +579,53 @@ function diffDateTimesBig(
   )
   return { ...dateDiff, ...nanoToDurationTimeFields(timeNano) }
 }
+
+/*
+HACK: callers should always assert defined result
+*/
+export function prepareZonedEpochDiff(
+  timeZone: TimeZone,
+  startZoned: ZonedEpochNanoFields,
+  endZoned: ZonedEpochNanoFields,
+  sign: -1 | 1,
+): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
+  const startIsoDate = zonedEpochSlotsToIso(startZoned)
+  const endIsoDate = zonedEpochSlotsToIso(endZoned)
+  const endEpochNano = endZoned.epochNanoseconds
+  let dayCorrection = 0
+
+  // If wall-clock will be overshot, guaranteed 1-day correction
+  const timeDiffNano =
+    timeFieldsToNano(endIsoDate) - timeFieldsToNano(startIsoDate)
+  const timeSign = Math.sign(timeDiffNano)
+  if (timeSign === -sign) {
+    dayCorrection++
+  }
+
+  // Date-only units land on the end date with the
+  // start time. Around a compatible DST push-forward, forward differences can
+  // overshoot once more after the plain wall-clock correction above, so only
+  // that direction gets a single extra retry.
+  const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
+
+  for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
+    const midIsoDate = moveByDays(endIsoDate, dayCorrection * -sign)
+    const midEpochNano = getSingleInstantFor(
+      timeZone,
+      combineDateAndTime(midIsoDate, startIsoDate),
+    )
+
+    if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
+      const remainderNano = Number(endEpochNano - midEpochNano)
+      return [startIsoDate, midIsoDate, remainderNano]
+    }
+  }
+}
+
+// Exact date and uniform-interval arithmetic
+// -----------------------------------------------------------------------------
+// Date-only diffing. Calendar units delegate to the calendar implementation;
+// ISO day/week units balance an elapsed interval without calendar arithmetic.
 
 export function diffCalendarDates(
   calendar: CalendarImpl,
@@ -724,79 +801,6 @@ export function diffCalendarDates(
   }
 }
 
-// Zoned diff preparation
-// -----------------------------------------------------------------------------
-// This lower layer derives the wall-clock anchor and elapsed remainder needed
-// by exact zoned date-part diffing.
-
-/*
-HACK: callers should always assert defined result
-*/
-export function prepareZonedEpochDiff(
-  timeZone: TimeZone,
-  startZoned: ZonedEpochNanoFields,
-  endZoned: ZonedEpochNanoFields,
-  sign: -1 | 1,
-): [CalendarDateTimeFields, CalendarDateFields, number] | undefined {
-  const startIsoDate = zonedEpochSlotsToIso(startZoned)
-  const endIsoDate = zonedEpochSlotsToIso(endZoned)
-  const endEpochNano = endZoned.epochNanoseconds
-  let dayCorrection = 0
-
-  // If wall-clock will be overshot, guaranteed 1-day correction
-  const timeDiffNano =
-    timeFieldsToNano(endIsoDate) - timeFieldsToNano(startIsoDate)
-  const timeSign = Math.sign(timeDiffNano)
-  if (timeSign === -sign) {
-    dayCorrection++
-  }
-
-  // Date-only units land on the end date with the
-  // start time. Around a compatible DST push-forward, forward differences can
-  // overshoot once more after the plain wall-clock correction above, so only
-  // that direction gets a single extra retry.
-  const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
-
-  for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
-    const midIsoDate = moveByDays(endIsoDate, dayCorrection * -sign)
-    const midEpochNano = getSingleInstantFor(
-      timeZone,
-      combineDateAndTime(midIsoDate, startIsoDate),
-    )
-
-    if (compareBigInts(endEpochNano, midEpochNano) !== -sign) {
-      const remainderNano = Number(endEpochNano - midEpochNano)
-      return [startIsoDate, midIsoDate, remainderNano]
-    }
-  }
-}
-
-// Uniform epoch and ISO diffing
-// -----------------------------------------------------------------------------
-// Fixed-length units bypass calendar arithmetic and work from elapsed epochs or
-// ISO day counts.
-
-export function diffEpochNanos(
-  startEpochNano: bigint,
-  endEpochNano: bigint,
-  largestUnit: DayTimeUnit,
-  smallestUnit: DayTimeUnit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): DurationFields {
-  return {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(
-      roundBigNanoToInc(
-        endEpochNano - startEpochNano,
-        computeBigNanoInc(smallestUnit, roundingInc),
-        roundingMode,
-      ),
-      largestUnit,
-    ),
-  }
-}
-
 // Balance a uniform elapsed interval without calendar arithmetic.
 export function diffIsoEpochs(
   unit: Unit.Day | Unit.Week,
@@ -833,9 +837,9 @@ export function diffIsoDates(
     : { ...durationFieldDefaults, days }
 }
 
-// Private date primitives
+// Date comparison and day-count primitives
 // -----------------------------------------------------------------------------
-// Field comparisons and day counts form the bottom layer of structured diffs.
+// Leaf helpers over ISO date fields that avoid epoch conversion.
 
 // Local field comparison avoids converting edge-of-range dates to epoch time.
 function compareIsoDate(
