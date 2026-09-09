@@ -14,6 +14,8 @@ import { CalendarImpl } from '../internal/calendarImpl'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { computeIsoDayOfWeek } from '../internal/isoCalendarMath'
 
+// Slot-backed getter tables used by classApi (basic and full) and funcApi/shim.
+
 // Keep these maps initialized in the same modules as their field-name arrays.
 // Building them here from imports can hit bundled circular-init TDZs.
 export { durationGetters } from '../internal/durationFields'

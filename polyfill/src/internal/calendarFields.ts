@@ -1,3 +1,4 @@
+import { Overflow } from '../options/model'
 import {
   computeCalendarDaysInMonthForYearMonth,
   computeCalendarMonthsInYearForYear,
@@ -9,7 +10,6 @@ import { toIntegerWithTrunc } from './cast'
 import * as errorMessages from './errorMessages'
 import { DateFields, DayFields, MonthFields } from './fieldTypes'
 import { gregoryEraOrigins, normalizeEraName } from './intlCalendarConfig'
-import { Overflow } from './optionsModel'
 import {
   clampEntity,
   clampProp,

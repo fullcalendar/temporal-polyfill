@@ -5,7 +5,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { timeGetters } from '../../apiHelpers/nativeMixins'
+import { timeGetters } from '../../apiHelpers/gettersForNative'
 import { TimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'

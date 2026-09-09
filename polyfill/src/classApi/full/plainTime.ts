@@ -6,9 +6,9 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffTimes } from '../../apiHelpers/dateTimeDiff'
-import { withTimeFields } from '../../apiHelpers/fieldUpdate'
-import { timeGetters } from '../../apiHelpers/shimMixins'
+import { diffTimes } from '../../apiHelpers/diffHelpers'
+import { timeGetters } from '../../apiHelpers/gettersForSlots'
+import { withTimeFields } from '../../apiHelpers/withFields'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { zonedDateTimeToTime } from '../../internal/convert'
@@ -21,9 +21,6 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { moveTime } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { RoundingModeEnum } from '../../internal/optionsModel'
-import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundTimeToInc } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
@@ -32,6 +29,9 @@ import {
 } from '../../internal/timeFieldMath'
 import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
+import { RoundingModeEnum } from '../../options/model'
+import { refineRoundingOptions } from '../../options/roundingRefine'
 import {
   Duration,
   DurationArg,

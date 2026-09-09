@@ -1,9 +1,9 @@
 import type { Temporal } from 'temporal-spec'
-import { type SubsecDigits } from './temporalSpecHelpers'
-import { Unit } from './units'
+import { type SubsecDigits } from '../internal/temporalSpecHelpers'
+import { Unit } from '../internal/units'
 
 /*
-Shared internal option model.
+Canonical option model shared by internal/ and apiHelpers/.
 
 There are two internal shapes in this file:
 
@@ -13,9 +13,10 @@ There are two internal shapes in this file:
 
 Raw option-bag input shapes live in temporalSpecHelpers.
 
-Keeping this model apart from normalization, coercion, validation, and
-call-site refinement avoids pulling implementation helpers into otherwise
-independent option modules.
+Every option enum and refined tuple type belongs here. The enums are the
+refined vocabulary, and the sibling files in this directory are the parsers
+that produce them. Both internal/ and apiHelpers/ import these types from here;
+do not split them out to make internal/ self-contained.
 */
 
 // Coerced internal option values. These are never raw user strings.
@@ -57,9 +58,9 @@ export const enum OffsetDisplay {
 }
 
 export const enum RoundingModeEnum {
-  // Modes that get inverted by optionsRoundingRefine.invertRoundingMode.
+  // Modes that get inverted by roundingRefine.invertRoundingMode.
   // If this enum changes, update roundingModeMap and roundingModeFuncs in
-  // optionsConfig so string coercion and rounding dispatch stay aligned.
+  // config so string coercion and rounding dispatch stay aligned.
   Floor = 0,
   HalfFloor = 1,
   Ceil = 2,

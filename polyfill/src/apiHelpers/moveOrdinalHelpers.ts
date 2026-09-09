@@ -1,16 +1,17 @@
 import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
+import { toIntegerWithTrunc } from '../internal/cast'
+import { CalendarDateFields } from '../internal/fieldTypes'
 import {
   moveToRefinedDayOfMonth,
   moveToRefinedDayOfWeek,
   moveToRefinedDayOfYear,
   moveToRefinedWeekOfYear,
-} from '../internal/calendarPosition'
-import { toIntegerWithTrunc } from '../internal/cast'
-import { CalendarDateFields } from '../internal/fieldTypes'
-import { refineOverflowOptions } from '../internal/optionsFieldRefine'
+} from '../internal/moveOrdinal'
+import { refineOverflowOptions } from '../options/fieldRefine'
 
-// Keep public option coercion before the position's numeric conversion.
+// Public-argument wrappers over internal/moveOrdinal.ts. Public option
+// coercion must happen before the ordinal's numeric conversion.
 export function moveToDayOfYear(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
@@ -26,7 +27,6 @@ export function moveToDayOfYear(
   )
 }
 
-// Keep public option coercion before the position's numeric conversion.
 export function moveToDayOfMonth(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
@@ -42,7 +42,6 @@ export function moveToDayOfMonth(
   )
 }
 
-// Keep public option coercion before the position's numeric conversion.
 // The calendar is unused (day-of-week is ISO) but kept so all four position
 // movers share one signature for the func API's zoned transform adapter.
 export function moveToDayOfWeek(
@@ -59,7 +58,6 @@ export function moveToDayOfWeek(
   )
 }
 
-// Keep public option coercion before the position's numeric conversion.
 export function moveToWeekOfYear(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,

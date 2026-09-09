@@ -5,12 +5,15 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { dateFieldGetters, timeGetters } from '../../apiHelpers/nativeMixins'
-import { normalizeRoundToOptions } from '../../apiHelpers/roundToOptions'
+import {
+  dateFieldGetters,
+  timeGetters,
+} from '../../apiHelpers/gettersForNative'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
+import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 import {
   DateTimeFormatLike,
   DateTimeFromFields,
@@ -559,7 +562,7 @@ export function roundToYear(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToYear(
       getNativePlainDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }
@@ -571,7 +574,7 @@ export function roundToMonth(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToMonth(
       getNativePlainDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }
@@ -583,7 +586,7 @@ export function roundToWeek(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToWeek(
       getNativePlainDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }

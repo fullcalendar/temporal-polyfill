@@ -1,6 +1,6 @@
+import { Overflow } from '../options/model'
 import { timeFieldDefaults, timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
-import { Overflow } from './optionsModel'
 import { constrainTimeFields } from './timeFieldMath'
 import { pluckProps } from './utils'
 

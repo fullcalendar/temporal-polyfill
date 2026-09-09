@@ -1,3 +1,4 @@
+import { Overflow, RoundingModeEnum } from '../options/model'
 import {
   computeCalendarDateFields,
   computeCalendarDaysInMonthForYearMonth,
@@ -30,7 +31,6 @@ import {
   moveToStartOfMonth,
   resolveMonthInMovedYear,
 } from './move'
-import { Overflow, RoundingModeEnum } from './optionsModel'
 import {
   createDateRelativeOps,
   createDateTimeRelativeOps,

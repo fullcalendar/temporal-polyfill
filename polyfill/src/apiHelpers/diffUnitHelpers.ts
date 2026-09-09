@@ -9,13 +9,17 @@ import {
   diffZonedCalendarUnitsRounded,
   diffZonedDayWeekUnitsRounded,
 } from '../internal/diff'
+import {
+  computeEpochNanoUnitDiff,
+  computeIsoDateTimeUnitDiff,
+  computeTimeUnitDiff,
+} from '../internal/diffUnit'
 import { durationFieldNamesAsc } from '../internal/durationFields'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
   TimeFields,
 } from '../internal/fieldTypes'
-import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
 import { getCommonCalendar } from '../internal/slotUtils'
 import { EpochNanoFields, ZonedEpochNanoFields } from '../internal/slots'
 import {
@@ -25,13 +29,9 @@ import {
   totalZonedCalendarDuration,
   totalZonedDayWeekDuration,
 } from '../internal/total'
-import {
-  computeEpochNanoUnitDiff,
-  computeIsoDateTimeUnitDiff,
-  computeTimeUnitDiff,
-} from '../internal/unitDiff'
 import { DayWeekUnit, TimeUnit, Unit } from '../internal/units'
 import { bindArgs } from '../internal/utils'
+import { refineUnitDiffOptions } from '../options/roundingRefine'
 
 export const diffZonedYears = bindArgs(diffZonedCalendarUnit, Unit.Year)
 export const diffZonedMonths = bindArgs(diffZonedCalendarUnit, Unit.Month)

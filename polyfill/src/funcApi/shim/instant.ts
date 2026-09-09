@@ -5,12 +5,11 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffInstants } from '../../apiHelpers/dateTimeDiff'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
+import { diffInstants } from '../../apiHelpers/diffHelpers'
 import {
   adaptRecordTimeUnitDiff,
   diffInstantEpochNanoTimeUnit,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -50,6 +49,7 @@ import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike } from '../commonTypes'
 import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -397,7 +397,7 @@ function roundToUnit(
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
   // solarMode: Instant validates increments against a full UTC day.
-  const [roundingInc, roundingMode] = refineRoundToOptions(
+  const [roundingInc, roundingMode] = refineUnitRoundOptions(
     smallestUnit,
     options,
     true, // solarMode

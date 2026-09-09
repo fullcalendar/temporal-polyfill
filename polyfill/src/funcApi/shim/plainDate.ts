@@ -1,30 +1,26 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-} from '../../apiHelpers/calendarPosition'
-import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffDates } from '../../apiHelpers/dateTimeDiff'
-import {
-  moveDateByMonths,
-  moveDateByYears,
-} from '../../apiHelpers/dateTimeMove'
-import { withDateFields } from '../../apiHelpers/fieldUpdate'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
-import { dateFieldGetters } from '../../apiHelpers/shimMixins'
+import { diffDates } from '../../apiHelpers/diffHelpers'
 import {
   diffDateDays,
   diffDateMonths,
   diffDateWeeks,
   diffDateYears,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
+import { dateFieldGetters } from '../../apiHelpers/gettersForSlots'
+import { moveDateByMonths, moveDateByYears } from '../../apiHelpers/moveHelpers'
+import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/moveOrdinalHelpers'
+import { withDateFields } from '../../apiHelpers/withFields'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -65,7 +61,6 @@ import {
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { moveDate, moveDateByDays } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import {
   createDateTimeFromRefinedFields,
@@ -77,6 +72,8 @@ import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { Unit } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import {
   DateFromFields,
   DateTimeFormatLike,
@@ -721,7 +718,7 @@ function roundToInterval(
   options?: RoundingMathOptions | RoundingMode,
 ): ShimPlainDateRecord {
   const slots = getShimPlainDateSlots(record)
-  const [, roundingMode] = refineRoundToOptions(unit, options)
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
   const roundedIsoDateTime = roundDateToInterval(
     computeInterval,
     slots.calendar,

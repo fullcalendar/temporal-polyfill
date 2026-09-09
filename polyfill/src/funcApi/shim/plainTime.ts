@@ -5,15 +5,14 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffTimes } from '../../apiHelpers/dateTimeDiff'
-import { reversedMove } from '../../apiHelpers/dateTimeMove'
-import { withTimeFields } from '../../apiHelpers/fieldUpdate'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
-import { timeGetters } from '../../apiHelpers/shimMixins'
+import { diffTimes } from '../../apiHelpers/diffHelpers'
 import {
   adaptRecordTimeUnitDiff,
   diffTimeNanoOfDayTimeUnit,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
+import { timeGetters } from '../../apiHelpers/gettersForSlots'
+import { reversedMove } from '../../apiHelpers/moveHelpers'
+import { withTimeFields } from '../../apiHelpers/withFields'
 import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareTimeFields, plainTimesEqual } from '../../internal/compare'
 import { refinePlainTimeObjectLike } from '../../internal/createFromFields'
@@ -40,6 +39,7 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -290,7 +290,7 @@ function roundToUnit(
   const slots = getShimPlainTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
-  const [roundingInc, roundingMode] = refineRoundToOptions(
+  const [roundingInc, roundingMode] = refineUnitRoundOptions(
     smallestUnit,
     options,
   )

@@ -1,14 +1,19 @@
-import * as errorMessages from './errorMessages'
-import { roundingIncName } from './optionsConfig'
-import { Overflow } from './optionsModel'
-import { Unit, nanoInUtcDay, unitNamesAsc, unitNanoMap } from './units'
-import { clampEntity, throwRangeError } from './utils'
+import * as errorMessages from '../internal/errorMessages'
+import {
+  Unit,
+  nanoInUtcDay,
+  unitNamesAsc,
+  unitNanoMap,
+} from '../internal/units'
+import { clampEntity, throwRangeError } from '../internal/utils'
+import { roundingIncName } from './config'
+import { Overflow } from './model'
 
 /*
 Post-coercion option validation.
 
 These helpers assume option properties have already been read and coerced.
-Keeping them separate from `optionsCoerce` makes the staged flow clearer:
+Keeping them separate from `coerce` makes the staged flow clearer:
 normalize the options object, coerce individual values, then validate
 relationships or operation-specific bounds.
 */

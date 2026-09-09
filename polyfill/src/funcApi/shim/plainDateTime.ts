@@ -1,25 +1,11 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-} from '../../apiHelpers/calendarPosition'
-import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffDateTimes } from '../../apiHelpers/dateTimeDiff'
-import {
-  moveDateByMonths,
-  moveDateByYears,
-  reversedMove,
-} from '../../apiHelpers/dateTimeMove'
-import { withDateTimeFields } from '../../apiHelpers/fieldUpdate'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
-import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
+import { diffDateTimes } from '../../apiHelpers/diffHelpers'
 import {
   adaptRecordTimeUnitDiff,
   diffDateTimeDays,
@@ -27,7 +13,20 @@ import {
   diffDateTimeMonths,
   diffDateTimeWeeks,
   diffDateTimeYears,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
+import { dateFieldGetters, timeGetters } from '../../apiHelpers/gettersForSlots'
+import {
+  moveDateByMonths,
+  moveDateByYears,
+  reversedMove,
+} from '../../apiHelpers/moveHelpers'
+import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/moveOrdinalHelpers'
+import { withDateTimeFields } from '../../apiHelpers/withFields'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -82,10 +81,6 @@ import {
   moveDateTime,
   moveDateTimeByNano,
 } from '../../internal/move'
-import {
-  refineEpochDisambigOptions,
-  refineOverflowOptions,
-} from '../../internal/optionsFieldRefine'
 import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
 import {
   createDateSlots,
@@ -106,6 +101,11 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
+import {
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+} from '../../options/fieldRefine'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike, DateTimeFromFields } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -675,7 +675,7 @@ function roundToDayTimeUnit(
   const slots = getShimPlainDateTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
-  const [roundingInc, roundingMode] = refineRoundToOptions(
+  const [roundingInc, roundingMode] = refineUnitRoundOptions(
     smallestUnit,
     options,
   )
@@ -886,7 +886,7 @@ function roundToInterval(
   options?: RoundingMathOptions | RoundingMode,
 ): ShimPlainDateTimeRecord {
   const slots = getShimPlainDateTimeSlots(record)
-  const [, roundingMode] = refineRoundToOptions(unit, options)
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
   const isoDateTime = roundDateTimeToInterval(
     computeInterval,
     slots.calendar,

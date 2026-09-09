@@ -4,8 +4,8 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { withMonthDayFields } from '../../apiHelpers/fieldUpdate'
-import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
+import { monthDayFieldGetters } from '../../apiHelpers/gettersForSlots'
+import { withMonthDayFields } from '../../apiHelpers/withFields'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { plainMonthDaysEqual } from '../../internal/compare'

@@ -5,15 +5,14 @@ import {
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffYearMonths } from '../../apiHelpers/dateTimeDiff'
-import { reversedMove } from '../../apiHelpers/dateTimeMove'
-import { withYearMonthFields } from '../../apiHelpers/fieldUpdate'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
-import { yearMonthFieldGetters } from '../../apiHelpers/shimMixins'
+import { diffYearMonths } from '../../apiHelpers/diffHelpers'
 import {
   diffYearMonthMonths,
   diffYearMonthYears,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
+import { yearMonthFieldGetters } from '../../apiHelpers/gettersForSlots'
+import { reversedMove } from '../../apiHelpers/moveHelpers'
+import { withYearMonthFields } from '../../apiHelpers/withFields'
 import {
   computeCalendarDaysInMonth,
   computeCalendarDaysInYear,
@@ -51,12 +50,13 @@ import {
 } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { moveYearMonth, moveYearMonthByUnits } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { Overflow } from '../../internal/optionsModel'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { Unit } from '../../internal/units'
 import { NumberSign } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
+import { Overflow } from '../../options/model'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -412,7 +412,7 @@ export function roundToYear(
   options?: RoundingMathOptions | RoundingMode,
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
-  const [, roundingMode] = refineRoundToOptions(Unit.Year, options)
+  const [, roundingMode] = refineUnitRoundOptions(Unit.Year, options)
   const roundedIsoDateTime = roundDateToInterval(
     computeYearInterval,
     slots.calendar,

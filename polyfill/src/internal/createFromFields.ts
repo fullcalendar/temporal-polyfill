@@ -1,4 +1,9 @@
 import type { Temporal } from 'temporal-spec'
+import {
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from '../options/fieldRefine'
+import { Overflow } from '../options/model'
 import { getCalendarFieldNames } from './calendarFields'
 import { type CalendarImpl } from './calendarImpl'
 import {
@@ -43,11 +48,6 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { isoEpochFirstLeapYear } from './isoCalendarMath'
-import {
-  refineOverflowOptions,
-  refineZonedFieldOptions,
-} from './optionsFieldRefine'
-import { Overflow } from './optionsModel'
 import { RelativeToSlots } from './relativeMath'
 import {
   ZonedEpochNanoFields,

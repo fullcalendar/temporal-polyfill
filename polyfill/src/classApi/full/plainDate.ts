@@ -6,12 +6,12 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffDates } from '../../apiHelpers/dateTimeDiff'
-import { withDateFields } from '../../apiHelpers/fieldUpdate'
+import { diffDates } from '../../apiHelpers/diffHelpers'
 import {
   dateDerivedGetters,
   dateFieldGetters,
-} from '../../apiHelpers/shimMixins'
+} from '../../apiHelpers/gettersForSlots'
+import { withDateFields } from '../../apiHelpers/withFields'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
@@ -39,12 +39,12 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { moveDate } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { createDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
 import {
   CalendarArg,
   getCalendarFromBag,

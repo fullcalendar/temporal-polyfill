@@ -1,7 +1,16 @@
 import type { Temporal } from 'temporal-spec'
-import { toIntegerWithTrunc, toString } from './cast'
-import { DurationFieldName, durationFieldNamesAsc } from './durationFields'
-import * as errorMessages from './errorMessages'
+import { toIntegerWithTrunc, toString } from '../internal/cast'
+import {
+  DurationFieldName,
+  durationFieldNamesAsc,
+} from '../internal/durationFields'
+import * as errorMessages from '../internal/errorMessages'
+import type {
+  FractionalSecondDigits,
+  SubsecDigits,
+} from '../internal/temporalSpecHelpers'
+import { Unit, unitNameMap } from '../internal/units'
+import { bindArgs, clampEntity, throwRangeError } from '../internal/utils'
 import {
   calendarDisplayMap,
   directionMap,
@@ -18,21 +27,15 @@ import {
   subsecDigitsName,
   timeZoneDisplayMap,
   totalUnitStr,
-} from './optionsConfig'
-import { Overflow } from './optionsModel'
-import type {
-  FractionalSecondDigits,
-  SubsecDigits,
-} from './temporalSpecHelpers'
-import { Unit, unitNameMap } from './units'
-import { bindArgs, clampEntity, throwRangeError } from './utils'
+} from './config'
+import { Overflow } from './model'
 
 /*
 Single-option coercion.
 
 The helpers here read one already-normalized option bag property, coerce that
 property into an internal enum/unit/value, and leave relationship checks to
-`optionsValidate`. The higher-level `refine*Options` functions decide when each
+`validate`. The higher-level `refine*Options` functions decide when each
 helper is called, preserving observable property order.
 */
 

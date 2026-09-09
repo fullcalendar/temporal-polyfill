@@ -1,4 +1,17 @@
 import type { Temporal } from 'temporal-spec'
+import {
+  refineDateDisplayOptions,
+  refineDateTimeDisplayOptions,
+  refineInstantDisplayOptions,
+  refineTimeDisplayOptions,
+  refineZonedDateTimeDisplayOptions,
+} from '../options/displayRefine'
+import {
+  CalendarDisplay,
+  OffsetDisplay,
+  RoundingModeEnum,
+  TimeZoneDisplay,
+} from '../options/model'
 import { bigNanoInSec } from './bigNano'
 import {
   type CalendarImpl,
@@ -18,19 +31,6 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import {
-  refineDateDisplayOptions,
-  refineDateTimeDisplayOptions,
-  refineInstantDisplayOptions,
-  refineTimeDisplayOptions,
-  refineZonedDateTimeDisplayOptions,
-} from './optionsDisplayRefine'
-import {
-  CalendarDisplay,
-  OffsetDisplay,
-  RoundingModeEnum,
-  TimeZoneDisplay,
-} from './optionsModel'
 import {
   roundBigNanoToDayOriginInc,
   roundDateTimeToInc,

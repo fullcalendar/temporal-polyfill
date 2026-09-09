@@ -1,3 +1,4 @@
+import { Overflow } from '../options/model'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -9,15 +10,18 @@ import * as errorMessages from './errorMessages'
 import { CalendarDateFields } from './fieldTypes'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from './isoCalendarMath'
 import { moveDateByDays } from './move'
-import { Overflow } from './optionsModel'
 import { clampEntity, throwRangeError } from './utils'
 
-// A position is a requested coordinate within a calendar period, such as a day
-// of the month or week of the year. These set coordinates; move.ts adds offsets.
+// An ordinal is a 1-based coordinate within a containing period: day of the
+// year, day of the month, day of the week, or week of the year. These functions
+// move a date so one ordinal equals a requested value, honoring overflow;
+// move.ts instead adds offsets. Day-of-week and week-of-year are ISO notions
+// (week-of-year throws for non-ISO calendars), while day-of-year and
+// day-of-month consult the calendar.
 
-// "Refined" marks the boundary with apiHelpers: the position is already an
+// "Refined" marks the boundary with apiHelpers: the ordinal is already an
 // integer and overflow is already parsed. Dates remain ISO fields, while
-// calendar queries determine the legal positions and movement distances.
+// calendar queries determine the legal ordinals and movement distances.
 export function moveToRefinedDayOfYear(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,

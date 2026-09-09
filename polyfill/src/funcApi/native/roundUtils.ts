@@ -1,12 +1,12 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { normalizeRoundToOptions } from '../../apiHelpers/roundToOptions'
+import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 
 /*
 Shoehorns a separately-held smallestUnit into a raw options object for the
 native branch, whose underlying `.round()` method accepts only a single
 options-like argument and does its own spec-compliant parsing. (The shim
-branch instead refines directly via refineRoundToOptions.)
+branch instead refines directly via refineUnitRoundOptions.)
 */
 export function createRoundToOptions<
   UN extends Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>,
@@ -14,5 +14,5 @@ export function createRoundToOptions<
   smallestUnit: UN,
   options?: RoundingMathOptions | RoundingMode,
 ): { smallestUnit: UN } & RoundingMathOptions {
-  return { ...normalizeRoundToOptions(options), smallestUnit }
+  return { ...normalizeUnitRoundOptions(options), smallestUnit }
 }

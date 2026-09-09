@@ -1,7 +1,7 @@
+import { RoundingModeEnum } from '../options/model'
 import { divideBigNanoToExactNumber } from './bigNano'
 import { isoDateTimeToEpochNano } from './epochMath'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
-import { RoundingModeEnum } from './optionsModel'
 import {
   computeBigNanoInc,
   computeNanoInc,

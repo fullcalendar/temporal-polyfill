@@ -1,8 +1,8 @@
+import { OffsetDisambig } from '../options/model'
 import { type CalendarImpl } from './calendarImpl'
 import { timeFieldDefaults } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { OffsetDisambig } from './optionsModel'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import {
   getMatchingInstantFor,

@@ -6,13 +6,13 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffZonedDateTimes } from '../../apiHelpers/dateTimeDiff'
-import { withZonedDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { diffZonedDateTimes } from '../../apiHelpers/diffHelpers'
 import {
   dateDerivedGetters,
   dateFieldGetters,
   timeGetters,
-} from '../../apiHelpers/shimMixins'
+} from '../../apiHelpers/gettersForSlots'
+import { withZonedDateTimeFields } from '../../apiHelpers/withFields'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toBigInt } from '../../internal/cast'
 import {
@@ -45,13 +45,6 @@ import { parseZonedDateTime } from '../../internal/isoParse'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
 import { moveZonedEpochSlots } from '../../internal/move'
 import {
-  refineOverflowOptions,
-  refineZonedFieldOptions,
-} from '../../internal/optionsFieldRefine'
-import { RoundingModeEnum } from '../../internal/optionsModel'
-import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
-import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
-import {
   computeZonedHoursInDay,
   computeZonedStartOfDay,
   roundZonedEpochSlotsToUnit,
@@ -70,6 +63,13 @@ import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { zonedEpochSlotsToIso } from '../../internal/timeZoneMath'
 import { DayTimeUnit } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
+import {
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from '../../options/fieldRefine'
+import { RoundingModeEnum } from '../../options/model'
+import { refineRoundingOptions } from '../../options/roundingRefine'
+import { refineDirectionOptions } from '../../options/transitionRefine'
 import {
   CalendarArg,
   getCalendarFromBag,

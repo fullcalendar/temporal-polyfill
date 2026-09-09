@@ -6,13 +6,13 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffDateTimes } from '../../apiHelpers/dateTimeDiff'
-import { withDateTimeFields } from '../../apiHelpers/fieldUpdate'
+import { diffDateTimes } from '../../apiHelpers/diffHelpers'
 import {
   dateDerivedGetters,
   dateFieldGetters,
   timeGetters,
-} from '../../apiHelpers/shimMixins'
+} from '../../apiHelpers/gettersForSlots'
+import { withDateTimeFields } from '../../apiHelpers/withFields'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import {
@@ -44,12 +44,6 @@ import { validateIsoDateTimeFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateTimeIso } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
 import { moveDateTime } from '../../internal/move'
-import {
-  refineEpochDisambigOptions,
-  refineOverflowOptions,
-} from '../../internal/optionsFieldRefine'
-import { RoundingModeEnum } from '../../internal/optionsModel'
-import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
 import {
   createDateSlots,
@@ -61,6 +55,12 @@ import { checkIsoDateTimeInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { DayTimeUnit } from '../../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
+import {
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+} from '../../options/fieldRefine'
+import { RoundingModeEnum } from '../../options/model'
+import { refineRoundingOptions } from '../../options/roundingRefine'
 import {
   CalendarArg,
   getCalendarFromBag,

@@ -1,10 +1,10 @@
 import type { Temporal } from 'temporal-spec'
-import * as errorMessages from './errorMessages'
-import { coerceDirection } from './optionsCoerce'
-import { directionName } from './optionsConfig'
-import { Direction } from './optionsModel'
-import { normalizeOptionsOrString } from './optionsNormalize'
-import { throwRangeError } from './utils'
+import * as errorMessages from '../internal/errorMessages'
+import { throwRangeError } from '../internal/utils'
+import { coerceDirection } from './coerce'
+import { directionName } from './config'
+import { Direction } from './model'
+import { normalizeOptionsOrString } from './normalize'
 
 /*
 High-level transition option refinement.

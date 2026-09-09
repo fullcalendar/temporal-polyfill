@@ -1,4 +1,6 @@
 import type { Temporal } from 'temporal-spec'
+import type { SubsecDigits } from '../internal/temporalSpecHelpers'
+import { TimeUnit, Unit, unitNanoMap } from '../internal/units'
 import {
   coerceCalendarDisplay,
   coerceFractionalSecondDigits,
@@ -6,19 +8,17 @@ import {
   coerceRoundingMode,
   coerceSmallestUnit,
   coerceTimeZoneDisplay,
-} from './optionsCoerce'
-import { smallestUnitStr } from './optionsConfig'
-import { CalendarDisplay, RoundingModeEnum } from './optionsModel'
+} from './coerce'
+import { smallestUnitStr } from './config'
+import { CalendarDisplay, RoundingModeEnum } from './model'
 import type {
   DateTimeDisplayTuple,
   InstantDisplayTuple,
   TimeDisplayTuple,
   ZonedDateTimeDisplayTuple,
-} from './optionsModel'
-import { normalizeOptions } from './optionsNormalize'
-import { validateUnitRange } from './optionsValidate'
-import type { SubsecDigits } from './temporalSpecHelpers'
-import { TimeUnit, Unit, unitNanoMap } from './units'
+} from './model'
+import { normalizeOptions } from './normalize'
+import { validateUnitRange } from './validate'
 
 type InstantDisplayOptions<
   TZ extends Temporal.InstantToStringOptions['timeZone'],

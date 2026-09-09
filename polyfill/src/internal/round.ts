@@ -1,3 +1,9 @@
+import { roundingModeFuncs } from '../options/config'
+import {
+  EpochDisambig,
+  OffsetDisambig,
+  RoundingModeEnum,
+} from '../options/model'
 import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import type { IsoDateTimeInterval } from './calendarInterval'
@@ -20,8 +26,6 @@ import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateByDays } from './move'
-import { roundingModeFuncs } from './optionsConfig'
-import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
 import {
   RelativeOps,
   clampRelativeDuration,

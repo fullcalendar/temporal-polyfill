@@ -1,8 +1,8 @@
+import { EpochDisambig, OffsetDisambig } from '../options/model'
 import { bigNanoInUtcDay } from './bigNano'
 import { epochNanoToIsoDateTime, isoDateTimeToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateTimeFields, DateTimeFields } from './fieldTypes'
-import { EpochDisambig, OffsetDisambig } from './optionsModel'
 import { roundToMinute } from './round'
 import { ZonedEpochNanoFields } from './slots'
 import {

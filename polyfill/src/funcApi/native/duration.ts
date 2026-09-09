@@ -3,7 +3,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { durationGetters } from '../../apiHelpers/nativeMixins'
+import { durationGetters } from '../../apiHelpers/gettersForNative'
 import { DurationFields } from '../../internal/durationFields'
 import * as errorMessages from '../../internal/errorMessages'
 import { LocalesArg } from '../../internal/intlFormatUtils'

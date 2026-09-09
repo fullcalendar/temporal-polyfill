@@ -20,11 +20,6 @@ import {
   mergeYearMonthFields,
   mergeZonedDateTimeFields,
 } from '../internal/merge'
-import {
-  refineOverflowOptions,
-  refineZonedFieldOptions,
-} from '../internal/optionsFieldRefine'
-import { OffsetDisambig } from '../internal/optionsModel'
 import { ZonedEpochNanoFields } from '../internal/slots'
 import {
   createDateFromRefinedFields,
@@ -33,6 +28,11 @@ import {
   refineCalendarDateFields,
   refineMonthDayFields,
 } from '../internal/slotsFromRefinedFields'
+import {
+  refineOverflowOptions,
+  refineZonedFieldOptions,
+} from '../options/fieldRefine'
+import { OffsetDisambig } from '../options/model'
 
 export function withDateFields(
   slots: CalendarDateFields & { calendar: CalendarImpl },

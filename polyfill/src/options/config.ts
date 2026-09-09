@@ -1,4 +1,12 @@
 import {
+  roundExpand,
+  roundHalfCeil,
+  roundHalfEven,
+  roundHalfExpand,
+  roundHalfFloor,
+  roundHalfTrunc,
+} from '../internal/utils'
+import {
   CalendarDisplay,
   Direction,
   EpochDisambig,
@@ -7,15 +15,7 @@ import {
   Overflow,
   RoundingModeEnum,
   TimeZoneDisplay,
-} from './optionsModel'
-import {
-  roundExpand,
-  roundHalfCeil,
-  roundHalfEven,
-  roundHalfExpand,
-  roundHalfFloor,
-  roundHalfTrunc,
-} from './utils'
+} from './model'
 
 /*
 Static option names, string-to-enum maps, and enum-indexed config tables.
@@ -71,7 +71,7 @@ export const offsetDisplayMap = {
   never: OffsetDisplay.Never,
 }
 
-// Keep this map in sync with RoundingModeEnum in optionsModel.
+// Keep this map in sync with RoundingModeEnum in model.
 export const roundingModeMap = {
   floor: RoundingModeEnum.Floor,
   halfFloor: RoundingModeEnum.HalfFloor,
@@ -84,7 +84,7 @@ export const roundingModeMap = {
   halfEven: RoundingModeEnum.HalfEven,
 }
 
-// Keep this table index-aligned with RoundingModeEnum in optionsModel.
+// Keep this table index-aligned with RoundingModeEnum in model.
 export const roundingModeFuncs = [
   Math.floor,
   roundHalfFloor,

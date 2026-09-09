@@ -3,7 +3,7 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { monthDayFieldGetters } from '../../apiHelpers/nativeMixins'
+import { monthDayFieldGetters } from '../../apiHelpers/gettersForNative'
 import { MonthDayFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NativeTemporal } from '../../nativeSwitch'

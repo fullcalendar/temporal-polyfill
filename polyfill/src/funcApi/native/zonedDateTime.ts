@@ -5,12 +5,15 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { dateFieldGetters, timeGetters } from '../../apiHelpers/nativeMixins'
-import { normalizeRoundToOptions } from '../../apiHelpers/roundToOptions'
+import {
+  dateFieldGetters,
+  timeGetters,
+} from '../../apiHelpers/gettersForNative'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
+import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 import { NativeDiffFunc, ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -576,7 +579,7 @@ export function roundToYear(
   return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToYear(
       getNativeZonedDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }
@@ -587,7 +590,7 @@ export function roundToMonth(
   return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToMonth(
       getNativeZonedDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }
@@ -598,7 +601,7 @@ export function roundToWeek(
   return createNativeZonedDateTimeRecord(
     TemporalUtils.roundToWeek(
       getNativeZonedDateTime(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }

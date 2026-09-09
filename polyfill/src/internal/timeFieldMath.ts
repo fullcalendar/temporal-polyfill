@@ -1,6 +1,6 @@
+import { Overflow } from '../options/model'
 import { timeFieldNamesAsc } from './fieldNames'
 import { TimeFields } from './fieldTypes'
-import { Overflow } from './optionsModel'
 import {
   milliInHour,
   milliInMinute,

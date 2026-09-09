@@ -1,25 +1,11 @@
 import type { Temporal as TemporalSpec } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
 import {
-  moveToDayOfMonth,
-  moveToDayOfWeek,
-  moveToDayOfYear,
-  moveToWeekOfYear,
-} from '../../apiHelpers/calendarPosition'
-import {
   attachDebugString,
   defineTemporalClass,
   forbiddenValueOf,
 } from '../../apiHelpers/classStyle'
-import { diffZonedDateTimes } from '../../apiHelpers/dateTimeDiff'
-import {
-  moveDateByMonths,
-  moveDateByYears,
-  reversedMove,
-} from '../../apiHelpers/dateTimeMove'
-import { withZonedDateTimeFields } from '../../apiHelpers/fieldUpdate'
-import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
-import { dateFieldGetters, timeGetters } from '../../apiHelpers/shimMixins'
+import { diffZonedDateTimes } from '../../apiHelpers/diffHelpers'
 import {
   adaptRecordTimeUnitDiff,
   diffZonedDays,
@@ -27,7 +13,20 @@ import {
   diffZonedMonths,
   diffZonedWeeks,
   diffZonedYears,
-} from '../../apiHelpers/unitDiff'
+} from '../../apiHelpers/diffUnitHelpers'
+import { dateFieldGetters, timeGetters } from '../../apiHelpers/gettersForSlots'
+import {
+  moveDateByMonths,
+  moveDateByYears,
+  reversedMove,
+} from '../../apiHelpers/moveHelpers'
+import {
+  moveToDayOfMonth,
+  moveToDayOfWeek,
+  moveToDayOfYear,
+  moveToWeekOfYear,
+} from '../../apiHelpers/moveOrdinalHelpers'
+import { withZonedDateTimeFields } from '../../apiHelpers/withFields'
 import {
   computeCalendarDayOfYear,
   computeCalendarDaysInMonth,
@@ -78,9 +77,6 @@ import {
   moveEpochNanoByNano,
   moveZonedEpochSlots,
 } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
-import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
 import {
   alignZonedEpoch,
   computeZonedHoursInDay,
@@ -114,6 +110,10 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
+import { EpochDisambig, OffsetDisambig } from '../../options/model'
+import { refineUnitRoundOptions } from '../../options/roundingRefine'
+import { refineDirectionOptions } from '../../options/transitionRefine'
 import { ZonedDateTimeFields } from '../commonTypes'
 import { ZonedDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -602,7 +602,7 @@ function roundToTimeUnit(
   const slots = getShimZonedDateTimeSlots(record)
   // We already hold smallestUnit as a separate arg, so refine the options
   // directly instead of synthesizing a raw options bag for re-parsing.
-  const [roundingInc, roundingMode] = refineRoundToOptions(
+  const [roundingInc, roundingMode] = refineUnitRoundOptions(
     smallestUnit,
     options,
   )
@@ -620,7 +620,7 @@ export function roundToDay(
   options?: RoundingMathOptions | RoundingMode,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
-  const [, roundingMode] = refineRoundToOptions(Unit.Day, options)
+  const [, roundingMode] = refineUnitRoundOptions(Unit.Day, options)
   return createShimZonedDateTimeRecord(
     createZonedEpochNanoSlots(
       roundZonedEpochToDay(slots, roundingMode),
@@ -831,7 +831,7 @@ function roundToInterval(
   options?: RoundingMathOptions | RoundingMode,
 ): ShimZonedDateTimeRecord {
   const slots = getShimZonedDateTimeSlots(record)
-  const [, roundingMode] = refineRoundToOptions(unit, options)
+  const [, roundingMode] = refineUnitRoundOptions(unit, options)
   const epochNanoseconds = roundZonedEpochToInterval(
     computeInterval,
     slots,

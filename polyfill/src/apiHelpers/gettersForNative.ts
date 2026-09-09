@@ -8,7 +8,10 @@ import type {
   YearMonthStats,
 } from '../internal/fieldTypes'
 import { createPropGetters } from '../internal/utils'
-import * as ShimMixins from './shimMixins'
+import * as SlotGetters from './gettersForSlots'
+
+// Used only by funcApi/native. These property-forwarding getters are keyed off
+// the slot-backed tables via Object.keys, requiring this runtime import.
 
 function createNativeGetters<Slots>(
   shimGetters: Partial<Record<keyof Slots, unknown>>,
@@ -19,29 +22,29 @@ function createNativeGetters<Slots>(
 }
 
 export const durationGetters = createNativeGetters<DurationFields>(
-  ShimMixins.durationGetters,
+  SlotGetters.durationGetters,
 )
 
 export const timeGetters = createNativeGetters<TimeFields>(
-  ShimMixins.timeGetters,
+  SlotGetters.timeGetters,
 )
 
 export const yearMonthFieldGetters = createNativeGetters<YearMonthFields>(
-  ShimMixins.yearMonthFieldGetters,
+  SlotGetters.yearMonthFieldGetters,
 )
 
 export const dateFieldGetters = createNativeGetters<DateFields>(
-  ShimMixins.dateFieldGetters,
+  SlotGetters.dateFieldGetters,
 )
 
 export const monthDayFieldGetters = createNativeGetters<
   Pick<MonthDayFields, 'monthCode' | 'day'>
->(ShimMixins.monthDayFieldGetters)
+>(SlotGetters.monthDayFieldGetters)
 
 export const yearMonthDerivedGetters = createNativeGetters<YearMonthStats>(
-  ShimMixins.yearMonthDerivedGetters,
+  SlotGetters.yearMonthDerivedGetters,
 )
 
 export const dateDerivedGetters = createNativeGetters<DateStats>(
-  ShimMixins.dateDerivedGetters,
+  SlotGetters.dateDerivedGetters,
 )

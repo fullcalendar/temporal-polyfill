@@ -6,12 +6,12 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { diffYearMonths } from '../../apiHelpers/dateTimeDiff'
-import { withYearMonthFields } from '../../apiHelpers/fieldUpdate'
+import { diffYearMonths } from '../../apiHelpers/diffHelpers'
 import {
   yearMonthDerivedGetters,
   yearMonthFieldGetters,
-} from '../../apiHelpers/shimMixins'
+} from '../../apiHelpers/gettersForSlots'
+import { withYearMonthFields } from '../../apiHelpers/withFields'
 import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import { toIntegerWithTrunc } from '../../internal/cast'
 import {
@@ -37,10 +37,10 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { moveYearMonth } from '../../internal/move'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { NumberSign, isObjectLike } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
 import { getCalendarFromBag } from './calendarArg'
 import {
   resolveBasicCalendarArg,

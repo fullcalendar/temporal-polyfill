@@ -5,12 +5,12 @@ import {
   attachDebugString,
   defineTemporalClass,
 } from '../../apiHelpers/classStyle'
-import { yearMonthFieldGetters } from '../../apiHelpers/nativeMixins'
-import { normalizeRoundToOptions } from '../../apiHelpers/roundToOptions'
+import { yearMonthFieldGetters } from '../../apiHelpers/gettersForNative'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
+import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
 import { PlainYearMonthRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'
@@ -278,7 +278,7 @@ export function roundToYear(
   return createNativePlainYearMonthRecord(
     TemporalUtils.roundToYear(
       getNativePlainYearMonth(record),
-      normalizeRoundToOptions(options),
+      normalizeUnitRoundOptions(options),
     ),
   )
 }

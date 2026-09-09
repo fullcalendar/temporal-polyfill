@@ -1,3 +1,4 @@
+import { normalizeOptions } from '../options/normalize'
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
 import { durationDayTimeToBigNano, getMaxDurationUnit } from './durationMath'
@@ -8,7 +9,6 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
-import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
   isUniformUnit,

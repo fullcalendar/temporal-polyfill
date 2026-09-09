@@ -1,3 +1,4 @@
+import { refineTotalOptions } from '../options/roundingRefine'
 import { divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import {
@@ -13,7 +14,6 @@ import {
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields } from './fieldTypes'
 import { moveToStartOfMonth } from './move'
-import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   RelativeOps,
   RelativeToSlots,

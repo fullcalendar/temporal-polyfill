@@ -1,3 +1,4 @@
+import { Overflow } from '../options/model'
 import type { MonthCodeParts } from './calendarMonthCode'
 import { isoArgsToEpochDays } from './epochMath'
 import { calendarDateFieldNamesAsc } from './fieldNames'
@@ -7,7 +8,6 @@ import type {
   CalendarWeekFields,
   CalendarYearMonthFields,
 } from './fieldTypes'
-import { Overflow } from './optionsModel'
 import { validateTimeFields } from './timeFieldMath'
 import { allPropsEqual, clampProp, divTrunc, modFloor, modTrunc } from './utils'
 

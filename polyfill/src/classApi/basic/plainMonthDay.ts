@@ -6,8 +6,8 @@ import {
   forbiddenValueOf,
   invalidRecordType,
 } from '../../apiHelpers/classStyle'
-import { withMonthDayFields } from '../../apiHelpers/fieldUpdate'
-import { monthDayFieldGetters } from '../../apiHelpers/shimMixins'
+import { monthDayFieldGetters } from '../../apiHelpers/gettersForSlots'
+import { withMonthDayFields } from '../../apiHelpers/withFields'
 import {
   CalendarImpl,
   getCalendarSlotId,
@@ -36,10 +36,10 @@ import {
 } from '../../internal/isoCalendarMath'
 import { formatPlainMonthDayIso } from '../../internal/isoFormat'
 import { parsePlainMonthDay } from '../../internal/isoParse'
-import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { isObjectLike } from '../../internal/utils'
+import { refineOverflowOptions } from '../../options/fieldRefine'
 import { extractCalendarFromBag } from './calendarArg'
 import {
   resolveBasicCalendarArg,
