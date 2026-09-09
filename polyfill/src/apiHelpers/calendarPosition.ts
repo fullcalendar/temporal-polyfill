@@ -1,10 +1,10 @@
 import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
 import {
-  computeDayOfMonthMove,
-  computeDayOfWeekMove,
-  computeDayOfYearMove,
-  computeWeekOfYearMove,
+  moveToRefinedDayOfMonth,
+  moveToRefinedDayOfWeek,
+  moveToRefinedDayOfYear,
+  moveToRefinedWeekOfYear,
 } from '../internal/calendarPosition'
 import { toIntegerWithTrunc } from '../internal/cast'
 import { CalendarDateFields } from '../internal/fieldTypes'
@@ -18,7 +18,7 @@ export function moveToDayOfYear(
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  return computeDayOfYearMove(
+  return moveToRefinedDayOfYear(
     calendar,
     isoDate,
     toIntegerWithTrunc(dayOfYear, 'dayOfMonth'),
@@ -34,7 +34,7 @@ export function moveToDayOfMonth(
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  return computeDayOfMonthMove(
+  return moveToRefinedDayOfMonth(
     calendar,
     isoDate,
     toIntegerWithTrunc(day, 'day'),
@@ -52,7 +52,7 @@ export function moveToDayOfWeek(
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  return computeDayOfWeekMove(
+  return moveToRefinedDayOfWeek(
     isoDate,
     toIntegerWithTrunc(dayOfWeek, 'dayOfWeek'),
     overflow,
@@ -67,7 +67,7 @@ export function moveToWeekOfYear(
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
-  return computeWeekOfYearMove(
+  return moveToRefinedWeekOfYear(
     calendar,
     isoDate,
     toIntegerWithTrunc(weekOfYear, 'weekOfYear'),

@@ -67,7 +67,7 @@ export function refineCalendarDateFields(
   return [year, monthCodeParts]
 }
 
-type RefinedPlainMonthDayFields = [
+type RefinedMonthDayFields = [
   year: number | undefined,
   monthCodeParts: MonthCodeParts | undefined,
 ]
@@ -76,7 +76,7 @@ type RefinedPlainMonthDayFields = [
 export function refineMonthDayFields(
   fields: Partial<DateFields>, // guaranteed `day`
   calendar: CalendarImpl,
-): RefinedPlainMonthDayFields {
+): RefinedMonthDayFields {
   const isIso = calendar === isoCalendarImpl
   const eraOrigins = getCalendarEraOrigins(calendar)
 

@@ -15,9 +15,10 @@ import { clampEntity, throwRangeError } from './utils'
 // A position is a requested coordinate within a calendar period, such as a day
 // of the month or week of the year. These set coordinates; move.ts adds offsets.
 
-// Inputs are coerced positions and parsed overflow. Dates remain ISO fields,
-// while calendar queries determine the legal positions and movement distances.
-export function computeDayOfYearMove(
+// "Refined" marks the boundary with apiHelpers: the position is already an
+// integer and overflow is already parsed. Dates remain ISO fields, while
+// calendar queries determine the legal positions and movement distances.
+export function moveToRefinedDayOfYear(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   dayOfYear: number,
@@ -35,7 +36,7 @@ export function computeDayOfYearMove(
   return moveDateByDays(isoDate, normDayOfYear - currentDayOfYear)
 }
 
-export function computeDayOfMonthMove(
+export function moveToRefinedDayOfMonth(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   day: number,
@@ -48,7 +49,7 @@ export function computeDayOfMonthMove(
 }
 
 // Day-of-week is an ISO notion, so no calendar is consulted.
-export function computeDayOfWeekMove(
+export function moveToRefinedDayOfWeek(
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   overflow: Overflow,
@@ -57,7 +58,7 @@ export function computeDayOfWeekMove(
   return moveDateByDays(isoDate, normDayOfWeek - computeIsoDayOfWeek(isoDate))
 }
 
-export function computeWeekOfYearMove(
+export function moveToRefinedWeekOfYear(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   weekOfYear: number,
