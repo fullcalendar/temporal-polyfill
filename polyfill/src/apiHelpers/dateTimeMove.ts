@@ -2,7 +2,7 @@ import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
 import { toStrictInteger } from '../internal/cast'
 import { CalendarDateFields } from '../internal/fieldTypes'
-import { addDateMonths, moveByDays } from '../internal/move'
+import { moveDateByCalendarUnits } from '../internal/move'
 import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 
 export function reversedMove<S>(
@@ -15,12 +15,11 @@ export function reversedMove<S>(
 
 // Move-by-Unit
 // -----------------------------------------------------------------------------
-// These functions validate input
-// Month/year movement is calendar-aware. ISO day/week movement is not, so those
-// helpers deliberately return plain ISO date fields and let callers reattach
-// their calendar only when building record/slot outputs.
+// Public-argument wrappers over calendar-aware year/month movement: coerce the
+// count and refine overflow options, then defer to the core. Week/day movement
+// needs no calendar or options, so callers use moveDateByDays directly.
 
-export function moveByYears(
+export function moveDateByYears(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   years: number,
@@ -30,10 +29,16 @@ export function moveByYears(
   if (!years) {
     return isoDate
   }
-  return addDateMonths(calendar, isoDate, toStrictInteger(years), 0, overflow)
+  return moveDateByCalendarUnits(
+    calendar,
+    isoDate,
+    toStrictInteger(years),
+    0,
+    overflow,
+  )
 }
 
-export function moveByMonths(
+export function moveDateByMonths(
   calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   months: number,
@@ -43,21 +48,11 @@ export function moveByMonths(
   if (!months) {
     return isoDate
   }
-  return addDateMonths(calendar, isoDate, 0, toStrictInteger(months), overflow)
-}
-
-export function moveByIsoWeeks(
-  _calendar: CalendarImpl,
-  isoDate: CalendarDateFields,
-  weeks: number,
-): CalendarDateFields {
-  return moveByDays(isoDate, toStrictInteger(weeks) * 7)
-}
-
-export function moveByDaysStrict(
-  _calendar: CalendarImpl,
-  isoDate: CalendarDateFields,
-  days: number,
-): CalendarDateFields {
-  return moveByDays(isoDate, toStrictInteger(days))
+  return moveDateByCalendarUnits(
+    calendar,
+    isoDate,
+    0,
+    toStrictInteger(months),
+    overflow,
+  )
 }

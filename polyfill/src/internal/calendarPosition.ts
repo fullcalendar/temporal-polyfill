@@ -8,7 +8,7 @@ import { type CalendarImpl, isoCalendarImpl } from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields } from './fieldTypes'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from './isoCalendarMath'
-import { moveByDays } from './move'
+import { moveDateByDays } from './move'
 import { Overflow } from './optionsModel'
 import { clampEntity, throwRangeError } from './utils'
 
@@ -32,7 +32,7 @@ export function computeDayOfYearMove(
     overflow,
   )
   const currentDayOfYear = computeCalendarDayOfYear(calendar, isoDate)
-  return moveByDays(isoDate, normDayOfYear - currentDayOfYear)
+  return moveDateByDays(isoDate, normDayOfYear - currentDayOfYear)
 }
 
 export function computeDayOfMonthMove(
@@ -44,17 +44,17 @@ export function computeDayOfMonthMove(
   const daysInMonth = computeCalendarDaysInMonth(calendar, isoDate)
   const normDayOfMonth = clampEntity('day', day, 1, daysInMonth, overflow)
   const currentDayOfMonth = computeCalendarDateFields(calendar, isoDate).day
-  return moveByDays(isoDate, normDayOfMonth - currentDayOfMonth)
+  return moveDateByDays(isoDate, normDayOfMonth - currentDayOfMonth)
 }
 
+// Day-of-week is an ISO notion, so no calendar is consulted.
 export function computeDayOfWeekMove(
-  _calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   overflow: Overflow,
 ): CalendarDateFields {
   const normDayOfWeek = clampEntity('dayOfWeek', dayOfWeek, 1, 7, overflow)
-  return moveByDays(isoDate, normDayOfWeek - computeIsoDayOfWeek(isoDate))
+  return moveDateByDays(isoDate, normDayOfWeek - computeIsoDayOfWeek(isoDate))
 }
 
 export function computeWeekOfYearMove(
@@ -77,5 +77,5 @@ export function computeWeekOfYearMove(
     overflow,
   )
 
-  return moveByDays(isoDate, (normWeekOfYear - currentWeekOfYear) * 7)
+  return moveDateByDays(isoDate, (normWeekOfYear - currentWeekOfYear) * 7)
 }

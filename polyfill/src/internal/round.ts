@@ -19,7 +19,7 @@ import {
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { moveByDays } from './move'
+import { moveDateByDays } from './move'
 import { roundingModeFuncs } from './optionsConfig'
 import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
 import {
@@ -317,7 +317,7 @@ export function roundDateTimeToInc(
     roundingMode,
   )
 
-  const roundedIsoDate = moveByDays(isoDateTime, dayDelta)
+  const roundedIsoDate = moveDateByDays(isoDateTime, dayDelta)
   const roundedIsoDateTime = combineDateAndTime(
     roundedIsoDate,
     roundedTimeFields,
@@ -552,7 +552,7 @@ function computeZonedDayEpochInterval(
   const isoDate = zonedEpochSlotsToIso(slots)
   const isoFields0 = combineDateAndTime(isoDate, timeFieldDefaults)
   const isoFields1 = combineDateAndTime(
-    moveByDays(isoFields0, 1),
+    moveDateByDays(isoFields0, 1),
     timeFieldDefaults,
   )
 

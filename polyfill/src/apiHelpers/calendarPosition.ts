@@ -43,15 +43,16 @@ export function moveToDayOfMonth(
 }
 
 // Keep public option coercion before the position's numeric conversion.
+// The calendar is unused (day-of-week is ISO) but kept so all four position
+// movers share one signature for the func API's zoned transform adapter.
 export function moveToDayOfWeek(
-  calendar: CalendarImpl,
+  _calendar: CalendarImpl,
   isoDate: CalendarDateFields,
   dayOfWeek: number,
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
   return computeDayOfWeekMove(
-    calendar,
     isoDate,
     toIntegerWithTrunc(dayOfWeek, 'dayOfWeek'),
     overflow,

@@ -196,7 +196,11 @@ export function spanZonedDayWeekRelativeDuration(
     epochNanoseconds = getSingleInstantFor(
       timeZone,
       combineDateAndTime(
-        moveDateByDayWeekUnits(origin, durationFields),
+        moveDateByDayWeekUnits(
+          origin,
+          durationFields.weeks,
+          durationFields.days,
+        ),
         origin,
       ),
     )
@@ -420,7 +424,10 @@ export function createZonedDayWeekOps(
     moveToEpochNano: (duration) =>
       getSingleInstantFor(
         slots.timeZone,
-        combineDateAndTime(moveDateByDayWeekUnits(origin, duration), origin),
+        combineDateAndTime(
+          moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
+          origin,
+        ),
       ),
   }
 }
@@ -432,7 +439,10 @@ export function createPlainDayWeekOps(
     originEpochNano: isoDateTimeToEpochNano(origin),
     moveToEpochNano: (duration) =>
       isoDateTimeToEpochNano(
-        combineDateAndTime(moveDateByDayWeekUnits(origin, duration), origin),
+        combineDateAndTime(
+          moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
+          origin,
+        ),
       ),
   }
 }

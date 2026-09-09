@@ -38,9 +38,11 @@ import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { Unit } from './units'
 import { clampEntity, throwRangeError } from './utils'
 
-// Naming throughout this file: `move*` takes a DurationFields (or a raw
-// nanosecond/day delta in the `*By*` primitives), while `add*` takes bare
-// year/month counts and works in calendar coordinates.
+// Naming throughout this file. `move<Thing>` takes a DurationFields and
+// returns a moved value of the same kind. `move<Thing>By<Delta>` does the same
+// but takes raw counts (years/months, weeks/days, nanoseconds) instead of a
+// duration. `add*` is different in kind: numbers in, numbers out, arithmetic on
+// calendar year/month coordinates rather than on a date value.
 
 // Pre-refined value movement
 // -----------------------------------------------------------------------------
@@ -86,7 +88,7 @@ export function moveYearMonthByUnits(
   const moved =
     years || months
       ? checkIsoDateInBounds(
-          addDateMonths(calendar, first, years, months, overflow),
+          moveDateByCalendarUnits(calendar, first, years, months, overflow),
         )
       : first
   return moveToStartOfMonth(calendar, moved)
@@ -177,7 +179,7 @@ export function moveDateTimeByNano(
 ): CalendarDateTimeFields {
   const [time, days] = moveTimeByNano(fields, delta)
   return checkIsoDateTimeInBounds(
-    combineDateAndTime(moveByDays(fields, days), time),
+    combineDateAndTime(moveDateByDays(fields, days), time),
   )
 }
 
@@ -223,7 +225,13 @@ export function moveDate(
   days += Number(durationTimeToBigNano(durationFields) / bigNanoInUtcDay)
 
   if (years || months) {
-    isoDate = addDateMonths(calendar, isoDateFields, years, months, overflow)
+    isoDate = moveDateByCalendarUnits(
+      calendar,
+      isoDateFields,
+      years,
+      months,
+      overflow,
+    )
   } else if (weeks || days) {
     isoDate = isoDateFields
   } else {
@@ -231,7 +239,7 @@ export function moveDate(
   }
 
   if (weeks || days) {
-    isoDate = moveByDays(isoDate, weeks * 7 + days)
+    isoDate = moveDateByDays(isoDate, weeks * 7 + days)
   }
 
   return checkIsoDateInBounds(isoDate)
@@ -241,11 +249,10 @@ export function moveDate(
 // intermediate date bounds check.
 export function moveDateByDayWeekUnits(
   origin: CalendarDateFields,
-  durationFields: DurationFields,
+  weeks: number,
+  days: number,
 ): CalendarDateFields {
-  return checkIsoDateInBounds(
-    moveByDays(origin, durationFields.weeks * 7 + durationFields.days),
-  )
+  return checkIsoDateInBounds(moveDateByDays(origin, weeks * 7 + days))
 }
 
 // Calendar date operations
@@ -258,10 +265,10 @@ export function moveToStartOfMonth(
   isoDateFields: CalendarDateFields,
 ): CalendarDateFields {
   const dayOfMonth = computeCalendarDateFields(calendar, isoDateFields).day
-  return moveByDays(isoDateFields, 1 - dayOfMonth)
+  return moveDateByDays(isoDateFields, 1 - dayOfMonth)
 }
 
-export function addDateMonths(
+export function moveDateByCalendarUnits(
   calendar: CalendarImpl,
   isoDateFields: CalendarDateFields,
   years: number,
@@ -386,7 +393,7 @@ export function moveEpochNanoByNano(epoch: bigint, delta: bigint): bigint {
   return checkEpochNanoInBounds(epoch + delta)
 }
 
-export function moveByDays(
+export function moveDateByDays(
   isoDate: CalendarDateFields,
   days: number,
 ): CalendarDateFields {

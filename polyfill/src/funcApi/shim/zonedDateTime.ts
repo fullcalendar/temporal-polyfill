@@ -13,10 +13,8 @@ import {
 } from '../../apiHelpers/classStyle'
 import { diffZonedDateTimes } from '../../apiHelpers/dateTimeDiff'
 import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
+  moveDateByMonths,
+  moveDateByYears,
   reversedMove,
 } from '../../apiHelpers/dateTimeMove'
 import { withZonedDateTimeFields } from '../../apiHelpers/fieldUpdate'
@@ -75,7 +73,11 @@ import {
 } from '../../internal/isoFormat'
 import { parseZonedDateTime } from '../../internal/isoParse'
 import { zonedDateTimeWithPlainTime } from '../../internal/modify'
-import { moveEpochNanoByNano, moveZonedEpochSlots } from '../../internal/move'
+import {
+  moveDateByDays,
+  moveEpochNanoByNano,
+  moveZonedEpochSlots,
+} from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
@@ -545,10 +547,14 @@ export const withWeekOfYear = zonedTransform(moveToWeekOfYear)
 // Non-standard: Move
 // -----------------------------------------------------------------------------
 
-export const addYears = zonedTransform(moveByYears)
-export const addMonths = zonedTransform(moveByMonths)
-export const addWeeks = zonedTransform(moveByIsoWeeks)
-export const addDays = zonedTransform(moveByDaysStrict)
+export const addYears = zonedTransform(moveDateByYears)
+export const addMonths = zonedTransform(moveDateByMonths)
+export const addWeeks = zonedTransform((_calendar, isoDate, weeks: number) =>
+  moveDateByDays(isoDate, toStrictInteger(weeks) * 7),
+)
+export const addDays = zonedTransform((_calendar, isoDate, days: number) =>
+  moveDateByDays(isoDate, toStrictInteger(days)),
+)
 export const addHours = bindArgs(moveByTimeUnit, nanoInHour)
 export const addMinutes = bindArgs(moveByTimeUnit, nanoInMinute)
 export const addSeconds = bindArgs(moveByTimeUnit, nanoInSec)

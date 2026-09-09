@@ -13,10 +13,8 @@ import {
 } from '../../apiHelpers/classStyle'
 import { diffDates } from '../../apiHelpers/dateTimeDiff'
 import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
+  moveDateByMonths,
+  moveDateByYears,
 } from '../../apiHelpers/dateTimeMove'
 import { withDateFields } from '../../apiHelpers/fieldUpdate'
 import { refineRoundToOptions } from '../../apiHelpers/roundToOptions'
@@ -42,7 +40,7 @@ import {
   getCalendarSlotId,
 } from '../../internal/calendarImpl'
 import { IsoDateTimeInterval } from '../../internal/calendarInterval'
-import { toIntegerWithTrunc } from '../../internal/cast'
+import { toIntegerWithTrunc, toStrictInteger } from '../../internal/cast'
 import { compareIsoDateFields, plainDatesEqual } from '../../internal/compare'
 import { dateToZonedDateTime } from '../../internal/convert'
 import { refinePlainDateObjectLike } from '../../internal/createFromFields'
@@ -66,7 +64,7 @@ import {
 } from '../../internal/isoCalendarMath'
 import { formatDateIsoAuto, formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
-import { moveByDays, moveDate } from '../../internal/move'
+import { moveDate, moveDateByDays } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import {
@@ -541,7 +539,7 @@ export function addYears(
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
     createDateSlots(
-      moveByYears(slots.calendar, slots, years, options),
+      moveDateByYears(slots.calendar, slots, years, options),
       slots.calendar,
     ),
   )
@@ -555,7 +553,7 @@ export function addMonths(
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
     createDateSlots(
-      moveByMonths(slots.calendar, slots, months, options),
+      moveDateByMonths(slots.calendar, slots, months, options),
       slots.calendar,
     ),
   )
@@ -568,7 +566,7 @@ export function addWeeks(
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
     createDateSlots(
-      moveByIsoWeeks(slots.calendar, slots, weeks),
+      moveDateByDays(slots, toStrictInteger(weeks) * 7),
       slots.calendar,
     ),
   )
@@ -581,7 +579,7 @@ export function addDays(
   const slots = getShimPlainDateSlots(record)
   return createRecordFromDateFields(
     createDateSlots(
-      moveByDaysStrict(slots.calendar, slots, days),
+      moveDateByDays(slots, toStrictInteger(days)),
       slots.calendar,
     ),
   )
@@ -744,7 +742,7 @@ function aligned(
 ): (record: ShimPlainDateRecord) => ShimPlainDateRecord {
   return (record) => {
     const slots = getShimPlainDateSlots(record)
-    const isoDate = moveByDays(
+    const isoDate = moveDateByDays(
       computeAlignment(slots.calendar, slots),
       dayDelta,
     )

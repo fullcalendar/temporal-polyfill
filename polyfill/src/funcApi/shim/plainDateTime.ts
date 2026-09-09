@@ -13,10 +13,8 @@ import {
 } from '../../apiHelpers/classStyle'
 import { diffDateTimes } from '../../apiHelpers/dateTimeDiff'
 import {
-  moveByDaysStrict,
-  moveByIsoWeeks,
-  moveByMonths,
-  moveByYears,
+  moveDateByMonths,
+  moveDateByYears,
   reversedMove,
 } from '../../apiHelpers/dateTimeMove'
 import { withDateTimeFields } from '../../apiHelpers/fieldUpdate'
@@ -79,7 +77,11 @@ import {
   formatPlainDateTimeIso,
 } from '../../internal/isoFormat'
 import { parsePlainDateTime } from '../../internal/isoParse'
-import { moveDateTime, moveDateTimeByNano } from '../../internal/move'
+import {
+  moveDateByDays,
+  moveDateTime,
+  moveDateTimeByNano,
+} from '../../internal/move'
 import {
   refineEpochDisambigOptions,
   refineOverflowOptions,
@@ -576,7 +578,7 @@ export function addYears(
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
     createDateTimeFromRefinedFields(
-      moveByYears(slots.calendar, slots, years, options),
+      moveDateByYears(slots.calendar, slots, years, options),
       slots,
       slots.calendar,
     ),
@@ -591,7 +593,7 @@ export function addMonths(
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
     createDateTimeFromRefinedFields(
-      moveByMonths(slots.calendar, slots, months, options),
+      moveDateByMonths(slots.calendar, slots, months, options),
       slots,
       slots.calendar,
     ),
@@ -605,7 +607,7 @@ export function addWeeks(
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
     createDateTimeFromRefinedFields(
-      moveByIsoWeeks(slots.calendar, slots, weeks),
+      moveDateByDays(slots, toStrictInteger(weeks) * 7),
       slots,
       slots.calendar,
     ),
@@ -619,7 +621,7 @@ export function addDays(
   const slots = getShimPlainDateTimeSlots(record)
   return createShimPlainDateTimeRecord(
     createDateTimeFromRefinedFields(
-      moveByDaysStrict(slots.calendar, slots, days),
+      moveDateByDays(slots, toStrictInteger(days)),
       slots,
       slots.calendar,
     ),

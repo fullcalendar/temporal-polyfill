@@ -25,8 +25,8 @@ import { combineDateAndTime } from './fieldUtils'
 import { diffIsoMonthSlots } from './isoCalendarMath'
 import {
   addCalendarMonths,
-  addDateMonths,
-  moveByDays,
+  moveDateByCalendarUnits,
+  moveDateByDays,
   moveToStartOfMonth,
   resolveMonthInMovedYear,
 } from './move'
@@ -569,7 +569,7 @@ function diffDateTimesBig(
   let timeNano =
     timeFieldsToNano(endIsoDateTime) - timeFieldsToNano(startIsoDateTime)
   if (Math.sign(timeNano) === -sign) {
-    diffEndDate = moveByDays(endIsoDateTime, -sign)
+    diffEndDate = moveDateByDays(endIsoDateTime, -sign)
     timeNano += nanoInUtcDay * sign
   }
 
@@ -611,7 +611,7 @@ export function prepareZonedEpochDiff(
   const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
 
   for (; dayCorrection <= maxDayCorrection; dayCorrection++) {
-    const midIsoDate = moveByDays(endIsoDate, dayCorrection * -sign)
+    const midIsoDate = moveDateByDays(endIsoDate, dayCorrection * -sign)
     const midEpochNano = getSingleInstantFor(
       timeZone,
       combineDateAndTime(midIsoDate, startIsoDate),
@@ -664,7 +664,7 @@ export function diffCalendarDates(
         ? calendar.diffMonthSlots(year0, month0, year1, month1)
         : diffIsoMonthSlots(year0, month0, year1, month1)
 
-      let anchorIsoDate = addDateMonths(
+      let anchorIsoDate = moveDateByCalendarUnits(
         calendar,
         startIsoDate,
         0,
@@ -680,7 +680,7 @@ export function diffCalendarDates(
       // diffed against a 29-day one in its slot).
       if (sign * compareNumbers(day0, day1) > 0) {
         months -= sign
-        anchorIsoDate = addDateMonths(
+        anchorIsoDate = moveDateByCalendarUnits(
           calendar,
           startIsoDate,
           0,

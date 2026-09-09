@@ -12,7 +12,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { computeIsoDayOfWeek } from './isoCalendarMath'
-import { addCalendarMonths, moveByDays } from './move'
+import { addCalendarMonths, moveDateByDays } from './move'
 import { RoundingModeEnum } from './optionsModel'
 import { computeEpochNanoFrac } from './relativeMath'
 import { roundWithMode } from './round'
@@ -64,7 +64,10 @@ export function computeIsoWeekFloor(
   slots: CalendarDateFields,
 ): CalendarDateTimeFields {
   const dayOfWeek = computeIsoDayOfWeek(slots)
-  return combineDateAndTime(moveByDays(slots, 1 - dayOfWeek), timeFieldDefaults)
+  return combineDateAndTime(
+    moveDateByDays(slots, 1 - dayOfWeek),
+    timeFieldDefaults,
+  )
 }
 
 export const computeHourFloor = bindArgs(clearTimeFields, Unit.Hour)
@@ -95,7 +98,7 @@ export function computeIsoWeekCeil(
   slots: CalendarDateFields,
 ): CalendarDateTimeFields {
   return combineDateAndTime(
-    moveByDays(computeIsoWeekFloor(calendar, slots), 7),
+    moveDateByDays(computeIsoWeekFloor(calendar, slots), 7),
     timeFieldDefaults,
   )
 }
@@ -104,7 +107,7 @@ export function computeDayCeil(
   _calendar: CalendarImpl,
   slots: CalendarDateFields,
 ): CalendarDateTimeFields {
-  return combineDateAndTime(moveByDays(slots, 1), timeFieldDefaults)
+  return combineDateAndTime(moveDateByDays(slots, 1), timeFieldDefaults)
 }
 
 // Interval
@@ -141,7 +144,7 @@ export function computeIsoWeekInterval(
 ): IsoDateTimeInterval {
   const isoFields0 = computeIsoWeekFloor(calendar, slots)
   const isoFields1 = combineDateAndTime(
-    moveByDays(isoFields0, 7),
+    moveDateByDays(isoFields0, 7),
     timeFieldDefaults,
   )
   return [isoFields0, isoFields1]
