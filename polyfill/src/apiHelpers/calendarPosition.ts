@@ -21,7 +21,7 @@ export function moveToDayOfYear(
   return moveToRefinedDayOfYear(
     calendar,
     isoDate,
-    toIntegerWithTrunc(dayOfYear, 'dayOfMonth'),
+    toIntegerWithTrunc(dayOfYear),
     overflow,
   )
 }
@@ -37,7 +37,7 @@ export function moveToDayOfMonth(
   return moveToRefinedDayOfMonth(
     calendar,
     isoDate,
-    toIntegerWithTrunc(day, 'day'),
+    toIntegerWithTrunc(day),
     overflow,
   )
 }
@@ -54,7 +54,7 @@ export function moveToDayOfWeek(
   const overflow = refineOverflowOptions(options)
   return moveToRefinedDayOfWeek(
     isoDate,
-    toIntegerWithTrunc(dayOfWeek, 'dayOfWeek'),
+    toIntegerWithTrunc(dayOfWeek),
     overflow,
   )
 }
@@ -70,7 +70,7 @@ export function moveToWeekOfYear(
   return moveToRefinedWeekOfYear(
     calendar,
     isoDate,
-    toIntegerWithTrunc(weekOfYear, 'weekOfYear'),
+    toIntegerWithTrunc(weekOfYear),
     overflow,
   )
 }
