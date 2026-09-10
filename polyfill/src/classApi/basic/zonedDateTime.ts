@@ -53,7 +53,6 @@ import {
 import { getZonedTimeZoneId } from '../../internal/slotUtils'
 import {
   ZonedEpochNanoFields,
-  createDurationSlots,
   createZonedEpochNanoSlots,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
@@ -240,9 +239,7 @@ export const ZonedDateTime = defineTemporalClass(
     ): Duration {
       const slots = getZonedDateTimeSlots(this)
       const other = toZonedDateTimeSlots(otherArg)
-      return createDuration(
-        createDurationSlots(diffZonedDateTimes(false, slots, other, options)),
-      )
+      return createDuration(diffZonedDateTimes(false, slots, other, options))
     }
 
     since(
@@ -255,9 +252,7 @@ export const ZonedDateTime = defineTemporalClass(
     ): Duration {
       const slots = getZonedDateTimeSlots(this)
       const other = toZonedDateTimeSlots(otherArg)
-      return createDuration(
-        createDurationSlots(diffZonedDateTimes(true, slots, other, options)),
-      )
+      return createDuration(diffZonedDateTimes(true, slots, other, options))
     }
 
     round(
