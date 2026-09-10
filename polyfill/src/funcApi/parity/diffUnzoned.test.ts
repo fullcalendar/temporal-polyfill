@@ -111,12 +111,18 @@ function expectDiffParity<Record, TemporalValue>(
   temporal0: TemporalValue,
   temporal1: TemporalValue,
   options?: DiffOptions,
+  expected?: number,
 ): void {
-  expect(
-    captureResult(() => callDiff(recordDiff, record0, record1, options)),
-  ).toStrictEqual(
+  const recordResult = captureResult(() =>
+    callDiff(recordDiff, record0, record1, options),
+  )
+  expect(recordResult).toStrictEqual(
     captureResult(() => callDiff(temporalDiff, temporal0, temporal1, options)),
   )
+
+  if (expected !== undefined) {
+    expect(recordResult).toStrictEqual({ value: expected })
+  }
 }
 
 function plainDateRecord(value: Temporal.PlainDate) {
@@ -144,6 +150,7 @@ describe('PlainDate diff parity', () => {
     value0: string
     value1: string
     options?: DiffOptions
+    expected?: number
   }
 
   const cases: ParityCase[] = [
@@ -167,6 +174,22 @@ describe('PlainDate diff parity', () => {
       value1: '-271821-04-20',
     },
     {
+      name: 'skips a lower-bound day total that truncates to zero',
+      unit: 'days',
+      value0: '-271821-04-19',
+      value1: '-271821-04-20',
+      options: { roundingIncrement: 2 },
+      expected: 0,
+    },
+    {
+      name: 'skips a lower-bound week total that truncates to zero',
+      unit: 'weeks',
+      value0: '-271821-04-19',
+      value1: '-271821-04-20',
+      options: { roundingIncrement: 2 },
+      expected: 0,
+    },
+    {
       name: 'validates an upper-bound week window',
       unit: 'weeks',
       value0: '+275760-09-12',
@@ -175,7 +198,7 @@ describe('PlainDate diff parity', () => {
     },
   ]
 
-  it.each(cases)('$name', ({ unit, value0, value1, options }) => {
+  it.each(cases)('$name', ({ unit, value0, value1, options, expected }) => {
     const temporal0 = Temporal.PlainDate.from(value0)
     const temporal1 = Temporal.PlainDate.from(value1)
 
@@ -187,6 +210,7 @@ describe('PlainDate diff parity', () => {
       temporal0,
       temporal1,
       options,
+      expected,
     )
   })
 
@@ -243,6 +267,7 @@ describe('PlainDateTime diff parity', () => {
     value0: string
     value1: string
     options?: DiffOptions
+    expected?: number
   }
 
   const cases: ParityCase[] = [
@@ -272,6 +297,22 @@ describe('PlainDateTime diff parity', () => {
       value1: '-271821-04-20T23:59:59.999999999',
     },
     {
+      name: 'skips a lower-bound day total that truncates to zero',
+      unit: 'days',
+      value0: '-271821-04-19T00:00:00.000000001',
+      value1: '-271821-04-19T00:00:00.000000002',
+      options: { roundingIncrement: 10 },
+      expected: 0,
+    },
+    {
+      name: 'skips a lower-bound week total that truncates to zero',
+      unit: 'weeks',
+      value0: '-271821-04-19T00:00:00.000000001',
+      value1: '-271821-04-19T00:00:00.000000002',
+      options: { roundingIncrement: 10 },
+      expected: 0,
+    },
+    {
       name: 'validates an upper-bound week window',
       unit: 'weeks',
       value0: '+275760-09-12T00:00',
@@ -280,7 +321,7 @@ describe('PlainDateTime diff parity', () => {
     },
   ]
 
-  it.each(cases)('$name', ({ unit, value0, value1, options }) => {
+  it.each(cases)('$name', ({ unit, value0, value1, options, expected }) => {
     const temporal0 = Temporal.PlainDateTime.from(value0)
     const temporal1 = Temporal.PlainDateTime.from(value1)
 
@@ -292,6 +333,7 @@ describe('PlainDateTime diff parity', () => {
       temporal0,
       temporal1,
       options,
+      expected,
     )
   })
 

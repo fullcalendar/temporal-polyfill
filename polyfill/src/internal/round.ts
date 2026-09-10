@@ -29,10 +29,10 @@ import { moveDateByDays } from './move'
 import {
   RelativeOps,
   clampRelativeDuration,
-  computeEpochNanoFrac,
   isUniformUnit,
   moveRelativeMarkerToEpochNano,
 } from './relativeMath'
+import { computeEpochNanoFrac } from './relativeUnit'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'

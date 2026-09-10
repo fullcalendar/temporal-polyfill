@@ -25,12 +25,12 @@ import {
   moveEpochNanoByNano,
   moveZonedEpochSlots,
 } from './move'
+import { epochNanoIsWithinWindow } from './relativeUnit'
 import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
 import { DayWeekUnit, Unit } from './units'
-import { compareBigInts, fabricateNearHalfFraction } from './utils'
 
 // Relative contracts
 // -----------------------------------------------------------------------------
@@ -445,60 +445,6 @@ export function createPlainDayWeekOps(
         ),
       ),
   }
-}
-
-// Epoch interval arithmetic
-// -----------------------------------------------------------------------------
-// Pure bigint math on a [epochNano0, epochNano1] window: membership tests and
-// the fractional progress used by rounding modes.
-
-function epochNanoIsWithinWindow(
-  epochNanoProgress: bigint,
-  epochNano0: bigint,
-  epochNano1: bigint,
-  sign: number,
-): boolean {
-  if (sign > 0) {
-    return (
-      compareBigInts(epochNano0, epochNanoProgress) <= 0 &&
-      compareBigInts(epochNanoProgress, epochNano1) <= 0
-    )
-  }
-
-  return (
-    compareBigInts(epochNano1, epochNanoProgress) <= 0 &&
-    compareBigInts(epochNanoProgress, epochNano0) <= 0
-  )
-}
-
-export function computeEpochNanoFrac(
-  epochNanoProgress: bigint,
-  epochNano0: bigint,
-  epochNano1: bigint,
-): number {
-  const denomBig = epochNano1 - epochNano0
-  const numeratorBig = epochNanoProgress - epochNano0
-  if (!numeratorBig) {
-    return 0
-  }
-
-  const absNumerator = numeratorBig < 0n ? -numeratorBig : numeratorBig
-  const absDenom = denomBig < 0n ? -denomBig : denomBig
-  const fracSign =
-    compareBigInts(numeratorBig, 0n) === compareBigInts(denomBig, 0n) ? 1 : -1
-
-  if (compareBigInts(absNumerator, absDenom) <= 0) {
-    if (absNumerator === absDenom) {
-      return fracSign
-    }
-
-    return fabricateNearHalfFraction(
-      compareBigInts(absNumerator * 2n, absDenom),
-      fracSign,
-    )
-  }
-
-  return Number(numeratorBig) / Number(denomBig)
 }
 
 // Relative-type and unit predicates
