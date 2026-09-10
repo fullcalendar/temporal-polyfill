@@ -1,4 +1,3 @@
-import { roundingModeFuncs } from '../options/config'
 import {
   EpochDisambig,
   OffsetDisambig,
@@ -28,11 +27,15 @@ import { combineDateAndTime } from './fieldUtils'
 import { moveDateByDays } from './move'
 import {
   RelativeOps,
-  clampRelativeDuration,
   isUniformUnit,
   moveRelativeMarkerToEpochNano,
 } from './relativeMath'
-import { computeEpochNanoFrac } from './relativeUnit'
+import {
+  clampRelativeUnitValue,
+  computeEpochNanoFrac,
+  resolveRelativeUnit,
+} from './relativeUnit'
+import { roundNumberToInc, roundWithMode } from './roundNumber'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
@@ -377,33 +380,30 @@ function nudgeRelativeDuration(
   const truncedVal =
     divTrunc(durationFields[smallestUnitFieldName], roundingInc) * roundingInc
 
-  baseDurationFields[smallestUnitFieldName] = truncedVal
-
-  const nudgeWindow = clampRelativeDuration(
-    baseDurationFields,
-    smallestUnit, // clampUnit
-    roundingInc * sign, // clampDistance
-    relativeOps,
+  const [roundedVal, nudgeWindow] = resolveRelativeUnit(
+    truncedVal,
+    sign,
     endEpochNano,
+    (value) => {
+      // baseDurationFields is scratch here; the field is rewritten below
+      baseDurationFields[smallestUnitFieldName] = value
+      return moveRelativeMarkerToEpochNano(relativeOps, baseDurationFields)
+    },
+    roundingInc,
+    roundingMode,
   )
-  const epochNano0 = nudgeWindow.epochNano0
-  const epochNano1 = nudgeWindow.epochNano1
-
-  // usually between 0-1, however can be higher when weeks aren't bounded by months
-  const frac = computeEpochNanoFrac(endEpochNano, epochNano0, epochNano1)
-
-  const windowStartVal = nudgeWindow.startDurationFields[smallestUnitFieldName]
-  const windowEndVal = nudgeWindow.endDurationFields[smallestUnitFieldName]
-  const exactVal = windowStartVal + frac * sign * roundingInc
-  const roundedVal = roundNumberToInc(exactVal, roundingInc, roundingMode)
-  const roundedToEnd = roundedVal === windowEndVal
 
   baseDurationFields[smallestUnitFieldName] = roundedVal
 
+  // The rounded value is one of the window's two edges, so its epoch is
+  // already known. A value other than truncedVal means the window shifted or
+  // the value rounded up to endValue; either way a big unit grew.
   return [
     baseDurationFields,
-    roundedToEnd ? epochNano1 : epochNano0,
-    nudgeWindow.shifted || roundedToEnd, // guaranteed big unit because of big smallestUnit
+    roundedVal === nudgeWindow.endValue
+      ? nudgeWindow.epochNano1
+      : nudgeWindow.epochNano0,
+    roundedVal !== truncedVal,
   ]
 }
 
@@ -429,11 +429,18 @@ function nudgeZonedTimeDuration(
   const nanoInc = computeNanoInc(smallestUnit, roundingInc)
   let roundedTimeNano = roundNumberToInc(timeNano, nanoInc, roundingMode)
 
-  const dayWindow = clampRelativeDuration(
-    { ...durationFields, ...durationTimeFieldDefaults },
-    Unit.Day, // clampUnit
-    sign, // clampDistance
-    relativeOps,
+  const dateDurationFields = {
+    ...durationFields,
+    ...durationTimeFieldDefaults,
+  }
+  const dayWindow = clampRelativeUnitValue(
+    dateDurationFields.days,
+    sign,
+    (days) => {
+      // dateDurationFields is scratch; only the window's epochs are used
+      dateDurationFields.days = days
+      return moveRelativeMarkerToEpochNano(relativeOps, dateDurationFields)
+    },
     endEpochNano,
   )
   const dayEpochNano0 = dayWindow.epochNano0
@@ -630,18 +637,6 @@ export function roundBigNanoToDayOriginInc(
   )
 }
 
-/*
-Never receives smallestUnit/roundingIncrement
-Use computeNanoInc for that
-*/
-export function roundNumberToInc(
-  num: number,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): number {
-  return roundWithMode(num / roundingInc, roundingMode) * roundingInc
-}
-
 // quotientTail is the small, Number-safe part of the full quotient that gets
 // fed to roundWithMode. Callers compute it before shifting bigNano relative
 // to an origin, so halfEven still sees the original quotient parity.
@@ -688,11 +683,4 @@ export function computeBigNanoInc(
   roundingInc: number,
 ): bigint {
   return BigInt(unitNanoMap[smallestUnit]) * BigInt(roundingInc)
-}
-
-export function roundWithMode(
-  num: number,
-  roundingMode: RoundingModeEnum,
-): number {
-  return roundingModeFuncs[roundingMode](num)
 }

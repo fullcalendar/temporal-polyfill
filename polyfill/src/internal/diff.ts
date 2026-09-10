@@ -39,9 +39,9 @@ import {
   computeBigNanoInc,
   computeNanoInc,
   roundBigNanoToInc,
-  roundNumberToInc,
   roundRelativeDuration,
 } from './round'
+import { roundNumberToInc } from './roundNumber'
 import { getCommonTimeZone } from './slotUtils'
 import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateInBounds } from './temporalLimits'

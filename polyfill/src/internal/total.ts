@@ -14,11 +14,12 @@ import * as errorMessages from './errorMessages'
 import {
   RelativeOps,
   RelativeToSlots,
-  clampRelativeDuration,
   isUniformUnit,
   isZonedEpochSlots,
+  moveRelativeMarkerToEpochNano,
   spanRelativeDuration,
 } from './relativeMath'
+import { resolveRelativeUnit } from './relativeUnit'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
 import { NumberSign, throwRangeError } from './utils'
@@ -90,22 +91,20 @@ export function totalRelativeDuration(
   // The spec treats zero relative durations as positive when probing the
   // surrounding unit window. That matters at the upper Instant boundary:
   // origin + 1 day may be out of range even if the origin itself is valid.
-  const sign = computeDurationSign(durationFields) || 1
-  const nudgeWindow = clampRelativeDuration(
-    clearDurationFields(totalUnit, durationFields),
-    totalUnit,
-    sign,
-    relativeOps,
-    endEpochNano,
-  )
-  const epochNano0 = nudgeWindow.epochNano0
-  const epochNano1 = nudgeWindow.epochNano1
-  const denom = Number(epochNano1 - epochNano0)
-  const numerator = Number(endEpochNano - epochNano0)
-  const integerPart =
-    nudgeWindow.startDurationFields[durationFieldNamesAsc[totalUnit]]
+  const fieldName = durationFieldNamesAsc[totalUnit]
+  const baseDurationFields = clearDurationFields(totalUnit, durationFields)
 
-  return integerPart + (numerator / denom) * sign
+  return resolveRelativeUnit(
+    durationFields[fieldName],
+    computeDurationSign(durationFields) || 1,
+    endEpochNano,
+    (value) => {
+      // baseDurationFields is scratch; only the resolved number is returned
+      baseDurationFields[fieldName] = value
+      return moveRelativeMarkerToEpochNano(relativeOps, baseDurationFields)
+    },
+    1,
+  )[0]
 }
 
 export function totalDayTimeDuration(

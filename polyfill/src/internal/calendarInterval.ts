@@ -15,7 +15,7 @@ import { combineDateAndTime } from './fieldUtils'
 import { computeIsoDayOfWeek } from './isoCalendarMath'
 import { addCalendarMonths, moveDateByDays } from './move'
 import { computeEpochNanoFrac } from './relativeUnit'
-import { roundWithMode } from './round'
+import { roundWithMode } from './roundNumber'
 import { TimeUnit, Unit } from './units'
 import { bindArgs, zeroOutProps } from './utils'
 

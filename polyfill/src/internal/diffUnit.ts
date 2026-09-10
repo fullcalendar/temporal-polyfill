@@ -26,17 +26,9 @@ import {
   createDateRelativeOps,
   moveRelativeMarkerToEpochNano,
 } from './relativeMath'
-import {
-  MoveRelativeUnitValue,
-  clampRelativeUnitValue,
-  computeEpochNanoFrac,
-} from './relativeUnit'
-import {
-  computeBigNanoInc,
-  computeNanoInc,
-  roundBigNanoToInc,
-  roundNumberToInc,
-} from './round'
+import { resolveRelativeUnit } from './relativeUnit'
+import { computeBigNanoInc, computeNanoInc, roundBigNanoToInc } from './round'
+import { roundNumberToInc } from './roundNumber'
 import { ZonedEpochNanoFields } from './slots'
 import {
   checkEpochNanoInBounds,
@@ -53,7 +45,6 @@ import {
   YearMonthUnit,
   unitNanoMap,
 } from './units'
-import { divTrunc } from './utils'
 
 // Scalar unit differences for the func API. Inputs and rounding settings have
 // already been validated and refined by the API layer.
@@ -223,6 +214,7 @@ export function countYearMonthUnit(
 Mirrors the calendar-unit diffs (diffZonedCalendarUnitsRounded,
 diffDateTimeCalendarUnitsRounded, diffDateCalendarUnitsRounded) when
 rounding, and spanRelativeDuration then totalRelativeDuration when totaling.
+Both paths now finish in relativeUnit.ts's shared scalar resolver.
 */
 export function countRelativeUnit(
   unit: Unit,
@@ -295,8 +287,8 @@ Mirrors diffZonedCalendarUnitsRounded with a day or week smallestUnit, and
 spanZonedRelativeDuration then totalRelativeDuration when totaling, without
 DurationFields. The scalar counterpart of countRelativeUnit, kept separate so
 these builds retain neither calendar arithmetic nor duration-field plumbing.
-Same pipeline: exact diff, then window probing. Zoned days vary in length,
-so even days probe through the time zone.
+Same pipeline and shared scalar resolver: exact diff, then window probing. Zoned
+days vary in length, so even days probe through the time zone.
 */
 export function countZonedDayWeekUnit(
   unit: DayWeekUnit,
@@ -347,18 +339,17 @@ export function countZonedDayWeekUnit(
     (value) => moveByDays(value * daysInUnit),
     roundingInc,
     roundingMode,
-  )
+  )[0]
 }
 
 // Relative-unit cores
 // -----------------------------------------------------------------------------
-// The steps shared by the relative diffs above: the DurationFields-to-scalar
-// bridge, and the window resolution both bridges use.
+// The DurationFields-to-scalar bridge used by relative diffs. Window resolution
+// lives in relativeUnit.ts so class and functional APIs share the scalar leaf.
 
 /*
-Mirrors nudgeRelativeDuration (with a mode) and totalRelativeDuration
-(without one): reduces a balanced duration to one unit's scalar value by
-probing that unit's window through RelativeOps.
+Bridges a balanced DurationFields value into relativeUnit.ts's scalar resolver,
+which is also the leaf used by nudgeRelativeDuration and totalRelativeDuration.
 */
 function resolveDurationUnit(
   unit: Unit,
@@ -394,52 +385,5 @@ function resolveDurationUnit(
       }),
     unitWindowInc,
     roundingMode,
-  )
-}
-
-/*
-Mirrors the window step shared by nudgeRelativeDuration and
-totalRelativeDuration, with clampRelativeUnitValue standing in for
-clampRelativeDuration. Resolves a unit's scalar value from the endpoint's
-position within a window of `unitWindowInc` units:
-- Rounding: the window spans `unitWindowInc` units and the interpolated value is
-  rounded with `roundingMode`.
-- Totaling: `roundingMode` is undefined, the window spans exactly one unit,
-  and the exact fraction is returned as-is.
-`wholeValue` is the sign-carrying count of whole units from the exact diff.
-*/
-function resolveRelativeUnit(
-  wholeValue: number,
-  sign: number,
-  endEpochNano: bigint,
-  moveValueToEpochNano: MoveRelativeUnitValue,
-  unitWindowInc: number,
-  roundingMode: RoundingModeEnum | undefined,
-): number {
-  const startValue = divTrunc(wholeValue, unitWindowInc) * unitWindowInc
-  const unitWindow = clampRelativeUnitValue(
-    startValue,
-    unitWindowInc * sign,
-    moveValueToEpochNano,
-    endEpochNano,
-  )
-  const isTotal = roundingMode === undefined
-
-  // Totals need the real fraction. Rounding only needs a representative that
-  // preserves exact-half comparisons for large bigint windows.
-  const fraction = isTotal
-    ? Number(endEpochNano - unitWindow.epochNano0) /
-      Number(unitWindow.epochNano1 - unitWindow.epochNano0)
-    : computeEpochNanoFrac(
-        endEpochNano,
-        unitWindow.epochNano0,
-        unitWindow.epochNano1,
-      )
-
-  // (endValue - startValue) is ±unitWindowInc, so this multiplication is exact
-  const value =
-    unitWindow.startValue +
-    fraction * (unitWindow.endValue - unitWindow.startValue)
-
-  return isTotal ? value : roundNumberToInc(value, unitWindowInc, roundingMode)
+  )[0]
 }

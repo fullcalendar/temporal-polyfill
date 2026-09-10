@@ -1,10 +1,6 @@
 import { type CalendarImpl } from './calendarImpl'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
-import {
-  DurationFieldName,
-  DurationFields,
-  durationFieldNamesAsc,
-} from './durationFields'
+import { DurationFields } from './durationFields'
 import { durationHasDateParts } from './durationMath'
 import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
@@ -16,7 +12,6 @@ import {
   moveDateTime,
   moveZonedEpochSlots,
 } from './move'
-import { epochNanoIsWithinWindow } from './relativeUnit'
 import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { TimeZone } from './timeZone'
@@ -168,84 +163,6 @@ export function spanPlainRelativeDuration(
     // cheaper date-only ops
     createDateRelativeOps(calendar, relativeToSlots),
   ]
-}
-
-// Relative interval windows
-// -----------------------------------------------------------------------------
-// Position an epoch within adjacent relative-unit boundaries. These probes are
-// separate from the actual duration endpoints constructed by span operations,
-// and may shift one window forward when the balanced duration overshoots.
-
-export function clampRelativeDuration(
-  durationFields: DurationFields,
-  clampUnit: Unit,
-  clampDistance: number,
-  relativeOps: RelativeOps,
-  epochNanoProgress?: bigint,
-) {
-  const unitName = durationFieldNamesAsc[clampUnit]
-  let startDurationFields = durationFields
-  let shifted = false
-  let window = computeRelativeDurationWindow(
-    startDurationFields,
-    unitName,
-    clampDistance,
-    relativeOps,
-  )
-
-  // Calendar-unit rounding uses a finite epoch-nanosecond window. Around dates
-  // that constrain, like Jan 31 -> Feb 29, the balanced duration can describe a
-  // point just beyond the first truncated window. The spec retries one window
-  // later in that case; Duration.total() uses the same operation with trunc.
-  if (
-    epochNanoProgress &&
-    !epochNanoIsWithinWindow(
-      epochNanoProgress,
-      window.epochNano0,
-      window.epochNano1,
-      Math.sign(clampDistance),
-    )
-  ) {
-    startDurationFields = {
-      ...durationFields,
-      [unitName]: durationFields[unitName] + clampDistance,
-    }
-    shifted = true
-    window = computeRelativeDurationWindow(
-      startDurationFields,
-      unitName,
-      clampDistance,
-      relativeOps,
-    )
-  }
-
-  return {
-    ...window,
-    startDurationFields,
-    shifted,
-  }
-}
-
-function computeRelativeDurationWindow(
-  startDurationFields: DurationFields,
-  unitName: DurationFieldName,
-  clampDistance: number,
-  relativeOps: RelativeOps,
-) {
-  const endDurationFields = {
-    ...startDurationFields,
-    [unitName]: startDurationFields[unitName] + clampDistance,
-  }
-
-  const epochNano0 = moveRelativeMarkerToEpochNano(
-    relativeOps,
-    startDurationFields,
-  )
-  const epochNano1 = moveRelativeMarkerToEpochNano(
-    relativeOps,
-    endDurationFields,
-  )
-  return { epochNano0, epochNano1, endDurationFields }
 }
 
 // Relative marker movement

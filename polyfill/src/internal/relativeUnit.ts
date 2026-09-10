@@ -1,11 +1,13 @@
-import { compareBigInts, fabricateNearHalfFraction } from './utils'
+import { RoundingModeEnum } from '../options/model'
+import { roundNumberToInc } from './roundNumber'
+import { compareBigInts, divTrunc, fabricateNearHalfFraction } from './utils'
 
 // Scalar relative-unit math
 // -----------------------------------------------------------------------------
-// The class API rounds and totals whole DurationFields. The func API only needs
-// ONE unit's value, so this leaf works on a scalar: a candidate unit value plus
-// a callback that moves the origin by it. Callers supply the type-specific
-// movement; this module owns the window and its fraction math.
+// Both APIs bottom out here. The func API already works with one unit's scalar
+// value; the class API adapts DurationFields into that same scalar plus a
+// callback that moves the origin by it. This module owns the window and its
+// fraction math without retaining either API's orchestration records.
 
 export type MoveRelativeUnitValue = (value: number) => bigint
 
@@ -65,6 +67,56 @@ function computeRelativeUnitWindow(
     epochNano0: moveValueToEpochNano(startValue),
     epochNano1: moveValueToEpochNano(endValue),
   }
+}
+
+/*
+Resolves a unit's scalar value from the endpoint's position within a window of
+`unitWindowInc` units. `wholeValue` is the sign-carrying count of whole units
+from the exact diff.
+
+`roundingMode` doubles as the mode switch: defined means rounding, which
+returns an increment-aligned value; undefined means totaling, which uses a
+one-unit window (`unitWindowInc` is 1) and returns the exact fractional value.
+
+Also returns the window the value was resolved in. A rounded value is always
+the window's startValue or endValue, so callers that need the epoch it landed
+on can read it from the window instead of probing again.
+*/
+export function resolveRelativeUnit(
+  wholeValue: number,
+  sign: number,
+  endEpochNano: bigint,
+  moveValueToEpochNano: MoveRelativeUnitValue,
+  unitWindowInc: number,
+  roundingMode?: RoundingModeEnum,
+): [value: number, unitWindow: RelativeUnitWindow] {
+  const unitWindow = clampRelativeUnitValue(
+    divTrunc(wholeValue, unitWindowInc) * unitWindowInc,
+    unitWindowInc * sign,
+    moveValueToEpochNano,
+    endEpochNano,
+  )
+  const isTotal = roundingMode === undefined
+
+  // Totals need the real fraction. Rounding only needs to know which side of a
+  // half the endpoint falls on, and computeEpochNanoFrac fabricates a stand-in
+  // near 0.5 to keep that comparison exact, so it would be wrong as a total.
+  const fraction = isTotal
+    ? Number(endEpochNano - unitWindow.epochNano0) /
+      Number(unitWindow.epochNano1 - unitWindow.epochNano0)
+    : computeEpochNanoFrac(
+        endEpochNano,
+        unitWindow.epochNano0,
+        unitWindow.epochNano1,
+      )
+  const value =
+    unitWindow.startValue +
+    fraction * (unitWindow.endValue - unitWindow.startValue)
+
+  return [
+    isTotal ? value : roundNumberToInc(value, unitWindowInc, roundingMode),
+    unitWindow,
+  ]
 }
 
 // Epoch interval arithmetic
