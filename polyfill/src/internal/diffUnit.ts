@@ -26,7 +26,7 @@ import {
   createDateRelativeOps,
   moveRelativeMarkerToEpochNano,
 } from './relativeMath'
-import { resolveRelativeUnit } from './relativeUnit'
+import { roundRelativeUnit, totalRelativeUnit } from './relativeUnit'
 import { computeBigNanoInc, computeNanoInc, roundBigNanoToInc } from './round'
 import { roundNumberToInc } from './roundNumber'
 import { ZonedEpochNanoFields } from './slots'
@@ -332,14 +332,19 @@ export function countZonedDayWeekUnit(
   const sign = Math.sign(deltaDays) || Math.sign(remainderNano)
   const wholeValue = Math.trunc(deltaDays / daysInUnit)
 
-  return resolveRelativeUnit(
-    wholeValue,
-    sign,
-    endEpochNano,
-    (value) => moveByDays(value * daysInUnit),
-    roundingInc,
-    roundingMode,
-  )[0]
+  const moveValueToEpochNano = (value: number): bigint =>
+    moveByDays(value * daysInUnit)
+
+  return roundingMode === undefined
+    ? totalRelativeUnit(wholeValue, sign, endEpochNano, moveValueToEpochNano)
+    : roundRelativeUnit(
+        wholeValue,
+        sign,
+        endEpochNano,
+        moveValueToEpochNano,
+        roundingInc,
+        roundingMode,
+      )[0]
 }
 
 // Relative-unit cores
@@ -374,16 +379,25 @@ function resolveDurationUnit(
   // Larger units stay fixed while the probed unit varies
   const baseDurationFields = clearDurationFields(unit, durationFields)
 
-  return resolveRelativeUnit(
-    durationFields[fieldName],
-    sign,
-    endEpochNano,
-    (value) =>
-      moveRelativeMarkerToEpochNano(relativeOps, {
-        ...baseDurationFields,
-        [fieldName]: value,
-      }),
-    unitWindowInc,
-    roundingMode,
-  )[0]
+  const moveValueToEpochNano = (value: number): bigint =>
+    moveRelativeMarkerToEpochNano(relativeOps, {
+      ...baseDurationFields,
+      [fieldName]: value,
+    })
+
+  return roundingMode === undefined
+    ? totalRelativeUnit(
+        durationFields[fieldName],
+        sign,
+        endEpochNano,
+        moveValueToEpochNano,
+      )
+    : roundRelativeUnit(
+        durationFields[fieldName],
+        sign,
+        endEpochNano,
+        moveValueToEpochNano,
+        unitWindowInc,
+        roundingMode,
+      )[0]
 }

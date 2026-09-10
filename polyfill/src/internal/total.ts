@@ -19,7 +19,7 @@ import {
   moveRelativeMarkerToEpochNano,
   spanRelativeDuration,
 } from './relativeMath'
-import { resolveRelativeUnit } from './relativeUnit'
+import { totalRelativeUnit } from './relativeUnit'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
 import { DayTimeUnit, Unit, unitNanoMap } from './units'
 import { NumberSign, throwRangeError } from './utils'
@@ -94,7 +94,7 @@ export function totalRelativeDuration(
   const fieldName = durationFieldNamesAsc[totalUnit]
   const baseDurationFields = clearDurationFields(totalUnit, durationFields)
 
-  return resolveRelativeUnit(
+  return totalRelativeUnit(
     durationFields[fieldName],
     computeDurationSign(durationFields) || 1,
     endEpochNano,
@@ -103,8 +103,7 @@ export function totalRelativeDuration(
       baseDurationFields[fieldName] = value
       return moveRelativeMarkerToEpochNano(relativeOps, baseDurationFields)
     },
-    1,
-  )[0]
+  )
 }
 
 export function totalDayTimeDuration(
