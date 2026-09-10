@@ -95,6 +95,15 @@ export type RoundingMathTuple = [
   roundingMode: RoundingModeEnum,
 ]
 
+/*
+The refined rounding settings of a func-API unit diff (diffYears, etc).
+An undefined mode means an exact total instead of a rounded value.
+*/
+export type UnitDiffRoundingTuple = [
+  roundingInc: number,
+  roundingMode: RoundingModeEnum | undefined,
+]
+
 export type RoundingTuple = [smallestUnit: Unit, ...RoundingMathTuple]
 
 export type DiffTuple = [largestUnit: Unit, ...RoundingTuple]

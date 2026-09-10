@@ -1,6 +1,5 @@
 import { refineTotalOptions } from '../options/roundingRefine'
 import { divideBigNanoToExactNumber } from './bigNano'
-import { type CalendarImpl } from './calendarImpl'
 import {
   DurationFields,
   clearDurationFields,
@@ -12,23 +11,16 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
-import { CalendarDateFields } from './fieldTypes'
-import { moveToStartOfMonth } from './move'
 import {
   RelativeOps,
   RelativeToSlots,
-  ZonedEpochMarker,
   clampRelativeDuration,
   isUniformUnit,
   isZonedEpochSlots,
-  spanPlainDayWeekRelativeDuration,
-  spanPlainRelativeDuration,
   spanRelativeDuration,
-  spanZonedDayWeekRelativeDuration,
-  spanZonedRelativeDuration,
 } from './relativeMath'
 import type { DurationTotalOptions } from './temporalSpecHelpers'
-import { DayTimeUnit, DayWeekUnit, Unit, unitNanoMap } from './units'
+import { DayTimeUnit, Unit, unitNanoMap } from './units'
 import { NumberSign, throwRangeError } from './utils'
 
 // Option-refining total entry point
@@ -75,97 +67,6 @@ export function totalDuration<RA>(
   if (isUniformUnit(totalUnit, isZoned)) {
     return totalDayTimeDuration(balancedDuration, totalUnit as DayTimeUnit)
   }
-
-  return totalRelativeDuration(
-    balancedDuration,
-    endEpochNano,
-    totalUnit,
-    relativeOps,
-  )
-}
-
-// YearMonth reference normalization
-// -----------------------------------------------------------------------------
-// PlainYearMonth arithmetic uses the first day as its reference date even when
-// the stored ISO reference day differs. Wraps the plain calendar composition.
-
-export function totalYearMonthDuration(
-  durationFields: DurationFields,
-  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
-  totalUnit: Unit.Year | Unit.Month,
-): number {
-  const { calendar } = relativeToSlots
-  return totalPlainCalendarDuration(
-    durationFields,
-    { ...moveToStartOfMonth(calendar, relativeToSlots), calendar },
-    totalUnit,
-  )
-}
-
-// Pre-refined relative total compositions
-// -----------------------------------------------------------------------------
-// One composition per relativeTo flavor and unit kind. Each spans the duration
-// against its origin and hands the endpoints to a totaling core.
-
-export function totalZonedCalendarDuration(
-  durationFields: DurationFields,
-  relativeToSlots: ZonedEpochMarker,
-  totalUnit: Unit,
-): number {
-  const [balancedDuration, endEpochNano, relativeOps] =
-    spanZonedRelativeDuration(relativeToSlots, durationFields, totalUnit)
-
-  return totalRelativeDuration(
-    balancedDuration,
-    endEpochNano,
-    totalUnit,
-    relativeOps,
-  )
-}
-
-export function totalPlainCalendarDuration(
-  durationFields: DurationFields,
-  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
-  totalUnit: Unit,
-): number {
-  const [balancedDuration, endEpochNano, relativeOps] =
-    spanPlainRelativeDuration(relativeToSlots, durationFields, totalUnit)
-
-  return totalRelativeDuration(
-    balancedDuration,
-    endEpochNano,
-    totalUnit,
-    relativeOps,
-  )
-}
-
-export function totalZonedDayWeekDuration(
-  durationFields: DurationFields,
-  relativeToSlots: ZonedEpochMarker,
-  totalUnit: DayWeekUnit,
-): number {
-  const [balancedDuration, endEpochNano, relativeOps] =
-    spanZonedDayWeekRelativeDuration(relativeToSlots, durationFields, totalUnit)
-
-  return totalRelativeDuration(
-    balancedDuration,
-    endEpochNano,
-    totalUnit,
-    relativeOps,
-  )
-}
-
-export function totalPlainDayWeekDuration(
-  durationFields: DurationFields,
-  relativeToFields: CalendarDateFields,
-  totalUnit: DayWeekUnit,
-): number {
-  const [balancedDuration, endEpochNano, relativeOps] =
-    spanPlainDayWeekRelativeDuration(
-      relativeToFields,
-      durationFields,
-      totalUnit,
-    )
 
   return totalRelativeDuration(
     balancedDuration,

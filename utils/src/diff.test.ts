@@ -112,6 +112,16 @@ describe('diffMonths', () => {
       expect(months).toBe(1)
       expect(monthsInc).toBe(3)
     })
+
+    it('rounds at the requested unit when only an increment is given', () => {
+      const pd0 = Temporal.PlainDate.from('2024-01-31')
+      const pd1 = Temporal.PlainDate.from('2024-02-29')
+      // 29 days = 4.14 weeks, truncated to a multiple of 3 weeks
+      expect(diffWeeks(pd0, pd1, { roundingIncrement: 3 })).toBe(3)
+      // whole days, so an explicit increment of 1 still yields an integer
+      expect(diffWeeks(pd0, pd1, { roundingIncrement: 1 })).toBe(4)
+      expect(diffWeeks(pd0, pd1)).toBeCloseTo(29 / 7)
+    })
   })
 
   describe('PlainYearMonth', () => {

@@ -13,13 +13,13 @@ import {
   diffYears,
 } from 'temporal-utils'
 import { describe, expect, it } from 'vitest'
-import { Temporal } from '../../classApi/basic/implementation'
 import * as CalendarFns from '../calendar'
 import * as InstantFns from '../instant'
 import * as PlainDateFns from '../plainDate'
 import * as PlainDateTimeFns from '../plainDateTime'
 import * as PlainTimeFns from '../plainTime'
 import * as PlainYearMonthFns from '../plainYearMonth'
+import { Temporal } from './testUtils'
 
 type DateDiffName = 'years' | 'months' | 'weeks' | 'days'
 type TimeDiffName =
@@ -174,7 +174,7 @@ describe('PlainDate diff parity', () => {
       value1: '-271821-04-20',
     },
     {
-      name: 'skips a lower-bound day total that truncates to zero',
+      name: 'rounds a single day down to zero with an increment',
       unit: 'days',
       value0: '-271821-04-19',
       value1: '-271821-04-20',
@@ -182,12 +182,35 @@ describe('PlainDate diff parity', () => {
       expected: 0,
     },
     {
-      name: 'skips a lower-bound week total that truncates to zero',
+      name: 'rounds a single day down to zero weeks with an increment',
       unit: 'weeks',
       value0: '-271821-04-19',
       value1: '-271821-04-20',
       options: { roundingIncrement: 2 },
       expected: 0,
+    },
+    {
+      name: 'truncates whole weeks to a multiple of the increment',
+      unit: 'weeks',
+      value0: '2024-01-31',
+      value1: '2024-02-29',
+      options: { roundingIncrement: 3 },
+      expected: 3,
+    },
+    {
+      name: 'truncates days to a multiple of the increment near the lower bound',
+      unit: 'days',
+      value0: '2024-01-31',
+      value1: '-271821-04-19',
+      options: { roundingIncrement: 5 },
+      expected: -100019750,
+    },
+    {
+      name: 'probes an exact month multiple at the upper bound',
+      unit: 'months',
+      value0: '2024-01-31',
+      value1: '+275760-08-31',
+      options: 'floor',
     },
     {
       name: 'validates an upper-bound week window',
@@ -243,7 +266,7 @@ describe('PlainDate diff parity', () => {
     },
   )
 
-  it('pre-rounds at day precision when only an increment is given', () => {
+  it('rounds at the requested unit when only an increment is given', () => {
     const temporal0 = Temporal.PlainDate.from('2024-01-01')
     const temporal1 = Temporal.PlainDate.from('2024-01-06')
     const options: RoundingMathOptions = { roundingIncrement: 2 }
@@ -297,7 +320,7 @@ describe('PlainDateTime diff parity', () => {
       value1: '-271821-04-20T23:59:59.999999999',
     },
     {
-      name: 'skips a lower-bound day total that truncates to zero',
+      name: 'rounds a single day down to zero with an increment',
       unit: 'days',
       value0: '-271821-04-19T00:00:00.000000001',
       value1: '-271821-04-19T00:00:00.000000002',
@@ -305,12 +328,26 @@ describe('PlainDateTime diff parity', () => {
       expected: 0,
     },
     {
-      name: 'skips a lower-bound week total that truncates to zero',
+      name: 'rounds a single day down to zero weeks with an increment',
       unit: 'weeks',
       value0: '-271821-04-19T00:00:00.000000001',
       value1: '-271821-04-19T00:00:00.000000002',
       options: { roundingIncrement: 10 },
       expected: 0,
+    },
+    {
+      name: 'rounds a near-half day without float drift',
+      unit: 'days',
+      value0: '2024-01-31T12:00',
+      value1: '2023-01-31T00:00:00.000000001',
+      options: 'halfExpand',
+      expected: -365,
+    },
+    {
+      name: 'totals weeks with the same float construction',
+      unit: 'weeks',
+      value0: '2024-01-31T12:00',
+      value1: '2024-02-29T23:59:59.999999999',
     },
     {
       name: 'validates an upper-bound week window',
@@ -400,7 +437,7 @@ describe('PlainDateTime diff parity', () => {
     },
   )
 
-  it('pre-rounds at nanosecond precision when only an increment is given', () => {
+  it('rounds at the requested unit when only an increment is given', () => {
     const temporal0 = Temporal.PlainDateTime.from('2024-01-01T00:00')
     const temporal1 = Temporal.PlainDateTime.from(
       '2024-01-01T00:00:00.000000005',
@@ -446,6 +483,31 @@ describe('PlainYearMonth diff parity', () => {
         record1,
         temporal0,
         temporal1,
+      )
+    },
+  )
+
+  it.each(['years', 'months'] as const)(
+    '$s distinguishes calendar months that start in the same ISO month',
+    (unit) => {
+      // Hebrew Adar and Nisan 5785 both begin in ISO March 2025
+      const value0 = '2025-03-01[u-ca=hebrew]'
+      const value1 = '2025-03-30[u-ca=hebrew]'
+      const record0 = PlainYearMonthFns.fromString(value0, CalendarFns.getAny)
+      const record1 = PlainYearMonthFns.fromString(value1, CalendarFns.getAny)
+      const temporal0 = Temporal.PlainYearMonth.from(value0)
+      const temporal1 = Temporal.PlainYearMonth.from(value1)
+
+      expect(temporal0.monthCode).not.toBe(temporal1.monthCode)
+      expectDiffParity(
+        plainYearMonthDiffs[unit],
+        temporalDateDiffs[unit],
+        record0,
+        record1,
+        temporal0,
+        temporal1,
+        undefined,
+        unit === 'months' ? 1 : undefined,
       )
     },
   )
@@ -505,7 +567,7 @@ describe('PlainYearMonth diff parity', () => {
     )
   })
 
-  it('pre-rounds at month precision when only an increment is given', () => {
+  it('rounds at the requested unit when only an increment is given', () => {
     const record0 = PlainYearMonthFns.create(2024, 1)
     const record1 = PlainYearMonthFns.create(2024, 6)
     const temporal0 = Temporal.PlainYearMonth.from('2024-01')
@@ -582,7 +644,7 @@ describe('PlainTime diff parity', () => {
     )
   })
 
-  it('pre-rounds at nanosecond precision when only an increment is given', () => {
+  it('rounds at the requested unit when only an increment is given', () => {
     const temporal0 = Temporal.PlainTime.from('00:00')
     const temporal1 = Temporal.PlainTime.from('00:00:00.000000005')
     const options: RoundingMathOptions = { roundingIncrement: 2 }
@@ -619,7 +681,7 @@ describe('Instant diff parity', () => {
     },
   )
 
-  it('pre-rounds at nanosecond precision when only an increment is given', () => {
+  it('rounds at the requested unit when only an increment is given', () => {
     const epochNanoseconds0 = 0n
     const epochNanoseconds1 = 5n
     const temporal0 = new Temporal.Instant(epochNanoseconds0)

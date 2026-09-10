@@ -1,5 +1,12 @@
 import { compareBigInts, fabricateNearHalfFraction } from './utils'
 
+// Scalar relative-unit math
+// -----------------------------------------------------------------------------
+// The class API rounds and totals whole DurationFields. The func API only needs
+// ONE unit's value, so this leaf works on a scalar: a candidate unit value plus
+// a callback that moves the origin by it. Callers supply the type-specific
+// movement; this module owns the window and its fraction math.
+
 export type MoveRelativeUnitValue = (value: number) => bigint
 
 export interface RelativeUnitWindow {
@@ -7,53 +14,50 @@ export interface RelativeUnitWindow {
   endValue: number
   epochNano0: bigint
   epochNano1: bigint
-  shifted: boolean
 }
 
 /*
-Finds the adjacent relative-unit boundaries containing an endpoint. Callers
-supply the type-specific movement operation, while this leaf owns the scalar
-window and its one-step constraint correction.
+Finds the adjacent unit boundaries containing the endpoint.
+
+Calendar-unit windows are finite epoch-nanosecond intervals. Around dates that
+constrain, like Jan 31 -> Feb 29, the balanced duration can describe a point
+just beyond the first window, so the spec retries one window later.
 */
 export function clampRelativeUnitValue(
   startValue: number,
   valueDelta: number,
   moveValueToEpochNano: MoveRelativeUnitValue,
-  epochNanoProgress?: bigint,
+  epochNanoProgress: bigint,
 ): RelativeUnitWindow {
-  let shifted = false
-  let window = computeRelativeUnitWindow(
+  let unitWindow = computeRelativeUnitWindow(
     startValue,
     valueDelta,
     moveValueToEpochNano,
   )
 
   if (
-    epochNanoProgress &&
     !epochNanoIsWithinWindow(
       epochNanoProgress,
-      window.epochNano0,
-      window.epochNano1,
+      unitWindow.epochNano0,
+      unitWindow.epochNano1,
       Math.sign(valueDelta),
     )
   ) {
-    startValue += valueDelta
-    shifted = true
-    window = computeRelativeUnitWindow(
-      startValue,
+    unitWindow = computeRelativeUnitWindow(
+      startValue + valueDelta,
       valueDelta,
       moveValueToEpochNano,
     )
   }
 
-  return { ...window, shifted }
+  return unitWindow
 }
 
 function computeRelativeUnitWindow(
   startValue: number,
   valueDelta: number,
   moveValueToEpochNano: MoveRelativeUnitValue,
-): Omit<RelativeUnitWindow, 'shifted'> {
+): RelativeUnitWindow {
   const endValue = startValue + valueDelta
   return {
     startValue,
@@ -62,6 +66,12 @@ function computeRelativeUnitWindow(
     epochNano1: moveValueToEpochNano(endValue),
   }
 }
+
+// Epoch interval arithmetic
+// -----------------------------------------------------------------------------
+// Pure bigint math on a [epochNano0, epochNano1] window: membership tests and
+// the fractional progress used by rounding modes. Shared with the class API's
+// DurationFields-based rounding.
 
 export function epochNanoIsWithinWindow(
   epochNanoProgress: bigint,
@@ -106,23 +116,4 @@ export function computeEpochNanoFrac(
   }
 
   return Number(numeratorBig) / Number(denomBig)
-}
-
-/*
-Interpolates the scalar value represented by a relative window. Totals need
-the actual fraction, while rounding only needs a half-safe representative.
-*/
-export function interpolateRelativeUnitValue(
-  startValue: number,
-  endValue: number,
-  epochNanoProgress: bigint,
-  epochNano0: bigint,
-  epochNano1: bigint,
-  exactFraction: boolean,
-): number {
-  const fraction = exactFraction
-    ? Number(epochNanoProgress - epochNano0) / Number(epochNano1 - epochNano0)
-    : computeEpochNanoFrac(epochNanoProgress, epochNano0, epochNano1)
-
-  return startValue + fraction * (endValue - startValue)
 }

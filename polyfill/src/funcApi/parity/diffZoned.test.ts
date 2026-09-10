@@ -100,6 +100,43 @@ const diffParityCases: DiffParityCase[] = [
     }),
   ),
   {
+    name: 'backward hour across a repeated wall-clock time, floored to a year',
+    unit: 'years',
+    instant0: '2024-11-03T06:30:00Z',
+    instant1: '2024-11-03T05:30:00Z',
+    timeZone: 'America/New_York',
+    options: 'floor',
+  },
+  {
+    name: 'backward hour across a repeated wall-clock time, totaled in months',
+    unit: 'months',
+    instant0: '2024-11-03T06:30:00Z',
+    instant1: '2024-11-03T05:30:00Z',
+    timeZone: 'America/New_York',
+  },
+  // The origin is the later instance of a repeated wall-clock time, so the
+  // exact diff carries a 24-hour time part that re-adds past the endpoint
+  ...(['years', 'months', 'weeks', 'days'] as const).map((unit) => ({
+    name: `${unit} total from the later instance of a repeated hour`,
+    unit,
+    instant0: '2024-11-03T06:30:00Z',
+    instant1: '2024-11-04T05:30:00Z',
+    timeZone: 'America/New_York',
+  })),
+  {
+    name: 'zero total at the upper bound',
+    unit: 'years',
+    instant0: '+275760-09-13T00:00:00Z',
+    instant1: '+275760-09-13T00:00:00Z',
+  },
+  {
+    name: 'lower-bound day rounding with an increment',
+    unit: 'days',
+    instant0: '-271821-04-20T00:00:00.000000001Z',
+    instant1: '-271821-04-20T00:00:00Z',
+    options: { roundingIncrement: 2 },
+  },
+  {
     name: 'backward year with floor rounding near a transition',
     unit: 'years',
     instant0: '2024-03-10T00:00:00Z',

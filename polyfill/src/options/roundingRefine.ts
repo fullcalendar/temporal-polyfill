@@ -28,6 +28,7 @@ import type {
   DurationRoundingTuple,
   RoundingMathTuple,
   RoundingTuple,
+  UnitDiffRoundingTuple,
 } from './model'
 import { normalizeOptions, normalizeOptionsOrString } from './normalize'
 import {
@@ -202,30 +203,30 @@ function refineRoundingMathOptions(
 
 /*
 Refines temporal-utils' two diff paths without manufacturing Temporal options.
-An explicit rounding mode makes the requested unit both largest and smallest;
-otherwise until() uses the type's default precision before Duration::total.
+Any rounding option (a mode, or the presence of an increment) selects the
+rounded path, where the requested unit is both largest and smallest and
+the mode defaults to until()'s `trunc`. Otherwise the result is an exact
+total, represented by an undefined mode, and no options are read at all.
 */
 export function refineUnitDiffOptions(
   unit: Unit,
   options: RoundingMathOptions | RoundingMode | undefined,
-  defaultSmallestUnit: Unit,
-): [
-  smallestUnit: Unit,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-  shouldTotal: boolean,
-] {
-  const shouldTotal =
-    typeof options !== 'string' && !(options && options.roundingMode)
-  const smallestUnit = shouldTotal ? defaultSmallestUnit : unit
-  const [roundingInc, roundingMode] = refineRoundingMathOptions(
-    smallestUnit,
-    options || {},
-    true,
-    shouldTotal ? RoundingModeEnum.Trunc : RoundingModeEnum.HalfExpand,
-  )
+): UnitDiffRoundingTuple {
+  const isRounded =
+    typeof options === 'string' ||
+    Boolean(
+      options &&
+        (options.roundingMode || options.roundingIncrement !== undefined),
+    )
 
-  return [smallestUnit, roundingInc, roundingMode, shouldTotal]
+  return isRounded
+    ? refineRoundingMathOptions(
+        unit,
+        options as RoundingMathOptions | RoundingMode,
+        true,
+        RoundingModeEnum.Trunc,
+      )
+    : [1, undefined]
 }
 
 /*

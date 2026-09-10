@@ -31,7 +31,14 @@ function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
     // TODO: throw error if unit impossible for input-types?
     // like diffing years for PlainTime?
 
-    if (normOptions.roundingMode) {
+    // Any rounding option selects the rounded path, where the requested unit
+    // is both largest and smallest. An increment alone then rounds at that
+    // unit with until()'s default `trunc` mode, matching native defaults.
+    // Otherwise the result is an exact fractional total.
+    if (
+      normOptions.roundingMode ||
+      normOptions.roundingIncrement !== undefined
+    ) {
       return date0.until(date1, {
         ...normOptions,
         largestUnit: unit,
@@ -39,10 +46,13 @@ function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
       })[unit]
     }
 
-    const duration = date0.until(date1, {
-      ...normOptions,
-      largestUnit: unit,
-    })
+    const duration = date0.until(date1, { largestUnit: unit })
+
+    // Equal inputs total to zero. Short-circuit before involving relativeTo,
+    // whose validation and unit-window probing can throw at the boundaries.
+    if (duration.blank) {
+      return 0
+    }
 
     // Time-unit helpers produce pure elapsed-time totals. This keeps Instant
     // and PlainTime valid because neither can be used as a `relativeTo` value.
@@ -58,6 +68,7 @@ function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {
         ? date0.toPlainDate({ day: 1 })
         : date0
     ) as Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime
+
     return duration.total({ unit, relativeTo })
   }
 }

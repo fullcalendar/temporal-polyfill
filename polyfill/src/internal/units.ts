@@ -27,6 +27,9 @@ export type DayTimeUnit = Unit.Day | TimeUnit
 // never through the calendar implementation. Zoned days still vary in length.
 export type DayWeekUnit = Unit.Day | Unit.Week
 
+// The calendar class: moved through the calendar implementation
+export type YearMonthUnit = Unit.Year | Unit.Month
+
 export const unitNameMap = {
   nanosecond: Unit.Nanosecond,
   microsecond: Unit.Microsecond,

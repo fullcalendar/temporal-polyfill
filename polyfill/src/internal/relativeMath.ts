@@ -1,18 +1,11 @@
-import { bigNanoInUtcDay } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
-import {
-  diffDateTimesExact,
-  diffDatesByDayWeekUnit,
-  diffEpochNanosByDayWeekUnit,
-  diffZonedDateParts,
-  diffZonedEpochsExact,
-} from './diff'
+import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import {
   DurationFieldName,
   DurationFields,
   durationFieldNamesAsc,
 } from './durationFields'
-import { durationHasDateParts, durationTimeToBigNano } from './durationMath'
+import { durationHasDateParts } from './durationMath'
 import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
@@ -21,8 +14,6 @@ import {
   moveDate,
   moveDateByDayWeekUnits,
   moveDateTime,
-  moveDateTimeByNano,
-  moveEpochNanoByNano,
   moveZonedEpochSlots,
 } from './move'
 import { epochNanoIsWithinWindow } from './relativeUnit'
@@ -30,7 +21,7 @@ import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
-import { DayWeekUnit, Unit } from './units'
+import { Unit } from './units'
 
 // Relative contracts
 // -----------------------------------------------------------------------------
@@ -123,8 +114,8 @@ export function moveRelativeEndpointToEpochNano(
 // Flavor-specific duration spans
 // -----------------------------------------------------------------------------
 // Build the endpoint of `relativeTo + duration`, diff it back to a balanced
-// duration, and return matching RelativeOps. Separate zoned/plain and
-// calendar/ISO variants let each caller tree-shake the flavors it never uses.
+// duration, and return matching RelativeOps. Separate zoned/plain variants let
+// each caller tree-shake the flavor it never uses.
 
 // Zoned callers that already know their relativeTo flavor can use this branch
 // directly, allowing the plain branch to tree-shake out.
@@ -176,76 +167,6 @@ export function spanPlainRelativeDuration(
     // The origin's time is midnight, so the rounding core can stay on the
     // cheaper date-only ops
     createDateRelativeOps(calendar, relativeToSlots),
-  ]
-}
-
-// Day/week spans reconstruct the endpoint without retaining general
-// calendar movement, while preserving zoned ambiguity and bounds behavior.
-export function spanZonedDayWeekRelativeDuration(
-  relativeToSlots: ZonedEpochMarker,
-  durationFields: DurationFields,
-  largestUnit: DayWeekUnit,
-): [DurationFields, bigint, RelativeOps] {
-  const { timeZone } = relativeToSlots
-  const diffDate = (start: CalendarDateFields, end: CalendarDateFields) =>
-    diffDatesByDayWeekUnit(largestUnit === Unit.Week, start, end)
-  let epochNanoseconds = relativeToSlots.epochNanoseconds
-
-  if (durationFields.weeks || durationFields.days) {
-    const origin = zonedEpochSlotsToIso(relativeToSlots)
-    epochNanoseconds = getSingleInstantFor(
-      timeZone,
-      combineDateAndTime(
-        moveDateByDayWeekUnits(
-          origin,
-          durationFields.weeks,
-          durationFields.days,
-        ),
-        origin,
-      ),
-    )
-  }
-
-  const endSlots = {
-    ...relativeToSlots,
-    epochNanoseconds: moveEpochNanoByNano(
-      epochNanoseconds,
-      durationTimeToBigNano(durationFields),
-    ),
-  }
-
-  return [
-    diffZonedDateParts(timeZone, relativeToSlots, endSlots, diffDate),
-    endSlots.epochNanoseconds,
-    createZonedDayWeekOps(relativeToSlots),
-  ]
-}
-
-// Day/week spans avoid retaining calendar month/year movement while
-// preserving the same midnight anchor and endpoint range checks.
-export function spanPlainDayWeekRelativeDuration(
-  relativeToFields: CalendarDateFields,
-  durationFields: DurationFields,
-  largestUnit: DayWeekUnit,
-): [DurationFields, bigint, RelativeOps] {
-  const origin = checkIsoDateTimeInBounds(
-    combineDateAndTime(relativeToFields, timeFieldDefaults),
-  )
-  const end = moveDateTimeByNano(
-    origin,
-    BigInt(durationFields.weeks * 7 + durationFields.days) * bigNanoInUtcDay +
-      durationTimeToBigNano(durationFields),
-  )
-  const endEpochNano = isoDateTimeToEpochNano(end)
-
-  return [
-    diffEpochNanosByDayWeekUnit(
-      largestUnit,
-      isoDateTimeToEpochNano(origin),
-      endEpochNano,
-    ),
-    endEpochNano,
-    createPlainDayWeekOps(origin),
   ]
 }
 
@@ -359,11 +280,11 @@ export function moveRelativeMarkerToEpochNano(
 // Movement and epoch adapters
 // -----------------------------------------------------------------------------
 // Factories for RelativeOps. Each chooses calendar arithmetic for year/month
-// operations or ISO day arithmetic for day/week helpers, retaining the
-// intermediate date bounds check, then reattaches the origin's time and resolves
-// its time zone when needed; plain-date operations use a direct ISO conversion.
-// Each factory closes over only the mechanics it needs, keeping unrelated
-// dependencies out of fixed helpers.
+// operations or ISO day arithmetic for the func API's day/week helpers,
+// retaining the intermediate date bounds check, then reattaches the origin's
+// time and resolves its time zone when needed; plain-date operations use a
+// direct ISO conversion. Each factory closes over only the mechanics it needs,
+// keeping unrelated dependencies out of unit-specific helpers.
 
 export function createZonedRelativeOps(
   calendar: CalendarImpl,
@@ -415,34 +336,15 @@ export function createDateRelativeOps(
   }
 }
 
-export function createZonedDayWeekOps(
-  slots: ZonedEpochNanoFields,
-): RelativeOps {
-  const origin = zonedEpochSlotsToIso(slots)
+// For a PlainDate or PlainDateTime origin, probing from the origin's midnight.
+// Plain days are uniform, so the time of day never affects a window and the
+// func API expresses its endpoints relative to midnight instead.
+export function createDateDayWeekOps(origin: CalendarDateFields): RelativeOps {
   return {
-    originEpochNano: slots.epochNanoseconds,
+    originEpochNano: isoDateToEpochNano(origin),
     moveToEpochNano: (duration) =>
-      getSingleInstantFor(
-        slots.timeZone,
-        combineDateAndTime(
-          moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
-          origin,
-        ),
-      ),
-  }
-}
-
-export function createPlainDayWeekOps(
-  origin: CalendarDateTimeFields,
-): RelativeOps {
-  return {
-    originEpochNano: isoDateTimeToEpochNano(origin),
-    moveToEpochNano: (duration) =>
-      isoDateTimeToEpochNano(
-        combineDateAndTime(
-          moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
-          origin,
-        ),
+      isoDateToEpochNano(
+        moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
       ),
   }
 }

@@ -1,5 +1,5 @@
 import { bigNanoInUtcDay } from './bigNano'
-import { isoDateToEpochNano } from './epochMath'
+import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { epochNanoDayMax, isoYearMax, isoYearMin } from './temporalConstants'
@@ -38,38 +38,35 @@ export function checkIsoDateInBounds(
   // PlainDate bounds are date-level bounds, not midnight-instant bounds.
   // They include the lower extra ISO day that PlainDateTime only allows after
   // midnight. Zoned operations pass false for strict CheckISODaysRange.
-  checkIsoDateEpochNanoInBounds(
-    isoDateToEpochNano(isoDate),
-    allowPlainDateLowerEdge,
-  )
+  const epochNano = isoDateToEpochNano(isoDate)
+  const min = allowPlainDateLowerEdge ? plainDateEpochNanoMin : epochNanoMin
+  if (epochNano < min || epochNano > epochNanoMax) {
+    throwRangeError(errorMessages.outOfBoundsDate)
+  }
   return isoDate
 }
 
 export function checkIsoDateTimeInBounds(
   isoDateTime: CalendarDateTimeFields,
 ): CalendarDateTimeFields {
-  const epochNano = isoDateToEpochNano(isoDateTime)
-
-  // PlainDateTime's lower edge permits one extra ISO day, but not midnight of
-  // that day. The upper edge ends on epoch day +100000000 at 23:59:59.999999999.
-  checkIsoDateEpochNanoInBounds(epochNano)
-
-  // Reject exact lower-edge midnight; PlainDateTime starts one nanosecond later.
-  if (epochNano === plainDateEpochNanoMin && !timeFieldsToNano(isoDateTime)) {
-    throwRangeError(errorMessages.outOfBoundsDate)
-  }
-
+  checkIsoDateTimeEpochNanoInBounds(isoDateTimeToEpochNano(isoDateTime))
   return isoDateTime
 }
 
-function checkIsoDateEpochNanoInBounds(
-  epochNano: bigint,
-  allowPlainDateLowerEdge = true,
-): void {
-  const min = allowPlainDateLowerEdge ? plainDateEpochNanoMin : epochNanoMin
-  if (epochNano < min || epochNano > epochNanoMax) {
+/*
+PlainDateTime limits on an epoch that includes the time of day. The lower
+edge permits one extra ISO day, but not midnight of that day, so the epoch
+must be later than that midnight. The upper edge ends on epoch day +100000000
+at 23:59:59.999999999, so the epoch must be before the following midnight.
+*/
+export function checkIsoDateTimeEpochNanoInBounds(epochNano: bigint): bigint {
+  if (
+    epochNano <= plainDateEpochNanoMin ||
+    epochNano >= epochNanoMax + bigNanoInUtcDay
+  ) {
     throwRangeError(errorMessages.outOfBoundsDate)
   }
+  return epochNano
 }
 
 export function checkEpochNanoInBounds(epochNano: bigint): bigint {
