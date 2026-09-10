@@ -33,7 +33,7 @@ import {
 import {
   clampRelativeUnitValue,
   computeEpochNanoFrac,
-  roundRelativeUnit,
+  roundRelativeUnitWindow,
 } from './relativeUnit'
 import { roundNumberToInc, roundWithMode } from './roundNumber'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
@@ -380,15 +380,19 @@ function nudgeRelativeDuration(
   const truncedVal =
     divTrunc(durationFields[smallestUnitFieldName], roundingInc) * roundingInc
 
-  const [roundedVal, nudgeWindow] = roundRelativeUnit(
-    durationFields[smallestUnitFieldName],
-    sign,
-    endEpochNano,
+  const nudgeWindow = clampRelativeUnitValue(
+    truncedVal,
+    roundingInc * sign,
     (value) => {
       // baseDurationFields is scratch here; the field is rewritten below
       baseDurationFields[smallestUnitFieldName] = value
       return moveRelativeMarkerToEpochNano(relativeOps, baseDurationFields)
     },
+    endEpochNano,
+  )
+  const roundedVal = roundRelativeUnitWindow(
+    nudgeWindow,
+    endEpochNano,
     roundingInc,
     roundingMode,
   )

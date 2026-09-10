@@ -1,11 +1,9 @@
 import type { DurationFields } from '../internal/durationFields'
 import type {
   DateFields,
-  DateStats,
   MonthDayFields,
   TimeFields,
   YearMonthFields,
-  YearMonthStats,
 } from '../internal/fieldTypes'
 import { createPropGetters } from '../internal/utils'
 import * as SlotGetters from './gettersForSlots'
@@ -40,11 +38,3 @@ export const dateFieldGetters = createNativeGetters<DateFields>(
 export const monthDayFieldGetters = createNativeGetters<
   Pick<MonthDayFields, 'monthCode' | 'day'>
 >(SlotGetters.monthDayFieldGetters)
-
-export const yearMonthDerivedGetters = createNativeGetters<YearMonthStats>(
-  SlotGetters.yearMonthDerivedGetters,
-)
-
-export const dateDerivedGetters = createNativeGetters<DateStats>(
-  SlotGetters.dateDerivedGetters,
-)

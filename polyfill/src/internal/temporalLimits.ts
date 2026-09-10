@@ -46,6 +46,15 @@ export function checkIsoDateInBounds(
   return isoDate
 }
 
+// Plain-week probes already have a midnight epoch. Keep this scalar range
+// check independent of field conversion and the zoned lower-bound switch.
+export function checkIsoDateEpochNanoInBounds(epochNano: bigint): bigint {
+  if (epochNano < plainDateEpochNanoMin || epochNano > epochNanoMax) {
+    throwRangeError(errorMessages.outOfBoundsDate)
+  }
+  return epochNano
+}
+
 export function checkIsoDateTimeInBounds(
   isoDateTime: CalendarDateTimeFields,
 ): CalendarDateTimeFields {

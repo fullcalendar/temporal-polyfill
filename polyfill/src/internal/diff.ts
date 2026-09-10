@@ -48,7 +48,7 @@ import { checkIsoDateInBounds } from './temporalLimits'
 import { timeFieldsToNano } from './timeFieldMath'
 import { TimeZone } from './timeZone'
 import { getSingleInstantFor, zonedEpochSlotsToIso } from './timeZoneMath'
-import { DayTimeUnit, DayWeekUnit, TimeUnit, Unit, nanoInUtcDay } from './units'
+import { DayTimeUnit, TimeUnit, Unit, nanoInUtcDay } from './units'
 import {
   NumberSign,
   compareBigInts,
@@ -452,44 +452,6 @@ export function diffZonedDateParts(
   return { ...dateDiff, ...nanoToDurationTimeFields(remainderNano) }
 }
 
-/*
-Scalar form of diffZonedDateParts for the func API's zoned day/week helpers:
-the signed count of ISO days between the wall-clock dates, plus the
-nanoseconds remaining past the moved marker. Keeps the same same-date
-shortcut, so an ambiguous repeated wall-clock time is never re-resolved.
-*/
-export function diffZonedEpochsByDays(
-  timeZone: TimeZone,
-  startZoned: ZonedEpochNanoFields,
-  endZoned: ZonedEpochNanoFields,
-): [days: number, remainderNano: number] {
-  const sign = compareBigInts(
-    endZoned.epochNanoseconds,
-    startZoned.epochNanoseconds,
-  )
-  if (!sign) {
-    return [0, 0]
-  }
-
-  // Same local date: at most a day-and-change, so a Number is safe
-  const isoDateTime0 = zonedEpochSlotsToIso(startZoned)
-  const isoDateTime1 = zonedEpochSlotsToIso(endZoned)
-  if (!compareIsoDates(isoDateTime0, isoDateTime1)) {
-    return [0, Number(endZoned.epochNanoseconds - startZoned.epochNanoseconds)]
-  }
-
-  const [startIsoDateTime, endIsoDate, remainderNano] = prepareZonedEpochDiff(
-    timeZone,
-    startZoned,
-    endZoned,
-    sign,
-  )
-  return [
-    isoDateToEpochDays(endIsoDate) - isoDateToEpochDays(startIsoDateTime),
-    remainderNano,
-  ]
-}
-
 function diffDateTimesBig(
   calendar: CalendarImpl,
   startIsoDateTime: CalendarDateTimeFields,
@@ -516,7 +478,7 @@ function diffDateTimesBig(
   return { ...dateDiff, ...nanoToDurationTimeFields(timeNano) }
 }
 
-function prepareZonedEpochDiff(
+export function prepareZonedEpochDiff(
   timeZone: TimeZone,
   startZoned: ZonedEpochNanoFields,
   endZoned: ZonedEpochNanoFields,
@@ -741,25 +703,6 @@ export function diffCalendarDates(
     months: monthDiff,
     days: dayDiff,
   }
-}
-
-// Balance a uniform elapsed interval without calendar arithmetic.
-export function diffEpochNanosByDayWeekUnit(
-  unit: DayWeekUnit,
-  startEpochNano: bigint,
-  endEpochNano: bigint,
-): DurationFields {
-  const durationFields = {
-    ...durationFieldDefaults,
-    ...nanoToDurationDayTimeFields(endEpochNano - startEpochNano, Unit.Day),
-  }
-  return unit === Unit.Week
-    ? {
-        ...durationFields,
-        weeks: divTrunc(durationFields.days, 7),
-        days: modTrunc(durationFields.days, 7),
-      }
-    : durationFields
 }
 
 // Diff in day/week units. Weeks are seven days, independently of the

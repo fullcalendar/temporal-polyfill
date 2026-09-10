@@ -3,12 +3,11 @@ import { type CalendarImpl } from '../internal/calendarImpl'
 import {
   diffCalendarDates,
   diffDateTimesExact,
-  diffDatesByDayWeekUnit,
-  diffEpochNanosByDayWeekUnit,
   diffZonedEpochsExact,
 } from '../internal/diff'
 import {
   countDateTimeUnit,
+  countDateWeeks,
   countEpochNanoDays,
   countEpochNanoUnit,
   countRelativeUnit,
@@ -28,17 +27,14 @@ import {
 } from '../internal/fieldTypes'
 import {
   RelativeOps,
-  createDateDayWeekOps,
   createDateRelativeOps,
   createZonedRelativeOps,
 } from '../internal/relativeMath'
 import { getCommonCalendar, getCommonTimeZone } from '../internal/slotUtils'
 import { EpochNanoFields, ZonedEpochNanoFields } from '../internal/slots'
 import { timeFieldsToNano } from '../internal/timeFieldMath'
-import { TimeZone } from '../internal/timeZone'
 import { DayWeekUnit, TimeUnit, Unit, YearMonthUnit } from '../internal/units'
 import { bindArgs } from '../internal/utils'
-import { UnitDiffRoundingTuple } from '../options/model'
 import { refineUnitDiffOptions } from '../options/roundingRefine'
 
 // Unit-specific diffing for the func API (diffYears, diffHours, etc). Each
@@ -153,23 +149,28 @@ function diffZonedCalendarUnit(
   options?: UnitDiffOptions,
 ): number {
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffZonedUnit(unit, slots0, slots1, options, (timeZone, rounding) =>
-    countRelativeUnit(
-      unit,
-      {
-        diffExact: () =>
-          diffZonedEpochsExact(timeZone, calendar, slots0, slots1, unit),
-        relativeOps: createZonedRelativeOps(calendar, timeZone, slots0),
-        endEpochNano: slots1.epochNanoseconds,
-      },
-      rounding,
-      true,
-    ),
+  const rounding = refineUnitDiffOptions(unit, options)
+  if (slots0.epochNanoseconds === slots1.epochNanoseconds) {
+    return 0
+  }
+  const timeZone = getCommonTimeZone(slots0.timeZone, slots1.timeZone)
+  return countRelativeUnit(
+    unit,
+    {
+      diffExact: () =>
+        diffZonedEpochsExact(timeZone, calendar, slots0, slots1, unit),
+      relativeOps: createZonedRelativeOps(calendar, timeZone, slots0),
+      endEpochNano: slots1.epochNanoseconds,
+    },
+    rounding,
+    true,
   )
 }
 
 // A scalar path: keeps calendar-month movement and DurationFields out of
-// these builds.
+// these builds. Compose directly instead of allocating a callback around the
+// entire calculation: the calendar and day/week consumers retain only their
+// own core, with options read before zero and time-zone validation.
 function diffZonedDayWeekUnit(
   unit: DayWeekUnit,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
@@ -177,26 +178,20 @@ function diffZonedDayWeekUnit(
   options?: UnitDiffOptions,
 ): number {
   getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffZonedUnit(unit, slots0, slots1, options, (timeZone, rounding) =>
-    countZonedDayWeekUnit(unit, timeZone, slots0, slots1, rounding),
-  )
-}
-
-function diffZonedUnit(
-  unit: Unit,
-  slots0: ZonedEpochNanoFields,
-  slots1: ZonedEpochNanoFields,
-  options: UnitDiffOptions,
-  compute: (timeZone: TimeZone, rounding: UnitDiffRoundingTuple) => number,
-): number {
   const rounding = refineUnitDiffOptions(unit, options)
 
-  // Equal instants are zero before the time zones are compared
+  // Equal instants are zero before the time zones are compared.
   if (slots0.epochNanoseconds === slots1.epochNanoseconds) {
     return 0
   }
 
-  return compute(getCommonTimeZone(slots0.timeZone, slots1.timeZone), rounding)
+  return countZonedDayWeekUnit(
+    unit,
+    getCommonTimeZone(slots0.timeZone, slots1.timeZone),
+    slots0,
+    slots1,
+    rounding,
+  )
 }
 
 // PlainDateTime
@@ -226,18 +221,10 @@ export function diffDateTimeWeeks(
   options?: UnitDiffOptions,
 ): number {
   getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffPlainRelativeUnit(
-    Unit.Week,
-    options,
-    // plain days are uniform, so the exact diff is nanosecond arithmetic
-    () =>
-      diffEpochNanosByDayWeekUnit(
-        Unit.Week,
-        isoDateTimeToEpochNano(slots0),
-        isoDateTimeToEpochNano(slots1),
-      ),
-    createDateDayWeekOps(slots0),
+  return countDateWeeks(
+    slots0,
     computeEndEpochNanoFromMidnight(slots0, slots1),
+    refineUnitDiffOptions(Unit.Week, options),
   )
 }
 
@@ -291,12 +278,10 @@ export function diffDateWeeks(
   options?: UnitDiffOptions,
 ): number {
   getCommonCalendar(slots0.calendar, slots1.calendar)
-  return diffPlainRelativeUnit(
-    Unit.Week,
-    options,
-    () => diffDatesByDayWeekUnit(true, slots0, slots1),
-    createDateDayWeekOps(slots0),
+  return countDateWeeks(
+    slots0,
     isoDateToEpochNano(slots1),
+    refineUnitDiffOptions(Unit.Week, options),
   )
 }
 
@@ -337,7 +322,7 @@ function diffYearMonthUnit(
 // -----------------------------------------------------------------------------
 
 function diffPlainRelativeUnit(
-  unit: Unit,
+  unit: YearMonthUnit,
   options: UnitDiffOptions,
   diffExact: () => DurationFields,
   relativeOps: RelativeOps,

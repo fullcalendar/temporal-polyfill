@@ -1,19 +1,23 @@
 import { RoundingModeEnum, UnitDiffRoundingTuple } from '../options/model'
-import { divideBigNanoToExactNumber } from './bigNano'
+import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import {
   compareIsoDates,
   diffCalendarDates,
-  diffZonedEpochsByDays,
+  prepareZonedEpochDiff,
 } from './diff'
 import {
   DurationFields,
-  clearDurationFields,
+  durationFieldDefaults,
   durationFieldNamesAsc,
   durationTimeFieldDefaults,
 } from './durationFields'
 import { computeDurationSign, durationTimeToBigNano } from './durationMath'
-import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
+import {
+  isoDateTimeToEpochNano,
+  isoDateToEpochDays,
+  isoDateToEpochNano,
+} from './epochMath'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
@@ -32,6 +36,7 @@ import { roundNumberToInc } from './roundNumber'
 import { ZonedEpochNanoFields } from './slots'
 import {
   checkEpochNanoInBounds,
+  checkIsoDateEpochNanoInBounds,
   checkIsoDateInBounds,
   checkIsoDateTimeEpochNanoInBounds,
 } from './temporalLimits'
@@ -156,9 +161,10 @@ export function countEpochNanoDays(
 
 // Relative-unit differences
 // -----------------------------------------------------------------------------
-// Calendar units, weeks, and zoned days are non-uniform. Their value comes from
-// probing the unit window around the endpoint through RelativeOps, exactly as
-// the class API does, but reduced to the one unit being asked for.
+// Calendar units, plain weeks, and zoned days/weeks resolve by probing the unit
+// window around the endpoint, exactly as the class API does, but reduced to the
+// one unit being asked for. Calendar units probe through RelativeOps; the
+// day/week cores probe through a direct move callback.
 
 /*
 The type-specific pieces of a relative unit diff. Each func-API type builds
@@ -217,7 +223,7 @@ rounding, and spanRelativeDuration then totalRelativeDuration when totaling.
 Both paths now finish in relativeUnit.ts's shared scalar resolver.
 */
 export function countRelativeUnit(
-  unit: Unit,
+  unit: YearMonthUnit,
   relativeUnitDiff: RelativeUnitDiff,
   [roundingInc, roundingMode]: UnitDiffRoundingTuple,
   isZoned?: boolean, // zoned durations are validated and rebuilt as Instants
@@ -283,6 +289,57 @@ export function countRelativeUnit(
 }
 
 /*
+Mirrors diffDatesRounded's and diffDateTimesRounded's week branch, then
+spanPlainRelativeDuration and totalRelativeDuration when totaling.
+
+Plain weeks are uniform seven-day windows, so no RelativeOps are needed: the
+probe is plain bigint arithmetic from the origin's midnight. It still resolves
+through the shared window leaf rather than dividing the whole interval at
+once, because that can produce a different float64 result and would skip the
+date-bounds probing the class API performs. `endEpochNano` is expressed
+relative to the origin's midnight, even when the public inputs are
+PlainDateTimes.
+*/
+export function countDateWeeks(
+  originIsoDate: CalendarDateFields,
+  endEpochNano: bigint,
+  [roundingInc, roundingMode]: UnitDiffRoundingTuple,
+): number {
+  const originEpochNano = isoDateToEpochNano(originIsoDate)
+  const diffNano = endEpochNano - originEpochNano
+  if (!diffNano) {
+    return 0
+  }
+
+  if (roundingMode === undefined) {
+    // Totals validate the plain relativeTo frame before probing. Rounded
+    // differences may use the extra lower ISO day, including its midnight.
+    checkIsoDateTimeEpochNanoInBounds(originEpochNano)
+    checkIsoDateTimeEpochNanoInBounds(endEpochNano)
+  }
+
+  const wholeWeeks = Number(diffNano / (bigNanoInUtcDay * 7n))
+  const sign = diffNano < 0n ? -1 : 1
+  const moveWeeksToEpochNano = (weeks: number): bigint =>
+    weeks
+      ? checkIsoDateEpochNanoInBounds(
+          originEpochNano + BigInt(weeks) * bigNanoInUtcDay * 7n,
+        )
+      : originEpochNano
+
+  return roundingMode === undefined
+    ? totalRelativeUnit(wholeWeeks, sign, endEpochNano, moveWeeksToEpochNano)
+    : roundRelativeUnit(
+        wholeWeeks,
+        sign,
+        endEpochNano,
+        moveWeeksToEpochNano,
+        roundingInc,
+        roundingMode,
+      )
+}
+
+/*
 Mirrors diffZonedCalendarUnitsRounded with a day or week smallestUnit, and
 spanZonedRelativeDuration then totalRelativeDuration when totaling, without
 DurationFields. The scalar counterpart of countRelativeUnit, kept separate so
@@ -299,12 +356,26 @@ export function countZonedDayWeekUnit(
 ): number {
   const daysInUnit = unit === Unit.Week ? 7 : 1
   const startEpochNano = startZoned.epochNanoseconds
+  const sign = endZoned.epochNanoseconds > startEpochNano ? 1 : -1
   const originIsoDateTime = zonedEpochSlotsToIso(startZoned) // memoized
-  const [deltaDays, remainderNano] = diffZonedEpochsByDays(
-    timeZone,
-    startZoned,
-    endZoned,
-  )
+  let deltaDays = 0
+  let remainderNano: number
+
+  // Same local date: keep the exact instant difference, including repeated
+  // wall-clock times. Otherwise share the class diff's DST-corrected marker.
+  if (!compareIsoDates(originIsoDateTime, zonedEpochSlotsToIso(endZoned))) {
+    remainderNano = Number(endZoned.epochNanoseconds - startEpochNano)
+  } else {
+    const [startIsoDateTime, endIsoDate, timeNano] = prepareZonedEpochDiff(
+      timeZone,
+      startZoned,
+      endZoned,
+      sign,
+    )
+    deltaDays =
+      isoDateToEpochDays(endIsoDate) - isoDateToEpochDays(startIsoDateTime)
+    remainderNano = timeNano
+  }
 
   // A probe marker: the origin moved by ISO days, keeping its wall-clock
   // time. A zero move reuses the origin's own instant rather than
@@ -329,7 +400,6 @@ export function countZonedDayWeekUnit(
 
   // Weeks fold whole seven-day groups; leftover days reappear as the window
   // fraction. The instants differ, so one of these is nonzero.
-  const sign = Math.sign(deltaDays) || Math.sign(remainderNano)
   const wholeValue = Math.trunc(deltaDays / daysInUnit)
 
   const moveValueToEpochNano = (value: number): bigint =>
@@ -344,7 +414,7 @@ export function countZonedDayWeekUnit(
         moveValueToEpochNano,
         roundingInc,
         roundingMode,
-      )[0]
+      )
 }
 
 // Relative-unit cores
@@ -357,7 +427,7 @@ Bridges a balanced DurationFields value into relativeUnit.ts's scalar resolver,
 which is also the leaf used by nudgeRelativeDuration and totalRelativeDuration.
 */
 function resolveDurationUnit(
-  unit: Unit,
+  unit: YearMonthUnit,
   durationFields: DurationFields,
   endEpochNano: bigint,
   relativeOps: RelativeOps,
@@ -367,21 +437,12 @@ function resolveDurationUnit(
   const sign = computeDurationSign(durationFields) // nonzero
   const fieldName = durationFieldNamesAsc[unit]
 
-  // Weeks are seven-day groups. Fold whole groups into the unit value; the
-  // leftover days reappear as the window fraction.
-  if (unit === Unit.Week) {
-    durationFields = {
-      ...durationFields,
-      weeks: durationFields.weeks + Math.trunc(durationFields.days / 7),
-    }
-  }
-
-  // Larger units stay fixed while the probed unit varies
-  const baseDurationFields = clearDurationFields(unit, durationFields)
-
+  // Exact year/month diffs have no fields larger than their largest unit.
+  // A probe therefore only needs the one scalar field, never a cleared copy
+  // of the original duration or a week/day balancing step.
   const moveValueToEpochNano = (value: number): bigint =>
     moveRelativeMarkerToEpochNano(relativeOps, {
-      ...baseDurationFields,
+      ...durationFieldDefaults,
       [fieldName]: value,
     })
 
@@ -399,5 +460,5 @@ function resolveDurationUnit(
         moveValueToEpochNano,
         unitWindowInc,
         roundingMode,
-      )[0]
+      )
 }

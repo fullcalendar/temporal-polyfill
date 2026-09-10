@@ -159,6 +159,24 @@ In this example, record `20443, Full: 24247`. Ignore the later `export
 min+gzip` table for size-audit entries.
 
 
+## Function Groups and Ordering
+
+Source files in `polyfill/src` are divided into groups by a title-plus-dashed-rule
+block comment:
+
+```
+// Group title
+// -----------------------------------------------------------------------------
+// One or two lines on what the group contains.
+```
+
+Each group is a layer. Order groups, and the functions within a group, from top
+to bottom by highest-level abstraction to lowest-level utility, so callers sit
+above their callees. When adding a function, put it in the group whose header
+describes it, next to its closest sibling, and update the header if the group's
+description no longer fits.
+
+
 ## Naming Conventions
 
 Internal identifier naming rules (shape prefixes like `iso`/`plain`/`zoned`,

@@ -19,6 +19,79 @@ export interface RelativeUnitWindow {
 }
 
 /*
+Totals a unit from the endpoint's exact position within its surrounding
+one-unit window. `wholeValue` is the sign-carrying count of whole units from
+the exact diff.
+*/
+export function totalRelativeUnit(
+  wholeValue: number,
+  sign: number,
+  endEpochNano: bigint,
+  moveValueToEpochNano: MoveRelativeUnitValue,
+): number {
+  const unitWindow = clampRelativeUnitValue(
+    wholeValue,
+    sign,
+    moveValueToEpochNano,
+    endEpochNano,
+  )
+  const fraction =
+    Number(endEpochNano - unitWindow.epochNano0) /
+    Number(unitWindow.epochNano1 - unitWindow.epochNano0)
+
+  return interpolateRelativeUnitWindow(unitWindow, fraction)
+}
+
+/*
+Rounds a unit from the endpoint's position within an increment-sized window.
+Returns only the scalar. Callers needing the selected epoch build their own
+window and pass it to roundRelativeUnitWindow, without a result tuple.
+*/
+export function roundRelativeUnit(
+  wholeValue: number,
+  sign: number,
+  endEpochNano: bigint,
+  moveValueToEpochNano: MoveRelativeUnitValue,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): number {
+  const unitWindow = clampRelativeUnitValue(
+    divTrunc(wholeValue, roundingInc) * roundingInc,
+    roundingInc * sign,
+    moveValueToEpochNano,
+    endEpochNano,
+  )
+
+  return roundRelativeUnitWindow(
+    unitWindow,
+    endEpochNano,
+    roundingInc,
+    roundingMode,
+  )
+}
+
+// Round an existing window so Duration rounding can also reuse its two epochs.
+export function roundRelativeUnitWindow(
+  unitWindow: RelativeUnitWindow,
+  endEpochNano: bigint,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): number {
+  // Unlike totalRelativeUnit, which needs the real fraction, rounding only
+  // needs to know which side of a half the endpoint falls on. computeEpochNanoFrac
+  // fabricates a stand-in near 0.5 to keep that comparison exact, so it would
+  // be wrong as a total.
+  const fraction = computeEpochNanoFrac(
+    endEpochNano,
+    unitWindow.epochNano0,
+    unitWindow.epochNano1,
+  )
+  const value = interpolateRelativeUnitWindow(unitWindow, fraction)
+
+  return roundNumberToInc(value, roundingInc, roundingMode)
+}
+
+/*
 Finds the adjacent unit boundaries containing the endpoint.
 
 Calendar-unit windows are finite epoch-nanosecond intervals. Around dates that
@@ -67,64 +140,6 @@ function computeRelativeUnitWindow(
     epochNano0: moveValueToEpochNano(startValue),
     epochNano1: moveValueToEpochNano(endValue),
   }
-}
-
-/*
-Totals a unit from the endpoint's exact position within its surrounding
-one-unit window. `wholeValue` is the sign-carrying count of whole units from
-the exact diff.
-*/
-export function totalRelativeUnit(
-  wholeValue: number,
-  sign: number,
-  endEpochNano: bigint,
-  moveValueToEpochNano: MoveRelativeUnitValue,
-): number {
-  const unitWindow = clampRelativeUnitValue(
-    wholeValue,
-    sign,
-    moveValueToEpochNano,
-    endEpochNano,
-  )
-  const fraction =
-    Number(endEpochNano - unitWindow.epochNano0) /
-    Number(unitWindow.epochNano1 - unitWindow.epochNano0)
-
-  return interpolateRelativeUnitWindow(unitWindow, fraction)
-}
-
-/*
-Rounds a unit from the endpoint's position within an increment-sized window.
-Also returns that window: the rounded value is always one of its edges, so
-callers that need the resulting epoch can reuse the matching boundary.
-*/
-export function roundRelativeUnit(
-  wholeValue: number,
-  sign: number,
-  endEpochNano: bigint,
-  moveValueToEpochNano: MoveRelativeUnitValue,
-  roundingInc: number,
-  roundingMode: RoundingModeEnum,
-): [value: number, unitWindow: RelativeUnitWindow] {
-  const unitWindow = clampRelativeUnitValue(
-    divTrunc(wholeValue, roundingInc) * roundingInc,
-    roundingInc * sign,
-    moveValueToEpochNano,
-    endEpochNano,
-  )
-
-  // Unlike totalRelativeUnit, which needs the real fraction, rounding only
-  // needs to know which side of a half the endpoint falls on. computeEpochNanoFrac
-  // fabricates a stand-in near 0.5 to keep that comparison exact, so it would
-  // be wrong as a total.
-  const fraction = computeEpochNanoFrac(
-    endEpochNano,
-    unitWindow.epochNano0,
-    unitWindow.epochNano1,
-  )
-  const value = interpolateRelativeUnitWindow(unitWindow, fraction)
-
-  return [roundNumberToInc(value, roundingInc, roundingMode), unitWindow]
 }
 
 function interpolateRelativeUnitWindow(

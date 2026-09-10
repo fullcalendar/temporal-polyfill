@@ -19,6 +19,8 @@ import * as PlainDateFns from '../plainDate'
 import * as PlainDateTimeFns from '../plainDateTime'
 import * as PlainTimeFns from '../plainTime'
 import * as PlainYearMonthFns from '../plainYearMonth'
+import * as ShimPlainDate from '../shim/plainDate'
+import * as ShimPlainDateTime from '../shim/plainDateTime'
 import { Temporal } from './testUtils'
 
 type DateDiffName = 'years' | 'months' | 'weeks' | 'days'
@@ -697,5 +699,73 @@ describe('Instant diff parity', () => {
       temporal1,
       options,
     )
+  })
+})
+
+// Scalar week arithmetic must preserve the class API's fraction construction,
+// window-bound validation, and all signed rounding modes without DurationFields.
+// Call shim records directly so this exercises the scalar core on native hosts too.
+describe('scalar week diff parity', () => {
+  const roundingModes: RoundingMode[] = [
+    'ceil',
+    'floor',
+    'expand',
+    'trunc',
+    'halfCeil',
+    'halfFloor',
+    'halfExpand',
+    'halfTrunc',
+    'halfEven',
+  ]
+  const options: DiffOptions[] = [
+    undefined,
+    ...[1, 2, 3].flatMap((roundingIncrement) => [
+      { roundingIncrement },
+      ...roundingModes.map((roundingMode) => ({
+        roundingIncrement,
+        roundingMode,
+      })),
+    ]),
+  ]
+
+  it.each([
+    ['2024-01-01T00:00', '2024-01-04T11:59:59.999999999'],
+    ['2024-01-01T00:00', '2024-01-04T12:00'],
+    ['2024-01-01T00:00', '2024-01-04T12:00:00.000000001'],
+    ['1967-01-14T12:30:14.370581404', '1967-02-24T05:12:08.285872474'],
+    ['-271821-04-19T00:00:00.000000001', '-271821-04-20T23:59:59.999999999'],
+    ['+275760-09-06T12:00', '+275760-09-13T23:59:59.999999999'],
+    ['-271821-04-20T12:00', '+275760-09-12T12:00'],
+    ['2024-01-01T00:00', '2024-01-01T00:00'],
+  ])('%s to %s', (start, end) => {
+    for (const [value0, value1] of [
+      [start, end],
+      [end, start],
+    ]) {
+      const temporal0 = Temporal.PlainDateTime.from(value0)
+      const temporal1 = Temporal.PlainDateTime.from(value1)
+      const date0 = temporal0.toPlainDate()
+      const date1 = temporal1.toPlainDate()
+      for (const rounding of options) {
+        expectDiffParity(
+          ShimPlainDateTime.diffWeeks,
+          diffWeeks,
+          ShimPlainDateTime.fromString(value0, CalendarFns.getISO),
+          ShimPlainDateTime.fromString(value1, CalendarFns.getISO),
+          temporal0,
+          temporal1,
+          rounding,
+        )
+        expectDiffParity(
+          ShimPlainDate.diffWeeks,
+          diffWeeks,
+          ShimPlainDate.fromString(value0.split('T')[0], CalendarFns.getISO),
+          ShimPlainDate.fromString(value1.split('T')[0], CalendarFns.getISO),
+          date0,
+          date1,
+          rounding,
+        )
+      }
+    }
   })
 })

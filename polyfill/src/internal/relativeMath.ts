@@ -6,12 +6,7 @@ import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import {
-  moveDate,
-  moveDateByDayWeekUnits,
-  moveDateTime,
-  moveZonedEpochSlots,
-} from './move'
+import { moveDate, moveDateTime, moveZonedEpochSlots } from './move'
 import { ZonedEpochNanoFields } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { TimeZone } from './timeZone'
@@ -250,19 +245,6 @@ export function createDateRelativeOps(
     originEpochNano: isoDateToEpochNano(origin),
     moveToEpochNano: (duration) =>
       isoDateToEpochNano(moveDate(calendar, origin, duration)),
-  }
-}
-
-// For a PlainDate or PlainDateTime origin, probing from the origin's midnight.
-// Plain days are uniform, so the time of day never affects a window and the
-// func API expresses its endpoints relative to midnight instead.
-export function createDateDayWeekOps(origin: CalendarDateFields): RelativeOps {
-  return {
-    originEpochNano: isoDateToEpochNano(origin),
-    moveToEpochNano: (duration) =>
-      isoDateToEpochNano(
-        moveDateByDayWeekUnits(origin, duration.weeks, duration.days),
-      ),
   }
 }
 

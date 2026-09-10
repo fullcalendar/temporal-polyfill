@@ -238,16 +238,6 @@ export function moveDate(
   return checkIsoDateInBounds(movedIsoDate)
 }
 
-// Move only by ISO days or seven-day weeks while retaining moveDate's required
-// intermediate date bounds check.
-export function moveDateByDayWeekUnits(
-  origin: CalendarDateFields,
-  weeks: number,
-  days: number,
-): CalendarDateFields {
-  return checkIsoDateInBounds(moveDateByDays(origin, weeks * 7 + days))
-}
-
 // Calendar date operations
 // -----------------------------------------------------------------------------
 // Operations on ISO dates that need the calendar's view of months: snap to the
