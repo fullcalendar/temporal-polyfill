@@ -40,7 +40,9 @@
     "vitest:debug": "vitest run --no-isolate --no-file-parallelism --test-timeout 3600000",
     "test262": "./scripts/test262.js",
     "clean": "./scripts/clean.js --tsc",
-    "size": "pnpm run minify && ./scripts/size.js"
+    "size": "pnpm run minify && ./scripts/size.js",
+    "size:snapshot": "pnpm run minify && node ./scripts/size-snapshot.js",
+    "size:check": "pnpm --dir ../misc/export-size run build && pnpm run build && pnpm run size:snapshot --output dist/size-snapshot.json --baseline scripts/size-baseline.json --check"
   },
   "type": "module",
   "buildConfig": {

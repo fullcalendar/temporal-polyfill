@@ -128,6 +128,12 @@ small portions of code can back be packed with a lot of meaning.
 
 Before making size-oriented changes, measure and record the baseline size first.
 
+Read [polyfill/SIZE.md](polyfill/SIZE.md) for the complete minified + gzip
+snapshot and regression-check workflow, covering both global IIFEs and every
+function API entry point. Use `size:snapshot` for checkpoint comparisons and
+`size:check` to check against the accepted baseline. Report sizes after both
+minification and gzip, with percentage deltas when comparing checkpoints.
+
 The size command depends on the `misc/export-size` submodule's built
 output. Always build `export-size` first:
 
