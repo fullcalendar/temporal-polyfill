@@ -29,6 +29,50 @@ describe('Temporal.Duration', () => {
       ].join(','),
     )
   })
+
+  // TODO: Contribute these cases to Test262's
+  // Temporal/Duration/prototype/total/relativeto-date-limits.js coverage.
+  it.each([
+    ['PlainDate', '-271821-04-19'],
+    ['PlainDateTime', '-271821-04-19T00:00:00.000000001'],
+  ] as const)(
+    'totals zero calendar units at the lower %s boundary',
+    (_, relativeTo) => {
+      const duration = new Temporal.Duration()
+
+      for (const unit of ['weeks', 'months', 'years'] as const) {
+        expect(duration.total({ unit, relativeTo })).toBe(0)
+      }
+    },
+  )
+
+  // TODO: Contribute these cases to Test262's
+  // Temporal/Duration/prototype/round/relativeto-undefined-throw-on-calendar-units.js
+  // coverage.
+  it.each(['week', 'month', 'year'] as const)(
+    'requires relativeTo to round a zero duration to %s',
+    (smallestUnit) => {
+      expect(() => new Temporal.Duration().round(smallestUnit)).toThrow(
+        RangeError,
+      )
+    },
+  )
+
+  // TODO: Contribute these cases to Test262's
+  // Temporal/Duration/prototype/round/relativeto-date-limits.js coverage.
+  it.each(['day', 'week', 'month', 'year'] as const)(
+    'checks the upper ZonedDateTime boundary when rounding a zero duration to %s',
+    (smallestUnit) => {
+      const relativeTo = new Temporal.ZonedDateTime(
+        8_640_000_000_000_000_000_000n,
+        'UTC',
+      )
+
+      expect(() =>
+        new Temporal.Duration().round({ smallestUnit, relativeTo }),
+      ).toThrow(RangeError)
+    },
+  )
 })
 
 describe('Temporal.ZonedDateTime', () => {

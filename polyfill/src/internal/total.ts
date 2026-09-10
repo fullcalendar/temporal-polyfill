@@ -59,11 +59,10 @@ export function totalDuration<RA>(
     throwRangeError(errorMessages.missingRelativeTo)
   }
 
-  // Zero durations can still need relative calendar math. In particular, a
-  // zoned `day` total must compute the adjacent day-length window, and that
-  // window can cross the representable Instant boundary even when the duration
-  // itself is zero.
-  if (!slots.sign && isUniformUnit(totalUnit, isZoned)) {
+  // Plain zero durations return after validating that relativeTo is present
+  // when required. Zoned calendar/day totals still probe their relative window,
+  // which can cross the representable Instant boundary even at zero.
+  if (!slots.sign && (!isZoned || totalUnit < Unit.Day)) {
     return 0
   }
 

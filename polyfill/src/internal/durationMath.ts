@@ -145,20 +145,18 @@ export function roundDuration<RA>(
     )
   }
 
-  const isZoned = relativeToSlots && isZonedEpochSlots(relativeToSlots)
-
-  // A blank duration usually returns itself. The exception is zoned sub-day
-  // rounding with a day-or-larger largest unit: even a zero duration rounds
-  // through the day-length path, which observes the next-day boundary.
-  const needsZonedDayLength =
-    isZoned && largestUnit >= Unit.Day && smallestUnit < Unit.Day
-
-  if (!slots.sign && !needsZonedDayLength) {
-    return slots
-  }
-
   if (!relativeToSlots) {
     throwRangeError(errorMessages.missingRelativeTo)
+  }
+
+  const isZoned = isZonedEpochSlots(relativeToSlots)
+
+  // Equal plain date-times and equal instants have an explicit zero-difference
+  // path in the spec. A zoned difference whose largest unit is day or larger
+  // instead enters relative rounding, where even zero can probe the next date
+  // boundary and discover that it lies outside the Instant range.
+  if (!slots.sign && (!isZoned || largestUnit < Unit.Day)) {
+    return slots
   }
 
   const [balancedDuration, endEpochNano, relativeOps] = spanRelativeDuration(
