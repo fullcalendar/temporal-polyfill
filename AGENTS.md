@@ -157,3 +157,11 @@ Size of ./dist/full/.global.min.js ...
 
 In this example, record `20443, Full: 24247`. Ignore the later `export
 min+gzip` table for size-audit entries.
+
+
+## Naming Conventions
+
+Internal identifier naming rules (shape prefixes like `iso`/`plain`/`zoned`,
+unit suffixes, `parts` vs `args`, when `Fields` is kept, diff/move/round
+function names) live in [polyfill/NAMING.md](polyfill/NAMING.md). Read it before
+renaming or adding internal functions and locals.
