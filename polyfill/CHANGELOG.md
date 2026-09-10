@@ -10,6 +10,14 @@ don't work in GH release markdown. must be absolute
 
 ## Unreleased
 
+- FEATURE: Smaller global IIFE bundles after minification and gzip, compared with v1.0.4:
+  - Basic (`global.js`): 19,532 → 19,433 bytes (−0.51%)
+  - Full (`full/global.js`): 23,378 → 23,276 bytes (−0.44%)
+- FEATURE: Tree-shakeable API imports are 27.30% smaller on average after minification and gzip, compared with v1.0.4 (the arithmetic mean of individual percentage changes across all 410 function entry points). Highlights:
+  - `Duration.sign`: 880 → 186 bytes (−78.86%), saving 694 bytes
+  - `PlainDate.daysInWeek`, `PlainDateTime.daysInWeek`, and `ZonedDateTime.daysInWeek`: 880 → 192 bytes each (−78.18%), saving 688 bytes each
+  - `PlainDate.toPlainMonthDay`: 3,135 → 1,494 bytes (−52.34%), saving 1,641 bytes
+  - `PlainDate.toPlainYearMonth`: 2,808 → 1,194 bytes (−57.48%), saving 1,614 bytes
 - FIX: Tree-shakeable API year/month rounding and alignment helpers use correct non-ISO calendar boundaries instead of mixing calendar year/month values with ISO fields
 - FIX: `ZonedDateTime.getTimeZoneTransition` preserves transitions at epoch nanoseconds `0n` instead of returning `null`, in both class-based and tree-shakeable APIs
 - FIX: Improve behavioral parity between the tree-shakeable and class-based APIs:
