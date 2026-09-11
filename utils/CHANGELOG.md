@@ -1,6 +1,11 @@
 
 # `temporal-utils` Changelog
 
+## v1.0.3
+
+- FIX: `diff*` helpers honor `roundingIncrement` when `roundingMode` is omitted, using Temporal's default `trunc` rounding
+- FIX: Date-unit `diff*` helpers return `0` for equal inputs at range boundaries instead of throwing
+
 ## v1.0.2
 
 - FIX: Compatibility with CJS and `require(esm)` (#101), thx @connor-baer
