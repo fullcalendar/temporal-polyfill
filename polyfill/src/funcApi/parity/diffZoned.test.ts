@@ -9,6 +9,7 @@ import {
 import { describe, expect, it } from 'vitest'
 import { Temporal } from '../../classApi/basic/implementation'
 import * as CalendarFns from '../calendar'
+import { itSkipNative } from '../testUtils'
 import * as ZonedDateTimeFns from '../zonedDateTime'
 
 type DiffName = 'years' | 'months' | 'weeks' | 'days'
@@ -35,6 +36,7 @@ interface DiffParityCase {
   instant1: string
   timeZone?: string
   options?: DiffOptions
+  skipNative?: boolean
 }
 
 interface DiffFunction<T> {
@@ -97,6 +99,7 @@ const diffParityCases: DiffParityCase[] = [
       instant0: '2024-11-02T00:00:00Z',
       instant1: '2024-11-01T15:00:00Z',
       options: roundingMode,
+      skipNative: roundingMode === 'ceil' || roundingMode === 'trunc',
     }),
   ),
   {
@@ -106,6 +109,7 @@ const diffParityCases: DiffParityCase[] = [
     instant1: '2024-11-03T05:30:00Z',
     timeZone: 'America/New_York',
     options: 'floor',
+    skipNative: true,
   },
   {
     name: 'backward hour across a repeated wall-clock time, totaled in months',
@@ -113,6 +117,7 @@ const diffParityCases: DiffParityCase[] = [
     instant0: '2024-11-03T06:30:00Z',
     instant1: '2024-11-03T05:30:00Z',
     timeZone: 'America/New_York',
+    skipNative: true,
   },
   // The origin is the later instance of a repeated wall-clock time, so the
   // exact diff carries a 24-hour time part that re-adds past the endpoint
@@ -122,6 +127,7 @@ const diffParityCases: DiffParityCase[] = [
     instant0: '2024-11-03T06:30:00Z',
     instant1: '2024-11-04T05:30:00Z',
     timeZone: 'America/New_York',
+    skipNative: unit !== 'days',
   })),
   {
     name: 'zero total at the upper bound',
@@ -150,6 +156,7 @@ const diffParityCases: DiffParityCase[] = [
     instant0: '2011-12-31T00:00:00Z',
     instant1: '2011-12-30T15:00:00Z',
     timeZone: 'Pacific/Apia',
+    skipNative: true,
   },
   ...(['floor', 'ceil', 'trunc', 'expand'] as const).map(
     (roundingMode): DiffParityCase => ({
@@ -159,6 +166,7 @@ const diffParityCases: DiffParityCase[] = [
       instant1: '2011-12-30T15:00:00Z',
       timeZone: 'Pacific/Apia',
       options: roundingMode,
+      skipNative: true,
     }),
   ),
   {
@@ -197,43 +205,53 @@ function callDiff<T>(
     : diff(value0, value1, options)
 }
 
-describe('zoned diff parity', () => {
-  it.each(diffParityCases)(
-    '$name',
-    ({ unit, instant0, instant1, timeZone, options }) => {
-      const epochNanoseconds0 = Temporal.Instant.from(instant0).epochNanoseconds
-      const epochNanoseconds1 = Temporal.Instant.from(instant1).epochNanoseconds
-      const resolvedTimeZone = timeZone || 'UTC'
-      const record0 = ZonedDateTimeFns.create(
-        epochNanoseconds0,
-        resolvedTimeZone,
-      )
-      const record1 = ZonedDateTimeFns.create(
-        epochNanoseconds1,
-        resolvedTimeZone,
-      )
-      const temporal0 = new Temporal.ZonedDateTime(
-        epochNanoseconds0,
-        resolvedTimeZone,
-      )
-      const temporal1 = new Temporal.ZonedDateTime(
-        epochNanoseconds1,
-        resolvedTimeZone,
-      )
-
-      expect(
-        captureResult(() =>
-          callDiff(recordDiffs[unit], record0, record1, options),
-        ),
-      ).toStrictEqual(
-        captureResult(() =>
-          callDiff(temporalDiffs[unit], temporal0, temporal1, options),
-        ),
-      )
-    },
+function expectDiffParity({
+  unit,
+  instant0,
+  instant1,
+  timeZone,
+  options,
+}: DiffParityCase): void {
+  const epochNanoseconds0 = Temporal.Instant.from(instant0).epochNanoseconds
+  const epochNanoseconds1 = Temporal.Instant.from(instant1).epochNanoseconds
+  const resolvedTimeZone = timeZone || 'UTC'
+  const record0 = ZonedDateTimeFns.create(epochNanoseconds0, resolvedTimeZone)
+  const record1 = ZonedDateTimeFns.create(epochNanoseconds1, resolvedTimeZone)
+  const temporal0 = new Temporal.ZonedDateTime(
+    epochNanoseconds0,
+    resolvedTimeZone,
+  )
+  const temporal1 = new Temporal.ZonedDateTime(
+    epochNanoseconds1,
+    resolvedTimeZone,
   )
 
-  it.each(['years', 'months', 'weeks', 'days'] as const)(
+  expect(
+    captureResult(() => callDiff(recordDiffs[unit], record0, record1, options)),
+  ).toStrictEqual(
+    captureResult(() =>
+      callDiff(temporalDiffs[unit], temporal0, temporal1, options),
+    ),
+  )
+}
+
+const portableDiffParityCases = diffParityCases.filter(
+  ({ skipNative }) => !skipNative,
+)
+const nativeBugDiffParityCases = diffParityCases.filter(
+  ({ skipNative }) => skipNative,
+)
+
+describe('zoned diff parity', () => {
+  it.each(portableDiffParityCases)('$name', expectDiffParity)
+
+  // Node 26 native Temporal has known rounding and transition bugs for these
+  // cases. They continue to run against the shim on older Node versions.
+  itSkipNative.each(nativeBugDiffParityCases)('$name', expectDiffParity)
+
+  // Node 26 native Temporal rejects different time-zone IDs before observing
+  // that the instants are equal. The shim still covers the intended result.
+  itSkipNative.each(['years', 'months', 'weeks', 'days'] as const)(
     '$s returns zero for equal instants in different time zones',
     (unit) => {
       const epochNanoseconds = 0n
