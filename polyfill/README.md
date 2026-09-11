@@ -251,7 +251,7 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023).
   <tr>
     <td>Spec date</td>
     <td>
-      August 2026
+      September 2026
     </td>
     <td>
       March 2025
