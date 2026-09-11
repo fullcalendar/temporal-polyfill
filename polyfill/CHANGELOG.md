@@ -8,26 +8,30 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
-## Unreleased
+## v1.0.5
 
-- FEATURE: Smaller global IIFE bundles after minification and gzip, compared with v1.0.4:
+### 📉 Size Wins
+
+- Smaller global IIFE bundles after min+gzip:
   - Basic (`global.js`): 19,532 → 19,433 bytes (−0.51%)
   - Full (`full/global.js`): 23,378 → 23,276 bytes (−0.44%)
-- FEATURE: Tree-shakeable API imports are 27.30% smaller on average after minification and gzip, compared with v1.0.4 (the arithmetic mean of individual percentage changes across all 410 function entry points). Highlights:
-  - `Duration.sign`: 880 → 186 bytes (−78.86%), saving 694 bytes
-  - `PlainDate.daysInWeek`, `PlainDateTime.daysInWeek`, and `ZonedDateTime.daysInWeek`: 880 → 192 bytes each (−78.18%), saving 688 bytes each
-  - `PlainDate.toPlainMonthDay`: 3,135 → 1,494 bytes (−52.34%), saving 1,641 bytes
-  - `PlainDate.toPlainYearMonth`: 2,808 → 1,194 bytes (−57.48%), saving 1,614 bytes
+- Tree-shakeable API imports are 27.30% smaller on average after min+gzip. Highlights:
+  - `DurationFns.sign`: 880 → 186 bytes (−78.86%)
+  - `ZonedDateTimeFns.compare`: 950 → 268 bytes (−71.79%)
+  - `PlainDateFns.toPlainYearMonth`: 2,808 → 1,194 bytes (−57.48%)
+
+### 🐛 Tree-Shakeable API Correctness Fixes
+
 - FIX: Tree-shakeable API year/month rounding and alignment helpers use correct non-ISO calendar boundaries instead of mixing calendar year/month values with ISO fields
-- FIX: `ZonedDateTime.getTimeZoneTransition` preserves transitions at epoch nanoseconds `0n` instead of returning `null`, in both class-based and tree-shakeable APIs
+- FIX: `ZonedDateTimeFns.getTimeZoneTransition` preserves transitions at epoch nanoseconds `0n` instead of returning `null`, in both class-based and tree-shakeable APIs
 - FIX: Improve behavioral parity between the tree-shakeable and class-based APIs:
-  - `diffYears`/`diffMonths`/`diffWeeks`/`diffDays`:
+  - `diffYears`/`Months`/`Weeks`/`Days`:
     - `ZonedDateTime` handles equal instants, fractional units, DST transitions, skipped dates, rounding, and calendar validation (#103, #104)
     - `PlainDateTime` includes time remainders and uses correct relative calendar-unit rounding, floating-point precision, calendar validation, and range validation
     - `PlainDate` uses correct relative calendar-unit rounding, floating-point precision, calendar validation, and range validation
     - `PlainYearMonth` ignores the internal reference ISO day, uses month precision, and handles rounding and range boundaries correctly
-  - `PlainTime` `diffHours`/`diffMinutes`/`diffSeconds`/`diffMilliseconds`/`diffMicroseconds`/`diffNanoseconds` preserve fractional precision and return positive zero for results that round to zero
-  - All `diff*` functions apply `roundingIncrement` without `roundingMode` at each Temporal type's default smallest unit before totaling in the requested unit
+  - `diffHours`/`Minutes`/`Seconds`/`Milliseconds`/`Microseconds`/`Nanoseconds`
+    - `PlainTime` preserves fractional precision and return positive zero for results that round to zero
 
 ## v1.0.4
 
