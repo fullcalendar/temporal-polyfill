@@ -8,6 +8,10 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## Unreleased
+
+- FIX: `require('temporal-polyfill/global')` and `require('temporal-polyfill/full/global')` throw `ERR_REQUIRE_ESM` / `SyntaxError: Cannot use import statement outside a module` in CommonJS modules, Jest, Vitest `vmForks`, and Vite SSR (#105)
+
 ## v1.0.5
 
 ### 📉 Size Wins
