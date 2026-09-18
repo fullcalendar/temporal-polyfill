@@ -37,11 +37,29 @@ async function writePkgJson(pkgDir, isDev) {
         extensions.dts
       : './' + distName + extensions.dts
 
+    // IIFE entries (./global and ./full/global) ship two build artifacts:
+    // - global.esm.js  — the ESM bundle (used by modern bundlers and Node ESM)
+    // - global.cjs     — the IIFE/UMD bundle (safe to load in any CJS context)
+    //
+    // Expose the IIFE artifact via the "require" condition so that:
+    //   - require('temporal-polyfill/global') works in plain CJS modules
+    //   - Jest, Vitest vmForks, and Vite SSR (which parse node_modules deps as
+    //     strict CJS in isolated VM contexts) don't hit
+    //     "Cannot use import statement outside a module"
+    //
+    // For all other exports (ESM-only), we keep the existing behaviour: no
+    // "require" condition, letting `default` cover all resolvers. Modern
+    // Node 22+ can require() an ESM graph; older Node gets ERR_REQUIRE_ESM.
+    const requirePath = exportConfig.iife
+      ? './' + distName + extensions.iife
+      : undefined
+
     distExportMap[exportPath] = {
+      types: typesPath,
+      ...(requirePath ? { require: requirePath } : {}),
       // `default` lets every resolver select the ESM bundle. Modern Node can
       // load this synchronous module graph from require(), while older Node
       // resolves it first and then reports the more useful ERR_REQUIRE_ESM.
-      types: typesPath,
       default: esmPath,
     }
 

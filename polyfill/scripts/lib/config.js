@@ -5,12 +5,16 @@ export const extensions = {
   // as an ESM module that can be imported by another script
   esmWhenIifePrefix: '.esm',
 
-  iife: '.js',
+  // .cjs extension (not .js) is required so that Node loads the IIFE bundle
+  // as CommonJS even in a package with "type": "module". Without it, Node
+  // would reject require('temporal-polyfill/global') with ERR_REQUIRE_ESM
+  // because all .js files in a "type":"module" package are treated as ESM.
+  iife: '.cjs',
   iifeMin: '.min.js',
   dts: '.d.ts',
 }
 
 export const minifyPathMap = {
-  'dist/global.js': 'dist/.global.min.js',
-  'dist/full/global.js': 'dist/full/.global.min.js',
+  'dist/global.cjs': 'dist/.global.min.js',
+  'dist/full/global.cjs': 'dist/full/.global.min.js',
 }
