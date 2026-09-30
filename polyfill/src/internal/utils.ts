@@ -1,5 +1,5 @@
 import * as TemporalUtils from 'temporal-utils/protected'
-import { Overflow } from '../options/model'
+import type { Overflow } from '../options/model'
 import * as errorMessages from './errorMessages'
 
 export const constrainToRange: (
