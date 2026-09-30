@@ -227,6 +227,7 @@ function buildModuleConfigs({
         //// sourcemap: isDev,
         //// sourcemapExcludeSources: true,
         plugins: [
+          buildChunkCycleGuardPlugin(),
           !isDev && pureTopLevel(),
           !isDev && terser(buildTerserEsmOptions()),
           !isDev &&
@@ -362,6 +363,30 @@ function buildSourceDirectoryChunksPlugin(sourceRoot) {
   }
 }
 
+// A slice of `internal/`: primitive coercion, error strings, and
+// unit/duration field tables that nothing else in `internal/` outranks. These
+// live in their own chunk purely to break a chunk-level import cycle.
+//
+// `options/` needs them (top-level `roundingModeFuncs` captures the rounding
+// helpers during module evaluation), while the rest of `internal/` needs `options/`
+// back. Leaving them in the `internal` chunk makes `internal` <-> `options` cyclic,
+// which only works while those bindings are hoisted function declarations. Any tool
+// that lexicalizes them (an arrow-converting minifier, a module-wrapping loader)
+// turns the cycle into a `Cannot access '<x>' before initialization` TDZ crash at
+// import time.
+//
+// We split out the shared functions into `internal-base`, so both `options` and
+// `internal` point down at it and no fragile cycle exists.
+//
+// See also: `chunk-cycle-guard` below, which fails the build if it detects a cycle.
+const internalBaseModules = [
+  'internal/cast',
+  'internal/durationFields',
+  'internal/errorMessages',
+  'internal/units',
+  'internal/utils',
+]
+
 // Match the Rollup chunk name to the source file's directory under `dist/.tsc`.
 // Top-level files go to `root`; nested paths are flattened so
 // `funcApi/native/foo.js` becomes the `funcApi-native` chunk instead of writing
@@ -379,9 +404,90 @@ function resolveSourceDirectoryChunkName(id, sourceRoot, meta) {
     return
   }
 
-  const sourceDir = dirname(relativePath(sourceRoot, id))
+  const sourcePath = relativePath(sourceRoot, id)
+  const sourcePathNoExt = sourcePath
+    .split(pathSep)
+    .join('/')
+    .replace(/(\.d)?\.[^./]+$/, '')
+
+  if (internalBaseModules.includes(sourcePathNoExt)) {
+    return 'internal-base'
+  }
+
+  const sourceDir = dirname(sourcePath)
 
   return sourceDir === '.' ? 'root' : sourceDir.split(pathSep).join('-')
+}
+
+// Fails the build when emitted chunks import each other in a cycle.
+//
+// Rollup happily emits cyclic chunks, and such a bundle usually runs fine --
+// until a downstream tool rewrites a hoisted `function` into a `const`, at which
+// point the cycle's evaluation order starts throwing TDZ ReferenceErrors in
+// consumers' builds. Module-level cycles inside a single chunk are fine (Rollup
+// flattens and orders them), so this only inspects chunk-to-chunk edges. Only
+// static imports count: dynamic imports are deferred past module evaluation and
+// are in fact a legitimate way to break an evaluation-order cycle.
+function buildChunkCycleGuardPlugin() {
+  return {
+    name: 'chunk-cycle-guard',
+    generateBundle(_outputOptions, bundle) {
+      const importsByFileName = new Map()
+
+      for (const fileName in bundle) {
+        const chunk = bundle[fileName]
+        if (chunk.type === 'chunk') {
+          importsByFileName.set(fileName, chunk.imports)
+        }
+      }
+
+      const cycle = findFirstCycle(importsByFileName)
+
+      if (cycle) {
+        this.error('Cyclic chunk imports: ' + cycle.join(' -> '))
+      }
+    },
+  }
+}
+
+// Depth-first search returning the first cycle found as a node list whose last
+// entry repeats its first, or undefined when the graph is acyclic. Catches
+// cycles of any length, not just mutual pairs.
+function findFirstCycle(edgesByNode) {
+  const finished = new Set()
+  const stack = []
+  const onStack = new Set()
+
+  function visit(node) {
+    if (finished.has(node)) {
+      return
+    }
+
+    if (onStack.has(node)) {
+      return [...stack.slice(stack.indexOf(node)), node]
+    }
+
+    stack.push(node)
+    onStack.add(node)
+
+    for (const next of edgesByNode.get(node) || []) {
+      const cycle = visit(next)
+      if (cycle) {
+        return cycle
+      }
+    }
+
+    stack.pop()
+    onStack.delete(node)
+    finished.add(node)
+  }
+
+  for (const node of edgesByNode.keys()) {
+    const cycle = visit(node)
+    if (cycle) {
+      return cycle
+    }
+  }
 }
 
 // Lang Utils
