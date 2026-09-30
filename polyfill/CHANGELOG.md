@@ -8,6 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## Unreleased
+
+### 🐛 Bugfixes
+
+- FIX: Resolve load-time ReferenceError under exotic loaders (#107)
+
 ## v1.0.5
 
 ### 📉 Size Wins
