@@ -34,6 +34,7 @@ import {
   Unit,
   nanoInSec,
   nanoInUtcDay,
+  unitNamesAsc,
   unitNanoMap,
 } from './units'
 import { NumberSign, clampEntity, divTrunc, throwRangeError } from './utils'
@@ -55,7 +56,7 @@ export function addDurationsWithoutRelativeTo(
   ) as Unit
 
   if (maxUnit > Unit.Day) {
-    throwRangeError(errorMessages.invalidLargeUnits)
+    throwRangeError(errorMessages.largeUnitsRequireRelativeTo)
   }
 
   return addDayTimeDurationsChecked(
@@ -264,8 +265,15 @@ export function validateDurationTimeUnit(n: number): void {
 // -----------------------------------------------------------------------------
 
 export function durationOnlyTimeToBigNano(fields: DurationFields): bigint {
-  if (durationHasDateParts(fields)) {
-    throwRangeError(errorMessages.invalidLargeUnits)
+  // Only Instant math converts this way, and Instant cannot represent date
+  // fields. Naming the largest offending unit tells the caller which field
+  // needs ZonedDateTime arithmetic instead.
+  const maxUnit = getMaxDurationUnit(fields)
+
+  if (maxUnit >= Unit.Day) {
+    throwRangeError(
+      errorMessages.unsupportedInstantDurationField(unitNamesAsc[maxUnit]),
+    )
   }
 
   return durationTimeToBigNano(fields)

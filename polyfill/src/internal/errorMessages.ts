@@ -85,7 +85,10 @@ export const forbiddenDurationSigns = 'Cannot mix duration signs'
 export const missingRelativeTo = 'Missing relativeTo'
 export const invalidRelativeTo = (arg: unknown) =>
   invalidEntity('relativeTo', arg)
-export const invalidLargeUnits = 'Cannot use large units' // for Instant math
+export const largeUnitsRequireRelativeTo =
+  'For years, months, or weeks arithmetic, use date arithmetic relative to a starting point'
+export const unsupportedInstantDurationField = (unitName: string) =>
+  `Duration field ${unitName} not supported by Temporal.Instant. Try Temporal.ZonedDateTime instead.` // for Instant math
 export const invalidSmallUnits = 'Cannot use small units'
 
 // Options Refining

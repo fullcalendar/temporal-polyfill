@@ -304,6 +304,48 @@ describe('integration recreations', () => {
     })
   })
 
+  // test262 asserts the RangeError for date-field arithmetic on Instant but
+  // not the message, which this issue asked to name the offending field.
+  describe('issue #85: large-unit error messages', () => {
+    it.each([
+      [{ days: 1 }, 'day'],
+      [{ weeks: 1 }, 'week'],
+      [{ months: 1 }, 'month'],
+      [{ years: 1, days: 1 }, 'year'], // largest date field wins
+    ])(
+      'Instant.add names the offending field for %o',
+      (durationLike, unitName) => {
+        const instant = Temporal.PlainDate.from('2024-03-15')
+          .toZonedDateTime('UTC')
+          .toInstant()
+
+        expect(() => instant.add(Temporal.Duration.from(durationLike))).toThrow(
+          `Duration field ${unitName} not supported by Temporal.Instant. Try Temporal.ZonedDateTime instead.`,
+        )
+      },
+    )
+
+    it('Instant.subtract names the offending field too', () => {
+      const instant = Temporal.Instant.from('2024-03-15T00:00:00Z')
+
+      expect(() =>
+        instant.subtract(Temporal.Duration.from({ weeks: 2 })),
+      ).toThrow(
+        'Duration field week not supported by Temporal.Instant. Try Temporal.ZonedDateTime instead.',
+      )
+    })
+
+    it('Duration.add points at relative date arithmetic', () => {
+      expect(() =>
+        Temporal.Duration.from({ months: 1 }).add(
+          Temporal.Duration.from({ days: 1 }),
+        ),
+      ).toThrow(
+        'For years, months, or weeks arithmetic, use date arithmetic relative to a starting point',
+      )
+    })
+  })
+
   // test262 covers the same close-transition root cause through
   // getTimeZoneTransition/startOfDay tests for these zones, but not these
   // exact ZonedDateTime.from string inputs. Keep this focused regression
