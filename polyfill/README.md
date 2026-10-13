@@ -253,7 +253,7 @@ Test runners that use their own module loader need extra support:
   </tr>
   <tr>
     <td><a href='./scripts/size-comparison/RESULTS.md'>Min+gzip size</a></td>
-    <td>19.4 kB, 23.3 kB (full)</td>
+    <td>19.5 kB, 23.3 kB (full)</td>
     <td>52.1 kB (+168%, +124%)</td>
   </tr>
   <tr>

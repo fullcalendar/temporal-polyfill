@@ -9,7 +9,7 @@ All bundles are minified with Terser, then gzipped.
 
 | Package | Basic calendars | All calendars |
 | --- | ---: | ---: |
-| `temporal-polyfill` | 19,433 B | 23,276 B |
+| `temporal-polyfill` | 19,453 B | 23,285 B |
 | `@js-temporal/polyfill` | 52,136 B (+168%) | 52,136 B (+124%) |
 
 `@js-temporal/polyfill` has no basic/full split — its single bundle always includes
