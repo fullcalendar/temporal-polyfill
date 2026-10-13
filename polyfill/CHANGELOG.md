@@ -8,12 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
-## Unreleased
+## v1.0.6
 
 ### 🐛 Bugfixes
 
-- FIX: Load-time `ReferenceError: Cannot access '...' before initialization` under ESM loaders that wrap modules, such as OpenTelemetry's `import-in-the-middle` (#107, #108). Thanks @noahsilas for the diagnosis and the build-time chunk cycle check!
-- FIX: Clearer `RangeError` messages when a duration has units the operation can't accept, naming the offending field and the allowed range (#85, #109). For example, `instant.add({ days: 1 })` now throws `Invalid unit: days; must be between nanoseconds-hours` instead of `Cannot use large units`. Covers `Instant.add`/`subtract`, `Duration.add`/`subtract`, and `PlainYearMonth.add`/`subtract`. Thanks @cpruijsen for the regression tests!
+- FIX: Load-time `ReferenceError: Cannot access '...' before initialization` under ESM loaders that wrap modules, such as OpenTelemetry's `import-in-the-middle` (#107, #108). Thx @noahsilas
+- FIX: Clearer error for disallowed duration units, e.g. `instant.add({ days: 1 })` throws `Invalid unit: days; must be between nanoseconds-hours` instead of `Cannot use large units` (#85, #109). Thx @cpruijsen
 
 ## v1.0.5
 
