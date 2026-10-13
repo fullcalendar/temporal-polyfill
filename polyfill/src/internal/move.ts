@@ -8,7 +8,11 @@ import {
 } from './calendarDerived'
 import { type CalendarImpl } from './calendarImpl'
 import { monthCodeNumberToMonth } from './calendarMonthCode'
-import { DurationFields, durationTimeFieldDefaults } from './durationFields'
+import {
+  DurationFields,
+  durationFieldNamesAsc,
+  durationTimeFieldDefaults,
+} from './durationFields'
 import {
   computeDurationSign,
   durationHasDateParts,
@@ -56,11 +60,17 @@ export function moveYearMonth(
   durationSlots: DurationFields,
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateFields {
-  if (
-    computeDurationSign(durationSlots) &&
-    getMaxDurationUnit(durationSlots) < Unit.Month
-  ) {
-    throwRangeError(errorMessages.invalidSmallUnits)
+  // A nonzero duration needs months or larger; YearMonth has no day to start
+  // weeks/days/time from. Throws if the largest unit is below months
+  if (computeDurationSign(durationSlots)) {
+    clampEntity(
+      'unit',
+      getMaxDurationUnit(durationSlots),
+      Unit.Month,
+      Unit.Year,
+      Overflow.Reject,
+      durationFieldNamesAsc,
+    )
   }
 
   // Overflow has already been observed before lower-unit validation above.

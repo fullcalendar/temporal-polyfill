@@ -54,9 +54,16 @@ export function addDurationsWithoutRelativeTo(
     getMaxDurationUnit(otherSlots),
   ) as Unit
 
-  if (maxUnit > Unit.Day) {
-    throwRangeError(errorMessages.invalidLargeUnits)
-  }
+  // Without relativeTo, days are treated as exactly 24 hours, but weeks and
+  // larger have no fixed length. Throws if the largest unit exceeds days
+  clampEntity(
+    'unit',
+    maxUnit,
+    Unit.Nanosecond,
+    Unit.Day,
+    Overflow.Reject,
+    durationFieldNamesAsc,
+  )
 
   return addDayTimeDurationsChecked(
     doSubtract,
@@ -264,9 +271,16 @@ export function validateDurationTimeUnit(n: number): void {
 // -----------------------------------------------------------------------------
 
 export function durationOnlyTimeToBigNano(fields: DurationFields): bigint {
-  if (durationHasDateParts(fields)) {
-    throwRangeError(errorMessages.invalidLargeUnits)
-  }
+  // Only Instant math converts this way. Without a time zone, even days have
+  // no fixed length (DST), so throws if the largest unit exceeds hours
+  clampEntity(
+    'unit',
+    getMaxDurationUnit(fields),
+    Unit.Nanosecond,
+    Unit.Hour,
+    Overflow.Reject,
+    durationFieldNamesAsc,
+  )
 
   return durationTimeToBigNano(fields)
 }

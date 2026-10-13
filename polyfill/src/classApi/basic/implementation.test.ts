@@ -304,6 +304,35 @@ describe('integration recreations', () => {
     })
   })
 
+  // test262 asserts these RangeErrors but never their messages. The issue was
+  // that "Cannot use large units" didn't say which field was rejected, so
+  // assert that the offending (plural) Duration field name appears.
+  // Adapted from a regression test by @cpruijsen in PR #109.
+  describe('issue #85: unit-range errors name the offending field', () => {
+    it('Instant.add rejects days', () => {
+      // The exact repro from the issue
+      const startOfDay = Temporal.PlainDate.from('2024-03-15')
+        .toZonedDateTime('UTC')
+        .toInstant()
+
+      expect(() => startOfDay.add(Temporal.Duration.from({ days: 1 }))).toThrow(
+        'Invalid unit: days',
+      )
+    })
+
+    it('Duration.add without relativeTo rejects months', () => {
+      expect(() =>
+        Temporal.Duration.from({ months: 1 }).add({ days: 1 }),
+      ).toThrow('Invalid unit: months')
+    })
+
+    it('PlainYearMonth.add rejects a days-only duration', () => {
+      expect(() =>
+        Temporal.PlainYearMonth.from('2024-03').add({ days: 45 }),
+      ).toThrow('Invalid unit: days')
+    })
+  })
+
   // test262 covers the same close-transition root cause through
   // getTimeZoneTransition/startOfDay tests for these zones, but not these
   // exact ZonedDateTime.from string inputs. Keep this focused regression
