@@ -12,7 +12,7 @@ don't work in GH release markdown. must be absolute
 
 ### 🐛 Bugfixes
 
-- FIX: Load-time `ReferenceError: Cannot access '...' before initialization` under ESM loaders that wrap modules, such as OpenTelemetry's `import-in-the-middle` (#107, #108), thx @noahsilas
+- FIX: Load-time `ReferenceError: Cannot access '...' before initialization` under ESM loaders that wrap modules, such as OpenTelemetry's `import-in-the-middle` (#107, #108). Thanks @noahsilas for the diagnosis and the build-time chunk cycle check!
 
 ## v1.0.5
 
