@@ -213,6 +213,14 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023).
 
 \* On Android, Chrome's `Intl.DateTimeFormat` API formats some `islamic-umalqura` dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
 
+### CommonJS & Test Runners
+
+This package is ESM-only. CommonJS code can `require()` it on Node 20.19+ and 22.12+.
+Test runners that use their own module loader need extra support:
+
+- **Vitest:** the default `forks` pool works. The `vmForks`/`vmThreads` pools need Vitest 5+ and Node 24.9+ ([docs](https://vitest.dev/config/pool)).
+- **Jest:** needs Jest 30.4+, Node 24.9+, and `--experimental-vm-modules` ([docs](https://jestjs.io/docs/ecmascript-modules)). Otherwise, use [`transformIgnorePatterns`](https://jestjs.io/docs/configuration#transformignorepatterns-arraystring).
+
 ## Comparison with `@js-temporal/polyfill`
 
 <table>
