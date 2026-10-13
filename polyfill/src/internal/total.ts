@@ -1,4 +1,3 @@
-import { refineTotalOptions } from '../options/roundingRefine'
 import { divideBigNanoToExactNumber } from './bigNano'
 import {
   DurationFields,
@@ -11,6 +10,7 @@ import {
   getMaxDurationUnit,
 } from './durationMath'
 import * as errorMessages from './errorMessages'
+import { refineTotalOptions } from './optionsRoundingRefine'
 import {
   RelativeOps,
   RelativeToSlots,

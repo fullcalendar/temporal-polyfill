@@ -1,13 +1,13 @@
 import type { Temporal } from 'temporal-spec'
-import { requireObjectLike } from '../internal/cast'
+import { requireObjectLike } from './cast'
 import {
   coerceEpochDisambig,
   coerceOffsetDisambig,
   coerceOverflow,
-} from './coerce'
-import { EpochDisambig, OffsetDisambig, Overflow } from './model'
-import type { ZonedFieldTuple } from './model'
-import { normalizeOptions } from './normalize'
+} from './optionsCoerce'
+import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
+import type { ZonedFieldTuple } from './optionsModel'
+import { normalizeOptions } from './optionsNormalize'
 
 /*
 High-level field-construction option refinement.

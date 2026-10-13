@@ -8,9 +8,9 @@ import {
 import { dateFieldGetters } from '../../apiHelpers/gettersForNative'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
+import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 import {
   DateFromFields,
   DateTimeFormatLike,

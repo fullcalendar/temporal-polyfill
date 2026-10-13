@@ -1,6 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { Overflow } from '../options/model'
-import { refineDurationRoundOptions } from '../options/roundingRefine'
 import {
   bigNanoInHour,
   bigNanoInMicro,
@@ -19,6 +17,8 @@ import {
   durationFieldNamesAsc,
 } from './durationFields'
 import * as errorMessages from './errorMessages'
+import { Overflow } from './optionsModel'
+import { refineDurationRoundOptions } from './optionsRoundingRefine'
 import {
   RelativeToSlots,
   isZonedEpochSlots,

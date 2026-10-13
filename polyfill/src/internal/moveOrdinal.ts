@@ -1,4 +1,3 @@
-import { Overflow } from '../options/model'
 import {
   computeCalendarDateFields,
   computeCalendarDayOfYear,
@@ -10,6 +9,7 @@ import * as errorMessages from './errorMessages'
 import { CalendarDateFields } from './fieldTypes'
 import { computeIsoDayOfWeek, computeIsoWeekFields } from './isoCalendarMath'
 import { moveDateByDays } from './move'
+import { Overflow } from './optionsModel'
 import { clampEntity, throwRangeError } from './utils'
 
 // An ordinal is a 1-based coordinate within a containing period: day of the

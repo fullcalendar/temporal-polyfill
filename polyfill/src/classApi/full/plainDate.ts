@@ -39,12 +39,12 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainDateIso } from '../../internal/isoFormat'
 import { parsePlainDate } from '../../internal/isoParse'
 import { moveDate } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { createDateTimeFromRefinedFields } from '../../internal/slotsFromRefinedFields'
 import { checkIsoDateInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
-import { refineOverflowOptions } from '../../options/fieldRefine'
 import {
   CalendarArg,
   getCalendarFromBag,

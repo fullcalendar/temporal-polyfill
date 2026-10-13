@@ -347,9 +347,12 @@ unsuffixed: `branding`, `classStyle`, `gettersForSlots`, `gettersForNative`,
 `withFields`. Repeating a basename across the two directories is avoided for
 grep and editor-tab reasons, not because it is ambiguous to the compiler.
 
-**`options/` is a sibling of `internal/`, not a layer above or below it.** It
-holds the files that read raw public option bags. `options/model.ts` is the
-canonical home for every option enum and refined tuple type; `internal/` and
+**Option-bag files live in `internal/` with an `options` prefix.** They read
+raw public option bags: `optionsCoerce`, `optionsNormalize`, and the
+`options*Refine` readers. `internal/optionsModel.ts` is the canonical home for
+every option enum and refined tuple type; the rest of `internal/` and
 `apiHelpers/` import those types from there and never redeclare them. The
-other files in that directory are the parsers that produce the enums, and
-none of them exports a type.
+other `options*` files are the parsers that produce the enums, and none of
+them exports a type. They once had their own `options/` directory, but it and
+`internal/` import each other, and since chunks are named per directory that
+made a chunk-level import cycle (#107).

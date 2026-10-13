@@ -1,4 +1,3 @@
-import { EpochDisambig, OffsetDisambig, Overflow } from '../options/model'
 import {
   computeCalendarDateFields,
   computeCalendarMonthCodeParts,
@@ -41,6 +40,7 @@ import {
   YearMonthFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
+import { EpochDisambig, OffsetDisambig, Overflow } from './optionsModel'
 import {
   ZonedEpochNanoFields,
   createDurationSlots,

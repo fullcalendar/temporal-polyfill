@@ -1,4 +1,3 @@
-import { Overflow } from '../options/model'
 import { bigNanoInUtcDay } from './bigNano'
 import {
   computeCalendarDateFields,
@@ -27,6 +26,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { addIsoMonths } from './isoCalendarMath'
+import { Overflow } from './optionsModel'
 import { ZonedEpochNanoFields } from './slots'
 import {
   checkEpochNanoInBounds,

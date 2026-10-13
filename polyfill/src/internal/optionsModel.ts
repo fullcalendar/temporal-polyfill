@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
-import { type SubsecDigits } from '../internal/temporalSpecHelpers'
-import { Unit } from '../internal/units'
+import { type SubsecDigits } from './temporalSpecHelpers'
+import { Unit } from './units'
 
 /*
 Canonical option model shared by internal/ and apiHelpers/.

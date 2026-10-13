@@ -1,41 +1,41 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { requirePropDefined } from '../internal/cast'
-import * as errorMessages from '../internal/errorMessages'
-import type {
-  DurationRoundingOptions,
-  DurationTotalOptions,
-} from '../internal/temporalSpecHelpers'
-import { type DayTimeUnit, Unit } from '../internal/units'
-import { throwRangeError } from '../internal/utils'
+import { requirePropDefined } from './cast'
+import * as errorMessages from './errorMessages'
 import {
   coerceLargestUnit,
   coerceRoundingIncInteger,
   coerceRoundingMode,
   coerceSmallestUnit,
   coerceTotalUnit,
-} from './coerce'
+} from './optionsCoerce'
 import {
   largestUnitStr,
   relativeToName,
   roundingModeName,
   smallestUnitStr,
   totalUnitStr,
-} from './config'
-import { RoundingModeEnum } from './model'
+} from './optionsConfig'
+import { RoundingModeEnum } from './optionsModel'
 import type {
   DiffTuple,
   DurationRoundingTuple,
   RoundingMathTuple,
   RoundingTuple,
   UnitDiffRoundingTuple,
-} from './model'
-import { normalizeOptions, normalizeOptionsOrString } from './normalize'
+} from './optionsModel'
+import { normalizeOptions, normalizeOptionsOrString } from './optionsNormalize'
 import {
   checkLargestSmallestUnit,
   validateRoundingInc,
   validateUnitRange,
-} from './validate'
+} from './optionsValidate'
+import type {
+  DurationRoundingOptions,
+  DurationTotalOptions,
+} from './temporalSpecHelpers'
+import { type DayTimeUnit, Unit } from './units'
+import { throwRangeError } from './utils'
 
 /*
 High-level rounding, diff, and total option refinement.

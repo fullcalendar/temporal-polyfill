@@ -1,12 +1,4 @@
 import {
-  roundExpand,
-  roundHalfCeil,
-  roundHalfEven,
-  roundHalfExpand,
-  roundHalfFloor,
-  roundHalfTrunc,
-} from '../internal/utils'
-import {
   CalendarDisplay,
   Direction,
   EpochDisambig,
@@ -15,7 +7,15 @@ import {
   Overflow,
   RoundingModeEnum,
   TimeZoneDisplay,
-} from './model'
+} from './optionsModel'
+import {
+  roundExpand,
+  roundHalfCeil,
+  roundHalfEven,
+  roundHalfExpand,
+  roundHalfFloor,
+  roundHalfTrunc,
+} from './utils'
 
 /*
 Static option names, string-to-enum maps, and enum-indexed config tables.

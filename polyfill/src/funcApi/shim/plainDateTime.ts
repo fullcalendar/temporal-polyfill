@@ -81,6 +81,11 @@ import {
   moveDateTime,
   moveDateTimeByNano,
 } from '../../internal/move'
+import {
+  refineEpochDisambigOptions,
+  refineOverflowOptions,
+} from '../../internal/optionsFieldRefine'
+import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
 import {
   createDateSlots,
@@ -101,11 +106,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import {
-  refineEpochDisambigOptions,
-  refineOverflowOptions,
-} from '../../options/fieldRefine'
-import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike, DateTimeFromFields } from '../commonTypes'
 import { PlainDateTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'

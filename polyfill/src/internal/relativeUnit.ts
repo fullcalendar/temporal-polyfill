@@ -1,4 +1,4 @@
-import { RoundingModeEnum } from '../options/model'
+import { RoundingModeEnum } from './optionsModel'
 import { roundNumberToInc } from './roundNumber'
 import { compareBigInts, divTrunc, fabricateNearHalfFraction } from './utils'
 

@@ -1,13 +1,8 @@
-import * as errorMessages from '../internal/errorMessages'
-import {
-  Unit,
-  nanoInUtcDay,
-  unitNamesAsc,
-  unitNanoMap,
-} from '../internal/units'
-import { clampEntity, throwRangeError } from '../internal/utils'
-import { roundingIncName } from './config'
-import { Overflow } from './model'
+import * as errorMessages from './errorMessages'
+import { roundingIncName } from './optionsConfig'
+import { Overflow } from './optionsModel'
+import { Unit, nanoInUtcDay, unitNamesAsc, unitNanoMap } from './units'
+import { clampEntity, throwRangeError } from './utils'
 
 /*
 Post-coercion option validation.

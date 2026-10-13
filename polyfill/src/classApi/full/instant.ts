@@ -22,6 +22,8 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatInstantIso } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveEpochNano } from '../../internal/move'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
@@ -31,8 +33,6 @@ import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
 import { queryTimeZone } from '../../internal/timeZone'
 import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { RoundingModeEnum } from '../../options/model'
-import { refineRoundingOptions } from '../../options/roundingRefine'
 import {
   Duration,
   DurationArg,

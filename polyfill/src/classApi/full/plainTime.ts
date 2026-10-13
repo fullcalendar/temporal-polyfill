@@ -21,6 +21,9 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { moveTime } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
+import { RoundingModeEnum } from '../../internal/optionsModel'
+import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundTimeToInc } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
@@ -29,9 +32,6 @@ import {
 } from '../../internal/timeFieldMath'
 import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, isObjectLike, mapProps } from '../../internal/utils'
-import { refineOverflowOptions } from '../../options/fieldRefine'
-import { RoundingModeEnum } from '../../options/model'
-import { refineRoundingOptions } from '../../options/roundingRefine'
 import {
   Duration,
   DurationArg,

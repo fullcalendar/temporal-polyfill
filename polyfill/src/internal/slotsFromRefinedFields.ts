@@ -1,4 +1,3 @@
-import { Overflow } from '../options/model'
 import {
   computeCalendarIsoFieldsFromParts,
   computeCalendarMonthCodeParts,
@@ -26,6 +25,7 @@ import {
   computeIsoYearMonthFieldsForMonthDay,
   isoEpochFirstLeapYear,
 } from './isoCalendarMath'
+import { Overflow } from './optionsModel'
 import { createDateSlots, createDateTimeSlots } from './slots'
 import {
   checkIsoDateInBounds,

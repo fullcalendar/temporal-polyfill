@@ -25,6 +25,7 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from '../internal/fieldTypes'
+import { refineUnitDiffOptions } from '../internal/optionsRoundingRefine'
 import {
   RelativeOps,
   createDateRelativeOps,
@@ -35,7 +36,6 @@ import { EpochNanoFields, ZonedEpochNanoFields } from '../internal/slots'
 import { timeFieldsToNano } from '../internal/timeFieldMath'
 import { DayWeekUnit, TimeUnit, Unit, YearMonthUnit } from '../internal/units'
 import { bindArgs } from '../internal/utils'
-import { refineUnitDiffOptions } from '../options/roundingRefine'
 
 // Unit-specific diffing for the func API (diffYears, diffHours, etc). Each
 // entry point validates its inputs and options, then composes the pieces the

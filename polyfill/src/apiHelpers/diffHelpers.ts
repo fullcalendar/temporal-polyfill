@@ -15,6 +15,8 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from '../internal/fieldTypes'
+import { RoundingModeEnum } from '../internal/optionsModel'
+import { refineDiffOptions } from '../internal/optionsRoundingRefine'
 import { getCommonCalendar } from '../internal/slotUtils'
 import {
   EpochNanoFields,
@@ -23,8 +25,6 @@ import {
 } from '../internal/slots'
 import { TimeUnit, Unit } from '../internal/units'
 import { NumberSign } from '../internal/utils'
-import { RoundingModeEnum } from '../options/model'
-import { refineDiffOptions } from '../options/roundingRefine'
 
 // Shared API preparation keeps option reads and since's rounding inversion /
 // result negation together. Arithmetic below this layer sees only parsed units.

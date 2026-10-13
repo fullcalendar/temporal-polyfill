@@ -34,6 +34,7 @@ import {
 } from '../../internal/isoFormat'
 import { parseInstant } from '../../internal/isoParse'
 import { moveEpochNano, moveEpochNanoByNano } from '../../internal/move'
+import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import {
   computeBigNanoInc,
   roundBigNanoToDayOriginInc,
@@ -45,7 +46,6 @@ import { queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import { TimeUnit, Unit } from '../../internal/units'
 import { NumberSign, bindArgs } from '../../internal/utils'
-import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike } from '../commonTypes'
 import { InstantRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'

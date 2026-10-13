@@ -1,6 +1,6 @@
 import type { Temporal } from 'temporal-spec'
 import type { RoundingMathOptions, RoundingMode } from 'temporal-utils'
-import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
+import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 
 /*
 Shoehorns a separately-held smallestUnit into a raw options object for the

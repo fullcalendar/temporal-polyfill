@@ -1,5 +1,5 @@
-import { roundingModeFuncs } from '../options/config'
-import { RoundingModeEnum } from '../options/model'
+import { roundingModeFuncs } from './optionsConfig'
+import { RoundingModeEnum } from './optionsModel'
 
 /*
 Never receives smallestUnit/roundingIncrement. Use computeNanoInc for that.

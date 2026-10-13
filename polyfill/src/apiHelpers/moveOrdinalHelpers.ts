@@ -8,7 +8,7 @@ import {
   moveToRefinedDayOfYear,
   moveToRefinedWeekOfYear,
 } from '../internal/moveOrdinal'
-import { refineOverflowOptions } from '../options/fieldRefine'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 
 // Public-argument wrappers over internal/moveOrdinal.ts. Public option
 // coercion must happen before the ordinal's numeric conversion.

@@ -11,9 +11,9 @@ import {
 } from '../../apiHelpers/gettersForNative'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
+import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
-import { normalizeUnitRoundOptions } from '../../options/roundingRefine'
 import {
   DateTimeFormatLike,
   DateTimeFromFields,

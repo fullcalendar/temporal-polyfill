@@ -1,4 +1,3 @@
-import { RoundingModeEnum, UnitDiffRoundingTuple } from '../options/model'
 import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import {
@@ -25,6 +24,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateByDays, moveToStartOfMonth } from './move'
+import { RoundingModeEnum, UnitDiffRoundingTuple } from './optionsModel'
 import {
   RelativeOps,
   createDateRelativeOps,

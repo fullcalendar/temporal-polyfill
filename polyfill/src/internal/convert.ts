@@ -1,4 +1,3 @@
-import { EpochDisambig, Overflow } from '../options/model'
 import { bigNanoInMilli } from './bigNano'
 import { getCalendarFieldNames } from './calendarFields'
 import { type CalendarImpl } from './calendarImpl'
@@ -26,6 +25,7 @@ import {
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { mergeCalendarFields } from './merge'
+import { EpochDisambig, Overflow } from './optionsModel'
 import {
   EpochNanoFields,
   ZonedEpochNanoFields,

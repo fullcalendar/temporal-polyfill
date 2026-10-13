@@ -1,5 +1,4 @@
 import type { Temporal } from 'temporal-spec'
-import { refineZonedFieldOptions } from '../options/fieldRefine'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -31,6 +30,7 @@ import {
   parseOffsetNano,
   parseOffsetNanoMaybe,
 } from './offsetParse'
+import { refineZonedFieldOptions } from './optionsFieldRefine'
 import { RelativeToSlots } from './relativeMath'
 import {
   EpochNanoFields,

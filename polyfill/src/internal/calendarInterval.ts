@@ -1,4 +1,3 @@
-import { RoundingModeEnum } from '../options/model'
 import {
   computeCalendarDateFields,
   computeCalendarIsoFieldsFromParts,
@@ -14,6 +13,7 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { computeIsoDayOfWeek } from './isoCalendarMath'
 import { addCalendarMonths, moveDateByDays } from './move'
+import { RoundingModeEnum } from './optionsModel'
 import { computeEpochNanoFrac } from './relativeUnit'
 import { roundWithMode } from './roundNumber'
 import { TimeUnit, Unit } from './units'

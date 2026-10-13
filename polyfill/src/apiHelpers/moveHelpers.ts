@@ -3,7 +3,7 @@ import { type CalendarImpl } from '../internal/calendarImpl'
 import { toStrictInteger } from '../internal/cast'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import { moveDateByCalendarUnits } from '../internal/move'
-import { refineOverflowOptions } from '../options/fieldRefine'
+import { refineOverflowOptions } from '../internal/optionsFieldRefine'
 
 export function reversedMove<S>(
   f: (slots: S, units: number, options?: Temporal.OverflowOptions) => S,

@@ -24,6 +24,7 @@ import { LocalesArg, RawDateTimeFormat } from '../../internal/intlFormatUtils'
 import { formatPlainTimeIso, formatTimeIsoAuto } from '../../internal/isoFormat'
 import { parsePlainTime } from '../../internal/isoParse'
 import { moveTime, moveTimeByNano } from '../../internal/move'
+import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { computeNanoInc, roundTimeToInc } from '../../internal/round'
 import {
   timeFieldsToMilli,
@@ -39,7 +40,6 @@ import {
   nanoInSec,
 } from '../../internal/units'
 import { NumberSign, bindArgs, mapProps } from '../../internal/utils'
-import { refineUnitRoundOptions } from '../../options/roundingRefine'
 import { DateTimeFormatLike } from '../commonTypes'
 import { PlainTimeRecordBranding } from '../recordBranding'
 import type * as RecordTypes from '../recordTypes'

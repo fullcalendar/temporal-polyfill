@@ -1,16 +1,7 @@
 import type { Temporal } from 'temporal-spec'
-import { toIntegerWithTrunc, toString } from '../internal/cast'
-import {
-  DurationFieldName,
-  durationFieldNamesAsc,
-} from '../internal/durationFields'
-import * as errorMessages from '../internal/errorMessages'
-import type {
-  FractionalSecondDigits,
-  SubsecDigits,
-} from '../internal/temporalSpecHelpers'
-import { Unit, unitNameMap } from '../internal/units'
-import { bindArgs, clampEntity, throwRangeError } from '../internal/utils'
+import { toIntegerWithTrunc, toString } from './cast'
+import { DurationFieldName, durationFieldNamesAsc } from './durationFields'
+import * as errorMessages from './errorMessages'
 import {
   calendarDisplayMap,
   directionMap,
@@ -27,8 +18,14 @@ import {
   subsecDigitsName,
   timeZoneDisplayMap,
   totalUnitStr,
-} from './config'
-import { Overflow } from './model'
+} from './optionsConfig'
+import { Overflow } from './optionsModel'
+import type {
+  FractionalSecondDigits,
+  SubsecDigits,
+} from './temporalSpecHelpers'
+import { Unit, unitNameMap } from './units'
+import { bindArgs, clampEntity, throwRangeError } from './utils'
 
 /*
 Single-option coercion.

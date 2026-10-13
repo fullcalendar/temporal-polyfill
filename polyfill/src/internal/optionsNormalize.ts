@@ -1,5 +1,5 @@
 export { normalizeOptions } from 'temporal-utils/protected'
-import { requireObjectLike } from '../internal/cast'
+import { requireObjectLike } from './cast'
 
 /*
 Whole-options normalization only.

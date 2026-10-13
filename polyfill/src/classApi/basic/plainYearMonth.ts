@@ -37,10 +37,10 @@ import { validateIsoDateFields } from '../../internal/isoCalendarMath'
 import { formatPlainYearMonthIso } from '../../internal/isoFormat'
 import { parsePlainYearMonth } from '../../internal/isoParse'
 import { moveYearMonth } from '../../internal/move'
+import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { createDateSlots } from '../../internal/slots'
 import { checkIsoYearMonthInBounds } from '../../internal/temporalLimits'
 import { NumberSign, isObjectLike } from '../../internal/utils'
-import { refineOverflowOptions } from '../../options/fieldRefine'
 import { getCalendarFromBag } from './calendarArg'
 import {
   resolveBasicCalendarArg,
