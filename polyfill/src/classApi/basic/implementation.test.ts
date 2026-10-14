@@ -75,6 +75,18 @@ describe('Temporal.Duration', () => {
   )
 })
 
+describe('Temporal.Instant', () => {
+  it('uses positive-sign rounding before the epoch', () => {
+    const instant = Temporal.Instant.from('1969-12-31T23:30Z')
+    expect(instant.round('hour').toString()).toBe('1970-01-01T00:00:00Z')
+    expect(
+      Temporal.Instant.fromEpochNanoseconds(-1n).toString({
+        smallestUnit: 'second',
+      }),
+    ).toBe('1969-12-31T23:59:59Z')
+  })
+})
+
 describe('Temporal.ZonedDateTime', () => {
   describe('round', () => {
     it('only accepts day/time smallestUnit', () => {
