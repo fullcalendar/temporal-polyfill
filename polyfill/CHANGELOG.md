@@ -8,6 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## Unreleased
+
+### 🐛 Bugfixes
+
+- FIX: `Instant#round`, `Instant#toString` and `ZonedDateTime#toString` round pre-1970 values to the correct boundary (#110, #117, #111). Thx @vera-rubin
+
 ## v1.0.6
 
 ### 🐛 Bugfixes
