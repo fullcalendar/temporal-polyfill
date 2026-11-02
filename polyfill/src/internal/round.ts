@@ -243,8 +243,13 @@ export function roundDayTimeDurationByInc(
   nanoInc: number,
   roundingMode: RoundingModeEnum,
 ): Partial<DurationFields> {
-  // force <= Day
-  const maxUnit = Math.min(getMaxDurationUnit(durationFields), Unit.Day)
+  // Force <= Day. Also force >= Second, because Duration fields are float64: a huge
+  // sub-second field would lose the digits this rounding just decided. Balancing up
+  // leaves a whole-seconds field and small remainders, which are all exact.
+  const maxUnit = Math.max(
+    Math.min(getMaxDurationUnit(durationFields), Unit.Day),
+    Unit.Second,
+  )
   const bigNano = durationDayTimeToBigNano(durationFields)
   const roundedBigNano = roundBigNanoToInc(
     bigNano,

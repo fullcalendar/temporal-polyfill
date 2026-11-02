@@ -129,3 +129,39 @@ describe('Duration#toString rounding to zero', () => {
     ).toBe('PT0S')
   })
 })
+
+describe('Duration#toString rounding huge sub-second fields', () => {
+  it('keeps the rounded digits above 2^53', () => {
+    // A Number near 2^60 holds only multiples of 256, so leaving this in the
+    // nanoseconds field would snap the rounded value back to the input
+    const duration = new Temporal.Duration(0, 0, 0, 0, 0, 0, 0, 0, 0, 2 ** 60)
+
+    expect(
+      duration.toString({
+        smallestUnit: 'microsecond',
+        roundingMode: 'ceil',
+      }),
+    ).toBe('PT1152921504.606847S')
+    expect(
+      duration.negated().toString({
+        smallestUnit: 'microsecond',
+        roundingMode: 'floor',
+      }),
+    ).toBe('-PT1152921504.606847S')
+  })
+
+  it('applies to milliseconds and microseconds fields', () => {
+    expect(
+      new Temporal.Duration(0, 0, 0, 0, 0, 0, 0, 2 ** 60).toString({
+        smallestUnit: 'second',
+        roundingMode: 'ceil',
+      }),
+    ).toBe('PT1152921504606847S')
+    expect(
+      new Temporal.Duration(0, 0, 0, 0, 0, 0, 0, 0, 2 ** 60).toString({
+        smallestUnit: 'millisecond',
+        roundingMode: 'ceil',
+      }),
+    ).toBe('PT1152921504606.847S')
+  })
+})

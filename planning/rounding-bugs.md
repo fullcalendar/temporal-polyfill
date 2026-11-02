@@ -105,3 +105,26 @@ with the default `trunc` mode. The function API shares the formatter.
 `-` from that sign. It's not a rounding error: the fields were correct.
 
 **Fix:** recompute the sign from the rounded fields.
+
+## #5: `Duration#toString` loses precision on huge sub-second fields
+
+**Symptom:** `new Duration(0, 0, 0, 0, 0, 0, 0, 0, 0, 2 ** 60).toString({ smallestUnit: 'microsecond', roundingMode: 'ceil' })`
+gave `PT1152921504.606846S`. Correct is `PT1152921504.606847S`.
+
+**How it happens:** rounding a duration whose largest non-zero field is a sub-second
+one, with a value above 2^53. It failed about 25% of the time at that size, and never
+below it.
+
+**Why:** this is real double rounding. `roundDayTimeDurationByInc` rounds exactly in
+BigInt, but then balances the result back into the input's largest unit. `Number()`
+at that size can only hold multiples of 256, so it undoes the rounding:
+
+```text
+1152921504606846976   the input
+1152921504606847000   rounded with `ceil`, exact in BigInt
+1152921504606846976   after Number(), back to the input
+```
+
+**Fix:** balance into at least seconds, like the spec's `Duration#toString`, which
+uses `LargerOfTwoTemporalUnits(largestUnit, second)`. Whole seconds and small
+sub-second remainders are all exact. Lite does the same in `Duration.ts`'s `toString`.

@@ -16,6 +16,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `ZonedDateTime` `until`/`since` no longer throw when a backward diff ends in a repeated hour
 - FIX: Rounding zoned differences to a time unit near a repeated hour gives the correct day and time split
 - FIX: `Duration#toString` no longer prints `-PT0S` when a negative duration rounds to zero
+- FIX: `Duration#toString` keeps its rounded digits for sub-second fields above 2^53
 
 ## v1.0.6
 
