@@ -1,15 +1,19 @@
 # WONTFIX
-# The spec calls for higher floating-point division precision than what JS's
-# 64-bit floats provide. proposal-temporal/polyfill achieves this via string
+# Duration#total can be off in the last bit of the result. The spec calls for the
+# float closest to the exact value, which JS's 64-bit floats can't always produce
+# through ordinary arithmetic. proposal-temporal/polyfill achieves this via string
 # manipulation hacks:
 # https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/timeduration.mjs#L92
 #
 # Our polyfill avoids the associated performance degradation and filesize
-# increase by doing simple native JS number division, but this sometimes results
-# in less precise results. Example:
+# increase by combining native JS number operations, each of which rounds, so the
+# result can be one float away from the exact value. Example:
 #
 #   OURS: 816.5692187493501
 #   SPEC: 816.56921874935
+#
+# This applies to every unit of Duration#total, including calendar units with
+# relativeTo.
 #
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
 built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js

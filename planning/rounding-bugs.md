@@ -168,3 +168,37 @@ turned up in the increment sweep.
 `roundingIncrement: { valueOf() { return 1n } }`, skip the expected `TypeError` in
 the shared number converter. The reference, lite and native all throw. It's
 unrelated to this range check.
+
+## #6 and #9: `Duration#total` off in the last bit (WONTFIX)
+
+**Symptom:** `Duration.from({ minutes: 146 }).total('hour')` gives
+`2.4333333333333336`, where the exact result rounds to `2.433333333333333`. Relative
+totals such as `{ unit: 'year', relativeTo }` have the same kind of error.
+
+**How it happens:** in sweeps, non-relative totals (#6) were wrong in up to about 4.5%
+of inputs, and relative totals (#9) in about 14% for years, 2% for months and 0.7% for
+weeks. The error never exceeded 1 ULP, the last bit of the float.
+
+**Why:** the steps round more than once. `divideBigNanoToExactNumber` rounds the
+fraction, then rounds again when adding the whole part. `totalRelativeUnit` divides,
+multiplies and adds in floats, and a year in nanoseconds is already above 2^53.
+
+**Decision:** leave both. Lite documents the same limitation in
+`docs/restrictions.md`, native had identical failure counts for #9 in our sweep, and
+being exact costs size and speed. A narrow fix for #6 was tried and dropped, since no
+user reported this. The comment in
+`polyfill/scripts/test262-expected-failures/shim.txt` records the deviation.
+
+## #3: Chinese and Dangi year moves (set aside)
+
+Kept for a separate calendar pass. `Temporal.PlainDate.from({ year: 1984, monthCode: 'M10L', day: 1, calendar: 'chinese' }).add({ years: 20 }).monthCode`
+gives `M09`, and correct is `M10`.
+
+**Why:** when the target year lacks the source's leap month, `resolveMonthInMovedYear`
+in `move.ts` returns the month code's number as the ordinal month. That's wrong when
+the target year has an earlier leap month.
+
+**Likely fix, tried on a copy of the build only:**
+`monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)` in place of
+`monthCodeNumber`. It cleared every `monthCode` difference from the reference and lite
+in a 1950-2050 sweep. It hasn't been run through vitest or test262.
