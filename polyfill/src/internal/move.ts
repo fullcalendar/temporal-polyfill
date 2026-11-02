@@ -354,9 +354,12 @@ export function resolveMonthInMovedYear(
       throwRangeError(errorMessages.invalidLeapMonth)
     }
 
-    // Chinese/Dangi-style calendars constrain MxxL to the matching common Mxx.
+    // Chinese/Dangi-style calendars constrain MxxL to the matching common Mxx,
+    // whose ordinal is one higher if the target year's leap month comes first.
     // Hebrew has a fixed Adar I leap slot; constraining it lands in common Adar.
-    return leapMonthMeta! < 0 ? -leapMonthMeta! : monthCodeNumber
+    if (leapMonthMeta! < 0) {
+      return -leapMonthMeta!
+    }
   }
 
   return monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)

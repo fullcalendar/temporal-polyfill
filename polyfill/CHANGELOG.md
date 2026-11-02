@@ -19,6 +19,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `Duration#toString` keeps its rounded digits for sub-second fields above 2^53
 - FIX: Relative rounding gives `0` instead of `-0`
 - FIX: `Instant#round` rejects `roundingIncrement` above 1e9
+- FIX: Chinese and Dangi year arithmetic lands on the correct month when constraining a leap month
 
 ## v1.0.6
 

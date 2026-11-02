@@ -189,16 +189,30 @@ being exact costs size and speed. A narrow fix for #6 was tried and dropped, sin
 user reported this. The comment in
 `polyfill/scripts/test262-expected-failures/shim.txt` records the deviation.
 
-## #3: Chinese and Dangi year moves (set aside)
+## #3: Chinese and Dangi year moves
 
-Kept for a separate calendar pass. `Temporal.PlainDate.from({ year: 1984, monthCode: 'M10L', day: 1, calendar: 'chinese' }).add({ years: 20 }).monthCode`
-gives `M09`, and correct is `M10`.
+**Symptom:** `PlainDate.from({ year: 1984, monthCode: 'M10L', day: 1, calendar: 'chinese' }).add({ years: 20 }).monthCode`
+gave `M09`. Correct is `M10`. Year-unit `until` could also give wrong results or throw
+`Cannot mix duration signs`.
 
-**Why:** when the target year lacks the source's leap month, `resolveMonthInMovedYear`
-in `move.ts` returns the month code's number as the ordinal month. That's wrong when
-the target year has an earlier leap month.
+**How it happens:** moving a date in a leap month by years, when the target year lacks
+that leap month but has an earlier one. About 16% of year moves from leap-month
+sources were wrong in a 1950-2050 sweep. `PlainYearMonth#add` and year-unit diffs share
+the path.
 
-**Likely fix, tried on a copy of the build only:**
-`monthCodeNumberToMonth(monthCodeNumber, false, targetLeapMonth)` in place of
-`monthCodeNumber`. It cleared every `monthCode` difference from the reference and lite
-in a 1950-2050 sweep. It hasn't been run through vitest or test262.
+**Why:** `resolveMonthInMovedYear` correctly constrains `MxxL` to `Mxx`, but then
+returned the month code's number as if it were an ordinal month. An earlier leap month
+in the target year shifts every later ordinal up by one, so `M10` is ordinal 11 there,
+and ordinal 10 is really `M09`.
+
+**Fix:** convert with `monthCodeNumberToMonth`, which accounts for the target year's
+leap month. Lite separates the same two steps as `constrainMonthCode` and
+`monthCodeToOrdinal`. Hebrew's branch is unchanged because its leap slot is fixed.
+
+**Left alone:** year-unit `until`/`since` still differs from the reference and lite on
+some leap-month sources, for all three lunisolar calendars. For example,
+`M03L` day 13 of 1955 in Chinese, `until` 10238 days later, gives `P27Y13M20D` where the
+reference and lite give `P28Y20D`. It's a separate cause in `diffCalendarDates`, which
+borrows a month for the day difference *before* comparing month codes, while the spec's
+`NonISODateSurpasses` compares the original month code first. Fixing that means
+reworking that diff logic.
