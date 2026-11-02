@@ -13,6 +13,7 @@ don't work in GH release markdown. must be absolute
 ### 🐛 Bugfixes
 
 - FIX: `Instant#round`, `Instant#toString` and `ZonedDateTime#toString` round pre-1970 values to the correct boundary (#110, #117, #111). Thx @vera-rubin
+- FIX: `ZonedDateTime` `until`/`since` no longer throw when a backward diff ends in a repeated hour
 
 ## v1.0.6
 

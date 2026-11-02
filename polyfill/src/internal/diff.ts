@@ -497,11 +497,12 @@ export function prepareZonedEpochDiff(
     dayCorrection++
   }
 
-  // Date-only units land on the end date with the
-  // start time. Around a compatible DST push-forward, forward differences can
-  // overshoot once more after the plain wall-clock correction above, so only
-  // that direction gets a single extra retry.
-  const maxDayCorrection = dayCorrection + (sign > 0 ? 1 : 0)
+  // Date-only units land on the end date with the start time, which can still
+  // overshoot after the wall-clock correction above. Going backward, the marker
+  // can resolve to the earlier occurrence of a repeated hour. Going forward, a
+  // compatible DST push-forward can move the marker past the end. These limits
+  // are absolute, so they include any correction already applied above.
+  const maxDayCorrection = sign > 0 ? 2 : 1
 
   // The condition-less `for` lets TypeScript see that the final candidate is
   // returned unconditionally, so the result type needs no `undefined`.
