@@ -629,7 +629,8 @@ export function roundBigNanoToDayOriginInc(
 ): bigint {
   const [day, timeNano] = divModFloorBigInt(bigNano, bigNanoInUtcDay)
   const dayOriginNano = day * bigNanoInUtcDay
-  const quotientTail = (dayOriginNano / bigNanoInc + timeNano / bigNanoInc) % 2n
+  // Non-negative parity keeps Instant rounding's sign positive before the epoch.
+  const quotientTail = (dayOriginNano / bigNanoInc + timeNano / bigNanoInc) & 1n
 
   return (
     dayOriginNano +
