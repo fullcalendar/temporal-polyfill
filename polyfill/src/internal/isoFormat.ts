@@ -7,6 +7,7 @@ import {
 } from './calendarImpl'
 import { DurationFields } from './durationFields'
 import {
+  computeDurationSign,
   durationSubMinuteToBigNano,
   negateDurationFields,
   validateDurationFields,
@@ -410,6 +411,9 @@ export function formatDurationIso(
       ...slots,
       ...roundDayTimeDurationByInc(slots, nanoInc, roundingMode),
     }
+
+    // Rounding can zero out every field, so the original sign may no longer apply
+    slots.sign = computeDurationSign(slots)
 
     // Check out-of-bounds
     validateDurationFields(slots)

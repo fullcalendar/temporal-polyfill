@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as DurationFns from '../../funcApi/duration'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
@@ -90,5 +91,41 @@ describe('ZonedDateTime time rounding near a repeated hour', () => {
         })
         .toString(),
     ).toBe('P1DT1H')
+  })
+})
+
+describe('Duration#toString rounding to zero', () => {
+  it('drops the sign when every field rounds away', () => {
+    const duration = Temporal.Duration.from({ milliseconds: -1 })
+
+    expect(duration.toString({ smallestUnit: 'second' })).toBe('PT0S')
+    expect(duration.toString({ fractionalSecondDigits: 0 })).toBe('PT0S')
+    expect(
+      Temporal.Duration.from({ nanoseconds: -1 }).toString({
+        smallestUnit: 'millisecond',
+      }),
+    ).toBe('PT0.000S')
+  })
+
+  it('keeps the sign when something remains', () => {
+    expect(
+      Temporal.Duration.from({ milliseconds: -1 }).toString({
+        smallestUnit: 'second',
+        roundingMode: 'expand',
+      }),
+    ).toBe('-PT1S')
+    expect(
+      Temporal.Duration.from({ weeks: -1, milliseconds: -1 }).toString({
+        smallestUnit: 'second',
+      }),
+    ).toBe('-P1WT0S')
+  })
+
+  it('function API', () => {
+    expect(
+      DurationFns.toString(DurationFns.fromFields({ milliseconds: -1 }), {
+        smallestUnit: 'second',
+      }),
+    ).toBe('PT0S')
   })
 })

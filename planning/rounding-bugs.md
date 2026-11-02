@@ -91,3 +91,17 @@ interval. Reference:
 giving `-1.0416666666666667`, because `clampRelativeUnitValue` doesn't validate its
 retried window. Lite throws a `RangeError`, and the reference fails an internal
 assertion. It's a separate path from this fix.
+
+## #4: `Duration#toString` keeps a stale negative sign
+
+**Symptom:** `Duration.from({ milliseconds: -1 }).toString({ smallestUnit: 'second' })`
+gave `-PT0S`. Correct is `PT0S`.
+
+**How it happens:** any negative duration whose every field rounds to zero, including
+with the default `trunc` mode. The function API shares the formatter.
+
+**Why:** `formatDurationIso` merged the rounded fields over the original slots with
+`{ ...slots, ...rounded }`, which kept the old `sign`. The formatter then printed the
+`-` from that sign. It's not a rounding error: the fields were correct.
+
+**Fix:** recompute the sign from the rounded fields.
