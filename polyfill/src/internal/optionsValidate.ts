@@ -18,7 +18,7 @@ TODO: change defaults and the way this is called because almost always
 allowManyLargeUnits: true
 */
 export function validateRoundingInc(
-  roundingInc: number, // results from coerceRoundingIncInteger
+  roundingInc: number, // from coerceRoundingIncInteger, so already 1 to 1e9
   smallestUnit: Unit,
   allowManyLargeUnits?: boolean,
   solarMode?: boolean,
@@ -26,28 +26,15 @@ export function validateRoundingInc(
   const upUnitNano = solarMode ? nanoInUtcDay : unitNanoMap[smallestUnit + 1]
 
   if (upUnitNano) {
-    const unitNano = unitNanoMap[smallestUnit]
-    const maxRoundingInc = upUnitNano / unitNano
-    roundingInc = clampEntity(
-      roundingIncName,
-      roundingInc,
-      1,
-      maxRoundingInc - (solarMode ? 0 : 1),
-      Overflow.Reject,
-    )
+    const incNano = roundingInc * unitNanoMap[smallestUnit]
 
-    // % is dangerous, but -0 will be falsy just like 0
-    if (upUnitNano % (roundingInc * unitNano)) {
+    // Must divide the larger unit evenly, which also rejects anything longer than
+    // it. Only solar mode can round to one whole larger unit.
+    if (upUnitNano % incNano || (!solarMode && incNano === upUnitNano)) {
       throwRangeError(errorMessages.invalidEntity(roundingIncName, roundingInc))
     }
-  } else {
-    roundingInc = clampEntity(
-      roundingIncName,
-      roundingInc,
-      1,
-      allowManyLargeUnits ? 10 ** 9 : 1,
-      Overflow.Reject,
-    )
+  } else if (!allowManyLargeUnits && roundingInc > 1) {
+    throwRangeError(errorMessages.invalidEntity(roundingIncName, roundingInc))
   }
 
   return roundingInc

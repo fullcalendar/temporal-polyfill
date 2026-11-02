@@ -43,7 +43,14 @@ export function coerceRoundingIncInteger(options: {
   if (roundingInc === undefined) {
     return 1
   }
-  return toIntegerWithTrunc(roundingInc, roundingIncName)
+  // The spec rejects this range when the option is read, before later options are
+  // read and before checking the increment against a unit. Instant#round needs
+  // that, since a huge increment can still divide evenly into its solar day.
+  const integer = toIntegerWithTrunc(roundingInc, roundingIncName)
+  if (integer < 1 || integer > 10 ** 9) {
+    throwRangeError(errorMessages.invalidEntity(roundingIncName, integer))
+  }
+  return integer
 }
 
 export function coerceFractionalSecondDigits(options: {

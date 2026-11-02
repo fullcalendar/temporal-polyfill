@@ -145,3 +145,26 @@ or `1 / value`. `sign` and `toString` were already fine.
 
 **Fix:** `|| 0` in `roundNumberToInc`, the choke point for every Number-based
 rounding caller.
+
+## #8: `Instant#round` accepts `roundingIncrement` above 1e9
+
+**Symptom:** `new Instant(5n).round({ smallestUnit: 'nanosecond', roundingIncrement: 2e9 })`
+returned a result. Correct is a `RangeError`.
+
+**How it happens:** only for values above 1e9 that divide evenly into a day, such as
+`2e9` or `86400e9`. `1e9 + 1` already threw, but only because it doesn't divide a
+day. Other APIs already rejected these values, though sometimes only after reading
+later options.
+
+**Why:** the spec's `GetRoundingIncrementOption` rejects anything outside 1 to 1e9 as
+soon as the option is read. We only coerced to an integer at that point and left the
+range to `validateRoundingInc`, whose Instant "solar mode" allows anything up to a
+full day in nanoseconds.
+
+**Fix:** check the range in `coerceRoundingIncInteger`. This isn't a rounding bug: it
+turned up in the increment sweep.
+
+**Left alone:** objects whose `valueOf` returns a BigInt, such as
+`roundingIncrement: { valueOf() { return 1n } }`, skip the expected `TypeError` in
+the shared number converter. The reference, lite and native all throw. It's
+unrelated to this range check.

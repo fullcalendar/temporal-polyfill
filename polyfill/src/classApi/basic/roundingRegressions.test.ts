@@ -210,3 +210,44 @@ describe('relative rounding to zero', () => {
     expect(PlainDateFns.diffYears(date, earlier, 'trunc')).toBe(0)
   })
 })
+
+describe('roundingIncrement range', () => {
+  const instant = new Temporal.Instant(5n)
+
+  it('Instant#round rejects increments above 1e9 that divide a day', () => {
+    for (const roundingIncrement of [2e9, 86400e9]) {
+      expect(() =>
+        instant.round({ smallestUnit: 'nanosecond', roundingIncrement }),
+      ).toThrow(RangeError)
+    }
+  })
+
+  it('still accepts an increment of exactly 1e9', () => {
+    expect(
+      instant
+        .round({ smallestUnit: 'nanosecond', roundingIncrement: 1e9 })
+        .toString(),
+    ).toBe('1970-01-01T00:00:00Z')
+    expect(
+      Temporal.Duration.from({ days: 1 })
+        .round({ smallestUnit: 'day', roundingIncrement: 1e9 })
+        .toString(),
+    ).toBe('PT0S')
+  })
+
+  it('rejects before reading later options', () => {
+    let didReadRoundingMode = false
+
+    expect(() =>
+      instant.round({
+        smallestUnit: 'nanosecond',
+        roundingIncrement: 2e9,
+        get roundingMode() {
+          didReadRoundingMode = true
+          return 'trunc' as const
+        },
+      }),
+    ).toThrow(RangeError)
+    expect(didReadRoundingMode).toBe(false)
+  })
+})

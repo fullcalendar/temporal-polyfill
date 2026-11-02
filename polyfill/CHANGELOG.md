@@ -18,6 +18,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `Duration#toString` no longer prints `-PT0S` when a negative duration rounds to zero
 - FIX: `Duration#toString` keeps its rounded digits for sub-second fields above 2^53
 - FIX: Relative rounding gives `0` instead of `-0`
+- FIX: `Instant#round` rejects `roundingIncrement` above 1e9
 
 ## v1.0.6
 
