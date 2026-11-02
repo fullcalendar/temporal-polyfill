@@ -128,3 +128,20 @@ at that size can only hold multiples of 256, so it undoes the rounding:
 **Fix:** balance into at least seconds, like the spec's `Duration#toString`, which
 uses `LargerOfTwoTemporalUnits(largestUnit, second)`. Whole seconds and small
 sub-second remainders are all exact. Lite does the same in `Duration.ts`'s `toString`.
+
+## #7: `-0` leaks from relative rounding
+
+**Symptom:** `Object.is(PlainDate.from('2020-06-01').until('2020-01-01', { largestUnit: 'year', smallestUnit: 'year', roundingMode: 'trunc' }).years, -0)`
+was `true`. Correct is `false`.
+
+**How it happens:** `until` and `Duration#round` on negative spans that round to zero
+in a year, month, week or zoned-day unit, and the function API's `diffYears`,
+`diffMonths`, `diffWeeks` and zoned `diffDays`. It's only visible through `Object.is`
+or `1 / value`. `sign` and `toString` were already fine.
+
+**Why:** rounding a small negative toward zero can return `-0`, such as
+`Math.ceil(-0.1)`, `Math.trunc(-0.1)`, and the `Math.round` branch of the half modes.
+`roundNumberToInc` passed that result straight through.
+
+**Fix:** `|| 0` in `roundNumberToInc`, the choke point for every Number-based
+rounding caller.

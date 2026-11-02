@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import * as CalendarFns from '../../funcApi/calendar'
 import * as DurationFns from '../../funcApi/duration'
+import * as PlainDateFns from '../../funcApi/plainDate'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
@@ -163,5 +165,48 @@ describe('Duration#toString rounding huge sub-second fields', () => {
         roundingMode: 'ceil',
       }),
     ).toBe('PT1152921504606.847S')
+  })
+})
+
+describe('relative rounding to zero', () => {
+  // toBe compares with Object.is, so these fail on -0
+  it('PlainDate#until gives positive zero', () => {
+    const date = Temporal.PlainDate.from('2020-06-01')
+
+    for (const unit of ['year', 'month', 'week'] as const) {
+      const duration = date.until('2020-05-31', {
+        largestUnit: unit,
+        smallestUnit: unit,
+        roundingMode: 'trunc',
+      })
+      expect(duration[`${unit}s`]).toBe(0)
+    }
+  })
+
+  it('Duration#round gives positive zero', () => {
+    const duration = Temporal.Duration.from({ days: -1 }).round({
+      largestUnit: 'year',
+      smallestUnit: 'year',
+      roundingMode: 'ceil',
+      relativeTo: '2020-06-01',
+    })
+    expect(duration.years).toBe(0)
+  })
+
+  it('ZonedDateTime#until gives positive zero', () => {
+    const zoned = Temporal.ZonedDateTime.from(`2020-06-01T12:00[${newYork}]`)
+    const duration = zoned.until(zoned.subtract({ hours: 1 }), {
+      largestUnit: 'day',
+      smallestUnit: 'day',
+      roundingMode: 'trunc',
+    })
+    expect(duration.days).toBe(0)
+  })
+
+  it('function API', () => {
+    const date = PlainDateFns.fromString('2020-06-01', CalendarFns.getBasic)
+    const earlier = PlainDateFns.fromString('2020-05-31', CalendarFns.getBasic)
+
+    expect(PlainDateFns.diffYears(date, earlier, 'trunc')).toBe(0)
   })
 })

@@ -9,7 +9,9 @@ export function roundNumberToInc(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): number {
-  return roundWithMode(num / roundingInc, roundingMode) * roundingInc
+  // Rounding a small negative toward zero can give -0, such as Math.trunc(-0.1),
+  // which must not reach results where Object.is or a function-API caller sees it
+  return roundWithMode(num / roundingInc, roundingMode) * roundingInc || 0
 }
 
 export function roundWithMode(
