@@ -16,6 +16,7 @@ import {
   nanoToDurationDayTimeFields,
   nanoToDurationTimeFields,
 } from './durationMath'
+import * as errorMessages from './errorMessages'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -54,6 +55,7 @@ import {
   divModFloorBigInt,
   divTrunc,
   fabricateNearHalfFraction,
+  throwRangeError,
 } from './utils'
 
 // Pre-refined zoned value operations
@@ -414,7 +416,7 @@ ONLY time
 function nudgeZonedTimeDuration(
   sign: NumberSign,
   durationFields: DurationFields, // must be balanced & top-heavy in day or larger (so, small time-fields)
-  endEpochNano: bigint, // original destination, then rewritten to the nudged instant
+  _endEpochNano: bigint,
   _largestUnit: Unit,
   smallestUnit: TimeUnit, // always <Day
   roundingInc: number, // always >=Day
@@ -433,31 +435,37 @@ function nudgeZonedTimeDuration(
     ...durationFields,
     ...durationTimeFieldDefaults,
   }
-  const dayWindow = clampRelativeUnitValue(
-    dateDurationFields.days,
-    sign,
-    (days) => {
-      // dateDurationFields is scratch; only the window's epochs are used
-      dateDurationFields.days = days
-      return moveRelativeMarkerToEpochNano(relativeOps, dateDurationFields)
-    },
-    endEpochNano,
-  )
-  const dayEpochNano0 = dayWindow.epochNano0
-  const dayEpochNano1 = dayWindow.epochNano1
 
+  // Mirrors NudgeToZonedTime: both edges of the final whole-day interval always
+  // resolve from the wall clock. Unlike the calendar-unit window (see
+  // ComputeNudgeWindow), a zero-length move doesn't reuse the origin's own instant
+  // and an endpoint outside the interval doesn't retry it. Both would change which
+  // occurrence of a repeated hour this interval starts from.
+  const dayEpochNano0 = relativeOps.moveToEpochNano(dateDurationFields)
+  const dayEpochNano1 = relativeOps.moveToEpochNano({
+    ...dateDurationFields,
+    days: dateDurationFields.days + sign,
+  })
+
+  // A skipped day (Pacific/Apia's 2011-12-30) can resolve both edges to the same
+  // instant, leaving no interval to round within.
   const daySpanNano = Number(dayEpochNano1 - dayEpochNano0)
+  if (Math.sign(daySpanNano) !== sign) {
+    throwRangeError(errorMessages.outOfBoundsDstGap)
+  }
+
   const beyondDayNano = roundedTimeNano - daySpanNano
   let dayDelta = 0
+  let nudgedEpochNano: bigint
 
   // rounded-time at start-of next day or beyond?
   // if so, rerun rounding with origin as next day
   if (!beyondDayNano || Math.sign(beyondDayNano) === sign) {
     dayDelta += sign
     roundedTimeNano = roundNumberToInc(beyondDayNano, nanoInc, roundingMode)
-    endEpochNano = dayEpochNano1 + BigInt(roundedTimeNano)
+    nudgedEpochNano = dayEpochNano1 + BigInt(roundedTimeNano)
   } else {
-    endEpochNano = dayEpochNano0 + BigInt(roundedTimeNano)
+    nudgedEpochNano = dayEpochNano0 + BigInt(roundedTimeNano)
   }
 
   const durationTimeFields = nanoToDurationTimeFields(roundedTimeNano)
@@ -468,7 +476,7 @@ function nudgeZonedTimeDuration(
     days: durationFields.days + dayDelta,
   }
 
-  return [nudgedDurationFields, endEpochNano, Boolean(dayDelta)]
+  return [nudgedDurationFields, nudgedEpochNano, Boolean(dayDelta)]
 }
 
 function nudgeDayTimeDuration(

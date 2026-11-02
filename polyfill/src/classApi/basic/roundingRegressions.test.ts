@@ -44,3 +44,51 @@ describe('ZonedDateTime diffs ending in a repeated hour', () => {
     )
   })
 })
+
+describe('ZonedDateTime time rounding near a repeated hour', () => {
+  // Both edges of the final day resolve from the wall clock, to the earlier
+  // occurrence of a repeated hour, even when the origin is the later occurrence.
+  const untilMinute = (start: string, end: string) =>
+    Temporal.ZonedDateTime.from(start)
+      .until(end, { largestUnit: 'day', smallestUnit: 'minute' })
+      .toString()
+
+  it('does not treat a second-occurrence origin as the start of the day', () => {
+    expect(
+      untilMinute(
+        `2024-11-03T01:30-05:00[${newYork}]`,
+        `2024-11-04T00:36[${newYork}]`,
+      ),
+    ).toBe('PT24H6M')
+  })
+
+  it('does not retry the day when the endpoint is past the day', () => {
+    expect(
+      untilMinute(
+        `2024-11-02T01:30[${newYork}]`,
+        `2024-11-03T01:12-05:00[${newYork}]`,
+      ),
+    ).toBe('P1DT42M')
+  })
+
+  it('throws when a skipped day leaves no interval to round within', () => {
+    expect(() =>
+      untilMinute(
+        '2011-12-31T12:00[Pacific/Apia]',
+        '2011-12-31T11:00[Pacific/Apia]',
+      ),
+    ).toThrow(RangeError)
+  })
+
+  it('rounding to the hour with a multi-hour transition', () => {
+    expect(
+      Temporal.ZonedDateTime.from('2024-10-26T01:46+02:00[Antarctica/Troll]')
+        .until('2024-10-27T01:45+00:00[Antarctica/Troll]', {
+          largestUnit: 'day',
+          smallestUnit: 'hour',
+          roundingMode: 'floor',
+        })
+        .toString(),
+    ).toBe('P1DT1H')
+  })
+})

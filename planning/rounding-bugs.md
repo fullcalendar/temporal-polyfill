@@ -54,3 +54,40 @@ marker's opposite-sign remainder was combined with the date part.
 **Fix:** use the spec's absolute limits, which are 2 forward and 1 backward.
 Reference: `DifferenceZonedDateTime`, `maxDayCorrection`. Lite:
 `differenceZonedDateTime`.
+
+## #2: Zoned time rounding uses the wrong day window
+
+**Symptom:** the day and time split came out wrong. These gave `P1DT6M` and
+`PT24H42M`; correct is `PT24H6M` and `P1DT42M`.
+
+```js
+const opts = { largestUnit: 'day', smallestUnit: 'minute' }
+Temporal.ZonedDateTime.from('2024-11-03T01:30-05:00[America/New_York]')
+  .until('2024-11-04T00:36[America/New_York]', opts)
+Temporal.ZonedDateTime.from('2024-11-02T01:30[America/New_York]')
+  .until('2024-11-03T01:12-05:00[America/New_York]', opts)
+```
+
+**How it happens:** `until`, `since` and `Duration#round` with a zoned origin, when
+rounding to a time unit with a day-or-larger `largestUnit`, and the origin or
+endpoint is in a repeated hour. It's rare: 38 of 12,000 inputs in a sweep near DST
+changes.
+
+**Why:** `nudgeZonedTimeDuration` built its final-day interval with two helpers
+meant for the calendar-unit window (the spec's `ComputeNudgeWindow`). The origin
+shortcut reused the origin's own instant for a zero-length move, and the retry moved
+to the next day when the endpoint was outside the interval. The spec's
+`NudgeToZonedTime` does neither: both edges always resolve from the wall clock, with
+`compatible` disambiguation, so an origin in the second occurrence still starts from
+the first. It also throws a `RangeError` if a skipped day leaves the interval empty,
+such as Pacific/Apia's 2011-12-30.
+
+**Fix:** compute both edges directly with `moveToEpochNano`, and throw on an empty
+interval. Reference:
+`NudgeToZonedTime`. Lite: `nudgeToZonedTime`.
+
+**Left alone:** relative `total` across a skipped day returns a number, such as
+`Duration.from({ hours: -1 }).total({ unit: 'day', relativeTo: '2011-12-31T12:00[Pacific/Apia]' })`
+giving `-1.0416666666666667`, because `clampRelativeUnitValue` doesn't validate its
+retried window. Lite throws a `RangeError`, and the reference fails an internal
+assertion. It's a separate path from this fix.
