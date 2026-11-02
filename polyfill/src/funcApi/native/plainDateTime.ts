@@ -11,7 +11,6 @@ import {
 } from '../../apiHelpers/gettersForNative'
 import { DateTimeFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { NumberSign, bindArgs } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import {
@@ -42,7 +41,7 @@ import {
   createNativePlainTimeRecord,
   getNativePlainTime,
 } from './plainTime'
-import { createRoundToOptions } from './roundUtils'
+import { createCalendarRoundOptions, createRoundToOptions } from './roundUtils'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -562,7 +561,7 @@ export function roundToYear(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToYear(
       getNativePlainDateTime(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }
@@ -574,7 +573,7 @@ export function roundToMonth(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToMonth(
       getNativePlainDateTime(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }
@@ -586,7 +585,7 @@ export function roundToWeek(
   return createNativePlainDateTimeRecord(
     TemporalUtils.roundToWeek(
       getNativePlainDateTime(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }

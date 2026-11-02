@@ -8,7 +8,6 @@ import {
 import { dateFieldGetters } from '../../apiHelpers/gettersForNative'
 import { DateFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import {
@@ -44,6 +43,7 @@ import {
   NativePlainYearMonthRecord,
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
+import { createCalendarRoundOptions } from './roundUtils'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -450,7 +450,7 @@ export function roundToYear(
   return createNativePlainDateRecord(
     TemporalUtils.roundToYear(
       getNativePlainDate(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }
@@ -462,7 +462,7 @@ export function roundToMonth(
   return createNativePlainDateRecord(
     TemporalUtils.roundToMonth(
       getNativePlainDate(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }
@@ -474,7 +474,7 @@ export function roundToWeek(
   return createNativePlainDateRecord(
     TemporalUtils.roundToWeek(
       getNativePlainDate(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }

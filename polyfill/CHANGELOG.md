@@ -20,6 +20,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Relative rounding gives `0` instead of `-0`
 - FIX: `Instant#round` rejects `roundingIncrement` above 1e9
 - FIX: Chinese and Dangi year arithmetic lands on the correct month when constraining a leap month
+- FIX: Function API `roundToYear`, `roundToMonth` and `roundToWeek` coerce `roundingIncrement` on hosts with native Temporal
 
 ## v1.0.6
 

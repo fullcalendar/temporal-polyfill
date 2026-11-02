@@ -8,7 +8,6 @@ import {
 import { yearMonthFieldGetters } from '../../apiHelpers/gettersForNative'
 import { YearMonthFields } from '../../internal/fieldTypes'
 import { LocalesArg } from '../../internal/intlFormatUtils'
-import { normalizeUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { NumberSign } from '../../internal/utils'
 import { NativeTemporal } from '../../nativeSwitch'
 import { DateTimeFormatLike, NativeDiffFunc } from '../commonTypes'
@@ -29,6 +28,7 @@ import {
   getNativeDuration,
 } from './duration'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
+import { createCalendarRoundOptions } from './roundUtils'
 
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>
 
@@ -278,7 +278,7 @@ export function roundToYear(
   return createNativePlainYearMonthRecord(
     TemporalUtils.roundToYear(
       getNativePlainYearMonth(record),
-      normalizeUnitRoundOptions(options),
+      createCalendarRoundOptions(options),
     ),
   )
 }
