@@ -39,6 +39,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Temporal strings can have more than 9 annotations
 - FIX: `PlainDate.from` accepts a date with a time at the lower limit, such as `-271821-04-19T00:00`, and non-ISO `PlainYearMonth.from` no longer checks the date as a `PlainDate`, such as `+275760-09-14[u-ca=gregory]`. Function API `fromString` too, on hosts without native Temporal
 - FIX: Time zones with two offset changes close together keep the offset between them, such as `Africa/Casablanca` in Ramadan or `Pacific/Fiji` in 2021, and `getTimeZoneTransition` finds both changes (#121)
+- FIX: `getTimeZoneTransition` no longer skips a forward transition that falls on an internal search boundary
 
 ### 📉 Size Wins
 

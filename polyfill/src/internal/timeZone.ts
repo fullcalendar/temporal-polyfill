@@ -229,10 +229,13 @@ function createIntlTimeZoneStore(
       }
     }
 
+    // A transition exactly at the start of a period can only be seen as the end of the
+    // period before it, because this period's samples both read the new offset. A
+    // forward search includes epochSec, so it must start from the second before.
     const searchEpochSec =
       direction > 0
         ? // if moving forward from far past, fast-forward search to lower bound
-          Math.max(epochSec, minPossibleTransitionSec)
+          Math.max(epochSec, minPossibleTransitionSec) - 1
         : epochSec
     let [startEpochSec, endEpochSec] = computePeriod(searchEpochSec, periodSec)
 

@@ -95,6 +95,20 @@ describe('queryTimeZone', () => {
     },
   )
 
+  it('finds a forward transition exactly at the start of a search period', () => {
+    const timeZone = queryTimeZone('Africa/Algiers')
+    const transitionSec = -950_486_400 // 1939-11-19T00:00Z
+
+    expect(
+      Math.abs(
+        transitionSec % (getTimeZonePeriodDays('Africa/Algiers') * secInUtcDay),
+      ),
+    ).toBe(0)
+    expect(
+      timeZone.getTransition(BigInt(transitionSec) * bigNanoInSec - 1n, 1),
+    ).toBe(BigInt(transitionSec) * bigNanoInSec)
+  })
+
   // Guards the period table against the host's time zone data, including future releases
   it.skipIf(!NativeTemporal)(
     "has a search period shorter than the gaps between each zone's transitions",
