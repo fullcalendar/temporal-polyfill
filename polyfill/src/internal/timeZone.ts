@@ -80,7 +80,7 @@ export class FixedTimeZone implements TimeZone {
   }
 
   // Strict ISO date bounds checking is intentionally NOT done here.
-  // It is conditionally performed in getMatchingInstantFor based on offsetDisambig.
+  // It is conditionally performed in getMatchingInstantFor, when matching an offset.
   // This allows offset: "use"/"ignore" to accept epoch-boundary dates.
   getPossibleInstantsFor(isoDateTime: CalendarDateTimeFields): bigint[] {
     return [isoDateTimeAndOffsetToEpochNano(isoDateTime, this.offsetNano)]

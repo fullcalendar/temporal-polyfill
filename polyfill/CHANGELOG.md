@@ -23,6 +23,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Function API `roundToYear`, `roundToMonth` and `roundToWeek` coerce `roundingIncrement` on hosts with native Temporal
 - FIX: `ZonedDateTime` `until`/`since` and function API diffs reject equal instants in different time zones for date units (#112)
 - FIX: `ZonedDateTime#withPlainTime` picks the earlier occurrence of a repeated hour, regardless of the current offset (#123)
+- FIX: `ZonedDateTime.from` accepts in-range values near the `Instant` limits, such as a `Z` string at either end (#120)
 
 ## v1.0.6
 

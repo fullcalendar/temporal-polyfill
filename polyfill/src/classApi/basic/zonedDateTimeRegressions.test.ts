@@ -5,7 +5,8 @@ import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
 // Regressions from user reports that test262 doesn't reach. Expected values match
-// native Temporal and the reference implementation in proposal-temporal/polyfill.
+// native Temporal and the spec. The reference implementation in
+// proposal-temporal/polyfill also agrees, except on Z with offset: 'ignore'.
 
 describe('ZonedDateTime diffs of equal instants in different time zones', () => {
   const newYorkStr = '2026-03-07T12:00[America/New_York]'
@@ -125,5 +126,96 @@ describe('ZonedDateTime#withPlainTime in a repeated hour', () => {
     expect(
       ZonedDateTimeFns.toString(ZonedDateTimeFns.withPlainTime(record, time)),
     ).toBe('2026-11-01T01:15:00-04:00[America/New_York]')
+  })
+})
+
+describe('ZonedDateTime.from near the Instant limits', () => {
+  const minInstantTokyo = '-271821-04-20T00:00:00Z[Asia/Tokyo]'
+  const minResultTokyo = '-271821-04-20T09:18:59+09:19[Asia/Tokyo]'
+
+  it('accepts Z at the lower limit', () => {
+    expect(Temporal.ZonedDateTime.from(minInstantTokyo).toString()).toBe(
+      minResultTokyo,
+    )
+  })
+
+  it('accepts Z at the upper limit', () => {
+    expect(
+      Temporal.ZonedDateTime.from(
+        '+275760-09-13T00:00:00Z[America/New_York]',
+      ).toString(),
+    ).toBe('+275760-09-12T20:00:00-04:00[America/New_York]')
+  })
+
+  it('accepts Z just inside a limit, where the wall-clock time is past it', () => {
+    expect(
+      Temporal.ZonedDateTime.from(
+        '-271821-04-20T01:00:00Z[Asia/Tokyo]',
+      ).toString(),
+    ).toBe('-271821-04-20T10:18:59+09:19[Asia/Tokyo]')
+  })
+
+  for (const offset of ['use', 'ignore', 'prefer', 'reject'] as const) {
+    it(`treats Z as exact with offset ${offset}`, () => {
+      expect(
+        Temporal.ZonedDateTime.from(minInstantTokyo, { offset }).toString(),
+      ).toBe(minResultTokyo)
+      expect(
+        Temporal.ZonedDateTime.from('2020-06-01T12:00Z[America/New_York]', {
+          offset,
+        }).toString(),
+      ).toBe('2020-06-01T08:00:00-04:00[America/New_York]')
+    })
+  }
+
+  it('rejects Z just past a limit', () => {
+    expect(() =>
+      Temporal.ZonedDateTime.from('-271821-04-19T23:59:59.999999999Z[UTC]'),
+    ).toThrow(RangeError)
+    expect(() =>
+      Temporal.ZonedDateTime.from('+275760-09-13T00:00:00.000000001Z[UTC]'),
+    ).toThrow(RangeError)
+  })
+
+  // The wall-clock date is one day before the Instant limit, but this zone's
+  // negative offset puts the resulting instant inside it.
+  const beforeLimitDateTime = '-271821-04-19T23:59:59.999999999'
+  const beforeLimitResult = `${beforeLimitDateTime}-04:56[America/New_York]`
+
+  it('accepts a wall-clock string before the limit date', () => {
+    expect(
+      Temporal.ZonedDateTime.from(
+        `${beforeLimitDateTime}[America/New_York]`,
+      ).toString(),
+    ).toBe(beforeLimitResult)
+  })
+
+  it('accepts a property bag with no offset before the limit date', () => {
+    const zdt = Temporal.ZonedDateTime.from({
+      year: -271821,
+      month: 4,
+      day: 19,
+      hour: 23,
+      timeZone: 'America/New_York',
+    })
+    expect(zdt.toString()).toBe(
+      '-271821-04-19T23:00:00-04:56[America/New_York]',
+    )
+  })
+
+  it('still rejects a matched offset before the limit date', () => {
+    expect(() =>
+      Temporal.ZonedDateTime.from(
+        `${beforeLimitDateTime}-04:56[America/New_York]`,
+      ),
+    ).toThrow(RangeError)
+  })
+
+  it('function API fromString agrees', () => {
+    const record = ZonedDateTimeFns.fromString(
+      minInstantTokyo,
+      CalendarFns.getBasic,
+    )
+    expect(ZonedDateTimeFns.toString(record)).toBe(minResultTokyo)
   })
 })

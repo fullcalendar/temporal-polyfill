@@ -62,27 +62,25 @@ export function getMatchingInstantFor(
   epochFuzzy?: boolean,
   hasZ?: boolean,
 ): bigint {
-  if (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use) {
-    // we ALWAYS use Z as a zero offset
-    if (offsetDisambig === OffsetDisambig.Use || hasZ) {
-      return isoDateTimeAndOffsetToEpochNano(isoDateTime, offsetNano)
-    }
-  }
-
-  // Only enforce strict ISO date bounds for Prefer/Reject offset disambiguation.
-  // Use/Ignore should skip this check, matching spec behavior for fixed-offset
-  // time zones at epoch boundaries (e.g. ZonedDateTime.from("-000001-01-01T00:00+00:00[UTC]")).
+  // Z is an exact instant at zero offset, whatever the offset option says. This
+  // comes first because a wall-clock reading of it can be past the Instant limits
+  // while the instant itself is in range.
   if (
-    offsetDisambig === OffsetDisambig.Prefer ||
-    offsetDisambig === OffsetDisambig.Reject
+    hasZ ||
+    (offsetNano !== undefined && offsetDisambig === OffsetDisambig.Use)
   ) {
-    checkIsoDateInBounds(isoDateTime, false)
+    return isoDateTimeAndOffsetToEpochNano(isoDateTime, offsetNano || 0)
   }
 
   const possibleEpochNanos = timeZone.getPossibleInstantsFor(isoDateTime)
 
   // Prefer or Reject
   if (offsetNano !== undefined && offsetDisambig !== OffsetDisambig.Ignore) {
+    // Only here does the spec enforce strict ISO date bounds. A wall-clock time
+    // with no offset to compare, or with an ignored one, can be past them while
+    // the resulting instant is in range.
+    checkIsoDateInBounds(isoDateTime, false)
+
     const matchingEpochNano = findMatchingEpochNano(
       possibleEpochNanos,
       isoDateTime,
@@ -97,10 +95,6 @@ export function getMatchingInstantFor(
       throwRangeError(errorMessages.invalidOffsetForTimeZone)
     }
     // else (offsetDisambig === OffsetDisambig.Prefer) ...
-  }
-
-  if (hasZ) {
-    return isoDateTimeToEpochNano(isoDateTime)
   }
 
   return getSingleInstantFor(
