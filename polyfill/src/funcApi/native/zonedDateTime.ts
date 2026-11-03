@@ -42,6 +42,7 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import { createCalendarRoundOptions, createRoundToOptions } from './roundUtils'
+import { requireTimeZoneId } from './timeZoneId'
 
 export const getNativeZonedDateTime: (
   record: unknown,
@@ -112,6 +113,7 @@ export function fromFields(
   options?: Temporal.ZonedDateTimeFromOptions,
 ): NativeZonedDateTimeRecord {
   const calendar = refineNativeCalendarArgMaybe(fields.calendar)
+  requireTimeZoneId(fields.timeZone)
   const resNative = NativeTemporal!.ZonedDateTime.from(
     { ...fields, calendar },
     options,
@@ -154,7 +156,7 @@ export function withTimeZone(
   timeZoneId: string,
 ): NativeZonedDateTimeRecord {
   const native = getNativeZonedDateTime(record)
-  const resNative = native.withTimeZone(timeZoneId)
+  const resNative = native.withTimeZone(requireTimeZoneId(timeZoneId))
   return createNativeZonedDateTimeRecord(resNative)
 }
 

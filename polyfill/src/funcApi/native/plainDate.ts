@@ -44,6 +44,7 @@ import {
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
 import { createCalendarRoundOptions } from './roundUtils'
+import { requireTimeZoneId } from './timeZoneId'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -281,6 +282,7 @@ export function toZonedDateTime(
               ? undefined
               : getNativePlainTime(options.plainTime),
         }
+  requireTimeZoneId(optionsObj.timeZone)
   const resNative = native.toZonedDateTime(optionsObj)
   return createNativeZonedDateTimeRecord(resNative)
 }

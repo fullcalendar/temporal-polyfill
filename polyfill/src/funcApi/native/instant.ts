@@ -20,6 +20,7 @@ import {
   getNativeDuration,
 } from './duration'
 import { createRoundToOptions } from './roundUtils'
+import { requireTimeZoneId } from './timeZoneId'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -145,7 +146,7 @@ export function toZonedDateTimeISO(
   timeZoneId: string,
 ): NativeZonedDateTimeRecord {
   const native = getNativeInstant(record)
-  const resNative = native.toZonedDateTimeISO(timeZoneId)
+  const resNative = native.toZonedDateTimeISO(requireTimeZoneId(timeZoneId))
   return createNativeZonedDateTimeRecord(resNative)
 }
 
@@ -166,6 +167,7 @@ export function toString(
   record: NativeInstantRecord,
   options?: InstantStringTimeZoneDisplayOptions,
 ): string {
+  requireTimeZoneId(options && options.timeZone)
   return getNativeInstant(record).toString(options)
 }
 

@@ -32,6 +32,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `ZonedDateTime#round` and function API `startOf*`/`endOf*` time units stay on the current occurrence of a repeat shorter than a minute
 - FIX: Function API `PlainYearMonth` `startOfYear` and `roundToYear` reject results outside the supported range
 - FIX: Function API `startOfMonth`, `endOfDay` and related helpers on hosts with native Temporal, around a repeated or skipped midnight and near the earliest date
+- FIX: Function API time zone parameters reject a string with a time zone annotation on hosts with native Temporal, as they already did elsewhere
 
 ## v1.0.6
 

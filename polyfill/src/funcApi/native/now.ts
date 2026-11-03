@@ -6,6 +6,7 @@ import {
   createNativePlainDateTimeRecord,
 } from './plainDateTime'
 import { NativePlainTimeRecord, createNativePlainTimeRecord } from './plainTime'
+import { requireTimeZoneId } from './timeZoneId'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -23,7 +24,7 @@ export function zonedDateTimeISO(
   timeZoneId?: string,
 ): NativeZonedDateTimeRecord {
   return createNativeZonedDateTimeRecord(
-    NativeTemporal!.Now.zonedDateTimeISO(timeZoneId),
+    NativeTemporal!.Now.zonedDateTimeISO(requireTimeZoneId(timeZoneId)),
   )
 }
 
@@ -31,18 +32,18 @@ export function plainDateTimeISO(
   timeZoneId?: string,
 ): NativePlainDateTimeRecord {
   return createNativePlainDateTimeRecord(
-    NativeTemporal!.Now.plainDateTimeISO(timeZoneId),
+    NativeTemporal!.Now.plainDateTimeISO(requireTimeZoneId(timeZoneId)),
   )
 }
 
 export function plainDateISO(timeZoneId?: string): NativePlainDateRecord {
   return createNativePlainDateRecord(
-    NativeTemporal!.Now.plainDateISO(timeZoneId),
+    NativeTemporal!.Now.plainDateISO(requireTimeZoneId(timeZoneId)),
   )
 }
 
 export function plainTimeISO(timeZoneId?: string): NativePlainTimeRecord {
   return createNativePlainTimeRecord(
-    NativeTemporal!.Now.plainTimeISO(timeZoneId),
+    NativeTemporal!.Now.plainTimeISO(requireTimeZoneId(timeZoneId)),
   )
 }

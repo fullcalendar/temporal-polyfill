@@ -42,6 +42,7 @@ import {
   getNativePlainTime,
 } from './plainTime'
 import { createCalendarRoundOptions, createRoundToOptions } from './roundUtils'
+import { requireTimeZoneId } from './timeZoneId'
 import {
   NativeZonedDateTimeRecord,
   createNativeZonedDateTimeRecord,
@@ -305,7 +306,10 @@ export function toZonedDateTime(
   options?: Temporal.DisambiguationOptions,
 ): NativeZonedDateTimeRecord {
   const native = getNativePlainDateTime(record)
-  const resNative = native.toZonedDateTime(timeZoneId, options)
+  const resNative = native.toZonedDateTime(
+    requireTimeZoneId(timeZoneId),
+    options,
+  )
   return createNativeZonedDateTimeRecord(resNative)
 }
 
