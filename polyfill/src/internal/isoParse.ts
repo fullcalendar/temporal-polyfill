@@ -297,7 +297,7 @@ export function parseCalendarId(s: string): string {
   }
   const timeParts = parseTimeOnlyParts(s)
   if (timeParts) {
-    return organizeAnnotationParts(timeParts[13]).calendarId
+    return organizeAnnotationParts(timeParts[13], timeParts[14]).calendarId
   }
   return s
 }
@@ -500,57 +500,37 @@ const leapSecondStr = '|60'
 
 const dateTimeRegExpStr =
   dateRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:dateSep, 5:month, 6:day
-  '(?:[T ]' +
+  '(?:[Tt ]' +
   timeRegExpStr(8, leapSecondStr) + // 7:hour, 8:timeSep, 9:minute, 10:second, 11:afterDecimal
-  '(Z|' + // 12:zOrOffset
-  signRegExpStr + // 13:offsetSign
-  timeRegExpStr(15) + // 14:hour, 15:sep, 16:minute, 17:second, 18:afterDecimal
-  ')?' +
+  `(?:([Zz])|(${signRegExpStr}` + // 12:z, 13:offset, 14:offsetSign
+  timeRegExpStr(16) + // 15:hour, 16:sep, 17:minute, 18:second, 19:afterDecimal
+  '))?' +
   ')?'
 
-// Would _normally_ need to modify to prevent reDoS attack,
-// (like https://github.com/moment/moment/pull/6015#issuecomment-1152961973)
-// BUT, this regexp is only used directly by annotationRegExp,
-// which only ever runs on strings already parsed by annotationsRegExpStr
-const annotationRegExpStr = '\\[(!?)([^\\]]*)\\]' // critical:1, annotation:2
-
-// Limit the number of annotations (maximum 9) to prevent reDoS attack
-const annotationsRegExpStr = `((?:${annotationRegExpStr}){0,9})` // multiple
+// The annotations, per RFC 9557 and the Temporal grammar. A time zone can only come
+// first. A key must be lowercase, which is why these regexps are case-sensitive. A
+// value is alphanumeric parts joined by hyphens. Every repeat starts with a delimiter
+// that can't match the characters before it, so none of them is a reDoS risk.
+const annotationsRegExpStr =
+  '(?:\\[!?([+-](?:[01]\\d|2[0-3])(?::?[0-5]\\d)?|[a-zA-Z._][\\w.+-]*(?:/[a-zA-Z._][\\w.+-]*)*)\\])?' + // timeZoneId
+  '((?:\\[!?[a-z_][a-z\\d_-]*=[a-zA-Z\\d]+(?:-[a-zA-Z\\d]+)*\\])*)' // the others
 
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
 const timeRegExp = createRegExp(
-  'T?' +
+  '[Tt]?' +
     timeRegExpStr(2, leapSecondStr) + // 1:hour, 2:sep, 3:minute, 4:second, 5:afterDecimal
     `(${signRegExpStr}${timeRegExpStr(9)})?` + // 6:offset, 7:sign, 8:hour, 9:sep, 10:minute, 11:second, 12:afterDecimal
-    annotationsRegExpStr, // 13
+    annotationsRegExpStr, // 13:timeZoneId, 14:others
 )
-const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
+// Splits the others, which annotationsRegExpStr has already validated
+const annotationRegExp = /\[(!?)([^=]+)=([^\]]+)/g
 
-// The insides of one annotation, per RFC 9557 and the Temporal grammar. A key must
-// be lowercase, so its regexp lacks the i flag that the regexps above have. A value
-// is alphanumeric parts joined by hyphens. Each repeat starts with a delimiter that
-// can't match the characters before it, so neither is a reDoS risk.
-const annotationKeyValueRegExp =
-  /^([a-z_][a-z\d_-]*)=([A-Za-z\d]+(?:-[A-Za-z\d]+)*)$/
-const timeZoneAnnotationRegExp =
-  /^(?:[+-](?:[01]\d|2[0-3])(?::?[0-5]\d)?|[a-z._][a-z\d._+-]*(?:\/[a-z._][a-z\d._+-]*)*)$/i
-
-const durationRegExp = createRegExp(
-  `${signRegExpStr}?P` + // 1:sign
-    '(\\d+Y)?' + // 2:years
-    '(\\d+M)?' + // 3:months
-    '(\\d+W)?' + // 4:weeks
-    '(\\d+D)?' + // 5:days
-    // Spec grammar (DurationTime) requires the time designator `T` to be
-    // followed by at least one H/M/S component, so reject a dangling `T`.
-    '(?:T(?!$)' +
-    `(?:(\\d+)${fractionRegExpStr}H)?` + // 6:hours, 7:partialHour
-    `(?:(\\d+)${fractionRegExpStr}M)?` + // 8:minutes, 9:partialMinute
-    `(?:(\\d+)${fractionRegExpStr}S)?` + // 10:seconds, 11:partialSecond
-    ')?',
-)
+// Spec grammar (DurationTime) requires the time designator `T` to be
+// followed by at least one H/M/S component, so reject a dangling `T`.
+const durationRegExp =
+  /^([+-])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(?:T(?!$)(?:(\d+)(?:[.,](\d{1,9}))?H)?(?:(\d+)(?:[.,](\d{1,9}))?M)?(?:(\d+)(?:[.,](\d{1,9}))?S)?)?$/i
 
 // NOTE: when modifying regexps, check for reDoS vulnerabilities:
 // https://devina.io/redos-checker
@@ -601,7 +581,7 @@ function parseMonthDayOnly(s: string): DateOrganized | undefined {
 function parseTimeOnly(s: string): TimeFields | undefined {
   const parts = parseTimeOnlyParts(s)
   if (!parts) return undefined
-  organizeAnnotationParts(parts[13]) // validate annotations
+  organizeAnnotationParts(parts[13], parts[14]) // validate annotations
   return organizeTimeParts(parts, 1)
 }
 
@@ -628,20 +608,17 @@ type WithCalendarStr = { calendarId: string }
 type DateOrganized = CalendarDateFields & WithCalendarStr
 
 function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
-  const zOrOffset = parts[12]
-  const hasZ = (zOrOffset || '').toUpperCase() === 'Z'
-
   return {
     year: organizeIsoYearParts(parts),
     month: parseInt(parts[5]),
     day: parseInt(parts[6]),
     ...organizeTimeParts(parts, 7),
-    ...organizeAnnotationParts(parts[19]),
+    ...organizeAnnotationParts(parts[20], parts[21]),
     hasTime: !!parts[7],
-    hasZ,
+    hasZ: !!parts[12],
     // TODO: figure out a way to pre-process into a number
     // (problems with TimeZone needing the full string?)
-    offset: hasZ ? undefined : zOrOffset,
+    offset: parts[13],
   }
 }
 
@@ -653,7 +630,7 @@ function organizeYearMonthParts(parts: string[]): DateOrganized {
     year: organizeIsoYearParts(parts),
     month: parseInt(parts[4]),
     day: 1,
-    ...organizeAnnotationParts(parts[5]),
+    ...organizeAnnotationParts(parts[5], parts[6]),
   }
 }
 
@@ -662,7 +639,7 @@ function organizeMonthDayParts(parts: string[]): DateOrganized {
     year: isoEpochFirstLeapYear,
     month: parseInt(parts[1]),
     day: parseInt(parts[2]),
-    ...organizeAnnotationParts(parts[3]),
+    ...organizeAnnotationParts(parts[3], parts[4]),
   }
 }
 
@@ -763,28 +740,21 @@ interface AnnotationsOrganized {
   timeZoneId: string | undefined
 }
 
-function organizeAnnotationParts(s: string): AnnotationsOrganized {
-  let calendarIsCritical: boolean | undefined
-  let timeZoneId: string | undefined
+function organizeAnnotationParts(
+  timeZoneId: string | undefined,
+  s: string,
+): AnnotationsOrganized {
+  let calendarIsCritical: string | undefined
   const calendarIds: string[] = []
 
   // iterate through matches
-  s.replace(annotationRegExp, (whole, criticalStr, mainStr, index) => {
-    const keyValue = annotationKeyValueRegExp.exec(mainStr)
-
-    if (keyValue) {
-      if (keyValue[1] === 'u-ca') {
-        // Lowercase calendar ID for case-insensitive matching (e.g. ISO8601 -> iso8601)
-        calendarIds.push(keyValue[2].toLowerCase())
-        calendarIsCritical ||= !!criticalStr
-      } else if (criticalStr) {
-        // Critical annotation not used
-        throwRangeError(errorMessages.invalidSubstring(whole))
-      }
-    } else if (!index && timeZoneAnnotationRegExp.test(mainStr)) {
-      // A time zone can only be the first annotation
-      timeZoneId = mainStr
-    } else {
+  s.replace(annotationRegExp, (whole, criticalStr, key, value) => {
+    if (key === 'u-ca') {
+      // Lowercase calendar ID for case-insensitive matching (e.g. ISO8601 -> iso8601)
+      calendarIds.push(value.toLowerCase())
+      calendarIsCritical ||= criticalStr
+    } else if (criticalStr) {
+      // Critical annotation not used
       throwRangeError(errorMessages.invalidSubstring(whole))
     }
 

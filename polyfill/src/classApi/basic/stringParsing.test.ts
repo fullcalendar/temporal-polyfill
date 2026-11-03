@@ -8,3 +8,14 @@ describe('time zone identifiers out of range', () => {
     expect(() => instant.toZonedDateTimeISO(id)).toThrow(RangeError)
   })
 })
+
+describe('annotations have no limit on their number', () => {
+  const annotations = '[foo=bar]'.repeat(50)
+
+  it.each([
+    ['2024-10-03', '2024-10-03'],
+    ['2024-10-03[UTC]', '2024-10-03'],
+  ])('%s', (s, expected) => {
+    expect(Temporal.PlainDate.from(s + annotations).toString()).toBe(expected)
+  })
+})

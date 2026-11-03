@@ -270,7 +270,7 @@ export const signRegExpStr = '([+-])' // outer captures
 export const fractionRegExpStr = '(?:[.,](\\d{1,9}))?'
 
 export function createRegExp(meat: string): RegExp {
-  return new RegExp(`^${meat}$`, 'i')
+  return new RegExp(`^${meat}$`)
 }
 
 export function parseSubsecNano(fracStr: string): number {
