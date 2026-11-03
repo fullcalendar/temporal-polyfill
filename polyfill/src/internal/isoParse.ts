@@ -42,7 +42,6 @@ import {
   checkIsoDateTimeInBounds,
   checkIsoYearMonthInBounds,
   isoDateTimeAndOffsetToEpochNano,
-  isoYearMonthIndexMin,
 } from './temporalLimits'
 import { nanoToTimeAndDay } from './timeFieldMath'
 import { FixedTimeZone, queryTimeZone } from './timeZone'
@@ -158,36 +157,26 @@ export function parsePlainDate(
   s: string,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
-  const slots = finalizeDateLike(
-    parsePlainDateLike(requireString(s)),
-    undefined,
-    resolveCalendar,
-  )
-  return createDateSlots(slots, slots.calendar)
+  return finalizeDate(parsePlainDateLike(s), resolveCalendar)
 }
 
 export function parsePlainYearMonth(
   s: string,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
-  const organized = parseYearMonthOnly(requireString(s))
+  const organized =
+    parseYearMonthOnly(requireString(s)) || parsePlainDateLike(s)
+  const calendar = resolveCalendar(organized.calendarId)
 
-  if (organized) {
-    return createDateSlots(
-      checkIsoYearMonthInBounds(organized),
-      resolveCalendar(organized.calendarId),
-    )
-  }
-
-  const dateSlots = finalizeDateLike(
-    parsePlainDateLike(s),
-    projectIsoYearMonthDate,
-    resolveCalendar,
+  // Only the year-month has to be in range, because a date in the first or last month
+  // can be out of range for a PlainDate. Check it again after moving, because the start
+  // of a non-ISO month can land in the ISO month before the first one.
+  return createDateSlots(
+    checkIsoYearMonthInBounds(
+      moveToStartOfMonth(calendar, checkIsoYearMonthInBounds(organized)),
+    ),
+    calendar,
   )
-  const { calendar } = dateSlots
-  const startOfMonthFields = moveToStartOfMonth(calendar, dateSlots)
-
-  return createDateSlots(startOfMonthFields, calendar)
 }
 
 export function parsePlainMonthDay(
@@ -296,7 +285,7 @@ export function parseTimeZoneId(s: string): string {
 }
 
 function parsePlainDateLike(s: string): DateTimeLikeOrganized {
-  const organized = parseDateTimeLike(s)
+  const organized = parseDateTimeLike(requireString(s))
 
   if (!organized || organized.hasZ) {
     throwFailedParse(s)
@@ -319,22 +308,7 @@ function finalizeDateLike(
     return finalizeDate(isoDateProjector(organized), resolveCalendar)
   }
 
-  return organized.hasTime
-    ? finalizeDateTime(organized, resolveCalendar)
-    : finalizeDate(organized, resolveCalendar)
-}
-
-function projectIsoYearMonthDate(
-  organized: DateTimeLikeOrganized,
-): DateOrganized {
-  // The final YearMonth slot drops the day, but its range check still needs a
-  // valid representative ISO date. The minimum ISO year-month starts on day 20.
-  const isoYearMonthIndex = organized.year * 12 + organized.month
-  const day = isoYearMonthIndex === isoYearMonthIndexMin ? 20 : 1
-  return {
-    ...organized,
-    day,
-  }
+  return finalizeDate(organized, resolveCalendar)
 }
 
 function projectIsoMonthDayDate(
@@ -432,14 +406,10 @@ function finalizeDate(
   organized: DateOrganized,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
-  validateIsoDateFields(organized)
-  checkIsoDateInBounds(organized)
-  return {
-    calendar: resolveCalendar(organized.calendarId),
-    year: organized.year,
-    month: organized.month,
-    day: organized.day,
-  }
+  return createDateSlots(
+    checkIsoDateInBounds(organized),
+    resolveCalendar(organized.calendarId),
+  )
 }
 
 // RegExp
