@@ -27,6 +27,10 @@ don't work in GH release markdown. must be absolute
 - FIX: Temporal strings with malformed or misplaced annotations are rejected, such as `2024-10-03[]` (#119)
 - FIX: UTC offsets reject minutes and seconds past 59, which `Instant.from` and others read as a wrong offset
 - FIX: `PlainTime.from` ignores a non-ISO calendar on a string with a date and time, and rejects an invalid date or offset there
+- FIX: Function API `withDayOfMonth`, and `add*`/`subtract*`/`with*` calls that leave the date unchanged, stay on the current occurrence of a repeated hour
+- FIX: Function API `withDayOfMonth` rejects a day below 1
+- FIX: `ZonedDateTime#round` and function API `startOf*`/`endOf*` time units stay on the current occurrence of a repeat shorter than a minute
+- FIX: Function API `PlainYearMonth` `startOfYear` and `roundToYear` reject results outside the supported range
 
 ## v1.0.6
 

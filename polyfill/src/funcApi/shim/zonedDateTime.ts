@@ -40,6 +40,7 @@ import { CalendarImpl, getCalendarSlotId } from '../../internal/calendarImpl'
 import type { IsoDateTimeInterval } from '../../internal/calendarInterval'
 import { toBigInt, toStrictInteger } from '../../internal/cast'
 import {
+  compareIsoDateFields,
   compareZonedEpochSlots,
   zonedDateTimesEqual,
 } from '../../internal/compare'
@@ -79,7 +80,6 @@ import {
   moveZonedEpochSlots,
 } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
-import { EpochDisambig, OffsetDisambig } from '../../internal/optionsModel'
 import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
 import { refineDirectionOptions } from '../../internal/optionsTransitionRefine'
 import {
@@ -96,10 +96,10 @@ import {
   createZonedEpochNanoSlots,
 } from '../../internal/slots'
 import { checkEpochNanoInBounds } from '../../internal/temporalLimits'
-import { queryTimeZone } from '../../internal/timeZone'
+import { type TimeZone, queryTimeZone } from '../../internal/timeZone'
 import { refineTimeZoneId } from '../../internal/timeZoneId'
 import {
-  getMatchingInstantFor,
+  getInstantPreferringOffset,
   getSingleInstantFor,
   zonedEpochSlotsToIso,
 } from '../../internal/timeZoneMath'
@@ -539,7 +539,12 @@ export function toTemporal(
 // -----------------------------------------------------------------------------
 
 export const withDayOfYear = zonedTransform(moveToDayOfYear)
-export const withDayOfMonth = zonedTransform(moveToDayOfMonth)
+// Equivalent to ZonedDateTime#with({ day }), which prefers the current offset. The others
+// here are equivalent to add(), which resolves the new wall-clock time as 'compatible'.
+export const withDayOfMonth = zonedTransform(
+  moveToDayOfMonth,
+  getInstantPreferringOffset,
+)
 export const withDayOfWeek = zonedTransform(moveToDayOfWeek)
 export const withWeekOfYear = zonedTransform(moveToWeekOfYear)
 
@@ -881,13 +886,10 @@ function alignedZonedTime(
     // 01:30-05:00 startOfHour stays in the second 01:00 hour. If the aligned
     // wall time is skipped, compatible disambiguation still moves forward.
     const epochNanoseconds =
-      getMatchingInstantFor(
+      getInstantPreferringOffset(
         timeZone,
         alignedIsoDateTime,
         isoDateTime.offsetNanoseconds,
-        OffsetDisambig.Prefer,
-        EpochDisambig.Compat,
-        true,
       ) + BigInt(nanoDelta)
 
     return createShimZonedDateTimeRecord({
@@ -903,6 +905,13 @@ function zonedTransform<A extends any[]>(
     isoDate: CalendarDateFields,
     ...args: A
   ) => CalendarDateFields,
+  // Passed in, so that the transforms that don't need offset matching don't retain it.
+  // Without one, the new wall-clock time resolves as 'compatible'.
+  resolveInstant?: (
+    timeZone: TimeZone,
+    isoDateTime: CalendarDateTimeFields,
+    offsetNano: number,
+  ) => bigint,
 ): (record: ShimZonedDateTimeRecord, ...args: A) => ShimZonedDateTimeRecord {
   return (record, ...args) => {
     const slots = getShimZonedDateTimeSlots(record)
@@ -912,10 +921,19 @@ function zonedTransform<A extends any[]>(
 
     // These transforms are date-only operations. Preserve the original
     // wall-clock time while allowing the transform to replace the ISO date.
-    const epochNanoseconds = getSingleInstantFor(
-      timeZone,
-      combineDateAndTime(isoDate, isoDateTime),
-    )
+    const newIsoDateTime = combineDateAndTime(isoDate, isoDateTime)
+
+    // An unchanged date keeps the exact instant, because re-resolving the wall-clock
+    // time would move the later occurrence of a repeated hour to the earlier one.
+    const epochNanoseconds = !compareIsoDateFields(isoDate, isoDateTime)
+      ? slots.epochNanoseconds
+      : resolveInstant
+        ? resolveInstant(
+            timeZone,
+            newIsoDateTime,
+            isoDateTime.offsetNanoseconds,
+          )
+        : getSingleInstantFor(timeZone, newIsoDateTime)
 
     return createShimZonedDateTimeRecord({
       ...slots,

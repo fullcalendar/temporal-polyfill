@@ -1,6 +1,9 @@
 import type { Temporal } from 'temporal-spec'
 import { type CalendarImpl } from '../internal/calendarImpl'
-import { toIntegerWithTrunc } from '../internal/cast'
+import {
+  toIntegerWithTrunc,
+  toPositiveIntegerWithTruncation,
+} from '../internal/cast'
 import { CalendarDateFields } from '../internal/fieldTypes'
 import {
   moveToRefinedDayOfMonth,
@@ -34,10 +37,12 @@ export function moveToDayOfMonth(
   options?: Temporal.OverflowOptions,
 ): CalendarDateFields {
   const overflow = refineOverflowOptions(options)
+  // Converted like a `day` field, since the native branch passes this to with(). Past the
+  // end of the month is subject to overflow, but a day below 1 is always invalid.
   return moveToRefinedDayOfMonth(
     calendar,
     isoDate,
-    toIntegerWithTrunc(day),
+    toPositiveIntegerWithTruncation(day),
     overflow,
   )
 }

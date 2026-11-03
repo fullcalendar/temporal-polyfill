@@ -420,7 +420,10 @@ export function roundToYear(
     roundingMode,
   )
   return createShimPlainYearMonthRecord(
-    createDateSlots(roundedIsoDateTime, slots.calendar),
+    createDateSlots(
+      checkIsoYearMonthInBounds(roundedIsoDateTime),
+      slots.calendar,
+    ),
   )
 }
 
@@ -432,7 +435,10 @@ export function startOfYear(
 ): ShimPlainYearMonthRecord {
   const slots = getShimPlainYearMonthSlots(record)
   return createShimPlainYearMonthRecord(
-    createDateSlots(computeYearFloor(slots.calendar, slots), slots.calendar),
+    createDateSlots(
+      checkIsoYearMonthInBounds(computeYearFloor(slots.calendar, slots)),
+      slots.calendar,
+    ),
   )
 }
 

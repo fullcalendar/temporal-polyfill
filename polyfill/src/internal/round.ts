@@ -21,7 +21,7 @@ import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateTimeFields, TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
 import { moveDateByDays } from './move'
-import { EpochDisambig, OffsetDisambig, RoundingModeEnum } from './optionsModel'
+import { RoundingModeEnum } from './optionsModel'
 import {
   RelativeOps,
   isUniformUnit,
@@ -37,7 +37,7 @@ import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import { checkIsoDateTimeInBounds } from './temporalLimits'
 import { nanoToTimeAndDay, timeFieldsToNano } from './timeFieldMath'
 import {
-  getMatchingInstantFor,
+  getInstantPreferringOffset,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
@@ -293,7 +293,7 @@ export function roundZonedEpochToTime(
     return slots.epochNanoseconds
   }
   const isoDateTime = zonedEpochSlotsToIso(slots)
-  return getMatchingInstantFor(
+  return getInstantPreferringOffset(
     slots.timeZone,
     roundDateTimeToInc(
       isoDateTime,
@@ -301,9 +301,6 @@ export function roundZonedEpochToTime(
       roundingMode,
     ),
     isoDateTime.offsetNanoseconds,
-    OffsetDisambig.Prefer,
-    EpochDisambig.Compat,
-    true,
   )
 }
 

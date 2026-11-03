@@ -53,6 +53,23 @@ function _zonedEpochSlotsToIso(
   }
 }
 
+// Resolves a changed wall-clock time on a ZonedDateTime the way ZonedDateTime#with and
+// #round do. A repeated time stays on the current offset, which has to match exactly,
+// and anything else resolves as 'compatible'.
+export function getInstantPreferringOffset(
+  timeZone: TimeZone,
+  isoDateTime: CalendarDateTimeFields,
+  offsetNano: number,
+): bigint {
+  return getMatchingInstantFor(
+    timeZone,
+    isoDateTime,
+    offsetNano,
+    OffsetDisambig.Prefer,
+    EpochDisambig.Compat,
+  )
+}
+
 export function getMatchingInstantFor(
   timeZone: TimeZone,
   isoDateTime: CalendarDateTimeFields,
