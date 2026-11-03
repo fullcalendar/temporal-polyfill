@@ -20,7 +20,9 @@ of the function API.
 The baseline is the accepted duplicate-slot cleanup checkpoint, documented in
 [the cleanup report](size-analysis/2026-09-10/slot-cleanup/REPORT.md), then
 re-accepted after moving `options/` into `internal/` to remove a chunk import
-cycle (#107): globals +17 / +4 bytes, function exports about flat. Review a new complete
+cycle (#107): globals +17 / +4 bytes, function exports about flat. It was
+re-accepted again after the rounding fixes (#110, #117, #111): globals +33 / +37
+bytes, 123 function exports grew and 90 shrank. Review a new complete
 snapshot before replacing it; do not update the baseline merely to make a failed
 check pass. Pin the toolchain when comparing results. `.npmrc` pins the Node
 version for package scripts, and the snapshot records Node and zlib versions.
