@@ -173,9 +173,8 @@ export function parsePlainYearMonth(
   const organized = parseYearMonthOnly(requireString(s))
 
   if (organized) {
-    requireIsoCalendar(organized)
     return createDateSlots(
-      checkIsoYearMonthInBounds(validateIsoDateFields(organized)),
+      checkIsoYearMonthInBounds(organized),
       resolveCalendar(organized.calendarId),
     )
   }
@@ -191,12 +190,6 @@ export function parsePlainYearMonth(
   return createDateSlots(startOfMonthFields, calendar)
 }
 
-function requireIsoCalendar(organized: { calendarId: string }): void {
-  if (organized.calendarId !== isoCalendarId) {
-    throwRangeError(errorMessages.invalidSubstring(organized.calendarId))
-  }
-}
-
 export function parsePlainMonthDay(
   s: string,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
@@ -204,10 +197,8 @@ export function parsePlainMonthDay(
   const organized = parseMonthDayOnly(requireString(s))
 
   if (organized) {
-    requireIsoCalendar(organized)
-
     return createDateSlots(
-      validateIsoDateFields(organized), // `organized` has isoEpochFirstLeapYear
+      organized, // has isoEpochFirstLeapYear
       resolveCalendar(organized.calendarId),
     )
   }
@@ -261,9 +252,7 @@ export function parsePlainTime(s: string): TimeFields {
     organized = dateTime
   }
 
-  // The two short forms can't both match, because they differ in digit count
-  const altParsed = parseYearMonthOnly(s) || parseMonthDayOnly(s)
-  if (altParsed && isIsoDateFieldsValid(altParsed)) {
+  if (parseYearMonthOnly(s) || parseMonthDayOnly(s)) {
     throwFailedParse(s)
   }
 
@@ -285,15 +274,10 @@ export function parseDuration(
 // If `s` is a Temporal string, extract its calendar annotation.
 // Time-only strings can carry a calendar annotation for withCalendar().
 export function parseCalendarId(s: string): string {
-  const dateTime = parseDateTimeLike(s)
-  if (dateTime) {
-    return dateTime.calendarId
-  }
-  // An impossible date falls through, because `2024-13` is also a time and an offset
-  const date = parseYearMonthOnly(s) || parseMonthDayOnly(s)
-  if (date && isIsoDateFieldsValid(date)) {
-    requireIsoCalendar(date)
-    return date.calendarId
+  const organized =
+    parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
+  if (organized) {
+    return organized.calendarId
   }
   const timeParts = parseTimeOnlyParts(s)
   if (timeParts) {
@@ -565,19 +549,26 @@ function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
 
 function parseYearMonthOnly(s: string): DateOrganized | undefined {
   const parts = yearMonthRegExp.exec(s)
-  if (!parts) return undefined
-
-  // YearMonth-only strings have just one optional date separator, so the
-  // full-date consistency check below does not apply. In particular, signed
-  // six-digit years like "-271821-04" can be misread by that check as a
-  // four-digit compact date prefix ("-2718-21-04") and rejected before the
-  // YearMonth-specific range validation can run.
-  return organizeYearMonthParts(parts)
+  return parts ? requireIsoCalendar(organizeYearMonthParts(parts)) : undefined
 }
 
 function parseMonthDayOnly(s: string): DateOrganized | undefined {
   const parts = monthDayRegExp.exec(s)
-  return parts ? organizeMonthDayParts(parts) : undefined
+  if (parts) {
+    const organized = organizeMonthDayParts(parts)
+    // An impossible date isn't a month-day, and might still be a time and an offset
+    if (isIsoDateFieldsValid(organized)) {
+      return requireIsoCalendar(organized)
+    }
+  }
+}
+
+// The short date forms can only have the ISO calendar
+function requireIsoCalendar(organized: DateOrganized): DateOrganized {
+  if (organized.calendarId !== isoCalendarId) {
+    throwRangeError(errorMessages.invalidSubstring(organized.calendarId))
+  }
+  return organized
 }
 
 function parseTimeOnly(s: string): TimeFields | undefined {
