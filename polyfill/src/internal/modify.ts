@@ -2,10 +2,9 @@ import { type CalendarImpl } from './calendarImpl'
 import { timeFieldDefaults } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { OffsetDisambig } from './optionsModel'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import {
-  getMatchingInstantFor,
+  getSingleInstantFor,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
@@ -19,18 +18,15 @@ export function zonedDateTimeWithPlainTime(
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
-  const { offsetNanoseconds } = isoDateTime
 
   const time = plainTimeFields || timeFieldDefaults
 
   let epochNano: bigint
 
   if (plainTimeFields) {
-    epochNano = getMatchingInstantFor(
+    epochNano = getSingleInstantFor(
       timeZone,
       combineDateAndTime(isoDateTime, time),
-      offsetNanoseconds,
-      OffsetDisambig.Prefer, // OffsetDisambig
     )
   } else {
     epochNano = getStartOfDayInstantFor(

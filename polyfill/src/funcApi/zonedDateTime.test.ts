@@ -225,6 +225,22 @@ describe('withFields', () => {
 })
 
 describe('withPlainTime', () => {
+  it('resolves a repeated hour to the earlier instant regardless of the offset', () => {
+    const zdt0 = ZonedDateTimeFns.fromString(
+      '2026-11-01T01:30:00-05:00[America/New_York]',
+      CalendarFns.getBasic,
+    )
+    const pt = PlainTimeFns.create(1, 15)
+    const zdt1 = ZonedDateTimeFns.withPlainTime(zdt0, pt)
+    expectZonedDateTimeEquals(
+      zdt1,
+      ZonedDateTimeFns.fromString(
+        '2026-11-01T01:15:00-04:00[America/New_York]',
+        CalendarFns.getBasic,
+      ),
+    )
+  })
+
   it('works with a time argument', () => {
     const zdt0 = ZonedDateTimeFns.create(
       1709055000000000000n,
