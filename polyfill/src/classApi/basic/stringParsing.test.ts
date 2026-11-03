@@ -104,3 +104,40 @@ describe('year-months at the limits only need the year-month in range', () => {
     ).toThrow(RangeError)
   })
 })
+
+describe('Duration strings', () => {
+  it.each([
+    ['P1Y2M3W4DT5H6M7.5S', 'P1Y2M3W4DT5H6M7.5S'],
+    ['-P1Y', '-P1Y'],
+    ['+p1yt1h', 'P1YT1H'],
+    ['PT1.5H', 'PT1H30M'],
+    ['PT1,5M', 'PT1M30S'],
+    ['PT1.123456789H', 'PT1H7M24.4444404S'],
+    ['-PT1.123456789M', '-PT1M7.40740734S'],
+    ['PT1H1M1.5S', 'PT1H1M1.5S'],
+    ['P0D', 'PT0S'],
+  ])('%s', (s, expected) => {
+    expect(Temporal.Duration.from(s).toString()).toBe(expected)
+  })
+
+  it.each([
+    'P',
+    'PT',
+    '-P',
+    'P1YT',
+    'P1DT',
+    'PT1.5H1M',
+    'PT1.5M1S',
+    'PT1.5H1.5M',
+    'P1.5D',
+    'PT.5S',
+    'PT1.S',
+    'PT1.1234567891S',
+    'P1Y\n',
+    '',
+    `P${'9'.repeat(400)}Y`,
+    `PT${'9'.repeat(400)}S`,
+  ])('%j is rejected', (s) => {
+    expect(() => Temporal.Duration.from(s)).toThrow(RangeError)
+  })
+})

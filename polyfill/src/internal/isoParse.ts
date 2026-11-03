@@ -48,14 +48,12 @@ import { utcTimeZoneId } from './timeZoneConfig'
 import { resolveTimeZoneId } from './timeZoneId'
 import { getMatchingInstantFor, getStartOfDayInstantFor } from './timeZoneMath'
 import { nanoToGivenFields } from './unitMath'
-import { TimeUnit, Unit, nanoInSec, unitNanoMap } from './units'
+import { Unit } from './units'
 import {
   NumberSign,
   createRegExp,
-  divModFloor,
   fractionRegExpStr,
   parseInt0,
-  parseSign,
   parseSubsecNano,
   signRegExpStr,
   throwRangeError,
@@ -255,11 +253,33 @@ export function parseDuration(
   s: string,
 ): DurationFields & { sign: NumberSign } {
   const parts = durationRegExp.exec(requireString(s))
-  if (!parts) {
+  if (!parts || invalidDurationRegExp.test(s)) {
     throwFailedParse(s)
   }
+
+  // invalidDurationRegExp allows at most one fraction
+  const fraction = nanoToGivenFields(
+    parseSubsecNano(parts[7] || '') * 3600 +
+      parseSubsecNano(parts[9] || '') * 60 +
+      parseSubsecNano(parts[11] || ''),
+    Unit.Minute,
+    durationFieldNamesAsc,
+  )
+  const durationFields = {
+    ...fraction,
+    years: parseInt0(parts[2]),
+    months: parseInt0(parts[3]),
+    weeks: parseInt0(parts[4]),
+    days: parseInt0(parts[5]),
+    hours: parseInt0(parts[6]),
+    minutes: parseInt0(parts[8]) + fraction.minutes!,
+    seconds: parseInt0(parts[10]) + fraction.seconds!,
+  } as DurationFields
+
   return createDurationSlots(
-    validateDurationFields(organizeDurationParts(parts)),
+    validateDurationFields(
+      parts[1] === '-' ? negateDurationFields(durationFields) : durationFields,
+    ),
   )
 }
 
@@ -425,10 +445,12 @@ const timeRegExp = createRegExp(
 // Splits the others, which annotationsRegExpStr has already validated
 const annotationRegExp = /\[(!?)([^=]+)=([^\]]+)/g
 
-// Spec grammar (DurationTime) requires the time designator `T` to be
-// followed by at least one H/M/S component, so reject a dangling `T`.
 const durationRegExp =
-  /^([+-])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(?:T(?!$)(?:(\d+)(?:[.,](\d{1,9}))?H)?(?:(\d+)(?:[.,](\d{1,9}))?M)?(?:(\d+)(?:[.,](\d{1,9}))?S)?)?$/i
+  /^([+-])?P(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(?:T(?:(\d+)(?:[.,](\d{1,9}))?H)?(?:(\d+)(?:[.,](\d{1,9}))?M)?(?:(\d+)(?:[.,](\d{1,9}))?S)?)?$/i
+
+// What durationRegExp can't express: at least one unit, a time designator with a time
+// unit after it, and nothing after a fraction
+const invalidDurationRegExp = /[PT]$|[.,]\d+[HMS]./i
 
 // NOTE: when modifying regexps, check for reDoS vulnerabilities:
 // https://devina.io/redos-checker
@@ -559,73 +581,6 @@ function organizeTimeParts(parts: string[], hourIndex: number): TimeFields {
   }
 }
 
-function organizeDurationParts(parts: string[]): DurationFields {
-  let hasAny = false
-  let hasAnyFrac = false
-  let leftoverNano = 0
-  let durationFields = {
-    years: parseUnit(parts[2]),
-    months: parseUnit(parts[3]),
-    weeks: parseUnit(parts[4]),
-    days: parseUnit(parts[5]),
-    hours: parseUnit(parts[6], parts[7], Unit.Hour),
-    minutes: parseUnit(parts[8], parts[9], Unit.Minute),
-    seconds: parseUnit(parts[10], parts[11], Unit.Second),
-    ...nanoToGivenFields(leftoverNano, Unit.Millisecond, durationFieldNamesAsc),
-  } as DurationFields
-
-  if (!hasAny) {
-    throwRangeError(errorMessages.noValidFields(durationFieldNamesAsc))
-  }
-
-  if (parseSign(parts[1]) < 0) {
-    durationFields = negateDurationFields(durationFields)
-  }
-
-  return durationFields
-
-  function parseUnit(wholeStr: string): number
-  function parseUnit(
-    wholeStr: string,
-    fracStr: string,
-    timeUnit: TimeUnit,
-  ): number
-  function parseUnit(
-    wholeStr: string,
-    fracStr?: string,
-    timeUnit?: TimeUnit,
-  ): number {
-    let leftoverUnits = 0 // from previous round
-    let wholeUnits = 0
-
-    if (timeUnit) {
-      ;[leftoverUnits, leftoverNano] = divModFloor(
-        leftoverNano,
-        unitNanoMap[timeUnit],
-      )
-    }
-
-    if (wholeStr !== undefined) {
-      if (hasAnyFrac) {
-        throwRangeError(errorMessages.invalidSubstring(wholeStr)) // Fraction must be last one
-      }
-
-      wholeUnits = parseIntSafe(wholeStr)
-      hasAny = true
-
-      if (fracStr) {
-        // convert seconds to other units
-        // more precise version of `frac / nanoInSec * nanoInUnit`
-        leftoverNano =
-          parseSubsecNano(fracStr) * (unitNanoMap[timeUnit!] / nanoInSec)
-        hasAnyFrac = true
-      }
-    }
-
-    return leftoverUnits + wholeUnits
-  }
-}
-
 // Annotations
 // -----------------------------------------------------------------------------
 
@@ -663,21 +618,4 @@ function organizeAnnotationParts(
     timeZoneId,
     calendarId: calendarIds[0] || isoCalendarId,
   }
-}
-
-// Utils
-// -----------------------------------------------------------------------------
-
-/*
-Guaranteed to be non-Infinity (which can happen if number beyond maxint I think)
-Only needs to be called when we know RegExp allows infinite repeating character
-*/
-function parseIntSafe(s: string): number {
-  const n = parseInt(s)
-
-  if (!Number.isFinite(n)) {
-    throwRangeError(errorMessages.invalidSubstring(s))
-  }
-
-  return n
 }
