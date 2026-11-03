@@ -25,6 +25,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `ZonedDateTime#withPlainTime` picks the earlier occurrence of a repeated hour, regardless of the current offset (#123)
 - FIX: `ZonedDateTime.from` accepts in-range values near the `Instant` limits, such as a `Z` string at either end (#120)
 - FIX: Temporal strings with malformed or misplaced annotations are rejected, such as `2024-10-03[]` (#119)
+- FIX: UTC offsets reject minutes and seconds past 59, which `Instant.from` and others read as a wrong offset
 
 ## v1.0.6
 

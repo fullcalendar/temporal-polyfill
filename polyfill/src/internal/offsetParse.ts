@@ -60,10 +60,19 @@ function organizeOffsetParts(
     throwRangeError(errorMessages.invalidSubstring(firstSubMinutePart))
   }
 
+  const minute = parseInt0(parts[3])
+  const second = parseInt0(parts[4])
+
+  // The regexp takes any two digits. An offset has no leap seconds, and hours are
+  // checked by validateTimeZoneOffset, once they're combined with the other units.
+  if (minute > 59 || second > 59) {
+    throwRangeError(errorMessages.outOfBoundsOffset)
+  }
+
   const offsetNanoPos =
     parseInt0(parts[2]) * nanoInHour +
-    parseInt0(parts[3]) * nanoInMinute +
-    parseInt0(parts[4]) * nanoInSec +
+    minute * nanoInMinute +
+    second * nanoInSec +
     parseSubsecNano(parts[5] || '')
 
   return validateTimeZoneOffset(offsetNanoPos * parseSign(parts[1]))
