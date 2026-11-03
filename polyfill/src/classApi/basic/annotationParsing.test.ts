@@ -1,4 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import * as CalendarFns from '../../funcApi/calendar'
+import * as InstantShim from '../../funcApi/shim/instant'
+import * as PlainDateShim from '../../funcApi/shim/plainDate'
+import * as PlainDateTimeShim from '../../funcApi/shim/plainDateTime'
+import * as PlainMonthDayShim from '../../funcApi/shim/plainMonthDay'
+import * as PlainTimeShim from '../../funcApi/shim/plainTime'
+import * as PlainYearMonthShim from '../../funcApi/shim/plainYearMonth'
+import * as ZonedDateTimeShim from '../../funcApi/shim/zonedDateTime'
 import { Temporal } from './implementation'
 
 // The annotation grammar from RFC 9557 and the Temporal spec. test262 covers some of
@@ -69,6 +77,27 @@ const entryPoints: [string, (annotations: string) => unknown][] = [
   ['Instant', (a) => Temporal.Instant.from(`2024-10-03T12:00Z${a}`)],
 ]
 
+// The function API's fromString exports. These call the shim directly, because on a host
+// with native Temporal the public exports hand the string to the host's own parser.
+const getCalendar = CalendarFns.getBasic
+const funcEntryPoints: typeof entryPoints = [
+  ['PlainDate', (a) => PlainDateShim.fromString(`2024-10-03${a}`, getCalendar)],
+  [
+    'PlainDateTime',
+    (a) => PlainDateTimeShim.fromString(`2024-10-03T12:00${a}`, getCalendar),
+  ],
+  ['PlainTime', (a) => PlainTimeShim.fromString(`12:00${a}`)],
+  [
+    'PlainYearMonth',
+    (a) => PlainYearMonthShim.fromString(`2024-10${a}`, getCalendar),
+  ],
+  [
+    'PlainMonthDay',
+    (a) => PlainMonthDayShim.fromString(`10-03${a}`, getCalendar),
+  ],
+  ['Instant', (a) => InstantShim.fromString(`2024-10-03T12:00Z${a}`)],
+]
+
 describe('annotations in Temporal strings', () => {
   for (const [name, parse] of entryPoints) {
     describe(name, () => {
@@ -85,6 +114,37 @@ describe('annotations in Temporal strings', () => {
       }
     })
   }
+
+  describe('function API', () => {
+    for (const [name, parse] of funcEntryPoints) {
+      it(`${name}.fromString rejects malformed annotations`, () => {
+        for (const annotations of malformed) {
+          expect(() => parse(annotations), annotations).toThrow(RangeError)
+        }
+      })
+
+      it(`${name}.fromString accepts well-formed annotations`, () => {
+        for (const annotations of wellFormed) {
+          expect(() => parse(annotations), annotations).not.toThrow()
+        }
+      })
+    }
+
+    it('ZonedDateTime.fromString rejects them too', () => {
+      for (const annotations of [
+        '[Asia/Tokyo][]',
+        '[Asia/Tokyo][foo=b;ar]',
+        '[u-ca=iso8601][Asia/Tokyo]',
+      ]) {
+        expect(() =>
+          ZonedDateTimeShim.fromString(
+            `2024-10-03T12:00${annotations}`,
+            getCalendar,
+          ),
+        ).toThrow(RangeError)
+      }
+    })
+  })
 
   it('ZonedDateTime rejects them too', () => {
     for (const annotations of [
