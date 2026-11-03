@@ -34,6 +34,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Function API `startOfMonth`, `endOfDay` and related helpers on hosts with native Temporal, around a repeated or skipped midnight and near the earliest date
 - FIX: Function API time zone parameters reject a string with a time zone annotation on hosts with native Temporal, as they already did elsewhere
 - FIX: `PlainDate`, `PlainDateTime`, `PlainYearMonth` and `PlainMonthDay` reject an invalid offset they would otherwise discard, and `withCalendar` and `withTimeZone` reject a date-time string with an invalid date, time or offset
+- FIX: `withCalendar` rejects an invalid time, and a year-month or month-day with a non-ISO calendar
 
 ## v1.0.6
 

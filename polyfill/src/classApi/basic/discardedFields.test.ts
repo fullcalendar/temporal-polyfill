@@ -61,6 +61,14 @@ describe('discarded fields in Temporal strings', () => {
       ...invalidDateTimes,
       '2024-02-30[u-ca=iso8601]',
       '2024-13-03',
+      '25:00[u-ca=iso8601]',
+      'T12:60[u-ca=iso8601]',
+      '02-30[u-ca=iso8601]', // an impossible month-day, and not a valid time
+      '--02-30[u-ca=iso8601]',
+      '2024-10[u-ca=hebrew]', // a year-month or month-day must be ISO
+      '-271821-04[u-ca=hebrew]',
+      '10-03[u-ca=hebrew]',
+      '--10-03[u-ca=hebrew]',
     ])('rejects %s', (s) => {
       expect(() => date.withCalendar(s)).toThrow(RangeError)
     })

@@ -297,13 +297,19 @@ export function parseDuration(
 // If `s` is a Temporal string, extract its calendar annotation.
 // Time-only strings can carry a calendar annotation for withCalendar().
 export function parseCalendarId(s: string): string {
-  const res =
-    parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
-  if (res) {
-    return res.calendarId
+  const dateTime = parseDateTimeLike(s)
+  if (dateTime) {
+    return dateTime.calendarId
+  }
+  // An impossible date falls through, because `2024-13` is also a time and an offset
+  const date = parseYearMonthOnly(s) || parseMonthDayOnly(s)
+  if (date && isIsoDateFieldsValid(date)) {
+    requireIsoCalendar(date)
+    return date.calendarId
   }
   const timeParts = parseTimeOnlyParts(s)
   if (timeParts) {
+    validateTimeFields(organizeTimeParts(timeParts, 1))
     return organizeAnnotationParts(timeParts[13]).calendarId
   }
   return s
