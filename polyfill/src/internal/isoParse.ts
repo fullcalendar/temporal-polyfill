@@ -100,7 +100,6 @@ export function parseInstant(s: string): EpochNanoFields {
     parseOffsetNanoMaybe(organized.timeZoneId, true) // onlyHourMinute=true
   }
 
-  validateIsoDateTimeFields(organized)
   const epochNanoseconds = isoDateTimeAndOffsetToEpochNano(
     organized,
     offsetNano,
@@ -268,12 +267,7 @@ export function parsePlainTime(s: string): TimeFields {
     if (dateTime.hasZ) {
       throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
     }
-    // The date and offset only have to be valid, even though both are discarded.
-    // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error.
-    validateIsoDateFields(dateTime)
-    if (dateTime.offset) {
-      parseOffsetNano(dateTime.offset)
-    }
+    // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error
     organized = dateTime
   }
 
@@ -342,13 +336,9 @@ function finalizeDateLike(
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
   if (isoDateProjector && organized.calendarId === isoCalendarId) {
-    // Full-date strings still go through the normal ParseISODateTime-style
-    // validation. Only after that do PlainYearMonth/PlainMonthDay project the
-    // parsed date onto the representative ISO date stored in their slots.
-    validateIsoDateFields(organized)
-    if (organized.hasTime) {
-      validateTimeFields(organized)
-    }
+    // Full-date strings have already had their ParseISODateTime-style validation.
+    // Only now do PlainYearMonth/PlainMonthDay project the parsed date onto the
+    // representative ISO date stored in their slots.
     return finalizeDate(isoDateProjector(organized), resolveCalendar)
   }
 
@@ -416,8 +406,6 @@ function finalizeZonedDateTime(
   const timeZoneId = resolveTimeZoneId(organized.timeZoneId)
   const timeZone = queryTimeZone(timeZoneId)
 
-  validateIsoDateTimeFields(organized)
-
   let epochNano: bigint
 
   if (organized.hasTime) {
@@ -456,7 +444,6 @@ function finalizeDateTime(
   organized: DateTimeLikeOrganized,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  validateIsoDateTimeFields(organized)
   checkIsoDateTimeInBounds(organized)
   return {
     ...combineDateAndTime(organized, organized),
@@ -580,7 +567,20 @@ const durationRegExp = createRegExp(
 
 function parseDateTimeLike(s: string): DateTimeLikeOrganized | undefined {
   const parts = dateTimeRegExp.exec(s)
-  return parts ? organizeDateTimeLikeParts(parts) : undefined
+  if (!parts) {
+    return undefined
+  }
+
+  const organized = organizeDateTimeLikeParts(parts)
+
+  // Checked here because every string type needs these to be valid, including the
+  // ones that discard them, like the date of a PlainTime or the offset of a PlainDate.
+  validateIsoDateTimeFields(organized)
+  if (organized.offset) {
+    parseOffsetNano(organized.offset)
+  }
+
+  return organized
 }
 
 function parseYearMonthOnly(s: string): DateOrganized | undefined {
