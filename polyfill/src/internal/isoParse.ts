@@ -533,6 +533,15 @@ const timeRegExp = createRegExp(
 )
 const annotationRegExp = new RegExp(annotationRegExpStr, 'g')
 
+// The insides of one annotation, per RFC 9557 and the Temporal grammar. A key must
+// be lowercase, so its regexp lacks the i flag that the regexps above have. A value
+// is alphanumeric parts joined by hyphens. Each repeat starts with a delimiter that
+// can't match the characters before it, so neither is a reDoS risk.
+const annotationKeyValueRegExp =
+  /^([a-z_][a-z\d_-]*)=([A-Za-z\d]+(?:-[A-Za-z\d]+)*)$/
+const timeZoneAnnotationRegExp =
+  /^(?:[+-](?:[01]\d|2[0-3])(?::?[0-5]\d)?|[a-z._][a-z\d._+-]*(?:\/[a-z._][a-z\d._+-]*)*)$/i
+
 const durationRegExp = createRegExp(
   `${signRegExpStr}?P` + // 1:sign
     '(\\d+Y)?' + // 2:years
@@ -764,21 +773,22 @@ function organizeAnnotationParts(s: string): AnnotationsOrganized {
   const calendarIds: string[] = []
 
   // iterate through matches
-  s.replace(annotationRegExp, (whole, criticalStr, mainStr) => {
-    const isCritical = Boolean(criticalStr)
-    const [val, name] = mainStr.split('=').reverse() as [string, string?]
+  s.replace(annotationRegExp, (whole, criticalStr, mainStr, index) => {
+    const keyValue = annotationKeyValueRegExp.exec(mainStr)
 
-    if (!name) {
-      if (timeZoneId) {
-        throwRangeError(errorMessages.invalidSubstring(whole)) // Cannot specify timeZone multiple times
+    if (keyValue) {
+      if (keyValue[1] === 'u-ca') {
+        // Lowercase calendar ID for case-insensitive matching (e.g. ISO8601 -> iso8601)
+        calendarIds.push(keyValue[2].toLowerCase())
+        calendarIsCritical ||= Boolean(criticalStr)
+      } else if (criticalStr) {
+        // Critical annotation not used
+        throwRangeError(errorMessages.invalidSubstring(whole))
       }
-      timeZoneId = val
-    } else if (name === 'u-ca') {
-      // Lowercase calendar ID for case-insensitive matching (e.g. ISO8601 -> iso8601)
-      calendarIds.push(val.toLowerCase())
-      calendarIsCritical ||= isCritical
-    } else if (isCritical || /[A-Z]/.test(name)) {
-      // Critical annotation not used, or uppercase disallowed
+    } else if (!index && timeZoneAnnotationRegExp.test(mainStr)) {
+      // A time zone can only be the first annotation
+      timeZoneId = mainStr
+    } else {
       throwRangeError(errorMessages.invalidSubstring(whole))
     }
 
