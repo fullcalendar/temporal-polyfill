@@ -227,22 +227,16 @@ export function parsePlainMonthDay(
 export function parsePlainTime(s: string): TimeFields {
   s = requireString(s)
 
-  let organized: TimeFields | undefined = parseTimeOnly(s)
+  // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error
+  const organized = parseDateTimeLike(s) || parseTimeOnly(s)
 
-  if (!organized) {
-    const dateTime = parseDateTimeLike(s)
-
-    if (!dateTime || !dateTime.hasTime) {
-      throwFailedParse(s) // Must have time for PlainTime
-    }
-    if (dateTime.hasZ) {
-      throwFailedParse(s) // Cannot have Z for PlainTime
-    }
-    // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error
-    organized = dateTime
-  }
-
-  if (parseYearMonthOnly(s) || parseMonthDayOnly(s)) {
+  if (
+    !organized ||
+    !organized.hasTime || // Must have time for PlainTime
+    organized.hasZ ||
+    parseYearMonthOnly(s) ||
+    parseMonthDayOnly(s)
+  ) {
     throwFailedParse(s)
   }
 
@@ -287,15 +281,11 @@ export function parseDuration(
 // Time-only strings can carry a calendar annotation for withCalendar().
 export function parseCalendarId(s: string): string {
   const organized =
-    parseDateTimeLike(s) || parseYearMonthOnly(s) || parseMonthDayOnly(s)
-  if (organized) {
-    return organized.calendarId
-  }
-  const timeParts = parseTimeOnlyParts(s)
-  if (timeParts) {
-    return organizeAnnotationParts(timeParts[13], timeParts[14]).calendarId
-  }
-  return s
+    parseDateTimeLike(s) ||
+    parseYearMonthOnly(s) ||
+    parseMonthDayOnly(s) ||
+    parseTimeOnly(s)
+  return organized ? organized.calendarId : s
 }
 
 export function parseTimeZoneId(s: string): string {
@@ -436,12 +426,6 @@ const annotationsRegExpStr =
 const yearMonthRegExp = createRegExp(yearMonthRegExpStr + annotationsRegExpStr)
 const monthDayRegExp = createRegExp(monthDayRegExpStr + annotationsRegExpStr)
 const dateTimeRegExp = createRegExp(dateTimeRegExpStr + annotationsRegExpStr)
-const timeRegExp = createRegExp(
-  '[Tt]?' +
-    timeRegExpStr(2, leapSecondStr) + // 1:hour, 2:sep, 3:minute, 4:second, 5:afterDecimal
-    `(${signRegExpStr}${timeRegExpStr(9)})?` + // 6:offset, 7:sign, 8:hour, 9:sep, 10:minute, 11:second, 12:afterDecimal
-    annotationsRegExpStr, // 13:timeZoneId, 14:others
-)
 // Splits the others, which annotationsRegExpStr has already validated
 const annotationRegExp = /\[(!?)([^=]+)=([^\]]+)/g
 
@@ -459,8 +443,7 @@ const invalidDurationRegExp = /[PT]$|[.,]\d+[HMS]./i
   yearMonthRegExp,
   monthDayRegExp,
   dateTimeRegExp,
-  timeRegExp,
-  // annotationRegExp, // no need to check. see note above
+  // annotationRegExp, // no need to check. it only runs on validated annotations
   durationRegExp,
 ].forEach((re) => console.log(re.source))
 */
@@ -505,15 +488,11 @@ function requireIsoCalendar(organized: DateOrganized): DateOrganized {
   return organized
 }
 
-function parseTimeOnly(s: string): TimeFields | undefined {
-  const parts = parseTimeOnlyParts(s)
-  if (!parts) return undefined
-  organizeAnnotationParts(parts[13], parts[14]) // validate annotations
-  return organizeTimeParts(parts, 1)
-}
-
-function parseTimeOnlyParts(s: string): string[] | undefined {
-  return timeRegExp.exec(s) || undefined
+// A time-only string is the end of a date-time string, so give it a placeholder date
+// to reuse the regexp. A time without a date can't use a space or Z.
+function parseTimeOnly(s: string): DateTimeLikeOrganized | undefined {
+  const organized = parseDateTimeLike(s.replace(/^t?/i, '0000-01-01T'))
+  return organized && !organized.hasZ ? organized : undefined
 }
 
 // Parts Organization
@@ -539,7 +518,10 @@ function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
     year: parseInt(parts[1]),
     month: parseInt(parts[3]),
     day: parseInt(parts[4]),
-    ...organizeTimeParts(parts, 5),
+    ...nanoToTimeAndDay(parseSubsecNano(parts[9] || ''))[0],
+    hour: parseInt0(parts[5]),
+    minute: parseInt0(parts[7]),
+    second: Math.min(parseInt0(parts[8]), 59), // massage leap-second
     ...organizeAnnotationParts(parts[18], parts[19]),
     hasTime: !!parts[5],
     hasZ: !!parts[10],
@@ -567,17 +549,6 @@ function organizeMonthDayParts(parts: string[]): DateOrganized {
     month: parseInt(parts[1]),
     day: parseInt(parts[2]),
     ...organizeAnnotationParts(parts[3], parts[4]),
-  }
-}
-
-function organizeTimeParts(parts: string[], hourIndex: number): TimeFields {
-  const second = parseInt0(parts[hourIndex + 3])
-
-  return {
-    ...nanoToTimeAndDay(parseSubsecNano(parts[hourIndex + 4] || ''))[0],
-    hour: parseInt0(parts[hourIndex]),
-    minute: parseInt0(parts[hourIndex + 2]),
-    second: second === 60 ? 59 : second, // massage leap-second
   }
 }
 
