@@ -35,6 +35,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Function API time zone parameters reject a string with a time zone annotation on hosts with native Temporal, as they already did elsewhere
 - FIX: `PlainDate`, `PlainDateTime`, `PlainYearMonth` and `PlainMonthDay` reject an invalid offset they would otherwise discard, and `withCalendar` and `withTimeZone` reject a date-time string with an invalid date, time or offset
 - FIX: `withCalendar` rejects an invalid time, and a year-month or month-day with a non-ISO calendar
+- FIX: `PlainTime`, `PlainDateTime` and `ZonedDateTime` `round` with `halfEven` and a `roundingIncrement` resolve ties to the correct multiple, such as `12:01:54` by 4 seconds giving `12:01:56`
 
 ## v1.0.6
 

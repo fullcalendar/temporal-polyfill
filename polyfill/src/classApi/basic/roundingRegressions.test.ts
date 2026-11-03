@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import * as CalendarFns from '../../funcApi/calendar'
 import * as DurationFns from '../../funcApi/duration'
 import * as PlainDateFns from '../../funcApi/plainDate'
+import * as PlainDateTimeFns from '../../funcApi/plainDateTime'
+import * as PlainTimeFns from '../../funcApi/plainTime'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
@@ -249,5 +251,108 @@ describe('roundingIncrement range', () => {
       }),
     ).toThrow(RangeError)
     expect(didReadRoundingMode).toBe(false)
+  })
+})
+
+describe('halfEven with an increment on wall-clock time', () => {
+  // A unit counts its multiples from the start of the next larger unit. It only shows
+  // on an exact tie, with an increment that goes into that larger unit an odd number of
+  // times, when the multiples counted from midnight have the opposite parity.
+  const cases = [
+    ['05:58:00', 'minute', 4, '05:56:00'], // 14.5 multiples into the hour
+    ['19:54:00', 'minute', 4, '19:56:00'], // 13.5
+    ['12:01:54', 'second', 4, '12:01:56'],
+    ['12:01:50', 'second', 4, '12:01:48'],
+    ['12:00:01.004', 'millisecond', 8, '12:00:01'],
+    ['12:00:00.001004', 'microsecond', 8, '12:00:00.001'],
+    ['12:00:00.000001004', 'nanosecond', 8, '12:00:00.000001'],
+    // hours count from midnight, so nothing changes for them
+    ['03:00:00', 'hour', 2, '04:00:00'],
+    ['01:00:00', 'hour', 2, '00:00:00'],
+  ] as const
+
+  const zoned = (time: string) => `2024-07-15T${time}+09:00[Asia/Tokyo]`
+
+  it.each(cases)('%s to %s by %i', (time, smallestUnit, inc, expected) => {
+    const options = {
+      smallestUnit,
+      roundingIncrement: inc,
+      roundingMode: 'halfEven',
+    } as const
+
+    expect(Temporal.PlainTime.from(time).round(options).toString()).toBe(
+      expected,
+    )
+    expect(
+      Temporal.PlainDateTime.from(`2024-07-15T${time}`)
+        .round(options)
+        .toString(),
+    ).toBe(`2024-07-15T${expected}`)
+    expect(
+      Temporal.ZonedDateTime.from(zoned(time)).round(options).toString(),
+    ).toBe(zoned(expected))
+  })
+
+  it('matches through the function API', () => {
+    const options = { roundingIncrement: 4, roundingMode: 'halfEven' } as const
+    const time = '12:01:54'
+    const dateTime = `2024-07-15T${time}`
+
+    expect(
+      PlainTimeFns.toString(
+        PlainTimeFns.roundToSecond(PlainTimeFns.fromString(time), options),
+      ),
+    ).toBe('12:01:56')
+    expect(
+      PlainDateTimeFns.toString(
+        PlainDateTimeFns.roundToSecond(
+          PlainDateTimeFns.fromString(dateTime, CalendarFns.getBasic),
+          options,
+        ),
+      ),
+    ).toBe('2024-07-15T12:01:56')
+    expect(
+      ZonedDateTimeFns.toString(
+        ZonedDateTimeFns.roundToSecond(
+          ZonedDateTimeFns.fromString(zoned(time), CalendarFns.getBasic),
+          options,
+        ),
+      ),
+    ).toBe(zoned('12:01:56'))
+  })
+
+  it('carries out of the larger unit and the day', () => {
+    const options = {
+      smallestUnit: 'second',
+      roundingIncrement: 3,
+      roundingMode: 'halfEven',
+    } as const
+
+    // 58.5 is 19.5 multiples into the minute, and 20 reaches the next one
+    expect(
+      Temporal.PlainTime.from('12:59:58.5').round(options).toString(),
+    ).toBe('13:00:00')
+    expect(
+      Temporal.PlainTime.from('23:59:58.5').round(options).toString(),
+    ).toBe('00:00:00')
+    expect(
+      Temporal.PlainDateTime.from('2024-07-15T23:59:58.5')
+        .round(options)
+        .toString(),
+    ).toBe('2024-07-16T00:00:00')
+  })
+
+  it('leaves Instant counting from the epoch', () => {
+    // The same wall-clock digits as the PlainTime above give a different multiple,
+    // because an Instant has no larger unit to count from
+    expect(
+      Temporal.Instant.from('2024-07-15T12:01:54Z')
+        .round({
+          smallestUnit: 'second',
+          roundingIncrement: 4,
+          roundingMode: 'halfEven',
+        })
+        .toString(),
+    ).toBe('2024-07-15T12:01:52Z')
   })
 })

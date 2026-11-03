@@ -24,7 +24,7 @@ import { moveTime } from '../../internal/move'
 import { refineOverflowOptions } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
-import { computeNanoInc, roundTimeToInc } from '../../internal/round'
+import { roundTimeToUnit } from '../../internal/round'
 import { createTimeSlots } from '../../internal/slots'
 import {
   timeFieldsToMilli,
@@ -150,11 +150,7 @@ export const PlainTime = defineTemporalClass(
         Unit.Hour,
       ) as [TimeUnit, number, RoundingModeEnum]
       return createPlainTime(
-        roundTimeToInc(
-          slots,
-          computeNanoInc(smallestUnit, roundingInc),
-          roundingMode,
-        )[0],
+        roundTimeToUnit(slots, smallestUnit, roundingInc, roundingMode)[0],
       )
     }
 

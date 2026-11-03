@@ -47,6 +47,7 @@ import {
   Unit,
   nanoInHour,
   nanoInMinute,
+  nanoInUtcDay,
   unitNanoMap,
 } from './units'
 import {
@@ -295,25 +296,58 @@ export function roundZonedEpochToTime(
   const isoDateTime = zonedEpochSlotsToIso(slots)
   return getInstantPreferringOffset(
     slots.timeZone,
-    roundDateTimeToInc(
-      isoDateTime,
-      computeNanoInc(smallestUnit, roundingInc),
-      roundingMode,
-    ),
+    roundDateTimeToUnit(isoDateTime, smallestUnit, roundingInc, roundingMode),
     isoDateTime.offsetNanoseconds,
   )
 }
 
 // Wall-clock rounding
 // -----------------------------------------------------------------------------
-// Round ISO date-time and time fields to a nanosecond increment. PlainDateTime
-// and PlainTime call these directly with pre-refined settings, and the zoned
-// time-unit strategy above rounds the wall-clock time before re-resolving it.
+// Round ISO date-time and time fields to a unit or a nanosecond increment.
+// PlainDateTime and PlainTime call these directly with pre-refined settings, and
+// the zoned time-unit strategy above rounds the wall-clock time before re-resolving it.
 
+// A unit rounds within the next larger unit, not within the whole day, because
+// halfEven's "even" counts multiples from the start of that larger unit. Seconds
+// by 4 rounds 12:01:54 up to :56, the 14th multiple in its minute, though it would
+// be an odd multiple counting from midnight. Days have no larger unit.
+export function roundDateTimeToUnit(
+  isoDateTime: CalendarDateTimeFields,
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): CalendarDateTimeFields {
+  return roundDateTimeToInc(
+    isoDateTime,
+    computeNanoInc(smallestUnit, roundingInc),
+    roundingMode,
+    unitNanoMap[smallestUnit + 1],
+  )
+}
+
+export function roundTimeToUnit(
+  timeFields: TimeFields,
+  smallestUnit: DayTimeUnit,
+  roundingInc: number,
+  roundingMode: RoundingModeEnum,
+): [TimeFields, number] {
+  return roundTimeToInc(
+    timeFields,
+    computeNanoInc(smallestUnit, roundingInc),
+    roundingMode,
+    unitNanoMap[smallestUnit + 1],
+  )
+}
+
+// toString calls this directly because fractionalSecondDigits gives a power of ten
+// rather than a unit. Those increments, and 1 second or 1 minute, go into their
+// larger unit an even number of times, so counting from midnight picks the same
+// multiple there.
 export function roundDateTimeToInc(
   isoDateTime: CalendarDateTimeFields,
   nanoInc: number,
   roundingMode: RoundingModeEnum,
+  spanNano?: number,
 ): CalendarDateTimeFields {
   // Time rounding can carry into the neighboring ISO date. Keep the original
   // date and time together here so the day delta is applied to the same
@@ -322,6 +356,7 @@ export function roundDateTimeToInc(
     isoDateTime,
     nanoInc,
     roundingMode,
+    spanNano,
   )
 
   const roundedIsoDate = moveDateByDays(isoDateTime, dayDelta)
@@ -337,9 +372,15 @@ export function roundTimeToInc(
   timeFields: TimeFields,
   nanoInc: number,
   roundingMode: RoundingModeEnum,
+  spanNano = nanoInUtcDay,
 ): [TimeFields, number] {
+  const timeNano = timeFieldsToNano(timeFields)
+  const remainderNano = timeNano % spanNano
+
   return nanoToTimeAndDay(
-    roundNumberToInc(timeFieldsToNano(timeFields), nanoInc, roundingMode),
+    timeNano -
+      remainderNano +
+      roundNumberToInc(remainderNano, nanoInc, roundingMode),
   )
 }
 

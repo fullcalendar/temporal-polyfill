@@ -86,7 +86,7 @@ import {
   refineOverflowOptions,
 } from '../../internal/optionsFieldRefine'
 import { refineUnitRoundOptions } from '../../internal/optionsRoundingRefine'
-import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
+import { roundDateTimeToUnit } from '../../internal/round'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -681,11 +681,7 @@ function roundToDayTimeUnit(
   )
   return createShimPlainDateTimeRecord(
     createDateTimeSlots(
-      roundDateTimeToInc(
-        slots,
-        computeNanoInc(smallestUnit, roundingInc),
-        roundingMode,
-      ),
+      roundDateTimeToUnit(slots, smallestUnit, roundingInc, roundingMode),
       slots.calendar,
     ),
   )

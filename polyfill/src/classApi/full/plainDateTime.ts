@@ -50,7 +50,7 @@ import {
 } from '../../internal/optionsFieldRefine'
 import { RoundingModeEnum } from '../../internal/optionsModel'
 import { refineRoundingOptions } from '../../internal/optionsRoundingRefine'
-import { computeNanoInc, roundDateTimeToInc } from '../../internal/round'
+import { roundDateTimeToUnit } from '../../internal/round'
 import {
   createDateSlots,
   createDateTimeSlots,
@@ -256,11 +256,7 @@ export const PlainDateTime = defineTemporalClass(
       ) as [DayTimeUnit, number, RoundingModeEnum]
       return createPlainDateTime(
         createDateTimeSlots(
-          roundDateTimeToInc(
-            slots,
-            computeNanoInc(smallestUnit, roundingInc),
-            roundingMode,
-          ),
+          roundDateTimeToUnit(slots, smallestUnit, roundingInc, roundingMode),
           slots.calendar,
         ),
       )
