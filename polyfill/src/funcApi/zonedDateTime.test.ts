@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { FixedTimeZone } from '../internal/timeZone'
 import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
+import * as InstantFns from './instant'
 import * as PlainTimeFns from './plainTime'
 import {
   expectDurationEquals,
@@ -410,6 +411,25 @@ describe('startOfDay', () => {
 })
 
 describe('getTimeZoneTransition', () => {
+  it('finds both of two close-together transitions, and the offset between them', () => {
+    const zdt = ZonedDateTimeFns.fromString(
+      '2018-06-01T12:00[Africa/Casablanca]',
+      CalendarFns.getBasic,
+    )
+    const toInstantString = (record: ZonedDateTimeFns.Record | null) =>
+      InstantFns.toString(ZonedDateTimeFns.toInstant(record!))
+
+    expect(ZonedDateTimeFns.toString(zdt)).toBe(
+      '2018-06-01T12:00:00+00:00[Africa/Casablanca]',
+    )
+    expect(
+      toInstantString(ZonedDateTimeFns.getTimeZoneTransition(zdt, 'previous')),
+    ).toBe('2018-05-13T02:00:00Z')
+    expect(
+      toInstantString(ZonedDateTimeFns.getTimeZoneTransition(zdt, 'next')),
+    ).toBe('2018-06-17T02:00:00Z')
+  })
+
   itSkipNative.each(['next', 'previous'] as const)(
     'keeps a %s transition at epoch zero',
     (direction) => {

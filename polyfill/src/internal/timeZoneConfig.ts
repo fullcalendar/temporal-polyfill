@@ -2,30 +2,24 @@ import { secInUtcDay } from './units'
 
 export const utcTimeZoneId = 'UTC'
 
-// Time-zone transition search works by sampling the offset at both ends
-// of a period and then bisecting only when those samples differ. Keep the broad
-// default for ordinary zones, but use shorter periods for tzdb histories where
-// the offset can change away and back within a few days. This period is used by
-// both transition search and direct offset lookup, so these day counts protect
-// ordinary DST-gap math too, not only getTimeZoneTransition().
+// Time-zone transition search works by sampling the offset at both ends of a period,
+// and then bisecting only when those samples differ. A period must be shorter than the
+// time between any two of a zone's transitions, or else both can land in one period,
+// which either hides them or finds only one. This period is used by both transition
+// search and direct offset lookup, so these day counts protect ordinary offset and
+// DST-gap math too, not only getTimeZoneTransition().
 //
-// TODO: maybe change this to 19 like proposal-temporal's polyfill
-//
-export const defaultTimeZonePeriodDays = 60
+// The default fits all but the zones below. timeZoneImpl.test.ts checks every zone
+// against native Temporal, so a closer pair in a future tzdb release will fail there.
+export const defaultTimeZonePeriodDays = 19
 
-// These values mirror known close-transition cases in test262. They are not a
-// general proof that no closer pair can ever appear in future tzdb releases;
-// they are a local performance/correctness tradeoff until the native Intl path
-// grows a transition search that can discover multiple changes inside a large
-// scan range.
-//
-// Borrowed from
+// Based on proposal-temporal's values, which come from close transitions in test262.
 // https://github.com/tc39/proposal-temporal/blob/171f1c3b630f91b1a0bba80ce5cbfcfa5b14c478/polyfill/lib/ecmascript.mjs#L2397
 //
 const timeZonePeriodDaysByName: Record<string, number> = {
   // Quoted keys are intentional. Production builds mangle property names, but
   // these keys are looked up by runtime IANA zone names.
-  'El_Aaiun': 17,
+  'El_Aaiun': 16, // 16.96 days apart in 1976
   'Tucuman': 12,
   'Tirane': 11,
   'Riga': 10,
