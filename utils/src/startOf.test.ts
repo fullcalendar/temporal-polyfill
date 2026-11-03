@@ -380,3 +380,32 @@ describe('startOfMicrosecond', () => {
     })
   })
 })
+
+describe('repeated midnight', () => {
+  // Midnight happens twice on 2020-11-01 in Havana, at -04:00 and then -05:00
+  const later = '2020-11-01T00:30:00-05:00[America/Havana]'
+  const start = '2020-11-01T00:00:00-04:00[America/Havana]'
+
+  it.each([
+    ['startOfMonth', startOfMonth],
+    ['startOfDay', startOfDay],
+  ])('%s picks the earlier occurrence', (_name, fn) => {
+    expect(fn(Temporal.ZonedDateTime.from(later)).toString()).toBe(start)
+  })
+
+  it('startOfMonth picks it from another day of the month', () => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '2020-11-15T12:00:00-05:00[America/Havana]',
+    )
+    expect(startOfMonth(zdt).toString()).toBe(start)
+  })
+
+  it('startOfDay moves a skipped midnight forward', () => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '2018-11-04T12:00:00-02:00[America/Sao_Paulo]',
+    )
+    expect(startOfDay(zdt).toString()).toBe(
+      '2018-11-04T01:00:00-02:00[America/Sao_Paulo]',
+    )
+  })
+})

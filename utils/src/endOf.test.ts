@@ -353,3 +353,138 @@ describe('endOfMicrosecond', () => {
     })
   })
 })
+
+describe('a day that does not start at midnight', () => {
+  // Midnight is skipped on 2018-11-04 in Sao Paulo, so the day starts at 01:00
+  const zone = '[America/Sao_Paulo]'
+  const end = `2018-11-04T23:59:59.999999999-02:00${zone}`
+
+  it('endOfDay stops at the next midnight', () => {
+    const zdt = Temporal.ZonedDateTime.from(`2018-11-04T12:00:00-02:00${zone}`)
+    expect(endOfDay(zdt).toString()).toBe(end)
+  })
+
+  it('endOfWeek ends on the transition day', () => {
+    const zdt = Temporal.ZonedDateTime.from(`2018-11-01T12:00:00-03:00${zone}`)
+    expect(endOfWeek(zdt).toString()).toBe(end)
+  })
+})
+
+describe('a period whose first day does not start at midnight', () => {
+  // Each of these days starts at 01:00. Adding a period to that start keeps the 01:00.
+  it('endOfMonth stops at the next midnight', () => {
+    const zdt = Temporal.ZonedDateTime.from('2014-08-15T12:00[Africa/Cairo]')
+    expect(endOfMonth(zdt).toString()).toBe(
+      '2014-08-31T23:59:59.999999999+03:00[Africa/Cairo]',
+    )
+  })
+
+  it('endOfYear stops at the next midnight', () => {
+    const zdt = Temporal.ZonedDateTime.from('1975-01-15T12:00[Africa/Bissau]')
+    expect(endOfYear(zdt).toString()).toBe(
+      '1975-12-31T23:59:59.999999999+00:00[Africa/Bissau]',
+    )
+  })
+})
+
+describe('a period whose last day does not exist', () => {
+  // 1994-12-31 was skipped in Kiritimati, going from -10:00 to +14:00
+  const end = '1994-12-30T23:59:59.999999999-10:00[Pacific/Kiritimati]'
+
+  it.each([
+    ['endOfMonth', endOfMonth],
+    ['endOfYear', endOfYear],
+    ['endOfDay', endOfDay],
+  ])('%s stops before the first instant of the next day', (_name, fn) => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '1994-12-30T12:00[Pacific/Kiritimati]',
+    )
+    expect(fn(zdt).toString()).toBe(end)
+  })
+
+  it('endOfMonth gets there from earlier in the month', () => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '1994-12-15T12:00[Pacific/Kiritimati]',
+    )
+    expect(endOfMonth(zdt).toString()).toBe(end)
+  })
+})
+
+describe('non-ISO calendars', () => {
+  it('endOfYear finds the last month of a leap year', () => {
+    const date = Temporal.PlainDate.from('2024-03-11[u-ca=hebrew]')
+    const end = endOfYear(date)
+    expect(end.toString()).toBe('2024-10-02[u-ca=hebrew]')
+    expect(end.monthCode).toBe('M12')
+    expect(end.add({ days: 1 }).year).toBe(date.year + 1)
+  })
+
+  it('endOfMonth finds the last day of a leap month', () => {
+    const date = Temporal.PlainDate.from('2024-02-10[u-ca=hebrew]') // Adar I
+    expect(date.monthCode).toBe('M05L')
+    const end = endOfMonth(date)
+    expect(end.monthCode).toBe('M05L')
+    expect(end.add({ days: 1 }).monthCode).toBe('M06')
+  })
+})
+
+describe('at the limits of the supported range', () => {
+  it('a period that starts before the earliest date still has an end', () => {
+    const zdt = Temporal.ZonedDateTime.from('-271821-04-20T00:00:00+00:00[UTC]')
+    expect(endOfMonth(zdt).toString()).toBe(
+      '-271821-04-30T23:59:59.999999999+00:00[UTC]',
+    )
+    expect(endOfYear(zdt).toString()).toBe(
+      '-271821-12-31T23:59:59.999999999+00:00[UTC]',
+    )
+    expect(endOfWeek(zdt).toString()).toBe(
+      '-271821-04-25T23:59:59.999999999+00:00[UTC]',
+    )
+
+    const date = Temporal.PlainDate.from('-271821-04-19')
+    expect(endOfMonth(date).toString()).toBe('-271821-04-30')
+    expect(endOfYear(date).toString()).toBe('-271821-12-31')
+
+    const yearMonth = Temporal.PlainYearMonth.from('-271821-04')
+    expect(endOfYear(yearMonth).toString()).toBe('-271821-12')
+  })
+
+  it('PlainDateTime has an end of every unit in its first moments', () => {
+    const dateTime = Temporal.PlainDateTime.from(
+      '-271821-04-19T00:00:00.000000001',
+    )
+    const day = '-271821-04-19T'
+    expect(endOfDay(dateTime).toString()).toBe(`${day}23:59:59.999999999`)
+    expect(endOfHour(dateTime).toString()).toBe(`${day}00:59:59.999999999`)
+    expect(endOfMinute(dateTime).toString()).toBe(`${day}00:00:59.999999999`)
+    expect(endOfSecond(dateTime).toString()).toBe(`${day}00:00:00.999999999`)
+    expect(endOfMillisecond(dateTime).toString()).toBe(
+      `${day}00:00:00.000999999`,
+    )
+    expect(endOfMicrosecond(dateTime).toString()).toBe(
+      `${day}00:00:00.000000999`,
+    )
+  })
+
+  it('PlainDateTime has an end of its last day', () => {
+    const dateTime = Temporal.PlainDateTime.from('+275760-09-13T12:00')
+    expect(endOfDay(dateTime).toString()).toBe(
+      '+275760-09-13T23:59:59.999999999',
+    )
+  })
+
+  it('a zoned end just before the latest instant is in range', () => {
+    const zdt = Temporal.ZonedDateTime.from('+275760-09-12T23:30:00+00:00[UTC]')
+    expect(endOfDay(zdt).toString()).toBe(
+      '+275760-09-12T23:59:59.999999999+00:00[UTC]',
+    )
+  })
+
+  it('an end past the limit still throws', () => {
+    const zdt = Temporal.ZonedDateTime.from('+275760-09-13T00:00:00+00:00[UTC]')
+    expect(() => endOfDay(zdt)).toThrow(RangeError)
+    expect(() => endOfMonth(zdt)).toThrow(RangeError)
+    const date = Temporal.PlainDate.from('+275760-09-13')
+    expect(() => endOfMonth(date)).toThrow(RangeError)
+  })
+})

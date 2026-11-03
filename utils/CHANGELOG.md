@@ -1,6 +1,12 @@
 
 # `temporal-utils` Changelog
 
+## Unreleased
+
+- FIX: `startOfMonth`, `startOfYear` and the rounding built on them pick the first occurrence of a repeated midnight
+- FIX: `endOfDay` and longer ends no longer run an hour into the next day when the day doesn't start at midnight
+- FIX: `endOfYear`, `endOfMonth`, `endOfWeek` and `endOfDay`, and `endOfHour` and shorter on plain types, work when the period's start is out of range
+
 ## v1.0.3
 
 - FIX: `diff*` helpers honor `roundingIncrement` when `roundingMode` is omitted, using Temporal's default `trunc` rounding

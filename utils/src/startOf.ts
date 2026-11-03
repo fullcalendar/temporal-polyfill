@@ -1,14 +1,5 @@
 import { withDayOfWeek } from './with.js'
 
-const zeroTimeFields = {
-  hour: 0,
-  minute: 0,
-  second: 0,
-  millisecond: 0,
-  microsecond: 0,
-  nanosecond: 0,
-}
-
 export function startOfYear<
   T extends
     | Temporal.PlainYearMonth
@@ -27,11 +18,16 @@ export function startOfYear<
     return date.with({ month: 1 }) as T
   }
 
-  return date.with({
-    month: 1,
-    day: 1,
-    ...zeroTimeFields,
-  }) as T
+  // The time goes through startOfDay rather than with(), which would keep the current
+  // offset if midnight were repeated, and pick the later of the two
+  return startOfDay(
+    (
+      date as
+        | Temporal.PlainDate
+        | Temporal.PlainDateTime
+        | Temporal.ZonedDateTime
+    ).with({ month: 1, day: 1 }) as Temporal.ZonedDateTime,
+  ) as unknown as T
 }
 
 export function startOfMonth<
@@ -40,10 +36,9 @@ export function startOfMonth<
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
 >(date: T): T {
-  return date.with({
-    day: 1,
-    ...zeroTimeFields,
-  }) as T
+  return startOfDay(
+    date.with({ day: 1 }) as Temporal.ZonedDateTime,
+  ) as unknown as T
 }
 
 export function startOfWeek<
