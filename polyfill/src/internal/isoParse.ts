@@ -236,7 +236,7 @@ export function parsePlainTime(s: string): TimeFields {
       throwFailedParse(s) // Must have time for PlainTime
     }
     if (dateTime.hasZ) {
-      throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
+      throwFailedParse(s) // Cannot have Z for PlainTime
     }
     // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error
     organized = dateTime
@@ -500,7 +500,7 @@ function parseMonthDayOnly(s: string): DateOrganized | undefined {
 // The short date forms can only have the ISO calendar
 function requireIsoCalendar(organized: DateOrganized): DateOrganized {
   if (organized.calendarId !== isoCalendarId) {
-    throwRangeError(errorMessages.invalidSubstring(organized.calendarId))
+    throwFailedParse(organized.calendarId)
   }
   return organized
 }
@@ -603,15 +603,14 @@ function organizeAnnotationParts(
       calendarIds.push(value.toLowerCase())
       calendarIsCritical ||= criticalStr
     } else if (criticalStr) {
-      // Critical annotation not used
-      throwRangeError(errorMessages.invalidSubstring(whole))
+      throwFailedParse(whole) // Critical annotation not used
     }
 
     return ''
   })
 
   if (calendarIds.length > 1 && calendarIsCritical) {
-    throwRangeError(errorMessages.invalidSubstring(s)) // Multiple calendars when one is critical
+    throwFailedParse(s) // Multiple calendars when one is critical
   }
 
   return {

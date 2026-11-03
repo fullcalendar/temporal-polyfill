@@ -25,7 +25,7 @@ export function parseOffsetNanoMaybe(
     return undefined
   }
   if (onlyHourMinute && parts[5]) {
-    throwRangeError(errorMessages.invalidSubstring(parts[5]))
+    throwRangeError(errorMessages.failedParse(s))
   }
   return (
     parseSign(parts[1]) *

@@ -91,8 +91,6 @@ export const flippedSmallestLargestUnit = 'smallestUnit > largestUnit'
 
 // Parsing
 export const failedParse = (s: string) => `Cannot parse: ${s}`
-export const invalidSubstring = (substring: string) =>
-  `Invalid substring: ${substring}`
 
 // Formatting
 export const invalidFormatOptions = 'Invalid formatting options'
