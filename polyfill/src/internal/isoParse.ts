@@ -464,17 +464,19 @@ function finalizeDate(
 const monthRegExpStr = '(0[1-9]|1[0-2])'
 const dayRegExpStr = '(0[1-9]|[12]\\d|3[01])'
 
+const yearRegExpStr = '((?!-0{6})[+-]\\d{6}|\\d{4})' // can't be negative zero
+
 const yearMonthRegExpStr =
-  `(?:(?:${signRegExpStr}(\\d{6}))|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
+  yearRegExpStr + // 1:year
   '-?' +
-  monthRegExpStr // 4:month
+  monthRegExpStr // 2:month
 
 const dateRegExpStr =
-  `(?:(?:${signRegExpStr}(\\d{6}))|(\\d{4}))` + // 1:yearSign, 2:yearDigits6, 3:yearDigits4
-  '(-?)' + // 4:separator
-  monthRegExpStr + // 5:month
-  '\\4' +
-  dayRegExpStr // 6:day
+  yearRegExpStr + // 1:year
+  '(-?)' + // 2:separator
+  monthRegExpStr + // 3:month
+  '\\2' +
+  dayRegExpStr // 4:day
 
 const monthDayRegExpStr =
   '(?:--)?' +
@@ -499,11 +501,11 @@ function timeRegExpStr(separatorIndex: number, leapSecondStr = ''): string {
 const leapSecondStr = '|60'
 
 const dateTimeRegExpStr =
-  dateRegExpStr + // 1:yearSign, 2:yearDigits6, 3:yearDigits4, 4:dateSep, 5:month, 6:day
+  dateRegExpStr + // 1:year, 2:dateSep, 3:month, 4:day
   '(?:[Tt ]' +
-  timeRegExpStr(8, leapSecondStr) + // 7:hour, 8:timeSep, 9:minute, 10:second, 11:afterDecimal
-  `(?:([Zz])|(${signRegExpStr}` + // 12:z, 13:offset, 14:offsetSign
-  timeRegExpStr(16) + // 15:hour, 16:sep, 17:minute, 18:second, 19:afterDecimal
+  timeRegExpStr(6, leapSecondStr) + // 5:hour, 6:timeSep, 7:minute, 8:second, 9:afterDecimal
+  `(?:([Zz])|(${signRegExpStr}` + // 10:z, 11:offset, 12:offsetSign
+  timeRegExpStr(14) + // 13:hour, 14:sep, 15:minute, 16:second, 17:afterDecimal
   '))?' +
   ')?'
 
@@ -609,16 +611,16 @@ type DateOrganized = CalendarDateFields & WithCalendarStr
 
 function organizeDateTimeLikeParts(parts: string[]): DateTimeLikeOrganized {
   return {
-    year: organizeIsoYearParts(parts),
-    month: parseInt(parts[5]),
-    day: parseInt(parts[6]),
-    ...organizeTimeParts(parts, 7),
-    ...organizeAnnotationParts(parts[20], parts[21]),
-    hasTime: !!parts[7],
-    hasZ: !!parts[12],
+    year: parseInt(parts[1]),
+    month: parseInt(parts[3]),
+    day: parseInt(parts[4]),
+    ...organizeTimeParts(parts, 5),
+    ...organizeAnnotationParts(parts[18], parts[19]),
+    hasTime: !!parts[5],
+    hasZ: !!parts[10],
     // TODO: figure out a way to pre-process into a number
     // (problems with TimeZone needing the full string?)
-    offset: parts[13],
+    offset: parts[11],
   }
 }
 
@@ -627,10 +629,10 @@ Result assumed to be ISO
 */
 function organizeYearMonthParts(parts: string[]): DateOrganized {
   return {
-    year: organizeIsoYearParts(parts),
-    month: parseInt(parts[4]),
+    year: parseInt(parts[1]),
+    month: parseInt(parts[2]),
     day: 1,
-    ...organizeAnnotationParts(parts[5], parts[6]),
+    ...organizeAnnotationParts(parts[3], parts[4]),
   }
 }
 
@@ -652,17 +654,6 @@ function organizeTimeParts(parts: string[], hourIndex: number): TimeFields {
     minute: parseInt0(parts[hourIndex + 2]),
     second: second === 60 ? 59 : second, // massage leap-second
   }
-}
-
-function organizeIsoYearParts(parts: string[]): number {
-  const yearSign = parseSign(parts[1])
-  const year = parseInt(parts[2] || parts[3])
-
-  if (yearSign < 0 && !year) {
-    throwRangeError(errorMessages.invalidSubstring(-0 as unknown as string))
-  }
-
-  return yearSign * year
 }
 
 function organizeDurationParts(parts: string[]): DurationFields {
