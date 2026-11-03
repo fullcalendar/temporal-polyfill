@@ -37,6 +37,10 @@ don't work in GH release markdown. must be absolute
 - FIX: `withCalendar` rejects an invalid time, and a year-month or month-day with a non-ISO calendar
 - FIX: `PlainTime`, `PlainDateTime` and `ZonedDateTime` `round` with `halfEven` and a `roundingIncrement` resolve ties to the correct multiple, such as `12:01:54` by 4 seconds giving `12:01:56`
 
+### 📉 Size Wins
+
+- Smaller string parsing, with ranges checked by the regexes themselves
+
 ## v1.0.6
 
 ### 🐛 Bugfixes

@@ -73,7 +73,6 @@ export const mismatchingTimeZones = 'Mismatching TimeZones'
 export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
 // TimeZone Offset/Gap
-export const outOfBoundsOffset = 'Out-of-bounds offset'
 export const outOfBoundsDstGap = 'Out-of-bounds TimeZone gap'
 export const invalidOffsetForTimeZone = 'Invalid TimeZone offset'
 export const ambigOffset = 'Ambiguous offset'

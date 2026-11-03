@@ -4,8 +4,7 @@ import * as InstantFns from '../../funcApi/instant'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
-// The regexp for a UTC offset takes any two digits for each unit, so minutes and
-// seconds past 59 need their own check. test262 only covers hours past 23.
+// test262 only covers hours past 23, so also check minutes and seconds past 59.
 
 const outOfRange = [
   '+00:60',

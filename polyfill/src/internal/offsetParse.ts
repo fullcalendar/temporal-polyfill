@@ -1,21 +1,12 @@
 import * as errorMessages from './errorMessages'
-import { timeRegExpStr } from './timeParse'
-import { nanoInHour, nanoInMinute, nanoInSec, nanoInUtcDay } from './units'
-import {
-  createRegExp,
-  parseInt0,
-  parseSign,
-  parseSubsecNano,
-  signRegExpStr,
-  throwRangeError,
-  validateTimeSeparators,
-} from './utils'
+import { nanoInHour, nanoInMinute, nanoInSec } from './units'
+import { parseInt0, parseSign, parseSubsecNano, throwRangeError } from './utils'
 
-export const offsetRegExpStr =
-  signRegExpStr + // 1:offsetSign
-  timeRegExpStr // 2:hour, 3:minute, 4:second, 5:afterDecimal
-
-const offsetRegExp = createRegExp(offsetRegExpStr)
+// 1:sign, 2:hour, 3:sep, 4:minute, 5:second, 6:afterDecimal
+// A literal, unlike the fragments in isoParse.ts, because a call here wouldn't tree-shake
+// out of the shared chunk that every function API export imports.
+const offsetRegExp =
+  /^([+-])([01]\d|2[0-3])(?:(:?)([0-5]\d)(?:\3([0-5]\d)(?:[.,](\d{1,9}))?)?)?$/
 
 export function parseOffsetNano(s: string): number {
   const offsetNano = parseOffsetNanoMaybe(s)
@@ -30,50 +21,21 @@ export function parseOffsetNanoMaybe(
   onlyHourMinute?: boolean,
 ): number | undefined {
   const parts = offsetRegExp.exec(s)
-  if (!parts) return undefined
-  if (!validateOffsetSeparators(parts[0])) return undefined
-  return organizeOffsetParts(parts, onlyHourMinute)
-}
-
-export function validateOffsetSeparators(s: string): boolean {
-  return validateTimeSeparators(s.slice(1))
+  if (!parts) {
+    return undefined
+  }
+  if (onlyHourMinute && parts[5]) {
+    throwRangeError(errorMessages.invalidSubstring(parts[5]))
+  }
+  return (
+    parseSign(parts[1]) *
+    (parseInt(parts[2]) * nanoInHour +
+      parseInt0(parts[4]) * nanoInMinute +
+      parseInt0(parts[5]) * nanoInSec +
+      parseSubsecNano(parts[6] || ''))
+  )
 }
 
 export function offsetHasSeconds(offset: string): boolean {
-  return offset.replace(/\D/g, '').length > 4
-}
-
-export function validateTimeZoneOffset(offsetNano: number): number {
-  if (Math.abs(offsetNano) >= nanoInUtcDay) {
-    throwRangeError(errorMessages.outOfBoundsOffset)
-  }
-  return offsetNano
-}
-
-function organizeOffsetParts(
-  parts: string[],
-  onlyHourMinute?: boolean,
-): number {
-  const firstSubMinutePart = parts[4] || parts[5]
-
-  if (onlyHourMinute && firstSubMinutePart) {
-    throwRangeError(errorMessages.invalidSubstring(firstSubMinutePart))
-  }
-
-  const minute = parseInt0(parts[3])
-  const second = parseInt0(parts[4])
-
-  // The regexp takes any two digits. An offset has no leap seconds, and hours are
-  // checked by validateTimeZoneOffset, once they're combined with the other units.
-  if (minute > 59 || second > 59) {
-    throwRangeError(errorMessages.outOfBoundsOffset)
-  }
-
-  const offsetNanoPos =
-    parseInt0(parts[2]) * nanoInHour +
-    minute * nanoInMinute +
-    second * nanoInSec +
-    parseSubsecNano(parts[5] || '')
-
-  return validateTimeZoneOffset(offsetNanoPos * parseSign(parts[1]))
+  return offset.length > 6 // longest without seconds is +hh:mm
 }
