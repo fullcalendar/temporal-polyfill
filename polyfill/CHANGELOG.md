@@ -21,6 +21,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `Instant#round` rejects `roundingIncrement` above 1e9
 - FIX: Chinese and Dangi year arithmetic lands on the correct month when constraining a leap month
 - FIX: Function API `roundToYear`, `roundToMonth` and `roundToWeek` coerce `roundingIncrement` on hosts with native Temporal
+- FIX: `ZonedDateTime` `until`/`since` and function API diffs reject equal instants in different time zones for date units (#112)
 
 ## v1.0.6
 

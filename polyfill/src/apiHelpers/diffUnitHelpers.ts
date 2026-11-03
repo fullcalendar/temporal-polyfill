@@ -150,10 +150,11 @@ function diffZonedCalendarUnit(
 ): number {
   const calendar = getCommonCalendar(slots0.calendar, slots1.calendar)
   const rounding = refineUnitDiffOptions(unit, options)
+  // Reject mismatched time zones even when the instants are equal
+  const timeZone = getCommonTimeZone(slots0.timeZone, slots1.timeZone)
   if (slots0.epochNanoseconds === slots1.epochNanoseconds) {
     return 0
   }
-  const timeZone = getCommonTimeZone(slots0.timeZone, slots1.timeZone)
   return countRelativeUnit(
     unit,
     {
@@ -170,7 +171,7 @@ function diffZonedCalendarUnit(
 // A scalar path: keeps calendar-month movement and DurationFields out of
 // these builds. Compose directly instead of allocating a callback around the
 // entire calculation: the calendar and day/week consumers retain only their
-// own core, with options read before zero and time-zone validation.
+// own core, with options read before time-zone validation and zero.
 function diffZonedDayWeekUnit(
   unit: DayWeekUnit,
   slots0: ZonedEpochNanoFields & { calendar: CalendarImpl },
@@ -180,18 +181,13 @@ function diffZonedDayWeekUnit(
   getCommonCalendar(slots0.calendar, slots1.calendar)
   const rounding = refineUnitDiffOptions(unit, options)
 
-  // Equal instants are zero before the time zones are compared.
+  // Reject mismatched time zones even when the instants are equal
+  const timeZone = getCommonTimeZone(slots0.timeZone, slots1.timeZone)
   if (slots0.epochNanoseconds === slots1.epochNanoseconds) {
     return 0
   }
 
-  return countZonedDayWeekUnit(
-    unit,
-    getCommonTimeZone(slots0.timeZone, slots1.timeZone),
-    slots0,
-    slots1,
-    rounding,
-  )
+  return countZonedDayWeekUnit(unit, timeZone, slots0, slots1, rounding)
 }
 
 // PlainDateTime

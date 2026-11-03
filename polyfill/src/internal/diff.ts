@@ -219,12 +219,14 @@ export function diffZonedCalendarUnitsRounded(
   roundingInc: number,
   roundingMode: RoundingModeEnum,
 ): DurationFields {
+  // Calendar units need one time zone, even when the instants are equal and the
+  // answer would otherwise be zero, so check that first.
+  const timeZone = getCommonTimeZone(startZoned.timeZone, endZoned.timeZone)
   const endEpochNano = endZoned.epochNanoseconds
   if (endEpochNano === startZoned.epochNanoseconds) {
     return durationFieldDefaults
   }
   let durationFields: DurationFields
-  const timeZone = getCommonTimeZone(startZoned.timeZone, endZoned.timeZone)
   durationFields = diffZonedEpochsExact(
     timeZone,
     calendar,
