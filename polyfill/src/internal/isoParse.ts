@@ -12,7 +12,6 @@ import * as errorMessages from './errorMessages'
 import {
   CalendarDateFields,
   CalendarDateTimeFields,
-  CalendarYearMonthFields,
   TimeFields,
 } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -103,22 +102,15 @@ export function parseRelativeToSlots(
 ): RelativeToSlots {
   const organized = parseDateTimeLike(requireString(s))
 
-  if (!organized) {
-    throwFailedParse(s)
-  }
-  if (organized.timeZoneId) {
+  if (organized && organized.timeZoneId) {
     return finalizeZonedDateTime(
       organized as ZonedDateTimeOrganized,
       resolveCalendar,
       undefined,
     )
   }
-  if (organized.hasZ) {
-    // PlainDate doesn't support Z
-    throwFailedParse(s)
-  }
 
-  return finalizeDate(organized, resolveCalendar)
+  return finalizeDate(parsePlainDateLike(s), resolveCalendar)
 }
 
 export function parseZonedDateTime(
@@ -143,14 +135,15 @@ export function parsePlainDateTime(
   s: string,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  const organized = parseDateTimeLike(requireString(s))
+  const organized = parsePlainDateLike(s)
 
-  if (!organized || organized.hasZ) {
-    throwFailedParse(s)
-  }
+  checkIsoDateTimeInBounds(organized)
 
   // result is exact DateTimeSlots shape
-  return finalizeDateTime(organized, resolveCalendar)
+  return {
+    ...combineDateAndTime(organized, organized),
+    calendar: resolveCalendar(organized.calendarId),
+  }
 }
 
 export function parsePlainDate(
@@ -183,44 +176,54 @@ export function parsePlainMonthDay(
   s: string,
   resolveCalendar: (rawCalendarId: string) => CalendarImpl,
 ): CalendarDateFields & { calendar: CalendarImpl } {
-  const organized = parseMonthDayOnly(requireString(s))
+  const organized = parseMonthDayOnly(requireString(s)) || parsePlainDateLike(s)
 
-  if (organized) {
+  if (organized.calendarId === isoCalendarId) {
+    // The stored reference year is a post-epoch leap year, so 02-29 can be represented,
+    // and the string's own year doesn't need to be in range
     return createDateSlots(
-      organized, // has isoEpochFirstLeapYear
-      resolveCalendar(organized.calendarId),
+      { ...organized, year: isoEpochFirstLeapYear },
+      resolveCalendar(isoCalendarId),
     )
   }
 
-  const dateSlots = finalizeDateLike(
-    parsePlainDateLike(s),
-    projectIsoMonthDayDate,
-    resolveCalendar,
-  )
-  const { calendar } = dateSlots
+  const { calendar } = finalizeDate(organized, resolveCalendar)
 
   // normalize year&month to be as close as possible to epoch
   const {
     year: origYear,
     month: origMonth,
     day,
-  } = computeCalendarDateFields(calendar, dateSlots)
+  } = computeCalendarDateFields(calendar, organized)
   const [monthCodeNumber, isLeapMonth] = computeCalendarMonthCodeParts(
     calendar,
     origYear,
     origMonth,
   )
-  const { year, month } = computeMonthDayReferenceYearMonth(
-    calendar,
-    monthCodeNumber,
-    isLeapMonth,
-    day,
-  )
-  const isoDate = checkIsoDateInBounds(
-    computeCalendarIsoFieldsFromParts(calendar, year, month, day),
-  )
+  // The falsy implementations are ISO, which is handled above, and Gregorian
+  const yearMonthFields = calendar
+    ? calendar.computeYearMonthFieldsForMonthDay(
+        monthCodeNumber,
+        isLeapMonth,
+        day,
+      )
+    : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
 
-  return createDateSlots(isoDate, calendar)
+  if (!yearMonthFields) {
+    throwRangeError(errorMessages.failedYearGuess)
+  }
+
+  return createDateSlots(
+    checkIsoDateInBounds(
+      computeCalendarIsoFieldsFromParts(
+        calendar,
+        yearMonthFields.year,
+        yearMonthFields.month,
+        day,
+      ),
+    ),
+    calendar,
+  )
 }
 
 export function parsePlainTime(s: string): TimeFields {
@@ -294,55 +297,6 @@ function parsePlainDateLike(s: string): DateTimeLikeOrganized {
   return organized
 }
 
-function finalizeDateLike(
-  organized: DateTimeLikeOrganized,
-  isoDateProjector:
-    | ((organized: DateTimeLikeOrganized) => DateOrganized)
-    | undefined,
-  resolveCalendar: (rawCalendarId: string) => CalendarImpl,
-): CalendarDateFields & { calendar: CalendarImpl } {
-  if (isoDateProjector && organized.calendarId === isoCalendarId) {
-    // Full-date strings have already had their ParseISODateTime-style validation.
-    // Only now do PlainYearMonth/PlainMonthDay project the parsed date onto the
-    // representative ISO date stored in their slots.
-    return finalizeDate(isoDateProjector(organized), resolveCalendar)
-  }
-
-  return finalizeDate(organized, resolveCalendar)
-}
-
-function projectIsoMonthDayDate(
-  organized: DateTimeLikeOrganized,
-): DateOrganized {
-  // The stored PlainMonthDay reference year is a post-epoch leap year, matching
-  // the ISO short form so 02-29 can be represented.
-  return {
-    ...organized,
-    year: isoEpochFirstLeapYear,
-  }
-}
-
-function computeMonthDayReferenceYearMonth(
-  calendar: CalendarImpl,
-  monthCodeNumber: number,
-  isLeapMonth: boolean,
-  day: number,
-): CalendarYearMonthFields {
-  const yearMonthFields = calendar
-    ? calendar.computeYearMonthFieldsForMonthDay(
-        monthCodeNumber,
-        isLeapMonth,
-        day,
-      )
-    : computeIsoYearMonthFieldsForMonthDay(monthCodeNumber, isLeapMonth)
-
-  if (!yearMonthFields) {
-    throwRangeError(errorMessages.failedYearGuess)
-  }
-
-  return yearMonthFields
-}
-
 // Finalizing 'organized' structs to slots
 // -----------------------------------------------------------------------------
 
@@ -388,18 +342,6 @@ function finalizeZonedDateTime(
     timeZone,
     resolveCalendar(organized.calendarId),
   )
-}
-
-// Returns exact DateTimeSlots shape
-function finalizeDateTime(
-  organized: DateTimeLikeOrganized,
-  resolveCalendar: (rawCalendarId: string) => CalendarImpl,
-): CalendarDateTimeFields & { calendar: CalendarImpl } {
-  checkIsoDateTimeInBounds(organized)
-  return {
-    ...combineDateAndTime(organized, organized),
-    calendar: resolveCalendar(organized.calendarId),
-  }
 }
 
 function finalizeDate(
