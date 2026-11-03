@@ -48,6 +48,22 @@ describe('fromString', () => {
       minute: 30,
     })
   })
+
+  it('ignores a calendar other than ISO on a date and time', () => {
+    for (const annotation of ['[u-ca=hebrew]', '[u-ca=unknown]']) {
+      const pt = PlainTimeFns.fromString(`2024-10-03T12:30${annotation}`)
+      expectPlainTimeEquals(pt, {
+        hour: 12,
+        minute: 30,
+      })
+    }
+  })
+
+  it('rejects an invalid date or offset', () => {
+    for (const s of ['2024-02-30T12:30', '2024-10-03T12:30+99:00']) {
+      expect(() => PlainTimeFns.fromString(s)).toThrow(RangeError)
+    }
+  })
 })
 
 describe('fromFields', () => {

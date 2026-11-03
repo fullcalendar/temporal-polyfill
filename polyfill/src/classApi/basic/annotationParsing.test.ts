@@ -118,6 +118,54 @@ describe('annotations in Temporal strings', () => {
     ).toThrow(RangeError)
   })
 
+  // A PlainTime has no calendar, so it never looks at which one was named. test262
+  // only covers this on strings with no date.
+  describe('PlainTime with a calendar other than ISO', () => {
+    for (const annotations of [
+      '[u-ca=hebrew]',
+      '[!u-ca=hebrew]',
+      '[u-ca=unknown]',
+      '[UTC][u-ca=hebrew]',
+      '[u-ca=hebrew][u-ca=gregory]',
+    ]) {
+      it(`accepts a date and time with ${annotations}`, () => {
+        const time = Temporal.PlainTime.from(`2024-10-03T12:00${annotations}`)
+        expect(time.toString()).toBe('12:00:00')
+      })
+    }
+
+    it('accepts one wherever a PlainTime string is taken', () => {
+      const s = '2024-10-03T12:00[u-ca=hebrew]'
+      expect(Temporal.PlainTime.from('12:00').equals(s)).toBe(true)
+      expect(
+        Temporal.PlainDateTime.from('2024-01-01').withPlainTime(s).toString(),
+      ).toBe('2024-01-01T12:00:00')
+      expect(
+        Temporal.ZonedDateTime.from('2024-01-01T00:00[UTC]')
+          .withPlainTime(s)
+          .toString(),
+      ).toBe('2024-01-01T12:00:00+00:00[UTC]')
+    })
+
+    it('still rejects what is wrong with the rest of the string', () => {
+      for (const s of [
+        '2024-10-03[u-ca=hebrew]', // no time
+        '2024-10-03T12:00Z[u-ca=hebrew]', // UTC designator
+        '2024-02-30T12:00[u-ca=hebrew]', // invalid date
+        '2024-02-30T12:00', // invalid date, with no annotation
+        '2024-13-03T12:00',
+        '2024-10-03T12:00+99:00[u-ca=hebrew]', // invalid offset
+        '2024-10-03T12:00+99:00', // invalid offset, with no annotation
+        '2024-10-03T12:00+00:99',
+        '2024-10-03T12:00+01:00:99',
+        '2024-10-03T12:00[u-ca=hebrew][!u-ca=gregory]', // critical conflict
+        '2024-10-03T12:00[u-ca=]', // malformed
+      ]) {
+        expect(() => Temporal.PlainTime.from(s)).toThrow(RangeError)
+      }
+    })
+  })
+
   it('stays fast on a long invalid annotation', () => {
     const long = `2024-10-03[${'a-'.repeat(50000)}=${'b-'.repeat(50000)}]`
     const start = performance.now()

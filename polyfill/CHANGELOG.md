@@ -26,6 +26,7 @@ don't work in GH release markdown. must be absolute
 - FIX: `ZonedDateTime.from` accepts in-range values near the `Instant` limits, such as a `Z` string at either end (#120)
 - FIX: Temporal strings with malformed or misplaced annotations are rejected, such as `2024-10-03[]` (#119)
 - FIX: UTC offsets reject minutes and seconds past 59, which `Instant.from` and others read as a wrong offset
+- FIX: `PlainTime.from` ignores a non-ISO calendar on a string with a date and time, and rejects an invalid date or offset there
 
 ## v1.0.6
 

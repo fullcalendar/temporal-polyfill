@@ -268,7 +268,12 @@ export function parsePlainTime(s: string): TimeFields {
     if (dateTime.hasZ) {
       throwRangeError(errorMessages.invalidSubstring('Z')) // Cannot have Z for PlainTime
     }
-    requireIsoCalendar(dateTime)
+    // The date and offset only have to be valid, even though both are discarded.
+    // A PlainTime has no calendar, so a non-ISO or unknown calendar isn't an error.
+    validateIsoDateFields(dateTime)
+    if (dateTime.offset) {
+      parseOffsetNano(dateTime.offset)
+    }
     organized = dateTime
   }
 
