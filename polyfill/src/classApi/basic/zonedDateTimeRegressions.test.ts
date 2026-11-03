@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import * as CalendarFns from '../../funcApi/calendar'
+import * as PlainTimeFns from '../../funcApi/plainTime'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
@@ -71,4 +72,58 @@ describe('ZonedDateTime diffs of equal instants in different time zones', () => 
       )
     })
   }
+})
+
+describe('ZonedDateTime#withPlainTime in a repeated hour', () => {
+  const firstOccurrence = '2026-11-01T01:30:00-04:00[America/New_York]'
+  const secondOccurrence = '2026-11-01T01:30:00-05:00[America/New_York]'
+
+  it('takes the earlier occurrence from the later receiver', () => {
+    const zdt = Temporal.ZonedDateTime.from(secondOccurrence)
+    expect(zdt.withPlainTime('01:15').toString()).toBe(
+      '2026-11-01T01:15:00-04:00[America/New_York]',
+    )
+  })
+
+  it('takes the earlier occurrence from the earlier receiver', () => {
+    const zdt = Temporal.ZonedDateTime.from(firstOccurrence)
+    expect(zdt.withPlainTime('01:15').toString()).toBe(
+      '2026-11-01T01:15:00-04:00[America/New_York]',
+    )
+  })
+
+  it('moves forward from a skipped time', () => {
+    const zdt = Temporal.ZonedDateTime.from(
+      '2026-03-08T12:00[America/New_York]',
+    )
+    expect(zdt.withPlainTime('02:30').toString()).toBe(
+      '2026-03-08T03:30:00-04:00[America/New_York]',
+    )
+  })
+
+  it('still rejects a time past the Instant limit', () => {
+    const zdt = new Temporal.ZonedDateTime(
+      8640000000000000000000n,
+      'Europe/Berlin',
+    )
+    expect(() => zdt.withPlainTime('12:00')).toThrow(RangeError)
+  })
+
+  it('keeps ZonedDateTime#with preferring the current offset', () => {
+    const zdt = Temporal.ZonedDateTime.from(secondOccurrence)
+    expect(zdt.with({ minute: 15 }).toString()).toBe(
+      '2026-11-01T01:15:00-05:00[America/New_York]',
+    )
+  })
+
+  it('function API withPlainTime agrees', () => {
+    const record = ZonedDateTimeFns.fromString(
+      secondOccurrence,
+      CalendarFns.getBasic,
+    )
+    const time = PlainTimeFns.fromString('01:15')
+    expect(
+      ZonedDateTimeFns.toString(ZonedDateTimeFns.withPlainTime(record, time)),
+    ).toBe('2026-11-01T01:15:00-04:00[America/New_York]')
+  })
 })

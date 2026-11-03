@@ -2,10 +2,9 @@ import { type CalendarImpl } from './calendarImpl'
 import { timeFieldDefaults } from './fieldNames'
 import { TimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
-import { OffsetDisambig } from './optionsModel'
 import { ZonedEpochNanoFields, createZonedEpochNanoSlots } from './slots'
 import {
-  getMatchingInstantFor,
+  getSingleInstantFor,
   getStartOfDayInstantFor,
   zonedEpochSlotsToIso,
 } from './timeZoneMath'
@@ -19,25 +18,15 @@ export function zonedDateTimeWithPlainTime(
 ): ZonedEpochNanoFields & { calendar: CalendarImpl } {
   const { timeZone } = zonedDateTimeSlots
   const isoDateTime = zonedEpochSlotsToIso(zonedDateTimeSlots)
-  const { offsetNanoseconds } = isoDateTime
-
   const time = plainTimeFields || timeFieldDefaults
+  const newIsoDateTime = combineDateAndTime(isoDateTime, time)
 
-  let epochNano: bigint
-
-  if (plainTimeFields) {
-    epochNano = getMatchingInstantFor(
-      timeZone,
-      combineDateAndTime(isoDateTime, time),
-      offsetNanoseconds,
-      OffsetDisambig.Prefer, // OffsetDisambig
-    )
-  } else {
-    epochNano = getStartOfDayInstantFor(
-      timeZone,
-      combineDateAndTime(isoDateTime, time),
-    )
-  }
+  // The new wall-clock time resolves on its own, as 'compatible'. The receiver's
+  // offset doesn't influence which occurrence of a repeated hour is chosen,
+  // unlike ZonedDateTime#with, whose offset option defaults to 'prefer'.
+  const epochNano = plainTimeFields
+    ? getSingleInstantFor(timeZone, newIsoDateTime)
+    : getStartOfDayInstantFor(timeZone, newIsoDateTime)
 
   return createZonedEpochNanoSlots(
     epochNano,
