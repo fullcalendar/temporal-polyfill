@@ -3,7 +3,7 @@
 
 A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), successor to the JavaScript `Date` object 🕒
 
-Only 19.5 kB and [spec compliant](#spec-compliance)
+Only 19.2 kB and [spec compliant](#spec-compliance)
 
 🌳 Need an even smaller footprint? Check out the [tree-shakeable API](../docs/fns/index.md)
 
@@ -253,8 +253,8 @@ Test runners that use their own module loader need extra support:
   </tr>
   <tr>
     <td><a href='./scripts/size-comparison/RESULTS.md'>Min+gzip size</a></td>
-    <td>19.5 kB, 23.3 kB (full)</td>
-    <td>52.1 kB (+168%, +124%)</td>
+    <td>19.2 kB, 23.0 kB (full)</td>
+    <td>52.1 kB (+172%, +126%)</td>
   </tr>
   <tr>
     <td>Spec date</td>
