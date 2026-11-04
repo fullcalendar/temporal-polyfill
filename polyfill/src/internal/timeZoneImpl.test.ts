@@ -4,6 +4,7 @@ import { maxMilli } from './temporalConstants'
 import { queryTimeZone } from './timeZone'
 import {
   getTimeZonePeriodDays,
+  maxOneOffTransitionSec,
   minPossibleTransitionSec,
 } from './timeZoneConfig'
 import { secInUtcDay } from './units'
@@ -63,33 +64,6 @@ describe('queryTimeZone', () => {
           bigNanoInSec,
       ),
     ).toBe(-3_944_626_740)
-  })
-
-  it('finds the previous transition of instants past the search lookahead', () => {
-    // Backward searches that start more than ~3 years after the current date
-    // used to restart from that lookahead point, so every later instant got the
-    // same transition from around the current year + 3. New York changes its
-    // offset twice a year, so the transition before 2100-07-01 is the start of
-    // DST in March 2100.
-    expect(
-      Number(
-        queryTimeZone('America/New_York').getTransition(
-          BigInt(4_118_083_200) * bigNanoInSec,
-          -1,
-        )! / bigNanoInSec,
-      ),
-    ).toBe(4_108_690_800)
-
-    // A zone whose offset stopped changing long ago still finds its last
-    // transition (Japan's last DST ended in 1951).
-    expect(
-      Number(
-        queryTimeZone('Asia/Tokyo').getTransition(
-          BigInt(4_118_083_200) * bigNanoInSec,
-          -1,
-        )! / bigNanoInSec,
-      ),
-    ).toBe(-577_962_000)
   })
 
   it('samples offsets near TimeClip boundaries without asking Intl for out-of-range dates', () => {
@@ -164,6 +138,47 @@ describe('queryTimeZone', () => {
       timeZone.getTransition(BigInt(transitionSec) * bigNanoInSec - 1n, 1),
     ).toBe(BigInt(transitionSec) * bigNanoInSec)
   })
+
+  // A backward search from far in the future. The answers don't depend on today's date.
+  it.each([
+    // zone, starting epoch second, previous transition's epoch second
+    ['America/New_York', 4118083200, 4108690800], // from 2100-07-01, to 2100-03-14
+    ['America/New_York', 32516726400, 32509494000], // from 3000-06-01, to 3000-03-09
+    ['Africa/Casablanca', 4118083200, 3703456800], // from 2100-07-01, to 2087-05-11
+    ['Asia/Tokyo', 4118083200, -577962000], // from 2100-07-01, to 1951-09-08
+  ] as const)(
+    'finds the previous transition from far in the future in %s',
+    (id, fromSec, expectedSec) => {
+      expect(
+        queryTimeZone(id).getTransition(BigInt(fromSec) * bigNanoInSec, -1),
+      ).toBe(BigInt(expectedSec) * bigNanoInSec)
+    },
+  )
+
+  // Guards the ceiling against the host's time zone data, including future releases
+  it.skipIf(!NativeTemporal)(
+    "has a one-off ceiling after each zone's last non-recurring transition",
+    () => {
+      const tooLate: string[] = []
+
+      for (const id of (Intl as any).supportedValuesOf('timeZone')) {
+        const last = NativeTemporal.Instant.from('2400-01-01T00:00Z')
+          .toZonedDateTimeISO(id)
+          .getTimeZoneTransition('previous')
+
+        // After the ceiling, a zone's transitions must carry on right up to 2400
+        if (
+          last &&
+          last.year < 2397 &&
+          last.epochMilliseconds >= maxOneOffTransitionSec * 1000
+        ) {
+          tooLate.push(`${id} ${last.toInstant()}`)
+        }
+      }
+
+      expect(tooLate).toEqual([])
+    },
+  )
 
   // Guards the search floor against the host's time zone data, including future releases
   it.skipIf(!NativeTemporal)(

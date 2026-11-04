@@ -45,3 +45,10 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
 // Guam, Saipan, Palau and Kosrae moved across the date line. timeZoneImpl.test.ts checks
 // this against native Temporal.
 export const minPossibleTransitionSec = -4e9
+
+// Transitions after this come only from recurring rules, which never stop. The one-off
+// transitions end on 2087-05-11, the last of Morocco's scheduled Ramadan changes in
+// Africa/Casablanca and Africa/El_Aaiun. Any value after that works, so this mirrors the
+// floor above and lands on 2096-10-02. timeZoneImpl.test.ts checks this against native
+// Temporal.
+export const maxOneOffTransitionSec = 4e9

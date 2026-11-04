@@ -16,6 +16,7 @@ import {
 import { timeFieldsToSec, timeFieldsToSubsecNano } from './timeFieldMath'
 import {
   getTimeZonePeriodDays,
+  maxOneOffTransitionSec,
   minPossibleTransitionSec,
 } from './timeZoneConfig'
 import { type ResolvedTimeZone, resolveTimeZoneRecord } from './timeZoneId'
@@ -218,17 +219,13 @@ function createIntlTimeZoneStore(
         return undefined
       }
 
-      const currentEpochSec = getCurrentEpochSec()
-      const lookaheadEpochSec = currentEpochSec + transitionSearchSec
-
-      // Starting in the future, past the lookahead. Zones that keep changing
-      // offsets (DST) have a transition within one search window before
-      // epochSec, as forward searches assume too. Otherwise, assume the offset
-      // no longer changes after the lookahead, and search back from there.
-      if (epochSec > lookaheadEpochSec) {
+      // Starting after every one-off transition, so a zone that still changes does so by
+      // recurring rule, and has a transition in the window just before epochSec. Any other
+      // zone's last transition is a one-off, so skip the empty stretch down to those.
+      if (epochSec > maxOneOffTransitionSec) {
         return (
           searchTransition(epochSec, -1, epochSec - transitionSearchSec) ??
-          searchTransition(lookaheadEpochSec, -1, minPossibleTransitionSec)
+          searchTransition(maxOneOffTransitionSec, -1, minPossibleTransitionSec)
         )
       }
 
@@ -248,9 +245,8 @@ function createIntlTimeZoneStore(
   }
 
   /*
-  Searches period by period from searchEpochSec towards searchLimit for the
-  first transition after (direction 1, inclusive) or before (direction -1,
-  exclusive) epochSec
+  Searches period by period from searchEpochSec towards searchLimit for the first
+  transition after (direction 1, inclusive) or before (direction -1, exclusive) epochSec
   */
   function searchTransition(
     searchEpochSec: number,
