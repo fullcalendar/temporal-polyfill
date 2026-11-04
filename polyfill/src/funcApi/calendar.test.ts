@@ -54,6 +54,22 @@ describe('function calendar records', () => {
     }
   })
 
+  it('keeps a valid calendar handle stable through many spellings', () => {
+    const buddhist = CalendarFns.getBuddhist()
+
+    // Enough valid spellings to clear a memoize with the default limit
+    for (let i = 0; i <= 10_000; i++) {
+      let bit = 0
+      CalendarFns.getExotic(
+        'islamic-umalqura'.replace(/[a-z]/g, (letter) =>
+          i & (1 << bit++) ? letter.toUpperCase() : letter,
+        ),
+      )
+    }
+
+    expect(CalendarFns.getBuddhist()).toBe(buddhist)
+  })
+
   it('creates basic calendar handles for function APIs', () => {
     const isoDate = PlainDateFns.create(2024, 1, 1, CalendarFns.getISO())
     const gregoryDate = PlainDateFns.create(

@@ -87,6 +87,7 @@ export function getDefinedProp(props: any, propName: string): any {
 export function memoize<K, V, A extends any[]>(
   generator: (key: K, ...otherArgs: A) => V,
   MapClass: { new (): any } = Map, // TODO: better type
+  maxSize = 1e4,
 ): (key: K, ...otherArgs: A) => V {
   const map = new MapClass()
 
@@ -98,7 +99,7 @@ export function memoize<K, V, A extends any[]>(
     // dates, so limit memory by starting over when full. Dropping everything is smaller
     // and faster under load than an LRU, and a normal app never gets here. A WeakMap has
     // no size, so it never clears, and doesn't need to.
-    if (map.size >= 1e4) {
+    if (map.size >= maxSize) {
       map.clear()
     }
     const val = generator(key, ...otherArgs)

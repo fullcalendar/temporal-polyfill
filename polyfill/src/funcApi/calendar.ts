@@ -107,9 +107,14 @@ export function getExotic(rawCalendarId: string): Record {
 // utils
 // -----
 
+// Never clears, so a valid calendar's record stays the same object for as long as the
+// app runs. Only valid IDs get here, so this can't grow forever: all of their spellings
+// together come to about 170,000 records, or 60 MB, which only a deliberate flood reaches.
 const getOrCreateFoundRecord = memoize(
   (rawCalendarId: string, meta: CalendarImplTuple): Record =>
     createCalendarRecord(rawCalendarId, createExoticCalendarGetter(meta)),
+  Map,
+  Infinity,
 )
 
 // Basic-only callers must not inherit an exotic implementation from a hot
