@@ -65,6 +65,33 @@ describe('queryTimeZone', () => {
     ).toBe(-3_944_626_740)
   })
 
+  it('finds the previous transition of instants past the search lookahead', () => {
+    // Backward searches that start more than ~3 years after the current date
+    // used to restart from that lookahead point, so every later instant got the
+    // same transition from around the current year + 3. New York changes its
+    // offset twice a year, so the transition before 2100-07-01 is the start of
+    // DST in March 2100.
+    expect(
+      Number(
+        queryTimeZone('America/New_York').getTransition(
+          BigInt(4_118_083_200) * bigNanoInSec,
+          -1,
+        )! / bigNanoInSec,
+      ),
+    ).toBe(4_108_690_800)
+
+    // A zone whose offset stopped changing long ago still finds its last
+    // transition (Japan's last DST ended in 1951).
+    expect(
+      Number(
+        queryTimeZone('Asia/Tokyo').getTransition(
+          BigInt(4_118_083_200) * bigNanoInSec,
+          -1,
+        )! / bigNanoInSec,
+      ),
+    ).toBe(-577_962_000)
+  })
+
   it('samples offsets near TimeClip boundaries without asking Intl for out-of-range dates', () => {
     const timeZone = queryTimeZone('America/Vancouver')
     const maxEpochNano = BigInt(maxMilli) * 1_000_000n

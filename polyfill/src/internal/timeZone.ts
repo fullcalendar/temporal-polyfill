@@ -221,29 +221,46 @@ function createIntlTimeZoneStore(
       const currentEpochSec = getCurrentEpochSec()
       const lookaheadEpochSec = currentEpochSec + transitionSearchSec
 
-      // Starting in the future, after maximum possible transition.
-      // Do analytics on the currentEpochSec->lookaheadEpochSec period.
-      // TODO: try to eliminate recursion
+      // Starting in the future, past the lookahead. Zones that keep changing
+      // offsets (DST) have a transition within one search window before
+      // epochSec, as forward searches assume too. Otherwise, assume the offset
+      // no longer changes after the lookahead, and search back from there.
       if (epochSec > lookaheadEpochSec) {
-        return getTransition(lookaheadEpochSec, -1)
+        return (
+          searchTransition(epochSec, -1, epochSec - transitionSearchSec) ??
+          searchTransition(lookaheadEpochSec, -1, minPossibleTransitionSec)
+        )
       }
+
+      return searchTransition(epochSec, -1, minPossibleTransitionSec)
     }
 
-    // A transition exactly at the start of a period can only be seen as the end of the
-    // period before it, because this period's samples both read the new offset. A
-    // forward search includes epochSec, so it must start from the second before.
-    const searchEpochSec =
-      direction > 0
-        ? // if moving forward from far past, fast-forward search to lower bound
-          Math.max(epochSec, minPossibleTransitionSec) - 1
-        : epochSec
+    return searchTransition(
+      // A transition exactly at the start of a period can only be seen as the end of the
+      // period before it, because this period's samples both read the new offset. A
+      // forward search includes epochSec, so it must start from the second before.
+      // If moving forward from far past, fast-forward search to lower bound.
+      Math.max(epochSec, minPossibleTransitionSec) - 1,
+      1,
+      Math.max(epochSec, getCurrentEpochSec()) + transitionSearchSec,
+      epochSec,
+    )
+  }
+
+  /*
+  Searches period by period from searchEpochSec towards searchLimit for the
+  first transition after (direction 1, inclusive) or before (direction -1,
+  exclusive) epochSec
+  */
+  function searchTransition(
+    searchEpochSec: number,
+    direction: -1 | 1,
+    searchLimit: number,
+    epochSec: number = searchEpochSec,
+  ): number | undefined {
     let [startEpochSec, endEpochSec] = computePeriod(searchEpochSec, periodSec)
 
     const inc = periodSec * direction
-    const searchLimit =
-      direction > 0
-        ? Math.max(epochSec, getCurrentEpochSec()) + transitionSearchSec
-        : minPossibleTransitionSec
     const inBounds = () =>
       direction < 0 ? endEpochSec > searchLimit : startEpochSec < searchLimit
 
