@@ -211,7 +211,10 @@ https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_o
 
 Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023). [CI](../.github/workflows/ci.yml) runs the full test suite against Node 16, 18, 20, 22, 24, and 26.
 
-\* On Android, Chrome's `Intl.DateTimeFormat` API formats some `islamic-umalqura` dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
+\* Quirks with these calendars:
+
+- `islamic-umalqura`: On Android, Chrome's `Intl.DateTimeFormat` API formats some dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
+- `chinese`, `dangi`: Dates come from the environment's `Intl.DateTimeFormat`, so results can differ from native `Temporal`, which may use different calendar data. Differences are rare for modern dates (usually one day, around the start of a month) and more common for dates far from the present.
 
 ### CommonJS & Test Runners
 
