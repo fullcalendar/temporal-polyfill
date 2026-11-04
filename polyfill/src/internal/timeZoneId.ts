@@ -36,26 +36,31 @@ export type ResolvedTimeZone =
       compareKey: string
     }
 
-export function resolveTimeZoneRecord(rawId: string): ResolvedTimeZone {
-  const upperRawId = rawId.toUpperCase()
+// Memoized by the raw ID: every ZonedDateTime construction, conversion and
+// offset lookup resolves its time zone ID, and parsing and normalizing it each
+// time costs more than the rest of a ZonedDateTime construction
+export const resolveTimeZoneRecord = memoize(
+  (rawId: string): ResolvedTimeZone => {
+    const upperRawId = rawId.toUpperCase()
 
-  const offsetRecord = parseTimeZoneOffsetId(upperRawId)
-  if (offsetRecord) {
-    return {
-      kind: 'fixed',
-      ...offsetRecord,
+    const offsetRecord = parseTimeZoneOffsetId(upperRawId)
+    if (offsetRecord) {
+      return {
+        kind: 'fixed',
+        ...offsetRecord,
+      }
     }
-  }
 
-  // Keep UTC distinct from +00:00. They both perform fixed-zero math, but
-  // Temporal equality compares UTC by name and offset zones by offset number.
-  const normId =
-    upperRawId === utcTimeZoneId
-      ? utcTimeZoneId
-      : normalizeNamedTimeZoneId(rawId)
+    // Keep UTC distinct from +00:00. They both perform fixed-zero math, but
+    // Temporal equality compares UTC by name and offset zones by offset number.
+    const normId =
+      upperRawId === utcTimeZoneId
+        ? utcTimeZoneId
+        : normalizeNamedTimeZoneId(rawId)
 
-  return queryNamedTimeZoneRecord(normId)
-}
+    return queryNamedTimeZoneRecord(normId)
+  },
+)
 
 const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
   if (normId === utcTimeZoneId) {

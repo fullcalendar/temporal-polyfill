@@ -38,6 +38,15 @@ describe('resolveTimeZoneRecord', () => {
     )
   })
 
+  it('resolves a repeated raw ID to the same record object, offsets included', () => {
+    expect(resolveTimeZoneRecord('america/new_york')).toBe(
+      resolveTimeZoneRecord('america/new_york'),
+    )
+    expect(resolveTimeZoneRecord('+05:30')).toBe(
+      resolveTimeZoneRecord('+05:30'),
+    )
+  })
+
   it('normalizes named-zone cache keys before resolving records and impls', () => {
     expect(resolveTimeZoneRecord('etc/gmt')).toBe(
       resolveTimeZoneRecord('Etc/GMT'),
