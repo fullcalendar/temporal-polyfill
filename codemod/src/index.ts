@@ -1213,8 +1213,9 @@ function ownMapValue<T>(map: Record<string, T>, key: string): T | undefined {
 }
 
 // CalendarRecord normally becomes the narrow calendar ID string accepted by the
-// fns API. This helper is only called from Temporal-consuming argument slots;
-// standalone CalendarFns calls stay in place and become diagnostics.
+// fns API. Direct CalendarFns calls come through here wherever they appear, as a
+// record stands in for its ID string. Calls with no ID equivalent stay in place
+// and become diagnostics.
 function calendarIdExpressionForKnownContext(
   state: TransformState,
   expression: any,

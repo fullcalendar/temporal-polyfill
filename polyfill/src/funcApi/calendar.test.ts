@@ -30,6 +30,17 @@ describe('function calendar records', () => {
     expect(CalendarFns.getExotic('BUDDHIST')).not.toBe(
       CalendarFns.getExotic('buddhist'),
     )
+    // Records stand in for calendar ID strings, so two identical IDs compare equal even
+    // when they're invalid, just as the strings would in the real Temporal API
+    expect(CalendarFns.getBasic('something-crazy')).toBe(
+      CalendarFns.getBasic('something-crazy'),
+    )
+    expect(CalendarFns.getExotic('something-crazy')).toBe(
+      CalendarFns.getExotic('something-crazy'),
+    )
+    expect(CalendarFns.getAny('something-crazy')).toBe(
+      CalendarFns.getExotic('something-crazy'),
+    )
     // Basic-only and exotic-capable resolver APIs intentionally return
     // different records, even for the same raw ID, so their validation
     // policies cannot leak into each other through the record cache.

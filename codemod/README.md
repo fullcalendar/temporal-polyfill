@@ -63,12 +63,15 @@ PlainDateFns.addDays(date, 3)          // → date.add({ days: 3 })
 PlainDateFns.compare(a, b)             // → Temporal.PlainDate.compare(a, b)
 ```
 
-**Calendar records → calendar IDs** — in slots where Temporal expects a
-calendar ID string:
+**Calendar records → calendar IDs** — wherever a calendar getter is called,
+since Temporal uses calendar ID strings instead of records:
 
 ```ts
 PlainDateFns.create(2024, 5, 1, CalendarFns.getBuddhist())
 // → new Temporal.PlainDate(2024, 5, 1, 'buddhist')
+
+doSomething(CalendarFns.getGregory())
+// → doSomething('gregory')
 ```
 
 **Types** — record and option types are rewritten to their `Temporal`

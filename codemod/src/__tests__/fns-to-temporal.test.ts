@@ -25,6 +25,21 @@ const same = PlainDateFns.equals(date, next)
     expect(result.code).not.toContain('temporal-polyfill/fns')
   })
 
+  it('rewrites calendar calls outside of Temporal calendar slots', () => {
+    const source = `
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+
+doSomething(CalendarFns.getGregory())
+const same = CalendarFns.getExotic(id) === CalendarFns.getExotic(id)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.code).toContain("doSomething('gregory')")
+    expect(result.code).toContain('const same = id === id')
+    expect(result.diagnostics).toEqual([])
+  })
+
   it('rewrites named PlainDate imports', () => {
     const source = `
 import { create, compare, isRecord } from 'temporal-polyfill/fns/PlainDate'

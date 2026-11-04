@@ -21,8 +21,8 @@ Statuses:
 
 - `direct`: rewrites to global `Temporal` or a Temporal prototype/static member.
 - `temporal-utils`: should rewrite through `temporal-utils`.
-- `contextual-calendar`: rewrites only inside a known Temporal-consuming
-  calendar slot.
+- `contextual-calendar`: a direct call rewrites to a calendar ID, wherever it
+  appears.
 - `diagnostic-only`: intentionally left unchanged with a diagnostic.
 
 `src/__tests__/fns-api-coverage.test.ts` parses the fns docs and fails if a
@@ -155,10 +155,6 @@ const { create } = PlainDateFns
 ```
 
 ```ts
-doSomething(CalendarFns.getGregory())
-```
-
-```ts
 const isDate = PlainDateFns.isRecord
 ```
 
@@ -208,14 +204,28 @@ Named calendar record getters map to literal calendar ID strings:
 | `CalendarFns.getPersian()` | `'persian'` |
 | `CalendarFns.getROC()` | `'roc'` |
 
-`CalendarFns.getExotic(id)`, `CalendarFns.getAny(id)`, and similar resolver
-calls should rewrite to the calendar ID expression when the value is being
-passed to known Temporal-consuming code. The fns API accepts a narrow calendar
-ID string here, not a broader `Temporal.CalendarLike` value such as a Temporal
-object or a date-time string with a calendar annotation.
+`CalendarFns.getExotic(id)`, `CalendarFns.getAny(id)`, and
+`CalendarFns.getBasic(id)` rewrite to their calendar ID expression. The fns API
+accepts a narrow calendar ID string here, not a broader `Temporal.CalendarLike`
+value such as a Temporal object or a date-time string with a calendar
+annotation.
 
-Calendar record values used outside known Temporal-consuming contexts are
-unsafe. Leave them unchanged and emit a diagnostic.
+Direct getter and resolver calls rewrite wherever they appear, not only where
+Temporal consumes them, because a record stands in for its ID string:
+
+```ts
+doSomething(CalendarFns.getGregory())
+// → doSomething('gregory')
+
+CalendarFns.getExotic(id) === CalendarFns.getExotic(id)
+// → id === id
+```
+
+The fns API keeps that comparison's result the same by returning one memoized
+record for identical IDs, even invalid ones.
+
+Other uses of `CalendarFns`, such as `CalendarFns.isRecord(value)` or a getter
+passed by reference, stay unchanged and emit a diagnostic.
 
 ## Record Guards
 
