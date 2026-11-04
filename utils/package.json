@@ -1,6 +1,6 @@
 {
   "name": "temporal-utils",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "title": "Temporal Utils",
   "description": "Convenience helpers for native Temporal objects",
   "author": {

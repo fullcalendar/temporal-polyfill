@@ -1,7 +1,7 @@
 
 # `temporal-utils` Changelog
 
-## Unreleased
+## v1.0.4
 
 - FIX: `startOfMonth`, `startOfYear` and the rounding built on them pick the first occurrence of a repeated midnight
 - FIX: `endOfDay` and longer ends no longer run an hour into the next day when the day doesn't start at midnight
