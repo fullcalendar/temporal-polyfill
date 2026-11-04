@@ -66,68 +66,37 @@ describe('annotations have no limit on their number', () => {
   })
 })
 
+// The class API tests go through the same parser with many more strings. These only
+// show that each function reaches it, and on native Temporal that the host agrees.
 describe('time-only strings', () => {
-  it.each([
-    ['12:00', '12:00:00'],
-    ['T12:00', '12:00:00'],
-    ['t12:00', '12:00:00'],
-    ['1232', '12:32:00'], // not a possible month-day
-    ['T1225', '12:25:00'], // the designator rules out a month-day
-    ['12:00+01:00[u-ca=hebrew]', '12:00:00'],
-    ['23:59:60', '23:59:59'],
-  ])('%s', (s, expected) => {
-    expect(PlainTimeFns.toString(PlainTimeFns.fromString(s))).toBe(expected)
+  it('accepts one', () => {
+    expect(PlainTimeFns.toString(PlainTimeFns.fromString('T1225'))).toBe(
+      '12:25:00',
+    )
   })
 
-  it.each([' 12:00', '12:00Z', '12:00z', '1225', '12-25', '202401', '2024-01'])(
-    '%s is rejected',
-    (s) => {
-      expect(() => PlainTimeFns.fromString(s)).toThrow(RangeError)
-    },
-  )
+  it('rejects a possible month-day', () => {
+    expect(() => PlainTimeFns.fromString('1225')).toThrow(RangeError)
+  })
 })
 
 describe('time zone identifiers out of range', () => {
-  const instant = InstantFns.fromEpochMilliseconds(0)
-
-  it.each(['+24:00', '+23:60', '-24:00', '+2400'])('%s', (id) => {
-    expect(() => InstantFns.toZonedDateTimeISO(instant, id)).toThrow(RangeError)
+  it('rejects +24:00', () => {
+    const instant = InstantFns.fromEpochMilliseconds(0)
+    expect(() => InstantFns.toZonedDateTimeISO(instant, '+24:00')).toThrow(
+      RangeError,
+    )
   })
 })
 
 describe('Duration strings', () => {
-  it.each([
-    ['P1Y2M3W4DT5H6M7.5S', 'P1Y2M3W4DT5H6M7.5S'],
-    ['-P1Y', '-P1Y'],
-    ['+p1yt1h', 'P1YT1H'],
-    ['PT1.5H', 'PT1H30M'],
-    ['PT1,5M', 'PT1M30S'],
-    ['PT1.123456789H', 'PT1H7M24.4444404S'],
-    ['-PT1.123456789M', '-PT1M7.40740734S'],
-    ['PT1H1M1.5S', 'PT1H1M1.5S'],
-    ['P0D', 'PT0S'],
-  ])('%s', (s, expected) => {
-    expect(DurationFns.toString(DurationFns.fromString(s))).toBe(expected)
+  it('accepts a fractional unit', () => {
+    expect(DurationFns.toString(DurationFns.fromString('PT1.5H'))).toBe(
+      'PT1H30M',
+    )
   })
 
-  it.each([
-    'P',
-    'PT',
-    '-P',
-    'P1YT',
-    'P1DT',
-    'PT1.5H1M',
-    'PT1.5M1S',
-    'PT1.5H1.5M',
-    'P1.5D',
-    'PT.5S',
-    'PT1.S',
-    'PT1.1234567891S',
-    'P1Y\n',
-    '',
-    `P${'9'.repeat(400)}Y`,
-    `PT${'9'.repeat(400)}S`,
-  ])('%j is rejected', (s) => {
+  it.each(['P', 'PT1.5H1M'])('rejects %s', (s) => {
     expect(() => DurationFns.fromString(s)).toThrow(RangeError)
   })
 })

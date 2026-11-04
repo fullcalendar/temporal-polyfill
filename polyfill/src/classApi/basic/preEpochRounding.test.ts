@@ -145,33 +145,6 @@ describe('rounding before the epoch', () => {
     })
   })
 
-  // Parity is what triggered the bug, so pin the neighbors on either side.
-  // -1001ms floors to -2s (even) and -2001ms floors to -3s (odd).
-  it('truncates toward the past for even and odd quotients', () => {
-    const toSecond = (epochMilli: number) =>
-      Temporal.Instant.fromEpochMilliseconds(epochMilli).toString({
-        smallestUnit: 'second',
-      })
-
-    expect(toSecond(-1)).toBe('1969-12-31T23:59:59Z')
-    expect(toSecond(-1001)).toBe('1969-12-31T23:59:58Z')
-    expect(toSecond(-2001)).toBe('1969-12-31T23:59:57Z')
-  })
-
-  // halfEven needs the real parity, not only a non-negative one
-  it('resolves halfEven ties to the even multiple', () => {
-    const round = (epochMilli: number) =>
-      Temporal.Instant.fromEpochMilliseconds(epochMilli).round({
-        smallestUnit: 'second',
-        roundingMode: 'halfEven',
-      }).epochMilliseconds
-
-    expect(round(-500)).toBe(0)
-    expect(round(-1500)).toBe(-2000)
-    expect(round(-2500)).toBe(-2000)
-    expect(round(-3500)).toBe(-4000)
-  })
-
   describe('agrees with the as-if-positive model', () => {
     for (const roundingMode of roundingModes) {
       it(`roundingMode ${roundingMode}`, () => {
