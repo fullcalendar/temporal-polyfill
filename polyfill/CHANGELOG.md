@@ -8,7 +8,7 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
-## Unreleased
+## v1.0.8
 
 ### 🐛 Bugfixes
 
