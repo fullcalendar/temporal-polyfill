@@ -94,6 +94,13 @@ export function memoize<K, V, A extends any[]>(
     if (map.has(key)) {
       return map.get(key) as V
     }
+    // Some keys come from outside input, like time zone IDs, calendar IDs and far-apart
+    // dates, so limit memory by starting over when full. Dropping everything is smaller
+    // and faster under load than an LRU, and a normal app never gets here. A WeakMap has
+    // no size, so it never clears, and doesn't need to.
+    if (map.size >= 1e4) {
+      map.clear()
+    }
     const val = generator(key, ...otherArgs)
     map.set(key, val)
     return val

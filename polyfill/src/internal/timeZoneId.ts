@@ -62,6 +62,9 @@ export const resolveTimeZoneRecord = memoize(
   },
 )
 
+// Memoized by the normalized ID, so all spellings of a zone share one record and one
+// Intl format. Formats are slow to create and heavy to hold, and a single zone has
+// thousands of valid spellings that resolveTimeZoneRecord would otherwise keep apart.
 const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
   if (normId === utcTimeZoneId) {
     return {
@@ -72,7 +75,7 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
   }
 
   const upperNormId = normId.toUpperCase()
-  const format = queryTimeZoneIntlFormat(upperNormId)
+  const format = createTimeZoneIntlFormat(upperNormId)
   return {
     kind: 'named',
     id: normId,
@@ -84,19 +87,17 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
 /**
  * @param upperNormId Expects normalized + uppercase
  */
-const queryTimeZoneIntlFormat = memoize(
-  (upperNormId: string): Intl.DateTimeFormat => {
-    // Offset math needs midnight as 00:00, not h24's 24:00.
-    return new RawDateTimeFormat('en-u-hc-h23', {
-      calendar: isoCalendarId,
-      timeZone: upperNormId,
-      era: 'short',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    })
-  },
-)
+function createTimeZoneIntlFormat(upperNormId: string): Intl.DateTimeFormat {
+  // Offset math needs midnight as 00:00, not h24's 24:00.
+  return new RawDateTimeFormat('en-u-hc-h23', {
+    calendar: isoCalendarId,
+    timeZone: upperNormId,
+    era: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  })
+}

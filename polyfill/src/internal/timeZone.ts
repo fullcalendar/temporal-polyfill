@@ -355,7 +355,7 @@ function clampIntlSampleEpochSec(epochSec: number): number {
 }
 
 /*
-The formatter comes from queryTimeZoneIntlFormat(), which always requests the
+The formatter comes from createTimeZoneIntlFormat(), which always requests the
 ISO calendar. Some hosts may resolve that as gregory, but either way the parts
 below are interpreted as ISO/Gregorian fields, not as user-calendar fields.
 */

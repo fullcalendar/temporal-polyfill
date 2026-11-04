@@ -15,6 +15,11 @@ don't work in GH release markdown. must be absolute
 - FIX: Time zone changes before 1847 are found, such as `Asia/Manila` on 1844-12-31, which also corrects `hoursInDay` and `toZonedDateTime` around them (#126, #114). Thx @gesposito
 - FIX: `getTimeZoneTransition('previous')` finds the right transition from far-future dates, whatever today's date is (#125, #113). Thx @gesposito
 
+### ⚡ Performance
+
+- `ZonedDateTime` construction and conversion are faster, as time zone lookups are now cached by raw ID (#115). Thx @gesposito
+- Internal caches now start over at 10,000 entries, limiting their memory use
+
 ## v1.0.7
 
 ### 🎉 6 Million Weekly Downloads
