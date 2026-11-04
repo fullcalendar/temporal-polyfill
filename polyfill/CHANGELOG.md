@@ -10,44 +10,35 @@ don't work in GH release markdown. must be absolute
 
 ## Unreleased
 
-### 🐛 Bugfixes
+### 🎉 6 Million Weekly Downloads
 
-- FIX: Rounding
-  - Pre-1970 values round to the correct boundary in `Instant#round`, `Instant#toString` and `ZonedDateTime#toString` (#110, #117, #111). Thx @vera-rubin
-  - `halfEven` ties with a `roundingIncrement` go to the correct multiple in `PlainTime`, `PlainDateTime` and `ZonedDateTime` `round`
-  - `Duration#toString` no longer prints `-PT0S` when rounding to zero, and keeps its rounded digits for sub-second fields above 2^53
-  - `Instant#round` rejects `roundingIncrement` above 1e9
-  - Relative rounding gives `0` instead of `-0`
-- FIX: Repeated and skipped times in `ZonedDateTime`
-  - `until`/`since` no longer throw when a backward diff ends in a repeated hour, and rounding to a time unit there gives the correct day and time split
-  - `withPlainTime` picks the earlier occurrence of a repeated hour, regardless of the current offset (#123)
-  - `round` and function API time-unit `startOf*`/`endOf*` stay on the current occurrence of a repeat shorter than a minute
-  - Function API `withDayOfMonth`, and `add*`/`subtract*`/`with*` that leave the date unchanged, stay on the current occurrence of a repeated hour
-  - Function API `startOfMonth`, `endOfDay` and related helpers are correct on hosts with native Temporal, around a repeated or skipped midnight and near the earliest date
-- FIX: Time zones
-  - Two offset changes close together keep the offset between them, such as `Africa/Casablanca` in Ramadan, and `getTimeZoneTransition` finds both (#121)
-  - `getTimeZoneTransition` no longer skips a forward transition on an internal search boundary
-  - `ZonedDateTime` `until`/`since` and function API diffs reject equal instants in different time zones for date units (#112)
-  - `Temporal.Now` uses `UTC` when the host reports no system time zone through `Intl` (#122)
-  - Function API time zone parameters reject a string with a time zone annotation on hosts with native Temporal
-- FIX: String parsing
-  - Malformed or misplaced annotations are rejected, such as `2024-10-03[]` (#119), and more than 9 annotations are allowed
-  - UTC offsets reject minutes and seconds past 59, and `PlainDate`, `PlainDateTime`, `PlainYearMonth` and `PlainMonthDay` reject an invalid offset they would otherwise discard
-  - `PlainTime.from` ignores a non-ISO calendar on a string with a date and time, and rejects an invalid date or offset there
-  - `withCalendar` and `withTimeZone` reject a date-time string with an invalid date, time or offset. `withCalendar` also rejects an invalid time, and a year-month or month-day with a non-ISO calendar
-- FIX: Limits of the supported range
-  - `ZonedDateTime.from` accepts in-range values near the `Instant` limits, such as a `Z` string at either end (#120)
-  - `PlainDate.from` accepts a date with a time at the lower limit, and non-ISO `PlainYearMonth.from` no longer checks the date as a `PlainDate`. Function API `fromString` too, on hosts without native Temporal
-  - Function API `PlainYearMonth` `startOfYear` and `roundToYear` reject results outside the range
-- FIX: Function API `roundToYear`, `roundToMonth` and `roundToWeek` coerce `roundingIncrement` on hosts with native Temporal, and `withDayOfMonth` rejects a day below 1
-- FIX: Chinese and Dangi year arithmetic lands on the correct month when constraining a leap month
-- FIX: Unminified builds no longer compute a debug string for every object on Node and similar hosts, which makes creating objects faster there (#116)
+`temporal-polyfill` has passed 6 million downloads a week! Thank you to everyone using it, reporting issues and sending fixes.
 
 ### 📉 Size Wins
 
 - Smaller global IIFE bundles after min+gzip, mainly from smaller string parsing:
   - Basic (`global.js`): 19,450 → 19,172 bytes (−1.4%)
   - Full (`full/global.js`): 23,280 → 23,020 bytes (−1.1%)
+
+### 🐛 Bugfixes
+
+Wider usage has brought reports of more rare cases, so most of these fixes are for corner cases.
+
+- FIX: Pre-1970 values round to the correct boundary in `Instant#round`, `Instant#toString` and `ZonedDateTime#toString` (#110, #117, #111). Thx @vera-rubin
+- FIX: `ZonedDateTime` `until`/`since` and function API diffs reject equal instants in different time zones for date units (#112)
+- FIX: Temporal strings with malformed or misplaced annotations are rejected, such as `2024-10-03[]` (#119)
+- FIX: `ZonedDateTime.from` accepts in-range values near the `Instant` limits, such as a `Z` string at either end (#120)
+- FIX: Two offset changes close together in a time zone keep the offset between them, such as `Africa/Casablanca` in Ramadan, and `getTimeZoneTransition` finds both (#121)
+- FIX: `Temporal.Now` uses `UTC` when the host reports no system time zone through `Intl` (#122)
+- FIX: `ZonedDateTime#withPlainTime` picks the earlier occurrence of a repeated hour, regardless of the current offset (#123)
+- FIX: Unminified builds no longer compute a debug string for every object on Node and similar hosts, which makes creating objects faster there (#116)
+- FIX: Better correctness in these other areas:
+  - Rounding, including `halfEven` ties with a `roundingIncrement`, `Duration#toString` with negative or very large values, and `-0` results
+  - Repeated and skipped times in `ZonedDateTime` and the function API, such as `until`/`since`, `round` and `startOf*`/`endOf*`
+  - String validation, including UTC offsets, discarded offsets, non-ISO calendars and `withCalendar`/`withTimeZone` arguments
+  - Dates at the limits of the supported range
+  - Function API agreement with the class API, with and without native Temporal
+  - `getTimeZoneTransition` search, and Chinese and Dangi leap-month arithmetic
 
 ## v1.0.6
 
