@@ -259,7 +259,7 @@ Test runners that use their own module loader need extra support:
   <tr>
     <td>Spec date</td>
     <td>
-      October 2026
+      November 2026
     </td>
     <td>
       March 2025
