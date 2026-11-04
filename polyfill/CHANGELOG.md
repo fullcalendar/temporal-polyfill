@@ -41,6 +41,7 @@ don't work in GH release markdown. must be absolute
 - FIX: Time zones with two offset changes close together keep the offset between them, such as `Africa/Casablanca` in Ramadan or `Pacific/Fiji` in 2021, and `getTimeZoneTransition` finds both changes (#121)
 - FIX: `getTimeZoneTransition` no longer skips a forward transition that falls on an internal search boundary
 - FIX: `Temporal.Now` uses `UTC` when the host reports no system time zone through `Intl` (#122)
+- FIX: Unminified builds no longer compute a debug string for every object on Node and similar hosts, where the console never showed it. `new ZonedDateTime` and other object creation get faster (#116)
 
 ### 📉 Size Wins
 

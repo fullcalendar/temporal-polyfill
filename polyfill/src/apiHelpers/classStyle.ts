@@ -83,8 +83,9 @@ interface JsonDebuggable {
 Must be called AFTER slots are assigned
 */
 export const attachDebugString: (instance: JsonDebuggable) => void =
-  // detect if NOT minified
-  noop.name === 'noop'
+  // detect if NOT minified. Node-like hosts run this unminified code in production and
+  // their console hides non-enumerable properties, so they'd pay for nothing visible.
+  noop.name === 'noop' && !(globalThis as any).process
     ? (instance: JsonDebuggable) => {
         Object.defineProperty(instance, '_str_', {
           value: instance.toJSON(),
