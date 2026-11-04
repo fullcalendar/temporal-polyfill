@@ -8,6 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## Unreleased
+
+### 🐛 Bugfixes
+
+- FIX: Time zone changes before 1847 are found, such as `Asia/Manila` on 1844-12-31, which also corrects `hoursInDay` and `toZonedDateTime` around them (#126, #114). Thx @gesposito
+
 ## v1.0.7
 
 ### 🎉 6 Million Weekly Downloads

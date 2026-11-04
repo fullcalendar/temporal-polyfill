@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { bigNanoInSec } from './bigNano'
 import { maxMilli } from './temporalConstants'
 import { queryTimeZone } from './timeZone'
-import { getTimeZonePeriodDays } from './timeZoneConfig'
+import {
+  getTimeZonePeriodDays,
+  minPossibleTransitionSec,
+} from './timeZoneConfig'
 import { secInUtcDay } from './units'
 
 const NativeTemporal = (globalThis as any).Temporal
@@ -135,6 +138,29 @@ describe('queryTimeZone', () => {
     ).toBe(BigInt(transitionSec) * bigNanoInSec)
   })
 
+  // Guards the search floor against the host's time zone data, including future releases
+  it.skipIf(!NativeTemporal)(
+    "has a search floor before each zone's first transition",
+    () => {
+      const tooEarly: string[] = []
+
+      for (const id of (Intl as any).supportedValuesOf('timeZone')) {
+        const first = NativeTemporal.Instant.from('1800-01-01T00:00Z')
+          .toZonedDateTimeISO(id)
+          .getTimeZoneTransition('next')
+
+        if (
+          first &&
+          first.epochMilliseconds <= minPossibleTransitionSec * 1000
+        ) {
+          tooEarly.push(`${id} ${first.toInstant()}`)
+        }
+      }
+
+      expect(tooEarly).toEqual([])
+    },
+  )
+
   // Guards the period table against the host's time zone data, including future releases
   it.skipIf(!NativeTemporal)(
     "has a search period shorter than the gaps between each zone's transitions",
@@ -144,7 +170,7 @@ describe('queryTimeZone', () => {
 
       for (const id of (Intl as any).supportedValuesOf('timeZone')) {
         const periodMilli = getTimeZonePeriodDays(id) * secInUtcDay * 1000
-        let zoned = NativeTemporal.Instant.from('1847-01-01T00:00Z')
+        let zoned = NativeTemporal.Instant.from('1800-01-01T00:00Z')
           .toZonedDateTimeISO(id)
           .getTimeZoneTransition('next')
         let prevMilli: number | undefined

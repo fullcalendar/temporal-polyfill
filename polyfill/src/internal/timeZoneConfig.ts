@@ -1,5 +1,3 @@
-import { secInUtcDay } from './units'
-
 export const utcTimeZoneId = 'UTC'
 
 // Time-zone transition search works by sampling the offset at both ends of a period,
@@ -41,7 +39,9 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
   return timeZonePeriodDaysByName[timeZoneName] || defaultTimeZonePeriodDays
 }
 
-// -46021 is 1844-01-01 as an ISO epoch-day count. The earliest transitions in
-// the time zone database are on 1844-12-31, when Asia/Manila and the Pacific
-// zones of Guam, Saipan, Palau and Kosrae moved across the date line.
-export const minPossibleTransitionSec = -46021 * secInUtcDay
+// Transition searches stop here. Any value before the earliest transition in the time
+// zone database works, so this is just a short round number, which lands on 1843-03-31.
+// The earliest transitions are on 1844-12-31, when Asia/Manila and the Pacific zones of
+// Guam, Saipan, Palau and Kosrae moved across the date line. timeZoneImpl.test.ts checks
+// this against native Temporal.
+export const minPossibleTransitionSec = -4e9
