@@ -36,6 +36,32 @@ describe('queryTimeZone', () => {
     ).toBe(-842_918_400)
   })
 
+  it('finds the transitions of 1844, the earliest in the time zone database', () => {
+    // Asia/Manila and Pacific/Guam (with Saipan, Palau and Kosrae) moved across
+    // the date line on 1844-12-31. Transition searches used to start at
+    // 1847-01-01 and never saw these.
+    const manila = queryTimeZone('Asia/Manila')
+    const from1800 = BigInt(-5_364_662_400) * bigNanoInSec
+    const from1846 = BigInt(-3_913_056_000) * bigNanoInSec
+    const transitionSec = Number(
+      manila.getTransition(from1800, 1)! / bigNanoInSec,
+    )
+
+    // 1844-12-31T15:56:00Z, or 15:56:08Z with time zone data that gives Manila's
+    // local mean time to the second (-15:56:08)
+    expect(transitionSec).toBeGreaterThanOrEqual(-3_944_621_040)
+    expect(transitionSec).toBeLessThanOrEqual(-3_944_621_032)
+    expect(Number(manila.getTransition(from1846, -1)! / bigNanoInSec)).toBe(
+      transitionSec,
+    )
+    expect(
+      Number(
+        queryTimeZone('Pacific/Guam').getTransition(from1800, 1)! /
+          bigNanoInSec,
+      ),
+    ).toBe(-3_944_626_740)
+  })
+
   it('samples offsets near TimeClip boundaries without asking Intl for out-of-range dates', () => {
     const timeZone = queryTimeZone('America/Vancouver')
     const maxEpochNano = BigInt(maxMilli) * 1_000_000n

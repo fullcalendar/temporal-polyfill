@@ -41,5 +41,7 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
   return timeZonePeriodDaysByName[timeZoneName] || defaultTimeZonePeriodDays
 }
 
-// -44925 is 1847-01-01 as an ISO epoch-day count.
-export const minPossibleTransitionSec = -44925 * secInUtcDay
+// -46021 is 1844-01-01 as an ISO epoch-day count. The earliest transitions in
+// the time zone database are on 1844-12-31, when Asia/Manila and the Pacific
+// zones of Guam, Saipan, Palau and Kosrae moved across the date line.
+export const minPossibleTransitionSec = -46021 * secInUtcDay
