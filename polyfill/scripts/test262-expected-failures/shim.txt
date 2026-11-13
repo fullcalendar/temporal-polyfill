@@ -40,6 +40,13 @@ intl402/DateTimeFormat/proto-from-ctor-realm.js
 intl402/DateTimeFormat/prototype/resolvedOptions/hourCycle-default.js
 
 # ENV-ISSUE
+# Host Intl.DateTimeFormat formats Chinese and Dangi dates from ICU4C data,
+# while this polyfill follows ICU4X like native Temporal. The two disagree on
+# some dates: ICU4C starts Chinese year 2030 on 2030-02-02, ICU4X on 2030-02-03.
+# Node <=22 also formats some Hebrew dates differently.
+intl402/DateTimeFormat/prototype/formatToParts/compare-to-temporal-lunisolar.js
+
+# ENV-ISSUE
 # Native Intl.DateTimeFormat's JS-facing format methods accept Date-bounded
 # epoch milliseconds. ECMA-402's Temporal bridge instead formats plain Temporal
 # objects from internal epoch-nanosecond records, so edge ISO dates must not hit
@@ -70,20 +77,3 @@ intl402/DateTimeFormat/prototype/resolvedOptions/resolved-numbering-system-unico
 intl402/DateTimeFormat/timezone-legacy-non-iana.js
 intl402/DateTimeFormat/timezone-case-insensitive.js
 intl402/DateTimeFormat/timezone-not-canonicalized.js
-
-# ENV-ISSUE
-# Chinese/Dangi calendar math follows the host ICU data scraped from
-# Intl.DateTimeFormat. Current test262 uses ICU4X Chinese calendar data for a
-# few cases where Node's ICU4C disagrees, including the 1987 leap-month slot and
-# two Chinese new-year boundaries. We intentionally do not patch the scraped
-# Intl data for these mismatches; doing so would make Temporal fields diverge
-# from DateTimeFormat output in the same runtime.
-intl402/Temporal/PlainDate/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainDate/prototype/monthCode/chinese-calendar-dates.js
-intl402/Temporal/PlainDateTime/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainDateTime/prototype/monthCode/chinese-calendar-dates.js
-intl402/Temporal/PlainMonthDay/prototype/monthCode/chinese-calendar-dates.js
-intl402/Temporal/PlainYearMonth/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/PlainYearMonth/prototype/monthCode/chinese-calendar-dates.js
-intl402/Temporal/ZonedDateTime/prototype/daysInYear/basic-chinese.js
-intl402/Temporal/ZonedDateTime/prototype/monthCode/chinese-calendar-dates.js

@@ -646,13 +646,20 @@ export function diffCalendarDates(
       const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
       // Leap-month sources can constrain to common counterparts across a year
       // boundary; those asymmetric cases keep a zero month remainder here.
+      // Going forward, a leap month whose common month the end was moved back
+      // to still comes before the end, unless the end was that leap month.
+      // For example, M03L-29 to M04-19 in a year without M03L is a full year.
       monthDiff =
         leapMonthMeta !== undefined &&
         isLeapMonth0 &&
         !isLeapMonth1 &&
         (leapMonthMeta < 0
           ? sign > 0 && monthCodeNumber1 === -leapMonthMeta
-          : sign < 0 && monthCodeNumber1 === monthCodeNumber0)
+          : monthCodeNumber1 === monthCodeNumber0 &&
+            (sign < 0 ||
+              (dayCorrect !== 0 &&
+                !!calendar &&
+                calendar.computeLeapMonth(year1) !== month1 + 1)))
           ? 0
           : monthCodeNumber1 - monthCodeNumber0 ||
             Number(isLeapMonth1) - Number(isLeapMonth0)
