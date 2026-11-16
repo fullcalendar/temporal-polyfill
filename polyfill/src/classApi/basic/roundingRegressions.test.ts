@@ -356,3 +356,56 @@ describe('halfEven with an increment on wall-clock time', () => {
     ).toBe('2024-07-15T12:01:52Z')
   })
 })
+
+describe('Duration#total rounding once', () => {
+  // The spec totals with exact math and converts to a Number only at the end.
+  // Adding a whole count and a separately rounded fraction can land one ULP
+  // off, e.g. 2 + 0.522 is 2.5220000000000002.
+  it('time units', () => {
+    expect(
+      Temporal.Duration.from({ nanoseconds: 2522 }).total('microsecond'),
+    ).toBe(2.522)
+    expect(
+      Temporal.Duration.from({
+        hours: 29,
+        seconds: 223,
+        microseconds: 3760,
+      }).total('day'),
+    ).toBe(1.2109143953703703)
+  })
+
+  it('calendar units', () => {
+    const total = (days: number, unit: Temporal.DateUnit) =>
+      Temporal.Duration.from({ days }).total({ unit, relativeTo: '2020-01-01' })
+
+    expect(total(9, 'week')).toBe(9 / 7)
+    // 2020-02-06 is 1 month and 5 days in; February 2020 has 29 days
+    expect(total(36, 'month')).toBe(34 / 29)
+    // 2021-01-31 is 1 year and 30 days in; 2021 has 365 days
+    expect(total(396, 'year')).toBe(395 / 365)
+  })
+
+  it('calendar units with a zoned relativeTo', () => {
+    expect(
+      Temporal.Duration.from({ days: 9 }).total({
+        unit: 'week',
+        relativeTo: '2020-01-01T00:00[UTC]',
+      }),
+    ).toBe(9 / 7)
+  })
+
+  it('function API', () => {
+    expect(
+      DurationFns.total(
+        DurationFns.fromFields({ nanoseconds: 2522 }),
+        'microsecond',
+      ),
+    ).toBe(2.522)
+    expect(
+      PlainDateFns.diffWeeks(
+        PlainDateFns.fromString('2020-01-01', CalendarFns.getBasic),
+        PlainDateFns.fromString('2020-01-10', CalendarFns.getBasic),
+      ),
+    ).toBe(9 / 7)
+  })
+})
