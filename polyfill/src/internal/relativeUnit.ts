@@ -1,3 +1,4 @@
+import { divideBigIntsToNumber } from './bigNano'
 import { RoundingModeEnum } from './optionsModel'
 import { roundNumberToInc } from './roundNumber'
 import { compareBigInts, divTrunc, fabricateNearHalfFraction } from './utils'
@@ -35,11 +36,16 @@ export function totalRelativeUnit(
     moveValueToEpochNano,
     endEpochNano,
   )
-  const fraction =
-    Number(endEpochNano - unitWindow.epochNano0) /
-    Number(unitWindow.epochNano1 - unitWindow.epochNano0)
+  const { startValue, endValue, epochNano0, epochNano1 } = unitWindow
+  const windowNano = epochNano1 - epochNano0
 
-  return interpolateRelativeUnitWindow(unitWindow, fraction)
+  // startValue + (endValue - startValue) * progress, as one exact fraction
+  // that rounds to a Number only once
+  return divideBigIntsToNumber(
+    BigInt(startValue) * windowNano +
+      BigInt(endValue - startValue) * (endEpochNano - epochNano0),
+    windowNano,
+  )
 }
 
 /*
