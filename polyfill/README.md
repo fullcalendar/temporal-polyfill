@@ -216,6 +216,11 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023).
 - `islamic-umalqura`: On Android, Chrome's `Intl.DateTimeFormat` API formats some dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
 - `chinese`, `dangi`: Dates come from the environment's `Intl.DateTimeFormat`, so results can differ from native `Temporal`, which may use different calendar data. Differences are rare for modern dates (usually one day, around the start of a month) and more common for dates far from the present.
 
+React Native's Hermes engine deviates from ECMA-402 for time zone identifiers ([meta/hermes#2323](https://github.com/meta/hermes/issues/2323)):
+
+- On iOS, a few IANA links (`US/Mountain`, `Asia/Kolkata`, `Etc/UTC`, ...) are only accepted in their exact-case spelling. The polyfill tries the normalized identifier first and falls back to the upper-cased spelling, so these zones work.
+- Hermes returns the identifier it was given from `resolvedOptions().timeZone`, so a zone and its alias don't compare equal there (`US/Mountain` vs `America/Denver`).
+
 ### CommonJS & Test Runners
 
 This package is ESM-only. CommonJS code can `require()` it on Node 20.19+ and 22.12+.

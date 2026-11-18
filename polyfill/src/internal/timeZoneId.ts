@@ -74,8 +74,7 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
     }
   }
 
-  const upperNormId = normId.toUpperCase()
-  const format = createTimeZoneIntlFormat(upperNormId)
+  const format = createTimeZoneIntlFormat(normId)
   return {
     kind: 'named',
     id: normId,
@@ -85,13 +84,29 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
 })
 
 /**
- * @param upperNormId Expects normalized + uppercase
+ * @param normId Expects normalized
  */
-function createTimeZoneIntlFormat(upperNormId: string): Intl.DateTimeFormat {
+function createTimeZoneIntlFormat(normId: string): Intl.DateTimeFormat {
+  try {
+    // IANA's own casing is what every host is expected to accept. Hermes on
+    // iOS is stricter than ECMA-402: it matches a handful of IANA links
+    // (US/Mountain, Asia/Kolkata, Etc/UTC, ...) case-sensitively, and the
+    // normalized spelling is the one its list of known zone names uses.
+    return createRawTimeZoneIntlFormat(normId)
+  } catch {
+    // Fall back to the upper-cased spelling, which this polyfill used
+    // unconditionally before, for hosts that reject the normalized one. Both
+    // attempts failing means the identifier really is unknown, and the error
+    // from the second attempt is the one callers have always seen.
+    return createRawTimeZoneIntlFormat(normId.toUpperCase())
+  }
+}
+
+function createRawTimeZoneIntlFormat(timeZone: string): Intl.DateTimeFormat {
   // Offset math needs midnight as 00:00, not h24's 24:00.
   return new RawDateTimeFormat('en-u-hc-h23', {
     calendar: isoCalendarId,
-    timeZone: upperNormId,
+    timeZone,
     era: 'short',
     year: 'numeric',
     month: 'numeric',
