@@ -65,6 +65,11 @@ export const invalidCalendar = (calendarId: string) =>
 export const exoticCalendarRequired = (calendarId: string, remedy: string) =>
   `Unknown calendar ${calendarId}; might need ${remedy}`
 export const mismatchingCalendars = 'Mismatching Calendars'
+export const mismatchingFormatCalendars = (
+  calendarId: string,
+  formatCalendarId: string,
+) =>
+  `Cannot format with calendar ${calendarId} in locale with calendar ${formatCalendarId}`
 
 // TimeZone
 export const invalidTimeZone = (calendarId: string) =>

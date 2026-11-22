@@ -54,12 +54,17 @@ export function checkResolvedCalendarCompatible(
   slots: { calendar: CalendarImpl },
   strictCalendarCheck?: boolean,
 ): void {
-  const resolvedCalendarId = format.resolvedOptions().calendar
+  if (strictCalendarCheck || slots.calendar !== isoCalendarImpl) {
+    const calendarId = getCalendarSlotId(slots.calendar)
+    const resolvedCalendarId = format.resolvedOptions().calendar
 
-  if (
-    (strictCalendarCheck || slots.calendar !== isoCalendarImpl) &&
-    getCalendarSlotId(slots.calendar) !== resolvedCalendarId
-  ) {
-    throwRangeError(errorMessages.mismatchingCalendars)
+    if (calendarId !== resolvedCalendarId) {
+      throwRangeError(
+        errorMessages.mismatchingFormatCalendars(
+          calendarId,
+          resolvedCalendarId,
+        ),
+      )
+    }
   }
 }

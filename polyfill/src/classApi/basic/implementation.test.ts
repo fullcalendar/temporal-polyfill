@@ -333,6 +333,55 @@ describe('integration recreations', () => {
     })
   })
 
+  // test262 asserts these RangeErrors but never their messages. The issue was
+  // that "Mismatching Calendars" didn't say which calendars didn't match, so
+  // users couldn't tell that the locale's calendar was the problem.
+  describe('issue #52: calendar mismatch errors name both calendars', () => {
+    it('PlainYearMonth.toLocaleString with an iso8601 PlainYearMonth', () => {
+      // The exact repro from the issue. PlainYearMonth requires the locale's
+      // calendar (gregory for 'en') to match its own calendar exactly.
+      expect(() =>
+        Temporal.PlainYearMonth.from('2024-11').toLocaleString('en'),
+      ).toThrow(
+        'Cannot format with calendar iso8601 in locale with calendar gregory',
+      )
+    })
+
+    it('PlainMonthDay.toLocaleString with an iso8601 PlainMonthDay', () => {
+      expect(() =>
+        Temporal.PlainMonthDay.from('11-05').toLocaleString('en'),
+      ).toThrow(
+        'Cannot format with calendar iso8601 in locale with calendar gregory',
+      )
+    })
+
+    it('PlainDate.toLocaleString with a non-ISO calendar', () => {
+      // Dates in the iso8601 calendar can be formatted in any locale, but
+      // other calendars must match the locale's calendar.
+      const date = Temporal.PlainDate.from('2024-11-05[u-ca=gregory]')
+
+      expect(() => date.toLocaleString('en-u-ca-japanese')).toThrow(
+        'Cannot format with calendar gregory in locale with calendar japanese',
+      )
+    })
+
+    it('Intl.DateTimeFormat#format with a PlainYearMonth', () => {
+      const format = new Intl.DateTimeFormat('en-u-ca-japanese')
+
+      expect(() =>
+        format.format(Temporal.PlainYearMonth.from('2024-11')),
+      ).toThrow(
+        'Cannot format with calendar iso8601 in locale with calendar japanese',
+      )
+    })
+
+    it('still formats when the calendars match', () => {
+      const pym = Temporal.PlainYearMonth.from('2024-11')
+
+      expect(pym.toLocaleString('en', { calendar: 'iso8601' })).toBe('2024-11')
+    })
+  })
+
   // test262 covers the same close-transition root cause through
   // getTimeZoneTransition/startOfDay tests for these zones, but not these
   // exact ZonedDateTime.from string inputs. Keep this focused regression
