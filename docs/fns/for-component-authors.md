@@ -1,22 +1,14 @@
-# For component authors
+# For component authors 🧩
 
-Notes for authors of third-party component libraries and other reusable tools —
-date pickers, schedulers, calendar grids, and anything else that needs date math
-under the hood.
+Guidance for authors of reusable libraries such as date pickers, schedulers, and calendar grids that need date math internally.
 
-If you build one of these, you know the date-library dilemma: bundle
-`dayjs`/`date-fns`, hand-roll helpers around `Date`, or pull in an adapter like
-`date-io` and make your users pick a library. Each path bundles *another* date
-library into every app that installs your component.
+Component libraries usually have to choose between bundling a date library like `dayjs` or `date-fns`, writing custom `Date` helpers, or introducing an adapter layer like `date-io`. Every one of those options adds another date library to every app that installs your component.
 
-The [tree-shakeable API](./index.md) is designed to end that — and to make
-Temporal the shared standard third-party components can finally agree on. Two
-properties make it a low-risk dependency.
+The [tree-shakeable API](./index.md) shares its internals with the host app's own Temporal polyfill, so your component doesn't bundle a second date library, and you can remove the dependency once native `Temporal` is available everywhere you target.
 
 ## Shared, not duplicated
 
-Declare `temporal-polyfill` as a **peer dependency** in your library's
-`package.json`, so the host app supplies the single shared install:
+List `temporal-polyfill` as a peer dependency in your library's `package.json` so the host application controls the single installed copy:
 
 ```json
 {
@@ -26,19 +18,16 @@ Declare `temporal-polyfill` as a **peer dependency** in your library's
 }
 ```
 
-Then import only the functions you need from `temporal-polyfill/fns/*`:
+Import only the functions you need from `temporal-polyfill/fns/*`:
 
 ```js
 // inside your component library
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
 ```
 
-You never force the full polyfill onto anyone. Whether to load it is the host
-application's choice, driven by which browsers and runtimes they need to support
-(Safari and older environments still lack native `Temporal`). Either way, the
-host ends up with a single `temporal-polyfill` install. Every consumer resolves
-to it — your component via `temporal-polyfill/fns` and the host app via
-`temporal-polyfill/global` — so the bundler deduplicates the shared code:
+Your library never forces the full class-based polyfill into the bundle. The host application decides whether to load `temporal-polyfill/global` based on the browsers and runtimes it targets (for example, Safari and older environments without native `Temporal`).
+
+Because both entrypoints live in the same package and share the same internal implementation, the bundler deduplicates them:
 
 ```
 app
@@ -51,32 +40,14 @@ app
         (only select functions)
 ```
 
-The function internals your component pulls in are the *same* internals the
-polyfill is built from — the payoff of shipping both as a single package rather
-than two. So several components that depend on the tree-shakeable API contribute
-one copy of Temporal's logic to the bundle, not one each, and an app that opts
-into the polyfill pays little extra on top.
+Multiple components depending on `temporal-polyfill/fns` share a single copy of the internals, and an app that also loads `temporal-polyfill/global` pays little extra.
 
-For this sharing to work, the host must have a `temporal-polyfill` install the
-component can resolve against. The functions operate on plain records and run
-without a global `Temporal`, but interop helpers like `toTemporal` still read
-the global at call time — see [Temporal Interop](./index.md#temporal-interop).
+The host application still needs `temporal-polyfill` installed so the peer dependency resolves. The `fns` functions operate on plain records and do not require a global `Temporal`, except for interop helpers like `toTemporal` which read the global at call time (see [Temporal Interop](./index.md#temporal-interop)).
 
-Custom (non-ISO) calendars are where the tree-shakeable API asks the most of you: the
-class-based API resolves calendars for you, but the `fns` API expects you to
-query and pass calendar objects explicitly. Rather than detail every case here,
-see the [`fns-and-global` example project](../../examples/fns-and-global), which
-works through this alongside the function-API-plus-global-polyfill setup
-described above.
+### Non-ISO calendars
+
+Unlike the class-based API, which resolves calendar IDs automatically, the `fns` API requires you to resolve and pass calendar objects explicitly. See the [`fns-and-global` example project](../../examples/fns-and-global) for a working setup that combines non-ISO calendars, the function API, and the global polyfill.
 
 ## A dependency you can delete
 
-Adopting the tree-shakeable API is not a permanent commitment. It carries your
-calendar logic while native `Temporal` is still rolling out, and once `Temporal`
-is available everywhere you target, [temporal-polyfill-codemod](../../codemod/README.md)
-rewrites your function calls into idiomatic `Temporal.*` and you remove the
-dependency entirely.
-
-No lock-in — and because each function maps one-to-one onto its `Temporal.*`
-equivalent, the migration is mechanical, with few edge cases and little to
-debug.
+Once native `Temporal` is available in every environment your library supports, run [temporal-polyfill-codemod](../../codemod/README.md) to rewrite your `temporal-polyfill/fns/*` calls to standard `Temporal.*` expressions and drop the `temporal-polyfill` peer dependency. No lock-in: each function maps one-to-one onto a `Temporal` method or `temporal-utils` helper, so the migration is mechanical, with few edge cases.

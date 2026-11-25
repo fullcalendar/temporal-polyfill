@@ -208,7 +208,7 @@ const same = monthDay.equals(otherMonthDay)
 Signature:
 
 ```ts
-(record: Record, options?: CalendarDisplayOptions) => string
+(record: Record, options?: ToStringOptions) => string
 ```
 
 Tree-shakeable API:
@@ -272,13 +272,14 @@ const text = monthDay.toLocaleString(locales, options)
 Signature:
 
 ```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => Format
 ```
 
 Tree-shakeable API:
 
 ```ts
 const format = PlainMonthDayFns.createFormat('en-US', {
+  calendar: 'iso8601',
   month: 'long',
   day: 'numeric',
 })
@@ -289,6 +290,7 @@ Temporal API equivalent:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {
+  calendar: 'iso8601',
   month: 'long',
   day: 'numeric',
 })

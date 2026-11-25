@@ -33,11 +33,16 @@ describe('fns API coverage table', () => {
 function readDocumentedHelpers(docFile: string): string[] {
   const markdown = readFileSync(join(docsDir, docFile), 'utf8')
   const helpers: string[] = []
-  const headingPattern = /^### `([^`]+)`$/gm
-  let match: RegExpExecArray | null
+  const sections = markdown.split(/^### `([^`]+)`$/gm)
 
-  while ((match = headingPattern.exec(markdown)) != null) {
-    helpers.push(match[1])
+  for (let i = 1; i < sections.length; i += 2) {
+    const name = sections[i]
+    const body = sections[i + 1].trimStart()
+    // Skip explicit "does not exist" notes (e.g. ZonedDateTime.createFormat).
+    if (body.startsWith('❌')) {
+      continue
+    }
+    helpers.push(name)
   }
 
   return helpers

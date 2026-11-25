@@ -20,7 +20,6 @@ const perPathTypes: Record<string, Record<string, string>> = {
   },
   ZonedDateTime: {
     Record: 'Temporal.ZonedDateTime',
-    Format: 'Intl.DateTimeFormat',
     FromFields: 'Temporal.ZonedDateTimeLikeObject',
     FromOptions: 'Temporal.ZonedDateTimeFromOptions',
     WithOptions: 'Temporal.ZonedDateTimeFromOptions',

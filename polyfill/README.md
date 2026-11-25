@@ -281,11 +281,13 @@ Test runners that use their own module loader need extra support:
 </table>
 
 
+<a id="tree-shakeable-api"></a>
+
 ## Tree-shakeable API 🌳
 
-For anyone hyper-concerned about bundle size, `temporal-polyfill` also ships an
-alternate function API designed for tree-shaking. Instead of large `Temporal.*`
-classes, every operation is a standalone function that acts on a plain record,
+For library authors and anyone watching bundle size closely, `temporal-polyfill` also ships an
+alternate function API designed for tree-shaking. Instead of `Temporal.*`
+classes that carry every method, every operation is a standalone function that acts on a plain record,
 so a bundler keeps only the functions you actually import.
 
 ```js
@@ -297,19 +299,18 @@ const later = PlainDateFns.addMonths(date, 2)
 PlainDateFns.toString(later) // '2026-08-01'
 ```
 
-🤝 **Building a component library?** The function API is built to be a shared,
-deletable peer dependency for third-party tools like date pickers and
+🧩 **Building a component library?** The function API is designed as a shared,
+removable peer dependency for third-party tools like date pickers and
 schedulers. See [For component authors](../docs/fns/for-component-authors.md).
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
 example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
 
-Best of all, this isn't a one-way door. When the time is right — once native
-`Temporal` is available in every environment you target, and you no longer need
-the polyfill — [temporal-polyfill-codemod](../codemod/README.md)
-rewrites your function calls back into idiomatic `Temporal.*` expressions.
-So `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`,
-with no manual find-and-replace.
+When native `Temporal` is available in every environment you target and you no
+longer need the polyfill, [temporal-polyfill-codemod](../codemod/README.md)
+rewrites your function calls back into standard `Temporal.*` expressions — so
+`PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`, with no
+manual find-and-replace.
 
 📖 [**Read the full Tree-shakeable API docs →**](../docs/fns/index.md)
 

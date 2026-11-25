@@ -231,17 +231,11 @@ export const subtractMonths: (
   options?: OverflowOptions,
 ) => Record = NativeTemporal ? Native.subtractMonths : Shim.subtractMonths
 
-export const subtractWeeks: (
-  record: Record,
-  units: number,
-  options?: OverflowOptions,
-) => Record = NativeTemporal ? Native.subtractWeeks : Shim.subtractWeeks
+export const subtractWeeks: (record: Record, weeks: number) => Record =
+  NativeTemporal ? Native.subtractWeeks : Shim.subtractWeeks
 
-export const subtractDays: (
-  record: Record,
-  units: number,
-  options?: OverflowOptions,
-) => Record = NativeTemporal ? Native.subtractDays : Shim.subtractDays
+export const subtractDays: (record: Record, days: number) => Record =
+  NativeTemporal ? Native.subtractDays : Shim.subtractDays
 
 // Non-standard: Round
 // -----------------------------------------------------------------------------

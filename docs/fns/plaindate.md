@@ -731,7 +731,7 @@ const nextDate = date.subtract({ days })
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<DateUnitName>) => DurationFns.Record
+(record: Record, otherRecord: Record, options?: DiffOptions) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -912,8 +912,8 @@ Tree-shakeable API:
 
 ```ts
 const nextDate = PlainDateFns.roundToYear(date)
-const nextDate = PlainDateFns.roundToYear(date, 'ceil')
-const nextDate = PlainDateFns.roundToYear(date, options)
+const nextDateCeil = PlainDateFns.roundToYear(date, 'ceil')
+const nextDateWithOptions = PlainDateFns.roundToYear(date, options)
 ```
 
 Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
@@ -922,8 +922,8 @@ Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 import { roundToYear } from 'temporal-utils'
 
 const nextDate = roundToYear(date)
-const nextDate = roundToYear(date, 'ceil')
-const nextDate = roundToYear(date, options)
+const nextDateCeil = roundToYear(date, 'ceil')
+const nextDateWithOptions = roundToYear(date, options)
 ```
 
 ### `roundToMonth`
@@ -940,8 +940,8 @@ Tree-shakeable API:
 
 ```ts
 const nextDate = PlainDateFns.roundToMonth(date)
-const nextDate = PlainDateFns.roundToMonth(date, 'ceil')
-const nextDate = PlainDateFns.roundToMonth(date, options)
+const nextDateCeil = PlainDateFns.roundToMonth(date, 'ceil')
+const nextDateWithOptions = PlainDateFns.roundToMonth(date, options)
 ```
 
 Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
@@ -950,8 +950,8 @@ Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 import { roundToMonth } from 'temporal-utils'
 
 const nextDate = roundToMonth(date)
-const nextDate = roundToMonth(date, 'ceil')
-const nextDate = roundToMonth(date, options)
+const nextDateCeil = roundToMonth(date, 'ceil')
+const nextDateWithOptions = roundToMonth(date, options)
 ```
 
 ### `roundToWeek`
@@ -968,8 +968,8 @@ Tree-shakeable API:
 
 ```ts
 const nextDate = PlainDateFns.roundToWeek(date)
-const nextDate = PlainDateFns.roundToWeek(date, 'ceil')
-const nextDate = PlainDateFns.roundToWeek(date, options)
+const nextDateCeil = PlainDateFns.roundToWeek(date, 'ceil')
+const nextDateWithOptions = PlainDateFns.roundToWeek(date, options)
 ```
 
 Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
@@ -978,8 +978,8 @@ Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 import { roundToWeek } from 'temporal-utils'
 
 const nextDate = roundToWeek(date)
-const nextDate = roundToWeek(date, 'ceil')
-const nextDate = roundToWeek(date, options)
+const nextDateCeil = roundToWeek(date, 'ceil')
+const nextDateWithOptions = roundToWeek(date, options)
 ```
 
 ## Start And End Of Unit
@@ -1129,7 +1129,7 @@ const nextDate = endOfWeek(date)
 Signature:
 
 ```ts
-(record: Record, options?: CalendarDisplayOptions) => string
+(record: Record, options?: ToStringOptions) => string
 ```
 
 Tree-shakeable API:
@@ -1193,7 +1193,7 @@ const text = date.toLocaleString(locales, options)
 Signature:
 
 ```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => Format
 ```
 
 Tree-shakeable API:

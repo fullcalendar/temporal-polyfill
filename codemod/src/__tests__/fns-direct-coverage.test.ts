@@ -118,6 +118,12 @@ function directCallArgs(typeName: string, helperName: string): string | null {
   }
 
   if (isSingleUnitArithmetic(helperName)) {
+    if (
+      typeName === 'PlainDate' &&
+      (helperName === 'subtractWeeks' || helperName === 'subtractDays')
+    ) {
+      return `${receiver}, 1`
+    }
     return `${receiver}, 1, options`
   }
 
@@ -130,6 +136,10 @@ function directCallArgs(typeName: string, helperName: string): string | null {
 
   if (helperName === 'withFields') {
     return `${receiver}, fields, options`
+  }
+
+  if (helperName === 'withDayOfMonth') {
+    return `${receiver}, 1, options`
   }
 
   if (helperName === 'withCalendar') {
