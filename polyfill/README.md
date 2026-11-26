@@ -219,7 +219,7 @@ Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023).
 
 \*\* Quirks with these calendars:
 
-- `chinese`, `dangi`: Dates come from the environment's `Intl.DateTimeFormat`, so results can differ from native `Temporal`, which may use different calendar data. Differences are rare for modern dates (usually one day, around the start of a month) and more common for dates far from the present.
+- `chinese`, `dangi`: Dates come from the environment's `Intl.DateTimeFormat`, so results can differ from native `Temporal`, which may use different calendar data. This is deliberate: a date's fields always match its `toLocaleString()` output in the same environment. Differences are rare for modern dates (usually one day, around the start of a month) and more common for dates far from the present.
 - `islamic-umalqura`: On Android, Chrome's `Intl.DateTimeFormat` API formats some dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
 
 ### CommonJS & Test Runners
