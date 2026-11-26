@@ -15,10 +15,25 @@ const persianMonthStarts = [
 
 // The 33-year rule makes 78 years from 1502 to 2987 AP leap years, but the
 // astronomical calendar on the 52.5° E meridian makes the following year a
-// leap year instead. ICU4X (and so native Temporal in V8) corrects exactly
-// these years; see NON_LEAP_CORRECTION in
+// leap year instead. ICU4X (behind native Temporal) corrects exactly these
+// years; see NON_LEAP_CORRECTION in
 // https://github.com/unicode-org/icu4x/blob/main/utils/calendrical_calculations/src/persian.rs
-// The 78 years form six runs, 33 years apart. Each pair is [firstYear, count].
+// ICU4C (behind the host's Intl.DateTimeFormat) has made the same corrections
+// since ICU 77, so on those hosts Temporal fields match formatted output too.
+// Older ICU4C still uses the plain 33-year rule. ICU4X only checked
+// 1178 to 3000 AP against the astronomical calendar, so every other year keeps
+// the plain 33-year rule.
+//
+// The 78 years form six runs, each stepping 33 years (one full cycle of the
+// rule). Each pair is [firstYear, count], which is much smaller in the build
+// than listing all 78 years:
+//   1502                    (1 year)
+//   1601, 1634, ..., 2987   (43 years)
+//   2059                    (1 year)
+//   2158, 2191, ..., 2983   (26 years)
+//   2748, 2781              (2 years)
+//   2847, 2880, ..., 2979   (5 years)
+// persianCalendar.test.ts checks these runs against ICU4X's full list.
 const persianNonLeapCorrections = [
   1502, 1, 1601, 43, 2059, 1, 2158, 26, 2748, 2, 2847, 5,
 ]
@@ -28,11 +43,16 @@ export function createPersianCalendar() {
     eraOrigins: persianEraOrigins,
     fromJulianDay(julianDay) {
       const daysSinceEpoch = julianDay - persianEpoch
+      // The year under the plain 33-year rule. A 33-year cycle has 12053 days
+      // (33 * 365 + 8 leap days).
       let year = 1 + Math.floor((33 * daysSinceEpoch + 3) / 12053)
       let dayOfYear = daysSinceEpoch - persianDaysBeforeYear(year)
 
       // A corrected year has 365 days, so the day the 33-year rule calls its
-      // 366th day is the first day of the next year
+      // 366th day is the first day of the next year. Every other day of that
+      // next year already gets the right year from the rule, and its
+      // dayOfYear comes out one higher than the plain rule's, because
+      // persianDaysBeforeYear starts that year a day early.
       if (dayOfYear === 365 && persianIsNonLeapCorrection(year)) {
         year++
         dayOfYear = 0
@@ -101,6 +121,12 @@ function persianDaysBeforeYear(year: number): number {
   )
 }
 
+/*
+Whether the 33-year rule's leap day for this year moves to the next year. True
+for the 78 years in persianNonLeapCorrections: a year is in a run when it is a
+whole number of 33-year cycles after the run's first year, and fewer than
+`count` cycles.
+*/
 function persianIsNonLeapCorrection(year: number): boolean {
   for (let i = 0; i < persianNonLeapCorrections.length; i += 2) {
     const yearsAfterFirst = year - persianNonLeapCorrections[i]

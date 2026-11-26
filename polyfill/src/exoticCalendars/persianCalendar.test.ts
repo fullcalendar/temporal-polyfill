@@ -55,16 +55,32 @@ describe('Persian calendar', () => {
   })
 
   it('reads each year boundary back from ISO from 1178 to 3000 AP', () => {
-    for (let year = 1178; year <= 3000; year++) {
-      const first = nowruz(year)
-      const last = first.with({ monthCode: 'M12', day: first.daysInYear - 336 })
-      const fromIso = (date: Temporal.PlainDate) =>
-        Temporal.PlainDate.from(date.toString({ calendarName: 'never' }))
-          .withCalendar('persian')
-          .toString()
+    // Converts from a bare ISO date, so the Persian fields come from
+    // fromJulianDay rather than from the fields the date was built with
+    const fieldsFromIso = (date: Temporal.PlainDate) => {
+      const { year, monthCode, day, dayOfYear } = Temporal.PlainDate.from(
+        date.toString({ calendarName: 'never' }),
+      ).withCalendar('persian')
+      return { year, monthCode, day, dayOfYear }
+    }
 
-      expect(fromIso(first), `${year}`).toBe(first.toString())
-      expect(fromIso(last), `${year}`).toBe(last.toString())
+    for (let year = 1178; year <= 3000; year++) {
+      const daysInYear = isLeapYear(year) ? 366 : 365
+      const first = nowruz(year)
+      const last = first.add({ days: daysInYear - 1 })
+
+      expect(fieldsFromIso(first), `${year}`).toEqual({
+        year,
+        monthCode: 'M01',
+        day: 1,
+        dayOfYear: 1,
+      })
+      expect(fieldsFromIso(last), `${year}`).toEqual({
+        year,
+        monthCode: 'M12',
+        day: daysInYear - 336,
+        dayOfYear: daysInYear,
+      })
       expect(last.add({ days: 1 }).equals(nowruz(year + 1)), `${year}`).toBe(
         true,
       )
