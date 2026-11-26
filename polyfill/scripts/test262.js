@@ -91,6 +91,14 @@ yargs(hideBin(process.argv))
           expectedFailureFiles.push('shim-node-gte22.txt')
         }
 
+        // Host time zone data, not the Node major version, decides these. Node
+        // ships tz updates in patch releases (24.22.1 moved to 2026e), so
+        // compare the tz version itself. IDs like "2026e" sort correctly as
+        // plain strings: year first, then the letter.
+        if ((process.versions.tz || '') >= '2026e') {
+          expectedFailureFiles.push('shim-tz-gte2026e.txt')
+        }
+
         if (classApi === 'basic') {
           expectedFailureFiles.push('calendar.txt')
         }

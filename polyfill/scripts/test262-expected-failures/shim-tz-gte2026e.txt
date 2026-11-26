@@ -1,0 +1,9 @@
+# ENV-ISSUE
+# With host time zone data 2026e or later (Node 24.22.1+, for example), the
+# host Intl.DateTimeFormat resolvedOptions().timeZone resolves CST6CDT to itself
+# instead of to America/Chicago, the zone it links to. ZonedDateTime#equals then
+# treats the two as different zones. Earlier 2026 data (Node 24.16 through
+# 24.22.0) canonicalizes it correctly, so CI's Node 24 lane still runs this test
+# as a real pass. As with the Node <=22 link mismatches in shim-node-lte22.txt,
+# we avoid one-off IANA-link workarounds for host Intl data.
+intl402/Temporal/ZonedDateTime/links.js
