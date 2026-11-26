@@ -10,6 +10,10 @@ don't work in GH release markdown. must be absolute
 
 ## v1.0.9
 
+### 🐛 Bugfixes
+
+- FIX: Named time zone lookups pass IANA-cased identifiers instead of upper-casing them, fixing `RangeError` on React Native's Hermes (iOS) for zones like `US/Mountain` and `Etc/UTC` (#133). Thx @rpinna
+
 ### 📝 Documentation
 
 - The [minimum browser versions](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md#supported-environments) now match the published code, which has used ES2020 syntax since v1.0.1: Chrome 80, Firefox 74, and Edge 80. Transpiling to an older target supports Chrome 71, Firefox 68, and Edge 79 (#135). Thx @arthurschreiber

@@ -230,6 +230,10 @@ Test runners that use their own module loader need extra support:
 - **Vitest:** the default `forks` pool works. The `vmForks`/`vmThreads` pools need Vitest 5+ and Node 24.9+ ([docs](https://vitest.dev/config/pool)).
 - **Jest:** needs Jest 30.4+, Node 24.9+, and `--experimental-vm-modules` ([docs](https://jestjs.io/docs/ecmascript-modules)). Otherwise, use [`transformIgnorePatterns`](https://jestjs.io/docs/configuration#transformignorepatterns-arraystring).
 
+### React Native (Hermes)
+
+On affected Hermes versions for iOS and Android, `Intl.DateTimeFormat` does not resolve time zone aliases to their primary IANA identifier ([Hermes issue #2323](https://github.com/meta/hermes/issues/2323)). As a result, comparing a zone with its alias (such as `US/Mountain` and `America/Denver`) fails in operations like `ZonedDateTime#equals()` and `until()`/`since()` when `largestUnit` is `'day'` or larger. Use primary identifiers consistently to avoid this.
+
 ## Comparison with `@js-temporal/polyfill`
 
 <table>

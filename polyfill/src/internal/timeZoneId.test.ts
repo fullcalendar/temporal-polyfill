@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { queryTimeZone } from './timeZone'
 import { resolveTimeZoneId, resolveTimeZoneRecord } from './timeZoneId'
 
@@ -52,5 +52,43 @@ describe('resolveTimeZoneRecord', () => {
       resolveTimeZoneRecord('Etc/GMT'),
     )
     expect(queryTimeZone('etc/gmt')).toBe(queryTimeZone('Etc/GMT'))
+  })
+
+  it('passes the case-normalized IANA ID to Intl.DateTimeFormat', async () => {
+    const OrigDateTimeFormat = Intl.DateTimeFormat
+    const seenTimeZones: (string | undefined)[] = []
+
+    // Mimic Hermes on iOS, which accepts exact IANA casing for link zones
+    // like "US/Mountain" but throws RangeError for "US/MOUNTAIN".
+    function StubDateTimeFormat(
+      locales?: string | string[],
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      seenTimeZones.push(options?.timeZone)
+      if (options?.timeZone !== 'US/Mountain') {
+        throw new RangeError(
+          `Incorrect timeZone information provided: ${options?.timeZone}`,
+        )
+      }
+      return new OrigDateTimeFormat(locales, options)
+    }
+
+    vi.resetModules()
+    Intl.DateTimeFormat =
+      StubDateTimeFormat as unknown as typeof Intl.DateTimeFormat
+
+    try {
+      const { resolveTimeZoneRecord: resolveFresh } = await import(
+        './timeZoneId'
+      )
+      const record = resolveFresh('us/mountain')
+
+      expect(record.kind).toBe('named')
+      expect(record.id).toBe('US/Mountain')
+      expect(seenTimeZones).toEqual(['US/Mountain'])
+    } finally {
+      Intl.DateTimeFormat = OrigDateTimeFormat
+      vi.resetModules()
+    }
   })
 })
