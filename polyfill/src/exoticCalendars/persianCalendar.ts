@@ -1,4 +1,3 @@
-import { modFloor } from '../internal/utils'
 import { createArithmeticCalendar } from './utils/arithmeticCalendar'
 
 // Adapted from Adobe's @internationalized/date Persian calendar implementation
@@ -46,18 +45,15 @@ export function createPersianCalendar() {
       // The year under the plain 33-year rule. A 33-year cycle has 12053 days
       // (33 * 365 + 8 leap days).
       let year = 1 + Math.floor((33 * daysSinceEpoch + 3) / 12053)
-      let dayOfYear = daysSinceEpoch - persianDaysBeforeYear(year)
 
-      // A corrected year has 365 days, so the day the 33-year rule calls its
-      // 366th day is the first day of the next year. Every other day of that
-      // next year already gets the right year from the rule, and its
-      // dayOfYear comes out one higher than the plain rule's, because
-      // persianDaysBeforeYear starts that year a day early.
-      if (dayOfYear === 365 && persianIsNonLeapCorrection(year)) {
+      // The plain rule's guess is never too high, but it is one too low on
+      // the first day after a corrected year: the rule calls that day the
+      // corrected year's 366th day, while the corrected year has only 365
+      if (daysSinceEpoch >= persianDaysBeforeYear(year + 1)) {
         year++
-        dayOfYear = 0
       }
 
+      const dayOfYear = daysSinceEpoch - persianDaysBeforeYear(year)
       const month =
         dayOfYear < 216
           ? Math.floor(dayOfYear / 31)
@@ -75,21 +71,19 @@ export function createPersianCalendar() {
       )
     },
     computeDaysInMonth(year, month) {
-      return month <= 6
-        ? 31
-        : month <= 11
-          ? 30
-          : persianIsLeapYear(year)
-            ? 30
-            : 29
+      // Esfand (month 12) takes whatever the year has left after the 336 days
+      // of months 1-11: 29 days, or 30 in a leap year
+      return month <= 6 ? 31 : month <= 11 ? 30 : persianDaysInYear(year) - 336
     },
-    computeDaysInYear(year) {
-      return persianIsLeapYear(year) ? 366 : 365
-    },
+    computeDaysInYear: persianDaysInYear,
     computeMonthsInYear() {
       return 12
     },
-    computeInLeapYear: persianIsLeapYear,
+    // A comparison, so a real boolean even though the build turns literal
+    // true and false into 1 and 0
+    computeInLeapYear(year) {
+      return persianDaysInYear(year) > 365
+    },
     computeEraFields({ year }) {
       return { era: 'ap', eraYear: year }
     },
@@ -97,21 +91,18 @@ export function createPersianCalendar() {
 }
 
 /*
-A corrected year gives its leap day to the year after it. The result reaches
-inLeapYear, and the build turns literal true and false into 1 and 0, so it is
-converted with Boolean().
+Every year length, and so every leap year, comes from persianDaysBeforeYear, so
+the corrections only need applying in one place. A corrected year gives its
+leap day to the year after it.
 */
-function persianIsLeapYear(year: number): boolean {
-  return Boolean(
-    !persianIsNonLeapCorrection(year) &&
-      (persianIsNonLeapCorrection(year - 1) ||
-        modFloor(25 * year + 11, 33) < 8),
-  )
+function persianDaysInYear(year: number): number {
+  return persianDaysBeforeYear(year + 1) - persianDaysBeforeYear(year)
 }
 
 /*
-Days from the epoch to 1 Farvardin of the given year. A corrected year is one
-day shorter than the 33-year rule says, so the year after it starts a day early.
+Days from the epoch to 1 Farvardin of the given year. The floor term counts the
+33-year rule's leap days before the year (8 per 33 years). A corrected year is
+one day shorter than the rule says, so the year after it starts a day early.
 */
 function persianDaysBeforeYear(year: number): number {
   return (
