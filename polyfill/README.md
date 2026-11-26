@@ -197,6 +197,7 @@ Compliance with the latest version of the Temporal spec is near-perfect [with ju
 ## Supported Environments
 
 <!--
+eslint.dist.config.js enforces these minimums on the build. Update it when the table changes.
 https://caniuse.com/bigint
 https://caniuse.com/mdn-javascript_operators_optional_chaining
 https://caniuse.com/mdn-javascript_operators_nullish_coalescing
