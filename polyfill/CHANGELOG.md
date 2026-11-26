@@ -13,6 +13,7 @@ don't work in GH release markdown. must be absolute
 ### 🐛 Bugfixes
 
 - FIX: Named time zone lookups pass IANA-cased identifiers instead of upper-casing them, fixing `RangeError` on React Native's Hermes (iOS) for zones like `US/Mountain` and `Etc/UTC` (#133). Thx @rpinna
+- FIX: Clearer errors for mismatched calendars and time zones, which now name both sides, e.g. `PlainYearMonth.from('2024-11').toLocaleString('en')` throws `Mismatching calendars: iso8601 and gregory` instead of `Mismatching Calendars`, and `until`/`since` across time zones throws `Mismatching time zones: UTC and Asia/Tokyo` (#52, #137). Thx @kgram, @gasparoff
 
 ### 📝 Documentation
 

@@ -64,12 +64,20 @@ export const invalidCalendar = (calendarId: string) =>
   baseErrorMessages.invalidEntity('Calendar', calendarId)
 export const exoticCalendarRequired = (calendarId: string, remedy: string) =>
   `Unknown calendar ${calendarId}; might need ${remedy}`
-export const mismatchingCalendars = 'Mismatching Calendars'
+// Shared by every calendar-equality check (diffing two objects, and formatting
+// an object against the calendar its locale resolved to), so name both sides
+export const mismatchingCalendars = (
+  calendarId0: string,
+  calendarId1: string,
+) => `Mismatching calendars: ${calendarId0} and ${calendarId1}`
 
 // TimeZone
 export const invalidTimeZone = (calendarId: string) =>
   baseErrorMessages.invalidEntity('TimeZone', calendarId)
-export const mismatchingTimeZones = 'Mismatching TimeZones'
+export const mismatchingTimeZones = (
+  timeZoneId0: string,
+  timeZoneId1: string,
+) => `Mismatching time zones: ${timeZoneId0} and ${timeZoneId1}`
 export const forbiddenIcuTimeZone = 'Forbidden ICU TimeZone'
 
 // TimeZone Offset/Gap

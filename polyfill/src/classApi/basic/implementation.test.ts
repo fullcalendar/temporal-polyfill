@@ -333,6 +333,46 @@ describe('integration recreations', () => {
     })
   })
 
+  // test262 asserts these RangeErrors but never their messages. The issue was
+  // that "Mismatching Calendars" didn't say which calendars conflicted. Check
+  // only that both IDs appear, so the wording itself can change freely. One
+  // case per place a mismatch is detected.
+  describe('issue #52: mismatch errors name both calendars/time zones', () => {
+    function expectMismatch(fn: () => unknown, ids: string[]): void {
+      expect(fn).toThrow(RangeError)
+      for (const id of ids) {
+        expect(fn).toThrow(id) // substring match
+      }
+    }
+
+    it('formatting against the locale calendar', () => {
+      // The exact repro from the issue. PlainYearMonth requires the locale's
+      // calendar (gregory for 'en') to match its own calendar exactly.
+      expectMismatch(
+        () => Temporal.PlainYearMonth.from('2024-11').toLocaleString('en'),
+        ['iso8601', 'gregory'],
+      )
+    })
+
+    it('diffing across calendars', () => {
+      const date0 = Temporal.PlainDate.from('2024-11-05')
+      const date1 = Temporal.PlainDate.from('2024-11-05[u-ca=gregory]')
+
+      expectMismatch(() => date0.until(date1), ['iso8601', 'gregory'])
+    })
+
+    it('diffing across time zones', () => {
+      // Day-or-larger units need a common time zone to find day boundaries
+      const zdt0 = Temporal.ZonedDateTime.from('2024-11-05T00:00[UTC]')
+      const zdt1 = Temporal.ZonedDateTime.from('2024-11-05T00:00[Asia/Tokyo]')
+
+      expectMismatch(
+        () => zdt0.until(zdt1, { largestUnit: 'days' }),
+        ['UTC', 'Asia/Tokyo'],
+      )
+    })
+  })
+
   // test262 covers the same close-transition root cause through
   // getTimeZoneTransition/startOfDay tests for these zones, but not these
   // exact ZonedDateTime.from string inputs. Keep this focused regression
