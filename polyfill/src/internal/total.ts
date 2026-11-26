@@ -1,4 +1,4 @@
-import { divideBigNanoToExactNumber } from './bigNano'
+import { divideNanoToNumber } from './bigNano'
 import {
   DurationFields,
   clearDurationFields,
@@ -110,8 +110,8 @@ export function totalDayTimeDuration(
   durationFields: DurationFields,
   totalUnit: DayTimeUnit,
 ): number {
-  return divideBigNanoToExactNumber(
+  return divideNanoToNumber(
     durationDayTimeToBigNano(durationFields),
-    unitNanoMap[totalUnit],
+    BigInt(unitNanoMap[totalUnit]),
   )
 }

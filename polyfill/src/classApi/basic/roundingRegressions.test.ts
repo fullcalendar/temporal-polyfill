@@ -4,12 +4,16 @@ import * as DurationFns from '../../funcApi/duration'
 import * as PlainDateFns from '../../funcApi/plainDate'
 import * as PlainDateTimeFns from '../../funcApi/plainDateTime'
 import * as PlainTimeFns from '../../funcApi/plainTime'
+import * as PlainDateShim from '../../funcApi/shim/plainDate'
+import * as PlainDateTimeShim from '../../funcApi/shim/plainDateTime'
+import * as PlainTimeShim from '../../funcApi/shim/plainTime'
+import * as ZonedDateTimeShim from '../../funcApi/shim/zonedDateTime'
 import * as ZonedDateTimeFns from '../../funcApi/zonedDateTime'
 import { Temporal } from './implementation'
 
 // Regressions found while auditing the polyfill's rounding, sign and BigInt
-// math. test262 doesn't reach these inputs. Expected values match the reference
-// implementation in proposal-temporal/polyfill.
+// math. Expected results match the reference implementation except for the
+// collapsed Apia day window documented below.
 
 const newYork = 'America/New_York'
 
@@ -354,5 +358,97 @@ describe('halfEven with an increment on wall-clock time', () => {
         })
         .toString(),
     ).toBe('2024-07-15T12:01:52Z')
+  })
+})
+
+describe('Duration#total rounding once', () => {
+  // Rounding the fraction first gives 2 + 0.522 = 2.5220000000000002.
+  it('totals fixed-length units without rounding intermediate values', () => {
+    expect(
+      Temporal.Duration.from({ nanoseconds: 2522 }).total('microsecond'),
+    ).toBe(2.522)
+    expect(
+      Temporal.Duration.from({
+        hours: 29,
+        seconds: 223,
+        microseconds: 3760,
+      }).total('day'),
+    ).toBe(1.2109143953703703)
+  })
+
+  it('rounds halfway cases to even in both directions', () => {
+    // At 2^50 microseconds the spacing is 250 ns, so 125 and 375 ns are ties.
+    const baseMicro = 2 ** 50
+    for (const sign of [1, -1]) {
+      const totalMicro = (nano: number) =>
+        Temporal.Duration.from({
+          microseconds: sign * baseMicro,
+          nanoseconds: sign * nano,
+        }).total('microsecond')
+
+      expect(totalMicro(125)).toBe(sign * baseMicro)
+      expect(totalMicro(126)).toBe(sign * (baseMicro + 0.25))
+      expect(totalMicro(375)).toBe(sign * (baseMicro + 0.5))
+    }
+  })
+
+  it('totals fractional calendar units in both directions', () => {
+    // One January plus five days of a 29-day February.
+    expect(
+      Temporal.Duration.from({ days: 36 }).total({
+        unit: 'month',
+        relativeTo: '2020-01-01',
+      }),
+    ).toBe(34 / 29)
+    // Back 366 days to 2020-01-31, then 30 days into the preceding 365-day year.
+    expect(
+      Temporal.Duration.from({ days: -396 }).total({
+        unit: 'year',
+        relativeTo: '2021-01-31',
+      }),
+    ).toBe(-395 / 365)
+  })
+
+  it('returns the whole day count when a skipped date collapses the window', () => {
+    // Apia skipped Dec 30, so both day boundaries land on Dec 31. The shim
+    // returns the same whole day count as until(). Native Temporal can throw here.
+    const start = '2012-01-01T00:00[Pacific/Apia]'
+    const end = '2011-12-31T00:00[Pacific/Apia]'
+    expect(
+      Temporal.Duration.from({ hours: -24 }).total({
+        unit: 'day',
+        relativeTo: start,
+      }),
+    ).toBe(-1)
+    expect(
+      ZonedDateTimeShim.diffDays(
+        ZonedDateTimeShim.fromString(start, CalendarFns.getBasic),
+        ZonedDateTimeShim.fromString(end, CalendarFns.getBasic),
+      ),
+    ).toBe(-1)
+  })
+
+  it('rounds fractional differences in the function API', () => {
+    expect(
+      PlainTimeShim.diffMicroseconds(
+        PlainTimeShim.fromString('00:00'),
+        PlainTimeShim.fromString('00:00:00.000002522'),
+      ),
+    ).toBe(2.522)
+    expect(
+      PlainDateTimeShim.diffMicroseconds(
+        PlainDateTimeShim.fromString('2020-01-01T00:00', CalendarFns.getBasic),
+        PlainDateTimeShim.fromString(
+          '2020-01-01T00:00:00.000002522',
+          CalendarFns.getBasic,
+        ),
+      ),
+    ).toBe(2.522)
+    expect(
+      PlainDateShim.diffWeeks(
+        PlainDateShim.fromString('2020-01-01', CalendarFns.getBasic),
+        PlainDateShim.fromString('2020-01-10', CalendarFns.getBasic),
+      ),
+    ).toBe(9 / 7)
   })
 })

@@ -1,4 +1,4 @@
-import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
+import { bigNanoInUtcDay, divideNanoToNumber } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import {
   compareIsoDates,
@@ -83,7 +83,7 @@ export function countEpochNanoUnit(
     )
   }
 
-  return divideBigNanoToExactNumber(diffNano, unitNanoMap[unit])
+  return divideNanoToNumber(diffNano, BigInt(unitNanoMap[unit]))
 }
 
 // Mirrors diffDateTimesRounded's sub-day branch
@@ -118,9 +118,9 @@ export function countTimeUnit(
     )
   }
 
-  // Converting through bigint canonicalizes -0 and uses the same exact
-  // quotient/remainder construction as duration totaling.
-  return divideBigNanoToExactNumber(BigInt(diffNano), unitNanoMap[unit])
+  // Even after rounding, a PlainTime difference spans at most one day.
+  // Both nanosecond counts fit exactly in Number, so only the quotient rounds.
+  return (diffNano || 0) / unitNanoMap[unit]
 }
 
 /*
@@ -156,7 +156,7 @@ export function countEpochNanoDays(
     checkIsoDateTimeEpochNanoInBounds(endEpochNano - originTimeBigNano)
   }
 
-  return divideBigNanoToExactNumber(diffNano, unitNanoMap[Unit.Day])
+  return divideNanoToNumber(diffNano, bigNanoInUtcDay)
 }
 
 // Relative-unit differences
@@ -292,13 +292,8 @@ export function countRelativeUnit(
 Mirrors diffDatesRounded's and diffDateTimesRounded's week branch, then
 spanPlainRelativeDuration and totalRelativeDuration when totaling.
 
-Plain weeks are uniform seven-day windows, so no RelativeOps are needed: the
-probe is plain bigint arithmetic from the origin's midnight. It still resolves
-through the shared window leaf rather than dividing the whole interval at
-once, because that can produce a different float64 result and would skip the
-date-bounds probing the class API performs. `endEpochNano` is expressed
-relative to the origin's midnight, even when the public inputs are
-PlainDateTimes.
+Plain weeks use seven-day steps from the origin's midnight, including for
+PlainDateTime inputs. Probe the window boundaries to validate both dates.
 */
 export function countDateWeeks(
   originIsoDate: CalendarDateFields,
