@@ -8,6 +8,12 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## v1.0.9
+
+### 📝 Documentation
+
+- The [minimum browser versions](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md#supported-environments) now match the published code, which has used ES2020 syntax since v1.0.1: Chrome 80, Firefox 74, and Edge 80. Transpiling to an older target supports Chrome 71, Firefox 68, and Edge 79 (#135). Thx @arthurschreiber
+
 ## v1.0.8
 
 ### 🐛 Bugfixes

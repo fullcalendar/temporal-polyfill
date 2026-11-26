@@ -198,23 +198,28 @@ Compliance with the latest version of the Temporal spec is near-perfect [with ju
 
 <!--
 https://caniuse.com/bigint
+https://caniuse.com/mdn-javascript_operators_optional_chaining
+https://caniuse.com/mdn-javascript_operators_nullish_coalescing
+https://caniuse.com/mdn-javascript_builtins_globalthis
 https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_calendar_parameter
 -->
 
-| Browser    | Minimum Release | For `chinese`, `dangi`, `islamic-umalqura`\* |
-| :--------- | --------------: | -------------------------------------------: |
-| Chrome     |   67 (May 2018) |                                80 (Feb 2020) |
-| Firefox    |   68 (Jul 2019) |                                76 (May 2020) |
-| Safari     |   14 (Sep 2020) |                              14.1 (Apr 2021) |
-| Safari iOS |   14 (Sep 2020) |                              14.5 (Apr 2021) |
-| Edge       |   79 (Jan 2020) |                                80 (Feb 2020) |
+| Browser    | Minimum Release | For `chinese`, `dangi`, `islamic-umalqura`\*\* |
+| :--------- | --------------: | ---------------------------------------------: |
+| Chrome     | 80\* (Feb 2020) |                                  80 (Feb 2020) |
+| Firefox    | 74\* (Mar 2020) |                                  76 (May 2020) |
+| Safari     |   14 (Sep 2020) |                                14.1 (Apr 2021) |
+| Safari iOS |   14 (Sep 2020) |                                14.5 (Apr 2021) |
+| Edge       | 80\* (Feb 2020) |                                  80 (Feb 2020) |
 
 Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023). [CI](../.github/workflows/ci.yml) runs the full test suite against Node 16, 18, 20, 22, 24, and 26.
 
-\* Quirks with these calendars:
+\* The published code uses ES2020 syntax. Transpile it to an older target to support older releases: Chrome 71 (Dec 2018), Firefox 68 (Jul 2019), and Edge 79 (Jan 2020).
 
-- `islamic-umalqura`: On Android, Chrome's `Intl.DateTimeFormat` API formats some dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
+\*\* Quirks with these calendars:
+
 - `chinese`, `dangi`: Dates come from the environment's `Intl.DateTimeFormat`, so results can differ from native `Temporal`, which may use different calendar data. Differences are rare for modern dates (usually one day, around the start of a month) and more common for dates far from the present.
+- `islamic-umalqura`: On Android, Chrome's `Intl.DateTimeFormat` API formats some dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
 
 ### CommonJS & Test Runners
 
