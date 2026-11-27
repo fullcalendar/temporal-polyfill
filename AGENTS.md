@@ -81,6 +81,8 @@ runner picks which files apply from the current lane — see the
 - `shim-node-lte*.txt` / `shim-node-gte*.txt` — host-Intl and other environment
   quirks tied to a Node version range. Do not add general failures here unless
   the failure really is specific to that range.
+- `shim-tz-gte*.txt` — quirks tied to the host's time zone data version
+  (`process.versions.tz`), which Node can change in a patch release.
 - `native.txt` — used instead of the shim lists when Node has native Temporal
   (>=26), where the runner tests the native-precedence artifact.
 - `calendar*.txt`, `shim-builtin-calls.txt`, `minified-function-length.txt` —

@@ -597,14 +597,12 @@ export const subtractMonths: (
   addMonths(record, -units, options)
 export const subtractWeeks: (
   record: ShimPlainDateRecord,
-  units: number,
-  options?: TemporalSpec.OverflowOptions,
-) => ShimPlainDateRecord = (record, units) => addWeeks(record, -units)
+  weeks: number,
+) => ShimPlainDateRecord = (record, weeks) => addWeeks(record, -weeks)
 export const subtractDays: (
   record: ShimPlainDateRecord,
-  units: number,
-  options?: TemporalSpec.OverflowOptions,
-) => ShimPlainDateRecord = (record, units) => addDays(record, -units)
+  days: number,
+) => ShimPlainDateRecord = (record, days) => addDays(record, -days)
 
 // Non-standard: Round
 // -----------------------------------------------------------------------------

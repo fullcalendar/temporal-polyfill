@@ -8,6 +8,19 @@ don't work in GH release markdown. must be absolute
 
 # `temporal-polyfill` Changelog
 
+## v1.0.9
+
+### 🐛 Bugfixes
+
+- FIX: The shim rounds `Duration#total` and fractional `diff*` results to the nearest representable number, including calendar units with `relativeTo`. For example, totaling 2522 nanoseconds in microseconds now returns `2.522` instead of `2.5220000000000002`. Day totals and `diffDays` also return the whole day count when a skipped local date collapses the interval (#134). Thx @bardrop
+- FIX: Named time zone lookups pass IANA-cased identifiers instead of upper-casing them, fixing `RangeError` on React Native's Hermes (iOS) for zones like `US/Mountain` and `Etc/UTC` (#133). Thx @rpinna
+- FIX: Clearer errors for mismatched calendars and time zones, which now name both sides, e.g. `PlainYearMonth.from('2024-11').toLocaleString('en')` throws `Mismatching calendars: iso8601 and gregory` instead of `Mismatching Calendars`, and `until`/`since` across time zones throws `Mismatching time zones: UTC and Asia/Tokyo` (#52, #137). Thx @kgram, @gasparoff
+- FIX: The `persian` calendar applies the same 78 leap-year corrections as native `Temporal` (and as `Intl.DateTimeFormat` with ICU 77+), from 1502 to 2987 AP (2123 to 3609 CE). Before, each corrected year was a leap year and the year after it started a day late, e.g. 1503 AP now starts on 2124-03-20 instead of 2124-03-21. The corrections add 94 bytes min+gzip to the full global bundle (+0.4%), and nothing to the basic one (#127, #131). Thx @craig-o-curtis
+
+### 📝 Documentation
+
+- The [minimum browser versions](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md#supported-environments) now match the published code, which has used ES2020 syntax since v1.0.1: Chrome 80, Firefox 74, and Edge 80. Transpiling to an older target supports Chrome 71, Firefox 68, and Edge 79 (#135). Thx @arthurschreiber
+
 ## v1.0.8
 
 ### 🐛 Bugfixes

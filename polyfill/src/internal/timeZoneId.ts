@@ -74,8 +74,9 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
     }
   }
 
-  const upperNormId = normId.toUpperCase()
-  const format = createTimeZoneIntlFormat(upperNormId)
+  // Pass IANA casing rather than upper-casing; Hermes on iOS rejects
+  // upper-cased link IDs like "US/MOUNTAIN" while accepting "US/Mountain".
+  const format = createTimeZoneIntlFormat(normId)
   return {
     kind: 'named',
     id: normId,
@@ -85,13 +86,13 @@ const queryNamedTimeZoneRecord = memoize((normId: string): ResolvedTimeZone => {
 })
 
 /**
- * @param upperNormId Expects normalized + uppercase
+ * @param normId Expects case-normalized IANA identifier
  */
-function createTimeZoneIntlFormat(upperNormId: string): Intl.DateTimeFormat {
+function createTimeZoneIntlFormat(normId: string): Intl.DateTimeFormat {
   // Offset math needs midnight as 00:00, not h24's 24:00.
   return new RawDateTimeFormat('en-u-hc-h23', {
     calendar: isoCalendarId,
-    timeZone: upperNormId,
+    timeZone: normId,
     era: 'short',
     year: 'numeric',
     month: 'numeric',

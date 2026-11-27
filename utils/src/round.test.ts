@@ -1,6 +1,8 @@
 import { Temporal } from '@js-temporal/polyfill'
 import { describe, expect, it } from 'vitest'
 import {
+  type RoundingMathOptions,
+  type RoundingMode,
   roundToDay,
   roundToHour,
   roundToMicrosecond,
@@ -11,6 +13,23 @@ import {
   roundToWeek,
   roundToYear,
 } from '.'
+
+describe('round type preservation', () => {
+  it('preserves specific receiver types and accepts union options', () => {
+    const options: RoundingMode | RoundingMathOptions = 'ceil'
+    const instant = Temporal.Instant.from('2024-07-27T12:30:00Z')
+    const roundedInstant: Temporal.Instant = roundToHour(instant, options)
+    expect(roundedInstant.epochNanoseconds).toBe(
+      Temporal.Instant.from('2024-07-27T13:00:00Z').epochNanoseconds,
+    )
+
+    const pdt = Temporal.PlainDateTime.from('2024-07-27T12:30:00')
+    const roundedDay: Temporal.PlainDateTime = roundToDay(pdt, options)
+    expect(roundedDay.equals(Temporal.PlainDateTime.from('2024-07-28'))).toBe(
+      true,
+    )
+  })
+})
 
 describe('roundToYear', () => {
   describe('ZonedDateTime', () => {

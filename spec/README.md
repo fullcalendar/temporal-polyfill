@@ -1,11 +1,8 @@
 # temporal-spec
 
-TypeScript type definitions for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the successor to the JavaScript `Date` object.
+Standalone TypeScript type definitions for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal) 📐
 
-This package ships **only** type declarations — no runtime code. It describes the
-shape of the Temporal API (plus the Temporal-related additions to `Intl` and
-`Date`) so that any Temporal implementation, polyfill, or application can share a
-single, accurate set of types.
+This package ships only `.d.ts` declarations, with no runtime code. It covers the `Temporal` API along with the Temporal-related additions to `Intl` and `Date`.
 
 
 ## Table of Contents
@@ -23,15 +20,9 @@ single, accurate set of types.
 
 ## Why This Exists
 
-Temporal is a Stage 4 TC39 proposal that, until recently, no version of
-TypeScript shipped types for. Implementations each had to carry their own copy of
-the declarations, and they tended to drift apart.
+Before 6.0, TypeScript shipped no Temporal types, so every implementation carried its own copy, and the copies drifted apart.
 
-`temporal-spec` centralizes those declarations into a standalone, dependency-free
-package. It's the type layer behind
-[`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md),
-and it's published separately so other Temporal implementations can reuse the
-exact same types.
+`temporal-spec` packages those declarations in a standalone, dependency-free module. It provides the types for [`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md) and is published separately so other implementations and apps can reuse the same definitions.
 
 
 ## Installation
@@ -40,20 +31,16 @@ exact same types.
 npm install temporal-spec
 ```
 
-Because it contains nothing but `.d.ts` files, it's a `devDependency` for most
-consumers.
+Because it contains only `.d.ts` files, most consumers can install it as a `devDependency`.
 
 
 ## Entry Points
 
-There are two ways to pull in the types, depending on whether you want `Temporal`
-to be a global.
+There are two entry points, depending on whether you want `Temporal` declared globally.
 
 ### Namespaced (no global pollution)
 
-Import the `Temporal` (and `Intl`) namespaces explicitly. This has **no side
-effects** — it does not touch the global TypeScript scope, so it's the right
-choice for libraries:
+Import the `Temporal` (and `Intl`) namespaces explicitly. This has no side effects and does not modify the global TypeScript scope, making it suitable for libraries:
 
 ```ts
 import type { Temporal } from 'temporal-spec'
@@ -65,9 +52,7 @@ function format(zdt: Temporal.ZonedDateTime): string {
 
 ### Global
 
-Import for its side effects to augment the global scope, making `Temporal`
-available everywhere without an explicit import (mirrors how the real API will
-behave once shipped):
+Import for side effects to augment the global scope so `Temporal` is available everywhere without explicit imports, matching the runtime global API:
 
 ```ts
 import 'temporal-spec/global'
@@ -80,23 +65,16 @@ function format(zdt: Temporal.ZonedDateTime): string {
 
 ## What's Included
 
-Both entry points cover the full surface of the proposal:
+Both entry points cover the full Temporal surface:
 
-- The **`Temporal`** namespace — `Instant`, `ZonedDateTime`, `PlainDate`,
-  `PlainTime`, `PlainDateTime`, `PlainYearMonth`, `PlainMonthDay`, `Duration`,
-  `Now`, and all of their supporting `*Like` / options types.
-- **`Intl.DateTimeFormat`** augmentations, so `format`, `formatToParts`,
-  `formatRange`, and `formatRangeToParts` accept Temporal objects.
-- **`Date.prototype.toTemporalInstant`** (exposed as a standalone
-  `toTemporalInstant` function from the namespaced entry point), for bridging
-  legacy `Date` values into Temporal.
+- The `Temporal` namespace (`Instant`, `ZonedDateTime`, `PlainDate`, `PlainTime`, `PlainDateTime`, `PlainYearMonth`, `PlainMonthDay`, `Duration`, `Now`, and all supporting `*Like` and options types).
+- `Intl.DateTimeFormat` augmentations so `format`, `formatToParts`, `formatRange`, and `formatRangeToParts` accept Temporal objects.
+- `Date.prototype.toTemporalInstant` (plus a standalone `toTemporalInstant` function type declaration in the namespaced `.d.ts` entry point; there is no runtime export).
 
 
 ## TypeScript Version Notes
 
-TypeScript **6.0+** bundles Temporal types in its built-in `lib` files
-(`esnext.temporal`), so if you're on a recent TypeScript and only need the
-global types, you may not need this package at all — just enable the lib:
+TypeScript 6.0+ includes Temporal types in its built-in `lib` files (`esnext.temporal`). If you are on TypeScript 6.0+ and only need the global types, enable the built-in lib instead:
 
 ```diff
 {
@@ -106,7 +84,7 @@ global types, you may not need this package at all — just enable the lib:
 }
 ```
 
-Or with more granularity:
+Or enable the individual libs:
 
 ```diff
 {
@@ -116,29 +94,20 @@ Or with more granularity:
 }
 ```
 
-`temporal-spec` remains useful when you:
+`temporal-spec` is still useful when you:
 
-- are on **TypeScript < 6.0**, which has no built-in Temporal types
-- want the **namespaced** (non-global) form, which `lib` does not provide
-- are authoring a polyfill and want types decoupled from the consumer's
-  TypeScript version
+- use TypeScript < 6.0, which has no built-in Temporal types
+- want the namespaced (non-global) form, which `lib` does not provide
+- author a polyfill and want types decoupled from the consumer's TypeScript version
 
 
 ## For Polyfill Authors
 
-If you're building your own Temporal implementation, `temporal-spec` lets you
-type-check your output against the same declarations everyone else uses, instead
-of vendoring a copy that slowly drifts from the spec. Depend on it, point your
-public types at the `Temporal` namespace, and stay in sync as the proposal
-evolves.
+If you are building a Temporal implementation, you can depend on `temporal-spec` and type-check your public API against its `Temporal` namespace instead of maintaining a separate copy of the declarations.
 
 
 ## Provenance & License
 
-These declarations are derived from the TypeScript project's `lib` files
-([`esnext.temporal.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.temporal.d.ts),
-[`esnext.intl.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.intl.d.ts),
-and [`esnext.date.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/esnext.date.d.ts)),
-which are Copyright (c) Microsoft Corporation.
+These declarations are derived from the TypeScript project's `lib` files ([`esnext.temporal.d.ts`](https://github.com/microsoft/TypeScript/blob/v6.0.3/src/lib/esnext.temporal.d.ts), [`esnext.intl.d.ts`](https://github.com/microsoft/TypeScript/blob/v6.0.3/src/lib/esnext.intl.d.ts), and [`esnext.date.d.ts`](https://github.com/microsoft/TypeScript/blob/v6.0.3/src/lib/esnext.date.d.ts)), which are Copyright (c) Microsoft Corporation.
 
 Licensed under the [Apache License, Version 2.0](https://github.com/fullcalendar/temporal-polyfill/blob/main/spec/LICENSE).

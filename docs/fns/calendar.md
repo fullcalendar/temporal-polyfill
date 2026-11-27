@@ -21,7 +21,7 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
   - [`getExotic`](#getexotic)
   - [`getAny`](#getany)
 - [Basic Calendars](#basic-calendars)
-  - [`getISO`](#getISO)
+  - [`getISO`](#getiso)
   - [`getGregory`](#getgregory)
 - [Exotic Calendars](#exotic-calendars)
   - [`getBuddhist`](#getbuddhist)
@@ -98,10 +98,12 @@ const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 const parsed = Temporal.PlainDate.from('2026-06-01[u-ca=gregory]')
 ```
 
-`getBasic` accepts only `iso8601` and `gregory`. When it is passed as a
-resolver, the real Temporal parser owns the calendar annotation directly, as the
-example above shows. Note that the bare string form has no equivalent of
-`getBasic`'s up-front check that the calendar is one of the two basic IDs.
+`getBasic` resolves `iso8601` and `gregory`. Unsupported calendar IDs still
+return a handle and throw lazily when passed into a date operation. When
+`getBasic` is passed as a resolver to `fromString`, the real Temporal parser
+owns the calendar annotation directly, as the example above shows. Note that
+standard Temporal supports all built-in calendars rather than restricting to the
+two basic IDs.
 
 ### `getExotic`
 
@@ -132,11 +134,10 @@ const calendar = calendarId
 const date = new Temporal.PlainDate(2026, 6, 1, calendar)
 ```
 
-`getExotic` validates that `name` is one of the tree-shakeable API's
-supported Intl-backed calendars. It is the aggregator behind the [exotic
-calendars](#exotic-calendars) — each individual getter takes no arguments
-and returns the same memoized record as `getExotic` pinned to a fixed
-calendar ID.
+`getExotic` resolves the tree-shakeable API's supported Intl-backed calendars.
+It is the aggregator behind the [exotic calendars](#exotic-calendars) — each
+individual getter takes no arguments and returns the same memoized record as
+`getExotic` pinned to a fixed calendar ID.
 
 Because `getExotic` is reached with a runtime `name`, a bundler cannot
 tell which calendar you will ask for, so it must keep the implementations of
@@ -146,10 +147,9 @@ reference. Prefer an individual getter when the calendar is known at the call
 site, and reserve `getExotic(name)` for when the ID is only known
 dynamically.
 
-The bare string form preserves the calendar choice, but not that eager
-validation: `getExotic(name)` throws immediately if `name` is
-unsupported, whereas a bare string is not checked until Temporal actually uses
-it to build or parse a value.
+Unsupported calendar IDs still return a memoized handle and throw lazily when
+used in a date operation, matching how bare calendar ID strings are validated
+when Temporal constructs or parses a value.
 
 ### `getAny`
 
@@ -183,9 +183,8 @@ IDs, and otherwise falls through to `getExotic`. Because it can route to
 any exotic calendar at runtime, it carries the same bundle cost as
 `getExotic` — every supported calendar is retained. Prefer
 `getBasic` or an individual exotic getter when the ID is known, and
-reserve `getAny` for fully dynamic IDs. The bare string form keeps the
-calendar selection but drops the tree-shakeable API's memoized handle and
-Intl-calendar validation.
+reserve `getAny` for fully dynamic IDs. Unsupported IDs return a handle and
+throw lazily when used in a date operation.
 
 ## Basic Calendars
 

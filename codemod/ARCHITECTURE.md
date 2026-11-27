@@ -15,7 +15,7 @@ helpers, and cases where a syntactic rewrite would be unsafe.
 
 `src/fns-api-coverage.ts` is the explicit coverage matrix for the documented
 runtime fns API. Each helper in `docs/fns/*.md`
-except `index.md` and `types.md` must be classified there.
+except `index.md`, `for-component-authors.md`, and `types.md` must be classified there.
 
 Statuses:
 
@@ -33,7 +33,7 @@ helper that is no longer documented.
 
 - Package directory: `codemod`
 - Package name: `temporal-polyfill-codemod`
-- Initial package visibility: private
+- Package visibility: public
 - Transform name: `fns-to-temporal`
 - CLI shape:
 
@@ -414,16 +414,3 @@ behavior:
 
 Every unsafe case that emits a diagnostic should have a fixture proving that the
 source stays unchanged and the diagnostic is reported.
-
-## Initial Rollout
-
-Start with package scaffolding, CLI/reporting, import tracking, and a narrow
-fixture-backed transform slice:
-
-1. Type-only rewrites from `types.md`.
-2. Shared import tracking and fns import cleanup.
-3. `PlainDate` runtime mappings.
-4. Calendar record rewrites needed by the first `PlainDate` mappings.
-
-After that, expand helper-by-helper using the per-type fns docs as the mapping
-source.

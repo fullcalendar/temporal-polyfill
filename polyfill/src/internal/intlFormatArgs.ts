@@ -5,9 +5,10 @@ import {
 } from './calendarImpl'
 import * as errorMessages from './errorMessages'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
+import { checkCalendarIdsMatch } from './slotUtils'
 import { ZonedEpochNanoFields } from './slots'
 import { utcTimeZoneId } from './timeZoneConfig'
-import { throwRangeError, throwTypeError } from './utils'
+import { throwTypeError } from './utils'
 
 type CalendarFormatSlots<S> = S & { calendar: CalendarImpl }
 
@@ -54,12 +55,13 @@ export function checkResolvedCalendarCompatible(
   slots: { calendar: CalendarImpl },
   strictCalendarCheck?: boolean,
 ): void {
-  const resolvedCalendarId = format.resolvedOptions().calendar
-
-  if (
-    (strictCalendarCheck || slots.calendar !== isoCalendarImpl) &&
-    getCalendarSlotId(slots.calendar) !== resolvedCalendarId
-  ) {
-    throwRangeError(errorMessages.mismatchingCalendars)
+  // ISO values format in any locale calendar unless the type is strict
+  // (PlainYearMonth/PlainMonthDay), so only then is resolvedOptions() needed.
+  // The object's calendar is named first and the locale's second.
+  if (strictCalendarCheck || slots.calendar !== isoCalendarImpl) {
+    checkCalendarIdsMatch(
+      getCalendarSlotId(slots.calendar),
+      format.resolvedOptions().calendar,
+    )
   }
 }

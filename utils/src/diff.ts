@@ -15,9 +15,7 @@ type DiffFunc<
     | Temporal.PlainDateTime
     | Temporal.ZonedDateTime,
 > = {
-  (date0: T, date1: T): number
-  (date0: T, date1: T, roundingMode: RoundingMode): number
-  (date0: T, date1: T, options: RoundingMathOptions): number
+  (date0: T, date1: T, options?: RoundingMode | RoundingMathOptions): number
 }
 
 function createDiffFunc(unit: PluralOnlyUnit): DiffFunc {

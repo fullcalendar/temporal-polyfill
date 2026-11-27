@@ -1,10 +1,8 @@
 # temporal-utils
 
-Small, application-level helpers for working with native [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal) objects
+Small helpers for working with standard [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal) objects 🛠️
 
-Most helpers preserve the input type. For example, passing a
-`Temporal.PlainDateTime` to `startOfMonth` returns a `Temporal.PlainDateTime`,
-while passing a `Temporal.ZonedDateTime` returns a `Temporal.ZonedDateTime`.
+Most helpers preserve the input type. Passing a `Temporal.PlainDateTime` to `startOfMonth` returns a `Temporal.PlainDateTime`; passing a `Temporal.ZonedDateTime` returns a `Temporal.ZonedDateTime`.
 
 ## Installation
 
@@ -12,14 +10,11 @@ while passing a `Temporal.ZonedDateTime` returns a `Temporal.ZonedDateTime`.
 npm install temporal-utils
 ```
 
-`temporal-utils` does not ship a Temporal implementation of its own — a global
-`Temporal` must already exist at runtime. See [Requirements](#requirements).
+Does not bundle a Temporal implementation. See [Requirements](#requirements).
 
 ## Usage
 
-Import the helpers you need from the package root and call them on native
-Temporal objects. Each helper accepts a range of Temporal types and gives you
-back the same type you passed in:
+Import helpers from the package root and pass any supported `Temporal` instance:
 
 ```ts
 import { startOfMonth, diffDays } from 'temporal-utils'
@@ -43,16 +38,12 @@ diffDays(
 
 ## Requirements
 
-`temporal-utils` operates on native `Temporal` objects but does **not** include
-a Temporal implementation of its own. A global `Temporal` must already exist at
-runtime — note that every example below references `Temporal.*` directly to
-build its inputs. Ensure one is present in one of two ways:
+`temporal-utils` does not bundle a Temporal implementation. It operates on any standard `Temporal` instances you pass in — whether from native `Temporal`, a global polyfill, or a local ponyfill import such as `import { Temporal } from 'temporal-polyfill'`.
 
-- **Native `Temporal`** — available in newer browsers and runtimes, but support
-  is still rolling out and remains incomplete.
-- **A polyfill** — recommended for now. We suggest
-  [`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md), which installs a global
-  `Temporal`:
+The examples in this README assume a global `Temporal`, provided either by:
+
+- **Native `Temporal`** in browsers and runtimes that ship it.
+- **A global polyfill**, such as [`temporal-polyfill`](https://github.com/fullcalendar/temporal-polyfill/blob/main/polyfill/README.md):
 
   ```ts
   import 'temporal-polyfill/global'
@@ -218,7 +209,9 @@ withWeekOfYear(date.withCalendar('hebrew'), 27)
 ## Difference Helpers
 
 Single-unit difference helpers return a number for `date0.until(date1)`. The
-helpers are directional: reversing the arguments reverses the sign.
+helpers are directional: reversing the arguments flips the sign (for variable-length
+calendar units such as months or years, the magnitude can also differ slightly
+depending on which endpoint anchors the calculation).
 
 If no options are supplied, the result is the exact total in the requested unit.
 Pass a `RoundingMode` string or a `RoundingMathOptions` object to request Temporal
@@ -401,9 +394,7 @@ Returns the difference in nanoseconds. Supported input types are
 
 ## Rounding Helpers
 
-Calendar rounding helpers return the closest start of the named unit. They are
-useful because Temporal's native `.round()` APIs cover day and smaller units,
-but not every larger calendar unit in a uniform way across date-like types.
+Calendar rounding helpers return the closest start of the named unit. Temporal's built-in `.round()` stops at days (and `PlainDate` / `PlainYearMonth` have no `.round()`), so these helpers cover year, month, and week boundaries.
 
 If `options` or `options.roundingMode` is omitted, `roundingMode` defaults to
 `'halfExpand'`. Pass a `RoundingMode` string as shorthand for
@@ -412,16 +403,6 @@ If `options` or `options.roundingMode` is omitted, `roundingMode` defaults to
 `RoundingMathOptions` must not include `smallestUnit`; the helper name supplies
 the unit. For the year, month, and week helpers, `roundingIncrement` must be
 omitted or `1`.
-
-⚠️ The day and smaller `roundTo*` helpers are exported as codemod targets, not
-as recommended hand-written API. In application code, prefer native Temporal
-`.round()` directly:
-
-```ts
-dateTime.round({ smallestUnit: 'day' })
-time.round({ smallestUnit: 'minute', roundingMode: 'ceil' })
-instant.round({ smallestUnit: 'second' })
-```
 
 ```ts
 import { roundToMonth, roundToWeek, roundToYear } from 'temporal-utils'
@@ -436,6 +417,16 @@ roundToMonth(dateTime, 'floor').toString()
 
 roundToWeek(dateTime, { roundingMode: 'floor' }).toString()
 // '2024-07-15T00:00:00'
+```
+
+⚠️ The day and smaller `roundTo*` helpers are exported as codemod targets rather
+than recommended hand-written API. In application code, prefer Temporal's built-in
+`.round()` directly:
+
+```ts
+dateTime.round({ smallestUnit: 'day' })
+time.round({ smallestUnit: 'minute', roundingMode: 'ceil' })
+instant.round({ smallestUnit: 'second' })
 ```
 
 ### `roundToYear`
@@ -609,7 +600,7 @@ function startOfYear<
 ```
 
 Returns the start of the current year. For `Temporal.PlainYearMonth`, this is
-January of the same year.
+the first month of the same year.
 
 ### `startOfMonth`
 
@@ -645,7 +636,8 @@ function startOfDay<T extends Temporal.PlainDateTime | Temporal.ZonedDateTime>(
 ): T
 ```
 
-Returns midnight at the start of the current day.
+Returns the start of the current day (`00:00`, or the first valid instant of the
+day if midnight is skipped by a time-zone transition).
 
 ### `startOfHour`
 
@@ -712,7 +704,7 @@ Returns the start of the current microsecond.
 End helpers return the last representable value before the next unit begins.
 For date-time and zoned date-time values, this means one nanosecond before the
 exclusive end. For date-only values, it means one day before the exclusive end.
-For `Temporal.PlainYearMonth`, `endOfYear` returns December of the same year.
+For `Temporal.PlainYearMonth`, `endOfYear` returns the last month of the same year.
 
 ```ts
 import { endOfDay, endOfMonth } from 'temporal-utils'

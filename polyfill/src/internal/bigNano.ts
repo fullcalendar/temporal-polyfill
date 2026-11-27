@@ -22,21 +22,16 @@ export const bigNanoInMinute = BigInt(nanoInMinute)
 export const bigNanoInHour = BigInt(nanoInHour)
 export const bigNanoInUtcDay = BigInt(nanoInUtcDay)
 
-export function divideBigNanoToExactNumber(
-  bigNano: bigint,
-  divisorNano: number,
+/*
+Round n/d to the nearest Number. A unit length or span between Temporal epochs
+has |d| < 2^74, so a nonzero ratio has magnitude above 2^-74. At that scale
+binary64 midpoints are multiples of 2^-127. A non-tie misses a midpoint by
+at least 2^-127 / |d| > 2^-201. Keeping 256 fractional bits preserves exact
+ties and the side each non-tie falls on. Number rounds to nearest-even and rescaling is exact.
+*/
+export function divideNanoToNumber(
+  numerator: bigint,
+  denominator: bigint,
 ): number {
-  const days = Number(bigNano / bigNanoInUtcDay)
-  const timeNano = Number(bigNano % bigNanoInUtcDay)
-  const whole = Math.trunc(timeNano / divisorNano)
-  const remainderNano = timeNano % divisorNano
-  const wholeInDay = nanoInUtcDay / divisorNano
-
-  // This is not calendar-day math. `nanoInUtcDay` is a convenient chunk size
-  // because it is exactly divisible by all built-in time-unit nanosecond
-  // divisors, while the within-day piece stays safely representable as Number.
-  // Combining `whole + fraction` before adding the large day contribution avoids
-  // prematurely rounding a huge bigint quotient and losing the fractional part's
-  // ability to affect the final float64 rounding.
-  return days * wholeInDay + (whole + remainderNano / divisorNano)
+  return Number((numerator << 256n) / denominator) / 2 ** 256
 }

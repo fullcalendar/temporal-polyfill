@@ -197,21 +197,27 @@ Compliance with the latest version of the Temporal spec is near-perfect [with ju
 ## Supported Environments
 
 <!--
+eslint.dist.config.js enforces these minimums on the build. Update it when the table changes.
 https://caniuse.com/bigint
+https://caniuse.com/mdn-javascript_operators_optional_chaining
+https://caniuse.com/mdn-javascript_operators_nullish_coalescing
+https://caniuse.com/mdn-javascript_builtins_globalthis
 https://caniuse.com/mdn-javascript_builtins_intl_datetimeformat_datetimeformat_options_parameter_options_calendar_parameter
 -->
 
-| Browser    | Minimum Release | For `islamic-umalqura`\* |
-| :--------- | --------------: | -----------------------: |
-| Chrome     |   67 (May 2018) |            80 (Feb 2020) |
-| Firefox    |   68 (Jul 2019) |            76 (May 2020) |
-| Safari     |   14 (Sep 2020) |          14.1 (Apr 2021) |
-| Safari iOS |   14 (Sep 2020) |          14.5 (Apr 2021) |
-| Edge       |   79 (Jan 2020) |            80 (Feb 2020) |
+| Browser    | Minimum Release | For `islamic-umalqura`\*\* |
+| :--------- | --------------: | -------------------------: |
+| Chrome     | 80\* (Feb 2020) |              80 (Feb 2020) |
+| Firefox    | 74\* (Mar 2020) |              76 (May 2020) |
+| Safari     |   14 (Sep 2020) |            14.1 (Apr 2021) |
+| Safari iOS |   14 (Sep 2020) |            14.5 (Apr 2021) |
+| Edge       | 80\* (Feb 2020) |              80 (Feb 2020) |
 
 Node.js is supported down to version 16 (Released Apr 2021, EOL since Sep 2023). [CI](../.github/workflows/ci.yml) runs the full test suite against Node 16, 18, 20, 22, 24, and 26.
 
-\* On Android, Chrome's `Intl.DateTimeFormat` API formats some `islamic-umalqura` dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
+\* The published code uses ES2020 syntax. Transpile it to an older target to support older releases: Chrome 71 (Dec 2018), Firefox 68 (Jul 2019), and Edge 79 (Jan 2020).
+
+\*\* On Android, Chrome's `Intl.DateTimeFormat` API formats some `islamic-umalqura` dates incorrectly ([Chromium issue](https://issues.chromium.org/issues/40856332)), but the `Temporal` API itself is unaffected. Patching `Intl.DateTimeFormat` is out of scope for this polyfill.
 
 ### CommonJS & Test Runners
 
@@ -220,6 +226,10 @@ Test runners that use their own module loader need extra support:
 
 - **Vitest:** the default `forks` pool works. The `vmForks`/`vmThreads` pools need Vitest 5+ and Node 24.9+ ([docs](https://vitest.dev/config/pool)).
 - **Jest:** needs Jest 30.4+, Node 24.9+, and `--experimental-vm-modules` ([docs](https://jestjs.io/docs/ecmascript-modules)). Otherwise, use [`transformIgnorePatterns`](https://jestjs.io/docs/configuration#transformignorepatterns-arraystring).
+
+### React Native (Hermes)
+
+On affected Hermes versions for iOS and Android, `Intl.DateTimeFormat` does not resolve time zone aliases to their primary IANA identifier ([Hermes issue #2323](https://github.com/meta/hermes/issues/2323)). As a result, comparing a zone with its alias (such as `US/Mountain` and `America/Denver`) fails in operations like `ZonedDateTime#equals()` and `until()`/`since()` when `largestUnit` is `'day'` or larger. Use primary identifiers consistently to avoid this.
 
 ## Comparison with `@js-temporal/polyfill`
 
@@ -278,11 +288,13 @@ Test runners that use their own module loader need extra support:
 </table>
 
 
+<a id="tree-shakeable-api"></a>
+
 ## Tree-shakeable API 🌳
 
-For anyone hyper-concerned about bundle size, `temporal-polyfill` also ships an
-alternate function API designed for tree-shaking. Instead of large `Temporal.*`
-classes, every operation is a standalone function that acts on a plain record,
+For library authors and anyone watching bundle size closely, `temporal-polyfill` also ships an
+alternate function API designed for tree-shaking. Instead of `Temporal.*`
+classes that carry every method, every operation is a standalone function that acts on a plain record,
 so a bundler keeps only the functions you actually import.
 
 ```js
@@ -294,19 +306,18 @@ const later = PlainDateFns.addMonths(date, 2)
 PlainDateFns.toString(later) // '2026-08-01'
 ```
 
-🤝 **Building a component library?** The function API is built to be a shared,
-deletable peer dependency for third-party tools like date pickers and
+🧩 **Building a component library?** The function API is designed as a shared,
+removable peer dependency for third-party tools like date pickers and
 schedulers. See [For component authors](../docs/fns/for-component-authors.md).
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*` — for
 example `temporal-polyfill/fns/PlainDate` or `temporal-polyfill/fns/ZonedDateTime`.
 
-Best of all, this isn't a one-way door. When the time is right — once native
-`Temporal` is available in every environment you target, and you no longer need
-the polyfill — [temporal-polyfill-codemod](../codemod/README.md)
-rewrites your function calls back into idiomatic `Temporal.*` expressions.
-So `PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`,
-with no manual find-and-replace.
+When native `Temporal` is available in every environment you target and you no
+longer need the polyfill, [temporal-polyfill-codemod](../codemod/README.md)
+rewrites your function calls back into standard `Temporal.*` expressions — so
+`PlainDateFns.addMonths(date, 2)` becomes `date.add({ months: 2 })`, with no
+manual find-and-replace.
 
 📖 [**Read the full Tree-shakeable API docs →**](../docs/fns/index.md)
 

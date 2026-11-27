@@ -40,10 +40,10 @@ The mappings below are based on `temporal-spec/global.d.ts`.
   - [`ToStringOptions`](#instant-tostringoptions)
 - [ZonedDateTime](#zoneddatetime)
   - [`Record`](#zoneddatetime-record)
-  - [`Format`](#zoneddatetime-format)
   - [`FromFields`](#zoneddatetime-fromfields)
   - [`FromOptions`](#zoneddatetime-fromoptions)
   - [`WithFields`](#zoneddatetime-withfields)
+  - [`WithOptions`](#zoneddatetime-withoptions)
   - [`DiffOptions`](#zoneddatetime-diffoptions)
   - [`ToStringOptions`](#zoneddatetime-tostringoptions)
   - [`TransitionOptions`](#transitionoptions)
@@ -145,6 +145,8 @@ single-unit rounding and diff utilities outside the tree-shakeable API.
 
 ## Calendar
 
+<a id="calendar-record"></a>
+
 ### `Record`
 
 Import path:
@@ -165,6 +167,8 @@ a wider annotation type.
 
 ## Instant
 
+<a id="instant-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -172,6 +176,8 @@ Temporal API type:
 ```ts
 Temporal.Instant
 ```
+
+<a id="instant-format"></a>
 
 ### `Format`
 
@@ -184,6 +190,8 @@ Intl.DateTimeFormat
 `global.d.ts` extends `Intl.DateTimeFormat` methods to accept formattable
 Temporal objects.
 
+<a id="instant-diffoptions"></a>
+
 ### `DiffOptions`
 
 Temporal API type:
@@ -193,6 +201,8 @@ Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
 ```
 
 Used by `Temporal.Instant.prototype.until` and `since`.
+
+<a id="instant-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -207,6 +217,8 @@ The tree-shakeable API type accepts a string-only `timeZone`; the Temporal API a
 
 ## ZonedDateTime
 
+<a id="zoneddatetime-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -215,13 +227,7 @@ Temporal API type:
 Temporal.ZonedDateTime
 ```
 
-### `Format`
-
-Temporal API type:
-
-```ts
-Intl.DateTimeFormat
-```
+<a id="zoneddatetime-fromfields"></a>
 
 ### `FromFields`
 
@@ -234,6 +240,8 @@ Temporal.ZonedDateTimeLikeObject
 Tree-shakeable API `calendar` is a `CalendarFns.Record`; Temporal `calendar` is a
 string.
 
+<a id="zoneddatetime-fromoptions"></a>
+
 ### `FromOptions`
 
 Temporal API type:
@@ -244,6 +252,8 @@ Temporal.ZonedDateTimeFromOptions
 
 Used by `Temporal.ZonedDateTime.from`.
 
+<a id="zoneddatetime-withfields"></a>
+
 ### `WithFields`
 
 Temporal API type:
@@ -253,6 +263,20 @@ Temporal.PartialTemporalLike<Temporal.ZonedDateTimeLikeObject>
 ```
 
 Used by `Temporal.ZonedDateTime.prototype.with`.
+
+<a id="zoneddatetime-withoptions"></a>
+
+### `WithOptions`
+
+Temporal API type:
+
+```ts
+Temporal.ZonedDateTimeFromOptions
+```
+
+Used by `Temporal.ZonedDateTime.prototype.with`.
+
+<a id="zoneddatetime-diffoptions"></a>
 
 ### `DiffOptions`
 
@@ -265,6 +289,8 @@ Temporal.RoundingOptionsWithLargestUnit<
 ```
 
 Used by `Temporal.ZonedDateTime.prototype.until` and `since`.
+
+<a id="zoneddatetime-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -292,6 +318,8 @@ Temporal.TransitionOptions['direction']
 
 ## PlainDateTime
 
+<a id="plaindatetime-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -299,6 +327,8 @@ Temporal API type:
 ```ts
 Temporal.PlainDateTime
 ```
+
+<a id="plaindatetime-format"></a>
 
 ### `Format`
 
@@ -308,6 +338,8 @@ Temporal API type:
 Intl.DateTimeFormat
 ```
 
+<a id="plaindatetime-fromfields"></a>
+
 ### `FromFields`
 
 Temporal API type:
@@ -316,8 +348,10 @@ Temporal API type:
 Temporal.DateTimeLikeObject
 ```
 
-Tree-shakeable API `calendar` is required and record-valued; Temporal `calendar` is
+Tree-shakeable API `calendar` is optional and record-valued; Temporal `calendar` is
 optional and string-valued in the object type.
+
+<a id="plaindatetime-withfields"></a>
 
 ### `WithFields`
 
@@ -328,6 +362,8 @@ Temporal.PartialTemporalLike<Temporal.DateTimeLikeObject>
 ```
 
 Used by `Temporal.PlainDateTime.prototype.with`.
+
+<a id="plaindatetime-diffoptions"></a>
 
 ### `DiffOptions`
 
@@ -341,6 +377,8 @@ Temporal.RoundingOptionsWithLargestUnit<
 
 Used by `Temporal.PlainDateTime.prototype.until` and `since`.
 
+<a id="plaindatetime-tostringoptions"></a>
+
 ### `ToStringOptions`
 
 Temporal API type:
@@ -351,6 +389,8 @@ Temporal.PlainDateTimeToStringOptions
 
 ## PlainDate
 
+<a id="plaindate-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -358,6 +398,8 @@ Temporal API type:
 ```ts
 Temporal.PlainDate
 ```
+
+<a id="plaindate-format"></a>
 
 ### `Format`
 
@@ -367,6 +409,8 @@ Temporal API type:
 Intl.DateTimeFormat
 ```
 
+<a id="plaindate-fromfields"></a>
+
 ### `FromFields`
 
 Temporal API type:
@@ -375,8 +419,10 @@ Temporal API type:
 Temporal.DateLikeObject
 ```
 
-Tree-shakeable API `calendar` is required and record-valued; Temporal `calendar` is
+Tree-shakeable API `calendar` is optional and record-valued; Temporal `calendar` is
 optional and string-valued in the object type.
+
+<a id="plaindate-withfields"></a>
 
 ### `WithFields`
 
@@ -387,6 +433,8 @@ Temporal.PartialTemporalLike<Temporal.DateLikeObject>
 ```
 
 Used by `Temporal.PlainDate.prototype.with`.
+
+<a id="plaindate-diffoptions"></a>
 
 ### `DiffOptions`
 
@@ -409,6 +457,8 @@ Temporal.PlainDateToZonedDateTimeOptions
 Tree-shakeable API `plainTime` is a `PlainTimeFns.Record`; Temporal `plainTime` is
 `Temporal.PlainTimeLike`.
 
+<a id="plaindate-tostringoptions"></a>
+
 ### `ToStringOptions`
 
 Temporal API type:
@@ -419,6 +469,8 @@ Temporal.PlainDateToStringOptions
 
 ## PlainTime
 
+<a id="plaintime-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -426,6 +478,8 @@ Temporal API type:
 ```ts
 Temporal.PlainTime
 ```
+
+<a id="plaintime-format"></a>
 
 ### `Format`
 
@@ -435,6 +489,8 @@ Temporal API type:
 Intl.DateTimeFormat
 ```
 
+<a id="plaintime-fromfields"></a>
+
 ### `FromFields`
 
 Temporal API type:
@@ -442,6 +498,8 @@ Temporal API type:
 ```ts
 Temporal.TimeLikeObject
 ```
+
+<a id="plaintime-withfields"></a>
 
 ### `WithFields`
 
@@ -453,6 +511,8 @@ Temporal.PartialTemporalLike<Temporal.TimeLikeObject>
 
 Used by `Temporal.PlainTime.prototype.with`.
 
+<a id="plaintime-diffoptions"></a>
+
 ### `DiffOptions`
 
 Temporal API type:
@@ -462,6 +522,8 @@ Temporal.RoundingOptionsWithLargestUnit<Temporal.TimeUnit>
 ```
 
 Used by `Temporal.PlainTime.prototype.until` and `since`.
+
+<a id="plaintime-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -473,6 +535,8 @@ Temporal.PlainTimeToStringOptions
 
 ## PlainYearMonth
 
+<a id="plainyearmonth-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -481,6 +545,8 @@ Temporal API type:
 Temporal.PlainYearMonth
 ```
 
+<a id="plainyearmonth-format"></a>
+
 ### `Format`
 
 Temporal API type:
@@ -488,6 +554,8 @@ Temporal API type:
 ```ts
 Intl.DateTimeFormat
 ```
+
+<a id="plainyearmonth-fromfields"></a>
 
 ### `FromFields`
 
@@ -499,6 +567,8 @@ Temporal.YearMonthLikeObject
 
 Tree-shakeable API `calendar` is record-valued; Temporal `calendar` is string-valued.
 
+<a id="plainyearmonth-withfields"></a>
+
 ### `WithFields`
 
 Temporal API type:
@@ -509,6 +579,8 @@ Temporal.PartialTemporalLike<Temporal.YearMonthLikeObject>
 
 Used by `Temporal.PlainYearMonth.prototype.with`.
 
+<a id="plainyearmonth-diffoptions"></a>
+
 ### `DiffOptions`
 
 Temporal API type:
@@ -518,6 +590,8 @@ Temporal.RoundingOptionsWithLargestUnit<'year' | 'month'>
 ```
 
 Used by `Temporal.PlainYearMonth.prototype.until` and `since`.
+
+<a id="plainyearmonth-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -531,6 +605,8 @@ The spec uses the same calendar-name option bag for `PlainYearMonth`.
 
 ## PlainMonthDay
 
+<a id="plainmonthday-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -539,6 +615,8 @@ Temporal API type:
 Temporal.PlainMonthDay
 ```
 
+<a id="plainmonthday-format"></a>
+
 ### `Format`
 
 Temporal API type:
@@ -546,6 +624,8 @@ Temporal API type:
 ```ts
 Intl.DateTimeFormat
 ```
+
+<a id="plainmonthday-fromfields"></a>
 
 ### `FromFields`
 
@@ -557,6 +637,8 @@ Temporal.DateLikeObject
 
 Tree-shakeable API `calendar` is record-valued; Temporal `calendar` is string-valued.
 
+<a id="plainmonthday-withfields"></a>
+
 ### `WithFields`
 
 Temporal API type:
@@ -566,6 +648,8 @@ Temporal.PartialTemporalLike<Temporal.DateLikeObject>
 ```
 
 Used by `Temporal.PlainMonthDay.prototype.with`.
+
+<a id="plainmonthday-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -579,6 +663,8 @@ The spec uses the same calendar-name option bag for `PlainMonthDay`.
 
 ## Duration
 
+<a id="duration-record"></a>
+
 ### `Record`
 
 Temporal API type:
@@ -587,6 +673,8 @@ Temporal API type:
 Temporal.Duration
 ```
 
+<a id="duration-fromfields"></a>
+
 ### `FromFields`
 
 Temporal API type:
@@ -594,6 +682,8 @@ Temporal API type:
 ```ts
 Temporal.DurationLikeObject
 ```
+
+<a id="duration-withfields"></a>
 
 ### `WithFields`
 
@@ -604,6 +694,8 @@ Temporal.PartialTemporalLike<Temporal.DurationLikeObject>
 ```
 
 Used by `Temporal.Duration.prototype.with`.
+
+<a id="duration-tostringoptions"></a>
 
 ### `ToStringOptions`
 
@@ -622,6 +714,8 @@ Temporal.PluralizeUnit<'day' | Temporal.TimeUnit>
 ```
 
 Used by `Temporal.Duration.prototype.round`.
+
+<a id="duration-roundingoptions"></a>
 
 ### `RoundingOptions`
 
@@ -642,7 +736,9 @@ Temporal API type:
 Temporal.PluralizeUnit<Temporal.DateUnit | Temporal.TimeUnit>
 ```
 
-Used by `Temporal.Duration.prototype.total`.
+Used by `Temporal.Duration.prototype.total`. This mapping widens the type: the
+tree-shakeable API's `TotalUnit` only includes `'day'` and time units, whereas
+the Temporal target also accepts `'year'`, `'month'`, and `'week'`.
 
 ### `DurationTotalOptions`
 

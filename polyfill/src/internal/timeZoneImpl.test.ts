@@ -144,7 +144,9 @@ describe('queryTimeZone', () => {
     // zone, starting epoch second, previous transition's epoch second
     ['America/New_York', 4118083200, 4108690800], // from 2100-07-01, to 2100-03-14
     ['America/New_York', 32516726400, 32509494000], // from 3000-06-01, to 3000-03-09
-    ['Africa/Casablanca', 4118083200, 3703456800], // from 2100-07-01, to 2087-05-11
+    // Brazil ended DST in 2019 after decades of yearly changes, so the search crosses
+    // a long quiet stretch to reach a recent one-off transition.
+    ['America/Sao_Paulo', 4118083200, 1550368800], // from 2100-07-01, to 2019-02-17
     ['Asia/Tokyo', 4118083200, -577962000], // from 2100-07-01, to 1951-09-08
   ] as const)(
     'finds the previous transition from far in the future in %s',

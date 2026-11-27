@@ -490,7 +490,7 @@ const nextTime = time.subtract({ nanoseconds })
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<TimeUnitName>) => DurationFns.Record
+(record: Record, otherRecord: Record, options?: DiffOptions) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -722,16 +722,16 @@ Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToHour(time)
-const nextTime = PlainTimeFns.roundToHour(time, 'ceil')
-const nextTime = PlainTimeFns.roundToHour(time, options)
+const nextTimeCeil = PlainTimeFns.roundToHour(time, 'ceil')
+const nextTimeWithOptions = PlainTimeFns.roundToHour(time, { roundingIncrement: 2 })
 ```
 
 Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'hour' })
-const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'hour' })
-const nextTime = time.round({ ...options, smallestUnit: 'hour' })
+const nextTimeCeil = time.round({ roundingMode: 'ceil', smallestUnit: 'hour' })
+const nextTimeWithOptions = time.round({ roundingIncrement: 2, smallestUnit: 'hour' })
 ```
 
 Temporal API equivalent, generic second argument:
@@ -756,16 +756,16 @@ Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMinute(time)
-const nextTime = PlainTimeFns.roundToMinute(time, 'ceil')
-const nextTime = PlainTimeFns.roundToMinute(time, options)
+const nextTimeCeil = PlainTimeFns.roundToMinute(time, 'ceil')
+const nextTimeWithOptions = PlainTimeFns.roundToMinute(time, { roundingIncrement: 2 })
 ```
 
 Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'minute' })
-const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'minute' })
-const nextTime = time.round({ ...options, smallestUnit: 'minute' })
+const nextTimeCeil = time.round({ roundingMode: 'ceil', smallestUnit: 'minute' })
+const nextTimeWithOptions = time.round({ roundingIncrement: 2, smallestUnit: 'minute' })
 ```
 
 Temporal API equivalent, generic second argument:
@@ -790,16 +790,16 @@ Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToSecond(time)
-const nextTime = PlainTimeFns.roundToSecond(time, 'ceil')
-const nextTime = PlainTimeFns.roundToSecond(time, options)
+const nextTimeCeil = PlainTimeFns.roundToSecond(time, 'ceil')
+const nextTimeWithOptions = PlainTimeFns.roundToSecond(time, { roundingIncrement: 2 })
 ```
 
 Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'second' })
-const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'second' })
-const nextTime = time.round({ ...options, smallestUnit: 'second' })
+const nextTimeCeil = time.round({ roundingMode: 'ceil', smallestUnit: 'second' })
+const nextTimeWithOptions = time.round({ roundingIncrement: 2, smallestUnit: 'second' })
 ```
 
 Temporal API equivalent, generic second argument:
@@ -824,16 +824,16 @@ Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMillisecond(time)
-const nextTime = PlainTimeFns.roundToMillisecond(time, 'ceil')
-const nextTime = PlainTimeFns.roundToMillisecond(time, options)
+const nextTimeCeil = PlainTimeFns.roundToMillisecond(time, 'ceil')
+const nextTimeWithOptions = PlainTimeFns.roundToMillisecond(time, { roundingIncrement: 2 })
 ```
 
 Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'millisecond' })
-const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'millisecond' })
-const nextTime = time.round({ ...options, smallestUnit: 'millisecond' })
+const nextTimeCeil = time.round({ roundingMode: 'ceil', smallestUnit: 'millisecond' })
+const nextTimeWithOptions = time.round({ roundingIncrement: 2, smallestUnit: 'millisecond' })
 ```
 
 Temporal API equivalent, generic second argument:
@@ -858,16 +858,16 @@ Tree-shakeable API:
 
 ```ts
 const nextTime = PlainTimeFns.roundToMicrosecond(time)
-const nextTime = PlainTimeFns.roundToMicrosecond(time, 'ceil')
-const nextTime = PlainTimeFns.roundToMicrosecond(time, options)
+const nextTimeCeil = PlainTimeFns.roundToMicrosecond(time, 'ceil')
+const nextTimeWithOptions = PlainTimeFns.roundToMicrosecond(time, { roundingIncrement: 2 })
 ```
 
 Temporal API equivalent:
 
 ```ts
 const nextTime = time.round({ smallestUnit: 'microsecond' })
-const nextTime = time.round({ roundingMode: 'ceil', smallestUnit: 'microsecond' })
-const nextTime = time.round({ ...options, smallestUnit: 'microsecond' })
+const nextTimeCeil = time.round({ roundingMode: 'ceil', smallestUnit: 'microsecond' })
+const nextTimeWithOptions = time.round({ roundingIncrement: 2, smallestUnit: 'microsecond' })
 ```
 
 Temporal API equivalent, generic second argument:
@@ -1117,7 +1117,7 @@ const nextTime = endOfMicrosecond(time)
 Signature:
 
 ```ts
-(record: Record, options?: TimeDisplayOptions) => string
+(record: Record, options?: ToStringOptions) => string
 ```
 
 Tree-shakeable API:
@@ -1181,7 +1181,7 @@ const text = time.toLocaleString(locales, options)
 Signature:
 
 ```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => Format
 ```
 
 Tree-shakeable API:

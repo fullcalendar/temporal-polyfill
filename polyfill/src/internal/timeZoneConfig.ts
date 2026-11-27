@@ -46,9 +46,10 @@ export function getTimeZonePeriodDays(timeZoneId: string): number {
 // this against native Temporal.
 export const minPossibleTransitionSec = -4e9
 
-// Transitions after this come only from recurring rules, which never stop. The one-off
-// transitions end on 2087-05-11, the last of Morocco's scheduled Ramadan changes in
-// Africa/Casablanca and Africa/El_Aaiun. Any value after that works, so this mirrors the
-// floor above and lands on 2096-10-02. timeZoneImpl.test.ts checks this against native
-// Temporal.
+// Transitions after this come only from recurring rules, which never stop. With time zone
+// data up to 2026b, the one-off transitions end on 2087-05-11, the last of Morocco's
+// scheduled Ramadan changes in Africa/Casablanca and Africa/El_Aaiun. Data from 2026c
+// drops those after 2026, so they end sooner. Any value after the latest works, so this
+// mirrors the floor above and lands on 2096-10-02. timeZoneImpl.test.ts checks this
+// against native Temporal.
 export const maxOneOffTransitionSec = 4e9

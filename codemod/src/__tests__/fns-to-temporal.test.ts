@@ -153,13 +153,13 @@ function flow(calendar: CalendarFns.Record, date: PlainDateFns.Record, birthday:
   it('rewrites createFormat to Intl.DateTimeFormat', () => {
     const source = `
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
-import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+import * as PlainDateTimeFns from 'temporal-polyfill/fns/PlainDateTime'
 
 const dateFormat = PlainDateFns.createFormat(undefined, {
   calendar: calendarId,
   dateStyle: 'full',
 })
-const zdtFormat = ZonedDateTimeFns.createFormat('en-US', options)
+const dateTimeFormat = PlainDateTimeFns.createFormat('en-US', options)
 `
 
     const result = transformSource(source, { path: 'input.ts' })
@@ -169,9 +169,116 @@ const zdtFormat = ZonedDateTimeFns.createFormat('en-US', options)
       'const dateFormat = new Intl.DateTimeFormat(undefined, {',
     )
     expect(result.code).toContain(
-      "const zdtFormat = new Intl.DateTimeFormat('en-US', options)",
+      "const dateTimeFormat = new Intl.DateTimeFormat('en-US', options)",
     )
     expect(result.code).not.toContain('createFormat')
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
+  it('warns on non-existent ZonedDateTime.createFormat and ZonedDateTime.Format', () => {
+    const source = `
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+
+type F = ZonedDateTimeFns.Format
+const zdtFormat = ZonedDateTimeFns.createFormat('en-US', options)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics.map((d) => d.message)).toContain(
+      'ZonedDateTime createFormat does not exist; use Intl.DateTimeFormat directly',
+    )
+    expect(result.diagnostics.map((d) => d.message)).toContain(
+      'No type rewrite is known for temporal-polyfill/fns/ZonedDateTime export Format',
+    )
+    expect(result.code).toContain('ZonedDateTimeFns.createFormat')
+    expect(result.code).toContain('ZonedDateTimeFns.Format')
+  })
+
+  it('rewrites withDayOfMonth directly to .with({ day }) only on date-bearing types', () => {
+    const source = `
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+
+const d = PlainDateFns.withDayOfMonth(date, day, options)
+const z = ZonedDateTimeFns.withDayOfMonth(zdt, 15)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.needsTemporalUtils).toBe(false)
+    expect(result.code).toContain('date.with({')
+    expect(result.code).toContain('day: day')
+    expect(result.code).toContain('zdt.with({')
+    expect(result.code).toContain('day: 15')
+    expect(result.code).not.toContain('temporal-utils')
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+
+    const unsupported = transformSource(
+      `
+import * as InstantFns from 'temporal-polyfill/fns/Instant'
+const bad = InstantFns.withDayOfMonth(instant, 1)
+`,
+      { path: 'input.ts' },
+    )
+    expect(unsupported.diagnostics.map((d) => d.message)).toContain(
+      'Instant withDayOfMonth does not exist',
+    )
+    expect(unsupported.code).toContain('InstantFns.withDayOfMonth')
+  })
+
+  it('preserves options on ZonedDateTime.fromString', () => {
+    const source = `
+import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
+import * as ZonedDateTimeFns from 'temporal-polyfill/fns/ZonedDateTime'
+
+const zdt = ZonedDateTimeFns.fromString(
+  '2024-11-03T01:30[America/New_York]',
+  CalendarFns.getBasic,
+  { disambiguation: 'later' },
+)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain('Temporal.ZonedDateTime.from(')
+    expect(result.code).toContain("{ disambiguation: 'later' }")
+    expect(result.code).not.toContain('temporal-polyfill/fns')
+  })
+
+  it('warns on legacy 3-argument PlainDate.subtractWeeks and subtractDays', () => {
+    const source = `
+import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
+
+const d1 = PlainDateFns.subtractWeeks(date, 2, options)
+const d2 = PlainDateFns.subtractDays(date, 3, options)
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics.map((d) => d.message)).toContain(
+      'PlainDate subtractWeeks call has an unexpected argument count',
+    )
+    expect(result.diagnostics.map((d) => d.message)).toContain(
+      'PlainDate subtractDays call has an unexpected argument count',
+    )
+  })
+
+  it('rewrites 3-argument Duration.compare with options', () => {
+    const source = `
+import * as DurationFns from 'temporal-polyfill/fns/Duration'
+
+const order = DurationFns.compare(a, b, { relativeTo })
+`
+
+    const result = transformSource(source, { path: 'input.ts' })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.code).toContain(
+      'const order = Temporal.Duration.compare(a, b, { relativeTo })',
+    )
     expect(result.code).not.toContain('temporal-polyfill/fns')
   })
 

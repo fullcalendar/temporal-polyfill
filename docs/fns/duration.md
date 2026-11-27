@@ -310,19 +310,22 @@ transform.
 Signature:
 
 ```ts
-(duration: Record, options: DurationRoundingOptions<RelativeTo>) => Record
+(duration: Record, unit: RoundingUnit) => Record
+(duration: Record, options: RoundingOptions) => Record
 ```
 
 Tree-shakeable API:
 
 ```ts
-const nextDuration = DurationFns.round(duration, options)
+const roundedToHour = DurationFns.round(duration, 'hour')
+const roundedWithOptions = DurationFns.round(duration, options)
 ```
 
 Temporal API equivalent:
 
 ```ts
-const nextDuration = duration.round(options)
+const roundedToHour = duration.round('hour')
+const roundedWithOptions = duration.round(options)
 ```
 
 Any `relativeTo` record in `options` needs its own record-to-Temporal transform.
@@ -332,8 +335,8 @@ Any `relativeTo` record in `options` needs its own record-to-Temporal transform.
 Signature:
 
 ```ts
-(duration: Record, unit: UnitName) => number
-(duration: Record, options: DurationTotalOptions<RelativeTo>) => number
+(duration: Record, unit: TotalUnit) => number
+(duration: Record, options: DurationTotalOptions) => number
 ```
 
 Tree-shakeable API:
@@ -358,7 +361,7 @@ transform.
 Signature:
 
 ```ts
-(duration: Record, otherDuration: Record, options?: RelativeToOptions<RelativeTo>) => number
+(duration: Record, otherDuration: Record, options?: RelativeToOptions) => number
 ```
 
 Tree-shakeable API:
@@ -383,7 +386,7 @@ transform.
 Signature:
 
 ```ts
-(duration: Record, options?: TimeDisplayOptions) => string
+(duration: Record, options?: ToStringOptions) => string
 ```
 
 Tree-shakeable API:

@@ -68,7 +68,6 @@ const perTypeTypeMap: Record<string, Record<string, string>> = {
   },
   ZonedDateTime: {
     Record: 'Temporal.ZonedDateTime',
-    Format: 'Intl.DateTimeFormat',
     FromFields: 'Temporal.ZonedDateTimeLikeObject',
     FromOptions: 'Temporal.ZonedDateTimeFromOptions',
     WithOptions: 'Temporal.ZonedDateTimeFromOptions',
@@ -264,10 +263,28 @@ const temporalUtilsHelpers = new Set([
   'endOfMillisecond',
   'endOfMicrosecond',
   'withDayOfYear',
-  'withDayOfMonth',
   'withDayOfWeek',
   'withWeekOfYear',
 ])
+
+const createFormatTypes = new Set([
+  'Instant',
+  'PlainDateTime',
+  'PlainDate',
+  'PlainTime',
+  'PlainYearMonth',
+  'PlainMonthDay',
+])
+
+const withDayOfMonthTypes = new Set([
+  'PlainDate',
+  'PlainDateTime',
+  'ZonedDateTime',
+])
+
+// PlainDate.subtractWeeks and subtractDays never used an options argument at
+// runtime, though an older .d.ts signature erroneously accepted one.
+const plainDateNoOptionsUnitMethods = new Set(['subtractWeeks', 'subtractDays'])
 
 const nativeRoundUnitsByType: Record<string, Set<string>> = {
   Instant: new Set(['hour', 'minute', 'second', 'millisecond', 'microsecond']),
@@ -612,6 +629,12 @@ function rewriteTypeReferences(
       const typeSource = perTypeTypeMap[binding.typeName]?.[typeName.right.name]
       if (typeSource != null) {
         replaceWithTypeSource(path, state, typeSource)
+      } else {
+        warn(
+          state,
+          path.node,
+          `No type rewrite is known for ${binding.importPath} export ${typeName.right.name}`,
+        )
       }
     }
   }
@@ -722,6 +745,26 @@ function rewriteRecordTypeCall(
       warn(state, call, `${typeName} fromString call has no string argument`)
       return null
     }
+    if (typeName === 'ZonedDateTime') {
+      if (args.length > 3) {
+        warn(
+          state,
+          call,
+          `${typeName} fromString call has an unexpected argument count`,
+        )
+        return null
+      }
+      // ZonedDateTime.fromString(s, getCalendar, options?) drops the calendar
+      // resolver but preserves the 3rd options argument for Temporal.ZonedDateTime.from.
+      const temporalArgs = args.length >= 3 ? [args[0], args[2]] : [args[0]]
+      return state.j.callExpression(
+        state.j.memberExpression(
+          temporalMember(state, config.temporalName),
+          state.j.identifier('from'),
+        ),
+        temporalArgs,
+      )
+    }
     return state.j.callExpression(
       state.j.memberExpression(
         temporalMember(state, config.temporalName),
@@ -807,6 +850,14 @@ function rewriteRecordTypeCall(
   }
 
   if (exportName === 'createFormat') {
+    if (!createFormatTypes.has(typeName)) {
+      warn(
+        state,
+        call,
+        `${typeName} createFormat does not exist; use Intl.DateTimeFormat directly`,
+      )
+      return null
+    }
     if (args.length > 2) {
       warn(
         state,
@@ -821,6 +872,34 @@ function rewriteRecordTypeCall(
         state.j.identifier('DateTimeFormat'),
       ),
       args,
+    )
+  }
+
+  if (exportName === 'withDayOfMonth') {
+    if (!withDayOfMonthTypes.has(typeName)) {
+      warn(state, call, `${typeName} withDayOfMonth does not exist`)
+      return null
+    }
+    if (args.length < 2 || args.length > 3) {
+      warn(
+        state,
+        call,
+        `${typeName} ${exportName} call has an unexpected argument count`,
+      )
+      return null
+    }
+    return state.j.callExpression(
+      state.j.memberExpression(args[0], state.j.identifier('with')),
+      [
+        state.j.objectExpression([
+          propertyFromValueWithComments(
+            state,
+            state.j.identifier('day'),
+            args[1],
+          ),
+        ]),
+        ...args.slice(2),
+      ],
     )
   }
 
@@ -841,7 +920,11 @@ function rewriteRecordTypeCall(
 
   const unitMethod = ownMapValue(unitMethodMap, exportName)
   if (config.unitMethods && unitMethod != null) {
-    if (args.length < 2 || args.length > 3) {
+    const maxArgs =
+      typeName === 'PlainDate' && plainDateNoOptionsUnitMethods.has(exportName)
+        ? 2
+        : 3
+    if (args.length < 2 || args.length > maxArgs) {
       warn(
         state,
         call,
@@ -913,7 +996,8 @@ function rewriteRecordTypeCall(
   }
 
   if (exportName === 'compare') {
-    if (args.length !== 2) {
+    const maxArgs = typeName === 'Duration' ? 3 : 2
+    if (args.length < 2 || args.length > maxArgs) {
       warn(
         state,
         call,

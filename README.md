@@ -1,19 +1,19 @@
 # temporal-polyfill monorepo
 
 > [!NOTE]
-> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](https://github.com/fullcalendar/temporal-polyfill/releases/tag/temporal-polyfill%401.0.1) for everything new.
+> 🎉 **temporal-polyfill 1.0 is out!** See the [1.0 release notes](https://github.com/fullcalendar/temporal-polyfill/releases/tag/temporal-polyfill%401.0.1).
 
-A collection of packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object 🕒
+Packages for working with [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the modern successor to the JavaScript `Date` object 🕒
 
-The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-compliant polyfill. The other packages orbit it: a tree-shakeable function API, a migration codemod, convenience helpers, and standalone TypeScript types.
+Most projects just need [temporal-polyfill](./polyfill/README.md); the other packages build on it.
 
 ## Contents
 
-- 📦 [**temporal-polyfill**](#temporal-polyfill) — A lightweight, spec-compliant polyfill for Temporal
-- 🌳 [**Tree-shakeable function API**](#tree-shakeable-function-api) — The same polyfill as standalone, tree-shakeable functions
-- 🤝 [**Built to be shared**](#built-to-be-shared) — Why the tree-shakeable API is a great fit for component libraries
-- 🔄 [**temporal-polyfill-codemod**](#temporal-polyfill-codemod) — Convert the tree-shakeable API to idiomatic Temporal
-- 🛠️ [**temporal-utils**](#temporal-utils) — Handy helpers for idiomatic Temporal objects
+- 📦 [**temporal-polyfill**](#temporal-polyfill) — Lightweight, spec-compliant polyfill for Temporal
+- 🌳 [**Tree-shakeable function API**](#tree-shakeable-function-api) — The same polyfill as standalone functions
+- 🧩 [**For component libraries**](#for-component-libraries) — Use Temporal in a library without bundling a second date library
+- 🔄 [**temporal-polyfill-codemod**](#temporal-polyfill-codemod) — Migrate from the function API to standard Temporal
+- 🛠️ [**temporal-utils**](#temporal-utils) — Convenience helpers for standard Temporal objects
 - 📐 [**temporal-spec**](#temporal-spec) — Standalone TypeScript type definitions for Temporal
 
 ---
@@ -22,7 +22,7 @@ The headliner is **[temporal-polyfill](#temporal-polyfill)** — a tiny, spec-co
 
 ## 📦 temporal-polyfill
 
-A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal), the successor to the JavaScript `Date` object. Less than 20 kB and spec-compliant.
+A lightweight polyfill for [Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal). Under 20 kB gzipped and spec-compliant.
 
 ```sh
 npm install temporal-polyfill
@@ -32,12 +32,12 @@ npm install temporal-polyfill
 import 'temporal-polyfill/global' // most common entrypoint
 
 Temporal.Now.zonedDateTimeISO().toString()
-// '2026-06-18T13:45:00-04:00[America/New_York]'
+// e.g. '2026-06-18T13:45:00-04:00[America/New_York]'
 ```
 
-See the full docs for the other entrypoints, CDN usage, the expanded-calendar `/full/` build, and TypeScript setup.
+See the package README for other entrypoints, CDN usage, the expanded-calendar `/full/` build, and TypeScript setup.
 
-📖 [**Read the full temporal-polyfill docs →**](./polyfill/README.md)
+📖 [**Read the temporal-polyfill docs →**](./polyfill/README.md)
 
 ---
 
@@ -45,7 +45,7 @@ See the full docs for the other entrypoints, CDN usage, the expanded-calendar `/
 
 ## 🌳 Tree-shakeable function API
 
-Shipped inside `temporal-polyfill`, but a different beast. For library authors and anyone hyper-concerned about bundle size, every Temporal operation is exposed as a standalone function that acts on a plain record. Instead of pulling in entire `Temporal.*` classes, your bundler keeps only the functions you actually import.
+Also shipped inside `temporal-polyfill`, for library authors and bundle-size-sensitive apps. Every Temporal operation is exposed as a standalone function operating on plain record objects rather than `Temporal.*` classes, so your bundler keeps only the functions you import.
 
 ```js
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate'
@@ -58,19 +58,17 @@ PlainDateFns.toString(later) // '2026-08-01'
 
 Each Temporal type has its own entrypoint under `temporal-polyfill/fns/*`, such as `temporal-polyfill/fns/ZonedDateTime`.
 
-📖 [**Read the full Tree-shakeable API docs →**](./docs/fns/index.md)
+📖 [**Read the tree-shakeable API docs →**](./docs/fns/index.md)
 
 ---
 
-<a id="built-to-be-shared"></a>
+<a id="for-component-libraries"></a>
 
-## 🤝 Built to be shared
+## 🧩 For component libraries
 
-If you build a date picker, scheduler, or any calendar-driven component, you know the date-library dilemma: bundle `dayjs`/`date-fns`, hand-roll helpers around `Date`, or pull in an adapter like `date-io` and make your users pick a library. Each path bundles *another* date library into every app that installs your component.
+Date pickers, schedulers, and other calendar-driven libraries usually end up bundling their own date utility library or asking consumers to configure an adapter.
 
-The [tree-shakeable API](./docs/fns/index.md) is designed to end that — and to make Temporal the shared standard third-party components can finally agree on.
-
-**Shared, not duplicated.** Depend on `temporal-polyfill` as a peer dependency and import only the tree-shakeable functions you need — you never force the full polyfill onto anyone. Whether to load it is the host app's call, driven by which browsers and runtimes they need to support (Safari and older environments still lack native `Temporal`). And because that's the *same package* your component already draws from, the shared internals dedupe instead of doubling up:
+With the [tree-shakeable API](./docs/fns/index.md), a component library can declare `temporal-polyfill` as a peer dependency and import only the functions it needs. Host applications decide whether to load the global polyfill (for browsers and runtimes without native `Temporal`), and because both entrypoints come from the same package, the bundler deduplicates the shared internals:
 
 ```
 app
@@ -83,7 +81,7 @@ app
         (only select functions)
 ```
 
-**A dependency you can delete.** Adopt the tree-shakeable API today, and when native Temporal is everywhere you target, [the codemod](./codemod/README.md) rewrites your code into idiomatic `Temporal.*` and the dependency falls away. No lock-in — and because each function maps one-to-one onto its `Temporal.*` equivalent, the migration is mechanical, with few edge cases and little to debug.
+Once native `Temporal` is available in all environments you support, [temporal-polyfill-codemod](./codemod/README.md) rewrites the function calls to standard `Temporal.*` code so you can remove the dependency with no lock-in.
 
 📖 [**Read more: For component authors →**](./docs/fns/for-component-authors.md)
 
@@ -93,7 +91,7 @@ app
 
 ## 🔄 temporal-polyfill-codemod
 
-Automated migrations for `temporal-polyfill` codebases. The current transform, `fns-to-temporal`, rewrites code that uses the [tree-shakeable function API](./docs/fns/index.md) into idiomatic Temporal — real `Temporal` objects and their methods — so you can drop the polyfill once native Temporal has landed everywhere you target.
+Automated migrations for `temporal-polyfill` codebases. The `fns-to-temporal` transform rewrites code using the [tree-shakeable function API](./docs/fns/index.md) into standard `Temporal` objects and methods.
 
 ```sh
 npx temporal-polyfill-codemod fns-to-temporal <path>
@@ -110,9 +108,9 @@ const date = new Temporal.PlainDate(2024, 5, 1)
 const next = date.add({ days: 3 })
 ```
 
-It's deliberately conservative — anything it can't unambiguously rewrite is left untouched and reported as a migration-blocking diagnostic, so CI catches an incomplete migration.
+Any usage that cannot be rewritten unambiguously is left unchanged and reported as a diagnostic with a non-zero exit code.
 
-📖 [**Read the full codemod docs →**](./codemod/README.md)
+📖 [**Read the codemod docs →**](./codemod/README.md)
 
 ---
 
@@ -120,7 +118,7 @@ It's deliberately conservative — anything it can't unambiguously rewrite is le
 
 ## 🛠️ temporal-utils
 
-Small, convenience helpers for the **idiomatic** `Temporal.*` API — not the tree-shakeable API above — providing the everyday `startOfMonth`, `endOfDay`, `diffDays`, and `roundToWeek` operations Temporal itself doesn't ship. They're what you reach for once you're writing real `Temporal` objects and methods (whether via the polyfill, native Temporal, or after running the codemod). Most helpers preserve the input type: pass a `PlainDate`, get a `PlainDate` back; pass a `ZonedDateTime`, get a `ZonedDateTime` back.
+Convenience helpers for standard `Temporal` objects (not the tree-shakeable function API), covering common operations that Temporal leaves out: `startOfMonth`, `endOfDay`, `diffDays`, `roundToWeek`, and similar utilities. Most helpers preserve the input type (`PlainDate` returns `PlainDate`, `ZonedDateTime` returns `ZonedDateTime`).
 
 ```sh
 npm install temporal-utils
@@ -139,9 +137,9 @@ diffDays(
 // 19
 ```
 
-`temporal-utils` operates on a global `Temporal`, so pair it with `temporal-polyfill` (or native Temporal) at runtime.
+`temporal-utils` works on any standard `Temporal` instances (native, global polyfill, or local ponyfill import). The examples above assume a global `Temporal`, such as native `Temporal` or [`temporal-polyfill`](./polyfill/README.md).
 
-📖 [**Read the full temporal-utils docs →**](./utils/README.md)
+📖 [**Read the temporal-utils docs →**](./utils/README.md)
 
 ---
 
@@ -149,7 +147,7 @@ diffDays(
 
 ## 📐 temporal-spec
 
-Standalone TypeScript type definitions for Temporal — **only** `.d.ts` files, no runtime code. It describes the shape of the Temporal API (plus the Temporal-related additions to `Intl` and `Date`) so any implementation, polyfill, or application can share a single, accurate set of types. It's the type layer behind `temporal-polyfill`, published separately so other implementations can reuse it.
+Standalone TypeScript type definitions for Temporal (plus the Temporal additions to `Intl` and `Date`), with no runtime code. It is the type layer used by `temporal-polyfill` and is published separately so other implementations and apps can share the same declarations.
 
 ```sh
 npm install temporal-spec
@@ -163,6 +161,6 @@ function format(zdt: Temporal.ZonedDateTime): string {
 }
 ```
 
-Most useful on **TypeScript < 6.0** (which has no built-in Temporal types) or when you want the namespaced, non-global form that `lib` doesn't provide.
+Useful on TypeScript < 6.0 (which lacks built-in Temporal types) or when you want namespaced imports without modifying the global scope.
 
-📖 [**Read the full temporal-spec docs →**](./spec/README.md)
+📖 [**Read the temporal-spec docs →**](./spec/README.md)

@@ -1,4 +1,4 @@
-import { bigNanoInUtcDay, divideBigNanoToExactNumber } from './bigNano'
+import { bigNanoInUtcDay } from './bigNano'
 import { type CalendarImpl } from './calendarImpl'
 import type { IsoDateTimeInterval } from './calendarInterval'
 import {
@@ -91,7 +91,9 @@ export function computeZonedHoursInDay(
 ): number {
   const [epochNano0, epochNano1] = computeZonedDayEpochInterval(slots)
 
-  return divideBigNanoToExactNumber(epochNano1 - epochNano0, nanoInHour)
+  // UTC offsets are under 24 hours in magnitude, so a local day spans under
+  // 72 hours. Its nanosecond length converts to Number exactly before division.
+  return Number(epochNano1 - epochNano0) / nanoInHour
 }
 
 export function computeZonedStartOfDay(

@@ -158,7 +158,7 @@ Tree-shakeable API:
 import * as CalendarFns from 'temporal-polyfill/fns/Calendar'
 
 const yearMonth = PlainYearMonthFns.fromString(
-  '2026-06[u-ca=gregory]',
+  '2026-06-01[u-ca=gregory]',
   CalendarFns.getBasic,
 )
 ```
@@ -166,7 +166,7 @@ const yearMonth = PlainYearMonthFns.fromString(
 Temporal API equivalent:
 
 ```ts
-const yearMonth = Temporal.PlainYearMonth.from('2026-06[u-ca=gregory]')
+const yearMonth = Temporal.PlainYearMonth.from('2026-06-01[u-ca=gregory]')
 ```
 
 Pass `getCalendar` to resolve the string's `[u-ca=…]` annotation into a
@@ -414,7 +414,7 @@ const nextYearMonth = yearMonth.subtract({ months }, options)
 Signature:
 
 ```ts
-(record: Record, otherRecord: Record, options?: DiffOptions<YearMonthUnitName>) => DurationFns.Record
+(record: Record, otherRecord: Record, options?: DiffOptions) => DurationFns.Record
 ```
 
 Tree-shakeable API:
@@ -543,8 +543,8 @@ Tree-shakeable API:
 
 ```ts
 const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth)
-const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, 'ceil')
-const nextYearMonth = PlainYearMonthFns.roundToYear(yearMonth, options)
+const nextYearMonthCeil = PlainYearMonthFns.roundToYear(yearMonth, 'ceil')
+const nextYearMonthWithOptions = PlainYearMonthFns.roundToYear(yearMonth, options)
 ```
 
 Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
@@ -553,8 +553,8 @@ Temporal API equivalent (with help of [temporal-utils](../../utils/README.md)):
 import { roundToYear } from 'temporal-utils'
 
 const nextYearMonth = roundToYear(yearMonth)
-const nextYearMonth = roundToYear(yearMonth, 'ceil')
-const nextYearMonth = roundToYear(yearMonth, options)
+const nextYearMonthCeil = roundToYear(yearMonth, 'ceil')
+const nextYearMonthWithOptions = roundToYear(yearMonth, options)
 ```
 
 ## Start And End Of Unit
@@ -612,7 +612,7 @@ const nextYearMonth = endOfYear(yearMonth)
 Signature:
 
 ```ts
-(record: Record, options?: CalendarDisplayOptions) => string
+(record: Record, options?: ToStringOptions) => string
 ```
 
 Tree-shakeable API:
@@ -676,13 +676,14 @@ const text = yearMonth.toLocaleString(locales, options)
 Signature:
 
 ```ts
-(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => DateTimeFormatLike<Record>
+(locales?: LocalesArg, options?: Intl.DateTimeFormatOptions) => Format
 ```
 
 Tree-shakeable API:
 
 ```ts
 const format = PlainYearMonthFns.createFormat('en-US', {
+  calendar: 'iso8601',
   month: 'long',
   year: 'numeric',
 })
@@ -693,6 +694,7 @@ Temporal API equivalent:
 
 ```ts
 const format = new Intl.DateTimeFormat('en-US', {
+  calendar: 'iso8601',
   month: 'long',
   year: 'numeric',
 })

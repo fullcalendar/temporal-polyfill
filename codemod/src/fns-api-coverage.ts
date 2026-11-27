@@ -101,7 +101,7 @@ const timeStartsAndEnds = {
 
 const dateFieldReplacement = {
   withDayOfYear: 'temporal-utils',
-  withDayOfMonth: 'temporal-utils',
+  withDayOfMonth: 'direct',
   withDayOfWeek: 'temporal-utils',
   withWeekOfYear: 'temporal-utils',
 } as const satisfies Record<string, FnsCodemodStatus>
@@ -189,7 +189,9 @@ export const fnsApiCoverage = {
     toPlainDateTime: 'direct',
     toPlainDate: 'direct',
     toPlainTime: 'direct',
-    ...formatting,
+    toString: 'direct',
+    toBasicString: 'direct',
+    toLocaleString: 'direct',
     ...temporalConversion,
   },
   PlainDateTime: {
