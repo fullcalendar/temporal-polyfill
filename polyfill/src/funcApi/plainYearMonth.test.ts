@@ -289,6 +289,26 @@ describe('addMonths', () => {
   })
 })
 
+// AddDurationToYearMonth rejects weeks, days and time even alongside years or
+// months. Matches the class API tests.
+describe.each(['add', 'subtract'] as const)(
+  '%s units below months',
+  (method) => {
+    it.each([
+      { months: 1, days: 1 },
+      { years: 1, nanoseconds: 1 },
+      { months: -1, weeks: -1, nanoseconds: -1 },
+    ])('rejects %o', (fields) => {
+      expect(() =>
+        PlainYearMonthFns[method](
+          PlainYearMonthFns.create(2024, 1),
+          DurationFns.fromFields(fields),
+        ),
+      ).toThrow(RangeError)
+    })
+  },
+)
+
 describe('subtract', () => {
   it('works', () => {
     const pym0 = PlainYearMonthFns.create(2024, 2)

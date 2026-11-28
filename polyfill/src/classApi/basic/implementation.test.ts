@@ -331,6 +331,16 @@ describe('integration recreations', () => {
         Temporal.PlainYearMonth.from('2024-03').add({ days: 45 }),
       ).toThrow('Invalid unit: days')
     })
+
+    it('PlainYearMonth.add names the largest unit below months', () => {
+      expect(() =>
+        Temporal.PlainYearMonth.from('2024-03').add({
+          months: 1,
+          weeks: 1,
+          nanoseconds: 1,
+        }),
+      ).toThrow('Invalid unit: weeks')
+    })
   })
 
   // test262 asserts these RangeErrors but never their messages. The issue was

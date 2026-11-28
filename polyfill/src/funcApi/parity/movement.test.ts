@@ -277,6 +277,7 @@ describe.each(['add', 'subtract'] as const)('%s movement parity', (method) => {
     { hours: 1 },
     { months: 1, days: 1 },
     { years: 1, nanoseconds: 1 },
+    { months: -1, weeks: -1, nanoseconds: -1 },
   ])('PlainYearMonth rejects %o', (fields) => {
     expectErrorParity(
       () =>

@@ -58,9 +58,11 @@ export function moveYearMonth(
   durationSlots: DurationFields,
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateFields {
-  // YearMonth has no day to start weeks/days/time from, so only years and
-  // months may be nonzero. Throws on any smaller unit
-  for (let unit = Unit.Nanosecond; unit < Unit.Month; unit++) {
+  // YearMonth has no day to start weeks/days/time from, so AddDurationToYearMonth
+  // throws if any of them is nonzero, even alongside years or months. Checks
+  // from weeks down, so the error names the largest offending unit. Every unit
+  // checked is below months, so clampEntity always throws here
+  for (let unit = Unit.Week; unit >= Unit.Nanosecond; unit--) {
     if (durationSlots[durationFieldNamesAsc[unit]]) {
       clampEntity(
         'unit',
