@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.2.0]
+        TEST_NODE_VERSION: [16.20.0, 18.19.0, 20.10.0, 22.14.0, 24.16.0, 26.13.1]
         include:
           - TEST_NODE_VERSION: 16.20.0
             LINT: 1
@@ -26,7 +26,7 @@ jobs:
             MINIFIER: terser
           - TEST_NODE_VERSION: 22.14.0
             MINIFIER: swc
-          - TEST_NODE_VERSION: 26.2.0
+          - TEST_NODE_VERSION: 26.13.1
             TEST262_BASIC_SKIP: 1
 
     steps:
