@@ -24,7 +24,7 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
-import { refineOption } from './refineOption'
+import { refineProps } from './refineProps'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
@@ -158,7 +158,7 @@ export function round(
     return createNativeDurationRecord(native.round(options))
   }
   const resNative = native.round(
-    refineOption(options, 'relativeTo', refineRelativeTo),
+    refineProps(options, { relativeTo: refineRelativeTo }),
   )
   return createNativeDurationRecord(resNative)
 }
@@ -173,7 +173,7 @@ export function total(
   if (typeof options === 'string') {
     return native.total(options)
   }
-  return native.total(refineOption(options, 'relativeTo', refineRelativeTo))
+  return native.total(refineProps(options, { relativeTo: refineRelativeTo }))
 }
 
 export function compare(
@@ -186,7 +186,7 @@ export function compare(
   return NativeTemporal!.Duration.compare(
     native,
     otherNative,
-    refineOption(options, 'relativeTo', refineRelativeTo),
+    refineProps(options, { relativeTo: refineRelativeTo }),
   ) as NumberSign // !!!
 }
 

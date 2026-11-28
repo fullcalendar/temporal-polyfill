@@ -20,6 +20,7 @@ import {
 } from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
+import { refineProps } from './refineProps'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
 
@@ -80,9 +81,8 @@ export function fromFields(
   fields: MonthDayFromFields<RecordTypes.CalendarRecord>,
   options?: Temporal.OverflowOptions,
 ): NativePlainMonthDayRecord {
-  const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.PlainMonthDay.from(
-    { ...fields, calendar },
+    refineProps(fields, { calendar: refineNativeCalendarArgMaybe }),
     options,
   )
   return createNativePlainMonthDayRecord(resNative)

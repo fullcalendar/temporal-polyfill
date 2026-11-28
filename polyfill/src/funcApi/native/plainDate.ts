@@ -43,7 +43,7 @@ import {
   NativePlainYearMonthRecord,
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
-import { refineOption } from './refineOption'
+import { refineProps } from './refineProps'
 import { createCalendarRoundOptions } from './roundUtils'
 import { requireTimeZoneId } from './timeZoneId'
 import {
@@ -107,9 +107,8 @@ export function fromFields(
   fields: DateFromFields<RecordTypes.CalendarRecord>,
   options?: Temporal.OverflowOptions,
 ): NativePlainDateRecord {
-  const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.PlainDate.from(
-    { ...fields, calendar },
+    refineProps(fields, { calendar: refineNativeCalendarArgMaybe }),
     options,
   )
   return createNativePlainDateRecord(resNative)
@@ -277,14 +276,13 @@ export function toZonedDateTime(
     typeof options === 'string'
       ? native.toZonedDateTime(requireTimeZoneId(options))
       : native.toZonedDateTime(
-          refineOption(
-            refineOption(options, 'timeZone', requireTimeZoneId),
-            'plainTime',
-            (plainTime) =>
+          refineProps(options, {
+            timeZone: requireTimeZoneId,
+            plainTime: (plainTime) =>
               plainTime === undefined
                 ? undefined
                 : getNativePlainTime(plainTime),
-          ),
+          }),
         )
   return createNativeZonedDateTimeRecord(resNative)
 }

@@ -28,6 +28,7 @@ import {
   getNativeDuration,
 } from './duration'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
+import { refineProps } from './refineProps'
 import { createCalendarRoundOptions } from './roundUtils'
 
 type Format = DateTimeFormatLike<NativePlainYearMonthRecord>
@@ -89,9 +90,8 @@ export function fromFields(
   fields: Partial<YearMonthFields & { calendar: RecordTypes.CalendarRecord }>,
   options?: Temporal.OverflowOptions,
 ): NativePlainYearMonthRecord {
-  const calendar = refineNativeCalendarArgMaybe(fields.calendar)
   const resNative = NativeTemporal!.PlainYearMonth.from(
-    { ...fields, calendar },
+    refineProps(fields, { calendar: refineNativeCalendarArgMaybe }),
     options,
   )
   return createNativePlainYearMonthRecord(resNative)

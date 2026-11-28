@@ -19,7 +19,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import { refineOption } from './refineOption'
+import { refineProps } from './refineProps'
 import { createRoundToOptions } from './roundUtils'
 import { requireTimeZoneId } from './timeZoneId'
 import {
@@ -169,7 +169,7 @@ export function toString(
   options?: InstantStringTimeZoneDisplayOptions,
 ): string {
   return getNativeInstant(record).toString(
-    refineOption(options, 'timeZone', requireTimeZoneId),
+    refineProps(options, { timeZone: requireTimeZoneId }),
   )
 }
 

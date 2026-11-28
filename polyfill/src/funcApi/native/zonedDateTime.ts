@@ -41,6 +41,7 @@ import {
   createNativePlainTimeRecord,
   getNativePlainTime,
 } from './plainTime'
+import { refineProps } from './refineProps'
 import { createCalendarRoundOptions, createRoundToOptions } from './roundUtils'
 import { requireTimeZoneId } from './timeZoneId'
 
@@ -112,10 +113,11 @@ export function fromFields(
   fields: ZonedDateTimeFields<RecordTypes.CalendarRecord>,
   options?: Temporal.ZonedDateTimeFromOptions,
 ): NativeZonedDateTimeRecord {
-  const calendar = refineNativeCalendarArgMaybe(fields.calendar)
-  requireTimeZoneId(fields.timeZone)
   const resNative = NativeTemporal!.ZonedDateTime.from(
-    { ...fields, calendar },
+    refineProps(fields, {
+      calendar: refineNativeCalendarArgMaybe,
+      timeZone: requireTimeZoneId,
+    }),
     options,
   )
   return createNativeZonedDateTimeRecord(resNative)
