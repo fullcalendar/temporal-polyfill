@@ -378,9 +378,13 @@ export function durationHasDateParts(fields: DurationFields): boolean {
   return Boolean(computeDurationSign(fields, durationDateFieldNamesAsc))
 }
 
-export function getMaxDurationUnit(fields: DurationFields): Unit {
-  let unit: Unit = Unit.Year
-
+// The largest nonzero unit, searching down from `unit`. Returns nanoseconds when
+// every unit searched is zero, so callers that need to know whether any unit is
+// set must check that unit's field.
+export function getMaxDurationUnit(
+  fields: DurationFields,
+  unit: Unit = Unit.Year,
+): Unit {
   for (; unit > Unit.Nanosecond; unit--) {
     if (fields[durationFieldNamesAsc[unit]]) {
       break

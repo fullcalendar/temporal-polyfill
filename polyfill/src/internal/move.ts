@@ -17,6 +17,7 @@ import {
   durationHasDateParts,
   durationOnlyTimeToBigNano,
   durationTimeToBigNano,
+  getMaxDurationUnit,
 } from './durationMath'
 import { epochDaysToIsoDate, isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
@@ -59,20 +60,19 @@ export function moveYearMonth(
   overflow: Overflow = Overflow.Constrain,
 ): CalendarDateFields {
   // YearMonth has no day to start weeks/days/time from, so AddDurationToYearMonth
-  // throws if any of them is nonzero, even alongside years or months. Checks
-  // from weeks down, so the error names the largest offending unit. Every unit
-  // checked is below months, so clampEntity always throws here
-  for (let unit = Unit.Week; unit >= Unit.Nanosecond; unit--) {
-    if (durationSlots[durationFieldNamesAsc[unit]]) {
-      clampEntity(
-        'unit',
-        unit,
-        Unit.Month,
-        Unit.Year,
-        Overflow.Reject,
-        durationFieldNamesAsc,
-      )
-    }
+  // throws if any of them is nonzero, even alongside years or months. Searches
+  // from weeks down, so the error names the largest offending unit. That unit is
+  // below months, so clampEntity always throws when its field is set
+  const subMonthUnit = getMaxDurationUnit(durationSlots, Unit.Week)
+  if (durationSlots[durationFieldNamesAsc[subMonthUnit]]) {
+    clampEntity(
+      'unit',
+      subMonthUnit,
+      Unit.Month,
+      Unit.Year,
+      Overflow.Reject,
+      durationFieldNamesAsc,
+    )
   }
 
   // Overflow has already been observed before lower-unit validation above.
