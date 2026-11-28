@@ -20,7 +20,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import { createRoundToOptions } from './roundUtils'
+import { createRoundToOptions } from './optionsRefine'
 
 type Format = DateTimeFormatLike<NativePlainTimeRecord>
 

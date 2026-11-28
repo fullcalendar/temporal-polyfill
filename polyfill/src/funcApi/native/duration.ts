@@ -24,7 +24,7 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
-import { refineProps } from './refineProps'
+import { refineProps } from './optionsRefine'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots

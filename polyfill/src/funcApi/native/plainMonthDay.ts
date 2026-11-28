@@ -19,8 +19,8 @@ import {
   runNativeCalendarResolver,
 } from './calendarResolve'
 import { createNativeDateTimeFormatFactory } from './dateTimeFormat'
+import { refineProps } from './optionsRefine'
 import { NativePlainDateRecord, createNativePlainDateRecord } from './plainDate'
-import { refineProps } from './refineProps'
 
 type Format = DateTimeFormatLike<NativePlainMonthDayRecord>
 

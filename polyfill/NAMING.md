@@ -356,3 +356,8 @@ other `options*` files are the parsers that produce the enums, and none of
 them exports a type. They once had their own `options/` directory, but it and
 `internal/` import each other, and since chunks are named per directory that
 made a chunk-level import cycle (#107).
+
+The native branch of the function API keeps its own option preparation beside
+its wrappers, with the same prefix: `funcApi/native/optionsRefine.ts` builds
+and copies the bags that wrappers hand to native Temporal. Only that branch
+uses it, so it stays out of `internal/`.

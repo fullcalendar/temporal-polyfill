@@ -9,7 +9,7 @@ import * as ZonedDateTimeFns from './zonedDateTime'
 
 /*
 Where the native branch copies an options or fields object before handing it to
-native Temporal (see native/refineProps.ts), both branches must still accept
+native Temporal (see refineProps in native/optionsRefine.ts), both branches must still accept
 the same objects. Properties inherited through a prototype count like own ones,
 and the property being refined is read only once. These run on whichever branch
 the host selects.

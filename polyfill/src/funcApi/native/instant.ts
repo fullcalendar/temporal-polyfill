@@ -19,8 +19,7 @@ import {
   createNativeDurationRecord,
   getNativeDuration,
 } from './duration'
-import { refineProps } from './refineProps'
-import { createRoundToOptions } from './roundUtils'
+import { createRoundToOptions, refineProps } from './optionsRefine'
 import { requireTimeZoneId } from './timeZoneId'
 import {
   NativeZonedDateTimeRecord,
