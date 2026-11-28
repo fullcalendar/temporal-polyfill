@@ -142,3 +142,62 @@ describe('year moves from a leap month the target year lacks', () => {
     expect(moved.month).toBe(6)
   })
 })
+
+// NonISODateSurpasses checks each candidate year by monthCode and then by the
+// constrained ordinal month, and either check can stop the count. Expected
+// values match native Temporal (Node 26).
+describe('diffs from a leap month the end year lacks', () => {
+  const diffYears = (
+    calendar: string,
+    [year0, monthCode0, day0]: [number, string, number],
+    [year1, monthCode1, day1]: [number, string, number],
+  ) =>
+    TemporalFull.PlainDate.from({
+      calendar,
+      year: year0,
+      monthCode: monthCode0,
+      day: day0,
+    })
+      .until(
+        TemporalFull.PlainDate.from({
+          calendar,
+          year: year1,
+          monthCode: monthCode1,
+          day: day1,
+        }),
+        { largestUnit: 'year' },
+      )
+      .toString()
+
+  // 2001 has M04L and 2002 doesn't. Reported by @craig-o-curtis in #132.
+  it('counts a full year when the constrained month reaches the end', () => {
+    // M04L sorts before M05, and its constrained date M04-29 is before M05-01
+    expect(diffYears('chinese', [2001, 'M04L', 29], [2002, 'M05', 1])).toBe(
+      'P1Y2D',
+    )
+    expect(diffYears('chinese', [2002, 'M05', 1], [2001, 'M04L', 29])).toBe(
+      '-P1Y1D',
+    )
+  })
+
+  it('stops the year count by monthCode order', () => {
+    // M04L sorts after M04, even though M04L-10 constrains to M04-10
+    expect(diffYears('chinese', [2001, 'M04L', 10], [2002, 'M04', 20])).toBe(
+      'P12M10D',
+    )
+  })
+
+  // 5784 has Adar I (M05L) and 5785 doesn't
+  it('stops the year count by the constrained month', () => {
+    // M05L sorts before M06, but M05L-15 constrains to M06-15, past M06-10
+    expect(diffYears('hebrew', [5784, 'M05L', 15], [5785, 'M06', 10])).toBe(
+      'P12M25D',
+    )
+    expect(diffYears('hebrew', [5784, 'M05L', 15], [5785, 'M06', 20])).toBe(
+      'P1Y5D',
+    )
+    expect(diffYears('hebrew', [5785, 'M06', 10], [5784, 'M05L', 15])).toBe(
+      '-P1Y25D',
+    )
+  })
+})

@@ -1,8 +1,6 @@
 import {
   computeCalendarDateFields,
-  computeCalendarDaysInMonthForYearMonth,
   computeCalendarMonthCodeParts,
-  computeCalendarMonthsInYearForYear,
 } from './calendarDerived'
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldDefaults } from './durationFields'
@@ -23,7 +21,6 @@ import {
 import { combineDateAndTime } from './fieldUtils'
 import { diffIsoMonthSlots } from './isoCalendarMath'
 import {
-  addCalendarMonths,
   moveDateByCalendarUnits,
   moveDateByDays,
   moveToStartOfMonth,
@@ -530,6 +527,15 @@ export function prepareZonedEpochDiff(
 // Date-only diffing. Calendar units delegate to the calendar implementation;
 // day/week units balance an elapsed interval without calendar arithmetic.
 
+// Calendar-unit diffs follow CalendarDateUntil and NonISODateUntil, which
+// count whole years, then whole months, one candidate at a time until the next
+// candidate would "surpass" the end date (NonISODateSurpasses). The counts are
+// computed here in closed form instead: start from the difference between the
+// end's and start's fields, then back off by one toward zero if that
+// overshoots. One back-off is always enough, because the backed-off count
+// lands in a year or month strictly before the end's, in the direction of the
+// diff. The leftover days are counted from the date reached by adding those
+// years and months with overflow constrain.
 export function diffCalendarDates(
   calendar: CalendarImpl,
   startIsoDate: CalendarDateFields,
@@ -544,95 +550,29 @@ export function diffCalendarDates(
     )
   }
 
-  const yearMonthDayStart = computeCalendarDateFields(calendar, startIsoDate)
-  const yearMonthDayEnd = computeCalendarDateFields(calendar, endIsoDate)
+  const sign = compareIsoDates(endIsoDate, startIsoDate)
+  let years = 0
+  let months = 0
+  let days = 0
 
-  if (largestUnit === Unit.Month) {
-    const { year: year0, month: month0, day: day0 } = yearMonthDayStart
-    const { year: year1, month: month1, day: day1 } = yearMonthDayEnd
-    const sign = Math.sign(
-      compareNumbers(year1, year0) ||
-        compareNumbers(month1, month0) ||
-        countIsoDays(startIsoDate, endIsoDate),
-    )
+  if (sign) {
+    const {
+      year: year0,
+      month: month0,
+      day: day0,
+    } = computeCalendarDateFields(calendar, startIsoDate)
+    const {
+      year: year1,
+      month: month1,
+      day: day1,
+    } = computeCalendarDateFields(calendar, endIsoDate)
+    // Orders the start's day-of-month against the end's. Every surpass check
+    // falls back to this when the months it compares are equal.
+    const dayOrder = compareNumbers(day0, day1)
+    // The start's month in the year reached by adding the counted years
+    let movedMonth = month0
 
-    let months = 0
-    let days = 0
-    if (sign) {
-      // Temporal counts concrete calendar month slots here, which matters for
-      // lunisolar calendars with inserted leap months.
-      months = calendar
-        ? calendar.diffMonthSlots(year0, month0, year1, month1)
-        : diffIsoMonthSlots(year0, month0, year1, month1)
-
-      let anchorIsoDate = moveDateByCalendarUnits(
-        calendar,
-        startIsoDate,
-        0,
-        months,
-        Overflow.Constrain,
-      )
-
-      // Back off a month if the anchor overshot the end. diffMonthSlots and
-      // addMonths are exact inverses, so the anchor always lands in the end's
-      // (year, month) — no need to compare those, only the day. Compare the
-      // *original* start day, since a day clamped down by a shorter target
-      // month isn't a real overshoot (this keeps e.g. a 30-day leap month
-      // diffed against a 29-day one in its slot).
-      if (sign * compareNumbers(day0, day1) > 0) {
-        months -= sign
-        anchorIsoDate = moveDateByCalendarUnits(
-          calendar,
-          startIsoDate,
-          0,
-          months,
-          Overflow.Constrain,
-        )
-      }
-
-      days = countIsoDays(anchorIsoDate, endIsoDate)
-    }
-
-    return { ...durationFieldDefaults, months, days }
-  }
-
-  const { year: year0, month: month0, day: day0 } = yearMonthDayStart
-  let { year: year1, month: month1, day: day1 } = yearMonthDayEnd
-  let yearDiff = year1 - year0
-  let monthDiff = month1 - month0
-  let dayDiff = day1 - day0
-
-  if (yearDiff || monthDiff) {
-    const sign = Math.sign(yearDiff || monthDiff)
-    let daysInMonth1 = computeCalendarDaysInMonthForYearMonth(
-      calendar,
-      year1,
-      month1,
-    )
-    let dayCorrect = 0
-
-    // A constrained month move that would turn the original day into the last
-    // day of a shorter month is not enough to earn a full month/year in a diff.
-    // Compare against the original day, not the truncated target-month day.
-    if (Math.sign(day1 - day0) === -sign) {
-      const origDaysInMonth1 = daysInMonth1
-      const yearMonthParts = addCalendarMonths(calendar, year1, month1, -sign)
-      ;({ year: year1, month: month1 } = yearMonthParts)
-      yearDiff = year1 - year0
-      monthDiff = month1 - month0
-      daysInMonth1 = computeCalendarDaysInMonthForYearMonth(
-        calendar,
-        year1,
-        month1,
-      )
-
-      dayCorrect = sign < 0 ? -origDaysInMonth1 : daysInMonth1
-    }
-
-    const day0Trunc = Math.min(day0, daysInMonth1)
-    dayDiff = day1 - day0Trunc + dayCorrect
-
-    if (yearDiff) {
+    if (largestUnit === Unit.Year && (years = year1 - year0)) {
       const [monthCodeNumber0, isLeapMonth0] = computeCalendarMonthCodeParts(
         calendar,
         year0,
@@ -643,69 +583,72 @@ export function diffCalendarDates(
         year1,
         month1,
       )
-      const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
-      // Leap-month sources can constrain to common counterparts across a year
-      // boundary; those asymmetric cases keep a zero month remainder here.
-      monthDiff =
-        leapMonthMeta !== undefined &&
-        isLeapMonth0 &&
-        !isLeapMonth1 &&
-        (leapMonthMeta < 0
-          ? sign > 0 && monthCodeNumber1 === -leapMonthMeta
-          : sign < 0 && monthCodeNumber1 === monthCodeNumber0)
-          ? 0
-          : monthCodeNumber1 - monthCodeNumber0 ||
-            Number(isLeapMonth1) - Number(isLeapMonth0)
+      movedMonth = resolveMonthInMovedYear(
+        calendar,
+        year1,
+        monthCodeNumber0,
+        isLeapMonth0,
+        Overflow.Constrain,
+      )
 
-      if (Math.sign(monthDiff) === -sign) {
-        const monthCorrect =
-          sign < 0 && -computeCalendarMonthsInYearForYear(calendar, year1)
-
-        year1 -= sign
-        yearDiff = year1 - year0
-
-        const month0Trunc = resolveMonthInMovedYear(
+      // NonISODateSurpasses checks a candidate year count twice, and either
+      // check can fail when the start is in a leap month the end's year lacks:
+      // 1. By monthCode, in string order, which puts each leap month just
+      //    after its common month (M04 < M04L < M05). Chinese M04L-10 does not
+      //    reach M04-20 in a year without M04L, though its constrained month
+      //    does.
+      // 2. By the constrained ordinal month. Hebrew M05L-15 constrains to
+      //    M06-15 in a common year, which passes M06-10, though M05L sorts
+      //    before M06.
+      if (
+        sign *
+          (compareNumbers(
+            monthCodeNumber0 * 2 + Number(isLeapMonth0),
+            monthCodeNumber1 * 2 + Number(isLeapMonth1),
+          ) || dayOrder) >
+          0 ||
+        sign * (compareNumbers(movedMonth, month1) || dayOrder) > 0
+      ) {
+        years -= sign
+        movedMonth = resolveMonthInMovedYear(
           calendar,
+          year0 + years,
           monthCodeNumber0,
           isLeapMonth0,
-          calendar ? calendar.computeLeapMonth(year1) : undefined,
           Overflow.Constrain,
-        )
-        monthDiff =
-          month1 -
-          month0Trunc +
-          (monthCorrect || computeCalendarMonthsInYearForYear(calendar, year1))
-      } else if (calendar) {
-        const month0Projected = resolveMonthInMovedYear(
-          calendar,
-          monthCodeNumber0,
-          isLeapMonth0,
-          calendar.computeLeapMonth(year1),
-          Overflow.Constrain,
-        )
-
-        // Once the year portion is balanced, the month remainder is the
-        // concrete number of calendar month slots between the source
-        // month-code tuple as it would exist in the balanced year and the
-        // target month. This matters for variable-leap calendars: M07 in a
-        // year with an inserted M05L is ordinal month 8, so M01 - M07 is
-        // seven month slots, not six month-code numbers.
-        monthDiff = calendar.diffMonthSlots(
-          year1,
-          month0Projected,
-          year1,
-          month1,
         )
       }
     }
+
+    // Count month slots, not monthCode numbers, so inserted leap months count.
+    // Back off one month if the start's day is past the end's. That can't
+    // happen when the slot count is zero, so the count never flips sign: with
+    // years counted, the year check above ruled it out, and otherwise the
+    // start and end share a month and the start comes first.
+    months =
+      (calendar
+        ? calendar.diffMonthSlots(year0 + years, movedMonth, year1, month1)
+        : diffIsoMonthSlots(year0 + years, movedMonth, year1, month1)) -
+      (sign * dayOrder > 0 ? sign : 0)
+
+    // Skip the move when there's nothing to add. Besides saving work, this
+    // avoids reading the start month's length, which a host Intl can fail to
+    // compute at the far end of its supported range.
+    days = countIsoDays(
+      years || months
+        ? moveDateByCalendarUnits(
+            calendar,
+            startIsoDate,
+            years,
+            months,
+            Overflow.Constrain,
+          )
+        : startIsoDate,
+      endIsoDate,
+    )
   }
 
-  return {
-    ...durationFieldDefaults,
-    years: yearDiff,
-    months: monthDiff,
-    days: dayDiff,
-  }
+  return { ...durationFieldDefaults, years, months, days }
 }
 
 // Diff in day/week units. Weeks are seven days, independently of the

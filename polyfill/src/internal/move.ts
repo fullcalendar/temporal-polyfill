@@ -278,16 +278,15 @@ export function moveDateByCalendarUnits(
       month,
     )
     year += years
-    month = resolveMonthInMovedYear(
-      calendar,
-      monthCodeNumber,
-      isLeapMonth,
-      calendar ? calendar.computeLeapMonth(year) : undefined,
-      overflow,
-    )
     month = clampEntity(
       'month',
-      month,
+      resolveMonthInMovedYear(
+        calendar,
+        year,
+        monthCodeNumber,
+        isLeapMonth,
+        overflow,
+      ),
       1,
       computeCalendarMonthsInYearForYear(calendar, year),
       overflow,
@@ -327,15 +326,18 @@ export function addCalendarMonths(
     : addIsoMonths(year, month, monthDelta)
 }
 
-// Year arithmetic keeps the source monthCode and re-resolves it as an ordinal
-// month in the destination year, which may or may not contain that leap month.
+// Year arithmetic keeps the source monthCode and finds it as an ordinal month
+// in the destination year, which may or may not contain that leap month (the
+// spec's ConstrainMonthCode followed by MonthCodeToOrdinal).
 export function resolveMonthInMovedYear(
   calendar: CalendarImpl,
+  year: number,
   monthCodeNumber: number,
   isLeapMonth: boolean,
-  targetLeapMonth: number | undefined,
   overflow: Overflow,
 ): number {
+  const targetLeapMonth = calendar ? calendar.computeLeapMonth(year) : undefined
+
   if (isLeapMonth) {
     const leapMonthMeta = calendar ? calendar.leapMonthMeta : undefined
 
