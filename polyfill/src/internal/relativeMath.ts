@@ -1,8 +1,16 @@
 import { type CalendarImpl } from './calendarImpl'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
-import { DurationFields } from './durationFields'
-import { durationHasDateParts } from './durationMath'
-import { isoDateTimeToEpochNano, isoDateToEpochNano } from './epochMath'
+import { DurationFields, durationTimeFieldDefaults } from './durationFields'
+import {
+  durationDayTimeToBigNano,
+  durationHasDateParts,
+  validateDurationFields,
+} from './durationMath'
+import {
+  isoDateTimeToEpochNano,
+  isoDateToEpochDays,
+  isoDateToEpochNano,
+} from './epochMath'
 import { timeFieldDefaults } from './fieldNames'
 import { CalendarDateFields, CalendarDateTimeFields } from './fieldTypes'
 import { combineDateAndTime } from './fieldUtils'
@@ -83,6 +91,10 @@ export function spanRelativeDuration(
 /*
 Moves relativeTo by a duration and returns only the resulting instant. Used by
 Duration::compare, which never needs the endpoint as a date-time.
+
+A plain relativeTo mirrors DateDurationDays: only years/months/weeks go through
+the calendar, then days and time are added exactly, so the endpoint itself
+isn't range-checked.
 */
 export function moveRelativeEndpointToEpochNano(
   relativeToSlots: RelativeToSlots,
@@ -92,12 +104,23 @@ export function moveRelativeEndpointToEpochNano(
     return moveZonedEpochSlots(relativeToSlots, durationFields).epochNanoseconds
   }
 
-  return isoDateTimeToEpochNano(
-    moveDateTime(
-      relativeToSlots.calendar,
-      combineDateAndTime(relativeToSlots, timeFieldDefaults),
-      durationFields,
-    ),
+  const movedDate = moveDate(relativeToSlots.calendar, relativeToSlots, {
+    ...durationFields,
+    ...durationTimeFieldDefaults,
+    days: 0,
+  })
+
+  return (
+    isoDateToEpochNano(relativeToSlots) +
+    durationDayTimeToBigNano(
+      validateDurationFields({
+        ...durationFields,
+        days:
+          durationFields.days +
+          isoDateToEpochDays(movedDate) -
+          isoDateToEpochDays(relativeToSlots),
+      }),
+    )
   )
 }
 

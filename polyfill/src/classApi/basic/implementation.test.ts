@@ -30,6 +30,38 @@ describe('Temporal.Duration', () => {
     )
   })
 
+  // No Test262 case compares with a PlainDate relativeTo whose full endpoint
+  // falls outside the date limits.
+  it('compares against a PlainDate relativeTo without moving it by days/time', () => {
+    const relativeTo = '2000-01-01'
+    const maxSec = Number.MAX_SAFE_INTEGER
+
+    expect(
+      Temporal.Duration.compare({ hours: 3e9 }, { years: 1 }, { relativeTo }),
+    ).toBe(1)
+    expect(
+      Temporal.Duration.compare(
+        { days: -1 },
+        { weeks: 1 },
+        { relativeTo: '-271821-04-19' },
+      ),
+    ).toBe(-1)
+    expect(
+      Temporal.Duration.compare(
+        { years: -1, seconds: -(maxSec - 365 * 86400) },
+        { years: -1 },
+        { relativeTo },
+      ),
+    ).toBe(-1)
+    expect(() =>
+      Temporal.Duration.compare(
+        { years: 1, seconds: maxSec - 365 * 86400 },
+        { years: 1 },
+        { relativeTo },
+      ),
+    ).toThrow(RangeError)
+  })
+
   // TODO: Contribute these cases to Test262's
   // Temporal/Duration/prototype/total/relativeto-date-limits.js coverage.
   it.each([
