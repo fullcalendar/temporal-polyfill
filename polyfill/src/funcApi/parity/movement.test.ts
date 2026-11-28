@@ -271,19 +271,22 @@ describe.each(['add', 'subtract'] as const)('%s movement parity', (method) => {
     )
   })
 
-  it.each(['weeks', 'days', 'hours'] as const)(
-    'PlainYearMonth rejects %s',
-    (unit) => {
-      expectErrorParity(
-        () =>
-          PlainYearMonth[method](
-            PlainYearMonth.create(2024, 1),
-            Duration.fromFields({ [unit]: 1 }),
-          ),
-        () => new Temporal.PlainYearMonth(2024, 1)[method]({ [unit]: 1 }),
-      )
-    },
-  )
+  it.each([
+    { weeks: 1 },
+    { days: 1 },
+    { hours: 1 },
+    { months: 1, days: 1 },
+    { years: 1, nanoseconds: 1 },
+  ])('PlainYearMonth rejects %o', (fields) => {
+    expectErrorParity(
+      () =>
+        PlainYearMonth[method](
+          PlainYearMonth.create(2024, 1),
+          Duration.fromFields(fields),
+        ),
+      () => new Temporal.PlainYearMonth(2024, 1)[method](fields),
+    )
+  })
 
   it('rejects movement beyond the Instant range', () => {
     const input = (method === 'add' ? 1n : -1n) * 8_640_000_000_000_000_000_000n
