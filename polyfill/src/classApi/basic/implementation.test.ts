@@ -30,36 +30,74 @@ describe('Temporal.Duration', () => {
     )
   })
 
-  // No Test262 case compares with a PlainDate relativeTo whose full endpoint
-  // falls outside the date limits.
-  it('compares against a PlainDate relativeTo without moving it by days/time', () => {
-    const relativeTo = '2000-01-01'
-    const maxSec = Number.MAX_SAFE_INTEGER
+  // Duration.compare with a PlainDate relativeTo follows DateDurationDays: only
+  // years/months/weeks are added to the date, and days and time are compared
+  // as exact amounts, so the whole duration is never added to the date. Expected
+  // values match native Temporal (Node 26).
+  // TODO: Contribute these cases to Test262's Temporal/Duration/compare coverage.
+  describe('compare with a PlainDate relativeTo', () => {
+    const { compare } = Temporal.Duration
 
-    expect(
-      Temporal.Duration.compare({ hours: 3e9 }, { years: 1 }, { relativeTo }),
-    ).toBe(1)
-    expect(
-      Temporal.Duration.compare(
-        { days: -1 },
-        { weeks: 1 },
-        { relativeTo: '-271821-04-19' },
-      ),
-    ).toBe(-1)
-    expect(
-      Temporal.Duration.compare(
-        { years: -1, seconds: -(maxSec - 365 * 86400) },
-        { years: -1 },
-        { relativeTo },
-      ),
-    ).toBe(-1)
-    expect(() =>
-      Temporal.Duration.compare(
-        { years: 1, seconds: maxSec - 365 * 86400 },
-        { years: 1 },
-        { relativeTo },
-      ),
-    ).toThrow(RangeError)
+    it('does not range-check the days or time added to the date', () => {
+      // 3e9 hours from 2000 is far past the date limits
+      expect(
+        compare({ hours: 3e9 }, { years: 1 }, { relativeTo: '2000-01-01' }),
+      ).toBe(1)
+      // A day before the earliest date
+      expect(
+        compare({ days: -1 }, { weeks: 1 }, { relativeTo: '-271821-04-19' }),
+      ).toBe(-1)
+    })
+
+    it('still range-checks the date after years, months and weeks', () => {
+      expect(() =>
+        compare({ weeks: 1 }, { months: 1 }, { relativeTo: '+275760-09-13' }),
+      ).toThrow(RangeError)
+    })
+
+    it('rejects a day-and-time total past the max time duration', () => {
+      const relativeTo = '2000-01-01'
+      const maxSec = Number.MAX_SAFE_INTEGER
+      const yearSec = 365 * 86400
+
+      // The max time duration is MAX_SAFE_INTEGER seconds plus 999,999,999 ns.
+      // 1999 has 365 days, so the year and seconds below add up to exactly
+      // MAX_SAFE_INTEGER seconds
+      const yearBack = { years: -1, seconds: -(maxSec - yearSec) }
+      expect(
+        compare(
+          { ...yearBack, nanoseconds: -999_999_999 },
+          { years: -1 },
+          { relativeTo },
+        ),
+      ).toBe(-1)
+      // One nanosecond past the max
+      expect(() =>
+        compare(
+          { ...yearBack, nanoseconds: -1_000_000_000 },
+          { years: -1 },
+          { relativeTo },
+        ),
+      ).toThrow(RangeError)
+      // 2000 has 366 days, so the days from the year push this one past too
+      expect(() =>
+        compare(
+          { years: 1, seconds: maxSec - yearSec },
+          { years: 1 },
+          { relativeTo },
+        ),
+      ).toThrow(RangeError)
+    })
+
+    it('still range-checks the endpoints for a ZonedDateTime relativeTo', () => {
+      expect(() =>
+        compare(
+          { hours: 3e9 },
+          { years: 1 },
+          { relativeTo: '2000-01-01T00:00[UTC]' },
+        ),
+      ).toThrow(RangeError)
+    })
   })
 
   // TODO: Contribute these cases to Test262's

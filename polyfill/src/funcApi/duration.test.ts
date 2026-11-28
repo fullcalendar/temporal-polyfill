@@ -320,6 +320,37 @@ describe('compare', () => {
       }),
     ).toThrow(TypeError)
   })
+
+  // DateDurationDays adds only years/months/weeks to the date, so days and
+  // time past the date limits still compare. Matches the class API tests.
+  it('does not range-check days or time against a PlainDate relativeTo', () => {
+    const pd = PlainDateFns.create(2000, 1, 1)
+    expect(
+      DurationFns.compare(
+        DurationFns.fromFields({ hours: 3e9 }),
+        DurationFns.fromFields({ years: 1 }),
+        { relativeTo: pd },
+      ),
+    ).toBe(1)
+    expect(
+      DurationFns.compare(
+        DurationFns.fromFields({ days: -1 }),
+        DurationFns.fromFields({ weeks: 1 }),
+        { relativeTo: PlainDateFns.create(-271821, 4, 19) },
+      ),
+    ).toBe(-1)
+    // 2000 has 366 days, so this total is one day past the max time duration
+    expect(() =>
+      DurationFns.compare(
+        DurationFns.fromFields({
+          years: 1,
+          seconds: Number.MAX_SAFE_INTEGER - 365 * 86400,
+        }),
+        DurationFns.fromFields({ years: 1 }),
+        { relativeTo: pd },
+      ),
+    ).toThrow(RangeError)
+  })
 })
 
 describe('toString', () => {

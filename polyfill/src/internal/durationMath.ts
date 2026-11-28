@@ -239,12 +239,21 @@ export function validateDurationFields(fields: DurationFields): DurationFields {
     validateDurationCalendarUnit(calendarUnit, fields[calendarUnit])
   }
 
-  // Duration time values may exceed MAX_SAFE_INTEGER only as a fractional
-  // seconds tail, so validate the balanced whole-second part.
-  const bigNano = durationDayTimeToBigNano(fields)
-  validateDurationTimeUnit(Number(bigNano / bigNanoInSec))
+  validateDurationDayTime(fields)
 
   return fields
+}
+
+/*
+Checks that the days and time together stay within the max time duration, and
+returns that total in nanoseconds. Duration time values may exceed
+MAX_SAFE_INTEGER only as a fractional seconds tail, so this validates the
+balanced whole-second part.
+*/
+export function validateDurationDayTime(fields: DurationFields): bigint {
+  const bigNano = durationDayTimeToBigNano(fields)
+  validateDurationTimeUnit(Number(bigNano / bigNanoInSec))
+  return bigNano
 }
 
 // Fixed-unit APIs use this without constructing a complete Duration record.

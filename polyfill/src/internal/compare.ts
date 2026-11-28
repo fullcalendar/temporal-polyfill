@@ -1,6 +1,10 @@
 import { type CalendarImpl } from './calendarImpl'
 import { DurationFields, durationFieldNamesAsc } from './durationFields'
-import { durationDayTimeToBigNano, getMaxDurationUnit } from './durationMath'
+import {
+  durationDayTimeToBigNano,
+  getMaxDurationUnit,
+  validateDurationDayTime,
+} from './durationMath'
 import { isoDateToEpochDays } from './epochMath'
 import * as errorMessages from './errorMessages'
 import {
@@ -8,12 +12,13 @@ import {
   CalendarDateTimeFields,
   TimeFields,
 } from './fieldTypes'
+import { moveZonedEpochSlots } from './move'
 import { normalizeOptions } from './optionsNormalize'
 import {
   RelativeToSlots,
+  countDateDurationDays,
   isUniformUnit,
   isZonedEpochSlots,
-  moveRelativeEndpointToEpochNano,
 } from './relativeMath'
 import { EpochNanoFields, ZonedEpochNanoFields } from './slots'
 import type { RelativeToOptions } from './temporalSpecHelpers'
@@ -75,9 +80,25 @@ export function compareDurations<RA>(
     throwRangeError(errorMessages.missingRelativeTo)
   }
 
+  // A zoned relativeTo compares the two endpoints, each built and
+  // range-checked by AddZonedDateTime
+  if (isZonedEpochSlots(relativeToSlots)) {
+    return compareBigInts(
+      moveZonedEpochSlots(relativeToSlots, durationSlots0).epochNanoseconds,
+      moveZonedEpochSlots(relativeToSlots, durationSlots1).epochNanoseconds,
+    )
+  }
+
+  // A plain relativeTo converts only the calendar units to days
+  // (DateDurationDays), for both durations before either total is checked.
+  // Then it compares the day-and-time totals as exact amounts, each of which
+  // throws past the max time duration (Add24HourDaysToTimeDuration).
+  const days0 = countDateDurationDays(relativeToSlots, durationSlots0)
+  const days1 = countDateDurationDays(relativeToSlots, durationSlots1)
+
   return compareBigInts(
-    moveRelativeEndpointToEpochNano(relativeToSlots, durationSlots0),
-    moveRelativeEndpointToEpochNano(relativeToSlots, durationSlots1),
+    validateDurationDayTime({ ...durationSlots0, days: days0 }),
+    validateDurationDayTime({ ...durationSlots1, days: days1 }),
   )
 }
 

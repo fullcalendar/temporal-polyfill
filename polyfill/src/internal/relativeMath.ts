@@ -1,11 +1,7 @@
 import { type CalendarImpl } from './calendarImpl'
 import { diffDateTimesExact, diffZonedEpochsExact } from './diff'
 import { DurationFields, durationTimeFieldDefaults } from './durationFields'
-import {
-  durationDayTimeToBigNano,
-  durationHasDateParts,
-  validateDurationFields,
-} from './durationMath'
+import { durationHasDateParts } from './durationMath'
 import {
   isoDateTimeToEpochNano,
   isoDateToEpochDays,
@@ -89,38 +85,30 @@ export function spanRelativeDuration(
 }
 
 /*
-Moves relativeTo by a duration and returns only the resulting instant. Used by
-Duration::compare, which never needs the endpoint as a date-time.
+Counts a duration's days once its years, months and weeks are converted to
+days from a plain relativeTo (the spec's DateDurationDays). Used by
+Duration::compare.
 
-A plain relativeTo mirrors DateDurationDays: only years/months/weeks go through
-the calendar, then days and time are added exactly, so the endpoint itself
-isn't range-checked.
+Only the calendar part is added to the date, so only that intermediate date is
+range-checked. The days are counted on top of it and the time part is left out,
+so no endpoint is built from the whole duration. A duration with days or time
+far past the date limits still compares.
 */
-export function moveRelativeEndpointToEpochNano(
-  relativeToSlots: RelativeToSlots,
+export function countDateDurationDays(
+  relativeToSlots: CalendarDateFields & { calendar: CalendarImpl },
   durationFields: DurationFields,
-): bigint {
-  if (isZonedEpochSlots(relativeToSlots)) {
-    return moveZonedEpochSlots(relativeToSlots, durationFields).epochNanoseconds
-  }
-
-  const movedDate = moveDate(relativeToSlots.calendar, relativeToSlots, {
-    ...durationFields,
-    ...durationTimeFieldDefaults,
-    days: 0,
-  })
-
+): number {
   return (
-    isoDateToEpochNano(relativeToSlots) +
-    durationDayTimeToBigNano(
-      validateDurationFields({
+    durationFields.days +
+    isoDateToEpochDays(
+      // Skips the calendar entirely when years, months and weeks are all zero
+      moveDate(relativeToSlots.calendar, relativeToSlots, {
         ...durationFields,
-        days:
-          durationFields.days +
-          isoDateToEpochDays(movedDate) -
-          isoDateToEpochDays(relativeToSlots),
+        ...durationTimeFieldDefaults,
+        days: 0,
       }),
-    )
+    ) -
+    isoDateToEpochDays(relativeToSlots)
   )
 }
 
@@ -190,8 +178,8 @@ export function spanPlainRelativeDuration(
 
 /*
 Moves the origin by a DATE-ONLY duration to probe a rounding or totaling marker.
-Unlike moveRelativeEndpointToEpochNano, this does not construct the duration's
-actual endpoint.
+Unlike spanRelativeDuration, this does not construct the duration's actual
+endpoint.
 
 This is the spec's window/threshold math: add through CalendarDateAdd on the ISO
 date, re-attach the origin's wall-clock time, then convert. The only range check
