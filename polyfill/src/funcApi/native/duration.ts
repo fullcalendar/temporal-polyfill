@@ -24,6 +24,7 @@ import {
   getZonedDateTimeSlotsIfPresent,
   setDurationSlots,
 } from '../temporalRecords'
+import { refineOption } from './refineOption'
 
 export const getNativeDuration: (record: unknown) => Temporal.Duration =
   getDurationSlots
@@ -156,10 +157,9 @@ export function round(
   if (typeof options === 'string') {
     return createNativeDurationRecord(native.round(options))
   }
-  const resNative = native.round({
-    ...options,
-    relativeTo: refineRelativeTo(options?.relativeTo),
-  })
+  const resNative = native.round(
+    refineOption(options, 'relativeTo', refineRelativeTo),
+  )
   return createNativeDurationRecord(resNative)
 }
 
@@ -173,11 +173,7 @@ export function total(
   if (typeof options === 'string') {
     return native.total(options)
   }
-  const refinedOptions: Temporal.DurationTotalOptions = {
-    ...options,
-    relativeTo: refineRelativeTo(options.relativeTo),
-  }
-  return native.total(refinedOptions)
+  return native.total(refineOption(options, 'relativeTo', refineRelativeTo))
 }
 
 export function compare(
@@ -187,10 +183,11 @@ export function compare(
 ): NumberSign {
   const native = getNativeDuration(duration)
   const otherNative = getNativeDuration(otherDuration)
-  return NativeTemporal!.Duration.compare(native, otherNative, {
-    ...options,
-    relativeTo: refineRelativeTo(options?.relativeTo),
-  }) as NumberSign // !!!
+  return NativeTemporal!.Duration.compare(
+    native,
+    otherNative,
+    refineOption(options, 'relativeTo', refineRelativeTo),
+  ) as NumberSign // !!!
 }
 
 export function toLocaleString(

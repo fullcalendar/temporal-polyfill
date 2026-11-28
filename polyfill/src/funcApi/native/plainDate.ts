@@ -43,6 +43,7 @@ import {
   NativePlainYearMonthRecord,
   createNativePlainYearMonthRecord,
 } from './plainYearMonth'
+import { refineOption } from './refineOption'
 import { createCalendarRoundOptions } from './roundUtils'
 import { requireTimeZoneId } from './timeZoneId'
 import {
@@ -272,18 +273,19 @@ export function toZonedDateTime(
   options: string | PlainDateToZonedDateTimeOptions<NativePlainTimeRecord>,
 ): NativeZonedDateTimeRecord {
   const native = getNativePlainDate(record)
-  const optionsObj =
+  const resNative =
     typeof options === 'string'
-      ? { timeZone: options }
-      : {
-          ...options,
-          plainTime:
-            options.plainTime === undefined
-              ? undefined
-              : getNativePlainTime(options.plainTime),
-        }
-  requireTimeZoneId(optionsObj.timeZone)
-  const resNative = native.toZonedDateTime(optionsObj)
+      ? native.toZonedDateTime(requireTimeZoneId(options))
+      : native.toZonedDateTime(
+          refineOption(
+            refineOption(options, 'timeZone', requireTimeZoneId),
+            'plainTime',
+            (plainTime) =>
+              plainTime === undefined
+                ? undefined
+                : getNativePlainTime(plainTime),
+          ),
+        )
   return createNativeZonedDateTimeRecord(resNative)
 }
 

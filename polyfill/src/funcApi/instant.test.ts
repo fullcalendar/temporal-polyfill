@@ -5,6 +5,7 @@ import {
   expectDurationEquals,
   expectInstantEquals,
   testHotCache,
+  withCountedOption,
 } from './testUtils'
 
 describe('create', () => {
@@ -248,6 +249,12 @@ describe('compare', () => {
 })
 
 describe('toString', () => {
+  it('reads timeZone once', () => {
+    const [options, getReadCount] = withCountedOption({}, 'timeZone', 'UTC')
+    InstantFns.toString(InstantFns.create(0n), options)
+    expect(getReadCount()).toBe(1)
+  })
+
   it('works without options', () => {
     const inst = InstantFns.create(1704063600000000001n)
     const s = InstantFns.toString(inst)

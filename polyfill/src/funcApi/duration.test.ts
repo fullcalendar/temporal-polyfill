@@ -3,7 +3,11 @@ import * as CalendarFns from './calendar'
 import * as DurationFns from './duration'
 import * as PlainDateFns from './plainDate'
 import * as PlainDateTimeFns from './plainDateTime'
-import { expectDurationEquals, itSkipNative } from './testUtils'
+import {
+  expectDurationEquals,
+  itSkipNative,
+  withCountedOption,
+} from './testUtils'
 import * as ZonedDateTimeFns from './zonedDateTime'
 
 describe('create', () => {
@@ -350,6 +354,41 @@ describe('compare', () => {
         { relativeTo: pd },
       ),
     ).toThrow(RangeError)
+  })
+})
+
+describe('relativeTo option reads', () => {
+  const dur = DurationFns.fromFields({ months: 1 })
+  const relativeTo = PlainDateFns.create(2024, 1, 1)
+
+  it('round reads relativeTo once', () => {
+    const [options, getReadCount] = withCountedOption(
+      { smallestUnit: 'days' as const },
+      'relativeTo',
+      relativeTo,
+    )
+    DurationFns.round(dur, options)
+    expect(getReadCount()).toBe(1)
+  })
+
+  it('total reads relativeTo once', () => {
+    const [options, getReadCount] = withCountedOption(
+      { unit: 'days' as const },
+      'relativeTo',
+      relativeTo,
+    )
+    DurationFns.total(dur, options)
+    expect(getReadCount()).toBe(1)
+  })
+
+  it('compare reads relativeTo once', () => {
+    const [options, getReadCount] = withCountedOption(
+      {},
+      'relativeTo',
+      relativeTo,
+    )
+    DurationFns.compare(dur, DurationFns.fromFields({ days: 31 }), options)
+    expect(getReadCount()).toBe(1)
   })
 })
 

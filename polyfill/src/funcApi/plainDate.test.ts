@@ -12,6 +12,7 @@ import {
   expectZonedDateTimeEquals,
   itSkipNative,
   testHotCache,
+  withCountedOption,
 } from './testUtils'
 
 const gregoryCalendar = CalendarFns.getGregory()
@@ -352,6 +353,25 @@ describe('compare', () => {
 })
 
 describe('toZonedDateTime', () => {
+  it('reads timeZone and plainTime once each', () => {
+    const [withTimeZone, getTimeZoneReads] = withCountedOption(
+      {},
+      'timeZone',
+      'UTC',
+    )
+    const [options, getPlainTimeReads] = withCountedOption(
+      withTimeZone,
+      'plainTime',
+      PlainTimeFns.create(12),
+    )
+    PlainDateFns.toZonedDateTime(
+      PlainDateFns.create(2024, 1, 1),
+      options as any,
+    )
+    expect(getTimeZoneReads()).toBe(1)
+    expect(getPlainTimeReads()).toBe(1)
+  })
+
   it('works with single timeZone arg', () => {
     const pd = PlainDateFns.create(2024, 2, 27, hebrewCalendar)
     const zdt = PlainDateFns.toZonedDateTime(pd, 'America/New_York')
